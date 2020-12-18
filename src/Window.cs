@@ -19,6 +19,8 @@ namespace LifeSim
             this._window = VeldridStartup.CreateWindow(ref windowCI);
         }
 
+        public string title { get => this._window.Title; set => this._window.Title = value; }
+
         public Sdl2Window window => this._window;
 
         public Sdl2Window nativeWindow => this._window;

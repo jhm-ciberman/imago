@@ -3,7 +3,7 @@ using Veldrid;
 
 namespace LifeSim.Rendering
 {
-    public class Mesh
+    public class Mesh : System.IDisposable
     {
         public struct VertData
         {

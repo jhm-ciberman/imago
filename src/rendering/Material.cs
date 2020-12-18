@@ -2,23 +2,33 @@ using Veldrid;
 
 namespace LifeSim.Rendering
 {
-    public class Material
+    public class Material : System.IDisposable
     {
-        private Pipeline _pipeline;
+        private Shader _shader;
+        private Texture _texture;
+        private ResourceSet _textureSet;
 
-        //private Shader shader;
-
-        public Material(Pipeline pipeline) 
+        public Material(ResourceFactory factory, GraphicsDevice graphicsDevice, Shader shader, Texture texture) 
         {
-            this._pipeline = pipeline;
+            this._shader = shader;
+            
+            this._textureSet = factory.CreateResourceSet(
+                new ResourceSetDescription(shader.worldTextureLayout, texture.textureView, graphicsDevice.Aniso4xSampler)
+            );
         }
 
-        public Pipeline pipeline => this._pipeline;
+        public Pipeline pipeline => this._shader.pipeline;
+        public ResourceSet textureSet => this._textureSet;
+
+        public void SetTexture(Texture texture)
+        {
+            this._texture = texture;
+        }
 
         public void Dispose()
         {
-            this._pipeline.Dispose();
-
+            this._shader.Dispose();
+            this._textureSet.Dispose();
         }
     }
 }
