@@ -29,7 +29,7 @@ namespace LifeSim.Rendering
                 preferStandardClipSpaceYDirection: true
             );
 
-            this._graphicsDevice = VeldridStartup.CreateGraphicsDevice(window.nativeWindow, options, GraphicsBackend.Vulkan);
+            this._graphicsDevice = VeldridStartup.CreateGraphicsDevice(window.nativeWindow, options, GraphicsBackend.OpenGL);
 
             this._factory = this._graphicsDevice.ResourceFactory;
             this._commandList = this._factory.CreateCommandList();

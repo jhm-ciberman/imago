@@ -12,35 +12,35 @@ namespace LifeSim
             Mesh.VertData[] vertices = new Mesh.VertData[]
             {
                 // Top
-                new Mesh.VertData(new Vector3(-0.5f, +0.5f, -0.5f), new Vector2(0, 0), RgbaFloat.Orange),
-                new Mesh.VertData(new Vector3(+0.5f, +0.5f, -0.5f), new Vector2(1, 0), RgbaFloat.Orange),
-                new Mesh.VertData(new Vector3(+0.5f, +0.5f, +0.5f), new Vector2(1, 1), RgbaFloat.Orange),
-                new Mesh.VertData(new Vector3(-0.5f, +0.5f, +0.5f), new Vector2(0, 1), RgbaFloat.Orange),
+                new Mesh.VertData(new Vector3(-0.5f, +0.5f, -0.5f), new Vector2(0, 0)),
+                new Mesh.VertData(new Vector3(+0.5f, +0.5f, -0.5f), new Vector2(1, 0)),
+                new Mesh.VertData(new Vector3(+0.5f, +0.5f, +0.5f), new Vector2(1, 1)),
+                new Mesh.VertData(new Vector3(-0.5f, +0.5f, +0.5f), new Vector2(0, 1)),
                 // Bottom                                                             
-                new Mesh.VertData(new Vector3(-0.5f,-0.5f, +0.5f),  new Vector2(0, 0), RgbaFloat.Green),
-                new Mesh.VertData(new Vector3(+0.5f,-0.5f, +0.5f),  new Vector2(1, 0), RgbaFloat.Green),
-                new Mesh.VertData(new Vector3(+0.5f,-0.5f, -0.5f),  new Vector2(1, 1), RgbaFloat.Green),
-                new Mesh.VertData(new Vector3(-0.5f,-0.5f, -0.5f),  new Vector2(0, 1), RgbaFloat.Green),
+                new Mesh.VertData(new Vector3(-0.5f,-0.5f, +0.5f),  new Vector2(0, 0)),
+                new Mesh.VertData(new Vector3(+0.5f,-0.5f, +0.5f),  new Vector2(1, 0)),
+                new Mesh.VertData(new Vector3(+0.5f,-0.5f, -0.5f),  new Vector2(1, 1)),
+                new Mesh.VertData(new Vector3(-0.5f,-0.5f, -0.5f),  new Vector2(0, 1)),
                 // Left                                                               
-                new Mesh.VertData(new Vector3(-0.5f, +0.5f, -0.5f), new Vector2(0, 0), RgbaFloat.Red),
-                new Mesh.VertData(new Vector3(-0.5f, +0.5f, +0.5f), new Vector2(1, 0), RgbaFloat.Red),
-                new Mesh.VertData(new Vector3(-0.5f, -0.5f, +0.5f), new Vector2(1, 1), RgbaFloat.Red),
-                new Mesh.VertData(new Vector3(-0.5f, -0.5f, -0.5f), new Vector2(0, 1), RgbaFloat.Red),
+                new Mesh.VertData(new Vector3(-0.5f, +0.5f, -0.5f), new Vector2(0, 0)),
+                new Mesh.VertData(new Vector3(-0.5f, +0.5f, +0.5f), new Vector2(1, 0)),
+                new Mesh.VertData(new Vector3(-0.5f, -0.5f, +0.5f), new Vector2(1, 1)),
+                new Mesh.VertData(new Vector3(-0.5f, -0.5f, -0.5f), new Vector2(0, 1)),
                 // Right                                                              
-                new Mesh.VertData(new Vector3(+0.5f, +0.5f, +0.5f), new Vector2(0, 0), RgbaFloat.Pink),
-                new Mesh.VertData(new Vector3(+0.5f, +0.5f, -0.5f), new Vector2(1, 0), RgbaFloat.Pink),
-                new Mesh.VertData(new Vector3(+0.5f, -0.5f, -0.5f), new Vector2(1, 1), RgbaFloat.Pink),
-                new Mesh.VertData(new Vector3(+0.5f, -0.5f, +0.5f), new Vector2(0, 1), RgbaFloat.Pink),
+                new Mesh.VertData(new Vector3(+0.5f, +0.5f, +0.5f), new Vector2(0, 0)),
+                new Mesh.VertData(new Vector3(+0.5f, +0.5f, -0.5f), new Vector2(1, 0)),
+                new Mesh.VertData(new Vector3(+0.5f, -0.5f, -0.5f), new Vector2(1, 1)),
+                new Mesh.VertData(new Vector3(+0.5f, -0.5f, +0.5f), new Vector2(0, 1)),
                 // Back                                                               
-                new Mesh.VertData(new Vector3(+0.5f, +0.5f, -0.5f), new Vector2(0, 0), RgbaFloat.Yellow),
-                new Mesh.VertData(new Vector3(-0.5f, +0.5f, -0.5f), new Vector2(1, 0), RgbaFloat.Yellow),
-                new Mesh.VertData(new Vector3(-0.5f, -0.5f, -0.5f), new Vector2(1, 1), RgbaFloat.Yellow),
-                new Mesh.VertData(new Vector3(+0.5f, -0.5f, -0.5f), new Vector2(0, 1), RgbaFloat.Yellow),
+                new Mesh.VertData(new Vector3(+0.5f, +0.5f, -0.5f), new Vector2(0, 0)),
+                new Mesh.VertData(new Vector3(-0.5f, +0.5f, -0.5f), new Vector2(1, 0)),
+                new Mesh.VertData(new Vector3(-0.5f, -0.5f, -0.5f), new Vector2(1, 1)),
+                new Mesh.VertData(new Vector3(+0.5f, -0.5f, -0.5f), new Vector2(0, 1)),
                 // Front                                                              
-                new Mesh.VertData(new Vector3(-0.5f, +0.5f, +0.5f), new Vector2(0, 0), RgbaFloat.Cyan),
-                new Mesh.VertData(new Vector3(+0.5f, +0.5f, +0.5f), new Vector2(1, 0), RgbaFloat.Cyan),
-                new Mesh.VertData(new Vector3(+0.5f, -0.5f, +0.5f), new Vector2(1, 1), RgbaFloat.Cyan),
-                new Mesh.VertData(new Vector3(-0.5f, -0.5f, +0.5f), new Vector2(0, 1), RgbaFloat.Cyan),
+                new Mesh.VertData(new Vector3(-0.5f, +0.5f, +0.5f), new Vector2(0, 0)),
+                new Mesh.VertData(new Vector3(+0.5f, +0.5f, +0.5f), new Vector2(1, 0)),
+                new Mesh.VertData(new Vector3(+0.5f, -0.5f, +0.5f), new Vector2(1, 1)),
+                new Mesh.VertData(new Vector3(-0.5f, -0.5f, +0.5f), new Vector2(0, 1)),
             };
 
             return vertices;

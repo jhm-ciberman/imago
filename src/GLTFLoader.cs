@@ -29,8 +29,7 @@ namespace LifeSim.Rendering
             for(var i = 0; i < verticesList.Count; i++) {
                 var pos = verticesList[i];
                 var uv = uvList[i];
-                System.Console.WriteLine(pos);
-                vertices[i] = new Mesh.VertData(pos, uv, Veldrid.RgbaFloat.Red);
+                vertices[i] = new Mesh.VertData(pos, uv);
             }
 
             System.Console.WriteLine("Meshes count: " + meshes.Count);

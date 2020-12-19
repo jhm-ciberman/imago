@@ -9,14 +9,12 @@ namespace LifeSim.Rendering
         {
             public Vector3 position;
             public Vector2 uv;
-            public RgbaFloat color;
-            public VertData(Vector3 position, Vector2 uv, RgbaFloat color)
+            public VertData(Vector3 position, Vector2 uv)
             {
                 this.position = position;
                 this.uv = uv;
-                this.color = color;
             }
-            public const uint sizeInBytes = (3 + 2 + 4) * 4;
+            public const uint sizeInBytes = (3 + 2) * 4;
         }
 
         private DeviceBuffer _vertexBuffer;

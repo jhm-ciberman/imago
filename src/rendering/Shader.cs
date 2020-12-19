@@ -40,12 +40,11 @@ namespace LifeSim.Rendering
 
             var vertexLayoutDesc = new VertexLayoutDescription(
                 new VertexElementDescription("position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
-                new VertexElementDescription("uv", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
-                new VertexElementDescription("color", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float4)
+                new VertexElementDescription("uv", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2)
             );
 
-            var rasterizerState = new RasterizerStateDescription( // TODO: Replace with default rasterizer state
-                FaceCullMode.None,
+            var rasterizerState = new RasterizerStateDescription(
+                FaceCullMode.Front,
                 PolygonFillMode.Solid,
                 FrontFace.Clockwise,
                 depthClipEnabled: true,
