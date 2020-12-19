@@ -41,7 +41,10 @@ namespace LifeSim
             this._texture = this._renderer.MakeTexture("res/uvs.jpg");
             this._shader = this._renderer.MakeShader(vertexCode, fragmentCode);
             this._material = this._renderer.MakeMaterial(this._shader, this._texture);
-            this._mesh = this._renderer.MakeMesh(Cube.GetVertices(), Cube.GetIndices());
+            //this._mesh = this._renderer.MakeMesh(Cube.GetVertices(), Cube.GetIndices());
+
+            var loader = new GLTFLoader();
+            this._mesh = loader.Load(this._renderer);
 
             var renderable = new Renderable(this._mesh, this._material);
             this._scene = new Scene(this._camera);

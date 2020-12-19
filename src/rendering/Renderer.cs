@@ -41,8 +41,6 @@ namespace LifeSim.Rendering
         public Texture MakeTexture(string path)
         {
             ImageSharpTexture texture = new ImageSharpTexture(path, true);
-            System.Console.WriteLine(texture.Width + " " + texture.Height);
-
             var deviceTexture = texture.CreateDeviceTexture(this._graphicsDevice, this._factory);
             var textureView = this._factory.CreateTextureView(deviceTexture);
             
