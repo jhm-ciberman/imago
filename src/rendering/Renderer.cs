@@ -1,9 +1,5 @@
-using System;
-using System.Text;
 using Veldrid;
 using Veldrid.ImageSharp;
-using Veldrid.Sdl2;
-using Veldrid.SPIRV;
 using Veldrid.StartupUtilities;
 
 namespace LifeSim.Rendering
@@ -17,6 +13,7 @@ namespace LifeSim.Rendering
         private CommandList _commandList;
 
         private ResourceLayout _projectionViewLayout;
+        private DeviceBuffer _worldBuffer;
 
         public Renderer(Window window)
         {
@@ -34,7 +31,7 @@ namespace LifeSim.Rendering
             this._factory = this._graphicsDevice.ResourceFactory;
             this._commandList = this._factory.CreateCommandList();
             this._swapchain = this._graphicsDevice.MainSwapchain;
-
+            this._worldBuffer = this._factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer));
             this._projectionViewLayout = Shader.MakeProjectionViewResourceLayout(this._factory);
         }
 
@@ -58,7 +55,7 @@ namespace LifeSim.Rendering
 
         public Material MakeMaterial(Shader shader, Texture texture)
         {
-            return new Material(this._factory, this._graphicsDevice, shader, texture);
+            return new Material(this._factory, this._graphicsDevice, shader, this._worldBuffer, texture);
         }
 
         public Shader MakeShader(string vertexCode, string fragmentCode)
@@ -76,6 +73,14 @@ namespace LifeSim.Rendering
             return new Camera(this._factory, this._projectionViewLayout);
         }
 
+        private void _DrawBegin()
+        {
+            this._commandList.Begin();
+            this._commandList.SetFramebuffer(this._swapchain.Framebuffer);
+            this._commandList.ClearColorTarget(0, RgbaFloat.Black);
+            this._commandList.ClearDepthStencil(1f);
+        }
+
         public void Render(Scene scene)
         {
             var camera = scene.camera;
@@ -88,19 +93,12 @@ namespace LifeSim.Rendering
             this._DrawEnd();
         }
 
-        private void _DrawBegin()
-        {
-            this._commandList.Begin();
-            this._commandList.SetFramebuffer(this._swapchain.Framebuffer);
-            this._commandList.ClearColorTarget(0, RgbaFloat.Black);
-            this._commandList.ClearDepthStencil(1f);
-        }
-
         public void _DrawRenderable(Renderable renderable, Camera camera)
         {
             var mesh = renderable.mesh;
             var material = renderable.material;
 
+            this._commandList.UpdateBuffer(this._worldBuffer, 0, renderable.transform.GetTransformMatrix());
             this._commandList.SetVertexBuffer(0, mesh.vertexBuffer);
             this._commandList.SetIndexBuffer(mesh.indexBuffer, IndexFormat.UInt16);
             this._commandList.SetPipeline(material.pipeline);
@@ -125,6 +123,10 @@ namespace LifeSim.Rendering
         internal void Resize(uint width, uint height)
         {
             this._graphicsDevice.ResizeMainWindow(width, height);
+        }
+
+        ~Renderer() {
+            this.Dispose();
         }
     }
 }

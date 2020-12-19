@@ -8,13 +8,15 @@ namespace LifeSim.Rendering
         public struct VertData
         {
             public Vector3 position;
+            public Vector3 normal;
             public Vector2 uv;
-            public VertData(Vector3 position, Vector2 uv)
+            public VertData(Vector3 position, Vector3 normal, Vector2 uv)
             {
                 this.position = position;
+                this.normal = normal;
                 this.uv = uv;
             }
-            public const uint sizeInBytes = (3 + 2) * 4;
+            public const uint sizeInBytes = (3 + 3 + 2) * 4;
         }
 
         private DeviceBuffer _vertexBuffer;
@@ -41,6 +43,10 @@ namespace LifeSim.Rendering
         {
             this._vertexBuffer.Dispose();
             this._indexBuffer.Dispose();
+        }
+
+        ~Mesh() {
+            this.Dispose();
         }
     }
 }

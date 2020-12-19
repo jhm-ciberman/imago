@@ -17,8 +17,8 @@ namespace LifeSim.Rendering
         public static ResourceLayout MakeProjectionViewResourceLayout(ResourceFactory factory)
         {
             return factory.CreateResourceLayout(new ResourceLayoutDescription(
-                new ResourceLayoutElementDescription("ProjectionBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex),
-                new ResourceLayoutElementDescription("ViewBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
+                new ResourceLayoutElementDescription("projectionBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex),
+                new ResourceLayoutElementDescription("viewBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
             ));
         }
 
@@ -34,12 +34,14 @@ namespace LifeSim.Rendering
             this._fragmentShader = shaders[1];
 
             this._worldTextureLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
-                new ResourceLayoutElementDescription("SurfaceTexture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
-                new ResourceLayoutElementDescription("SurfaceSampler", ResourceKind.Sampler, ShaderStages.Fragment)
+                new ResourceLayoutElementDescription("worldBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex),
+                new ResourceLayoutElementDescription("surfaceTexture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
+                new ResourceLayoutElementDescription("surfaceSampler", ResourceKind.Sampler, ShaderStages.Fragment)
             ));
 
             var vertexLayoutDesc = new VertexLayoutDescription(
                 new VertexElementDescription("position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
+                new VertexElementDescription("normal", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
                 new VertexElementDescription("uv", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2)
             );
 
@@ -65,11 +67,14 @@ namespace LifeSim.Rendering
 
         public void Dispose()
         {
-            System.Console.WriteLine("Dispose Shader");
             this._worldTextureLayout.Dispose();
             this._vertexShader.Dispose();
             this._fragmentShader.Dispose();
             this._pipeline.Dispose();
+        }
+
+        ~Shader() {
+            this.Dispose();
         }
     }
 }

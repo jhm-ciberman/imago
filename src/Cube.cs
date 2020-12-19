@@ -6,7 +6,7 @@ namespace LifeSim
 {
     public static class Cube
     {
-        
+        /*
         public static Mesh.VertData[] GetVertices()
         {
             Mesh.VertData[] vertices = new Mesh.VertData[]
@@ -60,5 +60,6 @@ namespace LifeSim
 
             return indices;
         }
+        */
     }
 }

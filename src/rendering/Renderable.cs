@@ -2,6 +2,7 @@ namespace LifeSim.Rendering
 {
     public class Renderable
     {
+        public Transform transform = new Transform();
         private Mesh _mesh;
         public Mesh mesh => this._mesh;
 

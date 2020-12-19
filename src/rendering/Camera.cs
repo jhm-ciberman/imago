@@ -23,10 +23,10 @@ namespace LifeSim.Rendering
         private float _aspect = 4f / 3f;
         public float aspect { get => this._aspect; set {this._aspect = value; this._projectionMatrixDirty = true;}}
 
-        private float _near = 0.09f;
+        private float _near = 0.01f;
         public float near { get => this._near; set {this._near = value; this._projectionMatrixDirty = true;}}
 
-        private float _far = 10.0f;
+        private float _far = 100.0f;
         public float far { get => this._far; set {this._far = value; this._projectionMatrixDirty = true;}}
 
         private DeviceBuffer _viewBuffer;
@@ -50,6 +50,10 @@ namespace LifeSim.Rendering
             this._viewBuffer.Dispose();
             this._projectionBuffer.Dispose();
             this._projectionViewSet.Dispose();
+        }
+
+        ~Camera() {
+            this.Dispose();
         }
 
         public void UpdateMatrices(GraphicsDevice device)

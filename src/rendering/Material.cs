@@ -8,12 +8,12 @@ namespace LifeSim.Rendering
         private Texture _texture;
         private ResourceSet _textureSet;
 
-        public Material(ResourceFactory factory, GraphicsDevice graphicsDevice, Shader shader, Texture texture) 
+        public Material(ResourceFactory factory, GraphicsDevice graphicsDevice, Shader shader, DeviceBuffer worldBuffer, Texture texture) 
         {
             this._shader = shader;
             
             this._textureSet = factory.CreateResourceSet(
-                new ResourceSetDescription(shader.worldTextureLayout, texture.textureView, graphicsDevice.Aniso4xSampler)
+                new ResourceSetDescription(shader.worldTextureLayout, worldBuffer, texture.textureView, graphicsDevice.PointSampler)
             );
         }
 
@@ -29,6 +29,10 @@ namespace LifeSim.Rendering
         {
             this._shader.Dispose();
             this._textureSet.Dispose();
+        }
+
+        ~Material() {
+            this.Dispose();
         }
     }
 }

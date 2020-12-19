@@ -19,5 +19,9 @@ namespace LifeSim.Rendering
             this._textureView.Dispose();
         }
 
+        ~Texture() {
+            this.Dispose();
+        }
+
     }
 }
