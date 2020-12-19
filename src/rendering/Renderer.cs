@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 using Veldrid;
 using Veldrid.ImageSharp;
@@ -22,7 +23,7 @@ namespace LifeSim.Rendering
             GraphicsDeviceOptions options = new GraphicsDeviceOptions(
                 debug: false,
                 swapchainDepthFormat: PixelFormat.R16_UNorm,
-                syncToVerticalBlank: true,
+                syncToVerticalBlank: false,
                 resourceBindingModel: ResourceBindingModel.Improved,
                 preferDepthRangeZeroToOne: true,
                 preferStandardClipSpaceYDirection: true
@@ -77,7 +78,19 @@ namespace LifeSim.Rendering
             return new Camera(this._factory, this._projectionViewLayout);
         }
 
-        public void DrawBegin()
+        public void Render(Scene scene)
+        {
+            var camera = scene.camera;
+            camera.UpdateMatrices(this._graphicsDevice);
+            this._DrawBegin();
+            var renderables = scene.renderables;
+            for (int i = 0; i < renderables.Count; i++) {
+                this._DrawRenderable(renderables[i], camera);
+            }
+            this._DrawEnd();
+        }
+
+        private void _DrawBegin()
         {
             this._commandList.Begin();
             this._commandList.SetFramebuffer(this._swapchain.Framebuffer);
@@ -85,9 +98,10 @@ namespace LifeSim.Rendering
             this._commandList.ClearDepthStencil(1f);
         }
 
-        public void DrawMesh(Mesh mesh, Material material, Camera camera)
+        public void _DrawRenderable(Renderable renderable, Camera camera)
         {
-            camera.UpdateMatrices(this._graphicsDevice);
+            var mesh = renderable.mesh;
+            var material = renderable.material;
 
             this._commandList.SetVertexBuffer(0, mesh.vertexBuffer);
             this._commandList.SetIndexBuffer(mesh.indexBuffer, IndexFormat.UInt16);
@@ -103,11 +117,16 @@ namespace LifeSim.Rendering
             );
         }
 
-        public void DrawEnd()
+        private void _DrawEnd()
         {
             this._commandList.End();
             this._graphicsDevice.SubmitCommands(this._commandList);
             this._graphicsDevice.SwapBuffers(this._swapchain);
+        }
+
+        internal void Resize(uint width, uint height)
+        {
+            this._graphicsDevice.ResizeMainWindow(width, height);
         }
     }
 }

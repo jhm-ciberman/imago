@@ -66,6 +66,7 @@ namespace LifeSim.Rendering
 
         public void Dispose()
         {
+            System.Console.WriteLine("Dispose Shader");
             this._worldTextureLayout.Dispose();
             this._vertexShader.Dispose();
             this._fragmentShader.Dispose();
