@@ -5,11 +5,11 @@ namespace LifeSim.Rendering
     public class Scene
     {
         private List<Renderable> _renderables = new List<Renderable>();
-        private Camera _camera;
+        private List<Camera> _cameras = new List<Camera>();
 
-        public Scene(Camera camera)
+        public Scene()
         {
-            this._camera = camera;
+            // 
         }
 
         public void Add(Renderable renderable)
@@ -17,7 +17,12 @@ namespace LifeSim.Rendering
             this._renderables.Add(renderable);
         }
 
+        public void Add(Camera camera)
+        {
+            this._cameras.Add(camera);
+        }
+
         public IReadOnlyList<Renderable> renderables => this._renderables;
-        public Camera camera => this._camera;
+        public IReadOnlyList<Camera> cameras => this._cameras;
     }
 }

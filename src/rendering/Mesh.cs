@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using Veldrid;
 
@@ -23,8 +25,13 @@ namespace LifeSim.Rendering
         private DeviceBuffer _indexBuffer;
         public uint indexCount;
 
-        public Mesh(ResourceFactory factory, GraphicsDevice graphicsDevice, VertData[] vertices, ushort[] indices)
+        public Mesh(ResourceFactory factory, GraphicsDevice graphicsDevice, MeshData mesh)
         {
+            VertData[] vertices = new VertData[mesh.positions.Count];
+            for(var i = 0; i < mesh.positions.Count; i++) {
+                vertices[i] = new Mesh.VertData(mesh.positions[i],  mesh.normals[i], mesh.uvs[i]);
+            }
+            var indices = mesh.indices.ToArray();
             uint vertCount = (uint) vertices.Length;
             uint indexCount = (uint) indices.Length;
             this._vertexBuffer = factory.CreateBuffer(new BufferDescription(vertCount * VertData.sizeInBytes, BufferUsage.VertexBuffer));

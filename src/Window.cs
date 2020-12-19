@@ -13,11 +13,27 @@ namespace LifeSim
             WindowCreateInfo windowCI = new WindowCreateInfo() {
                 X = 100,
                 Y = 100,
-                WindowWidth = 960,
-                WindowHeight = 540,
+                WindowWidth = 1024,
+                WindowHeight = 600,
                 WindowTitle = "Veldrid Tutorial"
             };
             this._window = VeldridStartup.CreateWindow(ref windowCI);
+            this._window.Resized += () => this.onResize?.Invoke(this);
+        }
+
+        public System.Action<Window> onResize;
+
+        public void GoFullscreenMode()
+        {
+            
+            this._window.WindowState = Veldrid.WindowState.FullScreen;
+            this.onResize?.Invoke(this);
+        }
+
+        public void GoWindowMode()
+        {
+            this._window.WindowState = Veldrid.WindowState.Normal;
+            this.onResize?.Invoke(this);
         }
 
         public void RunMainLoop(System.Action<float> mainLoop)
@@ -37,6 +53,8 @@ namespace LifeSim
                 Input.UpdateFrameInput(inputSnapshot);
             }
         }
+
+        public void Close() => this._window.Close();
 
         public string title { get => this._window.Title; set => this._window.Title = value; }
 

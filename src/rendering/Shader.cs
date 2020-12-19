@@ -14,14 +14,6 @@ namespace LifeSim.Rendering
 
         public ResourceLayout worldTextureLayout => this._worldTextureLayout;
 
-        public static ResourceLayout MakeProjectionViewResourceLayout(ResourceFactory factory)
-        {
-            return factory.CreateResourceLayout(new ResourceLayoutDescription(
-                new ResourceLayoutElementDescription("projectionBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex),
-                new ResourceLayoutElementDescription("viewBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
-            ));
-        }
-
         public Shader(ResourceFactory factory, Framebuffer framebuffer, ResourceLayout projectionViewLayout, string vertexCode, string fragmentCode)
         {
             var vertBytes = Encoding.UTF8.GetBytes(vertexCode);
@@ -34,15 +26,15 @@ namespace LifeSim.Rendering
             this._fragmentShader = shaders[1];
 
             this._worldTextureLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
-                new ResourceLayoutElementDescription("worldBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex),
-                new ResourceLayoutElementDescription("surfaceTexture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
-                new ResourceLayoutElementDescription("surfaceSampler", ResourceKind.Sampler, ShaderStages.Fragment)
+                new ResourceLayoutElementDescription("WorldBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex),
+                new ResourceLayoutElementDescription("SurfaceTexture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
+                new ResourceLayoutElementDescription("SurfaceSampler", ResourceKind.Sampler, ShaderStages.Fragment)
             ));
 
             var vertexLayoutDesc = new VertexLayoutDescription(
-                new VertexElementDescription("position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
-                new VertexElementDescription("normal", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
-                new VertexElementDescription("uv", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2)
+                new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
+                new VertexElementDescription("Normal", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
+                new VertexElementDescription("TextCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2)
             );
 
             var rasterizerState = new RasterizerStateDescription(
@@ -67,6 +59,7 @@ namespace LifeSim.Rendering
 
         public void Dispose()
         {
+            System.Console.WriteLine("Dispose shader");
             this._worldTextureLayout.Dispose();
             this._vertexShader.Dispose();
             this._fragmentShader.Dispose();
