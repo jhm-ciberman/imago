@@ -1,12 +1,14 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
+using System.Text;
 using Veldrid;
 using Veldrid.ImageSharp;
 using Veldrid.StartupUtilities;
+using Veldrid.SPIRV;
 
 namespace LifeSim.Rendering
 {
-    public class Renderer
+    public class GPURenderer
     {
         [StructLayout(LayoutKind.Sequential)]
         struct CameraInfo
@@ -23,11 +25,12 @@ namespace LifeSim.Rendering
 
         private DeviceBuffer _worldBuffer;
 
-        private ResourceLayout _cameraInfoLayout;
         private DeviceBuffer _cameraInfoBuffer;
         private ResourceSet _cameraInfoSet;
 
-        public Renderer(Window window)
+        private PipelineManager _pipelineManager;
+
+        public GPURenderer(Window window)
         {
             GraphicsDeviceOptions options = new GraphicsDeviceOptions(
                 debug: false,
@@ -46,24 +49,23 @@ namespace LifeSim.Rendering
             this._swapchain = this._graphicsDevice.MainSwapchain;
             this._worldBuffer = this._factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
-            this._cameraInfoLayout = this._factory.CreateResourceLayout(new ResourceLayoutDescription(
-                new ResourceLayoutElementDescription("CameraInfo", ResourceKind.UniformBuffer, ShaderStages.Vertex)
-            ));
+
             this._cameraInfoBuffer = this._factory.CreateBuffer(new BufferDescription(128, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
-            this._cameraInfoSet = this._factory.CreateResourceSet(
-                new ResourceSetDescription(this._cameraInfoLayout, this._cameraInfoBuffer)
-            );
+            this._pipelineManager = new PipelineManager(this._factory, this._swapchain.Framebuffer);
 
+            this._cameraInfoSet = this._factory.CreateResourceSet(
+                new ResourceSetDescription(this._pipelineManager.cameraInfoLayout, this._cameraInfoBuffer)
+            );
         }
 
-        public Texture MakeTexture(string path)
+        public GPUTexture MakeTexture(string path)
         {
             ImageSharpTexture texture = new ImageSharpTexture(path, true);
             var deviceTexture = texture.CreateDeviceTexture(this._graphicsDevice, this._factory);
             var textureView = this._factory.CreateTextureView(deviceTexture);
             
-            return new Texture(deviceTexture, textureView);
+            return new GPUTexture(deviceTexture, textureView);
         }
 
         public GraphicsBackend backendType => this._graphicsDevice.BackendType;
@@ -74,24 +76,23 @@ namespace LifeSim.Rendering
             this._swapchain.Dispose();
             this._graphicsDevice.Dispose();
 
-            this._cameraInfoLayout.Dispose();
             this._cameraInfoBuffer.Dispose();
             this._cameraInfoSet.Dispose();
         }
 
-        public Material MakeMaterial(Shader shader, Texture texture)
-        {
-            return new Material(this._factory, this._graphicsDevice, shader, this._worldBuffer, texture);
-        }
-
         public Shader MakeShader(string vertexCode, string fragmentCode)
         {
-            return new Shader(this._factory, this._swapchain.Framebuffer, this._cameraInfoLayout, vertexCode, fragmentCode);
+            var vertBytes = Encoding.UTF8.GetBytes(vertexCode);
+            var fragBytes = Encoding.UTF8.GetBytes(fragmentCode);
+            ShaderDescription vertexShaderDesc = new ShaderDescription(ShaderStages.Vertex, vertBytes, "main");
+            ShaderDescription fragmentShaderDesc = new ShaderDescription(ShaderStages.Fragment, fragBytes, "main");
+            var shaders = this._factory.CreateFromSpirv(vertexShaderDesc, fragmentShaderDesc);
+            return new Shader(shaders);
         }
 
-        public Mesh MakeMesh(MeshData meshData)
+        public GPUMesh MakeMesh(LifeSim.Mesh meshData)
         {
-            return new Mesh(this._factory, this._graphicsDevice, meshData);
+            return new GPUMesh(this._factory, this._graphicsDevice, meshData);
         }
 
         private void _SetupCamera(Camera camera)
@@ -127,9 +128,19 @@ namespace LifeSim.Rendering
             this._commandList.UpdateBuffer(this._worldBuffer, 0, renderable.transform.GetTransformMatrix());
             this._commandList.SetVertexBuffer(0, mesh.vertexBuffer);
             this._commandList.SetIndexBuffer(mesh.indexBuffer, IndexFormat.UInt16);
-            this._commandList.SetPipeline(material.pipeline);
+            
+            var pipeline = this._pipelineManager.GetPipeline(material.pass);
+            this._commandList.SetPipeline(pipeline.pipeline);
+            
+            if (material.resourceSetIsDirty) {
+                material.resourceSet?.Dispose();
+                var desc = new ResourceSetDescription(pipeline.resourceLayouts[1], this._worldBuffer, material.texture.textureView, this._graphicsDevice.PointSampler);
+                material.resourceSet = this._factory.CreateResourceSet(desc);
+                material.resourceSetIsDirty = false;
+            }
+
             this._commandList.SetGraphicsResourceSet(0, this._cameraInfoSet);
-            this._commandList.SetGraphicsResourceSet(1, material.textureSet);
+            this._commandList.SetGraphicsResourceSet(1, material.resourceSet);
             this._commandList.DrawIndexed(
                 indexCount: mesh.indexCount,
                 instanceCount: 1,
@@ -151,7 +162,7 @@ namespace LifeSim.Rendering
             this._graphicsDevice.ResizeMainWindow(width, height);
         }
 
-        ~Renderer() {
+        ~GPURenderer() {
             this.Dispose();
         }
     }

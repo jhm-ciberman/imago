@@ -12,13 +12,13 @@ namespace LifeSim
         }
 
         private Window _window;
-        private Renderer _renderer;
+        private GPURenderer _renderer;
         private DemoScene _scene;
 
         public App()
         {
             this._window = new Window();
-            this._renderer = new Renderer(this._window);
+            this._renderer = new GPURenderer(this._window);
 
             this._scene = new DemoScene(this._renderer);
             this._window.onResize += this.OnResize;

@@ -5,9 +5,8 @@ namespace LifeSim.Rendering
 {
     public class GLTFLoader
     {
-        public MeshData Load(string path)
+        public LifeSim.Mesh Load(string path)
         {
-
             var model = SharpGLTF.Schema2.ModelRoot.Load(path);
 
             var meshes = model.LogicalMeshes;
@@ -34,13 +33,10 @@ namespace LifeSim.Rendering
             System.Console.WriteLine("Primitive type: " + primitive.DrawPrimitiveType);
 
             if (normalList != null) {
-                return new MeshData(verticesList, uvList, indices, normalList.AsVector3Array());
+                return new LifeSim.Mesh(verticesList, uvList, indices, normalList.AsVector3Array());
             } else {
-                return new MeshData(verticesList, uvList, indices);
+                return new LifeSim.Mesh(verticesList, uvList, indices);
             }
         }
-
-
     }
-
 }

@@ -1,69 +1,46 @@
 using System.Text;
 using Veldrid;
-using Veldrid.SPIRV;
+
 
 namespace LifeSim.Rendering
 {
     public class Shader : System.IDisposable
     {
-        private readonly Veldrid.Shader _vertexShader;
-        private readonly Veldrid.Shader _fragmentShader;
-        private readonly ResourceLayout _worldTextureLayout;
-        private readonly Pipeline _pipeline;
-        public Pipeline pipeline => this._pipeline;
+        private readonly Veldrid.Shader[] _shaders;
 
-        public ResourceLayout worldTextureLayout => this._worldTextureLayout;
-
-        public Shader(ResourceFactory factory, Framebuffer framebuffer, ResourceLayout projectionViewLayout, string vertexCode, string fragmentCode)
+        public Shader(Veldrid.Shader[] shaders)
         {
-            var vertBytes = Encoding.UTF8.GetBytes(vertexCode);
-            var fragBytes = Encoding.UTF8.GetBytes(fragmentCode);
-            ShaderDescription vertexShaderDesc = new ShaderDescription(ShaderStages.Vertex, vertBytes, "main");
-            ShaderDescription fragmentShaderDesc = new ShaderDescription(ShaderStages.Fragment, fragBytes, "main");
-            
-            var shaders = factory.CreateFromSpirv(vertexShaderDesc, fragmentShaderDesc);
-            this._vertexShader = shaders[0];
-            this._fragmentShader = shaders[1];
+            this._shaders = shaders;
+        }
 
-            this._worldTextureLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
-                new ResourceLayoutElementDescription("WorldBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex),
-                new ResourceLayoutElementDescription("SurfaceTexture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
-                new ResourceLayoutElementDescription("SurfaceSampler", ResourceKind.Sampler, ShaderStages.Fragment)
-            ));
+        public ResourceLayoutDescription[] BuildResourceLayouts()
+        {
+            return new[] {
+                new ResourceLayoutDescription(
+                    new ResourceLayoutElementDescription("WorldBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex),
+                    new ResourceLayoutElementDescription("SurfaceTexture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
+                    new ResourceLayoutElementDescription("SurfaceSampler", ResourceKind.Sampler, ShaderStages.Fragment)
+                ),
+            };
+        }
 
-            var vertexLayoutDesc = new VertexLayoutDescription(
+        public ShaderSetDescription BuildShaderSetDescription()
+        {
+            var vertexLayout = new VertexLayoutDescription(
                 new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
                 new VertexElementDescription("Normal", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
                 new VertexElementDescription("TextCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2)
             );
 
-            var rasterizerState = new RasterizerStateDescription(
-                FaceCullMode.Front,
-                PolygonFillMode.Solid,
-                FrontFace.Clockwise,
-                depthClipEnabled: true,
-                scissorTestEnabled: false
-            );
-
-            GraphicsPipelineDescription pipelineDescription = new GraphicsPipelineDescription();
-            pipelineDescription.ShaderSet = new ShaderSetDescription(new [] { vertexLayoutDesc }, shaders);
-            pipelineDescription.BlendState = BlendStateDescription.SingleOverrideBlend;
-            pipelineDescription.DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual;
-            pipelineDescription.RasterizerState = rasterizerState;
-            pipelineDescription.PrimitiveTopology = PrimitiveTopology.TriangleList;
-            pipelineDescription.ResourceLayouts = new[] { projectionViewLayout, this._worldTextureLayout };
-            pipelineDescription.Outputs = framebuffer.OutputDescription; 
-
-            this._pipeline = factory.CreateGraphicsPipeline(pipelineDescription);
+            return new ShaderSetDescription(new [] { vertexLayout }, this._shaders);
         }
 
         public void Dispose()
         {
             System.Console.WriteLine("Dispose shader");
-            this._worldTextureLayout.Dispose();
-            this._vertexShader.Dispose();
-            this._fragmentShader.Dispose();
-            this._pipeline.Dispose();
+            foreach (var shader in this._shaders) {
+                shader.Dispose();
+            }
         }
 
         ~Shader() {

@@ -1,11 +1,11 @@
 namespace LifeSim.Rendering
 {
-    public class Texture : System.IDisposable
+    public class GPUTexture : System.IDisposable
     {
         private Veldrid.Texture _deviceTexture;
         private Veldrid.TextureView _textureView;
 
-        public Texture(Veldrid.Texture texture, Veldrid.TextureView textureView)
+        public GPUTexture(Veldrid.Texture texture, Veldrid.TextureView textureView)
         {
             this._deviceTexture = texture;
             this._textureView = textureView;
@@ -19,7 +19,7 @@ namespace LifeSim.Rendering
             this._textureView.Dispose();
         }
 
-        ~Texture() {
+        ~GPUTexture() {
             this.Dispose();
         }
 

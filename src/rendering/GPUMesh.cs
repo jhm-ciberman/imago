@@ -5,7 +5,7 @@ using Veldrid;
 
 namespace LifeSim.Rendering
 {
-    public class Mesh : System.IDisposable
+    public class GPUMesh : System.IDisposable
     {
         public struct VertData
         {
@@ -25,11 +25,11 @@ namespace LifeSim.Rendering
         private DeviceBuffer _indexBuffer;
         public uint indexCount;
 
-        public Mesh(ResourceFactory factory, GraphicsDevice graphicsDevice, MeshData mesh)
+        public GPUMesh(ResourceFactory factory, GraphicsDevice graphicsDevice, LifeSim.Mesh mesh)
         {
             VertData[] vertices = new VertData[mesh.positions.Count];
             for(var i = 0; i < mesh.positions.Count; i++) {
-                vertices[i] = new Mesh.VertData(mesh.positions[i],  mesh.normals[i], mesh.uvs[i]);
+                vertices[i] = new GPUMesh.VertData(mesh.positions[i],  mesh.normals[i], mesh.uvs[i]);
             }
             var indices = mesh.indices.ToArray();
             uint vertCount = (uint) vertices.Length;
@@ -52,7 +52,7 @@ namespace LifeSim.Rendering
             this._indexBuffer.Dispose();
         }
 
-        ~Mesh() {
+        ~GPUMesh() {
             this.Dispose();
         }
     }

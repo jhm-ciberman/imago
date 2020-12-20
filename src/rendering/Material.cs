@@ -2,37 +2,43 @@ using Veldrid;
 
 namespace LifeSim.Rendering
 {
-    public class Material : System.IDisposable
+    public class Material
     {
-        private Shader _shader;
-        private Texture _texture;
-        private ResourceSet _textureSet;
+        internal static System.Action<Material> onRefCountZero;
 
-        public Material(ResourceFactory factory, GraphicsDevice graphicsDevice, Shader shader, DeviceBuffer worldBuffer, Texture texture) 
+        private MaterialPass _pass;
+        public MaterialPass pass => this._pass;
+        
+        private GPUTexture _texture;
+        public GPUTexture texture => this._texture;
+
+        private uint _refCount = 0;
+
+        public Material(Shader shader, GPUTexture texture) 
         {
-            this._shader = shader;
-            
-            this._textureSet = factory.CreateResourceSet(
-                new ResourceSetDescription(shader.worldTextureLayout, worldBuffer, texture.textureView, graphicsDevice.PointSampler)
-            );
+            this._pass = new MaterialPass(shader);
+            this._texture = texture;
         }
 
-        public Pipeline pipeline => this._shader.pipeline;
-        public ResourceSet textureSet => this._textureSet;
-
-        public void SetTexture(Texture texture)
+        public void SetTexture(GPUTexture texture)
         {
             this._texture = texture;
         }
 
-        public void Dispose()
+        internal void MarkAsUsed()
         {
-            this._shader.Dispose();
-            this._textureSet.Dispose();
+            this._refCount++;
         }
 
-        ~Material() {
-            this.Dispose();
+        internal void MarkAsUnused()
+        {
+            this._refCount--;
+            if (this._refCount == 0) {
+                Material.onRefCountZero?.Invoke(this);
+            }
         }
+
+        public ResourceSet resourceSet;
+        public bool resourceSetIsDirty = true;
     }
 }
