@@ -5,28 +5,20 @@ namespace LifeSim
 {
     public class Mesh
     {
-        public readonly IReadOnlyList<Vector3> positions;
-        public readonly IReadOnlyList<Vector3> normals;
-        public readonly IReadOnlyList<Vector2> uvs;
-        public readonly IReadOnlyList<ushort> indices;
+        public readonly IList<Vector3> positions;
+        public readonly IList<Vector3> normals;
+        public readonly IList<Vector2> uvs;
+        public readonly IList<ushort> indices;
         
-        public Mesh(IReadOnlyList<Vector3> positions, IReadOnlyList<Vector2> uvs, IReadOnlyList<ushort> indices) 
+        public Mesh(IList<Vector3> positions, IList<ushort> indices, IList<Vector2> uvs, IList<Vector3> normals) 
         {
             this.positions = positions;
-            this.uvs = uvs;
-            this.indices = indices;
-            this.normals = this._ComputeNormals(positions, indices);
-        }
-
-        public Mesh(IReadOnlyList<Vector3> positions, IReadOnlyList<Vector2> uvs, IReadOnlyList<ushort> indices, IReadOnlyList<Vector3> normals) 
-        {
-            this.positions = positions;
-            this.uvs = uvs;
-            this.normals = normals;
+            this.uvs = uvs ?? new Vector2[positions.Count];
+            this.normals = normals ?? this._ComputeNormals(positions, indices);
             this.indices = indices;
         }
 
-        private Vector3[] _ComputeNormals(IReadOnlyList<Vector3> positions, IReadOnlyList<ushort> indices)
+        private Vector3[] _ComputeNormals(IList<Vector3> positions, IList<ushort> indices)
         {
             Vector3[] normals = new Vector3[positions.Count];
 

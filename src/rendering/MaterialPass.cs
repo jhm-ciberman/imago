@@ -5,6 +5,7 @@ namespace LifeSim.Rendering
         private static uint _globalIdCount = 0;
 
         public readonly uint id;
+        
         private Shader _shader;
         public Shader shader => this._shader;
 

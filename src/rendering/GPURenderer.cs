@@ -24,6 +24,7 @@ namespace LifeSim.Rendering
         private CommandList _commandList;
 
         private DeviceBuffer _worldBuffer;
+        private DeviceBuffer _bonesBuffer;
 
         private DeviceBuffer _cameraInfoBuffer;
         private ResourceSet _cameraInfoSet;
@@ -48,6 +49,7 @@ namespace LifeSim.Rendering
             this._commandList = this._factory.CreateCommandList();
             this._swapchain = this._graphicsDevice.MainSwapchain;
             this._worldBuffer = this._factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+            this._bonesBuffer = this._factory.CreateBuffer(new BufferDescription(64 * BonesInfo.maxNumberOfBones, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
 
             this._cameraInfoBuffer = this._factory.CreateBuffer(new BufferDescription(128, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
@@ -80,14 +82,14 @@ namespace LifeSim.Rendering
             this._cameraInfoSet.Dispose();
         }
 
-        public Shader MakeShader(string vertexCode, string fragmentCode)
+        public Shader MakeShader(string vertexCode, string fragmentCode, bool isSkinned = false)
         {
             var vertBytes = Encoding.UTF8.GetBytes(vertexCode);
             var fragBytes = Encoding.UTF8.GetBytes(fragmentCode);
             ShaderDescription vertexShaderDesc = new ShaderDescription(ShaderStages.Vertex, vertBytes, "main");
             ShaderDescription fragmentShaderDesc = new ShaderDescription(ShaderStages.Fragment, fragBytes, "main");
             var shaders = this._factory.CreateFromSpirv(vertexShaderDesc, fragmentShaderDesc);
-            return new Shader(shaders);
+            return new Shader(shaders, isSkinned);
         }
 
         public GPUMesh MakeMesh(LifeSim.Mesh meshData)
@@ -95,6 +97,7 @@ namespace LifeSim.Rendering
             return new GPUMesh(this._factory, this._graphicsDevice, meshData);
         }
 
+        private float _angle = 0f;
         private void _SetupCamera(Camera camera)
         {
             CameraInfo cameraInfo;
@@ -106,6 +109,27 @@ namespace LifeSim.Rendering
             this._commandList.SetFramebuffer(this._swapchain.Framebuffer);
             this._commandList.ClearColorTarget(0, new RgbaFloat(0.04f, 0.04f, 0.06f, 1.0f));
             this._commandList.ClearDepthStencil(1f);
+
+            var bones = this._bonesInfo.BonesTransformations;
+            for (int i = 0; i < bones.Length; i++) {
+                bones[i] = Matrix4x4.Identity;
+            }
+            bones[1] = Matrix4x4.CreateRotationZ(this._angle);
+            this._angle += 0.005f;
+            /*
+            var data = this._bonesInfo.GetBlittable();
+            unsafe {
+                for (int j = 0; j < BonesInfo.maxNumberOfBones; j++) {
+                    int i = j * 16;
+                    System.Console.WriteLine(data.BoneData[i + 0] + ", " + data.BoneData[i + 1] + data.BoneData[i + 2] + data.BoneData[i + 3]);
+                    System.Console.WriteLine(data.BoneData[i + 4] + ", " + data.BoneData[i + 5] + data.BoneData[i + 6] + data.BoneData[i + 7]);
+                    System.Console.WriteLine(data.BoneData[i + 8] + ", " + data.BoneData[i + 9] + data.BoneData[i + 10] + data.BoneData[i + 11]);
+                    System.Console.WriteLine(data.BoneData[i + 12] + ", " + data.BoneData[i + 13] + data.BoneData[i + 14] + data.BoneData[i + 15]);
+                    System.Console.WriteLine("");
+                }
+            }
+            */
+            this._commandList.UpdateBuffer(this._bonesBuffer, 0, this._bonesInfo.GetBlittable());
         }
 
         public void Render(Scene scene)
@@ -120,12 +144,15 @@ namespace LifeSim.Rendering
             }
         }
 
+        private BonesInfo _bonesInfo = BonesInfo.New();
+
         public void _DrawRenderable(Renderable renderable, Camera camera)
         {
             var mesh = renderable.mesh;
             var material = renderable.material;
 
             this._commandList.UpdateBuffer(this._worldBuffer, 0, renderable.transform.GetTransformMatrix());
+
             this._commandList.SetVertexBuffer(0, mesh.vertexBuffer);
             this._commandList.SetIndexBuffer(mesh.indexBuffer, IndexFormat.UInt16);
             
@@ -134,7 +161,7 @@ namespace LifeSim.Rendering
             
             if (material.resourceSetIsDirty) {
                 material.resourceSet?.Dispose();
-                var desc = new ResourceSetDescription(pipeline.resourceLayouts[1], this._worldBuffer, material.texture.textureView, this._graphicsDevice.PointSampler);
+                var desc = new ResourceSetDescription(pipeline.resourceLayouts[1], this._worldBuffer, material.texture.textureView, this._graphicsDevice.PointSampler, this._bonesBuffer);
                 material.resourceSet = this._factory.CreateResourceSet(desc);
                 material.resourceSetIsDirty = false;
             }
