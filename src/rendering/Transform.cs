@@ -13,7 +13,7 @@ namespace LifeSim.Rendering
         public Quaternion Rotation { get => _rotation; set { _rotation = value; TransformChanged?.Invoke(); } }
         public Vector3 Scale { get => _scale; set { _scale = value; TransformChanged?.Invoke(); } }
 
-        public event Action TransformChanged;
+        public event Action? TransformChanged;
 
         public Vector3 Forward => Vector3.Transform(-Vector3.UnitZ, _rotation);
 

@@ -92,7 +92,7 @@ namespace LifeSim.Rendering
             return new Shader(shaders, isSkinned);
         }
 
-        public GPUMesh MakeMesh(LifeSim.Mesh meshData)
+        public GPUMesh MakeMesh(LifeSim.MeshData meshData)
         {
             return new GPUMesh(this._factory, this._graphicsDevice, meshData);
         }

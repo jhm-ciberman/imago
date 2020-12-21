@@ -25,7 +25,7 @@ namespace LifeSim.Rendering
 
         private void _ReleaseMaterial(Material material)
         {
-            if (this._cache.TryGetValue(material.pass.id, out GPUPipeline pipeline)) {
+            if (this._cache.TryGetValue(material.pass.id, out GPUPipeline? pipeline)) {
                 pipeline.pipeline.Dispose();
                 foreach (var layout in pipeline.resourceLayouts) {
                     layout.Dispose();
@@ -39,11 +39,17 @@ namespace LifeSim.Rendering
         {
             public Veldrid.Pipeline pipeline;
             public Veldrid.ResourceLayout[] resourceLayouts; 
+
+            public GPUPipeline(Pipeline pipeline, ResourceLayout[] resourceLayouts)
+            {
+                this.pipeline = pipeline;
+                this.resourceLayouts = resourceLayouts;
+            }
         }
 
         public GPUPipeline GetPipeline(MaterialPass pass)
         {
-            if (this._cache.TryGetValue(pass.id, out GPUPipeline pipeline)) {
+            if (this._cache.TryGetValue(pass.id, out GPUPipeline? pipeline)) {
                 return pipeline;
             }
 
@@ -75,10 +81,7 @@ namespace LifeSim.Rendering
             pipelineDescription.ResourceLayouts = resourceLayouts;
             pipelineDescription.Outputs = this._framebuffer.OutputDescription; 
 
-            return new GPUPipeline {
-                pipeline = this._factory.CreateGraphicsPipeline(pipelineDescription),
-                resourceLayouts = resourceLayouts,
-            };
+            return new GPUPipeline(this._factory.CreateGraphicsPipeline(pipelineDescription), resourceLayouts);
         }
 
         private ResourceLayout[] _BuildResourceLayouts(ResourceLayoutDescription[] descriptions)

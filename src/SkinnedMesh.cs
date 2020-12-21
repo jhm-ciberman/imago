@@ -3,14 +3,14 @@ using System.Numerics;
 
 namespace LifeSim
 {
-    public class SkinnedMesh : Mesh
+    public class SkinnedMeshData : MeshData
     {
         public readonly IList<Vector4> joints;
         public readonly IList<Vector4> weights;
         public readonly IList<Matrix4x4> inverseBindMatrices;
 
-        public SkinnedMesh(
-            IList<Vector3> positions, IList<ushort> indices, IList<Vector2> uvs, IList<Vector3> normals, 
+        public SkinnedMeshData(
+            IList<Vector3> positions, IList<ushort> indices, IList<Vector2>? uvs, IList<Vector3>? normals, 
             IList<Vector4> joints, IList<Vector4> weights, IList<Matrix4x4> inverseBindMatrices
         ) 
             : base(positions, indices, uvs, normals)

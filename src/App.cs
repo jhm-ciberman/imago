@@ -20,21 +20,16 @@ namespace LifeSim
             this._window = new Window();
             this._renderer = new GPURenderer(this._window);
 
-            this._scene = new DemoScene(this._renderer);
-            this._window.onResize += this.OnResize;
+            this._scene = new DemoScene(this._window, this._renderer);
+            this._window.viewport.onResize += this.OnResize;
 
-            this.OnResize(this._window);
+            this.OnResize();
             this._window.RunMainLoop(this.Update);
         }
 
-        public void OnResize(Window window) 
+        public void OnResize() 
         {
-            this._renderer.Resize(this._window.width, this._window.height);
-
-            float aspect = (float) this._window.width / (float) this._window.height;
-            foreach (var camera in this._scene.cameras) {
-                camera.aspect = aspect;
-            }
+            this._renderer.Resize(this._window.viewport.width, this._window.viewport.height);
         }
 
         protected void Update(float deltaTime)

@@ -4,7 +4,7 @@ namespace LifeSim.Rendering
 {
     public class Material
     {
-        internal static System.Action<Material> onRefCountZero;
+        internal static System.Action<Material>? onRefCountZero;
 
         private MaterialPass _pass;
         public MaterialPass pass => this._pass;
@@ -13,6 +13,9 @@ namespace LifeSim.Rendering
         public GPUTexture texture => this._texture;
 
         private uint _refCount = 0;
+
+        public ResourceSet? resourceSet;
+        public bool resourceSetIsDirty = true;
 
         public Material(Shader shader, GPUTexture texture) 
         {
@@ -38,7 +41,5 @@ namespace LifeSim.Rendering
             }
         }
 
-        public ResourceSet resourceSet;
-        public bool resourceSetIsDirty = true;
     }
 }

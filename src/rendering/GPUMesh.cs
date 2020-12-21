@@ -6,7 +6,7 @@ using Veldrid;
 
 namespace LifeSim.Rendering
 {
-    public class GPUMesh : System.IDisposable
+    public class GPUMesh :  System.IDisposable
     {
         [StructLayout(LayoutKind.Sequential)]
         struct VertData
@@ -33,7 +33,7 @@ namespace LifeSim.Rendering
         public uint vertexCount;
         public uint indexCount;
 
-        public GPUMesh(ResourceFactory factory, GraphicsDevice graphicsDevice, LifeSim.Mesh mesh)
+        public GPUMesh(ResourceFactory factory, GraphicsDevice graphicsDevice, LifeSim.MeshData mesh)
         {
             var indices = mesh.indices.ToArray();
 
@@ -43,7 +43,7 @@ namespace LifeSim.Rendering
             this._indexBuffer  = factory.CreateBuffer(new BufferDescription(this.indexCount  * sizeof(ushort)      , BufferUsage.IndexBuffer ));
             graphicsDevice.UpdateBuffer(this._indexBuffer, 0, indices);
 
-            if (mesh is LifeSim.SkinnedMesh skinnedMesh) {
+            if (mesh is LifeSim.SkinnedMeshData skinnedMesh) {
                 var size = SkinnedVertData.sizeInBytes * this.vertexCount;
                 this._vertexBuffer = factory.CreateBuffer(new BufferDescription(size, BufferUsage.VertexBuffer));
                 graphicsDevice.UpdateBuffer(this._vertexBuffer, 0, this.GetSkinnedVerts(skinnedMesh));
@@ -55,7 +55,7 @@ namespace LifeSim.Rendering
 
         }
 
-        private VertData[] GetVerts(LifeSim.Mesh mesh)
+        private VertData[] GetVerts(LifeSim.MeshData mesh)
         {
             VertData[] vertices = new VertData[mesh.positions.Count];
             for(var i = 0; i < mesh.positions.Count; i++) {
@@ -67,7 +67,7 @@ namespace LifeSim.Rendering
         }
 
 
-        private SkinnedVertData[] GetSkinnedVerts(LifeSim.SkinnedMesh mesh)
+        private SkinnedVertData[] GetSkinnedVerts(LifeSim.SkinnedMeshData mesh)
         {
             SkinnedVertData[] vertices = new SkinnedVertData[mesh.joints.Count];
             for(var i = 0; i < mesh.joints.Count; i++) {

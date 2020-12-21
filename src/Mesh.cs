@@ -3,14 +3,14 @@ using System.Numerics;
 
 namespace LifeSim
 {
-    public class Mesh
+    public class MeshData
     {
         public readonly IList<Vector3> positions;
         public readonly IList<Vector3> normals;
         public readonly IList<Vector2> uvs;
         public readonly IList<ushort> indices;
         
-        public Mesh(IList<Vector3> positions, IList<ushort> indices, IList<Vector2> uvs, IList<Vector3> normals) 
+        public MeshData(IList<Vector3> positions, IList<ushort> indices, IList<Vector2>? uvs, IList<Vector3>? normals) 
         {
             this.positions = positions;
             this.uvs = uvs ?? new Vector2[positions.Count];

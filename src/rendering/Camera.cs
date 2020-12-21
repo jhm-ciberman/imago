@@ -9,14 +9,15 @@ namespace LifeSim.Rendering
         public Vector3 position;
         public Vector3 lookAt = Vector3.UnitZ;
         public float fov = 60 * System.MathF.PI / 180f;
-        public float aspect = 4f / 3f;
+        public float aspect => (float) this._viewPort.width / (float) this._viewPort.height;
         public float near = 0.01f;
         public float far = 100.0f;
 
+        private Viewport _viewPort;
  
-        public Camera()
+        public Camera(Viewport viewport)
         {
-            //
+            this._viewPort = viewport;
         }
 
         public Matrix4x4 projectionMatrix

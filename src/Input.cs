@@ -13,7 +13,6 @@ namespace LifeSim
         private static HashSet<MouseButton> _newMouseButtonsThisFrame = new HashSet<MouseButton>();
 
         public static Vector2 MousePosition;
-        public static InputSnapshot FrameSnapshot { get; private set; }
 
         public static bool GetKey(Key key)
         {
@@ -37,7 +36,6 @@ namespace LifeSim
 
         public static void UpdateFrameInput(InputSnapshot snapshot)
         {
-            FrameSnapshot = snapshot;
             _newKeysThisFrame.Clear();
             _newMouseButtonsThisFrame.Clear();
 

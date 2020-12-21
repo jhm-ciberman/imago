@@ -4,6 +4,7 @@
         <TargetFramework>netcoreapp3.1</TargetFramework>
         <RootNamespace>LifeSim</RootNamespace>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="SharpGLTF.Core" Version="1.0.0-alpha0020" />

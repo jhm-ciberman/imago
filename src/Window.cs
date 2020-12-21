@@ -7,6 +7,8 @@ namespace LifeSim
     public class Window
     {
         private Sdl2Window _window;
+        private Viewport _viewport;
+        public Viewport viewport => this._viewport;
 
         public Window()
         {
@@ -18,23 +20,25 @@ namespace LifeSim
                 WindowTitle = "Veldrid Tutorial"
             };
             this._window = VeldridStartup.CreateWindow(ref windowCI);
-            this._window.Resized += () => this.onResize?.Invoke(this);
-        }
 
-        public System.Action<Window> onResize;
+            this._viewport = new Viewport(this.width, this.height);
+            this._window.Resized += () => {
+                this._viewport.Resize(this.width, this.height);
+            };
+        }
 
         public void GoFullscreenMode()
         {
-            
-            this._window.WindowState = Veldrid.WindowState.FullScreen;
-            this.onResize?.Invoke(this);
+            this._window.WindowState = Veldrid.WindowState.BorderlessFullScreen;
         }
 
         public void GoWindowMode()
         {
             this._window.WindowState = Veldrid.WindowState.Normal;
-            this.onResize?.Invoke(this);
         }
+
+        public uint width  => (uint) this._window.Width;
+        public uint height => (uint) this._window.Height;
 
         public void RunMainLoop(System.Action<float> mainLoop)
         {
@@ -49,6 +53,10 @@ namespace LifeSim
 
                 mainLoop.Invoke(deltaSeconds);
 
+                if (Input.GetKeyDown(Veldrid.Key.Space)) {
+                    this.GoFullscreenMode();
+                }
+
                 var inputSnapshot = this._window.PumpEvents(); //For next frame
                 Input.UpdateFrameInput(inputSnapshot);
             }
@@ -58,8 +66,7 @@ namespace LifeSim
 
         public string title { get => this._window.Title; set => this._window.Title = value; }
 
-        public uint width => (uint) this._window.Width;
-        public uint height => (uint) this._window.Height;
+
 
         public Sdl2Window nativeWindow => this._window;
 
