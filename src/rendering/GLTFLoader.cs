@@ -7,24 +7,101 @@ namespace LifeSim.Rendering
     public class GLTFLoader
     {
         private GPURenderer _renderer;
-        public GLTFLoader(GPURenderer renderer)
+        private SharpGLTF.Schema2.ModelRoot _model;
+
+        public GLTFLoader(GPURenderer renderer, string path)
         {
             this._renderer = renderer;
-        }
-        
-        public GPUMesh Load(string path)
-        {
-            var model = SharpGLTF.Schema2.ModelRoot.Load(path);
-            //var model = glTFLoader.Interface.LoadModel(path);
+            this._model = SharpGLTF.Schema2.ModelRoot.Load(path);
 
-            var meshes = model.LogicalMeshes;
-            
-            var primitives = meshes[0].Primitives;
-            
-            var primitive = primitives[0];
             System.Console.WriteLine("Loading file " + path);
-            System.Console.WriteLine("Meshes count: " + meshes.Count);
-            System.Console.WriteLine("Primitives count: " + primitives.Count);
+        }
+
+        public Scene3D LoadScene(Material? defaultMaterial, int sceneIndex = 0)
+        {
+            return this._Scene(this._model.LogicalScenes[sceneIndex], defaultMaterial);
+        }
+
+        public GPUMesh LoadMesh(int meshIndex = 0)
+        {
+            return this._Primitive(this._model.LogicalMeshes[meshIndex].Primitives[0]);
+        }
+
+        public GPUMesh LoadMesh(string name)
+        {
+            foreach (var mesh in this._model.LogicalMeshes) {
+                if (mesh.Name == name) {
+                    return this._Primitive(mesh.Primitives[0]);
+                }
+            }
+            throw new System.Exception("Mesh not found"); // Todo: better error
+        }
+
+        public Animation LoadAnimation(int animationIndex = 0)
+        {
+            return this._Animation(this._model.LogicalAnimations[animationIndex]);
+        }
+
+        public Skin LoadSkin(int skinIndex, Material defaultMaterial)
+        {
+            return this._Skin(this._model.LogicalSkins[skinIndex], defaultMaterial);
+        }
+
+        private Animation _Animation(SharpGLTF.Schema2.Animation animation)
+        {
+            var anim = new Animation(animation.Name);
+            //animation.FindRotationSampler(node)
+            
+            return anim;
+        }
+
+        private Scene3D _Scene(SharpGLTF.Schema2.Scene scene, Material? defaultMaterial)
+        {
+            var scene3D = new Scene3D();
+            foreach (var node in scene.VisualChildren) {
+                scene3D.Add(this._Node(node, defaultMaterial));
+            }
+            return scene3D;
+        }
+
+        private Node3D _Node(SharpGLTF.Schema2.Node node, Material? defaultMaterial)
+        {
+            System.Console.WriteLine("Node: " + node.Name);
+            Node3D node3D;
+            if (node.Mesh != null && defaultMaterial != null) {
+                node3D = this._Mesh(node.Mesh, defaultMaterial);
+            } else {
+                node3D = new Node3D();
+            }
+
+            var t = node.LocalTransform;
+            node3D.transform.Rotation = t.Rotation;
+            node3D.transform.Scale    = t.Scale;
+            node3D.transform.Position = t.Translation;
+
+            foreach (var child in node.VisualChildren)
+            {
+                var child3D = this._Node(child, defaultMaterial);
+                node3D.Add(child3D);
+            }
+            return node3D;
+        }
+
+        private Renderable3D _Mesh(SharpGLTF.Schema2.Mesh mesh, Material defaultMaterial)
+        {
+            var gpuMesh = this._Primitive(mesh.Primitives[0]);
+            return new Renderable3D(gpuMesh, defaultMaterial);
+        }
+
+        private Skin _Skin(SharpGLTF.Schema2.Skin skin, Material defaultMaterial)
+        {
+            Node3D root = this._Node(skin.Skeleton ?? skin.GetJoint(0).Joint, defaultMaterial);
+            var invBindMats = skin.GetInverseBindMatricesAccessor().AsMatrix4x4Array();
+            return new Skin(root, invBindMats);
+        }
+
+        private GPUMesh _Primitive(SharpGLTF.Schema2.MeshPrimitive primitive)
+        {
             System.Console.WriteLine("Primitive type: " + primitive.DrawPrimitiveType);
 
             var indicesList = primitive.IndexAccessor.AsIndicesArray();
@@ -36,30 +113,23 @@ namespace LifeSim.Rendering
             foreach (var s in accessors.Keys) {
                 System.Console.WriteLine(s);
             }
-
+            
             var positionAccessor = accessors.GetValueOrDefault("POSITION");
             var texCoordAccessor = accessors.GetValueOrDefault("TEXCOORD_0");
-            var normalAccessor = accessors.GetValueOrDefault("NORMAL");
+            var normalAccessor   = accessors.GetValueOrDefault("NORMAL");
+            var jointsAccessor   = accessors.GetValueOrDefault("JOINTS_0");
+            var weightsAccessor  = accessors.GetValueOrDefault("WEIGHTS_0");
 
-            if (positionAccessor == null) throw new System.Exception("No position in mesh");
+            Debug.Assert(positionAccessor != null);
             var positions = positionAccessor.AsVector3Array();
             var texCoords = texCoordAccessor?.AsVector2Array();
             var normals = normalAccessor?.AsVector3Array();
 
-            var skins = model.LogicalSkins;
-            if (skins.Count > 0) {
-                var skin = skins[0];
-                System.Console.WriteLine("Skin: " + skin.Name);
-                System.Console.WriteLine("Skin Joints: " + skin.JointsCount);
-                var jointsAccessor = accessors.GetValueOrDefault("JOINTS_0");
-                var weightsAccessor = accessors.GetValueOrDefault("WEIGHTS_0");
-                Debug.Assert(jointsAccessor != null);
-                Debug.Assert(weightsAccessor != null);
+            if (weightsAccessor != null && jointsAccessor != null) {
                 var joints = jointsAccessor.AsVector4Array();
                 var weights = weightsAccessor.AsVector4Array();
-                var invBindMats = skin.GetInverseBindMatricesAccessor().AsMatrix4x4Array();
 
-                var mesh = new LifeSim.SkinnedMeshData(positions, indices, texCoords, normals, joints, weights, invBindMats);
+                var mesh = new LifeSim.SkinnedMeshData(positions, indices, texCoords, normals, joints, weights);
                 var gpuMesh = this._renderer.MakeMesh(mesh);
                 return gpuMesh;
             } else {
@@ -67,18 +137,6 @@ namespace LifeSim.Rendering
                 var gpuMesh = this._renderer.MakeMesh(mesh);
                 return gpuMesh;
             }
-
-            
-
-            //var animations = model.LogicalAnimations;
-            //if (animations.Count > 0) {
-            //    var animation = animations[0];
-            //    model.DefaultScene.
-            //    animation.FindRotationSampler();
-            //}
-
-
-
         }
     }
 }

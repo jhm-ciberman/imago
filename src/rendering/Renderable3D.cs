@@ -1,8 +1,7 @@
 namespace LifeSim.Rendering
 {
-    public class Renderable
+    public class Renderable3D : Node3D
     {
-        public Transform transform = new Transform();
         private GPUMesh _mesh;
         public GPUMesh mesh => this._mesh;
 
@@ -20,7 +19,7 @@ namespace LifeSim.Rendering
             }
         }
 
-        public Renderable(GPUMesh mesh, Material material)
+        public Renderable3D(GPUMesh mesh, Material material)
         {
             this._mesh = mesh;
             this._material = material;

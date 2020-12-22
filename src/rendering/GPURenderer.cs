@@ -5,6 +5,7 @@ using Veldrid;
 using Veldrid.ImageSharp;
 using Veldrid.StartupUtilities;
 using Veldrid.SPIRV;
+using System.Collections.Generic;
 
 namespace LifeSim.Rendering
 {
@@ -132,12 +133,27 @@ namespace LifeSim.Rendering
             this._commandList.UpdateBuffer(this._bonesBuffer, 0, this._bonesInfo.GetBlittable());
         }
 
-        public void Render(Scene scene)
+        private List<Renderable3D> _renderList = new List<Renderable3D>();
+
+        private void _UpdateRenderList(Node3D node)
         {
+            if (node is Renderable3D renderable) {
+                this._renderList.Add(renderable);
+            }
+            foreach (var child in node.transform.children) {
+                this._UpdateRenderList(child.node);
+            }
+        }
+
+        public void Render(Scene3D scene)
+        {
+            this._renderList.Clear();
+            this._UpdateRenderList(scene);
+            scene.UpdateWorldMatrices();
+
             foreach (var camera in scene.cameras) {
                 this._SetupCamera(camera);
-                var renderables = scene.renderables;
-                foreach (var renderable in scene.renderables) {
+                foreach (var renderable in this._renderList) {
                     this._DrawRenderable(renderable, camera);
                 }
                 this._DrawEnd();
@@ -146,12 +162,12 @@ namespace LifeSim.Rendering
 
         private BonesInfo _bonesInfo = BonesInfo.New();
 
-        public void _DrawRenderable(Renderable renderable, Camera camera)
+        public void _DrawRenderable(Renderable3D renderable, Camera camera)
         {
             var mesh = renderable.mesh;
             var material = renderable.material;
 
-            this._commandList.UpdateBuffer(this._worldBuffer, 0, renderable.transform.GetTransformMatrix());
+            this._commandList.UpdateBuffer(this._worldBuffer, 0, renderable.transform.worldMatrix);
 
             this._commandList.SetVertexBuffer(0, mesh.vertexBuffer);
             this._commandList.SetIndexBuffer(mesh.indexBuffer, IndexFormat.UInt16);
