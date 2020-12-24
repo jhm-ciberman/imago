@@ -48,7 +48,6 @@ namespace LifeSim.Rendering
 
         public void Dispose()
         {
-            System.Console.WriteLine("Dispose shader");
             foreach (var shader in this._shaders) {
                 shader.Dispose();
             }

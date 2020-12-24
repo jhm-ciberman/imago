@@ -31,7 +31,6 @@ namespace LifeSim.Rendering
                     layout.Dispose();
                 }
                 this._cache.Remove(material.pass.id);
-                System.Console.WriteLine("Material Cleaned Up!");
             }
         }
 

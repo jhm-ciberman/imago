@@ -115,7 +115,6 @@ namespace LifeSim.Rendering
             for (int i = 0; i < bones.Length; i++) {
                 bones[i] = Matrix4x4.Identity;
             }
-            bones[1] = Matrix4x4.CreateRotationZ(this._angle);
             this._angle += 0.005f;
             /*
             var data = this._bonesInfo.GetBlittable();
@@ -140,8 +139,8 @@ namespace LifeSim.Rendering
             if (node is Renderable3D renderable) {
                 this._renderList.Add(renderable);
             }
-            foreach (var child in node.transform.children) {
-                this._UpdateRenderList(child.node);
+            foreach (var child in node.children) {
+                this._UpdateRenderList(child);
             }
         }
 
@@ -167,7 +166,7 @@ namespace LifeSim.Rendering
             var mesh = renderable.mesh;
             var material = renderable.material;
 
-            this._commandList.UpdateBuffer(this._worldBuffer, 0, renderable.transform.worldMatrix);
+            this._commandList.UpdateBuffer(this._worldBuffer, 0, renderable.worldMatrix);
 
             this._commandList.SetVertexBuffer(0, mesh.vertexBuffer);
             this._commandList.SetIndexBuffer(mesh.indexBuffer, IndexFormat.UInt16);

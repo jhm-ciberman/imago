@@ -1,0 +1,100 @@
+using System.Numerics;
+using static glTFLoader.Schema.Accessor;
+
+namespace LifeSim.GLTF
+{
+    class GLTFAccessor
+    {
+        private IGLTFBufferView bufferView;
+        private int byteOffset;
+        private int count;
+        private ComponentTypeEnum componentType;
+        private bool normalized;
+
+        public GLTFAccessor(IGLTFBufferView bufferView, int byteOffset, int count, ComponentTypeEnum componentType, bool normalized)
+        {
+            this.bufferView = bufferView;
+            this.byteOffset = byteOffset;
+            this.count = count;
+            this.componentType = componentType;
+            this.normalized = normalized;
+        }
+
+        public ushort[] AsIndicesArray()
+        {
+            switch (this.componentType) {
+                case ComponentTypeEnum.UNSIGNED_BYTE:
+                    return this._Byte2UShort(this.bufferView.ReadByteArray(this.byteOffset, this.count));
+                case ComponentTypeEnum.UNSIGNED_SHORT:
+                    return this.bufferView.ReadUShortArray(this.byteOffset, this.count);
+                case ComponentTypeEnum.UNSIGNED_INT:
+                    return this._Int2UShort(this.bufferView.ReadUIntArray(this.byteOffset, this.count));
+            }
+            throw new System.NotSupportedException();
+        }
+
+        private ushort[] _Int2UShort(uint[] sourceArr)
+        {
+            var arr = new ushort[sourceArr.Length];
+            for (int i = 0; i < sourceArr.Length; i++) {
+                arr[i] = (ushort) sourceArr[i];
+            }
+            return arr;
+        }
+
+        private ushort[] _Byte2UShort(byte[] sourceArr)
+        {
+            var arr = new ushort[sourceArr.Length];
+            for (int i = 0; i < sourceArr.Length; i++) {
+                arr[i] = (ushort) sourceArr[i];
+            }
+            return arr;
+        }
+
+        public Vector2[] AsVector2Array() 
+        {
+            switch (this.componentType) {
+                case ComponentTypeEnum.FLOAT:
+                    return this.bufferView.ReadVector2Array(this.byteOffset, this.count);
+            }
+            throw new System.NotSupportedException();
+        }
+
+        public Vector3[] AsVector3Array() 
+        {
+            switch (this.componentType) {
+                case ComponentTypeEnum.FLOAT:
+                    return this.bufferView.ReadVector3Array(this.byteOffset, this.count);
+            }
+            throw new System.NotSupportedException();
+        }
+
+        public Vector4[] AsVector4Array()
+        {
+            switch (this.componentType) {
+                case ComponentTypeEnum.FLOAT:
+                    return this.bufferView.ReadVector4Array(this.byteOffset, this.count);
+                case ComponentTypeEnum.UNSIGNED_SHORT:
+                    return this.bufferView.ReadUShortVector4Array(this.byteOffset, this.count);
+            }
+            throw new System.NotSupportedException();
+        }
+
+        private Vector4[] _normalize(ushort[] sourceArr)
+        {
+            if (! this.normalized) throw new System.NotSupportedException();
+
+            var arr = new Vector4[sourceArr.Length / 4];
+            for (int i = 0; i < arr.Length; i++) {
+                arr[i] = new Vector4(sourceArr[i + 0], sourceArr[i + 1], sourceArr[i + 2], sourceArr[i + 3]) / 255f; 
+            }
+            return arr;
+        }
+    
+        //public Matrix3x2[] GetMatrix2x3() => this.bufferView.ReadMatrix2x2Array(this.count);
+        //public Matrix4x4[] GetMatrix3x3() => this.bufferView.ReadMatrix3x3Array(this.count);
+        //public Matrix4x4[] GetMatrix4x4() => this.bufferView.ReadMatrix4x4Array(this.count);
+
+
+    }
+}

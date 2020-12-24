@@ -21,9 +21,8 @@ namespace LifeSim.Rendering
 
         public void UpdateWorldMatrices()
         {
-            var identity = Matrix4x4.Identity;
-            foreach (var transform in this.transform.children) {
-                transform.UpdateWorldMatrix(ref identity);
+            foreach (var child in this.children) {
+                child.UpdateWorldMatrix();
             }
         }
     }

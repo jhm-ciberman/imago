@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -40,19 +39,18 @@ namespace LifeSim.Rendering
             this.vertexCount = (uint) mesh.positions.Count;
             this.indexCount  = (uint) mesh.indices.Count;
 
-            this._indexBuffer  = factory.CreateBuffer(new BufferDescription(this.indexCount  * sizeof(ushort)      , BufferUsage.IndexBuffer ));
+            this._indexBuffer  = factory.CreateBuffer(new BufferDescription(this.indexCount * sizeof(ushort), BufferUsage.IndexBuffer));
             graphicsDevice.UpdateBuffer(this._indexBuffer, 0, indices);
 
             if (mesh is LifeSim.SkinnedMeshData skinnedMesh) {
-                var size = SkinnedVertData.sizeInBytes * this.vertexCount;
+                uint size = (uint) Marshal.SizeOf<SkinnedVertData>() * this.vertexCount;
                 this._vertexBuffer = factory.CreateBuffer(new BufferDescription(size, BufferUsage.VertexBuffer));
                 graphicsDevice.UpdateBuffer(this._vertexBuffer, 0, this.GetSkinnedVerts(skinnedMesh));
             } else {
-                var size = VertData.sizeInBytes * this.vertexCount;
+                uint size = (uint) Marshal.SizeOf<VertData>() * this.vertexCount;
                 this._vertexBuffer = factory.CreateBuffer(new BufferDescription(size, BufferUsage.VertexBuffer));
                 graphicsDevice.UpdateBuffer(this._vertexBuffer, 0, this.GetVerts(mesh));
             }
-
         }
 
         private VertData[] GetVerts(LifeSim.MeshData mesh)
