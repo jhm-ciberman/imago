@@ -32,6 +32,8 @@ namespace LifeSim.Rendering
 
         private PipelineManager _pipelineManager;
 
+        private BonesInfo _bonesInfo = BonesInfo.New();
+
         public GPURenderer(Window window)
         {
             GraphicsDeviceOptions options = new GraphicsDeviceOptions(
@@ -93,7 +95,7 @@ namespace LifeSim.Rendering
             return new Shader(shaders, isSkinned);
         }
 
-        public GPUMesh MakeMesh(LifeSim.MeshData meshData)
+        public GPUMesh MakeMesh(MeshData meshData)
         {
             return new GPUMesh(this._factory, this._graphicsDevice, meshData);
         }
@@ -111,7 +113,7 @@ namespace LifeSim.Rendering
             this._commandList.ClearColorTarget(0, new RgbaFloat(0.04f, 0.04f, 0.06f, 1.0f));
             this._commandList.ClearDepthStencil(1f);
 
-            var bones = this._bonesInfo.BonesTransformations;
+            var bones = this._bonesInfo.bonesMatrices;
             for (int i = 0; i < bones.Length; i++) {
                 bones[i] = Matrix4x4.Identity;
             }
@@ -129,7 +131,7 @@ namespace LifeSim.Rendering
                 }
             }
             */
-            this._commandList.UpdateBuffer(this._bonesBuffer, 0, this._bonesInfo.GetBlittable());
+
         }
 
         private List<Renderable3D> _renderList = new List<Renderable3D>();
@@ -159,8 +161,6 @@ namespace LifeSim.Rendering
             }
         }
 
-        private BonesInfo _bonesInfo = BonesInfo.New();
-
         public void _DrawRenderable(Renderable3D renderable, Camera camera)
         {
             var mesh = renderable.mesh;
@@ -171,6 +171,11 @@ namespace LifeSim.Rendering
             this._commandList.SetVertexBuffer(0, mesh.vertexBuffer);
             this._commandList.SetIndexBuffer(mesh.indexBuffer, IndexFormat.UInt16);
             
+            if (renderable is SkinnedRenderable3D skinnedRenderable) {
+                skinnedRenderable.CopyMatricesToBuffer(ref this._bonesInfo);
+                this._commandList.UpdateBuffer(this._bonesBuffer, 0, this._bonesInfo.GetBlittable());
+            }
+
             var pipeline = this._pipelineManager.GetPipeline(material.pass);
             this._commandList.SetPipeline(pipeline.pipeline);
             

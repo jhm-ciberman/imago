@@ -1,4 +1,5 @@
 using System.Numerics;
+using LifeSim.Rendering;
 using static glTFLoader.Schema.Accessor;
 
 namespace LifeSim.GLTF
@@ -71,14 +72,27 @@ namespace LifeSim.GLTF
 
         public Vector4[] AsVector4Array()
         {
+            System.Console.WriteLine("componentType " + this.componentType + " normalized " + this.normalized);          
+
             switch (this.componentType) {
                 case ComponentTypeEnum.FLOAT:
                     return this.bufferView.ReadVector4Array(this.byteOffset, this.count);
-                case ComponentTypeEnum.UNSIGNED_SHORT:
-                    return this.bufferView.ReadUShortVector4Array(this.byteOffset, this.count);
             }
             throw new System.NotSupportedException();
         }
+
+
+        public UShort4[] AsUShort4Array()
+        {
+            System.Console.WriteLine("componentType " + this.componentType + " normalized " + this.normalized);          
+
+            switch (this.componentType) {
+                case ComponentTypeEnum.UNSIGNED_SHORT:
+                    return this.bufferView.ReadUShort4Array(this.byteOffset, this.count);
+            }
+            throw new System.NotSupportedException();
+        }
+
 
         private Vector4[] _normalize(ushort[] sourceArr)
         {
@@ -91,9 +105,9 @@ namespace LifeSim.GLTF
             return arr;
         }
     
-        //public Matrix3x2[] GetMatrix2x3() => this.bufferView.ReadMatrix2x2Array(this.count);
-        //public Matrix4x4[] GetMatrix3x3() => this.bufferView.ReadMatrix3x3Array(this.count);
-        //public Matrix4x4[] GetMatrix4x4() => this.bufferView.ReadMatrix4x4Array(this.count);
+        //public Matrix3x2[] GetMatrix2x3() => this.bufferView.ReadMatrix2x2Array(this.byteOffset, this.count);
+        //public Matrix4x4[] GetMatrix3x3() => this.bufferView.ReadMatrix3x3Array(this.byteOffset, this.count);
+        public Matrix4x4[] AsMatrix4x4() => this.bufferView.ReadMatrix4x4Array(this.byteOffset, this.count);
 
 
     }

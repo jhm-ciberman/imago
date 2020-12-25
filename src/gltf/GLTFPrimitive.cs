@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
+using LifeSim.Rendering;
 
 namespace LifeSim.GLTF
 {
@@ -15,6 +16,8 @@ namespace LifeSim.GLTF
             this._indicesAccessor = indices.HasValue ? this._model.GetAccessor(indices.Value) : null;
             this._attributes = attributes;
         }
+
+        private bool _loadSkinned = true;
 
         public MeshData MakeMesh()
         {
@@ -34,12 +37,13 @@ namespace LifeSim.GLTF
 
             var indices = this._indicesAccessor == null ? this._MakeFakeIndices(positions.Length) : this._indicesAccessor.AsIndicesArray();
 
-            if (weightsAccessor != null && jointsAccessor != null) {
-                var joints = jointsAccessor.AsVector4Array();
+            if (this._loadSkinned && weightsAccessor != null && jointsAccessor != null) {
+                System.Console.WriteLine("Joints");
+                var joints = jointsAccessor.AsUShort4Array();
                 var weights = weightsAccessor.AsVector4Array();
-                return new LifeSim.SkinnedMeshData(positions, indices, texCoords, normals, joints, weights);
+                return new SkinnedMeshData(positions, indices, texCoords, normals, joints, weights);
             } else {
-                var mesh = new LifeSim.MeshData(positions, indices, texCoords, normals);
+                var mesh = new MeshData(positions, indices, texCoords, normals);
                 return mesh;
             }
         }

@@ -39,7 +39,7 @@ namespace LifeSim.Rendering
             arr[2] = new VertexElementDescription("TextCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2);
 
             if (this._isSkinned) {
-                arr[3] = new VertexElementDescription("Joints", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float4);
+                arr[3] = new VertexElementDescription("Joints", VertexElementSemantic.TextureCoordinate, VertexElementFormat.UShort4);
                 arr[4] = new VertexElementDescription("Weights", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float4);
             }
 

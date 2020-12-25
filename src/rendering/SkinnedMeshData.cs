@@ -1,22 +1,26 @@
 using System.Collections.Generic;
 using System.Numerics;
 
-namespace LifeSim
+namespace LifeSim.Rendering
 {
     public class SkinnedMeshData : MeshData
     {
-        public readonly IList<Vector4> joints;
+        public readonly IList<UShort4> joints;
         public readonly IList<Vector4> weights;
 
 
         public SkinnedMeshData(
             IList<Vector3> positions, IList<ushort> indices, IList<Vector2>? uvs, IList<Vector3>? normals, 
-            IList<Vector4> joints, IList<Vector4> weights
+            IList<UShort4> joints, IList<Vector4> weights
         ) 
             : base(positions, indices, uvs, normals)
         {
             this.joints = joints;
             this.weights = weights;
+
+            for (int i = 0; i  < this.joints.Count; i++) {
+                System.Console.WriteLine(this.joints[i] + " " + this.weights[i]);
+            }
         }
     }
 }

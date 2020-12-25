@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Numerics;
 
-namespace LifeSim
+namespace LifeSim.Rendering
 {
     public class MeshData
     {

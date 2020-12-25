@@ -16,6 +16,9 @@ namespace LifeSim.Rendering
 
         public event Action? TransformChanged;
 
+        private Node3D? _parent = null;
+        public Node3D? parent => this._parent;
+
         public Vector3 forward => Vector3.Transform(Vector3.UnitZ, _rotation);
         
         private Matrix4x4 _localMatrix = Matrix4x4.Identity;
@@ -27,16 +30,29 @@ namespace LifeSim.Rendering
         private List<Node3D> _children = new List<Node3D>();
         public IReadOnlyList<Node3D> children => this._children;
         
-        public void Add(Node3D node)
-        {
-            this._children.Add(node);
-        }
-
         public Node3D()
         {
             this._position = Vector3.Zero;
             this._rotation = Quaternion.Identity;
             this._scale = Vector3.One;
+        }
+
+        public void Add(Node3D node)
+        {
+            if (this._parent == this) return;
+            node.parent?.Remove(node);
+            if (! this._children.Contains(node)) {
+                this._children.Add(node);
+                node._parent = this;
+            }
+        }
+
+        public void Remove(Node3D node)
+        {
+            if (node.parent == this) {
+                this._children.Remove(node);
+                node._parent = null;
+            }
         }
 
         public void UpdateWorldMatrix()

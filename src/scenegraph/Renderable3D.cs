@@ -1,3 +1,5 @@
+using System.Numerics;
+
 namespace LifeSim.Rendering
 {
     public class Renderable3D : Node3D

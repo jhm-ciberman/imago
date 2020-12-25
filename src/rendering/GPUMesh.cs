@@ -23,7 +23,7 @@ namespace LifeSim.Rendering
             public Vector3 position;
             public Vector3 normal;
             public Vector2 uv;
-            public Vector4 joints;
+            public UShort4 joints;
             public Vector4 weights;
         }
 
@@ -32,7 +32,7 @@ namespace LifeSim.Rendering
         public uint vertexCount;
         public uint indexCount;
 
-        public GPUMesh(ResourceFactory factory, GraphicsDevice graphicsDevice, LifeSim.MeshData mesh)
+        public GPUMesh(ResourceFactory factory, GraphicsDevice graphicsDevice, MeshData mesh)
         {
             var indices = mesh.indices.ToArray();
 
@@ -42,7 +42,7 @@ namespace LifeSim.Rendering
             this._indexBuffer  = factory.CreateBuffer(new BufferDescription(this.indexCount * sizeof(ushort), BufferUsage.IndexBuffer));
             graphicsDevice.UpdateBuffer(this._indexBuffer, 0, indices);
 
-            if (mesh is LifeSim.SkinnedMeshData skinnedMesh) {
+            if (mesh is SkinnedMeshData skinnedMesh) {
                 uint size = (uint) Marshal.SizeOf<SkinnedVertData>() * this.vertexCount;
                 this._vertexBuffer = factory.CreateBuffer(new BufferDescription(size, BufferUsage.VertexBuffer));
                 graphicsDevice.UpdateBuffer(this._vertexBuffer, 0, this.GetSkinnedVerts(skinnedMesh));
@@ -53,7 +53,7 @@ namespace LifeSim.Rendering
             }
         }
 
-        private VertData[] GetVerts(LifeSim.MeshData mesh)
+        private VertData[] GetVerts(MeshData mesh)
         {
             VertData[] vertices = new VertData[mesh.positions.Count];
             for(var i = 0; i < mesh.positions.Count; i++) {
@@ -65,7 +65,7 @@ namespace LifeSim.Rendering
         }
 
 
-        private SkinnedVertData[] GetSkinnedVerts(LifeSim.SkinnedMeshData mesh)
+        private SkinnedVertData[] GetSkinnedVerts(SkinnedMeshData mesh)
         {
             SkinnedVertData[] vertices = new SkinnedVertData[mesh.joints.Count];
             for(var i = 0; i < mesh.joints.Count; i++) {

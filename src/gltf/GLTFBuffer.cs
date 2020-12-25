@@ -1,5 +1,6 @@
 using System;
 using System.Numerics;
+using LifeSim.Rendering;
 
 namespace LifeSim.GLTF
 {
@@ -22,9 +23,9 @@ namespace LifeSim.GLTF
             return vector;
         }
 
-        public Vector4 ReadVector4UShort(int offset)
+        public UShort4 ReadUShort4(int offset)
         {
-            Vector4 vector;
+            UShort4 vector;
             vector.X = BitConverter.ToUInt16(this._bytes, offset + 0);
             vector.Y = BitConverter.ToUInt16(this._bytes, offset + 2);
             vector.Z = BitConverter.ToUInt16(this._bytes, offset + 4);
@@ -67,6 +68,31 @@ namespace LifeSim.GLTF
         public float ReadFloat(int offset)
         {
             return BitConverter.ToSingle(this._bytes, offset);
+        }
+
+        public Matrix4x4 ReadMatrix4x4(int offset)
+        {
+            Matrix4x4 mat = new Matrix4x4();
+            mat.M11 = BitConverter.ToSingle(this._bytes, offset + 0);
+            mat.M12 = BitConverter.ToSingle(this._bytes, offset + 4);
+            mat.M13 = BitConverter.ToSingle(this._bytes, offset + 8);
+            mat.M14 = BitConverter.ToSingle(this._bytes, offset + 12);
+
+            mat.M21 = BitConverter.ToSingle(this._bytes, offset + 16);
+            mat.M22 = BitConverter.ToSingle(this._bytes, offset + 20);
+            mat.M23 = BitConverter.ToSingle(this._bytes, offset + 24);
+            mat.M24 = BitConverter.ToSingle(this._bytes, offset + 28);
+
+            mat.M31 = BitConverter.ToSingle(this._bytes, offset + 32);
+            mat.M32 = BitConverter.ToSingle(this._bytes, offset + 36);
+            mat.M33 = BitConverter.ToSingle(this._bytes, offset + 40);
+            mat.M34 = BitConverter.ToSingle(this._bytes, offset + 44);
+
+            mat.M31 = BitConverter.ToSingle(this._bytes, offset + 48);
+            mat.M32 = BitConverter.ToSingle(this._bytes, offset + 52);
+            mat.M33 = BitConverter.ToSingle(this._bytes, offset + 56);
+            mat.M34 = BitConverter.ToSingle(this._bytes, offset + 60);
+            return mat;
         }
     }
 }
