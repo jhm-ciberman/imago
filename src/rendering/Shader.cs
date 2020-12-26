@@ -9,6 +9,7 @@ namespace LifeSim.Rendering
         private readonly Veldrid.Shader[] _shaders;
 
         private bool _isSkinned;
+        public bool isSkinned => this._isSkinned;
 
         public Shader(Veldrid.Shader[] shaders, bool isSkinned = false)
         {
@@ -18,13 +19,17 @@ namespace LifeSim.Rendering
 
         public ResourceLayoutDescription[] BuildResourceLayouts()
         {
+            System.Console.WriteLine("IsSkinned=" + this._isSkinned);
+            var arr = new ResourceLayoutElementDescription[this._isSkinned ? 4 : 3];
+            arr[0] = new ResourceLayoutElementDescription("WorldInfo", ResourceKind.UniformBuffer, ShaderStages.Vertex);
+            arr[1] = new ResourceLayoutElementDescription("SurfaceTexture", ResourceKind.TextureReadOnly, ShaderStages.Fragment);
+            arr[2] = new ResourceLayoutElementDescription("SurfaceSampler", ResourceKind.Sampler, ShaderStages.Fragment);
+            if (this._isSkinned) {
+                arr[3] = new ResourceLayoutElementDescription("BonesInfo", ResourceKind.UniformBuffer, ShaderStages.Vertex);
+            }
+
             return new[] {
-                new ResourceLayoutDescription(new[] {
-                    new ResourceLayoutElementDescription("WorldInfo", ResourceKind.UniformBuffer, ShaderStages.Vertex),
-                    new ResourceLayoutElementDescription("SurfaceTexture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
-                    new ResourceLayoutElementDescription("SurfaceSampler", ResourceKind.Sampler, ShaderStages.Fragment),
-                    new ResourceLayoutElementDescription("BonesInfo", ResourceKind.UniformBuffer, ShaderStages.Vertex)
-                }),
+                new ResourceLayoutDescription(arr),
             };
         }
 
@@ -34,9 +39,9 @@ namespace LifeSim.Rendering
 
             var arr = new VertexElementDescription[size];
             
-            arr[0] = new VertexElementDescription("Position", VertexElementSemantic.Position, VertexElementFormat.Float3);
+            arr[0] = new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3);
             arr[1] = new VertexElementDescription("Normal", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3);
-            arr[2] = new VertexElementDescription("TextCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2);
+            arr[2] = new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2);
 
             if (this._isSkinned) {
                 arr[3] = new VertexElementDescription("Joints", VertexElementSemantic.TextureCoordinate, VertexElementFormat.UShort4);

@@ -51,6 +51,7 @@ namespace LifeSim.GLTF
             int? matricesIndex = data.InverseBindMatrices;
             Matrix4x4[] matrices;
             if (matricesIndex == null) {
+                throw new System.Exception();
                 matrices = new GLTFBufferViewZeroed().ReadMatrix4x4Array(0, data.Joints.Length);
             } else {
                 matrices = this.GetAccessor(matricesIndex.Value).AsMatrix4x4();
@@ -58,7 +59,7 @@ namespace LifeSim.GLTF
 
             Node3D[] joints = new Node3D[data.Joints.Length];
             for (int i = 0; i < joints.Length; i++) {
-                joints[i] = this.GetNode(i);
+                joints[i] = this.GetNode(data.Joints[i]);
             }
             
             Node3D? root = data.Skeleton.HasValue ? this.GetNode(data.Skeleton.Value) : null;
@@ -86,7 +87,7 @@ namespace LifeSim.GLTF
         {
             var data = this._model.Accessors[index];
             var bufferView = this._GetBufferView(data.BufferView);
-            return new GLTFAccessor(bufferView, data.ByteOffset, data.Count, data.ComponentType, data.Normalized);
+            return new GLTFAccessor(bufferView, data.ByteOffset, data.Count, data.ComponentType, data.Type, data.Normalized);
         }
 
         private GLTFBuffer _GetBuffer(int index)

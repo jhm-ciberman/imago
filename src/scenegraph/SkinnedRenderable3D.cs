@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Numerics;
 
 namespace LifeSim.Rendering
@@ -6,19 +7,17 @@ namespace LifeSim.Rendering
     {
         public Skin skin;
 
-        public Matrix4x4[] boneMatrices;
-
         public SkinnedRenderable3D(GPUMesh mesh, Material material, Skin skin) : base(mesh, material)
         {
             this.skin = skin;
-            this.boneMatrices = new Matrix4x4[skin.joints.Count];
-
         }
 
-        public void CopyMatricesToBuffer(ref BonesInfo buffer)
+        public void CopyMatricesToBuffer(ref BonesInfo buffer, ref Matrix4x4 inverseMeshWorldMatrix)
         {
-            for (int i = 0; i < this.skin.joints.Count; i++) {
-                buffer.bonesMatrices[i] = Matrix4x4.Identity;
+
+            var joints = this.skin.joints;
+            for (int i = 0; i < joints.Count; i++) {
+                buffer.bonesMatrices[i] = this.skin.inverseBindMatrices[i] * joints[i].worldMatrix;
             }
         }
     }

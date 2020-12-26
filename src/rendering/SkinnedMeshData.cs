@@ -17,10 +17,6 @@ namespace LifeSim.Rendering
         {
             this.joints = joints;
             this.weights = weights;
-
-            for (int i = 0; i  < this.joints.Count; i++) {
-                System.Console.WriteLine(this.joints[i] + " " + this.weights[i]);
-            }
         }
     }
 }

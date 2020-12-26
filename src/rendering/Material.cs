@@ -40,6 +40,5 @@ namespace LifeSim.Rendering
                 Material.onRefCountZero?.Invoke(this);
             }
         }
-
     }
 }

@@ -73,6 +73,7 @@ namespace LifeSim.GLTF
         public Matrix4x4 ReadMatrix4x4(int offset)
         {
             Matrix4x4 mat = new Matrix4x4();
+    
             mat.M11 = BitConverter.ToSingle(this._bytes, offset + 0);
             mat.M12 = BitConverter.ToSingle(this._bytes, offset + 4);
             mat.M13 = BitConverter.ToSingle(this._bytes, offset + 8);
@@ -88,10 +89,10 @@ namespace LifeSim.GLTF
             mat.M33 = BitConverter.ToSingle(this._bytes, offset + 40);
             mat.M34 = BitConverter.ToSingle(this._bytes, offset + 44);
 
-            mat.M31 = BitConverter.ToSingle(this._bytes, offset + 48);
-            mat.M32 = BitConverter.ToSingle(this._bytes, offset + 52);
-            mat.M33 = BitConverter.ToSingle(this._bytes, offset + 56);
-            mat.M34 = BitConverter.ToSingle(this._bytes, offset + 60);
+            mat.M41 = BitConverter.ToSingle(this._bytes, offset + 48);
+            mat.M42 = BitConverter.ToSingle(this._bytes, offset + 52);
+            mat.M43 = BitConverter.ToSingle(this._bytes, offset + 56);
+            mat.M44 = BitConverter.ToSingle(this._bytes, offset + 60);
             return mat;
         }
     }

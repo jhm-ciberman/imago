@@ -9,8 +9,7 @@ namespace LifeSim.Rendering
     {
         [StructLayout(LayoutKind.Sequential)]
         struct VertData
-        {
-            public const uint sizeInBytes = (3 + 3 + 2) * 4;
+        {           
             public Vector3 position;
             public Vector3 normal;
             public Vector2 uv;
@@ -19,7 +18,6 @@ namespace LifeSim.Rendering
         [StructLayout(LayoutKind.Sequential)]
         struct SkinnedVertData
         {
-            public const uint sizeInBytes = (3 + 3 + 2 + 4 + 4) * 4;
             public Vector3 position;
             public Vector3 normal;
             public Vector2 uv;

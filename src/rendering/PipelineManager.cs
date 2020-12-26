@@ -59,6 +59,7 @@ namespace LifeSim.Rendering
 
         public GPUPipeline _CreateNewPipeline(MaterialPass pass)
         {
+            System.Console.WriteLine("NEW PASS ID=" + pass.id);
             var shader = pass.shader;
             var rasterizerState = new RasterizerStateDescription(
                 FaceCullMode.Front,
@@ -80,7 +81,8 @@ namespace LifeSim.Rendering
             pipelineDescription.ResourceLayouts = resourceLayouts;
             pipelineDescription.Outputs = this._framebuffer.OutputDescription; 
 
-            return new GPUPipeline(this._factory.CreateGraphicsPipeline(pipelineDescription), resourceLayouts);
+            var pipeline = this._factory.CreateGraphicsPipeline(pipelineDescription);
+            return new GPUPipeline(pipeline, resourceLayouts);
         }
 
         private ResourceLayout[] _BuildResourceLayouts(ResourceLayoutDescription[] descriptions)

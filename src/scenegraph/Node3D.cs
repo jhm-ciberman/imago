@@ -71,7 +71,7 @@ namespace LifeSim.Rendering
 
         private void _UpdateWorldMatrix(ref Matrix4x4 parentMatrix)
         {
-            this._worldMatrix = Matrix4x4.Multiply(this.GetLocalMatrix(), parentMatrix);
+            this._worldMatrix = this.GetLocalMatrix() * parentMatrix;
             for(int i = 0; i < this._children.Count; i++) {
                 this._children[i]._UpdateWorldMatrix(ref this._worldMatrix);
             }

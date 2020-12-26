@@ -1,4 +1,5 @@
 using System.Numerics;
+using glTFLoader.Schema;
 using LifeSim.Rendering;
 using static glTFLoader.Schema.Accessor;
 
@@ -9,15 +10,17 @@ namespace LifeSim.GLTF
         private IGLTFBufferView bufferView;
         private int byteOffset;
         private int count;
+        private Accessor.TypeEnum type;
         private ComponentTypeEnum componentType;
         private bool normalized;
 
-        public GLTFAccessor(IGLTFBufferView bufferView, int byteOffset, int count, ComponentTypeEnum componentType, bool normalized)
+        public GLTFAccessor(IGLTFBufferView bufferView, int byteOffset, int count, ComponentTypeEnum componentType, Accessor.TypeEnum type, bool normalized)
         {
             this.bufferView = bufferView;
             this.byteOffset = byteOffset;
             this.count = count;
             this.componentType = componentType;
+            this.type = type;
             this.normalized = normalized;
         }
 
@@ -107,7 +110,10 @@ namespace LifeSim.GLTF
     
         //public Matrix3x2[] GetMatrix2x3() => this.bufferView.ReadMatrix2x2Array(this.byteOffset, this.count);
         //public Matrix4x4[] GetMatrix3x3() => this.bufferView.ReadMatrix3x3Array(this.byteOffset, this.count);
-        public Matrix4x4[] AsMatrix4x4() => this.bufferView.ReadMatrix4x4Array(this.byteOffset, this.count);
+        public Matrix4x4[] AsMatrix4x4()
+        {
+            return this.bufferView.ReadMatrix4x4Array(this.byteOffset, this.count);
+        }
 
 
     }
