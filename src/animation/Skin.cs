@@ -1,18 +1,18 @@
 using System.Collections.Generic;
 using System.Numerics;
 
-namespace LifeSim.Rendering
+namespace LifeSim.Anim
 {
     public class Skin
     {
-        public readonly Node3D? root;
-        public readonly IList<Node3D> joints;
+        public readonly string? root;
+        public readonly IList<string> jointNames;
         public readonly IList<Matrix4x4> inverseBindMatrices;
 
-        public Skin(IList<Matrix4x4> inverseBindMatrices, IList<Node3D> joints, Node3D? root)
+        public Skin(IList<Matrix4x4> inverseBindMatrices, IList<string> jointNames, string? root)
         {
             this.root = root;
-            this.joints = joints;
+            this.jointNames = jointNames;
             this.inverseBindMatrices = inverseBindMatrices;
         }
     }

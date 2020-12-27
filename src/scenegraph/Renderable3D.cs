@@ -1,6 +1,6 @@
-using System.Numerics;
+using LifeSim.Rendering;
 
-namespace LifeSim.Rendering
+namespace LifeSim.SceneGraph
 {
     public class Renderable3D : Node3D
     {

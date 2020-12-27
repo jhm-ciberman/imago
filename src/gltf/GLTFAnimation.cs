@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Numerics;
-using LifeSim.Rendering;
+using LifeSim.Anim;
 using static glTFLoader.Schema.AnimationChannelTarget;
 using static glTFLoader.Schema.AnimationSampler;
 
@@ -8,7 +8,7 @@ namespace LifeSim.GLTF
 {
     public class GLTFAnimation
     {
-        private GLTFModel _model;
+        private GLTFLoader _model;
 
         private glTFLoader.Schema.AnimationSampler[] _samplers;
 
@@ -18,7 +18,7 @@ namespace LifeSim.GLTF
 
         private Dictionary<int, float[]> _inputsCache = new Dictionary<int, float[]>();
 
-        internal GLTFAnimation(GLTFModel model, glTFLoader.Schema.Animation animation)
+        internal GLTFAnimation(GLTFLoader model, glTFLoader.Schema.Animation animation)
         {
             this._model = model;
             this._samplers = animation.Samplers;
@@ -48,10 +48,10 @@ namespace LifeSim.GLTF
             var factory = this._GetChannelFactory(channel.Target.Path);
             if (factory == null) return null;
 
-            var targetName = this._model.GetNodeName(targetIndex.Value);
+            var targetName = this._model._GetNodeName(targetIndex.Value);
             var sampler = this._samplers[channel.Sampler];
             var input = this._GetSamplerInput(sampler.Input);
-            var output = this._model.GetAccessor(sampler.Output);
+            var output = this._model._GetAccessor(sampler.Output);
             return factory.MakeChannel(targetName, input, output, sampler.Interpolation);
         }
 
@@ -73,7 +73,7 @@ namespace LifeSim.GLTF
         private float[] _GetSamplerInput(int index)
         {
             if (! this._inputsCache.ContainsKey(index)) {
-                float[] inputArr = this._model.GetAccessor(index).AsFloatArray();
+                float[] inputArr = this._model._GetAccessor(index).AsFloatArray();
                 this._inputsCache.Add(index, inputArr);
                 return inputArr;
             }

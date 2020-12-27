@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using System.Numerics;
+using LifeSim.SceneGraph;
 
-namespace LifeSim.Rendering
+namespace LifeSim.Anim
 {
     public class Animation
     {

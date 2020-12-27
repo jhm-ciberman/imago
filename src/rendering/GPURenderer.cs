@@ -7,6 +7,7 @@ using Veldrid.StartupUtilities;
 using Veldrid.SPIRV;
 using System.Collections.Generic;
 using System.Diagnostics;
+using LifeSim.SceneGraph;
 
 namespace LifeSim.Rendering
 {
@@ -100,7 +101,7 @@ namespace LifeSim.Rendering
             return new GPUMesh(this._factory, this._graphicsDevice, meshData);
         }
 
-        private void _SetupCamera(Camera camera)
+        private void _SetupCamera(Camera3D camera)
         {
             CameraInfo cameraInfo;
             cameraInfo.projectionMatrix = camera.projectionMatrix;
@@ -115,7 +116,7 @@ namespace LifeSim.Rendering
 
         private List<Renderable3D> _renderList = new List<Renderable3D>();
 
-        private void _UpdateRenderList(Node3D node)
+        private void _UpdateRenderList(Container3D node)
         {
             if (node is Renderable3D renderable) {
                 this._renderList.Add(renderable);
@@ -140,7 +141,7 @@ namespace LifeSim.Rendering
             }
         }
 
-        public void _DrawRenderable(Renderable3D renderable, Camera camera)
+        public void _DrawRenderable(Renderable3D renderable, Camera3D camera)
         {
             var mesh = renderable.mesh;
             var material = renderable.material;
@@ -151,9 +152,7 @@ namespace LifeSim.Rendering
             this._commandList.SetIndexBuffer(mesh.indexBuffer, IndexFormat.UInt16);
             
             if (renderable is SkinnedRenderable3D skinnedRenderable) {
-                Matrix4x4.Invert(skinnedRenderable.worldMatrix, out Matrix4x4 invMat);
-                invMat = Matrix4x4.Identity;
-                skinnedRenderable.CopyMatricesToBuffer(ref this._bonesInfo, ref invMat);
+                skinnedRenderable.CopyMatricesToBuffer(ref this._bonesInfo, ref skinnedRenderable.worldMatrix);
                 this._commandList.UpdateBuffer(this._bonesBuffer, 0, this._bonesInfo.GetBlittable());
             }
 

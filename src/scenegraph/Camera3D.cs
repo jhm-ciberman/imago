@@ -2,9 +2,9 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using Veldrid;
 
-namespace LifeSim.Rendering
+namespace LifeSim.SceneGraph
 {
-    public class Camera
+    public class Camera3D
     {
         public Vector3 position;
         public Vector3 lookAt = Vector3.UnitZ;
@@ -15,7 +15,7 @@ namespace LifeSim.Rendering
 
         private Viewport _viewPort;
  
-        public Camera(Viewport viewport)
+        public Camera3D(Viewport viewport)
         {
             this._viewPort = viewport;
         }

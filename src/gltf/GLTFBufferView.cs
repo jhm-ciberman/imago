@@ -4,7 +4,7 @@ using LifeSim.Rendering;
 
 namespace LifeSim.GLTF
 {
-    public interface IGLTFBufferView
+    internal interface IGLTFBufferView
     {
         Vector2[] ReadVector2Array(int offset, int count);
         Vector3[] ReadVector3Array(int offset, int count);
@@ -20,7 +20,7 @@ namespace LifeSim.GLTF
         short[] ReadShortArray(int offset, int count);
     }
 
-    public class GLTFBufferViewZeroed : IGLTFBufferView
+    internal class GLTFBufferViewZeroed : IGLTFBufferView
     {
 
         public Vector2[] ReadVector2Array(int offset, int count)       => new Vector2[count];
@@ -43,11 +43,9 @@ namespace LifeSim.GLTF
             }
             return matrices;
         }
-
-
     }
 
-    public class GLTFBufferView : IGLTFBufferView
+    internal class GLTFBufferView : IGLTFBufferView
     {
         private GLTFBuffer _buffer;
         private int _byteLength;

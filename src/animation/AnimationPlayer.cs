@@ -1,4 +1,6 @@
-namespace LifeSim.Rendering
+using LifeSim.SceneGraph;
+
+namespace LifeSim.Anim
 {
     public class AnimationPlayer
     {

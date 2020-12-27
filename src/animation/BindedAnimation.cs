@@ -1,6 +1,7 @@
 using System.Collections.Generic;
+using LifeSim.SceneGraph;
 
-namespace LifeSim.Rendering
+namespace LifeSim.Anim
 {
     public class BindedAnimation
     {
