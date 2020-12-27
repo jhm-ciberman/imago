@@ -23,6 +23,16 @@ namespace LifeSim.GLTF
             return this._model.GetScene(index);
         }
 
+        public Animation LoadAnimation(int index = 0)
+        {
+            return this._model.GetAnimation(index);
+        }
+
+        public Animation[] LoadAnimations()
+        {
+            return this._model.GetAnimations();
+        }
+
         public GPUMesh LoadMesh(int meshIndex = 0)
         {
             return this._renderer.MakeMesh(this._model.GetPrimitive(meshIndex).MakeMesh());

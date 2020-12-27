@@ -19,7 +19,6 @@ namespace LifeSim.Rendering
 
         public ResourceLayoutDescription[] BuildResourceLayouts()
         {
-            System.Console.WriteLine("IsSkinned=" + this._isSkinned);
             var arr = new ResourceLayoutElementDescription[this._isSkinned ? 4 : 3];
             arr[0] = new ResourceLayoutElementDescription("WorldInfo", ResourceKind.UniformBuffer, ShaderStages.Vertex);
             arr[1] = new ResourceLayoutElementDescription("SurfaceTexture", ResourceKind.TextureReadOnly, ShaderStages.Fragment);

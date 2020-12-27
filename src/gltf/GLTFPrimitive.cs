@@ -38,7 +38,6 @@ namespace LifeSim.GLTF
             var indices = this._indicesAccessor == null ? this._MakeFakeIndices(positions.Length) : this._indicesAccessor.AsIndicesArray();
 
             if (this._loadSkinned && weightsAccessor != null && jointsAccessor != null) {
-                System.Console.WriteLine("Joints");
                 var joints = jointsAccessor.AsUShort4Array();
                 var weights = weightsAccessor.AsVector4Array();
                 return new SkinnedMeshData(positions, indices, texCoords, normals, joints, weights);

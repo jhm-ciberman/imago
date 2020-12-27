@@ -14,11 +14,6 @@ namespace LifeSim.Rendering
             this.root = root;
             this.joints = joints;
             this.inverseBindMatrices = inverseBindMatrices;
-
-            for (int i = 0; i < this.joints.Count; i++) {
-                //Matrix4x4.Invert(this.joints[i].worldMatrix, out Matrix4x4 m);
-                System.Console.WriteLine(this.inverseBindMatrices[i]);
-            }
         }
     }
 }

@@ -13,7 +13,11 @@ namespace LifeSim.GLTF
         UShort4[] ReadUShort4Array(int offset, int count);
         uint[] ReadUIntArray(int offset, int count);
         byte[] ReadByteArray(int offset, int count);
+        float[] ReadFloatArray(int offset, int count);
         Matrix4x4[] ReadMatrix4x4Array(int offset, int count);
+        Quaternion[] ReadQuaternionArray(int offset, int count);
+        sbyte[] ReadSByteArray(int offset, int count);
+        short[] ReadShortArray(int offset, int count);
     }
 
     public class GLTFBufferViewZeroed : IGLTFBufferView
@@ -26,6 +30,11 @@ namespace LifeSim.GLTF
         public UShort4[] ReadUShort4Array(int offset, int count)       => new UShort4[count];
         public uint[]    ReadUIntArray(int offset, int count)          => new uint[count];
         public byte[]    ReadByteArray(int offset, int count)          => new byte[count];
+        public float[]   ReadFloatArray(int offset, int count)         => new float[count];
+        public sbyte[]   ReadSByteArray(int offset, int count)         => new sbyte[count];
+        public short[]   ReadShortArray(int offset, int count)         => new short[count];
+        public Quaternion[] ReadQuaternionArray(int offset, int count) => new Quaternion[count];
+
         public Matrix4x4[] ReadMatrix4x4Array(int offset, int count) 
         {
             Matrix4x4[] matrices = new Matrix4x4[count];
@@ -34,6 +43,8 @@ namespace LifeSim.GLTF
             }
             return matrices;
         }
+
+
     }
 
     public class GLTFBufferView : IGLTFBufferView
@@ -71,6 +82,11 @@ namespace LifeSim.GLTF
         public ushort[]  ReadUShortArray(int offset, int count)        => this._Read<ushort>(offset, count, this._buffer.ReadUShort);
         public uint[]    ReadUIntArray(int offset, int count)          => this._Read<uint>(offset, count, this._buffer.ReadUInt);
         public byte[]    ReadByteArray(int offset, int count)          => this._Read<byte>(offset, count, this._buffer.ReadByte);
+        public float[]   ReadFloatArray(int offset, int count)         => this._Read<float>(offset, count, this._buffer.ReadFloat);
+        public sbyte[]   ReadSByteArray(int offset, int count)         => this._Read<sbyte>(offset, count, this._buffer.ReadSByte);
+        public short[]   ReadShortArray(int offset, int count)         => this._Read<short>(offset, count, this._buffer.ReadShort);
+
+        public Quaternion[] ReadQuaternionArray(int offset, int count) => this._Read<Quaternion>(offset, count, this._buffer.ReadQuaternion);
 
         public Matrix4x4[] ReadMatrix4x4Array(int offset, int count)   => this._Read<Matrix4x4>(offset, count, this._buffer.ReadMatrix4x4);
     }

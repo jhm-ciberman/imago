@@ -6,6 +6,8 @@ namespace LifeSim.Rendering
 {
     public class Node3D
     {
+        public string name = string.Empty;
+
         private Vector3    _position;
         private Quaternion _rotation;
         private Vector3    _scale;

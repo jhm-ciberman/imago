@@ -95,5 +95,25 @@ namespace LifeSim.GLTF
             mat.M44 = BitConverter.ToSingle(this._bytes, offset + 60);
             return mat;
         }
+
+        internal Quaternion ReadQuaternion(int offset)
+        {
+            Quaternion quat;
+            quat.X = BitConverter.ToSingle(this._bytes, offset + 0);
+            quat.Y = BitConverter.ToSingle(this._bytes, offset + 4);
+            quat.Z = BitConverter.ToSingle(this._bytes, offset + 8);
+            quat.W = BitConverter.ToSingle(this._bytes, offset + 12);
+            return quat;
+        }
+
+        internal sbyte ReadSByte(int offset)
+        {
+            return unchecked((sbyte) this._bytes[offset]);
+        }
+
+        internal short ReadShort(int offset)
+        {
+            return BitConverter.ToInt16(this._bytes, offset);
+        }
     }
 }
