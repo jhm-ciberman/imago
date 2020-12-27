@@ -13,10 +13,10 @@ namespace LifeSim.SceneGraph
             get => this._material;
             set
             {
-                if (this._material != material) {
+                if (this._material != value) {
                     this._material.MarkAsUnused();
-                    this._material = material;
-                    material.MarkAsUsed();
+                    this._material = value;
+                    this._material.MarkAsUsed();
                 }
             }
         }

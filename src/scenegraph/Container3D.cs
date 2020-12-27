@@ -31,6 +31,20 @@ namespace LifeSim.SceneGraph
             }
         }
 
+        public T? Find<T>() where T : Node3D
+        {
+            if (this is T childT) {
+                return childT;
+            }
+            foreach (var child in this.children) {
+                var result = child.Find<T>();
+                if (result != null) {
+                    return result;
+                }
+            }
+            return null;
+        }
+
         public void PrintHierarchyToConsole(string indent = "")
         {
             System.Console.WriteLine(indent + "- " + this.GetType().Name + ": " +this.name);
