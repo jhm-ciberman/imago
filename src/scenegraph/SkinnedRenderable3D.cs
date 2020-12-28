@@ -13,11 +13,12 @@ namespace LifeSim.SceneGraph
             this._skin = skin;
         }
 
-        public void CopyMatricesToBuffer(ref BonesInfo buffer, ref Matrix4x4 meshWorldMatrix)
+        public void CopyMatricesToBuffer(ref BonesInfo buffer)
         {
+            Matrix4x4.Invert(this.worldMatrix, out Matrix4x4 inverseMeshWorldMatrix);
             var joints = this._skin.joints;
             for (int i = 0; i < joints.Count; i++) {
-                buffer.bonesMatrices[i] = this._skin.inverseBindMatrices[i] * joints[i].worldMatrix * meshWorldMatrix;
+                buffer.bonesMatrices[i] = this._skin.inverseBindMatrices[i] * joints[i].worldMatrix * inverseMeshWorldMatrix;
             }
         }
     }

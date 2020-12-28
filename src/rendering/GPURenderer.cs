@@ -41,7 +41,7 @@ namespace LifeSim.Rendering
             GraphicsDeviceOptions options = new GraphicsDeviceOptions(
                 debug: false,
                 swapchainDepthFormat: PixelFormat.R16_UNorm,
-                syncToVerticalBlank: false,
+                syncToVerticalBlank: true,
                 resourceBindingModel: ResourceBindingModel.Improved,
                 preferDepthRangeZeroToOne: true,
                 preferStandardClipSpaceYDirection: true
@@ -152,7 +152,7 @@ namespace LifeSim.Rendering
             this._commandList.SetIndexBuffer(mesh.indexBuffer, IndexFormat.UInt16);
             
             if (renderable is SkinnedRenderable3D skinnedRenderable) {
-                skinnedRenderable.CopyMatricesToBuffer(ref this._bonesInfo, ref skinnedRenderable.worldMatrix);
+                skinnedRenderable.CopyMatricesToBuffer(ref this._bonesInfo);
                 this._commandList.UpdateBuffer(this._bonesBuffer, 0, this._bonesInfo.GetBlittable());
             }
 

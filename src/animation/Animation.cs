@@ -74,7 +74,7 @@ namespace LifeSim.Anim
 
             protected abstract T _Interpolate(int indexPrev, int indexNext, float time);
 
-            private int _FindIndex(float time, int lastTimeIndex) //TODO: optimize with lastTimeIndex
+            private int _FindNextIndex(float time, int lastTimeIndex) //TODO: optimize with lastTimeIndex
             {
                 for (int i = 0; i < this._times.Length; i++) {
                     if (this._times[i] >= time) {
@@ -86,12 +86,12 @@ namespace LifeSim.Anim
 
             public T Sample(float time, bool loop, ref int lastTimeIndex)
             {
-                var prevIndex = this._FindIndex(time, lastTimeIndex);
-                lastTimeIndex = prevIndex;
+                var nextIndex = this._FindNextIndex(time, lastTimeIndex);
+                lastTimeIndex = nextIndex;
 
-                var nextIndex = loop 
-                    ? (prevIndex + 1) % this._times.Length 
-                    : System.Math.Max(prevIndex + 1, this._times.Length);
+                var prevIndex = loop 
+                    ? (nextIndex - 1) % this._times.Length 
+                    : System.Math.Min(nextIndex - 1, 0);
 
                 return this._Interpolate(prevIndex, nextIndex, time);
             }
@@ -110,7 +110,9 @@ namespace LifeSim.Anim
             {
                 var prev = this._values[indexPrev];
                 var next = this._values[indexNext];
-                var t = (time - this._times[indexPrev]) / (this._times[indexNext] - this._times[indexPrev]);
+                var tPrev = this._times[indexPrev];
+                var tNext = this._times[indexNext];
+                var t = (time - tPrev) / (tNext - tPrev);
                 return this._interpolator.Linear(prev, next, t);
             }
         }
