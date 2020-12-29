@@ -14,6 +14,11 @@ namespace LifeSim.SceneGraph
         public float far = 100.0f;
 
         private Viewport _viewPort;
+
+        //private RgbaFloat _clearColor = new RgbaFloat(0.84f, 0.84f, 0.86f, 1.0f);
+        private RgbaFloat _clearColor = new RgbaFloat(0.04f, 0.04f, 0.06f, 1.0f);
+        public RgbaFloat clearColor => this._clearColor;
+
         public Viewport viewport => this._viewPort;
  
         public Camera3D(Viewport viewport)

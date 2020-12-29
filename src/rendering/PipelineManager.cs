@@ -5,20 +5,21 @@ namespace LifeSim.Rendering
 {
     public class PipelineManager
     {
-        private ResourceLayout _cameraInfoLayout;
-        public ResourceLayout cameraInfoLayout => this._cameraInfoLayout;
+        private ResourceLayout _globalInfoLayout;
+        public ResourceLayout globalInfoLayout => this._globalInfoLayout;
 
         private ResourceFactory _factory;
         private Dictionary<uint, GPUPipeline> _cache = new Dictionary<uint, GPUPipeline>(); // Key: MaterialPass.id
 
-        private Framebuffer _framebuffer;
+        private OutputDescription _outputDescription;
 
-        public PipelineManager(ResourceFactory factory, Framebuffer framebuffer)
+        public PipelineManager(ResourceFactory factory, OutputDescription outputDescription)
         {
             this._factory = factory;
-            this._framebuffer = framebuffer;
-            this._cameraInfoLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
-                new ResourceLayoutElementDescription("CameraInfo", ResourceKind.UniformBuffer, ShaderStages.Vertex)
+            this._outputDescription = outputDescription;
+            this._globalInfoLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
+                new ResourceLayoutElementDescription("CameraInfo", ResourceKind.UniformBuffer, ShaderStages.Vertex),
+                new ResourceLayoutElementDescription("LightInfo", ResourceKind.UniformBuffer, ShaderStages.Fragment)
             ));
             Material.onRefCountZero += this._ReleaseMaterial;
         }
@@ -78,7 +79,7 @@ namespace LifeSim.Rendering
             pipelineDescription.RasterizerState = rasterizerState;
             pipelineDescription.PrimitiveTopology = PrimitiveTopology.TriangleList;
             pipelineDescription.ResourceLayouts = resourceLayouts;
-            pipelineDescription.Outputs = this._framebuffer.OutputDescription; 
+            pipelineDescription.Outputs = this._outputDescription; 
 
             var pipeline = this._factory.CreateGraphicsPipeline(pipelineDescription);
             return new GPUPipeline(pipeline, resourceLayouts);
@@ -87,7 +88,7 @@ namespace LifeSim.Rendering
         private ResourceLayout[] _BuildResourceLayouts(ResourceLayoutDescription[] descriptions)
         {
             ResourceLayout[] layouts = new ResourceLayout[descriptions.Length + 1];
-            layouts[0] = this._cameraInfoLayout;
+            layouts[0] = this._globalInfoLayout;
             int i = 1;
             foreach (var description in descriptions) {
                 layouts[i++] = this._factory.CreateResourceLayout(description);

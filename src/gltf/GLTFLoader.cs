@@ -8,7 +8,7 @@ namespace LifeSim.GLTF
 {
     class GLTFLoader
     {
-        private GPURenderer3D _renderer;
+        private GPURenderer _renderer;
         private string _path;
         private glTFLoader.Schema.Gltf _model;
 
@@ -16,7 +16,7 @@ namespace LifeSim.GLTF
         private GLTFNode?[] _nodesCache;
         private Material _material;
 
-        public GLTFLoader(GPURenderer3D renderer, Material material, string path)
+        public GLTFLoader(GPURenderer renderer, Material material, string path)
         {
             System.Console.WriteLine("Loading file " + path);
             this._renderer = renderer;

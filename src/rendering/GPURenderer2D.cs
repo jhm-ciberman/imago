@@ -4,6 +4,9 @@ using System.IO;
 using System.Numerics;
 using FontStashSharp;
 using FontStashSharp.Interfaces;
+using LifeSim.SceneGraph;
+using Veldrid;
+using Rectangle = System.Drawing.Rectangle;
 
 namespace LifeSim.Rendering
 {
@@ -58,13 +61,18 @@ namespace LifeSim.Rendering
 
 
         private FontTextureFactory _textureFactory;
+        private GraphicsDevice _graphicsDevice;
         private SpriteBatcher _textBatcher;
         private FontSystem _fontSystem;
 
-        public GPURenderer2D(Veldrid.GraphicsDevice gd, Veldrid.CommandList commandList, Veldrid.OutputDescription outputDescription)
+        private CommandList _commandList;
+
+        public GPURenderer2D(GraphicsDevice gd, OutputDescription outputDescription)
         {
+            this._graphicsDevice = gd;
             this._textureFactory = new FontTextureFactory(gd);
-            this._textBatcher = new SpriteBatcher(gd, commandList, outputDescription);
+            this._commandList = gd.ResourceFactory.CreateCommandList();
+            this._textBatcher = new SpriteBatcher(gd, this._commandList, outputDescription);
 
             this._fontSystem = this.MakeFontSystem();
 			this._fontSystem.AddFont(File.ReadAllBytes(@"res/fonts/DroidSans.ttf"));
@@ -79,24 +87,26 @@ namespace LifeSim.Rendering
 			return new FontSystem(fontLoader, this._textureFactory, atlasSize, atlasSize, 0, 1, true);
         }
 
-        public void Render(Viewport viewport)
+        public void Render(Framebuffer framebuffer, Scene3D scene)
         {
+            Viewport viewport = scene.cameras[0].viewport;
             Matrix4x4 projection = Matrix4x4.CreateOrthographicOffCenter(0, viewport.width, viewport.height, 0, -10f, 100f);
+            this._commandList.Begin();
+            this._commandList.SetFramebuffer(framebuffer);
             this._textBatcher.BeginBatch(projection);
 
             var font = this._fontSystem.GetFont(30);
-            string text = "The quick brown fox jumps over the lazy dog\nいろはにほへ\nEmoji Font: 🙌📦👏👏";
-            //string text = "Hello World!";
+            //string text = "The quick brown fox jumps over the lazy dog\nいろはにほへ\nEmoji Font: 🙌📦👏👏";
+            string text = "Hello World!";
             font.DrawText(this._textBatcher, 30, 30, text, Color.OrangeRed);
-
-            var atlases = this._fontSystem.Atlases;
-            int i = 0;
-            foreach (var atlas in atlases) {
-                i++;
-                this._textBatcher.Draw((GPUTexture) atlas.Texture, new Vector2(0f, 200f * i), new Vector2(200, 200));
-            }
-
+            
             this._textBatcher.EndBatch();
+            this._commandList.End();
+        }
+
+        public void Submit()
+        {
+            this._graphicsDevice.SubmitCommands(this._commandList);
         }
 
     }

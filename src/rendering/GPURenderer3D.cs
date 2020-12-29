@@ -20,91 +20,59 @@ namespace LifeSim.Rendering
             public Matrix4x4 projectionMatrix;
         }
 
+        [StructLayout(LayoutKind.Sequential)]
+        struct LightInfo
+        {
+            public Vector3 ambientColor;
+            private float _padding0;
+            public Vector3 mainLightColor;
+            private float _padding1;
+            public Vector3 mainLightPosition;
+            private float _padding2;
+        }
+
         private GraphicsDevice _graphicsDevice;
-        public GraphicsDevice graphicsDevice => this._graphicsDevice;
         
         private ResourceFactory _factory;
-        private Swapchain _swapchain;
-
         private CommandList _commandList;
 
         private DeviceBuffer _worldBuffer;
         private DeviceBuffer _bonesBuffer;
 
         private DeviceBuffer _cameraInfoBuffer;
-        private ResourceSet _cameraInfoSet;
+        private DeviceBuffer _lightInfoBuffer;
+        private ResourceSet _globalInfoSet;
 
         private PipelineManager _pipelineManager;
 
         private BonesInfo _bonesInfo = BonesInfo.New();
 
-        private GPURenderer2D _renderer2d;
-
-        public GPURenderer3D(Window window)
+        public GPURenderer3D(GraphicsDevice graphicsDevice, OutputDescription outputDescription)
         {
-            GraphicsDeviceOptions options = new GraphicsDeviceOptions(
-                debug: false,
-                swapchainDepthFormat: PixelFormat.R16_UNorm,
-                syncToVerticalBlank: false,
-                resourceBindingModel: ResourceBindingModel.Improved,
-                preferDepthRangeZeroToOne: true,
-                preferStandardClipSpaceYDirection: true
-            );
-
-            this._graphicsDevice = VeldridStartup.CreateGraphicsDevice(window.nativeWindow, options, GraphicsBackend.Vulkan);
-
-
+            this._graphicsDevice = graphicsDevice;
             this._factory = this._graphicsDevice.ResourceFactory;
             this._commandList = this._factory.CreateCommandList();
-            this._swapchain = this._graphicsDevice.MainSwapchain;
+
             this._worldBuffer = this._factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
             this._bonesBuffer = this._factory.CreateBuffer(new BufferDescription(64 * BonesInfo.maxNumberOfBones, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
             this._cameraInfoBuffer = this._factory.CreateBuffer(new BufferDescription((uint) Marshal.SizeOf<CameraInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+            this._lightInfoBuffer = this._factory.CreateBuffer(new BufferDescription((uint) Marshal.SizeOf<LightInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
-            this._pipelineManager = new PipelineManager(this._factory, this._swapchain.Framebuffer);
+            this._pipelineManager = new PipelineManager(this._factory, outputDescription);
 
-            this._cameraInfoSet = this._factory.CreateResourceSet(
-                new ResourceSetDescription(this._pipelineManager.cameraInfoLayout, this._cameraInfoBuffer)
+            this._globalInfoSet = this._factory.CreateResourceSet(
+                new ResourceSetDescription(this._pipelineManager.globalInfoLayout, this._cameraInfoBuffer, this._lightInfoBuffer)
             );
-
-            this._renderer2d = new GPURenderer2D(this._graphicsDevice, this._commandList, this._swapchain.Framebuffer.OutputDescription);
         }
-
-        public GPUTexture MakeTexture(string path)
-        {
-            ImageSharpTexture texture = new ImageSharpTexture(path, true);
-            var deviceTexture = texture.CreateDeviceTexture(this._graphicsDevice, this._factory);
-            var textureView = this._factory.CreateTextureView(deviceTexture);
-            
-            return new GPUTexture(deviceTexture, textureView);
-        }
-
-        public GraphicsBackend backendType => this._graphicsDevice.BackendType;
 
         public void Dispose()
         {
             this._commandList.Dispose();
-            this._swapchain.Dispose();
             this._graphicsDevice.Dispose();
 
             this._cameraInfoBuffer.Dispose();
-            this._cameraInfoSet.Dispose();
-        }
-
-        public Shader MakeShader(string vertexCode, string fragmentCode, bool isSkinned = false)
-        {
-            var vertBytes = Encoding.UTF8.GetBytes(vertexCode);
-            var fragBytes = Encoding.UTF8.GetBytes(fragmentCode);
-            ShaderDescription vertexShaderDesc = new ShaderDescription(ShaderStages.Vertex, vertBytes, "main");
-            ShaderDescription fragmentShaderDesc = new ShaderDescription(ShaderStages.Fragment, fragBytes, "main");
-            var shaders = this._factory.CreateFromSpirv(vertexShaderDesc, fragmentShaderDesc);
-            return new Shader(shaders, isSkinned);
-        }
-
-        public GPUMesh MakeMesh(MeshData meshData)
-        {
-            return new GPUMesh(this._factory, this._graphicsDevice, meshData);
+            this._globalInfoSet.Dispose();
         }
 
         private void _SetupCamera(Camera3D camera)
@@ -114,10 +82,7 @@ namespace LifeSim.Rendering
             cameraInfo.viewMatrix = camera.viewMatrix;
             this._graphicsDevice.UpdateBuffer(this._cameraInfoBuffer, 0, ref cameraInfo);
 
-            this._commandList.Begin();
-            this._commandList.SetFramebuffer(this._swapchain.Framebuffer);
-            this._commandList.ClearColorTarget(0, new RgbaFloat(0.84f, 0.84f, 0.86f, 1.0f));
-            //this._commandList.ClearColorTarget(0, new RgbaFloat(0.04f, 0.04f, 0.06f, 1.0f));
+            this._commandList.ClearColorTarget(0, camera.clearColor);
             this._commandList.ClearDepthStencil(1f);
         }
 
@@ -133,11 +98,25 @@ namespace LifeSim.Rendering
             }
         }
 
-        public void Render(Scene3D scene)
+        private void _SetupLightInfo(Scene3D scene)
+        {
+            LightInfo lightInfo = new LightInfo();
+            lightInfo.ambientColor = scene.ambientColor;
+            lightInfo.mainLightColor = scene.sunColor;
+            lightInfo.mainLightPosition = scene.sunPosition;
+            this._commandList.UpdateBuffer(this._lightInfoBuffer, 0, ref lightInfo);
+        }
+
+        public void Render(Framebuffer framebuffer, Scene3D scene)
         {
             this._renderList.Clear();
             this._UpdateRenderList(scene);
             scene.UpdateWorldMatrices();
+
+
+            this._commandList.Begin();
+            this._commandList.SetFramebuffer(framebuffer);
+            this._SetupLightInfo(scene);
 
             foreach (var camera in scene.cameras) {
                 this._SetupCamera(camera);
@@ -146,9 +125,8 @@ namespace LifeSim.Rendering
                 }
 
                 this._commandList.ClearDepthStencil(1f);
-                this._renderer2d.Render(camera.viewport);
-                this._DrawEnd();
             }
+            this._commandList.End();
         }
 
         public void _DrawRenderable(Renderable3D renderable, Camera3D camera)
@@ -175,12 +153,12 @@ namespace LifeSim.Rendering
                     ? new BindableResource[] {this._worldBuffer, material.texture.textureView, this._graphicsDevice.PointSampler, this._bonesBuffer}
                     : new BindableResource[] {this._worldBuffer, material.texture.textureView, this._graphicsDevice.PointSampler};
 
-                var desc = new ResourceSetDescription(pipeline.resourceLayouts[1], arr); //, this._bonesBuffer);
+                var desc = new ResourceSetDescription(pipeline.resourceLayouts[1], arr);
                 material.resourceSet = this._factory.CreateResourceSet(desc);
                 material.resourceSetIsDirty = false;
             }
 
-            this._commandList.SetGraphicsResourceSet(0, this._cameraInfoSet);
+            this._commandList.SetGraphicsResourceSet(0, this._globalInfoSet);
             this._commandList.SetGraphicsResourceSet(1, material.resourceSet);
             this._commandList.DrawIndexed(
                 indexCount: mesh.indexCount,
@@ -191,16 +169,9 @@ namespace LifeSim.Rendering
             );
         }
 
-        private void _DrawEnd()
+        public void Submit()
         {
-            this._commandList.End();
             this._graphicsDevice.SubmitCommands(this._commandList);
-            this._graphicsDevice.SwapBuffers(this._swapchain);
-        }
-
-        internal void Resize(uint width, uint height)
-        {
-            this._graphicsDevice.ResizeMainWindow(width, height);
         }
 
         ~GPURenderer3D() {
