@@ -11,7 +11,7 @@ using LifeSim.SceneGraph;
 
 namespace LifeSim.Rendering
 {
-    public class GPURenderer
+    public class GPURenderer3D
     {
         [StructLayout(LayoutKind.Sequential)]
         struct CameraInfo
@@ -21,6 +21,8 @@ namespace LifeSim.Rendering
         }
 
         private GraphicsDevice _graphicsDevice;
+        public GraphicsDevice graphicsDevice => this._graphicsDevice;
+        
         private ResourceFactory _factory;
         private Swapchain _swapchain;
 
@@ -36,18 +38,20 @@ namespace LifeSim.Rendering
 
         private BonesInfo _bonesInfo = BonesInfo.New();
 
-        public GPURenderer(Window window)
+        private GPURenderer2D _renderer2d;
+
+        public GPURenderer3D(Window window)
         {
             GraphicsDeviceOptions options = new GraphicsDeviceOptions(
                 debug: false,
                 swapchainDepthFormat: PixelFormat.R16_UNorm,
-                syncToVerticalBlank: true,
+                syncToVerticalBlank: false,
                 resourceBindingModel: ResourceBindingModel.Improved,
                 preferDepthRangeZeroToOne: true,
                 preferStandardClipSpaceYDirection: true
             );
 
-            this._graphicsDevice = VeldridStartup.CreateGraphicsDevice(window.nativeWindow, options, GraphicsBackend.Vulkan);
+            this._graphicsDevice = VeldridStartup.CreateGraphicsDevice(window.nativeWindow, options, GraphicsBackend.OpenGL);
 
 
             this._factory = this._graphicsDevice.ResourceFactory;
@@ -63,6 +67,8 @@ namespace LifeSim.Rendering
             this._cameraInfoSet = this._factory.CreateResourceSet(
                 new ResourceSetDescription(this._pipelineManager.cameraInfoLayout, this._cameraInfoBuffer)
             );
+
+            this._renderer2d = new GPURenderer2D(this._graphicsDevice, this._commandList, this._swapchain.Framebuffer.OutputDescription);
         }
 
         public GPUTexture MakeTexture(string path)
@@ -110,7 +116,8 @@ namespace LifeSim.Rendering
 
             this._commandList.Begin();
             this._commandList.SetFramebuffer(this._swapchain.Framebuffer);
-            this._commandList.ClearColorTarget(0, new RgbaFloat(0.04f, 0.04f, 0.06f, 1.0f));
+            this._commandList.ClearColorTarget(0, new RgbaFloat(0.84f, 0.84f, 0.86f, 1.0f));
+            //this._commandList.ClearColorTarget(0, new RgbaFloat(0.04f, 0.04f, 0.06f, 1.0f));
             this._commandList.ClearDepthStencil(1f);
         }
 
@@ -137,6 +144,8 @@ namespace LifeSim.Rendering
                 foreach (var renderable in this._renderList) {
                     this._DrawRenderable(renderable, camera);
                 }
+
+                this._renderer2d.Render(camera.viewport);
                 this._DrawEnd();
             }
         }
@@ -193,7 +202,7 @@ namespace LifeSim.Rendering
             this._graphicsDevice.ResizeMainWindow(width, height);
         }
 
-        ~GPURenderer() {
+        ~GPURenderer3D() {
             this.Dispose();
         }
     }

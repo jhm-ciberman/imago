@@ -14,6 +14,7 @@ namespace LifeSim.SceneGraph
         public float far = 100.0f;
 
         private Viewport _viewPort;
+        public Viewport viewport => this._viewPort;
  
         public Camera3D(Viewport viewport)
         {

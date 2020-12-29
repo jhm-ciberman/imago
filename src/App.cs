@@ -1,6 +1,4 @@
 ﻿using LifeSim.Rendering;
-using System.Numerics;
-using System.IO;
 
 namespace LifeSim
 {
@@ -12,13 +10,13 @@ namespace LifeSim
         }
 
         private Window _window;
-        private GPURenderer _renderer;
+        private GPURenderer3D _renderer;
         private DemoScene _scene;
 
         public App()
         {
             this._window = new Window();
-            this._renderer = new GPURenderer(this._window);
+            this._renderer = new GPURenderer3D(this._window);
 
             this._scene = new DemoScene(this._window, this._renderer);
             this._window.viewport.onResize += this.OnResize;
@@ -35,10 +33,10 @@ namespace LifeSim
         protected void Update(float deltaTime)
         {
             var fps = (1f / deltaTime).ToString("0.00");
-            var dt = (deltaTime * 1000).ToString("0.00");
+            var dt = (int) (deltaTime * 1000000);
 
             var mouse = "(" + Input.MousePosition.X + ", " +Input.MousePosition.Y + ")";
-            this._window.title = "Hello world" + " (" + this._renderer.backendType.ToString() + ") frame = " + dt + "ms FPS = " + fps + " Mouse: " + mouse;
+            this._window.title = "Hello world" + " (" + this._renderer.backendType.ToString() + ") frame = " + dt + "microseg FPS = " + fps + " Mouse: " + mouse;
 
             if (Input.GetKey(Veldrid.Key.Escape)) {
                 this._window.Close();
