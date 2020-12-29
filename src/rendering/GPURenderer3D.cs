@@ -51,7 +51,7 @@ namespace LifeSim.Rendering
                 preferStandardClipSpaceYDirection: true
             );
 
-            this._graphicsDevice = VeldridStartup.CreateGraphicsDevice(window.nativeWindow, options, GraphicsBackend.OpenGL);
+            this._graphicsDevice = VeldridStartup.CreateGraphicsDevice(window.nativeWindow, options, GraphicsBackend.Vulkan);
 
 
             this._factory = this._graphicsDevice.ResourceFactory;
@@ -145,6 +145,7 @@ namespace LifeSim.Rendering
                     this._DrawRenderable(renderable, camera);
                 }
 
+                this._commandList.ClearDepthStencil(1f);
                 this._renderer2d.Render(camera.viewport);
                 this._DrawEnd();
             }
