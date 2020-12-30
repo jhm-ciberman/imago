@@ -31,16 +31,22 @@ namespace LifeSim.Rendering
             private float _padding2;
         }
 
+        [StructLayout(LayoutKind.Sequential)]
+        struct ModelInfo
+        {
+            public Matrix4x4 modelMatrix;
+        }
+
         private GraphicsDevice _graphicsDevice;
         
         private ResourceFactory _factory;
         private CommandList _commandList;
 
-        private DeviceBuffer _worldBuffer;
-        private DeviceBuffer _bonesBuffer;
-
-        private DeviceBuffer _cameraInfoBuffer;
         private DeviceBuffer _lightInfoBuffer;
+        private DeviceBuffer _cameraInfoBuffer;
+        private DeviceBuffer _modelInfoBuffer;
+        private DeviceBuffer _bonesInfoBuffer;
+
         private ResourceSet _globalInfoSet;
 
         private PipelineManager _pipelineManager;
@@ -53,11 +59,11 @@ namespace LifeSim.Rendering
             this._factory = this._graphicsDevice.ResourceFactory;
             this._commandList = this._factory.CreateCommandList();
 
-            this._worldBuffer = this._factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
-            this._bonesBuffer = this._factory.CreateBuffer(new BufferDescription(64 * BonesInfo.maxNumberOfBones, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+            this._modelInfoBuffer = this._factory.CreateBuffer(new BufferDescription((uint) Marshal.SizeOf<ModelInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+            this._bonesInfoBuffer = this._factory.CreateBuffer(new BufferDescription(64 * BonesInfo.maxNumberOfBones, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
             this._cameraInfoBuffer = this._factory.CreateBuffer(new BufferDescription((uint) Marshal.SizeOf<CameraInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
-            this._lightInfoBuffer = this._factory.CreateBuffer(new BufferDescription((uint) Marshal.SizeOf<LightInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+            this._lightInfoBuffer  = this._factory.CreateBuffer(new BufferDescription((uint) Marshal.SizeOf<LightInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
             this._pipelineManager = new PipelineManager(this._factory, outputDescription);
 
@@ -107,7 +113,7 @@ namespace LifeSim.Rendering
             this._commandList.UpdateBuffer(this._lightInfoBuffer, 0, ref lightInfo);
         }
 
-        public void Render(Framebuffer framebuffer, Scene3D scene)
+        public void Render(MainRenderTexture renderTexture, Scene3D scene)
         {
             this._renderList.Clear();
             this._UpdateRenderList(scene);
@@ -115,7 +121,7 @@ namespace LifeSim.Rendering
 
 
             this._commandList.Begin();
-            this._commandList.SetFramebuffer(framebuffer);
+            this._commandList.SetFramebuffer(renderTexture.framebuffer);
             this._SetupLightInfo(scene);
 
             foreach (var camera in scene.cameras) {
@@ -134,14 +140,14 @@ namespace LifeSim.Rendering
             var mesh = renderable.mesh;
             var material = renderable.material;
 
-            this._commandList.UpdateBuffer(this._worldBuffer, 0, renderable.worldMatrix);
+            this._commandList.UpdateBuffer(this._modelInfoBuffer, 0, renderable.worldMatrix);
 
             this._commandList.SetVertexBuffer(0, mesh.vertexBuffer);
             this._commandList.SetIndexBuffer(mesh.indexBuffer, IndexFormat.UInt16);
             
             if (renderable is SkinnedRenderable3D skinnedRenderable) {
                 skinnedRenderable.CopyMatricesToBuffer(ref this._bonesInfo);
-                this._commandList.UpdateBuffer(this._bonesBuffer, 0, this._bonesInfo.GetBlittable());
+                this._commandList.UpdateBuffer(this._bonesInfoBuffer, 0, this._bonesInfo.GetBlittable());
             }
 
             var pipeline = this._pipelineManager.GetPipeline(material.pass);
@@ -150,8 +156,8 @@ namespace LifeSim.Rendering
             if (material.resourceSetIsDirty) {
                 material.resourceSet?.Dispose();
                 var arr = (material.pass.shader.isSkinned)
-                    ? new BindableResource[] {this._worldBuffer, material.texture.textureView, this._graphicsDevice.PointSampler, this._bonesBuffer}
-                    : new BindableResource[] {this._worldBuffer, material.texture.textureView, this._graphicsDevice.PointSampler};
+                    ? new BindableResource[] {this._modelInfoBuffer, material.texture.textureView, this._graphicsDevice.PointSampler, this._bonesInfoBuffer}
+                    : new BindableResource[] {this._modelInfoBuffer, material.texture.textureView, this._graphicsDevice.PointSampler};
 
                 var desc = new ResourceSetDescription(pipeline.resourceLayouts[1], arr);
                 material.resourceSet = this._factory.CreateResourceSet(desc);

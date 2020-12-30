@@ -87,12 +87,12 @@ namespace LifeSim.Rendering
 			return new FontSystem(fontLoader, this._textureFactory, atlasSize, atlasSize, 0, 1, true);
         }
 
-        public void Render(Framebuffer framebuffer, Scene3D scene)
+        public void Render(MainRenderTexture renderTexture, Scene3D scene)
         {
             Viewport viewport = scene.cameras[0].viewport;
             Matrix4x4 projection = Matrix4x4.CreateOrthographicOffCenter(0, viewport.width, viewport.height, 0, -10f, 100f);
             this._commandList.Begin();
-            this._commandList.SetFramebuffer(framebuffer);
+            this._commandList.SetFramebuffer(renderTexture.framebuffer);
             this._textBatcher.BeginBatch(projection);
 
             var font = this._fontSystem.GetFont(30);

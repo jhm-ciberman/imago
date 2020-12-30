@@ -18,8 +18,9 @@ namespace LifeSim.Rendering
         private GPURenderer2D _renderer2d;
         private GPURenderer3D _renderer3d;
 
-        private Swapchain _swapchain;
-        private Framebuffer _framebuffer;
+        private MainRenderTexture _mainRenderTexture;
+
+        private FullScreenRenderer _fullScreenQuad;
 
         public GraphicsBackend backendType => this._graphicsDevice.BackendType;
 
@@ -27,7 +28,7 @@ namespace LifeSim.Rendering
         {
             GraphicsDeviceOptions options = new GraphicsDeviceOptions(
                 debug: false,
-                swapchainDepthFormat: PixelFormat.R16_UNorm,
+                swapchainDepthFormat: null,//PixelFormat.R16_UNorm,
                 syncToVerticalBlank: false,
                 resourceBindingModel: ResourceBindingModel.Improved,
                 preferDepthRangeZeroToOne: true,
@@ -36,11 +37,14 @@ namespace LifeSim.Rendering
 
             this._graphicsDevice = VeldridStartup.CreateGraphicsDevice(window.nativeWindow, options, GraphicsBackend.Vulkan);
             this._factory = this._graphicsDevice.ResourceFactory;
-            this._swapchain = this._graphicsDevice.MainSwapchain;
-            this._framebuffer = this._swapchain.Framebuffer;
-            OutputDescription outputDescription = this._framebuffer.OutputDescription;
+
+            this._mainRenderTexture = new MainRenderTexture(this._factory, window.width, window.height);
+
+            OutputDescription outputDescription = this._mainRenderTexture.outputDescription;
             this._renderer2d = new GPURenderer2D(this._graphicsDevice, outputDescription);
             this._renderer3d = new GPURenderer3D(this._graphicsDevice, outputDescription);
+
+            this._fullScreenQuad = new FullScreenRenderer(this._graphicsDevice, this._graphicsDevice.SwapchainFramebuffer, this._mainRenderTexture);
         }
 
         public GPUTexture MakeTexture(string path)
@@ -70,25 +74,31 @@ namespace LifeSim.Rendering
         public void Render(Scene3D scene)
         {
             var render3DTask = Task.Run(() => {
-                this._renderer3d.Render(this._framebuffer, scene);
+                this._renderer3d.Render(this._mainRenderTexture, scene);
             });
             var render2DTask = Task.Run(() => {
-                this._renderer2d.Render(this._framebuffer, scene);
+                this._renderer2d.Render(this._mainRenderTexture, scene);
             });
             Task.WaitAll(render3DTask, render2DTask);
             this._renderer3d.Submit();
             this._renderer2d.Submit();
-            this._graphicsDevice.SwapBuffers(this._swapchain);
+
+            this._fullScreenQuad.Render();
+
+            this._graphicsDevice.SwapBuffers();
         }
 
         internal void Resize(uint width, uint height)
         {
             this._graphicsDevice.ResizeMainWindow(width, height);
+            this._graphicsDevice.WaitForIdle();
+            this._mainRenderTexture.Dispose();
+            this._mainRenderTexture = new MainRenderTexture(this._factory, width, height);
+            this._fullScreenQuad.SetTexture(this._mainRenderTexture);
         }
 
         public void Dispose()
         {
-            this._swapchain.Dispose();
             this._graphicsDevice.Dispose();
         }
     }
