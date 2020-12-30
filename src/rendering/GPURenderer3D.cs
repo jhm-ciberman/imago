@@ -53,9 +53,12 @@ namespace LifeSim.Rendering
 
         private BonesInfo _bonesInfo = BonesInfo.New();
 
-        public GPURenderer3D(GraphicsDevice graphicsDevice, OutputDescription outputDescription)
+        private IRenderTexture _renderTexture;
+
+        public GPURenderer3D(GraphicsDevice graphicsDevice, IRenderTexture renderTexture)
         {
             this._graphicsDevice = graphicsDevice;
+            this._renderTexture = renderTexture;
             this._factory = this._graphicsDevice.ResourceFactory;
             this._commandList = this._factory.CreateCommandList();
 
@@ -65,7 +68,7 @@ namespace LifeSim.Rendering
             this._cameraInfoBuffer = this._factory.CreateBuffer(new BufferDescription((uint) Marshal.SizeOf<CameraInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
             this._lightInfoBuffer  = this._factory.CreateBuffer(new BufferDescription((uint) Marshal.SizeOf<LightInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
-            this._pipelineManager = new PipelineManager(this._factory, outputDescription);
+            this._pipelineManager = new PipelineManager(this._factory, renderTexture.outputDescription);
 
             this._globalInfoSet = this._factory.CreateResourceSet(
                 new ResourceSetDescription(this._pipelineManager.globalInfoLayout, this._cameraInfoBuffer, this._lightInfoBuffer)
@@ -113,7 +116,7 @@ namespace LifeSim.Rendering
             this._commandList.UpdateBuffer(this._lightInfoBuffer, 0, ref lightInfo);
         }
 
-        public void Render(MainRenderTexture renderTexture, Scene3D scene)
+        public void Render(Scene3D scene)
         {
             this._renderList.Clear();
             this._UpdateRenderList(scene);
@@ -121,7 +124,7 @@ namespace LifeSim.Rendering
 
 
             this._commandList.Begin();
-            this._commandList.SetFramebuffer(renderTexture.framebuffer);
+            this._commandList.SetFramebuffer(this._renderTexture.framebuffer);
             this._SetupLightInfo(scene);
 
             foreach (var camera in scene.cameras) {

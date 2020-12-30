@@ -15,15 +15,18 @@ namespace LifeSim.Rendering
         private Veldrid.Shader _fragmentShader;
         private Pipeline _pipeline;
         private ResourceLayout _resourceLayout;
-        private ResourceSet _resourceSet;
         private CommandList _commandList;
+        private IRenderTexture _destinationTexture;
+        private IRenderTexture _sourceTexture;
 
-        private Framebuffer _outputFramebuffer;
+        private ResourceSet? _resourceSet = null;
 
-        public FullScreenRenderer(GraphicsDevice gd, Framebuffer outputFramebuffer, MainRenderTexture renderTexture)
+        public FullScreenRenderer(GraphicsDevice gd, IRenderTexture sourceRenderTexture, IRenderTexture destinationRenderTexture)
         {
             this._gd = gd;
-            this._outputFramebuffer = outputFramebuffer;
+            this._destinationTexture = destinationRenderTexture;
+            this._sourceTexture = sourceRenderTexture;
+            this._sourceTexture.onResized += this._OnSourceTextureResized;
 
             var factory = gd.ResourceFactory;
 
@@ -54,23 +57,23 @@ namespace LifeSim.Rendering
             pipelineDescription.RasterizerState = RasterizerStateDescription.CullNone;
             pipelineDescription.PrimitiveTopology = PrimitiveTopology.TriangleList;
             pipelineDescription.ResourceLayouts = new ResourceLayout[] { this._resourceLayout };
-            pipelineDescription.Outputs = outputFramebuffer.OutputDescription;
+            pipelineDescription.Outputs = destinationRenderTexture.outputDescription;
 
             this._pipeline = factory.CreateGraphicsPipeline(pipelineDescription);
 
             this._vertexBuffer = factory.CreateBuffer(new BufferDescription(16 * 6, BufferUsage.VertexBuffer));
+            (float top, float bottom) = gd.IsUvOriginTopLeft ? (1f, 0f) : (0f, 1f);
             gd.UpdateBuffer(this._vertexBuffer, 0, new[] {
-                new Vector4(-1f, -1f, 0f, 1f), // x, y, u, v
-                new Vector4( 1f, -1f, 1f, 1f),
-                new Vector4( 1f,  1f, 1f, 0f),
+                new Vector4(-1f, -1f, 0f, top    ), // x, y, u, v
+                new Vector4( 1f, -1f, 1f, top    ),
+                new Vector4( 1f,  1f, 1f, bottom),
 
-                new Vector4(-1f, -1f, 0f, 1f),
-                new Vector4( 1f,  1f, 1f, 0f),
-                new Vector4(-1f,  1f, 0f, 0f),
+                new Vector4(-1f, -1f, 0f, top   ),
+                new Vector4( 1f,  1f, 1f, bottom),
+                new Vector4(-1f,  1f, 0f, bottom),
             });
             this._commandList = factory.CreateCommandList();
 
-            this._resourceSet = this._CreateResourceSet(renderTexture);
         }
 
         public void Dispose()
@@ -80,27 +83,35 @@ namespace LifeSim.Rendering
             this._fragmentShader.Dispose();
             this._pipeline.Dispose();
             this._resourceLayout.Dispose();
-            this._resourceSet.Dispose();
+            this._resourceSet?.Dispose();
             this._commandList.Dispose();
         }
 
-        private ResourceSet _CreateResourceSet(MainRenderTexture renderTexture)
+        public void SetSourceTexture(IRenderTexture sourceRenderTexture)
         {
-            return this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(
-                this._resourceLayout, renderTexture.colorTexture, this._gd.LinearSampler
-            ));
+            this._sourceTexture.onResized -= this._OnSourceTextureResized;
+            this._resourceSet?.Dispose();
+            this._resourceSet = null;
+            this._sourceTexture = sourceRenderTexture;
+            this._sourceTexture.onResized += this._OnSourceTextureResized;
         }
 
-        public void SetTexture(MainRenderTexture renderTexture)
+        private void _OnSourceTextureResized(IRenderTexture sourceRenderTexture)
         {
-            this._resourceSet.Dispose();
-            this._resourceSet = this._CreateResourceSet(renderTexture);
+            this._resourceSet = null;
+            this._resourceSet?.Dispose();
         }
 
         public void Render()
         {
+            if (this._resourceSet == null) {
+                this._resourceSet = this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(
+                    this._resourceLayout, this._sourceTexture.colorTexture, this._gd.LinearSampler
+                ));
+            }
+
             this._commandList.Begin();
-            this._commandList.SetFramebuffer(this._outputFramebuffer);
+            this._commandList.SetFramebuffer(this._destinationTexture.framebuffer);
             this._commandList.SetPipeline(this._pipeline);
             this._commandList.SetVertexBuffer(0, this._vertexBuffer);
             this._commandList.SetGraphicsResourceSet(0, this._resourceSet);

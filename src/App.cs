@@ -4,19 +4,30 @@ namespace LifeSim
 {
     class App
     {
-        static void Main()
+        static void Main(string[] args)
         {
-            new App();
+            Veldrid.GraphicsBackend backend = Veldrid.GraphicsBackend.Vulkan;
+            if (args.Length > 0) {
+                switch (args[0]) {
+                    case "vulkan": backend = Veldrid.GraphicsBackend.Vulkan; break;
+                    case "metal": backend = Veldrid.GraphicsBackend.Metal; break;
+                    case "directx11": backend = Veldrid.GraphicsBackend.Direct3D11; break;
+                    case "opengl": backend = Veldrid.GraphicsBackend.OpenGL; break;
+                    case "opengles": backend = Veldrid.GraphicsBackend.OpenGLES; break;
+                }
+            } 
+
+            new App(backend);
         }
 
         private Window _window;
         private GPURenderer _renderer;
         private DemoScene _scene;
 
-        public App()
+        public App(Veldrid.GraphicsBackend graphicsBackend)
         {
             this._window = new Window();
-            this._renderer = new GPURenderer(this._window);
+            this._renderer = new GPURenderer(this._window, graphicsBackend);
 
             this._scene = new DemoScene(this._window, this._renderer);
             this._window.viewport.onResize += this.OnResize;
@@ -38,7 +49,7 @@ namespace LifeSim
             var mouse = "(" + Input.MousePosition.X + ", " +Input.MousePosition.Y + ")";
             this._window.title = "Hello world" + " (" + this._renderer.backendType.ToString() + ") frame = " + dt + "microseg FPS = " + fps + " Mouse: " + mouse;
 
-            if (Input.GetKey(Veldrid.Key.Escape)) {
+            if (Input.GetKeyDown(Veldrid.Key.Escape)) {
                 this._window.Close();
                 return;
             }

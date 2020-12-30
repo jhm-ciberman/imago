@@ -66,13 +66,15 @@ namespace LifeSim.Rendering
         private FontSystem _fontSystem;
 
         private CommandList _commandList;
+        private IRenderTexture _renderTexture;
 
-        public GPURenderer2D(GraphicsDevice gd, OutputDescription outputDescription)
+        public GPURenderer2D(GraphicsDevice gd, IRenderTexture renderTexture)
         {
             this._graphicsDevice = gd;
+            this._renderTexture = renderTexture;
             this._textureFactory = new FontTextureFactory(gd);
             this._commandList = gd.ResourceFactory.CreateCommandList();
-            this._textBatcher = new SpriteBatcher(gd, this._commandList, outputDescription);
+            this._textBatcher = new SpriteBatcher(gd, this._commandList, renderTexture.outputDescription);
 
             this._fontSystem = this.MakeFontSystem();
 			this._fontSystem.AddFont(File.ReadAllBytes(@"res/fonts/DroidSans.ttf"));
@@ -87,12 +89,12 @@ namespace LifeSim.Rendering
 			return new FontSystem(fontLoader, this._textureFactory, atlasSize, atlasSize, 0, 1, true);
         }
 
-        public void Render(MainRenderTexture renderTexture, Scene3D scene)
+        public void Render(Scene3D scene)
         {
             Viewport viewport = scene.cameras[0].viewport;
             Matrix4x4 projection = Matrix4x4.CreateOrthographicOffCenter(0, viewport.width, viewport.height, 0, -10f, 100f);
             this._commandList.Begin();
-            this._commandList.SetFramebuffer(renderTexture.framebuffer);
+            this._commandList.SetFramebuffer(this._renderTexture.framebuffer);
             this._textBatcher.BeginBatch(projection);
 
             var font = this._fontSystem.GetFont(30);
