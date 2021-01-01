@@ -5,12 +5,8 @@ namespace LifeSim.Rendering
 {
     public class Material
     {
-        internal static System.Action<Material>? onRefCountZero;
-
         private Pass _pass;
         public Pass pass => this._pass;
-
-        private uint _refCount = 0;
 
         public ResourceSet resourceSet;
 
@@ -23,19 +19,6 @@ namespace LifeSim.Rendering
         internal void Dispose()
         {
             this.resourceSet.Dispose();
-        }
-
-        internal void MarkAsUsed()
-        {
-            this._refCount++;
-        }
-
-        internal void MarkAsUnused()
-        {
-            this._refCount--;
-            if (this._refCount == 0) {
-                Material.onRefCountZero?.Invoke(this);
-            }
         }
     }
 }

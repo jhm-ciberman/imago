@@ -5,13 +5,23 @@ namespace LifeSim.Rendering
     public struct ShaderDescription
     {
         public string filename;
-        public ResourceLayout[] resourcelayouts;
+        public ResourceLayout? passResourcelayout;
+        public ResourceLayout? materialResourcelayout;
+        public ResourceLayout? objectResourcelayout;
         public VertexLayoutDescription[] vertexLayouts;
 
-        public ShaderDescription(string filename, ResourceLayout[] resourcelayouts, VertexLayoutDescription[] vertexLayouts)
+        public ShaderDescription(
+            string filename, 
+            ResourceLayout passResourcelayout, 
+            ResourceLayout materialResourcelayout, 
+            ResourceLayout objectResourcelayout, 
+            VertexLayoutDescription[] vertexLayouts
+        )
         {
             this.filename = filename;
-            this.resourcelayouts = resourcelayouts;
+            this.passResourcelayout = passResourcelayout;
+            this.materialResourcelayout = materialResourcelayout;
+            this.objectResourcelayout = objectResourcelayout;
             this.vertexLayouts = vertexLayouts;
         }
     }

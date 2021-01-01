@@ -23,6 +23,8 @@ namespace LifeSim.Rendering
         private IRenderTexture _renderTexture;
         private SceneContext _sceneContext;
 
+        private List<Renderable3D> _renderList = new List<Renderable3D>();
+
         public GPURenderer3D(GraphicsDevice graphicsDevice, SceneContext sceneContext, IRenderTexture renderTexture)
         {
             this._graphicsDevice = graphicsDevice;
@@ -36,12 +38,6 @@ namespace LifeSim.Rendering
         {
             this._commandList.Dispose();
         }
-
-        struct RenderItem
-        {
-            public Renderable3D renderable;
-        }
-        private List<Renderable3D> _renderList = new List<Renderable3D>();
 
         private void _UpdateRenderList(Container3D node)
         {

@@ -18,7 +18,7 @@ namespace LifeSim.Rendering
         private GPURenderer2D _renderer2d;
         private GPURenderer3D _renderer3d;
 
-        private IRenderTexture _windowRenderTexture;
+        private IRenderTexture _fullScreenRenderTexture;
         private IRenderTexture _mainRenderTexture;
 
         private FullScreenRenderer _fullScreenQuad;
@@ -42,16 +42,16 @@ namespace LifeSim.Rendering
             this._graphicsDevice = VeldridStartup.CreateGraphicsDevice(window.nativeWindow, options, graphicsBackend);
             this._factory = this._graphicsDevice.ResourceFactory;
 
-            this._windowRenderTexture = new SwapchainRenderTexture(this._graphicsDevice.MainSwapchain);
+            this._fullScreenRenderTexture = new SwapchainRenderTexture(this._graphicsDevice.MainSwapchain);
             this._mainRenderTexture = new RenderTexture(this._factory, window.width, window.height);
 
             this._sceneContext = new SceneContext(this._factory);
-            this._materialManager = new MaterialManager(this._factory, this._mainRenderTexture, this._sceneContext);
+            this._materialManager = new MaterialManager(this._graphicsDevice, this._mainRenderTexture, this._fullScreenRenderTexture, this._sceneContext);
 
             this._renderer2d = new GPURenderer2D(this._graphicsDevice, this._mainRenderTexture);
             this._renderer3d = new GPURenderer3D(this._graphicsDevice, this._sceneContext, this._mainRenderTexture);
 
-            this._fullScreenQuad = new FullScreenRenderer(this._graphicsDevice, this._mainRenderTexture, this._windowRenderTexture);
+            this._fullScreenQuad = new FullScreenRenderer(this._graphicsDevice, this._materialManager, this._mainRenderTexture, this._fullScreenRenderTexture);
         }
 
         public MaterialManager materialManager => this._materialManager;
@@ -92,7 +92,7 @@ namespace LifeSim.Rendering
             this._graphicsDevice.ResizeMainWindow(width, height);
             this._graphicsDevice.WaitForIdle();
 
-            this._windowRenderTexture.Resize(width, height);
+            this._fullScreenRenderTexture.Resize(width, height);
             this._mainRenderTexture.Resize(width, height);
         }
 

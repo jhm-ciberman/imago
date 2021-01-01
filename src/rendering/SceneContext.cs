@@ -44,6 +44,9 @@ namespace LifeSim.Rendering
         public readonly ResourceLayout objectLayout;
         public readonly ResourceLayout skinedObjectLayout;
 
+        private readonly ResourceSet objectResourceSet;
+        private readonly ResourceSet skinnedResourceSet;
+
         public SceneContext(ResourceFactory factory)
         {
             this._factory = factory;  
@@ -62,6 +65,9 @@ namespace LifeSim.Rendering
         
             this.modelInfoBuffer = factory.CreateBuffer(new BufferDescription((uint) Marshal.SizeOf<ModelInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
             this.bonesInfoBuffer = factory.CreateBuffer(new BufferDescription(64 * BonesInfo.maxNumberOfBones, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+        
+            this.objectResourceSet = this._factory.CreateResourceSet(new ResourceSetDescription(this.objectLayout, this.modelInfoBuffer));
+            this.skinnedResourceSet = this._factory.CreateResourceSet(new ResourceSetDescription(this.skinedObjectLayout, this.modelInfoBuffer, this.bonesInfoBuffer));
         }
 
         public void Dispose()
@@ -78,15 +84,11 @@ namespace LifeSim.Rendering
                 return resourceSet;
             }
             if (renderable is SkinnedRenderable3D skinnedRenderable) {
-                resourceSet = this._factory.CreateResourceSet(new ResourceSetDescription(
-                    this.skinedObjectLayout, this.modelInfoBuffer, this.bonesInfoBuffer
-                ));
+                resourceSet = this.skinnedResourceSet;
             } else {
-                resourceSet = this._factory.CreateResourceSet(new ResourceSetDescription(
-                    this.objectLayout, this.modelInfoBuffer
-                ));
+                resourceSet = this.objectResourceSet;
             }
-            System.Console.WriteLine("create: " + renderable.name);
+
             this._resourceSets[renderable] = resourceSet;
             return resourceSet;
         }

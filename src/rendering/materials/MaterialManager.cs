@@ -11,23 +11,26 @@ namespace LifeSim.Rendering
         private ResourceFactory _factory;
         
         private string _shadersBasePath = "./res/shaders/";
-        
-        private Dictionary<uint, Veldrid.Pipeline> _pipelines = new Dictionary<uint, Veldrid.Pipeline>(); // Key: Pass.id
-        private Dictionary<Material, Veldrid.ResourceSet> _materialResources = new Dictionary<Material, Veldrid.ResourceSet>();
-        private Dictionary<ResourceLayoutDescription, ResourceLayout> _resourceLayouts = new Dictionary<ResourceLayoutDescription, ResourceLayout>();
 
         private ResourceLayout _passResourceLayout;
         private ResourceLayout _materialLayout;
+        private ResourceLayout _fullscreenMaterialLayout;
 
         private Shader _errorShader;
         private Shader _baseShader;
         private Shader _skinnedShader;
+        private Shader _fullscreenShader;
+
         private Pass _opaquePass;
         private Pass _skinnedPass;
+        private Pass _fullscreenPass;
 
-        public MaterialManager(ResourceFactory factory, IRenderTexture renderTexture, SceneContext sceneContext)
+        private GraphicsDevice _gd;
+
+        public MaterialManager(GraphicsDevice gd, IRenderTexture mainRenderTexture, IRenderTexture fullscreenRenderTexture, SceneContext sceneContext)
         {
-            this._factory = factory;
+            this._gd = gd;
+            this._factory = gd.ResourceFactory;
             //Material.onRefCountZero += (material) => material.Dispose();    
 
             this._passResourceLayout = this._factory.CreateResourceLayout(new ResourceLayoutDescription(
@@ -40,7 +43,16 @@ namespace LifeSim.Rendering
                 new ResourceLayoutElementDescription("SurfaceSampler", ResourceKind.Sampler, ShaderStages.Fragment)
             ));
 
+            this._fullscreenMaterialLayout = this._factory.CreateResourceLayout(new ResourceLayoutDescription(new [] {
+                new ResourceLayoutElementDescription("Texture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
+                new ResourceLayoutElementDescription("Sampler", ResourceKind.Sampler, ShaderStages.Fragment),
+            }));
+
             // Vertex layouts
+
+            var posOnlyVertexLayout = new VertexLayoutDescription(
+                new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float4)
+            );
 
             var baseVertexLayout = new VertexLayoutDescription(
                 new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
@@ -58,31 +70,53 @@ namespace LifeSim.Rendering
 
             // Shaders
 
-            this._errorShader = this._MakeShader(new ShaderDescription("error", 
-                new[] { this._passResourceLayout, this._materialLayout, sceneContext.objectLayout }, 
-                new[] { baseVertexLayout }
-            ));
+            this._errorShader = this._MakeShader(new ShaderDescription {
+                filename = "error", 
+                passResourcelayout     = this._passResourceLayout, 
+                materialResourcelayout = this._materialLayout, 
+                objectResourcelayout   = sceneContext.objectLayout,
+                vertexLayouts          = new[] { baseVertexLayout }
+            });
 
-            this._baseShader = this._MakeShader(new ShaderDescription("base", 
-                new[] { this._passResourceLayout, this._materialLayout, sceneContext.objectLayout }, 
-                new[] { baseVertexLayout }
-            ));
+            this._baseShader = this._MakeShader(new ShaderDescription { 
+                filename = "base", 
+                passResourcelayout     = this._passResourceLayout, 
+                materialResourcelayout = this._materialLayout, 
+                objectResourcelayout   = sceneContext.objectLayout, 
+                vertexLayouts          = new[] { baseVertexLayout }
+            });
 
-            this._skinnedShader = this._MakeShader(new ShaderDescription("skinned", 
-                new[] { this._passResourceLayout, this._materialLayout, sceneContext.skinedObjectLayout }, 
-                new[] { skinnedVertexLayout }
-            ));
+            this._skinnedShader = this._MakeShader(new ShaderDescription {
+                filename = "skinned", 
+                passResourcelayout     = this._passResourceLayout, 
+                materialResourcelayout = this._materialLayout, 
+                objectResourcelayout   = sceneContext.skinedObjectLayout, 
+                vertexLayouts          = new[] { skinnedVertexLayout }
+            });
 
+            this._fullscreenShader = this._MakeShader(new ShaderDescription {
+                filename = "fullscreen", 
+                passResourcelayout     = null, 
+                materialResourcelayout = this._fullscreenMaterialLayout, 
+                objectResourcelayout   = null, 
+                vertexLayouts          = new[] { posOnlyVertexLayout },
+            });
 
+            // Passes
 
             this._opaquePass = this._MakePass(new PassDescription(
-                this._baseShader, renderTexture, PolygonFillMode.Solid, BlendStateDescription.SingleOverrideBlend, 
+                this._baseShader, mainRenderTexture, PolygonFillMode.Solid, BlendStateDescription.SingleOverrideBlend, 
                 new[] { sceneContext.cameraInfoBuffer, sceneContext.lightInfoBuffer }
             ));
 
             this._skinnedPass = this._MakePass(new PassDescription(
-                this._skinnedShader, renderTexture, PolygonFillMode.Solid, BlendStateDescription.SingleOverrideBlend, 
+                this._skinnedShader, mainRenderTexture, PolygonFillMode.Solid, BlendStateDescription.SingleOverrideBlend, 
                 new[] { sceneContext.cameraInfoBuffer, sceneContext.lightInfoBuffer}
+            ));
+
+            this._fullscreenPass = this._MakePass(new PassDescription(
+                this._fullscreenShader, fullscreenRenderTexture, PolygonFillMode.Solid, BlendStateDescription.SingleOverrideBlend, 
+                new BindableResource[] { }
             ));
 
         }
@@ -98,6 +132,13 @@ namespace LifeSim.Rendering
         {
             return new Material(this._skinnedPass, this._factory.CreateResourceSet(new ResourceSetDescription(
                 this._materialLayout, texture.deviceTexture, texture.sampler
+            )));
+        }
+
+        public Material MakeFullscreen(Veldrid.Texture texture)
+        {
+            return new Material(this._fullscreenPass, this._factory.CreateResourceSet(new ResourceSetDescription(
+                this._fullscreenMaterialLayout, texture, this._gd.LinearSampler
             )));
         }
 
@@ -131,7 +172,12 @@ namespace LifeSim.Rendering
 
             var shaderSet = new ShaderSetDescription(description.vertexLayouts, shaders);
 
-            return new Shader(shaderSet, description.resourcelayouts);
+            return new Shader(
+                shaderSet, 
+                description.passResourcelayout,
+                description.materialResourcelayout,
+                description.objectResourcelayout
+            );
         }
 
         private Pass _MakePass(PassDescription description)
@@ -150,16 +196,19 @@ namespace LifeSim.Rendering
             pipelineDescription.DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual;
             pipelineDescription.RasterizerState = rasterizerState;
             pipelineDescription.PrimitiveTopology = PrimitiveTopology.TriangleList;
-            pipelineDescription.ResourceLayouts = description.shader.resourceLayouts;
+            pipelineDescription.ResourceLayouts = description.shader.GetResourceLayouts();
             pipelineDescription.Outputs = description.renderTexture.outputDescription; 
 
             var pipeline = this._factory.CreateGraphicsPipeline(pipelineDescription);
 
 
-            var passLayout = description.shader.resourceLayouts[0];
-            var resourceSet = this._factory.CreateResourceSet(
-                new ResourceSetDescription(passLayout, description.resources)
-            );
+            ResourceSet? resourceSet = null;
+            var passLayout = description.shader.passResourcelayout;
+            if (passLayout != null) {
+                resourceSet = this._factory.CreateResourceSet(
+                    new ResourceSetDescription(passLayout, description.resources)
+                );
+            }
 
             return new Pass(pipeline, resourceSet);
         }

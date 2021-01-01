@@ -11,55 +11,21 @@ namespace LifeSim.Rendering
         private GraphicsDevice _gd;
 
         private DeviceBuffer _vertexBuffer;
-        private Veldrid.Shader _vertexShader;
-        private Veldrid.Shader _fragmentShader;
-        private Pipeline _pipeline;
-        private ResourceLayout _resourceLayout;
         private CommandList _commandList;
         private IRenderTexture _destinationTexture;
         private IRenderTexture _sourceTexture;
 
-        private ResourceSet? _resourceSet = null;
+        private Material? _material = null;
+        private MaterialManager _materialManager;
 
-        public FullScreenRenderer(GraphicsDevice gd, IRenderTexture sourceRenderTexture, IRenderTexture destinationRenderTexture)
+        public FullScreenRenderer(GraphicsDevice gd, MaterialManager materialManager, IRenderTexture sourceRenderTexture, IRenderTexture destinationRenderTexture)
         {
             this._gd = gd;
             this._destinationTexture = destinationRenderTexture;
             this._sourceTexture = sourceRenderTexture;
             this._sourceTexture.onResized += this._OnSourceTextureResized;
-
+            this._materialManager = materialManager;
             var factory = gd.ResourceFactory;
-
-
-            string vertexCode   = File.ReadAllText("res/shaders/fullscreen.vert");
-            string fragmentCode = File.ReadAllText("res/shaders/fullscreen.frag");
-            var vertBytes = Encoding.UTF8.GetBytes(vertexCode);
-            var fragBytes = Encoding.UTF8.GetBytes(fragmentCode);
-            var vertexShaderDesc = new Veldrid.ShaderDescription(ShaderStages.Vertex, vertBytes, "main");
-            var fragmentShaderDesc = new Veldrid.ShaderDescription(ShaderStages.Fragment, fragBytes, "main");
-            var shaders = factory.CreateFromSpirv(vertexShaderDesc, fragmentShaderDesc);
-            this._vertexShader = shaders[0];
-            this._fragmentShader = shaders[1];
-
-            this._resourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(new [] {
-                new ResourceLayoutElementDescription("Texture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
-                new ResourceLayoutElementDescription("Sampler", ResourceKind.Sampler, ShaderStages.Fragment),
-            }));
-
-            var vertexLayout = new VertexLayoutDescription(
-                new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float4)
-            );
-
-            GraphicsPipelineDescription pipelineDescription = new GraphicsPipelineDescription();
-            pipelineDescription.ShaderSet = new ShaderSetDescription(new [] { vertexLayout }, shaders);
-            pipelineDescription.BlendState = BlendStateDescription.SingleAlphaBlend;
-            pipelineDescription.DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual;
-            pipelineDescription.RasterizerState = RasterizerStateDescription.CullNone;
-            pipelineDescription.PrimitiveTopology = PrimitiveTopology.TriangleList;
-            pipelineDescription.ResourceLayouts = new ResourceLayout[] { this._resourceLayout };
-            pipelineDescription.Outputs = destinationRenderTexture.outputDescription;
-
-            this._pipeline = factory.CreateGraphicsPipeline(pipelineDescription);
 
             this._vertexBuffer = factory.CreateBuffer(new BufferDescription(16 * 6, BufferUsage.VertexBuffer));
             (float top, float bottom) = gd.IsUvOriginTopLeft ? (1f, 0f) : (0f, 1f);
@@ -73,48 +39,41 @@ namespace LifeSim.Rendering
                 new Vector4(-1f,  1f, 0f, bottom),
             });
             this._commandList = factory.CreateCommandList();
-
         }
 
         public void Dispose()
         {
             this._vertexBuffer.Dispose();
-            this._vertexShader.Dispose();
-            this._fragmentShader.Dispose();
-            this._pipeline.Dispose();
-            this._resourceLayout.Dispose();
-            this._resourceSet?.Dispose();
+            this._material?.Dispose();
             this._commandList.Dispose();
         }
 
         public void SetSourceTexture(IRenderTexture sourceRenderTexture)
         {
             this._sourceTexture.onResized -= this._OnSourceTextureResized;
-            this._resourceSet?.Dispose();
-            this._resourceSet = null;
+            this._material?.Dispose();
+            this._material = null;
             this._sourceTexture = sourceRenderTexture;
             this._sourceTexture.onResized += this._OnSourceTextureResized;
         }
 
         private void _OnSourceTextureResized(IRenderTexture sourceRenderTexture)
         {
-            this._resourceSet = null;
-            this._resourceSet?.Dispose();
+            this._material?.Dispose();
+            this._material = null;
         }
 
         public void Render()
         {
-            if (this._resourceSet == null) {
-                this._resourceSet = this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(
-                    this._resourceLayout, this._sourceTexture.colorTexture, this._gd.LinearSampler
-                ));
+            if (this._material == null) {
+                this._material = this._material = this._materialManager.MakeFullscreen(this._sourceTexture.colorTexture);
             }
 
             this._commandList.Begin();
             this._commandList.SetFramebuffer(this._destinationTexture.framebuffer);
-            this._commandList.SetPipeline(this._pipeline);
+            this._commandList.SetPipeline(this._material.pass.pipeline);
             this._commandList.SetVertexBuffer(0, this._vertexBuffer);
-            this._commandList.SetGraphicsResourceSet(0, this._resourceSet);
+            this._commandList.SetGraphicsResourceSet(0, this._material.resourceSet);
             this._commandList.Draw(6);
             this._commandList.End();
 
