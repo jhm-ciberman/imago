@@ -103,10 +103,27 @@ namespace LifeSim.Rendering
 
         private Shader _MakeShader(ShaderDescription description)
         {
-            var vertexCode   = File.ReadAllText(Path.Combine(this._shadersBasePath, description.filename + ".vert"));
-            var fragmentCode = File.ReadAllText(Path.Combine(this._shadersBasePath, description.filename + ".frag"));
-            var vertBytes = Encoding.UTF8.GetBytes(vertexCode);
-            var fragBytes = Encoding.UTF8.GetBytes(fragmentCode);
+            StringBuilder vertex = new StringBuilder();
+            StringBuilder fragment = new StringBuilder();
+
+            var lines = File.ReadAllLines(Path.Combine(this._shadersBasePath, description.filename + ".glsl"));
+            StringBuilder? current = null;
+            foreach (var line in lines) {
+                if (line.Contains("#shader")) {
+                    if (line.Contains("vertex")) {
+                        current = vertex;
+                    } else if (line.Contains("fragment")) {
+                        current = fragment;
+                    } else {
+                        throw new System.Exception("Unrecognized type of shader: " + line);
+                    }
+                } else {
+                    current?.AppendLine(line);
+                }
+            }
+            
+            var vertBytes = Encoding.UTF8.GetBytes(vertex.ToString());
+            var fragBytes = Encoding.UTF8.GetBytes(fragment.ToString());
             var shaders = this._factory.CreateFromSpirv(
                 new Veldrid.ShaderDescription(ShaderStages.Vertex  , vertBytes, "main"),
                 new Veldrid.ShaderDescription(ShaderStages.Fragment, fragBytes, "main")
