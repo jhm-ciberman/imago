@@ -35,8 +35,8 @@ namespace LifeSim.Rendering
             string fragmentCode = File.ReadAllText("res/shaders/fullscreen.frag");
             var vertBytes = Encoding.UTF8.GetBytes(vertexCode);
             var fragBytes = Encoding.UTF8.GetBytes(fragmentCode);
-            ShaderDescription vertexShaderDesc = new ShaderDescription(ShaderStages.Vertex, vertBytes, "main");
-            ShaderDescription fragmentShaderDesc = new ShaderDescription(ShaderStages.Fragment, fragBytes, "main");
+            var vertexShaderDesc = new Veldrid.ShaderDescription(ShaderStages.Vertex, vertBytes, "main");
+            var fragmentShaderDesc = new Veldrid.ShaderDescription(ShaderStages.Fragment, fragBytes, "main");
             var shaders = factory.CreateFromSpirv(vertexShaderDesc, fragmentShaderDesc);
             this._vertexShader = shaders[0];
             this._fragmentShader = shaders[1];

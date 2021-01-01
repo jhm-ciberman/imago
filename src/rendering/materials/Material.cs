@@ -1,3 +1,4 @@
+using System;
 using Veldrid;
 
 namespace LifeSim.Rendering
@@ -6,26 +7,22 @@ namespace LifeSim.Rendering
     {
         internal static System.Action<Material>? onRefCountZero;
 
-        private MaterialPass _pass;
-        public MaterialPass pass => this._pass;
-        
-        private GPUTexture _texture;
-        public GPUTexture texture => this._texture;
+        private Pass _pass;
+        public Pass pass => this._pass;
 
         private uint _refCount = 0;
 
-        public ResourceSet? resourceSet;
-        public bool resourceSetIsDirty = true;
+        public ResourceSet resourceSet;
 
-        public Material(Shader shader, GPUTexture texture) 
+        public Material(Pass pass, ResourceSet resourceSet) 
         {
-            this._pass = new MaterialPass(shader);
-            this._texture = texture;
+            this._pass = pass;
+            this.resourceSet = resourceSet;
         }
 
-        public void SetTexture(GPUTexture texture)
+        internal void Dispose()
         {
-            this._texture = texture;
+            this.resourceSet.Dispose();
         }
 
         internal void MarkAsUsed()

@@ -57,8 +57,8 @@ namespace LifeSim.Rendering
             string fragmentCode = File.ReadAllText("res/shaders/sprites.frag");
             var vertBytes = Encoding.UTF8.GetBytes(vertexCode);
             var fragBytes = Encoding.UTF8.GetBytes(fragmentCode);
-            ShaderDescription vertexShaderDesc = new ShaderDescription(ShaderStages.Vertex, vertBytes, "main");
-            ShaderDescription fragmentShaderDesc = new ShaderDescription(ShaderStages.Fragment, fragBytes, "main");
+            var vertexShaderDesc = new Veldrid.ShaderDescription(ShaderStages.Vertex, vertBytes, "main");
+            var fragmentShaderDesc = new Veldrid.ShaderDescription(ShaderStages.Fragment, fragBytes, "main");
             var shaders = this._factory.CreateFromSpirv(vertexShaderDesc, fragmentShaderDesc);
             
             this._cameraInfoBuffer = this._factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer | BufferUsage.Dynamic));

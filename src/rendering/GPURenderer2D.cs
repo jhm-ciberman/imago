@@ -43,7 +43,7 @@ namespace LifeSim.Rendering
             private Veldrid.GraphicsDevice _gd;
 
             public FontTexture2D(Veldrid.GraphicsDevice gd, Veldrid.Texture texture, Veldrid.TextureView textureView)
-                : base(texture, textureView)
+                : base(texture, textureView, gd.LinearSampler)
             {
                 this._gd = gd;
             }
