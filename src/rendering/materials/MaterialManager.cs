@@ -15,23 +15,30 @@ namespace LifeSim.Rendering
         private ResourceLayout _passResourceLayout;
         private ResourceLayout _materialLayout;
         private ResourceLayout _fullscreenMaterialLayout;
+        private ResourceLayout _spritesPassLayout;
+        private ResourceLayout _spritesMaterialLayout;
 
         private Shader _errorShader;
         private Shader _baseShader;
         private Shader _skinnedShader;
         private Shader _fullscreenShader;
+        private Shader _spritesShader;
 
         private Pass _opaquePass;
         private Pass _skinnedPass;
         private Pass _fullscreenPass;
+        private Pass _spritesPass;
 
         private GraphicsDevice _gd;
 
         public MaterialManager(GraphicsDevice gd, IRenderTexture mainRenderTexture, IRenderTexture fullscreenRenderTexture, SceneContext sceneContext)
         {
             this._gd = gd;
-            this._factory = gd.ResourceFactory;
-            //Material.onRefCountZero += (material) => material.Dispose();    
+            this._factory = gd.ResourceFactory;  
+
+            this._spritesPassLayout = this._factory.CreateResourceLayout(new ResourceLayoutDescription(new [] {
+                new ResourceLayoutElementDescription("CameraInfo", ResourceKind.UniformBuffer, ShaderStages.Vertex),
+            }));
 
             this._passResourceLayout = this._factory.CreateResourceLayout(new ResourceLayoutDescription(
                 new ResourceLayoutElementDescription("CameraInfo", ResourceKind.UniformBuffer, ShaderStages.Vertex),
@@ -44,6 +51,11 @@ namespace LifeSim.Rendering
             ));
 
             this._fullscreenMaterialLayout = this._factory.CreateResourceLayout(new ResourceLayoutDescription(new [] {
+                new ResourceLayoutElementDescription("Texture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
+                new ResourceLayoutElementDescription("Sampler", ResourceKind.Sampler, ShaderStages.Fragment),
+            }));
+
+            this._spritesMaterialLayout = this._factory.CreateResourceLayout(new ResourceLayoutDescription(new [] {
                 new ResourceLayoutElementDescription("Texture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
                 new ResourceLayoutElementDescription("Sampler", ResourceKind.Sampler, ShaderStages.Fragment),
             }));
@@ -68,11 +80,17 @@ namespace LifeSim.Rendering
                 new VertexElementDescription("Weights", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float4)
             );
 
+            var spritesVertexLayout = new VertexLayoutDescription(
+                new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
+                new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
+                new VertexElementDescription("Color", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Byte4_Norm)
+            );
+
             // Shaders
 
             this._errorShader = this._MakeShader(new ShaderDescription {
                 filename = "error", 
-                passResourcelayout     = this._passResourceLayout, 
+                passResourcelayout     = this._spritesPassLayout, 
                 materialResourcelayout = this._materialLayout, 
                 objectResourcelayout   = sceneContext.objectLayout,
                 vertexLayouts          = new[] { baseVertexLayout }
@@ -102,21 +120,35 @@ namespace LifeSim.Rendering
                 vertexLayouts          = new[] { posOnlyVertexLayout },
             });
 
+            this._spritesShader = this._MakeShader(new ShaderDescription {
+                filename = "sprites", 
+                passResourcelayout     = this._spritesPassLayout, 
+                materialResourcelayout = this._spritesMaterialLayout, 
+                objectResourcelayout   = null, 
+                vertexLayouts          = new[] { spritesVertexLayout },
+            });
+
+
             // Passes
 
             this._opaquePass = this._MakePass(new PassDescription(
-                this._baseShader, mainRenderTexture, PolygonFillMode.Solid, BlendStateDescription.SingleOverrideBlend, 
-                new[] { sceneContext.cameraInfoBuffer, sceneContext.lightInfoBuffer }
+                this._baseShader, mainRenderTexture, FaceCullMode.Front, PolygonFillMode.Solid, BlendStateDescription.SingleOverrideBlend, 
+                new[] { sceneContext.camera3DInfoBuffer, sceneContext.lightInfoBuffer }
             ));
 
             this._skinnedPass = this._MakePass(new PassDescription(
-                this._skinnedShader, mainRenderTexture, PolygonFillMode.Solid, BlendStateDescription.SingleOverrideBlend, 
-                new[] { sceneContext.cameraInfoBuffer, sceneContext.lightInfoBuffer}
+                this._skinnedShader, mainRenderTexture, FaceCullMode.Front, PolygonFillMode.Solid, BlendStateDescription.SingleOverrideBlend, 
+                new[] { sceneContext.camera3DInfoBuffer, sceneContext.lightInfoBuffer}
             ));
 
             this._fullscreenPass = this._MakePass(new PassDescription(
-                this._fullscreenShader, fullscreenRenderTexture, PolygonFillMode.Solid, BlendStateDescription.SingleOverrideBlend, 
+                this._fullscreenShader, fullscreenRenderTexture, FaceCullMode.Front, PolygonFillMode.Solid, BlendStateDescription.SingleOverrideBlend, 
                 new BindableResource[] { }
+            ));
+
+            this._spritesPass = this._MakePass(new PassDescription(
+                this._spritesShader, mainRenderTexture, FaceCullMode.None, PolygonFillMode.Solid, BlendStateDescription.SingleAlphaBlend, 
+                new[] { sceneContext.camera2DInfoBuffer }
             ));
 
         }
@@ -139,6 +171,13 @@ namespace LifeSim.Rendering
         {
             return new Material(this._fullscreenPass, this._factory.CreateResourceSet(new ResourceSetDescription(
                 this._fullscreenMaterialLayout, texture, this._gd.LinearSampler
+            )));
+        }
+
+        public Material MakeSprites(Veldrid.Texture texture)
+        {
+            return new Material(this._spritesPass, this._factory.CreateResourceSet(new ResourceSetDescription(
+                this._spritesMaterialLayout, texture, this._gd.LinearSampler
             )));
         }
 
@@ -183,7 +222,7 @@ namespace LifeSim.Rendering
         private Pass _MakePass(PassDescription description)
         {
             var rasterizerState = new RasterizerStateDescription(
-                FaceCullMode.Front,
+                description.faceCullMode,
                 description.polygonFillMode,
                 FrontFace.Clockwise,
                 depthClipEnabled: true,

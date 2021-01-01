@@ -33,7 +33,8 @@ namespace LifeSim.Rendering
         }
 
         public readonly DeviceBuffer lightInfoBuffer;
-        public readonly DeviceBuffer cameraInfoBuffer;
+        public readonly DeviceBuffer camera2DInfoBuffer;
+        public readonly DeviceBuffer camera3DInfoBuffer;
 
         public readonly DeviceBuffer modelInfoBuffer;
         public readonly DeviceBuffer bonesInfoBuffer;
@@ -60,7 +61,8 @@ namespace LifeSim.Rendering
                 new ResourceLayoutElementDescription("BonesInfo", ResourceKind.UniformBuffer, ShaderStages.Vertex)
             ));
 
-            this.cameraInfoBuffer = factory.CreateBuffer(new BufferDescription((uint) Marshal.SizeOf<CameraInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+            this.camera3DInfoBuffer = factory.CreateBuffer(new BufferDescription((uint) Marshal.SizeOf<CameraInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+            this.camera2DInfoBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
             this.lightInfoBuffer  = factory.CreateBuffer(new BufferDescription((uint) Marshal.SizeOf<LightInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
         
             this.modelInfoBuffer = factory.CreateBuffer(new BufferDescription((uint) Marshal.SizeOf<ModelInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
@@ -72,7 +74,8 @@ namespace LifeSim.Rendering
 
         public void Dispose()
         {
-            this.cameraInfoBuffer.Dispose();
+            this.camera2DInfoBuffer.Dispose();
+            this.camera3DInfoBuffer.Dispose();
             this.lightInfoBuffer.Dispose();
             this.modelInfoBuffer.Dispose();
             this.bonesInfoBuffer.Dispose();
@@ -102,12 +105,17 @@ namespace LifeSim.Rendering
             commandList.UpdateBuffer(this.lightInfoBuffer, 0, ref lightInfo);
         }
 
-        public void SetupCameraInfoBuffer(CommandList commandList, Camera3D camera)
+        public void SetupCamera3DInfoBuffer(CommandList commandList, Camera3D camera)
         {
             CameraInfo cameraInfo;
             cameraInfo.projectionMatrix = camera.projectionMatrix;
             cameraInfo.viewMatrix = camera.viewMatrix;
-            commandList.UpdateBuffer(this.cameraInfoBuffer, 0, ref cameraInfo);
+            commandList.UpdateBuffer(this.camera3DInfoBuffer, 0, ref cameraInfo);
+        }
+
+        public void SetupCamera2DInfoBuffer(CommandList commandList, ref Matrix4x4 projection)
+        {
+            commandList.UpdateBuffer(this.camera2DInfoBuffer, 0, ref projection);
         }
     }
 }

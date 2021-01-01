@@ -1,12 +1,5 @@
-using System.Numerics;
-using System.Runtime.InteropServices;
-using System.Text;
 using Veldrid;
-using Veldrid.ImageSharp;
-using Veldrid.StartupUtilities;
-using Veldrid.SPIRV;
 using System.Collections.Generic;
-using System.Diagnostics;
 using LifeSim.SceneGraph;
 
 namespace LifeSim.Rendering
@@ -63,12 +56,10 @@ namespace LifeSim.Rendering
             foreach (var camera in scene.cameras) {
                 this._commandList.ClearColorTarget(0, camera.clearColor);
                 this._commandList.ClearDepthStencil(1f);
-                this._sceneContext.SetupCameraInfoBuffer(this._commandList, camera);
+                this._sceneContext.SetupCamera3DInfoBuffer(this._commandList, camera);
                 foreach (var renderable in this._renderList) {
                     this._DrawRenderable(renderable, camera);
                 }
-
-                this._commandList.ClearDepthStencil(1f);
             }
             this._commandList.End();
         }

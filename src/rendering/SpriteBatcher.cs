@@ -1,12 +1,9 @@
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using System.Text;
 using FontStashSharp.Interfaces;
 using Veldrid;
-using Veldrid.SPIRV;
 using Rectangle = System.Drawing.Rectangle;
 
 namespace LifeSim.Rendering
@@ -29,14 +26,11 @@ namespace LifeSim.Rendering
         }
 
         private CommandList _commandList;
-        private DeviceBuffer _cameraInfoBuffer;
         private ResourceFactory _factory;
         private GraphicsDevice _gd;
-        private Pipeline _pipeline;
-        private ResourceLayout _resourceLayout;
         private DeviceBuffer _vertexBuffer;
         private DeviceBuffer _indexBuffer;
-        private Dictionary<GPUTexture, ResourceSet> _textureSets;
+        private Dictionary<GPUTexture, Material> _materials = new Dictionary<GPUTexture, Material>();
         
         private int _maxBatchSize = 1000;
         private GPUTexture? _batchTexture = null;
@@ -46,48 +40,21 @@ namespace LifeSim.Rendering
         private int _totalDrawCalls = 0;
         private int _totalSpritesToDraw = 0;
 
+        private MaterialManager _materialManager;
 
-        public SpriteBatcher(GraphicsDevice gd, CommandList commandList, OutputDescription outputDescription)
+        public SpriteBatcher(
+            GraphicsDevice gd, MaterialManager materialManager, 
+            CommandList commandList, OutputDescription outputDescription
+        )
         {
             this._gd = gd;
+            this._materialManager = materialManager;
             this._commandList = commandList;
             this._factory = gd.ResourceFactory;
 
-            string vertexCode   = File.ReadAllText("res/shaders/sprites.vert");
-            string fragmentCode = File.ReadAllText("res/shaders/sprites.frag");
-            var vertBytes = Encoding.UTF8.GetBytes(vertexCode);
-            var fragBytes = Encoding.UTF8.GetBytes(fragmentCode);
-            var vertexShaderDesc = new Veldrid.ShaderDescription(ShaderStages.Vertex, vertBytes, "main");
-            var fragmentShaderDesc = new Veldrid.ShaderDescription(ShaderStages.Fragment, fragBytes, "main");
-            var shaders = this._factory.CreateFromSpirv(vertexShaderDesc, fragmentShaderDesc);
-            
-            this._cameraInfoBuffer = this._factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
-
-            this._resourceLayout = this._factory.CreateResourceLayout(new ResourceLayoutDescription(new [] {
-                new ResourceLayoutElementDescription("CameraInfo", ResourceKind.UniformBuffer, ShaderStages.Vertex),
-                new ResourceLayoutElementDescription("Texture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
-                new ResourceLayoutElementDescription("Sampler", ResourceKind.Sampler, ShaderStages.Fragment),
-            }));
-
-            var vertexLayout = new VertexLayoutDescription(
-                new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
-                new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
-                new VertexElementDescription("Color", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Byte4_Norm)
-            );
-            
-            GraphicsPipelineDescription pipelineDescription = new GraphicsPipelineDescription();
-            pipelineDescription.ShaderSet = new ShaderSetDescription(new [] { vertexLayout }, shaders);
-            pipelineDescription.BlendState = BlendStateDescription.SingleAlphaBlend;
-            pipelineDescription.DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual;
-            pipelineDescription.RasterizerState = RasterizerStateDescription.CullNone; // TODO: change
-            pipelineDescription.PrimitiveTopology = PrimitiveTopology.TriangleList;
-            pipelineDescription.ResourceLayouts = new ResourceLayout[] { this._resourceLayout };
-            pipelineDescription.Outputs = outputDescription;
-
-            this._pipeline = this._factory.CreateGraphicsPipeline(pipelineDescription);
-
             var indexBufferSize = sizeof(ushort) * 6 * this._maxBatchSize;
             var vertexBufferSize = Marshal.SizeOf<Vertex>() * 4 * this._maxBatchSize;
+
             this._indexBuffer = this._factory.CreateBuffer(new BufferDescription((uint) indexBufferSize, BufferUsage.IndexBuffer));
             this._vertexBuffer = this._factory.CreateBuffer(new BufferDescription((uint) vertexBufferSize, BufferUsage.VertexBuffer | BufferUsage.Dynamic));
             
@@ -99,20 +66,17 @@ namespace LifeSim.Rendering
                 int j = i * 6;
                 int offset = i * 4;
                 indices[j + 0] = (ushort) (offset + 0);
-                indices[j + 1] = (ushort) (offset + 1);
-                indices[j + 2] = (ushort) (offset + 2);
+                indices[j + 1] = (ushort) (offset + 2);
+                indices[j + 2] = (ushort) (offset + 1);
                 indices[j + 3] = (ushort) (offset + 0);
-                indices[j + 4] = (ushort) (offset + 2);
-                indices[j + 5] = (ushort) (offset + 3);
+                indices[j + 4] = (ushort) (offset + 3);
+                indices[j + 5] = (ushort) (offset + 2);
             }
             this._gd.UpdateBuffer(this._indexBuffer, 0, indices);
-
-            this._textureSets = new Dictionary<GPUTexture, ResourceSet>();
         }
 
-        public void BeginBatch(Matrix4x4 projectionMatrix)
+        public void BeginBatch()
         {
-            this._gd.UpdateBuffer(this._cameraInfoBuffer, 0, projectionMatrix);
             this._totalDrawCalls = 0;
             this._totalSpritesToDraw = 0;
         }
@@ -182,31 +146,31 @@ namespace LifeSim.Rendering
         public void EndBatch()
         {
             this.FlushCurrentBatch();
-            //System.Console.WriteLine("DrawCalls: " + this._totalDrawCalls + ". Total sprites " + this._totalSpritesToDraw + ". Total textures: " + this._textureSets.Count);
+            //System.Console.WriteLine("DrawCalls: " + this._totalDrawCalls + ". Total sprites " + this._totalSpritesToDraw + ". Total materials: " + this._materials.Count);
             this._totalDrawCalls = 0;
             this._totalSpritesToDraw = 0;
         }
 
-        private ResourceSet _GetResourceSetOrNew(GPUTexture texture)
+        private Material _GetMaterialOrNew(GPUTexture texture)
         {
-            if (! this._textureSets.TryGetValue(texture, out ResourceSet? resourceSet)) {
-                System.Console.WriteLine("Create texture");
-                resourceSet = this._factory.CreateResourceSet(
-                    new ResourceSetDescription(this._resourceLayout, this._cameraInfoBuffer, texture.textureView, this._gd.LinearSampler)
-                );
-                this._textureSets.Add(texture, resourceSet);
+            if (! this._materials.TryGetValue(texture, out Material? material)) {
+                System.Console.WriteLine("Create material");
+                material = this._materialManager.MakeSprites(texture.deviceTexture);
+                this._materials.Add(texture, material);
             }
-            return resourceSet;
+            return material;
         }
 
         public void FlushCurrentBatch()
         {
             if (this._batchTexture != null && this._batchCount > 0) {
 
-                this._gd.UpdateBuffer(this._vertexBuffer, 0, this._batchVertices);
+                this._commandList.UpdateBuffer(this._vertexBuffer, 0, this._batchVertices);
 
-                this._commandList.SetPipeline(this._pipeline);
-                this._commandList.SetGraphicsResourceSet(0, this._GetResourceSetOrNew(this._batchTexture));
+                var material = this._GetMaterialOrNew(this._batchTexture);
+                this._commandList.SetPipeline(material.pass.pipeline);
+                this._commandList.SetGraphicsResourceSet(0, material.pass.resourceSet);
+                this._commandList.SetGraphicsResourceSet(1, material.resourceSet);
                 this._commandList.SetIndexBuffer(this._indexBuffer, IndexFormat.UInt16);
                 this._commandList.SetVertexBuffer(0, this._vertexBuffer);
                 this._commandList.DrawIndexed(
@@ -225,13 +189,10 @@ namespace LifeSim.Rendering
 
         public void Dispose()
         {
-            this._pipeline.Dispose();
-            this._resourceLayout.Dispose();
-            this._cameraInfoBuffer.Dispose();
             this._indexBuffer.Dispose();
             this._vertexBuffer.Dispose();
 
-            foreach (var set in this._textureSets.Values) {
+            foreach (var set in this._materials.Values) {
                 set.Dispose();
             }
         }
