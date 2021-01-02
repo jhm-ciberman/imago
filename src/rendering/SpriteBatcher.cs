@@ -30,7 +30,7 @@ namespace LifeSim.Rendering
         private GraphicsDevice _gd;
         private DeviceBuffer _vertexBuffer;
         private DeviceBuffer _indexBuffer;
-        private Dictionary<GPUTexture, Material> _materials = new Dictionary<GPUTexture, Material>();
+        private Dictionary<GPUTexture, IMaterial> _materials = new Dictionary<GPUTexture, IMaterial>();
         
         private int _maxBatchSize = 1000;
         private GPUTexture? _batchTexture = null;
@@ -151,9 +151,9 @@ namespace LifeSim.Rendering
             this._totalSpritesToDraw = 0;
         }
 
-        private Material _GetMaterialOrNew(GPUTexture texture)
+        private IMaterial _GetMaterialOrNew(GPUTexture texture)
         {
-            if (! this._materials.TryGetValue(texture, out Material? material)) {
+            if (! this._materials.TryGetValue(texture, out IMaterial? material)) {
                 System.Console.WriteLine("Create material");
                 material = this._materialManager.MakeSprites(texture.deviceTexture);
                 this._materials.Add(texture, material);
@@ -170,7 +170,7 @@ namespace LifeSim.Rendering
                 var material = this._GetMaterialOrNew(this._batchTexture);
                 this._commandList.SetPipeline(material.pass.pipeline);
                 this._commandList.SetGraphicsResourceSet(0, material.pass.resourceSet);
-                this._commandList.SetGraphicsResourceSet(1, material.resourceSet);
+                this._commandList.SetGraphicsResourceSet(1, material.GetResourceSet());
                 this._commandList.SetIndexBuffer(this._indexBuffer, IndexFormat.UInt16);
                 this._commandList.SetVertexBuffer(0, this._vertexBuffer);
                 this._commandList.DrawIndexed(

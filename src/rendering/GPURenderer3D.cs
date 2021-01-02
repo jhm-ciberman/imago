@@ -46,7 +46,6 @@ namespace LifeSim.Rendering
             this._UpdateRenderList(scene);
             scene.UpdateWorldMatrices();
 
-
             this._commandList.Begin();
             this._commandList.SetFramebuffer(this._renderTexture.framebuffer);
             this._sceneContext.SetupLightInfoBuffer(this._commandList, scene);
@@ -76,7 +75,7 @@ namespace LifeSim.Rendering
             this._commandList.SetIndexBuffer(mesh.indexBuffer, IndexFormat.UInt16);
             this._commandList.SetPipeline(pass.pipeline);
             this._commandList.SetGraphicsResourceSet(0, pass.resourceSet); // Per pass
-            this._commandList.SetGraphicsResourceSet(1, material.resourceSet); // Per Material
+            this._commandList.SetGraphicsResourceSet(1, material.GetResourceSet()); // Per Material
             this._commandList.SetGraphicsResourceSet(2, objectResourceSet); // Per object
             this._commandList.DrawIndexed(
                 indexCount: mesh.indexCount,

@@ -28,7 +28,6 @@ namespace LifeSim
         public void Add(Renderable3D renderable)
         {
             renderable.pickingID = (uint) (this._list.Count + 1); 
-            System.Console.WriteLine("Register: " + renderable.pickingID + " " + renderable.name);
             this._list.Add(renderable); 
             
             /*new PickTarget {

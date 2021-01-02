@@ -91,9 +91,9 @@ namespace LifeSim.Rendering
 			return new FontSystem(fontLoader, this._textureFactory, atlasSize, atlasSize, 0, 1, true);
         }
 
-        public void Render(Scene3D scene)
+        public void Render(Canvas2D canvas)
         {
-            Viewport viewport = scene.cameras[0].viewport;
+            Viewport viewport = canvas.viewport;
             this._commandList.Begin();
             this._commandList.SetFramebuffer(this._renderTexture.framebuffer);
             this._commandList.ClearDepthStencil(1f);
@@ -101,10 +101,15 @@ namespace LifeSim.Rendering
             this._sceneContext.SetupCamera2DInfoBuffer(this._commandList, ref projection);
             this._textBatcher.BeginBatch();
 
-            var font = this._fontSystem.GetFont(30);
-            //string text = "The quick brown fox jumps over the lazy dog\nいろはにほへ\nEmoji Font: 🙌📦👏👏";
-            string text = "Hello World!";
-            font.DrawText(this._textBatcher, 30, 30, text, Color.OrangeRed);
+
+            foreach (var child in canvas.children) {
+                if (child is Text2D text2D) {
+                    var font = this._fontSystem.GetFont(30);
+                    //string text = "The quick brown fox jumps over the lazy dog\nいろはにほへ\nEmoji Font: 🙌📦👏👏";
+                    font.DrawText(this._textBatcher, 30, 30, text2D.text, Color.OrangeRed);
+                }
+            }
+
             
             this._textBatcher.EndBatch();
             this._commandList.End();

@@ -22,14 +22,14 @@ namespace LifeSim
 
         private Window _window;
         private GPURenderer _renderer;
-        private DemoScene _scene;
+        private DemoStage _stage;
 
         public App(Veldrid.GraphicsBackend graphicsBackend)
         {
             this._window = new Window();
             this._renderer = new GPURenderer(this._window, graphicsBackend);
 
-            this._scene = new DemoScene(this._window, this._renderer);
+            this._stage = new DemoStage(this._renderer, this._window.viewport);
             this._window.viewport.onResize += this.OnResize;
 
             this.OnResize();
@@ -54,8 +54,8 @@ namespace LifeSim
                 return;
             }
 
-            this._scene.Update(deltaTime);
-            this._renderer.Render(this._scene);
+            this._stage.Update(deltaTime);
+            this._renderer.Render(this._stage);
         }
     }
 

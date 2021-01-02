@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Veldrid;
+using Veldrid.ImageSharp;
 using Veldrid.SPIRV;
 
 namespace LifeSim.Rendering
@@ -47,7 +48,8 @@ namespace LifeSim.Rendering
 
             this._materialLayout = this._factory.CreateResourceLayout(new ResourceLayoutDescription(
                 new ResourceLayoutElementDescription("SurfaceTexture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
-                new ResourceLayoutElementDescription("SurfaceSampler", ResourceKind.Sampler, ShaderStages.Fragment)
+                new ResourceLayoutElementDescription("SurfaceSampler", ResourceKind.Sampler, ShaderStages.Fragment),
+                new ResourceLayoutElementDescription("MaterialInfo", ResourceKind.UniformBuffer, ShaderStages.Fragment)
             ));
 
             this._fullscreenMaterialLayout = this._factory.CreateResourceLayout(new ResourceLayoutDescription(new [] {
@@ -156,30 +158,45 @@ namespace LifeSim.Rendering
 
         }
 
+        public GPUTexture MakeTexture(string path)
+        {
+            ImageSharpTexture texture = new ImageSharpTexture(path, true);
+            var deviceTexture = texture.CreateDeviceTexture(this._gd, this._factory);
+            var textureView = this._factory.CreateTextureView(deviceTexture);
+            
+            return new GPUTexture(deviceTexture, textureView, this._gd.PointSampler);
+        }
+
+        public GLTF.GLTFLoader LoadGLTF(string path, Material defaultMaterial)
+        {
+            return new GLTF.GLTFLoader(this, defaultMaterial, path);
+        }
+
+        public GPUMesh MakeMesh(MeshData meshData)
+        {
+            return new GPUMesh(this._gd, meshData);
+        }
+
         public Material MakeOpaque(GPUTexture texture)
         {
-            return new Material(this._opaquePass, this._factory.CreateResourceSet(new ResourceSetDescription(
-                this._materialLayout, texture.deviceTexture, texture.sampler
-            )));
+            return new Material(this._opaquePass, this._gd, this._materialLayout, texture);
         }
 
         public Material MakeSkinned(GPUTexture texture)
         {
-            return new Material(this._skinnedPass, this._factory.CreateResourceSet(new ResourceSetDescription(
-                this._materialLayout, texture.deviceTexture, texture.sampler
-            )));
+            return new Material(this._skinnedPass, this._gd, this._materialLayout, texture);
         }
 
-        public Material MakeFullscreen(Veldrid.Texture texture)
+        public IMaterial MakeFullscreen(Veldrid.Texture texture)
         {
-            return new Material(this._fullscreenPass, this._factory.CreateResourceSet(new ResourceSetDescription(
+            return new InmutableMaterial(this._fullscreenPass, this._factory.CreateResourceSet(new ResourceSetDescription(
                 this._fullscreenMaterialLayout, texture, this._gd.LinearSampler
             )));
         }
 
-        public Material MakeSprites(Veldrid.Texture texture)
+        public IMaterial MakeSprites(Veldrid.Texture texture)
         {
-            return new Material(this._spritesPass, this._factory.CreateResourceSet(new ResourceSetDescription(
+            return new InmutableMaterial(this._spritesPass, this._factory.CreateResourceSet(new ResourceSetDescription(
                 this._spritesMaterialLayout, texture, this._gd.LinearSampler
             )));
         }

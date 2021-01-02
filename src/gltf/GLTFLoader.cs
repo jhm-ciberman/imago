@@ -2,13 +2,12 @@ using System.Numerics;
 using glTFLoader;
 using LifeSim.Anim;
 using LifeSim.Rendering;
-using LifeSim.SceneGraph;
 
 namespace LifeSim.GLTF
 {
-    class GLTFLoader
+    public class GLTFLoader
     {
-        private GPURenderer _renderer;
+        private MaterialManager _materialManager;
         private string _path;
         private glTFLoader.Schema.Gltf _model;
 
@@ -16,10 +15,10 @@ namespace LifeSim.GLTF
         private GLTFNode?[] _nodesCache;
         private Material _material;
 
-        public GLTFLoader(GPURenderer renderer, Material material, string path)
+        public GLTFLoader(MaterialManager manager, Material material, string path)
         {
             System.Console.WriteLine("Loading file " + path);
-            this._renderer = renderer;
+            this._materialManager = manager;
             this._path = path;
             this._model = glTFLoader.Interface.LoadModel(path);
             this._buffersCache = new GLTFBuffer[this._model.Buffers.Length];
@@ -90,7 +89,7 @@ namespace LifeSim.GLTF
 
         private GPUMesh _GetMesh(int index)
         {
-            return this._renderer.MakeMesh(this._GetPrimitive(index).MakeMesh());
+            return this._materialManager.MakeMesh(this._GetPrimitive(index).MakeMesh());
         }
 
         public Animation[] LoadAnimations()

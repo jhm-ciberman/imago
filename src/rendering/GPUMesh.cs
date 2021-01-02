@@ -30,13 +30,14 @@ namespace LifeSim.Rendering
         public uint vertexCount;
         public uint indexCount;
 
-        public GPUMesh(ResourceFactory factory, GraphicsDevice graphicsDevice, MeshData mesh)
+        public GPUMesh(GraphicsDevice graphicsDevice, MeshData mesh)
         {
             var indices = mesh.indices.ToArray();
 
             this.vertexCount = (uint) mesh.positions.Count;
             this.indexCount  = (uint) mesh.indices.Count;
 
+            ResourceFactory factory = graphicsDevice.ResourceFactory;
             this._indexBuffer  = factory.CreateBuffer(new BufferDescription(this.indexCount * sizeof(ushort), BufferUsage.IndexBuffer));
             graphicsDevice.UpdateBuffer(this._indexBuffer, 0, indices);
 

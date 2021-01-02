@@ -9,13 +9,9 @@ namespace LifeSim.SceneGraph
         private Quaternion _rotation;
         private Vector3    _scale;
 
-        public Vector3    position { get => _position; set { _position = value; this._localMatrixDirty = true; TransformChanged?.Invoke(); } }
-        public Quaternion rotation { get => _rotation; set { _rotation = value; this._localMatrixDirty = true; TransformChanged?.Invoke(); } }
-        public Vector3    scale    { get => _scale;    set { _scale = value;    this._localMatrixDirty = true; TransformChanged?.Invoke(); } }
-
-        public event Action? TransformChanged;
-
-        public Vector3 forward => Vector3.Transform(Vector3.UnitZ, _rotation);
+        public Vector3    position { get => _position; set { this._position = value; this._localMatrixDirty = true; } }
+        public Quaternion rotation { get => _rotation; set { this._rotation = value; this._localMatrixDirty = true; } }
+        public Vector3    scale    { get => _scale;    set { this._scale = value;    this._localMatrixDirty = true; } }
         
         private Matrix4x4 _localMatrix = Matrix4x4.Identity;
         private bool _localMatrixDirty = false;

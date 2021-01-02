@@ -15,7 +15,7 @@ namespace LifeSim.Rendering
         private IRenderTexture _destinationTexture;
         private IRenderTexture _sourceTexture;
 
-        private Material? _material = null;
+        private IMaterial? _material = null;
         private MaterialManager _materialManager;
 
         public FullScreenRenderer(GraphicsDevice gd, MaterialManager materialManager, IRenderTexture sourceRenderTexture, IRenderTexture destinationRenderTexture)
@@ -77,10 +77,13 @@ namespace LifeSim.Rendering
             this._commandList.SetFramebuffer(this._destinationTexture.framebuffer);
             this._commandList.SetPipeline(this._material.pass.pipeline);
             this._commandList.SetVertexBuffer(0, this._vertexBuffer);
-            this._commandList.SetGraphicsResourceSet(0, this._material.resourceSet);
+            this._commandList.SetGraphicsResourceSet(0, this._material.GetResourceSet());
             this._commandList.Draw(6);
             this._commandList.End();
+        }
 
+        public void Submit()
+        {
             this._gd.SubmitCommands(this._commandList);
         }
     }
