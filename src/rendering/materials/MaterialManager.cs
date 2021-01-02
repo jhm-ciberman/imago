@@ -107,11 +107,12 @@ namespace LifeSim.Rendering
             });
 
             this._skinnedShader = this._MakeShader(new ShaderDescription {
-                filename = "skinned", 
+                filename = "base", 
                 passResourcelayout     = this._passResourceLayout, 
                 materialResourcelayout = this._materialLayout, 
                 objectResourcelayout   = sceneContext.skinedObjectLayout, 
-                vertexLayouts          = new[] { skinnedVertexLayout }
+                vertexLayouts          = new[] { skinnedVertexLayout },
+                macros = new[] { new ShaderDescription.Macro("USE_SKINNED_MESH")}
             });
 
             this._fullscreenShader = this._MakeShader(new ShaderDescription {
@@ -222,8 +223,17 @@ namespace LifeSim.Rendering
                 }
             }
             
-            var vertBytes = Encoding.UTF8.GetBytes(vertex.ToString());
-            var fragBytes = Encoding.UTF8.GetBytes(fragment.ToString());
+            StringBuilder macros = new StringBuilder();
+            macros.AppendLine("#version 450");
+            if (description.macros != null) {
+                foreach (var macro in description.macros) {
+                    macros.AppendJoin(" ", "#define", macro.name, macro.value).AppendLine();
+                }
+            }
+            var macrosStr = macros.ToString();
+
+            var vertBytes = Encoding.UTF8.GetBytes(macrosStr + vertex.ToString());
+            var fragBytes = Encoding.UTF8.GetBytes(macrosStr + fragment.ToString());
             var shaders = this._factory.CreateFromSpirv(
                 new Veldrid.ShaderDescription(ShaderStages.Vertex  , vertBytes, "main"),
                 new Veldrid.ShaderDescription(ShaderStages.Fragment, fragBytes, "main")

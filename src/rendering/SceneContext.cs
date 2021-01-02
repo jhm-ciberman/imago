@@ -30,6 +30,7 @@ namespace LifeSim.Rendering
         struct ObjectInfo
         {
             public Matrix4x4 modelMatrix;
+            public Vector4 albedoColor;
             public System.UInt32 pickingID;
             private float _padding0;
             private float _padding1;
@@ -113,7 +114,7 @@ namespace LifeSim.Rendering
 
         public void SetupCamera3DInfoBuffer(CommandList commandList, Camera3D camera)
         {
-            CameraInfo cameraInfo;
+            CameraInfo cameraInfo = new CameraInfo();
             cameraInfo.projectionMatrix = camera.projectionMatrix;
             cameraInfo.viewMatrix = camera.viewMatrix;
             commandList.UpdateBuffer(this.camera3DInfoBuffer, 0, ref cameraInfo);
@@ -126,10 +127,11 @@ namespace LifeSim.Rendering
 
         public void SetupObjectInfoBuffer(CommandList commandList, Renderable3D renderable)
         {
-            commandList.UpdateBuffer(this.modelInfoBuffer, 0, new ObjectInfo {
-                modelMatrix = renderable.worldMatrix,
-                pickingID = renderable.pickingID,
-            });
+            ObjectInfo objectInfo = new ObjectInfo();
+            objectInfo.modelMatrix = renderable.worldMatrix;
+            objectInfo.albedoColor = renderable.albedoColor;
+            objectInfo.pickingID = renderable.pickingID;
+            commandList.UpdateBuffer(this.modelInfoBuffer, 0, ref objectInfo);
         }
 
         public void SetupBonesInfoBuffer(CommandList commandList, SkinnedRenderable3D skinnedRenderable)
