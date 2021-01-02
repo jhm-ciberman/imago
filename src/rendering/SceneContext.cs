@@ -27,9 +27,13 @@ namespace LifeSim.Rendering
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        struct ModelInfo
+        struct ObjectInfo
         {
             public Matrix4x4 modelMatrix;
+            public System.UInt32 pickingID;
+            private float _padding0;
+            private float _padding1;
+            private float _padding2;
         }
 
         public readonly DeviceBuffer lightInfoBuffer;
@@ -48,16 +52,18 @@ namespace LifeSim.Rendering
         private readonly ResourceSet objectResourceSet;
         private readonly ResourceSet skinnedResourceSet;
 
+        private BonesInfo _bonesInfo = BonesInfo.New();
+
         public SceneContext(ResourceFactory factory)
         {
             this._factory = factory;  
 
             this.objectLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
-                new ResourceLayoutElementDescription("WorldInfo", ResourceKind.UniformBuffer, ShaderStages.Vertex)
+                new ResourceLayoutElementDescription("ObjectInfo", ResourceKind.UniformBuffer, ShaderStages.Vertex)
             ));
 
             this.skinedObjectLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
-                new ResourceLayoutElementDescription("WorldInfo", ResourceKind.UniformBuffer, ShaderStages.Vertex),
+                new ResourceLayoutElementDescription("ObjectInfo", ResourceKind.UniformBuffer, ShaderStages.Vertex),
                 new ResourceLayoutElementDescription("BonesInfo", ResourceKind.UniformBuffer, ShaderStages.Vertex)
             ));
 
@@ -65,7 +71,7 @@ namespace LifeSim.Rendering
             this.camera2DInfoBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
             this.lightInfoBuffer  = factory.CreateBuffer(new BufferDescription((uint) Marshal.SizeOf<LightInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
         
-            this.modelInfoBuffer = factory.CreateBuffer(new BufferDescription((uint) Marshal.SizeOf<ModelInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+            this.modelInfoBuffer = factory.CreateBuffer(new BufferDescription((uint) Marshal.SizeOf<ObjectInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
             this.bonesInfoBuffer = factory.CreateBuffer(new BufferDescription(64 * BonesInfo.maxNumberOfBones, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
         
             this.objectResourceSet = this._factory.CreateResourceSet(new ResourceSetDescription(this.objectLayout, this.modelInfoBuffer));
@@ -116,6 +122,20 @@ namespace LifeSim.Rendering
         public void SetupCamera2DInfoBuffer(CommandList commandList, ref Matrix4x4 projection)
         {
             commandList.UpdateBuffer(this.camera2DInfoBuffer, 0, ref projection);
+        }
+
+        public void SetupObjectInfoBuffer(CommandList commandList, Renderable3D renderable)
+        {
+            commandList.UpdateBuffer(this.modelInfoBuffer, 0, new ObjectInfo {
+                modelMatrix = renderable.worldMatrix,
+                pickingID = renderable.pickingID,
+            });
+        }
+
+        public void SetupBonesInfoBuffer(CommandList commandList, SkinnedRenderable3D skinnedRenderable)
+        {
+            skinnedRenderable.CopyMatricesToBuffer(ref this._bonesInfo);
+            commandList.UpdateBuffer(this.bonesInfoBuffer, 0, this._bonesInfo.GetBlittable());
         }
     }
 }

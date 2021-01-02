@@ -55,6 +55,7 @@ namespace LifeSim.Rendering
         private Framebuffer _framebuffer;
         private Texture _depthTexture;
         private Texture _colorTexture;
+        private Texture _pickingTexture;
 
         public event Action<IRenderTexture>? onResized;
 
@@ -65,6 +66,7 @@ namespace LifeSim.Rendering
             this._height = height;
             this._depthTexture = this._CreateDepthTexture(width, height);
             this._colorTexture = this._CreateColorTexture(width, height);
+            this._pickingTexture = this._CreatePickingIDTexture(width, height);
             this._framebuffer = this._CreateFramebuffer();
         }
 
@@ -88,10 +90,20 @@ namespace LifeSim.Rendering
             ));
         }
 
+        private Texture _CreatePickingIDTexture(uint width, uint height)
+        {
+            return this._factory.CreateTexture(new TextureDescription(
+                width, height, depth: 1, mipLevels: 1, arrayLayers: 1, 
+                PixelFormat.R32_UInt, 
+                TextureUsage.RenderTarget | TextureUsage.Sampled,
+                TextureType.Texture2D
+            ));
+        }
+
         private Framebuffer _CreateFramebuffer()
         {
             return this._factory.CreateFramebuffer(new FramebufferDescription(
-                this._depthTexture, this._colorTexture
+                this._depthTexture, this._colorTexture, this._pickingTexture
             ));
         }
 
@@ -100,6 +112,8 @@ namespace LifeSim.Rendering
         public Texture colorTexture => this._colorTexture;
         
         public Texture depthTexture => this._depthTexture;
+
+        public Texture pickingTexture => this._pickingTexture;
         
         public OutputDescription outputDescription => this._framebuffer.OutputDescription;
 
@@ -110,6 +124,7 @@ namespace LifeSim.Rendering
         {
             this._depthTexture?.Dispose();
             this._colorTexture?.Dispose();
+            this._pickingTexture?.Dispose();
             this._framebuffer?.Dispose();
         }
 
@@ -118,6 +133,7 @@ namespace LifeSim.Rendering
             this.Dispose();
             this._depthTexture = this._CreateDepthTexture(width, height);
             this._colorTexture = this._CreateColorTexture(width, height);
+            this._pickingTexture = this._CreatePickingIDTexture(width, height);
             this._framebuffer = this._CreateFramebuffer();
             this.onResized?.Invoke(this);
         }

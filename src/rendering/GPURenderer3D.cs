@@ -11,8 +11,6 @@ namespace LifeSim.Rendering
         private ResourceFactory _factory;
         private CommandList _commandList;
 
-        private BonesInfo _bonesInfo = BonesInfo.New();
-
         private IRenderTexture _renderTexture;
         private SceneContext _sceneContext;
 
@@ -55,6 +53,7 @@ namespace LifeSim.Rendering
 
             foreach (var camera in scene.cameras) {
                 this._commandList.ClearColorTarget(0, camera.clearColor);
+                this._commandList.ClearColorTarget(1, RgbaFloat.Black);
                 this._commandList.ClearDepthStencil(1f);
                 this._sceneContext.SetupCamera3DInfoBuffer(this._commandList, camera);
                 foreach (var renderable in this._renderList) {
@@ -90,10 +89,9 @@ namespace LifeSim.Rendering
 
         private void _UpdatePerObjectBuffers(Renderable3D renderable)
         {
-            this._commandList.UpdateBuffer(this._sceneContext.modelInfoBuffer, 0, renderable.worldMatrix);
+            this._sceneContext.SetupObjectInfoBuffer(this._commandList, renderable);
             if (renderable is SkinnedRenderable3D skinnedRenderable) {
-                skinnedRenderable.CopyMatricesToBuffer(ref this._bonesInfo);
-                this._commandList.UpdateBuffer(this._sceneContext.bonesInfoBuffer, 0, this._bonesInfo.GetBlittable());
+                this._sceneContext.SetupBonesInfoBuffer(this._commandList, skinnedRenderable);
             }
         }
 

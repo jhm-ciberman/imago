@@ -66,7 +66,11 @@ namespace LifeSim.Rendering
         public void Render()
         {
             if (this._material == null) {
-                this._material = this._material = this._materialManager.MakeFullscreen(this._sourceTexture.colorTexture);
+                //if (this._sourceTexture is RenderTexture rt) {
+                //    this._material = this._material = this._materialManager.MakeFullscreen(rt.pickingTexture);
+                //} else {
+                    this._material = this._material = this._materialManager.MakeFullscreen(this._sourceTexture.colorTexture);
+                //}
             }
 
             this._commandList.Begin();

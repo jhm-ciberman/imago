@@ -128,16 +128,19 @@ namespace LifeSim.Rendering
                 vertexLayouts          = new[] { spritesVertexLayout },
             });
 
+            // Blend
+            
+            var blend = new BlendStateDescription(RgbaFloat.Black, BlendAttachmentDescription.OverrideBlend, BlendAttachmentDescription.OverrideBlend);
 
             // Passes
 
             this._opaquePass = this._MakePass(new PassDescription(
-                this._baseShader, mainRenderTexture, FaceCullMode.Front, PolygonFillMode.Solid, BlendStateDescription.SingleOverrideBlend, 
+                this._baseShader, mainRenderTexture, FaceCullMode.Front, PolygonFillMode.Solid, blend, 
                 new[] { sceneContext.camera3DInfoBuffer, sceneContext.lightInfoBuffer }
             ));
 
             this._skinnedPass = this._MakePass(new PassDescription(
-                this._skinnedShader, mainRenderTexture, FaceCullMode.Front, PolygonFillMode.Solid, BlendStateDescription.SingleOverrideBlend, 
+                this._skinnedShader, mainRenderTexture, FaceCullMode.Front, PolygonFillMode.Solid, blend, 
                 new[] { sceneContext.camera3DInfoBuffer, sceneContext.lightInfoBuffer}
             ));
 
