@@ -9,12 +9,16 @@ namespace LifeSim.Rendering
         private Pass _pass;
         public Pass pass => this._pass;
 
+        private Pass _shadowMapPass;
+        public Pass shadowmapPass => this._shadowMapPass;
+
         private ResourceSet _resourceSet;
         private GraphicsDevice _gd;
 
-        public Material(Pass pass, GraphicsDevice gd, ResourceLayout materialLayout, GPUTexture texture) 
+        public Material(Pass pass, Pass shadowMapPass, GraphicsDevice gd, ResourceLayout materialLayout, GPUTexture texture) 
         {
             this._pass = pass;
+            this._shadowMapPass = shadowMapPass;
             this._gd = gd;
             var factory = this._gd.ResourceFactory;
             this._resourceSet = factory.CreateResourceSet(new ResourceSetDescription(

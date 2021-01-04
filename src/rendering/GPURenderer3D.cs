@@ -25,8 +25,6 @@ namespace LifeSim.Rendering
             this._factory = this._graphicsDevice.ResourceFactory;
             this._sceneContext = sceneContext;
             this._commandList = this._factory.CreateCommandList();
-
-            this._shadowmapPass = materialManager.MakeShadowmapPass(sceneContext.shadowmapFramebuffer.OutputDescription);
         }
 
         public void Dispose()
@@ -47,8 +45,7 @@ namespace LifeSim.Rendering
             this._commandList.ClearDepthStencil(1f);
             this._sceneContext.SetupShadowMapBuffer(this._commandList, scene.mainLight);
             foreach (var renderable in this._renderList.renderables) {
-                if (renderable is SkinnedRenderable3D) continue;
-                this._DrawRenderable(renderable, this._shadowmapPass);
+                this._DrawRenderable(renderable, renderable.material.shadowmapPass);
             }
 
             // Opaques

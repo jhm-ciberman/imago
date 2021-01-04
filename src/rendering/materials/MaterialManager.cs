@@ -26,10 +26,13 @@ namespace LifeSim.Rendering
         private Shader _skinnedShader;
         private Shader _fullscreenShader;
         private Shader _spritesShader;
-        private Shader _shadowmapShader;
+        private Shader _shadowmapBaseShader;
+        private Shader _shadowmapSkinnedShader;
 
-        private Pass _opaquePass;
+        private Pass _basePass;
         private Pass _skinnedPass;
+        private Pass _shadowMapBasePass;
+        private Pass _shadowMapSkinnedPass;
         private Pass _fullscreenPass;
         private Pass _spritesPass;
 
@@ -139,12 +142,21 @@ namespace LifeSim.Rendering
                 vertexLayouts          = new[] { spritesVertexLayout },
             });
 
-            this._shadowmapShader = this._MakeShader(new ShaderDescription {
+            this._shadowmapBaseShader = this._MakeShader(new ShaderDescription {
                 filename = "shadowmap", 
                 passResourcelayout     = this._shadowMapPassLayout, 
                 materialResourcelayout = this._materialLayout, 
                 objectResourcelayout   = sceneContext.objectLayout, 
                 vertexLayouts          = new[] { baseVertexLayout },
+            });
+
+            this._shadowmapSkinnedShader = this._MakeShader(new ShaderDescription {
+                filename = "shadowmap", 
+                passResourcelayout     = this._shadowMapPassLayout, 
+                materialResourcelayout = this._materialLayout, 
+                objectResourcelayout   = sceneContext.skinedObjectLayout, 
+                vertexLayouts          = new[] { skinnedVertexLayout },
+                macros = new[] { new ShaderDescription.Macro("USE_SKINNED_MESH")}
             });
 
             // Blend
@@ -155,7 +167,7 @@ namespace LifeSim.Rendering
             //var shadowmapTexture = this.MakeTexture("res/uvs.jpg").deviceTexture;
             var shadowmapTexture = sceneContext.shadowmapTexture;
 
-            this._opaquePass = this._MakePass(new PassDescription(
+            this._basePass = this._MakePass(new PassDescription(
                 this._baseShader, mainRenderTexture.outputDescription, 
                 FaceCullMode.Front, PolygonFillMode.Solid, blend, 
                 DepthStencilStateDescription.DepthOnlyLessEqual,
@@ -182,17 +194,21 @@ namespace LifeSim.Rendering
                 DepthStencilStateDescription.DepthOnlyLessEqual,
                 new[] { sceneContext.camera2DInfoBuffer }
             ));
-
-        }
-
-        public Pass MakeShadowmapPass(OutputDescription outputDescription)
-        {
-            return this._MakePass(new PassDescription(
-                this._shadowmapShader, outputDescription, 
+            
+            this._shadowMapBasePass = this._MakePass(new PassDescription(
+                this._shadowmapBaseShader, sceneContext.shadowmapFramebuffer.OutputDescription, 
                 FaceCullMode.None, PolygonFillMode.Solid, BlendStateDescription.Empty, 
                 DepthStencilStateDescription.DepthOnlyLessEqual,
                 new[] { this._sceneContext.shadowmapInfoBuffer }
             ));
+
+            this._shadowMapSkinnedPass = this._MakePass(new PassDescription(
+                this._shadowmapSkinnedShader, sceneContext.shadowmapFramebuffer.OutputDescription, 
+                FaceCullMode.None, PolygonFillMode.Solid, BlendStateDescription.Empty, 
+                DepthStencilStateDescription.DepthOnlyLessEqual,
+                new[] { this._sceneContext.shadowmapInfoBuffer }
+            ));
+
         }
 
         public GPUTexture MakeTexture(string path)
@@ -216,12 +232,12 @@ namespace LifeSim.Rendering
 
         public Material MakeOpaque(GPUTexture texture)
         {
-            return new Material(this._opaquePass, this._gd, this._materialLayout, texture);
+            return new Material(this._basePass, this._shadowMapBasePass, this._gd, this._materialLayout, texture);
         }
 
         public Material MakeSkinned(GPUTexture texture)
         {
-            return new Material(this._skinnedPass, this._gd, this._materialLayout, texture);
+            return new Material(this._skinnedPass, this._shadowMapSkinnedPass, this._gd, this._materialLayout, texture);
         }
 
         public IMaterial MakeFullscreen(Veldrid.Texture texture)
