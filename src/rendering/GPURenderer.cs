@@ -44,11 +44,11 @@ namespace LifeSim.Rendering
             this._fullScreenRenderTexture = new SwapchainRenderTexture(this._graphicsDevice.MainSwapchain);
             this._mainRenderTexture = new RenderTexture(this._factory, window.width, window.height);
 
-            this._sceneContext = new SceneContext(this._factory);
+            this._sceneContext = new SceneContext(this._graphicsDevice);
             this._materialManager = new MaterialManager(this._graphicsDevice, this._mainRenderTexture, this._fullScreenRenderTexture, this._sceneContext);
 
             this._renderer2d = new GPURenderer2D(this._graphicsDevice, this._materialManager, this._sceneContext, this._mainRenderTexture);
-            this._renderer3d = new GPURenderer3D(this._graphicsDevice, this._sceneContext, this._mainRenderTexture);
+            this._renderer3d = new GPURenderer3D(this._graphicsDevice, this._materialManager, this._sceneContext, this._mainRenderTexture);
             this._mousePicker = new GPUMousePicker(this._graphicsDevice, this._mainRenderTexture);
             this._fullScreenQuad = new FullScreenRenderer(this._graphicsDevice, this._materialManager, this._mainRenderTexture, this._fullScreenRenderTexture);
         }

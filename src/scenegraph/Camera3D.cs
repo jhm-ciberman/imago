@@ -26,6 +26,8 @@ namespace LifeSim.SceneGraph
             this._viewPort = viewport;
         }
 
+        public Matrix4x4 viewProjectionMatrix => this.viewMatrix * this.projectionMatrix;
+
         public Matrix4x4 projectionMatrix
         {
             get => Matrix4x4.CreatePerspectiveFieldOfView(this.fov, this.aspect, this.near, this.far);

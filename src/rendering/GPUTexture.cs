@@ -26,9 +26,5 @@ namespace LifeSim.Rendering
             this._textureView.Dispose();
         }
 
-        ~GPUTexture() {
-            this.Dispose();
-        }
-
     }
 }

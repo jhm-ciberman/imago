@@ -11,8 +11,8 @@ namespace LifeSim.Rendering
         [StructLayout(LayoutKind.Sequential)]
         struct CameraInfo
         {
-            public Matrix4x4 viewMatrix;
-            public Matrix4x4 projectionMatrix;
+            public Matrix4x4 viewProjectionMatrix;
+            public Matrix4x4 shadowMapMatrix;
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -37,9 +37,16 @@ namespace LifeSim.Rendering
             private float _padding2;
         }
 
+        [StructLayout(LayoutKind.Sequential)]
+        struct ShadowMapInfo
+        {
+            public Matrix4x4 shadowMatrix;
+        }
+
         public readonly DeviceBuffer lightInfoBuffer;
         public readonly DeviceBuffer camera2DInfoBuffer;
         public readonly DeviceBuffer camera3DInfoBuffer;
+        public readonly DeviceBuffer shadowmapInfoBuffer;
 
         public readonly DeviceBuffer modelInfoBuffer;
         public readonly DeviceBuffer bonesInfoBuffer;
@@ -50,13 +57,19 @@ namespace LifeSim.Rendering
         public readonly ResourceLayout objectLayout;
         public readonly ResourceLayout skinedObjectLayout;
 
-        private readonly ResourceSet objectResourceSet;
-        private readonly ResourceSet skinnedResourceSet;
+        private readonly ResourceSet _objectResourceSet;
+        private readonly ResourceSet _skinnedResourceSet;
+
+        public readonly  Framebuffer shadowmapFramebuffer;
+        public readonly  Texture shadowmapTexture;
 
         private BonesInfo _bonesInfo = BonesInfo.New();
 
-        public SceneContext(ResourceFactory factory)
+        private Matrix4x4 _shadowMapScaling;
+
+        public SceneContext(GraphicsDevice graphicsDevice)
         {
+            var factory = graphicsDevice.ResourceFactory;
             this._factory = factory;  
 
             this.objectLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
@@ -68,15 +81,28 @@ namespace LifeSim.Rendering
                 new ResourceLayoutElementDescription("BonesInfo", ResourceKind.UniformBuffer, ShaderStages.Vertex)
             ));
 
-            this.camera3DInfoBuffer = factory.CreateBuffer(new BufferDescription((uint) Marshal.SizeOf<CameraInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
-            this.camera2DInfoBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
-            this.lightInfoBuffer  = factory.CreateBuffer(new BufferDescription((uint) Marshal.SizeOf<LightInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+            this.camera3DInfoBuffer   = factory.CreateBuffer(new BufferDescription((uint) Marshal.SizeOf<CameraInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+            this.camera2DInfoBuffer   = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+            this.lightInfoBuffer      = factory.CreateBuffer(new BufferDescription((uint) Marshal.SizeOf<LightInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+            this.shadowmapInfoBuffer  = factory.CreateBuffer(new BufferDescription((uint) Marshal.SizeOf<ShadowMapInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
         
             this.modelInfoBuffer = factory.CreateBuffer(new BufferDescription((uint) Marshal.SizeOf<ObjectInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
             this.bonesInfoBuffer = factory.CreateBuffer(new BufferDescription(64 * BonesInfo.maxNumberOfBones, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
         
-            this.objectResourceSet = this._factory.CreateResourceSet(new ResourceSetDescription(this.objectLayout, this.modelInfoBuffer));
-            this.skinnedResourceSet = this._factory.CreateResourceSet(new ResourceSetDescription(this.skinedObjectLayout, this.modelInfoBuffer, this.bonesInfoBuffer));
+            this._objectResourceSet = this._factory.CreateResourceSet(new ResourceSetDescription(this.objectLayout, this.modelInfoBuffer));
+            this._skinnedResourceSet = this._factory.CreateResourceSet(new ResourceSetDescription(this.skinedObjectLayout, this.modelInfoBuffer, this.bonesInfoBuffer));
+
+            uint shadowMapSize = 2048;
+            this.shadowmapTexture = this._factory.CreateTexture(TextureDescription.Texture2D(shadowMapSize, shadowMapSize, 1, 1, PixelFormat.D32_Float_S8_UInt, TextureUsage.DepthStencil | TextureUsage.Sampled));
+            this.shadowmapFramebuffer = this._factory.CreateFramebuffer(new FramebufferDescription(
+                this.shadowmapTexture, System.Array.Empty<Texture>()
+            ));
+
+            if (graphicsDevice.IsUvOriginTopLeft) {
+                this._shadowMapScaling = Matrix4x4.CreateScale(.5f, -.5f, 1f) * Matrix4x4.CreateTranslation(0.5f, 0.5f, 0f);
+            } else {
+                this._shadowMapScaling = Matrix4x4.CreateScale(.5f, .5f, 1f) * Matrix4x4.CreateTranslation(0.5f, 0.5f, 0f);
+            }
         }
 
         public void Dispose()
@@ -94,9 +120,9 @@ namespace LifeSim.Rendering
                 return resourceSet;
             }
             if (renderable is SkinnedRenderable3D skinnedRenderable) {
-                resourceSet = this.skinnedResourceSet;
+                resourceSet = this._skinnedResourceSet;
             } else {
-                resourceSet = this.objectResourceSet;
+                resourceSet = this._objectResourceSet;
             }
 
             this._resourceSets[renderable] = resourceSet;
@@ -107,22 +133,29 @@ namespace LifeSim.Rendering
         {
             LightInfo lightInfo = new LightInfo();
             lightInfo.ambientColor = scene.ambientColor;
-            lightInfo.mainLightColor = scene.sunColor;
-            lightInfo.mainLightPosition = scene.sunPosition;
+            lightInfo.mainLightColor = scene.mainLight.color;
+            lightInfo.mainLightPosition = scene.mainLight.position;
             commandList.UpdateBuffer(this.lightInfoBuffer, 0, ref lightInfo);
         }
 
-        public void SetupCamera3DInfoBuffer(CommandList commandList, Camera3D camera)
+        public void SetupCamera3DInfoBuffer(CommandList commandList, Camera3D camera, DirectionalLight mainLight)
         {
             CameraInfo cameraInfo = new CameraInfo();
-            cameraInfo.projectionMatrix = camera.projectionMatrix;
-            cameraInfo.viewMatrix = camera.viewMatrix;
+            cameraInfo.viewProjectionMatrix = camera.viewProjectionMatrix;
+            cameraInfo.shadowMapMatrix = mainLight.shadowMapMatrix * this._shadowMapScaling;
             commandList.UpdateBuffer(this.camera3DInfoBuffer, 0, ref cameraInfo);
         }
 
         public void SetupCamera2DInfoBuffer(CommandList commandList, ref Matrix4x4 projection)
         {
             commandList.UpdateBuffer(this.camera2DInfoBuffer, 0, ref projection);
+        }
+
+        public void SetupShadowMapBuffer(CommandList commandList, DirectionalLight light)
+        {
+            ShadowMapInfo shadowMapInfo = new ShadowMapInfo();
+            shadowMapInfo.shadowMatrix = light.shadowMapMatrix;
+            commandList.UpdateBuffer(this.shadowmapInfoBuffer, 0, ref shadowMapInfo);
         }
 
         public void SetupObjectInfoBuffer(CommandList commandList, Renderable3D renderable)

@@ -5,19 +5,29 @@ namespace LifeSim.Rendering
     public struct PassDescription
     {
         public Shader shader;
-        public IRenderTexture renderTexture; 
+        public OutputDescription outputDescription; 
         public FaceCullMode faceCullMode;
         public PolygonFillMode polygonFillMode;
         public BlendStateDescription blendState;
         public BindableResource[] resources;
+        public DepthStencilStateDescription depthStencilState;
 
-        public PassDescription(Shader shader, IRenderTexture renderTexture, FaceCullMode faceCullMode, PolygonFillMode polygonFillMode, BlendStateDescription blendState, BindableResource[] resources)
+        public PassDescription(
+            Shader shader, 
+            OutputDescription outputDescription, 
+            FaceCullMode faceCullMode, 
+            PolygonFillMode polygonFillMode, 
+            BlendStateDescription blendState, 
+            DepthStencilStateDescription depthStencilState,
+            BindableResource[] resources
+        )
         {
             this.shader = shader;
-            this.renderTexture = renderTexture;
+            this.outputDescription = outputDescription;
             this.faceCullMode = faceCullMode;
             this.polygonFillMode = polygonFillMode;
             this.blendState = blendState;
+            this.depthStencilState = depthStencilState;
             this.resources = resources;
         }
     }

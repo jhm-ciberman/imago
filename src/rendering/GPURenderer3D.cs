@@ -14,15 +14,19 @@ namespace LifeSim.Rendering
         private IRenderTexture _renderTexture;
         private SceneContext _sceneContext;
 
-        private List<Renderable3D> _renderList = new List<Renderable3D>();
+        private RenderList _renderList = new RenderList();
 
-        public GPURenderer3D(GraphicsDevice graphicsDevice, SceneContext sceneContext, IRenderTexture renderTexture)
+        private Pass _shadowmapPass;
+
+        public GPURenderer3D(GraphicsDevice graphicsDevice, MaterialManager materialManager, SceneContext sceneContext, IRenderTexture renderTexture)
         {
             this._graphicsDevice = graphicsDevice;
             this._renderTexture = renderTexture;
             this._factory = this._graphicsDevice.ResourceFactory;
             this._sceneContext = sceneContext;
             this._commandList = this._factory.CreateCommandList();
+
+            this._shadowmapPass = materialManager.MakeShadowmapPass(sceneContext.shadowmapFramebuffer.OutputDescription);
         }
 
         public void Dispose()
@@ -30,23 +34,24 @@ namespace LifeSim.Rendering
             this._commandList.Dispose();
         }
 
-        private void _UpdateRenderList(Container3D node)
-        {
-            if (node is Renderable3D renderable) {
-                this._renderList.Add(renderable);
-            }
-            foreach (var child in node.children) {
-                this._UpdateRenderList(child);
-            }
-        }
-
         public void Render(Scene3D scene)
         {
-            this._renderList.Clear();
-            this._UpdateRenderList(scene);
+            this._renderList.UpdateRenderList(scene);
             scene.UpdateWorldMatrices();
 
             this._commandList.Begin();
+
+            // Shadowmap
+            this._commandList.SetFramebuffer(this._sceneContext.shadowmapFramebuffer);
+
+            this._commandList.ClearDepthStencil(1f);
+            this._sceneContext.SetupShadowMapBuffer(this._commandList, scene.mainLight);
+            foreach (var renderable in this._renderList.renderables) {
+                if (renderable is SkinnedRenderable3D) continue;
+                this._DrawRenderable(renderable, this._shadowmapPass);
+            }
+
+            // Opaques
             this._commandList.SetFramebuffer(this._renderTexture.framebuffer);
             this._sceneContext.SetupLightInfoBuffer(this._commandList, scene);
 
@@ -54,23 +59,24 @@ namespace LifeSim.Rendering
                 this._commandList.ClearColorTarget(0, camera.clearColor);
                 this._commandList.ClearColorTarget(1, RgbaFloat.Black);
                 this._commandList.ClearDepthStencil(1f);
-                this._sceneContext.SetupCamera3DInfoBuffer(this._commandList, camera);
-                foreach (var renderable in this._renderList) {
-                    this._DrawRenderable(renderable, camera);
+                this._sceneContext.SetupCamera3DInfoBuffer(this._commandList, camera, scene.mainLight);
+                foreach (var renderable in this._renderList.renderables) {
+                    this._DrawRenderable(renderable, renderable.material.pass);
                 }
             }
+
             this._commandList.End();
         }
 
-        public void _DrawRenderable(Renderable3D renderable, Camera3D camera)
+        public void _DrawRenderable(Renderable3D renderable, Pass pass)
         {
             var mesh = renderable.mesh;
             var material = renderable.material;
-            var pass = material.pass;
 
-            this._UpdatePerObjectBuffers(renderable);
             var objectResourceSet = this._sceneContext.GetObjectResourceSet(renderable);
 
+
+            this._UpdatePerObjectBuffers(renderable);
             this._commandList.SetVertexBuffer(0, mesh.vertexBuffer);
             this._commandList.SetIndexBuffer(mesh.indexBuffer, IndexFormat.UInt16);
             this._commandList.SetPipeline(pass.pipeline);

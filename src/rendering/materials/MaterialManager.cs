@@ -10,10 +10,12 @@ namespace LifeSim.Rendering
     public class MaterialManager
     {
         private ResourceFactory _factory;
+        private SceneContext _sceneContext;
         
         private string _shadersBasePath = "./res/shaders/";
 
         private ResourceLayout _passResourceLayout;
+        private ResourceLayout _shadowMapPassLayout;
         private ResourceLayout _materialLayout;
         private ResourceLayout _fullscreenMaterialLayout;
         private ResourceLayout _spritesPassLayout;
@@ -24,6 +26,7 @@ namespace LifeSim.Rendering
         private Shader _skinnedShader;
         private Shader _fullscreenShader;
         private Shader _spritesShader;
+        private Shader _shadowmapShader;
 
         private Pass _opaquePass;
         private Pass _skinnedPass;
@@ -35,21 +38,26 @@ namespace LifeSim.Rendering
         public MaterialManager(GraphicsDevice gd, IRenderTexture mainRenderTexture, IRenderTexture fullscreenRenderTexture, SceneContext sceneContext)
         {
             this._gd = gd;
-            this._factory = gd.ResourceFactory;  
+            this._factory = gd.ResourceFactory;
+            this._sceneContext = sceneContext;
 
             this._spritesPassLayout = this._factory.CreateResourceLayout(new ResourceLayoutDescription(new [] {
                 new ResourceLayoutElementDescription("CameraInfo", ResourceKind.UniformBuffer, ShaderStages.Vertex),
             }));
 
+            this._shadowMapPassLayout = this._factory.CreateResourceLayout(new ResourceLayoutDescription(new [] {
+                new ResourceLayoutElementDescription("ShadowMapInfo", ResourceKind.UniformBuffer, ShaderStages.Vertex),
+            }));
+
             this._passResourceLayout = this._factory.CreateResourceLayout(new ResourceLayoutDescription(
                 new ResourceLayoutElementDescription("CameraInfo", ResourceKind.UniformBuffer, ShaderStages.Vertex),
-                new ResourceLayoutElementDescription("LightInfo", ResourceKind.UniformBuffer, ShaderStages.Fragment)
+                new ResourceLayoutElementDescription("LightInfo", ResourceKind.UniformBuffer, ShaderStages.Fragment),
+                new ResourceLayoutElementDescription("ShadowMapTexture", ResourceKind.TextureReadOnly, ShaderStages.Fragment)
             ));
 
             this._materialLayout = this._factory.CreateResourceLayout(new ResourceLayoutDescription(
                 new ResourceLayoutElementDescription("SurfaceTexture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
-                new ResourceLayoutElementDescription("SurfaceSampler", ResourceKind.Sampler, ShaderStages.Fragment),
-                new ResourceLayoutElementDescription("MaterialInfo", ResourceKind.UniformBuffer, ShaderStages.Fragment)
+                new ResourceLayoutElementDescription("SurfaceSampler", ResourceKind.Sampler, ShaderStages.Fragment)
             ));
 
             this._fullscreenMaterialLayout = this._factory.CreateResourceLayout(new ResourceLayoutDescription(new [] {
@@ -131,32 +139,60 @@ namespace LifeSim.Rendering
                 vertexLayouts          = new[] { spritesVertexLayout },
             });
 
+            this._shadowmapShader = this._MakeShader(new ShaderDescription {
+                filename = "shadowmap", 
+                passResourcelayout     = this._shadowMapPassLayout, 
+                materialResourcelayout = this._materialLayout, 
+                objectResourcelayout   = sceneContext.objectLayout, 
+                vertexLayouts          = new[] { baseVertexLayout },
+            });
+
             // Blend
             
-            var blend = new BlendStateDescription(RgbaFloat.Black, BlendAttachmentDescription.OverrideBlend, BlendAttachmentDescription.OverrideBlend);
+            var blend = new BlendStateDescription(RgbaFloat.Black, BlendAttachmentDescription.OverrideBlend, BlendAttachmentDescription.Disabled);
 
             // Passes
+            //var shadowmapTexture = this.MakeTexture("res/uvs.jpg").deviceTexture;
+            var shadowmapTexture = sceneContext.shadowmapTexture;
 
             this._opaquePass = this._MakePass(new PassDescription(
-                this._baseShader, mainRenderTexture, FaceCullMode.Front, PolygonFillMode.Solid, blend, 
-                new[] { sceneContext.camera3DInfoBuffer, sceneContext.lightInfoBuffer }
+                this._baseShader, mainRenderTexture.outputDescription, 
+                FaceCullMode.Front, PolygonFillMode.Solid, blend, 
+                DepthStencilStateDescription.DepthOnlyLessEqual,
+                new BindableResource[] { sceneContext.camera3DInfoBuffer, sceneContext.lightInfoBuffer, shadowmapTexture}
             ));
 
             this._skinnedPass = this._MakePass(new PassDescription(
-                this._skinnedShader, mainRenderTexture, FaceCullMode.Front, PolygonFillMode.Solid, blend, 
-                new[] { sceneContext.camera3DInfoBuffer, sceneContext.lightInfoBuffer}
+                this._skinnedShader, mainRenderTexture.outputDescription, 
+                FaceCullMode.Front, PolygonFillMode.Solid, blend, 
+                DepthStencilStateDescription.DepthOnlyLessEqual,
+                new BindableResource[] { sceneContext.camera3DInfoBuffer, sceneContext.lightInfoBuffer, shadowmapTexture}
             ));
 
             this._fullscreenPass = this._MakePass(new PassDescription(
-                this._fullscreenShader, fullscreenRenderTexture, FaceCullMode.Front, PolygonFillMode.Solid, BlendStateDescription.SingleOverrideBlend, 
+                this._fullscreenShader, fullscreenRenderTexture.outputDescription, 
+                FaceCullMode.Front, PolygonFillMode.Solid, BlendStateDescription.SingleOverrideBlend, 
+                DepthStencilStateDescription.DepthOnlyLessEqual,
                 new BindableResource[] { }
             ));
 
             this._spritesPass = this._MakePass(new PassDescription(
-                this._spritesShader, mainRenderTexture, FaceCullMode.None, PolygonFillMode.Solid, BlendStateDescription.SingleAlphaBlend, 
+                this._spritesShader, mainRenderTexture.outputDescription, 
+                FaceCullMode.None, PolygonFillMode.Solid, BlendStateDescription.SingleAlphaBlend, 
+                DepthStencilStateDescription.DepthOnlyLessEqual,
                 new[] { sceneContext.camera2DInfoBuffer }
             ));
 
+        }
+
+        public Pass MakeShadowmapPass(OutputDescription outputDescription)
+        {
+            return this._MakePass(new PassDescription(
+                this._shadowmapShader, outputDescription, 
+                FaceCullMode.None, PolygonFillMode.Solid, BlendStateDescription.Empty, 
+                DepthStencilStateDescription.DepthOnlyLessEqual,
+                new[] { this._sceneContext.shadowmapInfoBuffer }
+            ));
         }
 
         public GPUTexture MakeTexture(string path)
@@ -262,11 +298,11 @@ namespace LifeSim.Rendering
             GraphicsPipelineDescription pipelineDescription = new GraphicsPipelineDescription();
             pipelineDescription.ShaderSet = description.shader.shaderSet;
             pipelineDescription.BlendState = description.blendState;
-            pipelineDescription.DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual;
+            pipelineDescription.DepthStencilState = description.depthStencilState;
             pipelineDescription.RasterizerState = rasterizerState;
             pipelineDescription.PrimitiveTopology = PrimitiveTopology.TriangleList;
             pipelineDescription.ResourceLayouts = description.shader.GetResourceLayouts();
-            pipelineDescription.Outputs = description.renderTexture.outputDescription; 
+            pipelineDescription.Outputs = description.outputDescription; 
 
             var pipeline = this._factory.CreateGraphicsPipeline(pipelineDescription);
 
