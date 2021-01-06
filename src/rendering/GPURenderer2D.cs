@@ -69,14 +69,15 @@ namespace LifeSim.Rendering
         private IRenderTexture _renderTexture;
         private SceneContext _sceneContext;
 
-        public GPURenderer2D(GraphicsDevice gd, MaterialManager materialManager, SceneContext sceneContext, IRenderTexture renderTexture)
+        public GPURenderer2D(GraphicsDevice gd, GPURenderer renderer, GPUResources resources, PSOManager psoManager)
         {
+            var renderTexture = resources.mainRenderTexture;
             this._graphicsDevice = gd;
             this._renderTexture = renderTexture;
             this._textureFactory = new FontTextureFactory(gd);
             this._commandList = gd.ResourceFactory.CreateCommandList();
-            this._sceneContext = sceneContext;
-            this._textBatcher = new SpriteBatcher(gd, materialManager, this._commandList, renderTexture.outputDescription);
+            this._sceneContext = resources.sceneContext;
+            this._textBatcher = new SpriteBatcher(gd, psoManager, renderer, this._commandList);
 
             this._fontSystem = this.MakeFontSystem();
 			this._fontSystem.AddFont(File.ReadAllBytes(@"res/fonts/DroidSans.ttf"));

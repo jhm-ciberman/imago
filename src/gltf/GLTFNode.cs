@@ -13,9 +13,10 @@ namespace LifeSim.GLTF
         public Quaternion rotation;
         public Vector3 scale;
 
-        public GPUMesh? mesh;
-        public Skin? skin;
-        public Material? material;
+        public GPUMesh? mesh = null;
+        public Skin? skin = null;
+        public SurfaceMaterial? material = null;
+        public GLTFNode? parent = null;
 
         private List<GLTFNode> _children = new List<GLTFNode>();
         public IReadOnlyList<GLTFNode> children => this._children;
@@ -27,7 +28,16 @@ namespace LifeSim.GLTF
 
         public void Add(GLTFNode node)
         {
+            node.parent = this;
             this._children.Add(node);
-        }        
+        } 
+    
+        public string GetFullPathName()
+        {
+            if (this.parent != null) {
+                return this.parent.GetFullPathName() + "/" + this.name;
+            } 
+            return "/" + this.name;
+        }
     }
 }

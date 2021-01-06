@@ -27,6 +27,8 @@ namespace LifeSim.Rendering
 
         private DeviceBuffer _vertexBuffer;
         private DeviceBuffer _indexBuffer;
+        private VertexLayoutKind _vertexLayoutKind;
+        public VertexLayoutKind vertexLayoutKind => this._vertexLayoutKind;
         public uint vertexCount;
         public uint indexCount;
 
@@ -45,10 +47,12 @@ namespace LifeSim.Rendering
                 uint size = (uint) Marshal.SizeOf<SkinnedVertData>() * this.vertexCount;
                 this._vertexBuffer = factory.CreateBuffer(new BufferDescription(size, BufferUsage.VertexBuffer));
                 graphicsDevice.UpdateBuffer(this._vertexBuffer, 0, this.GetSkinnedVerts(skinnedMesh));
+                this._vertexLayoutKind = VertexLayoutKind.Skinned;
             } else {
                 uint size = (uint) Marshal.SizeOf<VertData>() * this.vertexCount;
                 this._vertexBuffer = factory.CreateBuffer(new BufferDescription(size, BufferUsage.VertexBuffer));
                 graphicsDevice.UpdateBuffer(this._vertexBuffer, 0, this.GetVerts(mesh));
+                this._vertexLayoutKind = VertexLayoutKind.Regular;
             }
         }
 

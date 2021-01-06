@@ -8,7 +8,7 @@ namespace LifeSim.SceneGraph
     {
         private BindedSkin _skin;
 
-        public SkinnedRenderable3D(GPUMesh mesh, Material material, BindedSkin skin) : base(mesh, material)
+        public SkinnedRenderable3D(GPUMesh mesh, SurfaceMaterial material, BindedSkin skin) : base(mesh, material)
         {
             this._skin = skin;
         }
@@ -20,6 +20,11 @@ namespace LifeSim.SceneGraph
             for (int i = 0; i < joints.Count; i++) {
                 buffer.bonesMatrices[i] = this._skin.inverseBindMatrices[i] * joints[i].worldMatrix * inverseMeshWorldMatrix;
             }
+        }
+
+        public override string[] GetShaderKeywords()
+        {
+            return new string[] { "USE_SKINNED_MESH" };
         }
     }
 }

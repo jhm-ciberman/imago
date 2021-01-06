@@ -48,7 +48,7 @@ namespace LifeSim.GLTF
             var factory = this._GetChannelFactory(channel.Target.Path);
             if (factory == null) return null;
 
-            var targetName = this._model._GetNodeName(targetIndex.Value);
+            var targetName = this._model._GetNode(targetIndex.Value).name;
             var sampler = this._samplers[channel.Sampler];
             var input = this._GetSamplerInput(sampler.Input);
             var output = this._model._GetAccessor(sampler.Output);

@@ -13,17 +13,17 @@ namespace LifeSim.Rendering
 
         private IRenderTexture _renderTexture;
         private SceneContext _sceneContext;
+        private PSOManager _psoManager;
 
         private RenderList _renderList = new RenderList();
 
-        private Pass _shadowmapPass;
-
-        public GPURenderer3D(GraphicsDevice graphicsDevice, MaterialManager materialManager, SceneContext sceneContext, IRenderTexture renderTexture)
+        public GPURenderer3D(GraphicsDevice graphicsDevice, PSOManager psoManager, GPUResources resources)
         {
             this._graphicsDevice = graphicsDevice;
-            this._renderTexture = renderTexture;
+            this._renderTexture = resources.mainRenderTexture;
+            this._psoManager = psoManager;
             this._factory = this._graphicsDevice.ResourceFactory;
-            this._sceneContext = sceneContext;
+            this._sceneContext = resources.sceneContext;
             this._commandList = this._factory.CreateCommandList();
         }
 
@@ -72,13 +72,14 @@ namespace LifeSim.Rendering
 
             var objectResourceSet = this._sceneContext.GetObjectResourceSet(renderable);
 
+            var pipeline = this._psoManager.GetPipeline(pass, renderable.material, renderable);
 
             this._UpdatePerObjectBuffers(renderable);
             this._commandList.SetVertexBuffer(0, mesh.vertexBuffer);
             this._commandList.SetIndexBuffer(mesh.indexBuffer, IndexFormat.UInt16);
-            this._commandList.SetPipeline(pass.pipeline);
+            this._commandList.SetPipeline(pipeline);
             this._commandList.SetGraphicsResourceSet(0, pass.resourceSet); // Per pass
-            this._commandList.SetGraphicsResourceSet(1, material.GetResourceSet()); // Per Material
+            this._commandList.SetGraphicsResourceSet(1, material.resourceSet); // Per Material
             this._commandList.SetGraphicsResourceSet(2, objectResourceSet); // Per object
             this._commandList.DrawIndexed(
                 indexCount: mesh.indexCount,

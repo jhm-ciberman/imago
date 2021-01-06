@@ -11,12 +11,6 @@ namespace LifeSim
             Renderable,
         }
 
-        struct PickTarget
-        {
-            public TargetType type;
-            public Renderable3D target;
-        }
-
         private List<Renderable3D> _list = new List<Renderable3D>();
 
         public PickingList()
@@ -29,11 +23,6 @@ namespace LifeSim
         {
             renderable.pickingID = (uint) (this._list.Count + 1); 
             this._list.Add(renderable); 
-            
-            /*new PickTarget {
-                type = TargetType.Renderable,
-                target = renderable,
-            });*/
         }
 
         public void AddAllRecursive(Container3D container)

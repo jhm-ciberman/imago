@@ -6,6 +6,7 @@ namespace LifeSim.Rendering
     public interface IMaterial : IDisposable
     {
         Pass pass { get; }
-        ResourceSet GetResourceSet();
+        ResourceLayout resourceLayout { get; }
+        ResourceSet resourceSet { get; }
     }
 }

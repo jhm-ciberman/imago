@@ -35,14 +35,16 @@ namespace LifeSim.GLTF
         public void Add(GLTFNode node)
         {
             this.children.Add(node);
-            this._AddToDictionaryRecursive(node);
+            this._AddToDictionaryRecursive(this.name, node);
         } 
 
-        private void _AddToDictionaryRecursive(GLTFNode node)
+        private void _AddToDictionaryRecursive(string currentPath, GLTFNode node)
         {
-            this._nodesByName.Add(node.name, node);
+            //currentPath += "/" + node.name;
+            currentPath = node.name;
+            this._nodesByName[currentPath] = node;
             foreach (var child in node.children) {
-                this._AddToDictionaryRecursive(child);
+                this._AddToDictionaryRecursive(currentPath, child);
             }
         }
 

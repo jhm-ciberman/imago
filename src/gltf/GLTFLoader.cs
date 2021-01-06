@@ -7,18 +7,18 @@ namespace LifeSim.GLTF
 {
     public class GLTFLoader
     {
-        private MaterialManager _materialManager;
+        private GPURenderer _renderer;
         private string _path;
         private glTFLoader.Schema.Gltf _model;
 
         private GLTFBuffer?[] _buffersCache;
         private GLTFNode?[] _nodesCache;
-        private Material _material;
+        private SurfaceMaterial _material;
 
-        public GLTFLoader(MaterialManager manager, Material material, string path)
+        public GLTFLoader(GPURenderer renderer, SurfaceMaterial material, string path)
         {
             System.Console.WriteLine("Loading file " + path);
-            this._materialManager = manager;
+            this._renderer = renderer;
             this._path = path;
             this._model = glTFLoader.Interface.LoadModel(path);
             this._buffersCache = new GLTFBuffer[this._model.Buffers.Length];
@@ -89,7 +89,7 @@ namespace LifeSim.GLTF
 
         private GPUMesh _GetMesh(int index)
         {
-            return this._materialManager.MakeMesh(this._GetPrimitive(index).MakeMesh());
+            return this._renderer.MakeMesh(this._GetPrimitive(index).MakeMesh());
         }
 
         public Animation[] LoadAnimations()

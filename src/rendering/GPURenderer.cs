@@ -9,23 +9,21 @@ namespace LifeSim.Rendering
 {
     public class GPURenderer : System.IDisposable
     {
-        private GraphicsDevice _graphicsDevice;
+        private GraphicsDevice _gd;
         private ResourceFactory _factory;
         
         private GPURenderer2D _renderer2d;
         private GPURenderer3D _renderer3d;
 
-        private IRenderTexture _fullScreenRenderTexture;
-        private RenderTexture _mainRenderTexture;
-
         private FullScreenRenderer _fullScreenQuad;
 
-        public GraphicsBackend backendType => this._graphicsDevice.BackendType;
-
-        private SceneContext _sceneContext;
-        private MaterialManager _materialManager;
+        public GraphicsBackend backendType => this._gd.BackendType;
 
         private GPUMousePicker _mousePicker;
+
+        private GPUResources _gpuResources;
+
+        private PSOManager _psoManager;
 
         public GPURenderer(Window window, GraphicsBackend graphicsBackend)
         {
@@ -38,24 +36,54 @@ namespace LifeSim.Rendering
                 preferStandardClipSpaceYDirection: true
             );
 
-            this._graphicsDevice = VeldridStartup.CreateGraphicsDevice(window.nativeWindow, options, graphicsBackend);
-            this._factory = this._graphicsDevice.ResourceFactory;
+            this._gd = VeldridStartup.CreateGraphicsDevice(window.nativeWindow, options, graphicsBackend);
+            this._factory = this._gd.ResourceFactory;
 
-            this._fullScreenRenderTexture = new SwapchainRenderTexture(this._graphicsDevice.MainSwapchain);
-            this._mainRenderTexture = new RenderTexture(this._factory, window.width, window.height);
+            this._gpuResources = new GPUResources(this._gd, window.width, window.height);
 
-            this._sceneContext = new SceneContext(this._graphicsDevice);
-            this._materialManager = new MaterialManager(this._graphicsDevice, this._mainRenderTexture, this._fullScreenRenderTexture, this._sceneContext);
+            this._psoManager = new PSOManager(this._factory);
 
-            this._renderer2d = new GPURenderer2D(this._graphicsDevice, this._materialManager, this._sceneContext, this._mainRenderTexture);
-            this._renderer3d = new GPURenderer3D(this._graphicsDevice, this._materialManager, this._sceneContext, this._mainRenderTexture);
-            this._mousePicker = new GPUMousePicker(this._graphicsDevice, this._mainRenderTexture);
-            this._fullScreenQuad = new FullScreenRenderer(this._graphicsDevice, this._materialManager, this._mainRenderTexture, this._fullScreenRenderTexture);
+            this._renderer2d     = new GPURenderer2D(this._gd, this, this._gpuResources, this._psoManager);
+            this._renderer3d     = new GPURenderer3D(this._gd, this._psoManager, this._gpuResources);
+            this._mousePicker    = new GPUMousePicker(this._gd);
+            this._fullScreenQuad = new FullScreenRenderer(this._gd, this, this._psoManager, this._gpuResources);
         }
 
-        public MaterialManager materialManager => this._materialManager;
+        public GPUTexture MakeTexture(string path)
+        {
+            ImageSharpTexture texture = new ImageSharpTexture(path, true);
+            var deviceTexture = texture.CreateDeviceTexture(this._gd, this._factory);
+            var textureView = this._factory.CreateTextureView(deviceTexture);
+            
+            return new GPUTexture(deviceTexture, textureView, this._gd.PointSampler);
+        }
 
-        public uint objectID => this._mousePicker.objectID;
+        public GLTF.GLTFLoader LoadGLTF(string path, SurfaceMaterial defaultMaterial)
+        {
+            return new GLTF.GLTFLoader(this, defaultMaterial, path);
+        }
+
+        public GPUMesh MakeMesh(MeshData meshData)
+        {
+            return new GPUMesh(this._gd, meshData);
+        }
+
+        public SurfaceMaterial MakeSurfaceMaterial(GPUTexture texture)
+        {
+            return new SurfaceMaterial(this._gpuResources, texture);
+        }
+
+        public SpriteMaterial MakeSpritesMaterial(Veldrid.Texture texture)
+        {
+            return new SpriteMaterial(this._gpuResources, texture);
+        }
+
+        public FullScreenMaterial MakeFullScreenMaterial(Veldrid.Texture texture)
+        {
+            return new FullScreenMaterial(this._gpuResources, texture);
+        }
+
+        public uint selectedObjectID => this._mousePicker.objectID;
 
         public void Render(IStage stage)
         {
@@ -68,32 +96,32 @@ namespace LifeSim.Rendering
                 this._renderer2d.Render(stage.currentCanvas2D);
             });
             var extraTask = Task.Run(() => {
-                this._mousePicker.Update();
+                this._mousePicker.Update(this._gpuResources.mainRenderTexture);
                 this._fullScreenQuad.Render();
             });
             Task.WaitAll(render3DTask, render2DTask, extraTask);
 
-            this._graphicsDevice.WaitForIdle();
+            this._gd.WaitForIdle();
             this._renderer3d.Submit();
             this._renderer2d.Submit();
             this._mousePicker.Submit();
             this._fullScreenQuad.Submit();
 
-            this._graphicsDevice.SwapBuffers();
+            this._gd.SwapBuffers();
         }
 
         internal void Resize(uint width, uint height)
         {
-            this._graphicsDevice.ResizeMainWindow(width, height);
-            this._graphicsDevice.WaitForIdle();
+            this._gd.ResizeMainWindow(width, height);
+            this._gd.WaitForIdle();
 
-            this._fullScreenRenderTexture.Resize(width, height);
-            this._mainRenderTexture.Resize(width, height);
+            this._gpuResources.fullScreenRenderTexture.Resize(width, height);
+            this._gpuResources.mainRenderTexture.Resize(width, height);
         }
 
         public void Dispose()
         {
-            this._graphicsDevice.Dispose();
+            this._gd.Dispose();
         }
     }
 }

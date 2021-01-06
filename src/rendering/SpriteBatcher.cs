@@ -10,6 +10,14 @@ namespace LifeSim.Rendering
 {
     public class SpriteBatcher : IFontStashRenderer, System.IDisposable
     {
+        class SpriteBatch : IRenderable
+        {
+            public VertexLayoutKind vertexLayoutKind => VertexLayoutKind.Sprite;
+
+            public ResourceLayout? resourceLayout => null;
+
+            public string[] GetShaderKeywords() => System.Array.Empty<string>();
+        }
 
         struct Vertex
         {
@@ -40,15 +48,15 @@ namespace LifeSim.Rendering
         private int _totalDrawCalls = 0;
         private int _totalSpritesToDraw = 0;
 
-        private MaterialManager _materialManager;
+        private PSOManager _psoManager;
+        private GPURenderer _renderer;
+        private SpriteBatch _renderable = new SpriteBatch();
 
-        public SpriteBatcher(
-            GraphicsDevice gd, MaterialManager materialManager, 
-            CommandList commandList, OutputDescription outputDescription
-        )
+        public SpriteBatcher(GraphicsDevice gd, PSOManager psoManager, GPURenderer renderer, CommandList commandList)
         {
             this._gd = gd;
-            this._materialManager = materialManager;
+            this._renderer = renderer;
+            this._psoManager = psoManager;
             this._commandList = commandList;
             this._factory = gd.ResourceFactory;
 
@@ -155,7 +163,7 @@ namespace LifeSim.Rendering
         {
             if (! this._materials.TryGetValue(texture, out IMaterial? material)) {
                 System.Console.WriteLine("Create material");
-                material = this._materialManager.MakeSprites(texture.deviceTexture);
+                material = this._renderer.MakeSpritesMaterial(texture.deviceTexture);
                 this._materials.Add(texture, material);
             }
             return material;
@@ -168,9 +176,10 @@ namespace LifeSim.Rendering
                 this._commandList.UpdateBuffer(this._vertexBuffer, 0, this._batchVertices);
 
                 var material = this._GetMaterialOrNew(this._batchTexture);
-                this._commandList.SetPipeline(material.pass.pipeline);
+                var pipeline = this._psoManager.GetPipeline(material.pass, material, this._renderable);
+                this._commandList.SetPipeline(pipeline);
                 this._commandList.SetGraphicsResourceSet(0, material.pass.resourceSet);
-                this._commandList.SetGraphicsResourceSet(1, material.GetResourceSet());
+                this._commandList.SetGraphicsResourceSet(1, material.resourceSet);
                 this._commandList.SetIndexBuffer(this._indexBuffer, IndexFormat.UInt16);
                 this._commandList.SetVertexBuffer(0, this._vertexBuffer);
                 this._commandList.DrawIndexed(

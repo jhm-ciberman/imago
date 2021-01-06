@@ -54,9 +54,6 @@ namespace LifeSim.Rendering
         private ResourceFactory _factory;
         private Dictionary<Renderable3D, ResourceSet> _resourceSets = new Dictionary<Renderable3D, ResourceSet>();
 
-        public readonly ResourceLayout objectLayout;
-        public readonly ResourceLayout skinedObjectLayout;
-
         private readonly ResourceSet _objectResourceSet;
         private readonly ResourceSet _skinnedResourceSet;
 
@@ -67,19 +64,10 @@ namespace LifeSim.Rendering
 
         private Matrix4x4 _shadowMapScaling;
 
-        public SceneContext(GraphicsDevice graphicsDevice)
+        public SceneContext(ResourceLayouts layouts, GraphicsDevice graphicsDevice)
         {
             var factory = graphicsDevice.ResourceFactory;
             this._factory = factory;  
-
-            this.objectLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
-                new ResourceLayoutElementDescription("ObjectInfo", ResourceKind.UniformBuffer, ShaderStages.Vertex)
-            ));
-
-            this.skinedObjectLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
-                new ResourceLayoutElementDescription("ObjectInfo", ResourceKind.UniformBuffer, ShaderStages.Vertex),
-                new ResourceLayoutElementDescription("BonesInfo", ResourceKind.UniformBuffer, ShaderStages.Vertex)
-            ));
 
             this.camera3DInfoBuffer   = factory.CreateBuffer(new BufferDescription((uint) Marshal.SizeOf<CameraInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
             this.camera2DInfoBuffer   = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
@@ -89,8 +77,8 @@ namespace LifeSim.Rendering
             this.modelInfoBuffer = factory.CreateBuffer(new BufferDescription((uint) Marshal.SizeOf<ObjectInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
             this.bonesInfoBuffer = factory.CreateBuffer(new BufferDescription(64 * BonesInfo.maxNumberOfBones, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
         
-            this._objectResourceSet = this._factory.CreateResourceSet(new ResourceSetDescription(this.objectLayout, this.modelInfoBuffer));
-            this._skinnedResourceSet = this._factory.CreateResourceSet(new ResourceSetDescription(this.skinedObjectLayout, this.modelInfoBuffer, this.bonesInfoBuffer));
+            this._objectResourceSet = this._factory.CreateResourceSet(new ResourceSetDescription(layouts.renderables.regular, this.modelInfoBuffer));
+            this._skinnedResourceSet = this._factory.CreateResourceSet(new ResourceSetDescription(layouts.renderables.skinned, this.modelInfoBuffer, this.bonesInfoBuffer));
 
             uint shadowMapSize = 2048;
             this.shadowmapTexture = this._factory.CreateTexture(TextureDescription.Texture2D(shadowMapSize, shadowMapSize, 1, 1, PixelFormat.D32_Float_S8_UInt, TextureUsage.DepthStencil | TextureUsage.Sampled));
