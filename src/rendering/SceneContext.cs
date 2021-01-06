@@ -122,7 +122,7 @@ namespace LifeSim.Rendering
             LightInfo lightInfo = new LightInfo();
             lightInfo.ambientColor = scene.ambientColor;
             lightInfo.mainLightColor = scene.mainLight.color;
-            lightInfo.mainLightPosition = scene.mainLight.position;
+            lightInfo.mainLightPosition = Vector3.Normalize(scene.mainLight.position);
             commandList.UpdateBuffer(this.lightInfoBuffer, 0, ref lightInfo);
         }
 

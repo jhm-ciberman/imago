@@ -29,7 +29,9 @@ namespace LifeSim.Rendering
         {
             if (! this._shaderVariants.TryGetValue(shaderVariant, out Shader shaders)) {
                 shaders = this._MakeShader(shaderVariant);
-                this._shaderVariants.Add(shaderVariant, shaders);
+                lock (this._shaderVariants) {
+                    this._shaderVariants.Add(shaderVariant, shaders);
+                }
                 return shaders;
             }
             return shaders;

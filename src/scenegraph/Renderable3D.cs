@@ -12,7 +12,7 @@ namespace LifeSim.SceneGraph
         
         public SurfaceMaterial material;
         
-        public Vector4 albedoColor = new Vector4(1f, 1f, 1f, 1f);
+        public Vector4 albedoColor = new Vector4(1f, 1f, 1f, 0f);
         
         public ResourceLayout resourceLayout { get; private set; }
 

@@ -7,7 +7,8 @@ namespace LifeSim.SceneGraph
     public class Camera3D
     {
         public Vector3 position;
-        public Vector3 lookAt = Vector3.UnitZ;
+        public Quaternion rotation = Quaternion.Identity;
+
         public float fov = 60 * System.MathF.PI / 180f;
         public float aspect => (float) this._viewPort.width / (float) this._viewPort.height;
         public float near = 0.01f;
@@ -35,7 +36,18 @@ namespace LifeSim.SceneGraph
 
         public Matrix4x4 viewMatrix
         {
-            get => Matrix4x4.CreateLookAt(this.position, this.lookAt, Vector3.UnitY);
+            get
+            {
+                Matrix4x4 worldMatrix = Matrix4x4.CreateFromQuaternion(this.rotation) * Matrix4x4.CreateTranslation(this.position);
+                Matrix4x4.Invert(worldMatrix, out worldMatrix);
+                return worldMatrix;
+            }
+        }
+
+        public void LookAt(Vector3 destPoint)
+        {
+            Matrix4x4 worldMat = Matrix4x4.CreateWorld(this.position, destPoint - this.position, Vector3.UnitY);
+            this.rotation = Quaternion.CreateFromRotationMatrix(worldMat);
         }
     }
 }
