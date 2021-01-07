@@ -15,7 +15,7 @@ namespace LifeSim.SceneGraph
 
         public void Add(Node3D node)
         {
-            if (this._parent == this) return;
+            if (node.parent == this) return;
             node.parent?.Remove(node);
             if (! this._children.Contains(node)) {
                 this._children.Add(node);
@@ -57,6 +57,42 @@ namespace LifeSim.SceneGraph
                 }
             }
             return null;
+        }
+
+        public T? FindPath<T>(string name) where T : Node3D
+        {
+            var arrayPaths = name.Split('/');
+            int currentIndex = 0;
+            Container3D currentNode = this;
+            bool found = true;
+            while (found && currentIndex < arrayPaths.Length) {
+                var currentNameToFind = arrayPaths[currentIndex];
+                foreach (var child in currentNode.children) {
+                    if (child.name == currentNameToFind) {
+                        currentNode = child;
+                        currentIndex++;
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            if (currentIndex < arrayPaths.Length) {
+                return null;
+            } else if (currentNode is T nodeT) {
+                return nodeT;
+            } else {
+                return null;
+            }
+        }
+
+        public void ForEachRecursive<T>(System.Action<Node3D> action) where T : Node3D
+        {
+            if (this is T childT) {
+                action(childT);
+            }
+            foreach (var child in this.children) {
+                child.ForEachRecursive<T>(action);
+            }
         }
 
         public void PrintHierarchyToConsole(string indent = "")

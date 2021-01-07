@@ -13,9 +13,15 @@ namespace LifeSim.Anim
             this._root = root;
         }
 
+        public void Play(BindedAnimation animation)
+        {
+            this._animation = animation;
+        }
+
         public void Play(Animation animation)
         {
-            this._animation = new BindedAnimation(this._root, animation);
+            var binder = new SimpleAnimationBinder();
+            this._animation = binder.Bind(this._root, animation);;
         }
 
         public void Update(float deltaTime)

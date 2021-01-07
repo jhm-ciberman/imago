@@ -26,6 +26,9 @@ namespace LifeSim.SceneGraph
             this._scale = Vector3.One;
         }
 
+        public Vector3 worldPosition => Vector3.Transform(Vector3.Zero, this._worldMatrix);
+        public Vector3 worldScale => Vector3.Transform(this._scale, this._worldMatrix);
+
         public void UpdateWorldMatrix()
         {
             this._worldMatrix = this.GetLocalMatrix();

@@ -8,6 +8,8 @@ namespace LifeSim.Anim
         private struct BindedChannel
         {
             private Node3D _target;
+            public Node3D target => this._target;
+
             private IReadOnlyList<Animation.IChannel> _channel;
             private int _lastTimeIndex; 
 
@@ -34,10 +36,24 @@ namespace LifeSim.Anim
 
         private Animation _animation;
 
-        public BindedAnimation(Node3D root, Animation animation)
+        public BindedAnimation(Animation animation)
         {
             this._animation = animation;
-            this._BindNodeRecursive(root, animation);
+        }
+
+        public IEnumerable<Node3D> nodes
+        {
+            get
+            {
+                foreach (var channel in this._channels) {
+                    yield return channel.target;
+                }
+            }
+        }
+
+        public void AddChannel(Node3D target, IReadOnlyList<Animation.IChannel> channels)
+        {
+            this._channels.Add(new BindedChannel(target, channels));
         }
 
         public void Update(float deltaTime)
@@ -49,19 +65,6 @@ namespace LifeSim.Anim
 
             foreach (var channel in this._channels) {
                 channel.Update(this._time, this._loop);
-            }
-        }
-
-        private void _BindNodeRecursive(Node3D node, Animation animation)
-        {
-            var channels = animation.FindChannels(node.name);
-
-            if (channels != null) {
-                this._channels.Add(new BindedChannel(node, channels));
-            }
-
-            foreach (var child in node.children) {
-                this._BindNodeRecursive(child, animation);    
             }
         }
     }

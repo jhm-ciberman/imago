@@ -53,13 +53,13 @@ namespace LifeSim.Anim
             protected override void SetTargetValue(Node3D node, ref Quaternion value) => node.rotation = value;
         }
 
-        public interface ISampler<T>
+        public interface ISampler<T> where T : struct
         {
             float duration { get; }
             T Sample(float time, bool loop, ref int lastTimeIndex);
         }
 
-        public abstract class BaseSampler<T> : ISampler<T>
+        public abstract class BaseSampler<T> : ISampler<T> where T : struct
         {
             protected float[] _times;
             protected T[] _values;
@@ -89,15 +89,16 @@ namespace LifeSim.Anim
                 var nextIndex = this._FindNextIndex(time, lastTimeIndex);
                 lastTimeIndex = nextIndex;
 
-                var prevIndex = loop 
-                    ? (nextIndex - 1) % this._times.Length 
-                    : System.Math.Min(nextIndex - 1, 0);
+                //var prevIndex = loop 
+                //    ? (nextIndex - 1) % this._times.Length 
+                //    : nextIndex - 1;
 
+                var prevIndex = System.Math.Clamp(nextIndex - 1, 0, this._times.Length);
                 return this._Interpolate(prevIndex, nextIndex, time);
             }
         }
 
-        public class SamplerLinear<T> : BaseSampler<T>
+        public class SamplerLinear<T> : BaseSampler<T> where T : struct
         {
             protected IInterpolator<T> _interpolator;
             
@@ -112,12 +113,16 @@ namespace LifeSim.Anim
                 var next = this._values[indexNext];
                 var tPrev = this._times[indexPrev];
                 var tNext = this._times[indexNext];
+                
+                if (indexPrev == indexNext) {
+                    return prev;
+                }
                 var t = (time - tPrev) / (tNext - tPrev);
                 return this._interpolator.Linear(prev, next, t);
             }
         }
 
-        public class SamplerStep<T> : BaseSampler<T>
+        public class SamplerStep<T> : BaseSampler<T> where T : struct
         {
             public SamplerStep(float[] times, T[] values, IInterpolator<T> interpolator) : base(times, values) 
             {
@@ -130,7 +135,7 @@ namespace LifeSim.Anim
             }
         }
 
-        public class SamplerCubicSpline<T> : BaseSampler<T>
+        public class SamplerCubicSpline<T> : BaseSampler<T> where T : struct
         {
             protected IInterpolator<T> _interpolator;
 
@@ -196,14 +201,17 @@ namespace LifeSim.Anim
                 duration = System.Math.Max(channel.duration, duration);
 
                 string key = channel.targetName;
+                key = key.Replace("mixamorig:", "");
                 if (this._channels.TryGetValue(key, out List<IChannel>? list)) {
                     list.Add(channel);
                 } else {
-                    this._channels.Add(channel.targetName, new List<IChannel> { channel });
+                    this._channels.Add(key, new List<IChannel> { channel });
                 }
             }
             this._duration = duration;
         }
+
+        public IEnumerable<string> channelNames => this._channels.Keys;
 
         public IReadOnlyList<IChannel>? FindChannels(string targetName)
         {

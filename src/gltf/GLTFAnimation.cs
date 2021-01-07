@@ -87,7 +87,7 @@ namespace LifeSim.GLTF
             Animation.IChannel MakeChannel(string targetName, float[] input, GLTFAccessor output, InterpolationEnum type);
         }
 
-        abstract class ChannelFactory<T> : IChannelFactory
+        abstract class ChannelFactory<T> : IChannelFactory where T : struct
         {
             public abstract Animation.IChannel MakeChannel(string targetName, float[] input, GLTFAccessor output, InterpolationEnum type);
             protected abstract Animation.IInterpolator<T> _MakeInterpolator();
