@@ -49,12 +49,14 @@ namespace LifeSim.Generation
         public FalloffValueGenerator(Vector2Int mapSize) 
         {
             this.mapSize = mapSize;
+            this._generatorFunction = this._GenerateCircularFalloff;
         }
 
         public FalloffValueGenerator(Vector2Int mapSize, Settings settings) 
         {
             this.mapSize = mapSize;
 
+            this._generatorFunction = this._GenerateCircularFalloff;
             this.falloffModel = settings.model;
             this.minValue = settings.minHeight;
             this.maxValue = settings.maxHeight;
@@ -71,12 +73,9 @@ namespace LifeSim.Generation
             {
                 this._model = value;
 
-                if (value == FalloffModel.Circular) 
-                {
+                if (value == FalloffModel.Circular) {
                     this._generatorFunction = this._GenerateCircularFalloff;
-                }
-                else 
-                {
+                } else {
                     this._generatorFunction = this._GenerateSquareFalloff;
                 }
             }

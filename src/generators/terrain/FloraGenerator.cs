@@ -57,7 +57,6 @@ namespace LifeSim.Generation
                     c++;
                 }
             }
-            System.Console.WriteLine("COUNT: " + c);
         }
     }
 }

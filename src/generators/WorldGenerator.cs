@@ -32,7 +32,6 @@ namespace LifeSim.Generation
                 int currentStep = 0;
                 foreach (var step in this._pipeline)
                 {
-                    System.Console.WriteLine("GOTOOO: " + step.GetType().Name);
                     Benchmark.Run(step.GetType().Name, () => step.Handle(world));
                     currentStep += 1;
 
