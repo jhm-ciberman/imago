@@ -1,4 +1,5 @@
-﻿using LifeSim.Rendering;
+﻿using LifeSim.Generation;
+using LifeSim.Rendering;
 
 namespace LifeSim
 {

@@ -23,17 +23,16 @@ namespace LifeSim.Anim
                     if (channels != null) {
                         binded.AddChannel(node, channels);
                         dictionary.Remove(channelName);
-                        System.Console.WriteLine("BOUND channel: " + channelName);
-                        
                     }
-                } else {
-                    System.Console.WriteLine("Unbound channel: " + channelName);
-                }
+                } 
+                //else {
+                //    System.Console.WriteLine("Unbound channel: " + channelName);
+                //}
             }
 
-            foreach (var nodeName in dictionary.Keys) {
-                System.Console.WriteLine("Unbound node: " + nodeName);
-            }
+            //foreach (var nodeName in dictionary.Keys) {
+            //    System.Console.WriteLine("Unbound node: " + nodeName);
+            //}
 
             return binded;
         }

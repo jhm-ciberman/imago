@@ -4,8 +4,8 @@ namespace LifeSim
 {
     public struct RectInt
     {
-        private Vector2Int coords;
-        private Vector2Int size;
+        public Vector2Int coords;
+        public Vector2Int size;
 
         public RectInt(Vector2Int coords, Vector2Int size)
         {
@@ -16,10 +16,10 @@ namespace LifeSim
         public Vector2Int min => new Vector2Int(this.xMin, this.yMin);
         public Vector2Int max => new Vector2Int(this.xMax, this.yMax);
 
-        public int xMin => Math.Min(this.coords.x, this.coords.x + this.size.x);
-        public int yMin => Math.Min(this.coords.y, this.coords.y + this.size.y);
-        public int xMax => Math.Max(this.coords.x, this.coords.x + this.size.x);
-        public int yMax => Math.Max(this.coords.y, this.coords.y + this.size.y);
+        public int xMin { get => Math.Min(this.coords.x, this.coords.x + this.size.x); set { int oldxmax = this.xMax; this.coords.x = value; this.size.x = oldxmax - this.coords.x; } }
+        public int yMin { get => Math.Min(this.coords.y, this.coords.y + this.size.y); set { int oldymax = this.yMax; this.coords.y = value; this.size.y = oldymax - this.coords.y; } }
+        public int xMax { get => Math.Max(this.coords.x, this.coords.x + this.size.x); set { this.size.x = value - this.coords.x; } }
+        public int yMax { get => Math.Max(this.coords.y, this.coords.y + this.size.y); set { this.size.y = value - this.coords.y; } }
 
         public bool Contains(Vector2Int position)
         {

@@ -77,7 +77,7 @@ namespace LifeSim.Rendering
             lock (this._pipelines) {
                 this._pipelines.Add(hash, pipeline);
             }
-            System.Console.WriteLine("ADD PIPELINE: 0x{0:X}", hash);
+            //System.Console.WriteLine("ADD PIPELINE: 0x{0:X}", hash);
             return pipeline;
         }
 

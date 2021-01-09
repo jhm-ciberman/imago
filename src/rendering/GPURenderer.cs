@@ -1,6 +1,8 @@
 using System.Text;
 using System.Threading.Tasks;
 using LifeSim.SceneGraph;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using Veldrid;
 using Veldrid.ImageSharp;
 using Veldrid.StartupUtilities;
@@ -52,6 +54,15 @@ namespace LifeSim.Rendering
         public GPUTexture MakeTexture(string path)
         {
             ImageSharpTexture texture = new ImageSharpTexture(path, true);
+            var deviceTexture = texture.CreateDeviceTexture(this._gd, this._factory);
+            var textureView = this._factory.CreateTextureView(deviceTexture);
+            
+            return new GPUTexture(deviceTexture, textureView, this._gd.PointSampler);
+        }
+
+        public GPUTexture MakeTexture(Image<Rgba32> image)
+        {
+            ImageSharpTexture texture = new ImageSharpTexture(image, true);
             var deviceTexture = texture.CreateDeviceTexture(this._gd, this._factory);
             var textureView = this._factory.CreateTextureView(deviceTexture);
             
