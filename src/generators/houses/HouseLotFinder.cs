@@ -161,16 +161,16 @@ namespace LifeSim.Generation
             Vector2Int maxValueCoord = new Vector2Int(0, 0);
             Grid<int> areasGrid = new Grid<int>(area.size);
 
-            for (int y = 0; y < area.size.y; y++)
+            for (int y = 0; y < area.height; y++)
             {
                 areasGrid.Set(0, y, surf.Get(area.min.x, area.min.y + y) ? 1 : 0);
             }
             
-            for (int x = 1; x < area.size.x; x++)
+            for (int x = 1; x < area.width; x++)
             {
                 areasGrid.Set(x, 0, surf.Get(area.min.x + x, area.min.y) ? 1 : 0);
 
-                for (int y = 1; y < area.size.y; y++)
+                for (int y = 1; y < area.height; y++)
                 {
                     if (! surf.Get(area.min.x + x, area.min.y + y)) continue; 
 

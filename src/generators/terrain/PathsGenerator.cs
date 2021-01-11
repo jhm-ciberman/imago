@@ -85,8 +85,8 @@ namespace LifeSim.Generation
             var center = world.size / 2;
             
             var tileCovers = new TileCover[] {
-                this._container.Get<TileCover>("tilecovers.mud"),
-                this._container.Get<TileCover>("tilecovers.stone"),
+                this._container.Get<TileCover>("tilecover.mud"),
+                this._container.Get<TileCover>("tilecover.stone"),
             };
 
             for(var i = 0; i < 5; i ++)

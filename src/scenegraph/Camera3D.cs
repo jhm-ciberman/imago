@@ -12,7 +12,7 @@ namespace LifeSim.SceneGraph
         public float fov = 60 * System.MathF.PI / 180f;
         public float aspect => (float) this._viewPort.width / (float) this._viewPort.height;
         public float near = 0.01f;
-        public float far = 100.0f;
+        public float far = 1000.0f;
 
         private Viewport _viewPort;
 

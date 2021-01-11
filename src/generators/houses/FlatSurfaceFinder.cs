@@ -51,8 +51,10 @@ namespace LifeSim.Generation
             if (! tile.isFlat) return;
 
             this._currentTilesCoordsList.Clear();
-            this._currentBox.coords = startingCoord;
-            this._currentBox.size = new Vector2Int(0, 0);
+            this._currentBox.x = startingCoord.x;
+            this._currentBox.y = startingCoord.y;
+            this._currentBox.width = 0;
+            this._currentBox.height = 0;
             this._currentHeight = tile.height0;
             this._stack.Clear();
             

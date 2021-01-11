@@ -67,8 +67,8 @@ namespace LifeSim.Generation
         private Dictionary<Biome, TileCover> _MakeRegions(World world)
         {
             return new Dictionary<Biome, TileCover> {
-                { this._container.Get<Biome>("biome.sand"),  this._container.Get<TileCover>("tilecovers.sand")  },
-                { this._container.Get<Biome>("biome.grass"), this._container.Get<TileCover>("tilecovers.grass") },
+                { this._container.Get<Biome>("biome.sand"),  this._container.Get<TileCover>("tilecover.sand")  },
+                { this._container.Get<Biome>("biome.grass"), this._container.Get<TileCover>("tilecover.grass") },
             };
         }
 

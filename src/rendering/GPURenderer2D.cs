@@ -23,29 +23,14 @@ namespace LifeSim.Rendering
 
             public ITexture2D Create(int width, int height)
             {
-                var factory = this._gd.ResourceFactory;
-                var texture = factory.CreateTexture(new Veldrid.TextureDescription(
-                    (uint) width, (uint) height, depth: 1, 
-                    mipLevels: 1, arrayLayers: 1, 
-                    Veldrid.PixelFormat.R8_G8_B8_A8_UNorm, 
-                    Veldrid.TextureUsage.Sampled, 
-                    Veldrid.TextureType.Texture2D
-                ));
-
-                var textureView = factory.CreateTextureView(texture);
-
-                return new FontTexture2D(this._gd, texture, textureView);
+                return new FontTexture2D(this._gd, (uint) width, (uint) height);
             }
         }
 
         class FontTexture2D : GPUTexture, ITexture2D
         {
-            private Veldrid.GraphicsDevice _gd;
-
-            public FontTexture2D(Veldrid.GraphicsDevice gd, Veldrid.Texture texture, Veldrid.TextureView textureView)
-                : base(texture, textureView, gd.LinearSampler)
+            public FontTexture2D(GraphicsDevice gd, uint width, uint height) : base(gd, width, height)
             {
-                this._gd = gd;
             }
 
             void ITexture2D.SetData(Rectangle bounds, byte[] data)

@@ -45,6 +45,7 @@ namespace LifeSim.Rendering
             this._commandList.ClearDepthStencil(1f);
             this._sceneContext.SetupShadowMapBuffer(this._commandList, scene.mainLight);
             foreach (var renderable in this._renderList.renderables) {
+                if (renderable.material == null) continue;
                 this._DrawRenderable(renderable, renderable.material.shadowmapPass);
             }
 
@@ -58,6 +59,7 @@ namespace LifeSim.Rendering
                 this._commandList.ClearDepthStencil(1f);
                 this._sceneContext.SetupCamera3DInfoBuffer(this._commandList, camera, scene.mainLight);
                 foreach (var renderable in this._renderList.renderables) {
+                    if (renderable.material == null) continue;
                     this._DrawRenderable(renderable, renderable.material.pass);
                 }
             }
@@ -69,10 +71,11 @@ namespace LifeSim.Rendering
         {
             var mesh = renderable.mesh;
             var material = renderable.material;
-
+            if (mesh == null || material == null) return;
+            
             var objectResourceSet = this._sceneContext.GetObjectResourceSet(renderable);
 
-            var pipeline = this._psoManager.GetPipeline(pass, renderable.material, renderable);
+            var pipeline = this._psoManager.GetPipeline(pass, material, renderable);
 
             this._UpdatePerObjectBuffers(renderable);
             this._commandList.SetVertexBuffer(0, mesh.vertexBuffer);

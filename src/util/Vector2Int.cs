@@ -1,4 +1,5 @@
 using System;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 
 namespace LifeSim
@@ -7,6 +8,9 @@ namespace LifeSim
     {
         public int x;
         public int y;
+
+        public static Vector2Int one => new Vector2Int(1, 1);
+        public static Vector2Int zero => new Vector2Int(0, 0);
 
         public Vector2Int(int x, int y)
         {
@@ -63,6 +67,12 @@ namespace LifeSim
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator Vector2(Vector2Int a)
+        {
+            return new Vector2(a.x, a.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object? other)
         {
             if (!(other is Vector2Int)) return false;
@@ -78,7 +88,12 @@ namespace LifeSim
 
         public override int GetHashCode()
         {
-            return x.GetHashCode() ^ (y.GetHashCode() << 2);
+            return x.GetHashCode() ^ (y.GetHashCode() << 16);
+        }
+
+        public override string? ToString()
+        {
+            return "(" + this.x + ", " + this.y + ")";
         }
     }
 }

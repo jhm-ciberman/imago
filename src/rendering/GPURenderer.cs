@@ -54,19 +54,13 @@ namespace LifeSim.Rendering
         public GPUTexture MakeTexture(string path)
         {
             ImageSharpTexture texture = new ImageSharpTexture(path, true);
-            var deviceTexture = texture.CreateDeviceTexture(this._gd, this._factory);
-            var textureView = this._factory.CreateTextureView(deviceTexture);
-            
-            return new GPUTexture(deviceTexture, textureView, this._gd.PointSampler);
+            return new GPUTexture(this._gd, texture);
         }
 
         public GPUTexture MakeTexture(Image<Rgba32> image)
         {
             ImageSharpTexture texture = new ImageSharpTexture(image, true);
-            var deviceTexture = texture.CreateDeviceTexture(this._gd, this._factory);
-            var textureView = this._factory.CreateTextureView(deviceTexture);
-            
-            return new GPUTexture(deviceTexture, textureView, this._gd.PointSampler);
+            return new GPUTexture(this._gd, texture);
         }
 
         public GLTF.GLTFLoader LoadGLTF(string path, SurfaceMaterial defaultMaterial)
