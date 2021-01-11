@@ -53,14 +53,21 @@ namespace LifeSim.Engine.Rendering
             this._commandList.SetFramebuffer(this._renderTexture.framebuffer);
             this._sceneContext.SetupLightInfoBuffer(this._commandList, scene);
 
-            foreach (var camera in scene.cameras) {
-                this._commandList.ClearColorTarget(0, camera.clearColor);
+            var cameras = scene.cameras;
+            if (cameras.Count == 0) {
+                this._commandList.ClearColorTarget(0, RgbaFloat.Black);
                 this._commandList.ClearColorTarget(1, RgbaFloat.Black);
-                this._commandList.ClearDepthStencil(1f);
-                this._sceneContext.SetupCamera3DInfoBuffer(this._commandList, camera, scene.mainLight);
-                foreach (var renderable in this._renderList.renderables) {
-                    if (renderable.material == null) continue;
-                    this._DrawRenderable(renderable, renderable.material.pass);
+            } else {
+                for (int i = 0; i < cameras.Count; i++) {
+                    var camera = cameras[i];
+                    this._commandList.ClearColorTarget(0, camera.clearColor);
+                    this._commandList.ClearColorTarget(1, RgbaFloat.Black);
+                    this._commandList.ClearDepthStencil(1f);
+                    this._sceneContext.SetupCamera3DInfoBuffer(this._commandList, camera, scene.mainLight);
+                    foreach (var renderable in this._renderList.renderables) {
+                        if (renderable.material == null) continue;
+                        this._DrawRenderable(renderable, renderable.material.pass);
+                    }
                 }
             }
 
