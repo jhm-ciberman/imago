@@ -1,4 +1,4 @@
-namespace LifeSim
+namespace LifeSim.Assets
 {
     public class BinPacker
     {

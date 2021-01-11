@@ -1,7 +1,7 @@
 /*
 using System.Collections.Generic;
 
-namespace LifeSim
+namespace LifeSim.Assets
 {
     public class ColorLUT
     {

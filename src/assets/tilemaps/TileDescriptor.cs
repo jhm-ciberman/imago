@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 
-namespace LifeSim
+namespace LifeSim.Assets
 {
     public class TileDescriptor : IEquatable<TileDescriptor>
     {

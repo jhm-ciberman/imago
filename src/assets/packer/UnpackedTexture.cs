@@ -1,7 +1,7 @@
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
-namespace LifeSim
+namespace LifeSim.Assets
 {
     public class UnpackedTexture
     {

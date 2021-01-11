@@ -1,5 +1,5 @@
 /*
-namespace LifeSim
+namespace LifeSim.Assets
 {
     public class CharacterTextureBlitter
     {

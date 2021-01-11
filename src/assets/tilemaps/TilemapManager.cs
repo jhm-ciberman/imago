@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.Numerics;
-using LifeSim.Rendering;
+using LifeSim.Engine.Rendering;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
-namespace LifeSim
+namespace LifeSim.Assets
 {
     public class TilemapManager
     {

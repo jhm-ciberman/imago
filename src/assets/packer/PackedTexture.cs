@@ -1,7 +1,7 @@
 using System.Numerics;
-using LifeSim.Rendering;
+using LifeSim.Engine.Rendering;
 
-namespace LifeSim
+namespace LifeSim.Assets
 {
     public class PackedTexture : IAsset
     {

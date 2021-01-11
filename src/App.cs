@@ -1,5 +1,6 @@
 ﻿using LifeSim.Demo;
-using LifeSim.Rendering;
+using LifeSim.Engine;
+using LifeSim.Engine.Rendering;
 
 namespace LifeSim
 {

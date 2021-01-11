@@ -1,8 +1,8 @@
 using System.Linq;
-using static LifeSim.Tilemap;
-using static LifeSim.TileRequest;
+using static LifeSim.Assets.Tilemap;
+using static LifeSim.Assets.TileRequest;
 
-namespace LifeSim
+namespace LifeSim.Assets
 {
     public class TileDescriptorFactory
     {

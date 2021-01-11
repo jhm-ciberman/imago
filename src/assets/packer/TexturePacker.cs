@@ -1,9 +1,9 @@
 using System.Collections.Generic;
-using static LifeSim.BinPacker;
+using static LifeSim.Assets.BinPacker;
 using System.Numerics;
-using LifeSim.Rendering;
+using LifeSim.Engine.Rendering;
 
-namespace LifeSim
+namespace LifeSim.Assets
 {
     public class TexturePacker 
     {

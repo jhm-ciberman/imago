@@ -1,8 +1,8 @@
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using static LifeSim.TileDescriptor;
+using static LifeSim.Assets.TileDescriptor;
 
-namespace LifeSim
+namespace LifeSim.Assets
 {
     public class Tilemap : IAsset
     {

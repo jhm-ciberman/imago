@@ -2,7 +2,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 
-namespace LifeSim 
+namespace LifeSim.Assets
 {
     class AtlasBuilder 
     {

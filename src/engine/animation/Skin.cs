@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Numerics;
 
-namespace LifeSim.Anim
+namespace LifeSim.Engine.Anim
 {
     public class Skin
     {

@@ -1,6 +1,6 @@
-using LifeSim.SceneGraph;
+using LifeSim.Engine.SceneGraph;
 
-namespace LifeSim.Anim
+namespace LifeSim.Engine.Anim
 {
     public class AnimationPlayer
     {

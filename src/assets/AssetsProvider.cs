@@ -1,12 +1,10 @@
 using System.Collections.Generic;
-using System.Numerics;
-using LifeSim.Rendering;
-using LifeSim.View3D;
+using LifeSim.Engine.Rendering;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using V = ClipperLib.IntPoint;
 
-namespace LifeSim
+namespace LifeSim.Assets
 {
     public class AssetsProvider
     {

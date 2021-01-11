@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using LifeSim.Simulation;
 
-namespace LifeSim
+namespace LifeSim.Assets
 {
     public class AssetsContainer
     {

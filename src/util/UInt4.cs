@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace LifeSim.Rendering
+namespace LifeSim.Engine.Rendering
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct UInt4

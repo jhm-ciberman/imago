@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
-using static LifeSim.TileDescriptor;
+using static LifeSim.Assets.TileDescriptor;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
-namespace LifeSim
+namespace LifeSim.Assets
 {
     public class TileDrawOperation
     {

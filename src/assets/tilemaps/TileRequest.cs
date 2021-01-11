@@ -1,11 +1,11 @@
 using System.Collections.Generic;
-using static LifeSim.Tilemap;
+using static LifeSim.Assets.Tilemap;
 using System.Linq;
 using System;
 using static LifeSim.Simulation.TileCoverData;
 using LifeSim.Simulation;
 
-namespace LifeSim
+namespace LifeSim.Assets
 {
     public class TileRequest : IEquatable<TileRequest>
     {
