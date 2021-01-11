@@ -9,6 +9,7 @@ namespace LifeSim
         private Sdl2Window _window;
         private Viewport _viewport;
         public Viewport viewport => this._viewport;
+        private InputInstance _input;
 
         public Window()
         {
@@ -25,6 +26,8 @@ namespace LifeSim
             this._window.Resized += () => {
                 this._viewport.Resize(this.width, this.height);
             };
+            this._input = new InputInstance(this._window);
+            Input.SetInstance(this._input);
         }
 
         public void GoFullscreenMode()
@@ -57,8 +60,7 @@ namespace LifeSim
                     this.GoFullscreenMode();
                 }
 
-                var inputSnapshot = this._window.PumpEvents(); //For next frame
-                Input.UpdateFrameInput(inputSnapshot);
+                this._input.UpdateFrameInput();
             }
         }
 

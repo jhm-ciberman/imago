@@ -27,7 +27,7 @@ namespace LifeSim.Rendering
 
         private bool _MouseIsInside(RenderTexture mainRenderTexture)
         {
-            var mousePos = Input.MousePosition;
+            var mousePos = Input.mousePosition;
             if (mousePos.X < 0) return false;
             if (mousePos.Y < 0) return false;
             var texture = mainRenderTexture.pickingTexture;
@@ -39,7 +39,7 @@ namespace LifeSim.Rendering
         public void Update(RenderTexture mainRenderTexture)
         {
             if (this._MouseIsInside(mainRenderTexture)) {
-                var mousePos = Input.MousePosition;
+                var mousePos = Input.mousePosition;
                 uint x = (uint) mousePos.X;
                 uint y;
                 if (this._gd.IsUvOriginTopLeft) {

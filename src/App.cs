@@ -47,10 +47,10 @@ namespace LifeSim
             var fps = (1f / deltaTime).ToString("0.00");
             var dt = (int) (deltaTime * 1000000);
 
-            var mouse = "(" + Input.MousePosition.X + ", " +Input.MousePosition.Y + ")";
+            var mouse = "(" + Input.mousePosition.X + ", " +Input.mousePosition.Y + ")";
             this._window.title = "Hello world" + " (" + this._renderer.backendType.ToString() + ") frame = " + dt + "microseg FPS = " + fps + " Mouse: " + mouse;
 
-            if (Input.GetKeyDown(Veldrid.Key.Escape)) {
+            if (Input.GetKeyDown(Veldrid.Key.Escape) && ! Input.mouseIsLocked) {
                 this._window.Close();
                 return;
             }

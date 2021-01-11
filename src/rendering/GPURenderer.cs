@@ -32,7 +32,7 @@ namespace LifeSim.Rendering
             GraphicsDeviceOptions options = new GraphicsDeviceOptions(
                 debug: false,
                 swapchainDepthFormat: PixelFormat.R16_UNorm,
-                syncToVerticalBlank: false,
+                syncToVerticalBlank: true,
                 resourceBindingModel: ResourceBindingModel.Default,
                 preferDepthRangeZeroToOne: true,
                 preferStandardClipSpaceYDirection: true
@@ -59,7 +59,7 @@ namespace LifeSim.Rendering
 
         public GPUTexture MakeTexture(Image<Rgba32> image)
         {
-            ImageSharpTexture texture = new ImageSharpTexture(image, true);
+            ImageSharpTexture texture = new ImageSharpTexture(image, false);
             return new GPUTexture(this._gd, texture);
         }
 
