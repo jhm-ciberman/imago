@@ -61,6 +61,9 @@ namespace LifeSim.Assets
                 container.Register(id, packedTexture);
             }
 
+            container.mainAtlasTexture = packer.texture;
+            GameStage.debugTexture = packer.texture;
+
             //ColorLUT loader = new ColorLUT(this._Tex("avatar/lut"));
             //this._MapLutAndRegister(container, "avatar.lut.hair.", loader.hair);
             //this._MapLutAndRegister(container, "avatar.lut.eyes.", loader.eyes);

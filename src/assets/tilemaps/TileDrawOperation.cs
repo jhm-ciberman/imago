@@ -94,7 +94,7 @@ namespace LifeSim.Assets
         {
             var p = layer.srcRect.coords + pixel - layer.dstOffset;
             var texture = layer.tilemap.texture;
-            return texture[p.x, texture.Height - 1 - p.y];
+            return texture[p.x, p.y];
         }
 
     }

@@ -59,6 +59,8 @@ namespace LifeSim.Engine
 
         private void Update(float deltaTime)
         {
+            this._renderer.mousePickingPosition = Input.mousePosition;
+            
             var fps = (1f / deltaTime).ToString("0.00");
             var dt = (int) (deltaTime * 1000000);
 

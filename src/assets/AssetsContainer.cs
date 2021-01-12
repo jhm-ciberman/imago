@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using LifeSim.Engine.Rendering;
 using LifeSim.Simulation;
 
 namespace LifeSim.Assets
@@ -12,6 +13,8 @@ namespace LifeSim.Assets
         {
             this._resources.Add(id, asset);
         }
+
+        public GPUTexture? mainAtlasTexture = null;
 
         public T Get<T>(string id) where T : IAsset
         {

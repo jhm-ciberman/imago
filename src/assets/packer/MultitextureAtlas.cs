@@ -37,6 +37,7 @@ namespace LifeSim.Assets
             int h = texture.Height;
             int r = this._GetFillArea(w) - w;
             int b = this._GetFillArea(h) - h;
+            System.Console.WriteLine(x + "," + y + ": " + texture.Width + ", " + texture.Height);
 
             if (r > 0) // Right
             {
@@ -59,7 +60,7 @@ namespace LifeSim.Assets
                     dx: x + w, dy: y + h, dw: r, dh: b);
             }
             // The actual image:
-            this._texture.Mutate(ctx => ctx.DrawImage(texture, new Point(x, this._texture.Height - y - h), 1f));
+            this._texture.Mutate(ctx => ctx.DrawImage(texture, new Point(x, y), 1f));
         }
 
         // x = source, d = destination
@@ -75,8 +76,8 @@ namespace LifeSim.Assets
                     int destY = dy + yy;
                     if (destX >= 0 && destY >= 0 && destX < this.width && destY < this.height) 
                     {
-                        var col = srcTexture[sx + (int) (xx * scaleX), srcTexture.Height - 1 - (sy + (int) (yy * scaleY))];
-                        this._texture[destX, this._texture.Height - destY - 1] = col;
+                        var col = srcTexture[sx + (int) (xx * scaleX), sy + (int) (yy * scaleY)];
+                        this._texture[destX, destY] = col;
                     }
                 }
             }

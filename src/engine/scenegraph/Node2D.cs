@@ -14,6 +14,8 @@ namespace LifeSim.Engine.SceneGraph
 
         private Matrix3x2 _localMatrix = Matrix3x2.Identity;
         private bool _localMatrixDirty = false;
+
+        public bool visible = true;
         
         private Matrix3x2 _worldMatrix;
         public ref Matrix3x2 worldMatrix => ref this._worldMatrix;

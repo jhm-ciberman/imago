@@ -23,7 +23,8 @@ namespace LifeSim.Assets
         private List<TileDrawOperation> _pendingOperations = new List<TileDrawOperation>();
 
         private GPUTexture _texture;
-        private SurfaceMaterial _material;
+        private SurfaceMaterial _materialTerrain;
+        private SurfaceMaterial _materialHouses;
 
         private int textureMaxSize;
 
@@ -46,13 +47,19 @@ namespace LifeSim.Assets
 
             this._image = new Image<Rgba32>(textureMaxSize, textureMaxSize);
             this._texture = assetManager.MakeTexture(this._image);
-            this._material = assetManager.MakeSurfaceMaterial(this._texture);
+            this._materialTerrain = assetManager.MakeSurfaceMaterial(this._texture);
 
             this._tileDescriptorFactory = new TileDescriptorFactory(assetsContainer);
+
+            var atlasTexture = assetsContainer.mainAtlasTexture;
+            if (atlasTexture == null) {
+                throw new System.Exception("No atlas texture registered");
+            }
+            this._materialHouses = assetManager.MakeSurfaceMaterial(atlasTexture);
         }
 
-        public GPUTexture texture => this._texture;
-        public SurfaceMaterial material => this._material;
+        public SurfaceMaterial materialTerrain => this._materialTerrain;
+        public SurfaceMaterial materialHouses => this._materialHouses;
 
         public void UpdateTilemap()
         {

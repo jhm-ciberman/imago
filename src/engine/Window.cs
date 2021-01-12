@@ -56,7 +56,7 @@ namespace LifeSim.Engine
 
                 mainLoop.Invoke(deltaSeconds);
 
-                if (Input.GetKeyDown(Veldrid.Key.Space)) {
+                if (Input.GetKeyDown(Veldrid.Key.F4)) {
                     this.GoFullscreenMode();
                 }
 

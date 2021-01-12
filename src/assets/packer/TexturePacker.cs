@@ -15,11 +15,19 @@ namespace LifeSim.Assets
         
         private AssetManager _assetManager;
 
+        private BinPacker _packer;
+        private AtlasBuilder _atlasBuilder;
+        private GPUTexture _texture;
+
         public TexturePacker(AssetManager assetManager, int mipmapLevels, int atlasSize)
         {
             this._assetManager = assetManager;
             this._mipmapLevels = mipmapLevels;
             this._atlasSize = atlasSize;
+            this._packer = new BinPacker((uint) (this._atlasSize >> this._mipmapLevels));
+
+            this._atlasBuilder = new AtlasBuilder(this._atlasSize, this._mipmapLevels);
+            this._texture = this._assetManager.MakeTexture(this._atlasBuilder.image);
         }
 
         public void Add(UnpackedTexture unpackedTexture)
@@ -32,15 +40,14 @@ namespace LifeSim.Assets
             this._unpacked.AddRange(unpackedTextures);
         }
 
+        public GPUTexture texture => this._texture;
+
         public (string, PackedTexture)[] Pack()
         {
             var sizes = this._GetBinRects(this._unpacked);
+            var rects = this._packer.Fit(sizes);
 
-            var packer = new BinPacker((uint) (this._atlasSize >> this._mipmapLevels));
-            var rects = packer.Fit(sizes);
 
-            AtlasBuilder mapAtlas = new AtlasBuilder(this._atlasSize, this._mipmapLevels);
-            var gpuTexture = this._assetManager.MakeTexture(mapAtlas.image);
             (string, PackedTexture)[] textures = new (string, PackedTexture)[this._unpacked.Count];
             int i = 0;
             foreach(var rect in rects) 
@@ -48,13 +55,15 @@ namespace LifeSim.Assets
                 UnpackedTexture texture = rect.element;
 
                 Vector2Int coord = new Vector2Int((int) rect.rect.x, (int) rect.rect.y);
-                mapAtlas.Draw(texture.baseMap, coord);
+                this._atlasBuilder.Draw(texture.baseMap, coord);
                 //if (texture.normalMap != null) normalAtlas.Draw(texture.normalMap, coord);
 
                 (Vector2 uv1, Vector2 uv2) = this._GetUVs(coord, texture.size);
 
-                textures[i++] = (texture.id, new PackedTexture(uv1, uv2, gpuTexture));
+                textures[i++] = (texture.id, new PackedTexture(uv1, uv2, this._texture));
             }
+
+            this._texture.Update(this._atlasBuilder.image);
 
             return textures;
         }
