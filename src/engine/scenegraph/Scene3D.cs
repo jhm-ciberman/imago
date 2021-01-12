@@ -1,11 +1,10 @@
-using System.Collections.Generic;
 using System.Numerics;
 
 namespace LifeSim.Engine.SceneGraph
 {
     public class Scene3D : Container<Node3D>
     {
-        private List<Camera3D> _cameras = new List<Camera3D>();
+        public Camera3D? activeCamera = null;
 
         public DirectionalLight mainLight = new DirectionalLight();
         
@@ -15,13 +14,6 @@ namespace LifeSim.Engine.SceneGraph
         {
             //
         }
-
-        public void Add(Camera3D camera)
-        {
-            this._cameras.Add(camera);
-        }
-
-        public IReadOnlyList<Camera3D> cameras => this._cameras;
 
         public void UpdateWorldMatrices()
         {

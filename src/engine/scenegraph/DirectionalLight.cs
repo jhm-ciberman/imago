@@ -4,16 +4,17 @@ namespace LifeSim.Engine.SceneGraph
 {
     public class DirectionalLight
     {
-        public Vector3 position = new Vector3(100, 200, 100);
+        public Vector3 direction = new Vector3(100, 200, 100);
         public Vector3 color = new Vector3(1f, 1f, 1f);
 
-        public Matrix4x4 shadowMapMatrix 
+        public Vector2 shadowMapSize = new Vector2(20f, 20f);
+        public float shadowZNear = 2f;
+        public float shadowZFar = 100f;
+
+        public Matrix4x4 GetShadowMapMatrix(Vector3 cameraPosition)
         {
-            get
-            {
-                return Matrix4x4.CreateLookAt(this.position, new Vector3(0, 0, 0), Vector3.UnitY)
-                    * Matrix4x4.CreateOrthographic(6, 6, 2f, 100f);
-            }
+            return Matrix4x4.CreateLookAt(cameraPosition + this.direction, cameraPosition, Vector3.UnitY)
+                * Matrix4x4.CreateOrthographic(this.shadowMapSize.X, this.shadowMapSize.Y, this.shadowZNear, this.shadowZFar);
         }
     }
 }

@@ -22,7 +22,7 @@ namespace LifeSim.Engine.Rendering
             private float _padding0;
             public Vector3 mainLightColor;
             private float _padding1;
-            public Vector3 mainLightPosition;
+            public Vector3 mainLightDirection;
             private float _padding2;
         }
 
@@ -122,7 +122,7 @@ namespace LifeSim.Engine.Rendering
             LightInfo lightInfo = new LightInfo();
             lightInfo.ambientColor = scene.ambientColor;
             lightInfo.mainLightColor = scene.mainLight.color;
-            lightInfo.mainLightPosition = Vector3.Normalize(scene.mainLight.position);
+            lightInfo.mainLightDirection = Vector3.Normalize(scene.mainLight.direction);
             commandList.UpdateBuffer(this.lightInfoBuffer, 0, ref lightInfo);
         }
 
@@ -130,7 +130,7 @@ namespace LifeSim.Engine.Rendering
         {
             CameraInfo cameraInfo = new CameraInfo();
             cameraInfo.viewProjectionMatrix = camera.viewProjectionMatrix;
-            cameraInfo.shadowMapMatrix = mainLight.shadowMapMatrix * this._shadowMapScaling;
+            cameraInfo.shadowMapMatrix = mainLight.GetShadowMapMatrix(camera.position) * this._shadowMapScaling;
             commandList.UpdateBuffer(this.camera3DInfoBuffer, 0, ref cameraInfo);
         }
 
@@ -139,10 +139,10 @@ namespace LifeSim.Engine.Rendering
             commandList.UpdateBuffer(this.camera2DInfoBuffer, 0, ref projection);
         }
 
-        public void SetupShadowMapBuffer(CommandList commandList, DirectionalLight light)
+        public void SetupShadowMapBuffer(CommandList commandList, Camera3D camera, DirectionalLight mainLight)
         {
             ShadowMapInfo shadowMapInfo = new ShadowMapInfo();
-            shadowMapInfo.shadowMatrix = light.shadowMapMatrix;
+            shadowMapInfo.shadowMatrix = mainLight.GetShadowMapMatrix(camera.position);
             commandList.UpdateBuffer(this.shadowmapInfoBuffer, 0, ref shadowMapInfo);
         }
 
