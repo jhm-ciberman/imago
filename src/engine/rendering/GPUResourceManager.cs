@@ -2,7 +2,7 @@ using Veldrid;
 
 namespace LifeSim.Engine.Rendering
 {
-    public class GPUResources : IMaterialBuilder 
+    public class GPUResourceManager : IMaterialBuilder 
     {
         private GraphicsDevice _gd;
 
@@ -16,7 +16,7 @@ namespace LifeSim.Engine.Rendering
 
         public readonly RenderTexture mainRenderTexture;
 
-        public GPUResources(GraphicsDevice gd, uint width, uint height)
+        public GPUResourceManager(GraphicsDevice gd, uint width, uint height)
         {
             this._gd = gd;
             var factory = gd.ResourceFactory;

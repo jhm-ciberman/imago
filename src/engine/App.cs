@@ -28,7 +28,9 @@ namespace LifeSim.Engine
         
         public Viewport viewport => this._window.viewport;
 
-        public GPURenderer renderer => this._renderer;
+        public uint selectedObjectID => this._renderer.selectedObjectID;
+        
+        public AssetManager assetManager => this._renderer.assetManager;
 
         private static Veldrid.GraphicsBackend ParseGraphicsBackend(string[] args)
         {

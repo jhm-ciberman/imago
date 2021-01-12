@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using LifeSim.Engine;
 using LifeSim.Engine.Rendering;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -8,11 +9,11 @@ namespace LifeSim.Assets
 {
     public class AssetsProvider
     {
-        private GPURenderer _renderer;
+        private AssetManager _assetsManager;
 
-        public AssetsProvider(GPURenderer renderer)
+        public AssetsProvider(AssetManager assetsManager)
         {
-            this._renderer = renderer;
+            this._assetsManager = assetsManager;
         }
         
         public AssetsContainer MakeContainer()
@@ -52,7 +53,7 @@ namespace LifeSim.Assets
                 ("tex:water"                   , "water.png"                     ),
             };
 
-            var packer = new TexturePacker(this._renderer, 6, 1024);
+            var packer = new TexturePacker(this._assetsManager, 6, 1024);
             foreach ((string id, string path) in packed) {
                 packer.Add(new UnpackedTexture(id, this._Tex(path))); 
             }
@@ -107,6 +108,12 @@ namespace LifeSim.Assets
 
             container.Register("asset:aperture.mediewindow", mediewindow.BuildAsset());
             container.Register("asset:aperture.mediedoor", mediedoor.BuildAsset());
+
+            container.Register("font:default", new FontAsset(this._assetsManager.MakeFontSystem(new string[] {
+                @"res/fonts/DroidSans.ttf",
+                @"res/fonts/DroidSansJapanese.ttf",
+                @"res/fonts/Symbola-Emoji.ttf",
+            })));
 
             return container;
         }

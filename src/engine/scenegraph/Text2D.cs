@@ -1,19 +1,33 @@
+using System.Drawing;
+using LifeSim.Assets;
+using LifeSim.Engine.Rendering;
+
 namespace LifeSim.Engine.SceneGraph
 {
-    public class Text2D : Node2D
+    public class Text2D : Renderable2D
     {
-        private string _text;
+        public string text;
 
-        public Text2D()
+        public Color color = Color.OrangeRed;
+
+        public FontAsset font;
+
+        public int fontSize = 30;
+
+        public Text2D() : this("", FontAsset.GetDefaultFont()) { }
+        public Text2D(string text) : this(text, FontAsset.GetDefaultFont()) { }
+        public Text2D(string text, FontAsset font)
         {
-            this._text = "";
+            this.text = text;
+            this.font = font;
         }
 
-        public Text2D(string text)
+        public override void Render(SpriteBatcher spriteBatcher)
         {
-            this._text = text;
+            //string text = "The quick brown fox jumps over the lazy dog\nいろはにほへ\nEmoji Font: 🙌📦👏👏";
+            var fontSize = this.font.GetFont(this.fontSize);
+            var pos = this.worldMatrix.Translation;
+            fontSize.DrawText(spriteBatcher, pos.X, pos.Y, this.text, this.color);
         }
-
-        public string text { get => this._text; set => this._text = value; }
     }
 }

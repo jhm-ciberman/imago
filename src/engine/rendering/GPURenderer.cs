@@ -23,7 +23,10 @@ namespace LifeSim.Engine.Rendering
 
         private GPUMousePicker _mousePicker;
 
-        private GPUResources _gpuResources;
+        private GPUResourceManager _gpuResources;
+
+        private AssetManager _assetManager;
+        public AssetManager assetManager => this._assetManager;
 
         private PSOManager _psoManager;
 
@@ -41,51 +44,16 @@ namespace LifeSim.Engine.Rendering
             this._gd = VeldridStartup.CreateGraphicsDevice(window.nativeWindow, options, graphicsBackend);
             this._factory = this._gd.ResourceFactory;
 
-            this._gpuResources = new GPUResources(this._gd, window.width, window.height);
+            this._gpuResources = new GPUResourceManager(this._gd, window.width, window.height);
 
             this._psoManager = new PSOManager(this._factory);
 
-            this._renderer2d     = new GPURenderer2D(this._gd, this, this._gpuResources, this._psoManager);
+            this._assetManager = new AssetManager(this._gd, this._gpuResources);
+
+            this._renderer2d     = new GPURenderer2D(this._gd, this._assetManager, this._gpuResources, this._psoManager);
             this._renderer3d     = new GPURenderer3D(this._gd, this._psoManager, this._gpuResources);
             this._mousePicker    = new GPUMousePicker(this._gd);
-            this._fullScreenQuad = new FullScreenRenderer(this._gd, this, this._psoManager, this._gpuResources);
-        }
-
-        public GPUTexture MakeTexture(string path)
-        {
-            ImageSharpTexture texture = new ImageSharpTexture(path, true);
-            return new GPUTexture(this._gd, texture);
-        }
-
-        public GPUTexture MakeTexture(Image<Rgba32> image)
-        {
-            ImageSharpTexture texture = new ImageSharpTexture(image, false);
-            return new GPUTexture(this._gd, texture);
-        }
-
-        public GLTF.GLTFLoader LoadGLTF(string path, SurfaceMaterial defaultMaterial)
-        {
-            return new GLTF.GLTFLoader(this, defaultMaterial, path);
-        }
-
-        public GPUMesh MakeMesh(MeshData meshData)
-        {
-            return new GPUMesh(this._gd, meshData);
-        }
-
-        public SurfaceMaterial MakeSurfaceMaterial(GPUTexture texture)
-        {
-            return new SurfaceMaterial(this._gpuResources, texture);
-        }
-
-        public SpriteMaterial MakeSpritesMaterial(Veldrid.Texture texture)
-        {
-            return new SpriteMaterial(this._gpuResources, texture);
-        }
-
-        public FullScreenMaterial MakeFullScreenMaterial(Veldrid.Texture texture)
-        {
-            return new FullScreenMaterial(this._gpuResources, texture);
+            this._fullScreenQuad = new FullScreenRenderer(this._gd, this._assetManager, this._psoManager, this._gpuResources);
         }
 
         public uint selectedObjectID => this._mousePicker.objectID;

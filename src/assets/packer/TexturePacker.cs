@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using static LifeSim.Assets.BinPacker;
 using System.Numerics;
 using LifeSim.Engine.Rendering;
+using LifeSim.Engine;
 
 namespace LifeSim.Assets
 {
@@ -12,11 +13,11 @@ namespace LifeSim.Assets
 
         private List<UnpackedTexture> _unpacked = new List<UnpackedTexture>(); 
         
-        private GPURenderer _renderer;
+        private AssetManager _assetManager;
 
-        public TexturePacker(GPURenderer renderer, int mipmapLevels, int atlasSize)
+        public TexturePacker(AssetManager assetManager, int mipmapLevels, int atlasSize)
         {
-            this._renderer = renderer;
+            this._assetManager = assetManager;
             this._mipmapLevels = mipmapLevels;
             this._atlasSize = atlasSize;
         }
@@ -39,7 +40,7 @@ namespace LifeSim.Assets
             var rects = packer.Fit(sizes);
 
             AtlasBuilder mapAtlas = new AtlasBuilder(this._atlasSize, this._mipmapLevels);
-            var gpuTexture = this._renderer.MakeTexture(mapAtlas.image);
+            var gpuTexture = this._assetManager.MakeTexture(mapAtlas.image);
             (string, PackedTexture)[] textures = new (string, PackedTexture)[this._unpacked.Count];
             int i = 0;
             foreach(var rect in rects) 

@@ -1,0 +1,96 @@
+using System.IO;
+using FontStashSharp;
+using FontStashSharp.Interfaces;
+using LifeSim.Engine.Rendering;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using Veldrid;
+using Veldrid.ImageSharp;
+using Rectangle = System.Drawing.Rectangle;
+
+namespace LifeSim.Engine
+{
+    public class AssetManager : ITexture2DCreator
+    {
+        class FontTexture2D : GPUTexture, ITexture2D
+        {
+            public FontTexture2D(GraphicsDevice gd, uint width, uint height) : base(gd, width, height)
+            {
+            }
+
+            void ITexture2D.SetData(Rectangle bounds, byte[] data)
+            {
+                this._gd.UpdateTexture(
+                    this._deviceTexture, data, 
+                    x: (uint) bounds.X, y: (uint) bounds.Y, z: 0, 
+                    width: (uint) bounds.Width, height: (uint) bounds.Height, depth: 1, 
+                    mipLevel: 0, arrayLayer: 0
+                );
+            }
+        }
+
+        private GraphicsDevice _gd;
+
+        private GPUResourceManager _gpuResourceManager;
+        
+        public AssetManager(GraphicsDevice gd, GPUResourceManager gpuResourceManager)
+        {
+            this._gd = gd;
+            this._gpuResourceManager = gpuResourceManager;
+            
+        }
+
+        public GPUTexture MakeTexture(string path)
+        {
+            ImageSharpTexture texture = new ImageSharpTexture(path, true);
+            return new GPUTexture(this._gd, texture);
+        }
+
+        public GPUTexture MakeTexture(Image<Rgba32> image)
+        {
+            ImageSharpTexture texture = new ImageSharpTexture(image, false);
+            return new GPUTexture(this._gd, texture);
+        }
+
+        public GLTF.GLTFLoader LoadGLTF(string path, SurfaceMaterial defaultMaterial)
+        {
+            return new GLTF.GLTFLoader(this, defaultMaterial, path);
+        }
+
+        public GPUMesh MakeMesh(MeshData meshData)
+        {
+            return new GPUMesh(this._gd, meshData);
+        }
+
+        public SurfaceMaterial MakeSurfaceMaterial(GPUTexture texture)
+        {
+            return new SurfaceMaterial(this._gpuResourceManager, texture);
+        }
+
+        public SpriteMaterial MakeSpritesMaterial(Veldrid.Texture texture)
+        {
+            return new SpriteMaterial(this._gpuResourceManager, texture);
+        }
+
+        public FullScreenMaterial MakeFullScreenMaterial(Veldrid.Texture texture)
+        {
+            return new FullScreenMaterial(this._gpuResourceManager, texture);
+        }
+
+        public FontSystem MakeFontSystem(string[] paths)
+        {
+            var fontLoader = StbTrueTypeSharpFontLoader.Instance;
+            int atlasSize = 1024;
+            var fontSystem = new FontSystem(fontLoader, this, atlasSize, atlasSize, 0, 1, true);
+            foreach (var path in paths) {
+                fontSystem.AddFont(File.ReadAllBytes(path));
+            }
+            return fontSystem;
+        }
+
+        ITexture2D ITexture2DCreator.Create(int width, int height)
+        {
+            return new FontTexture2D(this._gd, (uint) width, (uint) height);
+        }
+    }
+}

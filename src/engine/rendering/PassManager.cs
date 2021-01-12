@@ -9,7 +9,7 @@ namespace LifeSim.Engine.Rendering
         public readonly Pass fullscreen;
         public readonly Pass sprites;
 
-        public PassManager(GraphicsDevice gd, GPUResources resources)
+        public PassManager(GraphicsDevice gd, GPUResourceManager resources)
         {
             var sceneContext = resources.sceneContext;
             var shadowmapTexture = sceneContext.shadowmapTexture;

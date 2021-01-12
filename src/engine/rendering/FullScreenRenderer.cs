@@ -1,8 +1,5 @@
-using System.IO;
 using System.Numerics;
-using System.Text;
 using Veldrid;
-using Veldrid.SPIRV;
 
 namespace LifeSim.Engine.Rendering
 {
@@ -45,14 +42,14 @@ namespace LifeSim.Engine.Rendering
         private IRenderTexture _sourceTexture;
         private IMaterial? _material = null;
         private PSOManager _psoManager;
-        private GPURenderer _renderer;
+        private AssetManager _assetManager;
 
         private FullScreenQuad _quad;
 
-        public FullScreenRenderer(GraphicsDevice gd, GPURenderer renderer, PSOManager psoManager, GPUResources resources)
+        public FullScreenRenderer(GraphicsDevice gd, AssetManager assetManager, PSOManager psoManager, GPUResourceManager resources)
         {
             this._gd = gd;
-            this._renderer = renderer;
+            this._assetManager = assetManager;
             this._destinationTexture = resources.fullScreenRenderTexture;
             this._sourceTexture = resources.mainRenderTexture;
             this._sourceTexture.onResized += this._OnSourceTextureResized;
@@ -86,7 +83,7 @@ namespace LifeSim.Engine.Rendering
         public void Render()
         {
             if (this._material == null) {
-                this._material = this._renderer.MakeFullScreenMaterial(this._sourceTexture.colorTexture);
+                this._material = this._assetManager.MakeFullScreenMaterial(this._sourceTexture.colorTexture);
             }
 
             var pipeline = this._psoManager.GetPipeline(this._material.pass, this._material, this._quad);

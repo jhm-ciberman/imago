@@ -49,13 +49,13 @@ namespace LifeSim.Engine.Rendering
         private int _totalSpritesToDraw = 0;
 
         private PSOManager _psoManager;
-        private GPURenderer _renderer;
+        private AssetManager _assetManager;
         private SpriteBatch _renderable = new SpriteBatch();
 
-        public SpriteBatcher(GraphicsDevice gd, PSOManager psoManager, GPURenderer renderer, CommandList commandList)
+        public SpriteBatcher(GraphicsDevice gd, PSOManager psoManager, AssetManager assetManager, CommandList commandList)
         {
             this._gd = gd;
-            this._renderer = renderer;
+            this._assetManager = assetManager;
             this._psoManager = psoManager;
             this._commandList = commandList;
             this._factory = gd.ResourceFactory;
@@ -163,7 +163,7 @@ namespace LifeSim.Engine.Rendering
         {
             if (! this._materials.TryGetValue(texture, out IMaterial? material)) {
                 System.Console.WriteLine("Create material");
-                material = this._renderer.MakeSpritesMaterial(texture.deviceTexture);
+                material = this._assetManager.MakeSpritesMaterial(texture.deviceTexture);
                 this._materials.Add(texture, material);
             }
             return material;

@@ -17,7 +17,7 @@ namespace LifeSim.Engine.Rendering
 
         private RenderList _renderList = new RenderList();
 
-        public GPURenderer3D(GraphicsDevice graphicsDevice, PSOManager psoManager, GPUResources resources)
+        public GPURenderer3D(GraphicsDevice graphicsDevice, PSOManager psoManager, GPUResourceManager resources)
         {
             this._graphicsDevice = graphicsDevice;
             this._renderTexture = resources.mainRenderTexture;

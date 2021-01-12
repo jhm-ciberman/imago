@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Numerics;
+using LifeSim.Engine;
 using LifeSim.Engine.Rendering;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -28,7 +29,7 @@ namespace LifeSim.Assets
 
         private TileDescriptorFactory _tileDescriptorFactory;
 
-        public TilemapManager(GPURenderer renderer, AssetsContainer assetsContainer, int textureMaxSize, int mipMapLevels, int tileSize)
+        public TilemapManager(AssetManager assetManager, AssetsContainer assetsContainer, int textureMaxSize, int mipMapLevels, int tileSize)
         {
             this.textureMaxSize = textureMaxSize;
             this._gridSize = new Vector2Int(textureMaxSize, textureMaxSize) / tileSize;
@@ -44,8 +45,8 @@ namespace LifeSim.Assets
             }
 
             this._image = new Image<Rgba32>(textureMaxSize, textureMaxSize);
-            this._texture = renderer.MakeTexture(this._image);
-            this._material = renderer.MakeSurfaceMaterial(this._texture);
+            this._texture = assetManager.MakeTexture(this._image);
+            this._material = assetManager.MakeSurfaceMaterial(this._texture);
 
             this._tileDescriptorFactory = new TileDescriptorFactory(assetsContainer);
         }
