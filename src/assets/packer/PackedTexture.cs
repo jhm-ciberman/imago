@@ -1,3 +1,4 @@
+using System;
 using System.Numerics;
 using LifeSim.Engine.Rendering;
 
@@ -17,18 +18,18 @@ namespace LifeSim.Assets
         {
             this.baseMap = baseMap;
             this.bumpMap = bumpMap;
-            this.uv1 = new Vector2(uv1.X, uv2.Y);
-            this.uv2 = new Vector2(uv2.X, uv1.Y);
+            this.uv1 = uv1;
+            this.uv2 = uv2;
         }
 
-        public (float, float, float, float) GetUVs() 
+        internal Vector4 GetTextureST()
         {
-            return (this.uv1.X, 1f - this.uv1.Y, this.uv2.X, 1f - this.uv2.Y);
+            Vector2 delta = this.uv2 - this.uv1;
+            return new Vector4(delta.X, delta.Y, this.uv1.X, this.uv1.Y);
         }
 
         public Vector2 GetRealUV(Vector2 textureSpaceUV)
         {
-            //textureSpaceUV.Y = 1f - textureSpaceUV.Y;
             return this.uv1 + (this.uv2 - this.uv1) * textureSpaceUV;
         }
 

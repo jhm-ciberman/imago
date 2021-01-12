@@ -35,6 +35,7 @@ namespace LifeSim.Engine.Rendering
             private float _padding0;
             private float _padding1;
             private float _padding2;
+            public Vector4 textureST;
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -152,6 +153,7 @@ namespace LifeSim.Engine.Rendering
             objectInfo.modelMatrix = renderable.worldMatrix;
             objectInfo.albedoColor = renderable.albedoColor;
             objectInfo.pickingID = renderable.pickingID;
+            objectInfo.textureST = renderable.textureST;
             commandList.UpdateBuffer(this.modelInfoBuffer, 0, ref objectInfo);
         }
 

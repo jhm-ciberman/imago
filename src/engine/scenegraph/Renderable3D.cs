@@ -22,7 +22,9 @@ namespace LifeSim.Engine.SceneGraph
         }
         
         public Vector4 albedoColor = new Vector4(1f, 1f, 1f, 0f);
-        
+
+        public Vector4 textureST = new Vector4(1f, 1f, 0f, 0f);
+
         public ResourceLayout? resourceLayout { get; private set; }
 
         public VertexLayoutKind vertexLayoutKind => this.mesh != null ? this.mesh.vertexLayoutKind : VertexLayoutKind.Regular;

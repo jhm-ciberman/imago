@@ -34,7 +34,7 @@ namespace LifeSim.Assets
                     Vector2Int pixel = new Vector2Int(x, y);
                     var col = this._Fragment(pixel);
                     int px = this._dstCoord.x + pixel.x;
-                    int py = this._image.Height - 1 - this._dstCoord.y - pixel.y;
+                    int py = this._dstCoord.y + pixel.y;
                     this._image[px, py] = col;
                 }
             }

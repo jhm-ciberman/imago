@@ -162,7 +162,6 @@ namespace LifeSim.Engine.Rendering
         private IMaterial _GetMaterialOrNew(GPUTexture texture)
         {
             if (! this._materials.TryGetValue(texture, out IMaterial? material)) {
-                System.Console.WriteLine("Create material");
                 material = this._assetManager.MakeSpritesMaterial(texture.deviceTexture);
                 this._materials.Add(texture, material);
             }

@@ -56,6 +56,8 @@ namespace LifeSim.Assets
                 throw new System.Exception("No atlas texture registered");
             }
             this._materialHouses = assetManager.MakeSurfaceMaterial(atlasTexture);
+
+            //GameStage.debugTexture = this._texture;
         }
 
         public SurfaceMaterial materialTerrain => this._materialTerrain;
