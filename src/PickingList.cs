@@ -25,7 +25,7 @@ namespace LifeSim
             this._list.Add(renderable); 
         }
 
-        public void AddAllRecursive(Container3D container)
+        public void AddAllRecursive(Container<Node3D> container)
         {
             if (container is Renderable3D renderable) {
                 this.Add(renderable);

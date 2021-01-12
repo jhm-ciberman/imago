@@ -2,7 +2,7 @@ using System.Numerics;
 
 namespace LifeSim.Engine.SceneGraph
 {
-    public class Node2D : Container2D
+    public class Node2D : Container<Node2D>
     {
         private Vector2    _position;
         private float      _rotation;

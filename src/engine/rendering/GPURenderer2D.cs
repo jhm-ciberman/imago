@@ -27,6 +27,7 @@ namespace LifeSim.Engine.Rendering
         public void Render(Canvas2D canvas)
         {
             Viewport viewport = canvas.viewport;
+            canvas.UpdateWorldMatrices();
             this._commandList.Begin();
             this._commandList.SetFramebuffer(this._renderTexture.framebuffer);
             this._commandList.ClearDepthStencil(1f);
@@ -40,7 +41,7 @@ namespace LifeSim.Engine.Rendering
             this._commandList.End();
         }
 
-        private void _RenderRecursive(Container2D container)
+        private void _RenderRecursive(Container<Node2D> container)
         {
             foreach (var child in container.children) {
                 if (child is Renderable2D renderable) {

@@ -3,7 +3,7 @@ using System.Numerics;
 
 namespace LifeSim.Engine.SceneGraph 
 {
-    public class Node3D : Container3D
+    public class Node3D : Container<Node3D>
     {
         private Vector3    _position;
         private Quaternion _rotation;

@@ -13,13 +13,13 @@ namespace LifeSim.Engine.Rendering
 
         }
 
-        public void UpdateRenderList(Container3D node)
+        public void UpdateRenderList(Container<Node3D> node)
         {
             this._renderList.Clear();
             this._UpdateRecursive(node);
         }
 
-        private void _UpdateRecursive(Container3D node)
+        private void _UpdateRecursive(Container<Node3D> node)
         {
             if (node is Renderable3D renderable) {
                 this._renderList.Add(renderable);

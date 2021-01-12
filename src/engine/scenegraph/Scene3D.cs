@@ -3,7 +3,7 @@ using System.Numerics;
 
 namespace LifeSim.Engine.SceneGraph
 {
-    public class Scene3D : Container3D
+    public class Scene3D : Container<Node3D>
     {
         private List<Camera3D> _cameras = new List<Camera3D>();
 
