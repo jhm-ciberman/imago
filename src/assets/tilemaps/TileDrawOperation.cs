@@ -73,10 +73,10 @@ namespace LifeSim.Assets
         private Rgba32 _Blend(Rgba32 colA, Rgba32 colB, float amount)
         {
             return new Rgba32(
-                colA.R + (colB.R - colA.R) * amount,
-                colA.G + (colB.G - colA.G) * amount,
-                colA.B + (colB.B - colA.B) * amount,
-                colA.A + (colB.A - colA.A) * amount
+                (byte) (colA.R + (colB.R - colA.R) * amount),
+                (byte) (colA.G + (colB.G - colA.G) * amount),
+                (byte) (colA.B + (colB.B - colA.B) * amount),
+                (byte) (colA.A + (colB.A - colA.A) * amount)
             );
         }
 

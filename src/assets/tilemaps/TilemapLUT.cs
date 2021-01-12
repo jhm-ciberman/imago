@@ -17,7 +17,7 @@ namespace LifeSim.Assets
             float sum = 0f;
             for (int y = 0; y < rect.width; y++) {
                 for (int x = 0; x < rect.width; x++) {
-                    var col = texture[x, texture.Height - 1 - y];
+                    var col = texture[x, y];
                     sum += this._ToGrayscale(col);
                     set.Add(col);
                 }

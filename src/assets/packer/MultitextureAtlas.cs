@@ -37,7 +37,6 @@ namespace LifeSim.Assets
             int h = texture.Height;
             int r = this._GetFillArea(w) - w;
             int b = this._GetFillArea(h) - h;
-            System.Console.WriteLine(x + "," + y + ": " + texture.Width + ", " + texture.Height);
 
             if (r > 0) // Right
             {
