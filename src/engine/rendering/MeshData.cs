@@ -17,7 +17,7 @@ namespace LifeSim.Engine.Rendering
             this.normals = normals ?? new Vector3[positions.Count]; 
             this.indices = indices;
 
-            if (this.positions.Count != this.uvs.Count) {
+            if (this.positions.Count != this.uvs.Count) { // TODO: remove this assertion
                 throw new System.Exception("UVS " + this.uvs.Count + " " + this.positions.Count);
             }
             if (this.positions.Count != this.normals.Count) {
@@ -48,54 +48,86 @@ namespace LifeSim.Engine.Rendering
             }
         }
 
-        public MeshData FlipTris()
+        public void FlipTris()
         {
-            ushort[] indices = new ushort[this.indices.Count];
-            var vertices    = new List<Vector3>(this.positions);
-            var normals     = new List<Vector3>(this.normals);
-            var uv          = new List<Vector2>(this.uvs);
-
             for (var i = 0; i < this.indices.Count; i += 3) {
-                indices[i + 2] = indices[i + 0];
-                indices[i + 1] = indices[i + 1];
-                indices[i + 0] = indices[i + 2];
+                var a = this.indices[i + 0];
+                var b = this.indices[i + 1];
+                var c = this.indices[i + 2];
+
+                this.indices[i + 0] = c;
+                this.indices[i + 1] = b;
+                this.indices[i + 2] = a;
             }
 
-            for (int i = 0; i < normals.Count; i++) {
-                normals[i] = -normals[i];
+            for (int i = 0; i < this.normals.Count; i++) {
+                this.normals[i] = -this.normals[i];
+            }
+        }
+
+        public void Translate(Vector3 translation)
+        {
+            for (var i = 0; i < this.positions.Count; i++) {
+                this.positions[i] += translation;
+            }
+        }
+
+        public MeshData Clone()
+        {
+            Vector3[] positions    = new Vector3[this.positions.Count];
+            Vector3[] normals      = new Vector3[this.normals.Count];
+            Vector2[] uvs          = new Vector2[this.uvs.Count];
+            ushort[] indices = new ushort[this.indices.Count];
+
+            for (var i = 0; i < this.indices.Count; i++) {
+                indices[i] = this.indices[i];
             }
 
-            return new MeshData(vertices, indices, uv, normals);
+            for (var i = 0; i < this.positions.Count; i++) {
+                positions[i] = this.positions[i];
+            }
+
+            for (var i = 0; i < this.normals.Count; i++) {
+                normals[i] = this.normals[i];
+            }
+
+            for (int i = 0; i < this.uvs.Count; i++) {
+                uvs[i] = this.uvs[i];
+            }
+
+            return new MeshData(positions, indices, uvs, normals);
         }
 
         public MeshData Merge(MeshData mesh)
         {
             Vector3[] positions = new Vector3[mesh.positions.Count + this.positions.Count];
             Vector3[] normals   = new Vector3[mesh.normals.Count   + this.normals.Count];
-            Vector2[] uv        = new Vector2[mesh.uvs.Count       + this.uvs.Count];
-            int[] indices     = new int[mesh.indices.Count    + this.indices.Count];
+            Vector2[] uvs       = new Vector2[mesh.uvs.Count       + this.uvs.Count];
+            ushort[] indices    = new ushort[mesh.indices.Count    + this.indices.Count];
             
             for (int i = 0; i < this.positions.Count; i++) {
                 positions[i] = this.positions[i];
-                normals[i] = this.normals[i];
-                uv[i] = this.uvs[i];
+                normals[i]   = this.normals[i];
+                uvs[i]       = this.uvs[i];
             }
+
             for (int i = 0; i < mesh.positions.Count; i++) {
                 int j = i + this.positions.Count;
                 positions[j] = mesh.positions[i];
-                normals[j] = this.normals[i];
-                uv[j]       = mesh.uvs[i];
+                normals[j]   = mesh.normals[i];
+                uvs[j]       = mesh.uvs[i];
             }
 
             for (int i = 0; i < this.indices.Count; i++) {
                 indices[i] = this.indices[i];
             }
+
             for (int i = 0; i < mesh.indices.Count; i++) {
                 int j = i + this.indices.Count;
-                indices[j] = mesh.indices[i] + this.indices.Count;
+                indices[j] = (ushort) ((int)mesh.indices[i] + this.positions.Count);
             }
-
-            return new MeshData(positions, this.indices, uv, normals);
+            
+            return new MeshData(positions, indices, uvs, normals);
         }
 
     }

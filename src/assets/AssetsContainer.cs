@@ -10,8 +10,6 @@ namespace LifeSim.Assets
     {
         private Dictionary<string, IAsset> _resources = new Dictionary<string, IAsset>();
 
-
-
         public void Register(string id, IAsset asset)
         {
             this._resources.Add(id, asset);
@@ -33,6 +31,11 @@ namespace LifeSim.Assets
             return this.Get<PackedTexture>("tex:" + cover.id);
         }
 
+        public PackedTexture GetPackedTexture(Simulation.Object obj)
+        {
+            return this.Get<PackedTexture>("tex:" + obj.id);
+        }
+
         public Tilemap GetTilemap(TileCover cover)
         {
             return this.Get<Tilemap>("tilemap:" + cover.id);
@@ -46,6 +49,11 @@ namespace LifeSim.Assets
         public PlantAsset GetPlantAsset(Plant plant)
         {
             return this.Get<PlantAsset>("asset:" + plant.id);
+        }
+
+        public ObjectAsset GetObjectAsset(Simulation.Object obj)
+        {
+            return this.Get<ObjectAsset>("asset:" + obj.id);
         }
 
     }

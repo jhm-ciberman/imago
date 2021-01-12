@@ -13,7 +13,7 @@ namespace LifeSim.Engine.GLTF
         public GLTFPrimitive(GLTFLoader model, int? indices, Dictionary<string, int> attributes)
         {
             this._model = model;
-            this._indicesAccessor = indices.HasValue ? this._model._GetAccessor(indices.Value) : null;
+            this._indicesAccessor = indices.HasValue ? this._model.GetAccessor(indices.Value) : null;
             this._attributes = attributes;
         }
 
@@ -51,7 +51,7 @@ namespace LifeSim.Engine.GLTF
         private GLTFAccessor? _GetAttributeAccessor(string name)
         {
             if (this._attributes.TryGetValue(name, out int attributeId)) {
-                return this._model._GetAccessor(attributeId);
+                return this._model.GetAccessor(attributeId);
             }
             return null;
         }

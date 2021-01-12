@@ -52,7 +52,7 @@ namespace LifeSim.Engine
             return new GPUTexture(this._gd, texture);
         }
 
-        public GLTF.GLTFLoader LoadGLTF(string path, SurfaceMaterial defaultMaterial)
+        public GLTF.GLTFLoader LoadGLTF(string path, SurfaceMaterial? defaultMaterial = null)
         {
             return new GLTF.GLTFLoader(this, defaultMaterial, path);
         }

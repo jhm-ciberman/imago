@@ -1,6 +1,4 @@
-using System.IO;
 using FontStashSharp;
-using LifeSim.Engine;
 
 namespace LifeSim.Assets
 {

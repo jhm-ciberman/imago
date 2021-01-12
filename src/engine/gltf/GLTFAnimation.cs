@@ -48,10 +48,10 @@ namespace LifeSim.Engine.GLTF
             var factory = this._GetChannelFactory(channel.Target.Path);
             if (factory == null) return null;
 
-            var targetName = this._model._GetNode(targetIndex.Value).name;
+            var targetName = this._model.GetNode(targetIndex.Value).name;
             var sampler = this._samplers[channel.Sampler];
             var input = this._GetSamplerInput(sampler.Input);
-            var output = this._model._GetAccessor(sampler.Output);
+            var output = this._model.GetAccessor(sampler.Output);
             return factory.MakeChannel(targetName, input, output, sampler.Interpolation);
         }
 
@@ -73,7 +73,7 @@ namespace LifeSim.Engine.GLTF
         private float[] _GetSamplerInput(int index)
         {
             if (! this._inputsCache.ContainsKey(index)) {
-                float[] inputArr = this._model._GetAccessor(index).AsFloatArray();
+                float[] inputArr = this._model.GetAccessor(index).AsFloatArray();
                 this._inputsCache.Add(index, inputArr);
                 return inputArr;
             }

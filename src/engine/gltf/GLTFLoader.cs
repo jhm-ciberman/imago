@@ -13,9 +13,9 @@ namespace LifeSim.Engine.GLTF
 
         private GLTFBuffer?[] _buffersCache;
         private GLTFNode?[] _nodesCache;
-        private SurfaceMaterial _material;
+        private SurfaceMaterial? _material;
 
-        public GLTFLoader(AssetManager assetsManager, SurfaceMaterial material, string path)
+        public GLTFLoader(AssetManager assetsManager, SurfaceMaterial? material, string path)
         {
             System.Console.WriteLine("Loading file " + path);
             this._assetsManager = assetsManager;
@@ -26,20 +26,20 @@ namespace LifeSim.Engine.GLTF
             this._material = material;
         }
 
-        internal string _GetNodeName(int index)
+        internal string GetNodeName(int index)
         {
             var data = this._model.Nodes[index];
             return string.IsNullOrWhiteSpace(data.Name) ? "Node_" + index : data.Name;
         }
 
-        internal GLTFNode _GetNode(int index)
+        internal GLTFNode GetNode(int index)
         {
             GLTFNode? node = this._nodesCache[index];
             if (node != null) return node;
 
             var data = this._model.Nodes[index];
 
-            var name = this._GetNodeName(index);
+            var name = this.GetNodeName(index);
             node = new GLTFNode(name);
 
             if (data.Mesh.HasValue) {
@@ -68,7 +68,7 @@ namespace LifeSim.Engine.GLTF
 
             if (data.Children != null) {
                 foreach (var i in data.Children) {
-                    node.Add(this._GetNode(i));
+                    node.Add(this.GetNode(i));
                 }
             }
             return node;
@@ -89,7 +89,7 @@ namespace LifeSim.Engine.GLTF
 
         private GPUMesh _GetMesh(int index)
         {
-            return this._assetsManager.MakeMesh(this._GetPrimitive(index).MakeMesh());
+            return this._assetsManager.MakeMesh(this.GetPrimitive(index).MakeMesh());
         }
 
         public Animation[] LoadAnimations()
@@ -118,15 +118,15 @@ namespace LifeSim.Engine.GLTF
             if (matricesIndex == null) {
                 matrices = new GLTFBufferViewZeroed().ReadMatrix4x4Array(0, data.Joints.Length);
             } else {
-                matrices = this._GetAccessor(matricesIndex.Value).AsMatrix4x4();
+                matrices = this.GetAccessor(matricesIndex.Value).AsMatrix4x4();
             }
 
             string[] joints = new string[data.Joints.Length];
             for (int i = 0; i < joints.Length; i++) {
-                joints[i] = this._GetNodeName(data.Joints[i]);
+                joints[i] = this.GetNodeName(data.Joints[i]);
             }
             
-            string? root = data.Skeleton.HasValue ? this._GetNodeName(data.Skeleton.Value) : null;
+            string? root = data.Skeleton.HasValue ? this.GetNodeName(data.Skeleton.Value) : null;
             
             return new Skin(matrices, joints, root);
         }
@@ -137,18 +137,18 @@ namespace LifeSim.Engine.GLTF
             var name = data.Name ?? "Scene_" + index;
             var scene = new GLTFScene(name);
             foreach (var node in data.Nodes) {
-                scene.Add(this._GetNode(node));
+                scene.Add(this.GetNode(node));
             }
             return scene;
         }
 
-        internal GLTFPrimitive _GetPrimitive(int index)
+        internal GLTFPrimitive GetPrimitive(int index)
         {
             var data = this._model.Meshes[index].Primitives[0];
             return new GLTFPrimitive(this, data.Indices, data.Attributes);
         }
 
-        internal GLTFAccessor _GetAccessor(int index)
+        internal GLTFAccessor GetAccessor(int index)
         {
             var data = this._model.Accessors[index];
             var bufferView = this._GetBufferView(data.BufferView);
