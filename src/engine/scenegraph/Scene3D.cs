@@ -11,9 +11,8 @@ namespace LifeSim.Engine.SceneGraph
         
         public Vector3 ambientColor = new Vector3(.2f, .2f, .2f);
 
-        private RgbaFloat _clearColor = new RgbaFloat(0.84f, 0.84f, 0.86f, 1.0f);
+        public RgbaFloat clearColor = new RgbaFloat(0.84f, 0.84f, 0.86f, 1.0f);
         //private RgbaFloat _clearColor = new RgbaFloat(0.04f, 0.04f, 0.06f, 1.0f);
-        public RgbaFloat clearColor => this._clearColor;
 
         public Scene3D()
         {
