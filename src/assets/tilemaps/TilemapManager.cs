@@ -25,6 +25,7 @@ namespace LifeSim.Assets
         private GPUTexture _texture;
         private SurfaceMaterial _materialTerrain;
         private SurfaceMaterial _materialHouses;
+        private SurfaceMaterial _materialWater;
 
         private int textureMaxSize;
 
@@ -47,7 +48,6 @@ namespace LifeSim.Assets
 
             this._image = new Image<Rgba32>(textureMaxSize, textureMaxSize);
             this._texture = assetManager.MakeTexture(this._image);
-            this._materialTerrain = assetManager.MakeSurfaceMaterial(this._texture);
 
             this._tileDescriptorFactory = new TileDescriptorFactory(assetsContainer);
 
@@ -55,13 +55,19 @@ namespace LifeSim.Assets
             if (atlasTexture == null) {
                 throw new System.Exception("No atlas texture registered");
             }
+
+            this._materialTerrain = assetManager.MakeSurfaceMaterial(this._texture);
             this._materialHouses = assetManager.MakeSurfaceMaterial(atlasTexture);
+            this._materialWater = assetManager.MakeSurfaceMaterial(atlasTexture);
+            this._materialWater.castShadows = false;
+            this._materialTerrain.castShadows = false;
 
             //GameStage.debugTexture = this._texture;
         }
 
         public SurfaceMaterial materialTerrain => this._materialTerrain;
-        public SurfaceMaterial materialHouses => this._materialHouses;
+        public SurfaceMaterial materialHouses  => this._materialHouses;
+        public SurfaceMaterial materialWater   => this._materialWater;
 
         public void UpdateTilemap()
         {

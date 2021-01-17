@@ -17,6 +17,8 @@ namespace LifeSim.Engine.Rendering
         public ResourceSet resourceSet => this._resourceSet;
 
         private IMaterialBuilder _materialManager;
+        
+        public bool castShadows = true;
 
         public SurfaceMaterial(IMaterialBuilder builder, GPUTexture texture) 
         {

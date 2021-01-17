@@ -26,6 +26,11 @@ namespace LifeSim.Assets
             throw new Exception("The asset \"" + id + "\" is not of type " + typeof(T).Name);
         }
 
+        public PackedTexture GetWaterTexture()
+        {
+            return this.Get<PackedTexture>("tex:water");
+        }
+
         public PackedTexture GetPackedTexture(Cover cover)
         {
             return this.Get<PackedTexture>("tex:" + cover.id);

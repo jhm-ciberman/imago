@@ -47,7 +47,7 @@ namespace LifeSim.Engine.Rendering
                 this._commandList.SetFramebuffer(this._sceneContext.shadowmapFramebuffer);
                 this._commandList.ClearDepthStencil(1f);
                 this._sceneContext.SetupShadowMapBuffer(this._commandList, camera, scene.mainLight);
-                foreach (var renderable in this._renderList.renderables) {
+                foreach (var renderable in this._renderList.shadowRenderables) {
                     if (renderable.material == null) continue;
                     this._DrawRenderable(renderable, renderable.material.shadowmapPass);
                 }
@@ -63,7 +63,7 @@ namespace LifeSim.Engine.Rendering
             if (camera != null) {
                 this._commandList.ClearDepthStencil(1f);
                 this._sceneContext.SetupCamera3DInfoBuffer(this._commandList, camera, scene.mainLight);
-                foreach (var renderable in this._renderList.renderables) {
+                foreach (var renderable in this._renderList.baseRenderables) {
                     if (renderable.material == null) continue;
                     this._DrawRenderable(renderable, renderable.material.pass);
                 }

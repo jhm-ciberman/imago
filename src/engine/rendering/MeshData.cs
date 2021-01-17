@@ -29,7 +29,7 @@ namespace LifeSim.Engine.Rendering
             }
         }
 
-        private void RecomputeNormals()
+        public void RecomputeNormals()
         {
             for (var i = 0; i < indices.Count; i += 3) {
                 var index1 = this.indices[i + 0];
@@ -48,7 +48,7 @@ namespace LifeSim.Engine.Rendering
             }
         }
 
-        public void FlipTris()
+        public void FlipIndices()
         {
             for (var i = 0; i < this.indices.Count; i += 3) {
                 var a = this.indices[i + 0];
@@ -60,9 +60,19 @@ namespace LifeSim.Engine.Rendering
                 this.indices[i + 2] = a;
             }
 
+        }
+
+        public void FlipNormals()
+        {
             for (int i = 0; i < this.normals.Count; i++) {
                 this.normals[i] = -this.normals[i];
             }
+        }
+
+        public void FlipFaces()
+        {
+            this.FlipIndices();
+            this.FlipNormals();
         }
 
         public void Translate(Vector3 translation)
