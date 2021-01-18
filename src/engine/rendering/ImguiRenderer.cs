@@ -38,12 +38,18 @@ namespace LifeSim.Engine.Rendering
             this._imguiRenderer.WindowResized((int) width, (int) height);
         }
 
+        public IntPtr Texture(GPUTexture texture)
+        {
+            return this._imguiRenderer.GetOrCreateImGuiBinding(this._gd.ResourceFactory, texture.deviceTexture);
+        }
+
         public void Render()
         {
             this._commandList.Begin();
             this._commandList.SetFramebuffer(this._renderTexture.framebuffer);
             this._imguiRenderer.Render(this._gd, this._commandList);
             this._commandList.End();
+
         }
 
         public void Submit()

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Threading.Tasks;
@@ -67,6 +68,11 @@ namespace LifeSim.Engine.Rendering
         public void Update(float deltaTime, InputSnapshot inputSnapshot)
         {
             this._imguiRenderer.Update(deltaTime, inputSnapshot);
+        }
+
+        public IntPtr GetImGUITexture(GPUTexture texture)
+        {
+            return this._imguiRenderer.Texture(texture);
         }
 
         public void Render(IStage stage)

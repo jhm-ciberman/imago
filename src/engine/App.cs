@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using LifeSim.Engine.Rendering;
 using LifeSim.Engine.SceneGraph;
 using Veldrid.Sdl2;
@@ -71,6 +72,11 @@ namespace LifeSim.Engine
         public void SetStage(IStage stage)
         {
             this._stage = stage;
+        }
+
+        public IntPtr GetImGUITexture(GPUTexture texture)
+        {
+            return this._renderer.GetImGUITexture(texture);
         }
 
         private void _MainLoop()
