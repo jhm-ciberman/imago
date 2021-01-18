@@ -13,6 +13,7 @@ namespace LifeSim.Engine.Rendering
         private CommandList _commandList;
         private IRenderTexture _renderTexture;
         private SceneContext _sceneContext;
+        private bool _hasCommandsToSubmit;
 
         public GPURenderer2D(GraphicsDevice gd, AssetManager assetManager, GPUResourceManager resources, PSOManager psoManager)
         {
@@ -39,6 +40,8 @@ namespace LifeSim.Engine.Rendering
 
             this._spriteBatcher.EndBatch();
             this._commandList.End();
+
+            this._hasCommandsToSubmit = true;
         }
 
         private void _RenderRecursive(Container<Node2D> container)
@@ -53,7 +56,9 @@ namespace LifeSim.Engine.Rendering
 
         public void Submit()
         {
+            if (! this._hasCommandsToSubmit) return;
             this._graphicsDevice.SubmitCommands(this._commandList);
+            this._hasCommandsToSubmit = false;
         }
 
     }

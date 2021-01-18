@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Numerics;
 using System.Threading.Tasks;
 using LifeSim.Engine.SceneGraph;
@@ -83,6 +84,7 @@ namespace LifeSim.Engine.Rendering
                 this._imguiRenderer.Render();
                 this._fullScreenQuad.Render();
             });
+
             Task.WaitAll(render3DTask, render2DTask, extraTask);
 
             this._gd.WaitForIdle();

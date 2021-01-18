@@ -16,6 +16,7 @@ namespace LifeSim.Engine.Rendering
         private PSOManager _psoManager;
 
         private RenderList _renderList = new RenderList();
+        private bool _hasCommandsToSubmit;
 
         public GPURenderer3D(GraphicsDevice graphicsDevice, PSOManager psoManager, GPUResourceManager resources)
         {
@@ -70,6 +71,7 @@ namespace LifeSim.Engine.Rendering
             }
 
             this._commandList.End();
+            this._hasCommandsToSubmit = true;
         }
 
         public void _DrawRenderable(Renderable3D renderable, Pass pass)
@@ -108,7 +110,9 @@ namespace LifeSim.Engine.Rendering
 
         public void Submit()
         {
+            if (! this._hasCommandsToSubmit) return;
             this._graphicsDevice.SubmitCommands(this._commandList);
+            this._hasCommandsToSubmit = false;
         }
 
         ~GPURenderer3D() {
