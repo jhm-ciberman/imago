@@ -19,28 +19,32 @@ namespace LifeSim.Engine
         private Vector2 _mouseDelta;
         private bool _mouseIsLocked = false;
 
+        private InputSnapshot _inputSnapshot;
+        public InputSnapshot inputSnapshot => this._inputSnapshot;
+
         public InputInstance(Sdl2Window window)
         {
             this._window = window;
+            this._inputSnapshot = window.PumpEvents();
         }
 
         public void UpdateFrameInput()
         {
-            InputSnapshot snapshot = this._window.PumpEvents(); //For next frame
-            _newKeysThisFrame.Clear();
-            _newMouseButtonsThisFrame.Clear();
+            this._inputSnapshot = this._window.PumpEvents(); //For next frame
+            this._newKeysThisFrame.Clear();
+            this._newMouseButtonsThisFrame.Clear();
 
 
-            for (int i = 0; i < snapshot.KeyEvents.Count; i++) {
-                KeyEvent ke = snapshot.KeyEvents[i];
+            for (int i = 0; i < this._inputSnapshot.KeyEvents.Count; i++) {
+                KeyEvent ke = this._inputSnapshot.KeyEvents[i];
                 if (ke.Down) {
                     _KeyDown(ke.Key);
                 } else {
                     _KeyUp(ke.Key);
                 }
             }
-            for (int i = 0; i < snapshot.MouseEvents.Count; i++) {
-                MouseEvent me = snapshot.MouseEvents[i];
+            for (int i = 0; i < this._inputSnapshot.MouseEvents.Count; i++) {
+                MouseEvent me = this._inputSnapshot.MouseEvents[i];
                 if (me.Down) {
                     _MouseDown(me.MouseButton);
                 } else {
@@ -48,7 +52,7 @@ namespace LifeSim.Engine
                 }
             }
 
-            var newPos = snapshot.MousePosition;
+            var newPos = this._inputSnapshot.MousePosition;
             var center = new Vector2(this._window.Width / 2, this._window.Height / 2);
             this._mouseDelta = newPos - center;
             this._mousePosition = newPos;

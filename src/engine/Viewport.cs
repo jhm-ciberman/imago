@@ -5,8 +5,6 @@ namespace LifeSim.Engine
         private uint _width;
         private uint _height;
 
-        public event System.Action? onResize;
-
         public Viewport(uint width, uint height)
         {
             this._width = width;
@@ -17,7 +15,6 @@ namespace LifeSim.Engine
         {
             this._width = width;
             this._height = height;
-            this.onResize?.Invoke();
         }
 
         public uint width => this._width;

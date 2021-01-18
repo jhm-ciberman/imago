@@ -1,32 +1,45 @@
-﻿using LifeSim.Demo;
-using LifeSim.Engine;
+﻿using System.Diagnostics;
 using LifeSim.Engine.Rendering;
 using LifeSim.Engine.SceneGraph;
+using Veldrid.Sdl2;
+using Veldrid.StartupUtilities;
 
 namespace LifeSim.Engine
 {
     public class App
     {
-        private Window _window;
+        private Sdl2Window _window;
+
+        private Viewport _viewport;
+        public Viewport viewport => this._viewport;
+
+        private InputInstance _input;
+
         private GPURenderer _renderer;
+        
         private IStage _stage;
 
         public App(string[] args, System.Func<App, IStage> stageFactory)
         {
-            this._window = new Window();
+            WindowCreateInfo windowCI = new WindowCreateInfo(100, 100, 1024, 600, Veldrid.WindowState.Normal, "Medieval Life");
+            this._window = VeldridStartup.CreateWindow(ref windowCI);
+            this._viewport = new Viewport((uint) this._window.Width, (uint) this._window.Height);
+
             var graphicsBackend = App.ParseGraphicsBackend(args);
             this._renderer = new GPURenderer(this._window, graphicsBackend);
 
-            this._window.viewport.onResize += this.OnResize;
+            this._window.Resized += this.OnResize;
 
             this.OnResize();
             this._stage = stageFactory.Invoke(this); 
-            this._window.RunMainLoop(this.Update);
-        }
 
-        public Window window => this._window;
-        
-        public Viewport viewport => this._window.viewport;
+            this._window.Resized += this.OnResize;
+
+            this._input = new InputInstance(this._window);
+            Input.SetInstance(this._input);
+
+            this._MainLoop();
+        }
 
         public uint selectedObjectID => this._renderer.selectedObjectID;
         
@@ -49,7 +62,10 @@ namespace LifeSim.Engine
 
         private void OnResize() 
         {
-            this._renderer.Resize(this._window.viewport.width, this._window.viewport.height);
+            uint width = (uint) this._window.Width;
+            uint height = (uint) this._window.Height;
+            this._viewport.Resize(width, height);
+            this._renderer.Resize(width, height);
         }
 
         public void SetStage(IStage stage)
@@ -57,23 +73,41 @@ namespace LifeSim.Engine
             this._stage = stage;
         }
 
-        private void Update(float deltaTime)
+        private void _MainLoop()
         {
-            this._renderer.mousePickingPosition = Input.mousePosition;
-            
-            var fps = (1f / deltaTime).ToString("0.00");
-            var dt = (int) (deltaTime * 1000000);
+            Stopwatch sw = Stopwatch.StartNew();
+            double previousElapsed = sw.Elapsed.TotalSeconds;
 
-            var mouse = "(" + Input.mousePosition.X + ", " +Input.mousePosition.Y + ")";
-            this._window.title = "Hello world" + " (" + this._renderer.backendType.ToString() + ") frame = " + dt + "microseg FPS = " + fps + " Mouse: " + mouse;
+            while (this._window.Exists)
+            {
+                double newElapsed = sw.Elapsed.TotalSeconds;
+                float deltaTime = (float)(newElapsed - previousElapsed);
+                previousElapsed = newElapsed;
 
-            if (Input.GetKeyDown(Veldrid.Key.Escape) && ! Input.mouseIsLocked) {
-                this._window.Close();
-                return;
+                this._renderer.mousePickingPosition = Input.mousePosition;
+                
+                var fps = (1f / deltaTime).ToString("0.00");
+                var dt = (deltaTime * 1000).ToString("0.00");
+
+                var mouse = "(" + Input.mousePosition.X + ", " +Input.mousePosition.Y + ")";
+                this._window.Title = "Medieval Life" + " (" + this._renderer.backendType.ToString() + ") frame = " + dt + "ms FPS = " + fps + " Mouse: " + mouse;
+
+                if (Input.GetKeyDown(Veldrid.Key.Escape) && ! Input.mouseIsLocked) {
+                    this._window.Close();
+                    return;
+                }
+                if (Input.GetKeyDown(Veldrid.Key.F4)) {
+                    this._window.WindowState = Veldrid.WindowState.BorderlessFullScreen;
+                }
+
+                this._renderer.Update(deltaTime, this._input.inputSnapshot);
+                this._stage.Update(deltaTime);
+                this._renderer.Render(this._stage);
+
+                this._input.UpdateFrameInput(); // For next frame
             }
 
-            this._stage.Update(deltaTime);
-            this._renderer.Render(this._stage);
+
         }
     }
 
