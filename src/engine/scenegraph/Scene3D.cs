@@ -1,9 +1,10 @@
 using System.Numerics;
+using LifeSim.Engine.Rendering;
 using Veldrid;
 
 namespace LifeSim.Engine.SceneGraph
 {
-    public class Scene3D : Container<Node3D>
+    public class Scene3D : Container<Node3D>, ILayer
     {
         public Camera3D? activeCamera = null;
 
@@ -24,6 +25,11 @@ namespace LifeSim.Engine.SceneGraph
             foreach (var child in this.children) {
                 child.UpdateWorldMatrix();
             }
+        }
+
+        void ILayer.Render(GPURenderer renderer)
+        {
+            renderer.RenderScene3D(this);
         }
     }
 }

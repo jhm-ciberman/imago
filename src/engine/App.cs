@@ -18,9 +18,9 @@ namespace LifeSim.Engine
 
         private GPURenderer _renderer;
         
-        private IStage _stage;
+        private Stage _stage;
 
-        public App(string[] args, System.Func<App, IStage> stageFactory)
+        public App(string[] args, System.Func<App, Stage> stageFactory)
         {
             WindowCreateInfo windowCI = new WindowCreateInfo(100, 100, 1024, 600, Veldrid.WindowState.Normal, "Medieval Life");
             this._window = VeldridStartup.CreateWindow(ref windowCI);
@@ -69,7 +69,7 @@ namespace LifeSim.Engine
             this._renderer.Resize(width, height);
         }
 
-        public void SetStage(IStage stage)
+        public void SetStage(Stage stage)
         {
             this._stage = stage;
         }

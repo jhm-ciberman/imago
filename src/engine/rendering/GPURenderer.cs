@@ -3,10 +3,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Threading.Tasks;
 using LifeSim.Engine.SceneGraph;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
 using Veldrid;
-using Veldrid.ImageSharp;
 using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
 
@@ -75,23 +72,46 @@ namespace LifeSim.Engine.Rendering
             return this._imguiRenderer.Texture(texture);
         }
 
-        public void Render(IStage stage)
+        private List<Task> _renderTasks = new List<Task>();
+
+        private bool _renderImGUI = false;
+
+        public void RenderScene3D(Scene3D scene)
         {
-            var render3DTask = Task.Run(() => {
-                if (stage.currentScene3D == null) return;
-                this._renderer3d.Render(stage.currentScene3D);
-            });
-            var render2DTask = Task.Run(() => {
-                if (stage.currentCanvas2D == null) return;
-                this._renderer2d.Render(stage.currentCanvas2D);
-            });
-            var extraTask = Task.Run(() => {
+            if (scene == null) return;
+            this._renderTasks.Add(Task.Run(() => {
+                this._renderer3d.Render(scene);
+            }));
+        }
+
+        public void RenderCanvas2D(Canvas2D canvas)
+        {
+            if (canvas == null) return;
+            this._renderTasks.Add(Task.Run(() => {
+                this._renderer2d.Render(canvas);
+            }));
+        }
+
+        public void RenderImGUI(Canvas2D canvas)
+        {
+            this._renderImGUI = true;
+        }
+
+
+        public void Render(Stage stage)
+        {
+            this._renderTasks.Clear();
+            foreach (var layer in stage.GetLayers()) {
+                layer.Render(this);
+            }
+
+            this._renderTasks.Add(Task.Run(() => {
                 this._mousePicker.Update(this._gpuResources.mainRenderTexture, this.mousePickingPosition);
                 this._imguiRenderer.Render();
                 this._fullScreenQuad.Render();
-            });
+            }));
 
-            Task.WaitAll(render3DTask, render2DTask, extraTask);
+            Task.WaitAll(this._renderTasks.ToArray());
 
             this._gd.WaitForIdle();
             this._renderer3d.Submit();
