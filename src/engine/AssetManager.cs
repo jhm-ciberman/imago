@@ -5,7 +5,6 @@ using LifeSim.Engine.Rendering;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using Veldrid;
-using Veldrid.ImageSharp;
 using Rectangle = System.Drawing.Rectangle;
 
 namespace LifeSim.Engine
@@ -48,7 +47,6 @@ namespace LifeSim.Engine
 
         public GPUTexture MakeTexture(Image<Rgba32> image, uint mipLevels = 0)
         {
-            ImageSharpTexture texture = new ImageSharpTexture(image, false);
             return new GPUTexture(this._gd, image, mipLevels);
         }
 
