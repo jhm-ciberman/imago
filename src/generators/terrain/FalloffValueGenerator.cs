@@ -102,7 +102,7 @@ namespace LifeSim.Generation
 
             if (this.squareValue) value *= value;
 
-            value = this.minValue + (this.maxValue - this.minValue) * value;
+            value = Math.Clamp(this.minValue + (this.maxValue - this.minValue) * value, 0f, 1f);
 
             return 1f - value;
         }

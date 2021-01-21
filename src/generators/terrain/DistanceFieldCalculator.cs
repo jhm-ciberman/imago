@@ -23,29 +23,23 @@ namespace LifeSim.Generation
             int height = field.GetLength(1);
 
             // First pass, from top left to bottom right
-            for (int y = 1; y < width; y++)
-            {
-                for (int x = 1; x < height; x++)
-                {
+            for (int y = 1; y < height; y++) {
+                for (int x = 1; x < width; x++) {
                     DistanceFieldCalculator._Min(field, x, y, -1, -1);
                 }
 
-                for (int x = height - 2; x >= 0; x--)
-                {
+                for (int x = width - 2; x >= 0; x--) {
                     DistanceFieldCalculator._Min(field, x, y, +1, -1);
                 }
             }
 
             // Second pass, from bottom right to top left
-            for (int y = width - 2; y >= 0; y--)
-            {
-                for (int x = height - 2; x >= 0; x--)
-                {
+            for (int y = height - 2; y >= 0; y--) {
+                for (int x = width - 2; x >= 0; x--) {
                     DistanceFieldCalculator._Min(field, x, y, +1, +1);
                 }
 
-                for (int x = 1; x < height; x++)
-                {
+                for (int x = 1; x < width; x++) {
                     DistanceFieldCalculator._Min(field, x, y, -1, +1);
                 }
             }
@@ -69,10 +63,8 @@ namespace LifeSim.Generation
         {
             int[,] field = new int[world.size.x, world.size.y];
 
-            for (int y = 0; y < world.size.y; y++)
-            {
-                for (int x = 0; x < world.size.x; x++)
-                {
+            for (int y = 0; y < world.size.y; y++) {
+                for (int x = 0; x < world.size.x; x++) {
                     field[x, y] = hasFeatureCallback(world, x, y) ? 0 : int.MaxValue - 20;
                 }
             }
