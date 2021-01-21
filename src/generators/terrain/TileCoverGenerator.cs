@@ -12,14 +12,13 @@ namespace LifeSim.Generation
             }
         }
 
-
         private TileCoverData _GetTileCoverData(Tile tile)
         {
-            var cover = tile.baseTileCover;
-            var north = tile.north.baseTileCover ?? cover;
-            var east  = tile.east.baseTileCover  ?? cover;
-            var south = tile.south.baseTileCover ?? cover;
-            var west  = tile.west.baseTileCover  ?? cover;
+            var cover = tile.cover.baseTileCover;
+            var north = tile.north.cover.baseTileCover ?? cover;
+            var east  = tile.east.cover.baseTileCover  ?? cover;
+            var south = tile.south.cover.baseTileCover ?? cover;
+            var west  = tile.west.cover.baseTileCover  ?? cover;
 
             var dominance = cover.dominance;
             var northDiff = ! (cover == north) && dominance < north.dominance;
