@@ -42,7 +42,7 @@ namespace LifeSim.Generation
 
             this._AddRoof(house, housePreset);
 
-            this._CreateExteriorWalls(house, coverExt, coverInt);
+            this._CreateExteriorWalls(house, new CoverPair(coverExt, coverInt));
             this._AddApertures(house, window, door);
             return house;
         }
@@ -73,21 +73,21 @@ namespace LifeSim.Generation
             }
         }
 
-        private void _CreateExteriorWalls(House house, Cover coverExt, Cover coverInt)
+        private void _CreateExteriorWalls(House house, CoverPair covers)
         {
             foreach (var cell in house.cells) {
                 if (! cell.hasFloor) continue;
                 
-                if (! cell.north.hasFloor) cell.wallNorth.SetCovers(coverInt, coverExt);
-                if (! cell.east.hasFloor ) cell.wallEast.SetCovers(coverInt , coverExt);
-                if (! cell.south.hasFloor) cell.wallSouth.SetCovers(coverInt, coverExt);
-                if (! cell.west.hasFloor ) cell.wallWest.SetCovers(coverInt , coverExt);
+                if (! cell.north.hasFloor) cell.wallNorth.SetCovers(covers);
+                if (! cell.east.hasFloor ) cell.wallEast.SetCovers(covers);
+                if (! cell.south.hasFloor) cell.wallSouth.SetCovers(covers);
+                if (! cell.west.hasFloor ) cell.wallWest.SetCovers(covers);
             }
 
             if (house.size.x >= 5) {
                 for (var y = 0; y < house.size.y; y++) {
                     var cell = house.GetCell(new Vector2Int(3, y), 0);
-                    cell.wallWest.SetCovers(coverInt, coverExt);
+                    cell.wallWest.SetCovers(covers);
                 }
             }
         }
@@ -107,7 +107,8 @@ namespace LifeSim.Generation
                 //HouseGenerator.ROOF_FLAT,
             };
             var mainRoof = this._Choose(roofsModelsList);
-            var style = new RoofStyle(roofExterior, roofInterior, wallExterior, wallInterior);
+            var wall = new CoverPair(wallExterior, wallInterior);
+            var style = new RoofStyle(roofExterior, roofInterior, wall);
 
             foreach (var cell in this.GetHighestCells(house)) {
                 var model = this._random.NextDouble() > 0.8f ? this._Choose(roofsModelsList) : mainRoof;

@@ -101,13 +101,14 @@ namespace LifeSim.Engine.Rendering
         public void Render(Stage stage)
         {
             this._renderTasks.Clear();
+            this._renderImGUI = false;
             foreach (var layer in stage.GetLayers()) {
                 layer.Render(this);
             }
 
             this._renderTasks.Add(Task.Run(() => {
                 this._mousePicker.Update(this._gpuResources.mainRenderTexture, this.mousePickingPosition);
-                this._imguiRenderer.Render();
+                if (this._renderImGUI) this._imguiRenderer.Render();
                 this._fullScreenQuad.Render();
             }));
 
@@ -117,7 +118,7 @@ namespace LifeSim.Engine.Rendering
             this._renderer3d.Submit();
             this._renderer2d.Submit();
             this._mousePicker.Submit();
-            this._imguiRenderer.Submit();
+            if (this._renderImGUI) this._imguiRenderer.Submit();
             this._fullScreenQuad.Submit();
 
             this._gd.SwapBuffers();
