@@ -92,11 +92,11 @@ namespace LifeSim.Engine.Rendering
             }));
         }
 
-        public void RenderImGUI(Canvas2D canvas)
+        public void RenderImGUI(ImGUILayer layer)
         {
             this._renderImGUI = true;
+            layer.OnGUI();
         }
-
 
         public void Render(Stage stage)
         {

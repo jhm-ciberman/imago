@@ -209,8 +209,6 @@ namespace LifeSim.Generation
             public Aperture.Model[] windows;
 
             public Aperture.Model[] doors;
-
-            public RoofStyle roofStyle;
         }
 
     } 

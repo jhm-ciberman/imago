@@ -14,8 +14,6 @@ namespace LifeSim.Generation
 
         private FastNoiseLite _sampler;
 
-        private Vector2Int _offset;
-
         public NoiseValueGenerator(int seed, Settings settings)
         {
             float noiseToOctavesRatio = 0.5f;
@@ -27,7 +25,6 @@ namespace LifeSim.Generation
             this._sampler.SetFractalOctaves(octaves);
             this._sampler.SetFractalLacunarity(settings.lacunarity); 
             this._sampler.SetFractalGain(settings.gain); // Persistence
-            System.Console.WriteLine("Octaves: " + octaves);
         }
 
         public float CalculateHeight(int x, int y)
