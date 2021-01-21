@@ -40,16 +40,16 @@ namespace LifeSim.Engine
             
         }
 
-        public GPUTexture MakeTexture(string path)
+        public GPUTexture MakeTexture(string path, uint mipLevels = 0)
         {
-            ImageSharpTexture texture = new ImageSharpTexture(path, true);
-            return new GPUTexture(this._gd, texture);
+            Image<Rgba32> image = Image.Load<Rgba32>(path);
+            return new GPUTexture(this._gd, image, mipLevels);
         }
 
-        public GPUTexture MakeTexture(Image<Rgba32> image)
+        public GPUTexture MakeTexture(Image<Rgba32> image, uint mipLevels = 0)
         {
             ImageSharpTexture texture = new ImageSharpTexture(image, false);
-            return new GPUTexture(this._gd, texture);
+            return new GPUTexture(this._gd, image, mipLevels);
         }
 
         public GLTF.GLTFLoader LoadGLTF(string path, SurfaceMaterial? defaultMaterial = null)

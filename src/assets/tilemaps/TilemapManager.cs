@@ -36,18 +36,17 @@ namespace LifeSim.Assets
             this.textureMaxSize = textureMaxSize;
             this._gridSize = new Vector2Int(textureMaxSize, textureMaxSize) / tileSize;
             this._tileSize = tileSize;
-            this._mipMapLevels = mipMapLevels > 0 ? mipMapLevels : 0;
+            this._mipMapLevels = mipMapLevels > 0 ? mipMapLevels + 1 : 0;
 
             int count = this._gridSize.x * this._gridSize.y;
             this._freeTiles = new Queue<Vector2Int>(count);
-            for (int index = 0; index < count; index++)
-            {
+            for (int index = 0; index < count; index++) {
                 Vector2Int coord = new Vector2Int(index % this._gridSize.x, index / this._gridSize.y);
                 this._freeTiles.Enqueue(coord);
             }
 
             this._image = new Image<Rgba32>(textureMaxSize, textureMaxSize);
-            this._texture = assetManager.MakeTexture(this._image);
+            this._texture = assetManager.MakeTexture(this._image, (uint) this._mipMapLevels);
 
             this._tileDescriptorFactory = new TileDescriptorFactory(assetsContainer);
 
@@ -71,8 +70,9 @@ namespace LifeSim.Assets
 
         public void UpdateTilemap()
         {
-            foreach (var op in this._pendingOperations)
+            foreach (var op in this._pendingOperations) {
                 op.DrawTile();
+            }
 
             this._texture.Update(this._image);
 
@@ -81,8 +81,7 @@ namespace LifeSim.Assets
 
         public PackedTile RequestPackedTile(TileRequest request)
         {
-            if (! this._tiles.TryGetValue(request, out PackedTile? tile))
-            {
+            if (! this._tiles.TryGetValue(request, out PackedTile? tile)) {
                 tile = this._MakeNewTile(request);
                 this._tiles[request] = tile;
             }

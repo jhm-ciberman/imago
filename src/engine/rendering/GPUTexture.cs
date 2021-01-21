@@ -1,8 +1,8 @@
 using System;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using Veldrid.ImageSharp;
 
 namespace LifeSim.Engine.Rendering
 {
@@ -12,28 +12,29 @@ namespace LifeSim.Engine.Rendering
         protected Veldrid.Sampler _sampler;
         protected Veldrid.GraphicsDevice _gd;
 
-        public GPUTexture(Veldrid.GraphicsDevice gd, ImageSharpTexture texture)
+        public GPUTexture(Veldrid.GraphicsDevice gd, Image<Rgba32> image, uint mipLevels = 0)
+            : this(gd, (uint) image.Width, (uint) image.Height, mipLevels)
         {
-            this._gd = gd;
-            var factory = gd.ResourceFactory;
-            var deviceTexture = texture.CreateDeviceTexture(this._gd, factory);
-
-            this._deviceTexture = deviceTexture;
-            this._sampler = this._gd.PointSampler;
+            this.Update(image, true);
         }
 
-        public GPUTexture(Veldrid.GraphicsDevice gd, uint width, uint height)
+        public GPUTexture(Veldrid.GraphicsDevice gd, uint width, uint height, uint mipLevels = 0)
         {
             this._gd = gd;
             var factory = this._gd.ResourceFactory;
+            if (mipLevels == 0) {
+                mipLevels = (uint) BitOperations.Log2(Math.Min(width, height));
+            }
+
             this._deviceTexture = factory.CreateTexture(new Veldrid.TextureDescription(
                 (uint) width, (uint) height, depth: 1, 
-                mipLevels: 1, arrayLayers: 1, 
+                mipLevels: mipLevels, arrayLayers: 1, 
                 Veldrid.PixelFormat.R8_G8_B8_A8_UNorm, 
-                Veldrid.TextureUsage.Sampled, 
+                Veldrid.TextureUsage.Sampled | Veldrid.TextureUsage.GenerateMipmaps, 
                 Veldrid.TextureType.Texture2D
             ));
-            this._sampler = this._gd.PointSampler;
+            
+            this._sampler = gd.PointSampler;
         }
 
         public uint width => this._deviceTexture.Width;
@@ -42,7 +43,7 @@ namespace LifeSim.Engine.Rendering
         public Veldrid.Texture deviceTexture => this._deviceTexture;
         public Veldrid.Sampler sampler => this._sampler;
 
-        void Update(RectInt bounds, byte[] data)
+        void Update(RectInt bounds, byte[] data, bool generateMipmaps = true)
         {
             this._gd.UpdateTexture(
                 this._deviceTexture, data, 
@@ -50,15 +51,17 @@ namespace LifeSim.Engine.Rendering
                 width: (uint) bounds.width, height: (uint) bounds.height, depth: 1, 
                 mipLevel: 0, arrayLayer: 0
             );
+
+            if (generateMipmaps) this.RegenerateMipmaps();
         }
 
-        public unsafe void Update(Image<Rgba32> image)
+        public unsafe void Update(Image<Rgba32> image, bool generateMipmaps = true)
         {
             if (!image.TryGetSinglePixelSpan(out Span<Rgba32> pixelSpan)) {
                 throw new System.Exception("Unable to get image pixelspan.");
             }
 
-            fixed (void* pin = &MemoryMarshal.GetReference(pixelSpan)) { // TODO: Generate mipmaps, check matching width/height, etc
+            fixed (void* pin = &MemoryMarshal.GetReference(pixelSpan)) { // TODO: check matching width/height, etc
                 this._gd.UpdateTexture(
                     this._deviceTexture,
                     (IntPtr)pin,
@@ -69,6 +72,18 @@ namespace LifeSim.Engine.Rendering
                     depth: 1, mipLevel: (uint) 0, arrayLayer: 0
                 );
             }
+
+            if (generateMipmaps) this.RegenerateMipmaps();
+        }
+
+        public void RegenerateMipmaps()
+        {
+            var cl = this._gd.ResourceFactory.CreateCommandList();
+            cl.Begin();
+            cl.GenerateMipmaps(this._deviceTexture);
+            cl.End();
+
+            this._gd.SubmitCommands(cl);
         }
 
         public void Dispose()

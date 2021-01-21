@@ -29,14 +29,11 @@ namespace LifeSim.Generation
 
             int minArea = 10;
 
-            for (int x = 0; x < this._world.size.x; x++) 
-            {
-                for (int y = 0; y < this._world.size.y; y++) 
-                {
+            for (int x = 0; x < this._world.size.x; x++) {
+                for (int y = 0; y < this._world.size.y; y++)  {
                     this._FloodFill(new Vector2Int(x, y));
 
-                    if (this._currentTilesCoordsList.Count >= minArea) 
-                    {
+                    if (this._currentTilesCoordsList.Count >= minArea) {
                         this._AddSurface();
                     }
                 }
@@ -60,12 +57,10 @@ namespace LifeSim.Generation
             
             this._MarkTileAsVisited(startingCoord);
 
-            while (this._stack.Count > 0)
-            {
+            while (this._stack.Count > 0) {
                 Vector2Int coord = this._stack.Pop();
 
-                if (this._TileIsValid(coord))
-                {
+                if (this._TileIsValid(coord)) {
                     this._MarkTileAsVisited(coord);
                 }
             }
@@ -87,8 +82,7 @@ namespace LifeSim.Generation
             Vector2Int size = this._currentBox.size + new Vector2Int(1, 1);
             FlatSurface surface = new FlatSurface(this._world, coords, size, this._currentHeight);
 
-            foreach (Vector2Int tile in this._currentTilesCoordsList) 
-            {
+            foreach (Vector2Int tile in this._currentTilesCoordsList) {
                 surface.AddTile(tile.x - coords.x, tile.y - coords.y);
             }
 
@@ -111,8 +105,7 @@ namespace LifeSim.Generation
 
         private void _AddCoordToStack(Vector2Int coord)
         {
-            if (! this._visitedTiles.SafeGet(coord, true))
-            {
+            if (! this._visitedTiles.SafeGet(coord, true)) {
                 this._stack.Push(coord);
             }
         }

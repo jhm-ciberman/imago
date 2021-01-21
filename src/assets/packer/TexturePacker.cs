@@ -27,7 +27,7 @@ namespace LifeSim.Assets
             this._packer = new BinPacker((uint) (this._atlasSize >> this._mipmapLevels));
 
             this._atlasBuilder = new AtlasBuilder(this._atlasSize, this._mipmapLevels);
-            this._texture = this._assetManager.MakeTexture(this._atlasBuilder.image);
+            this._texture = this._assetManager.MakeTexture(this._atlasBuilder.image, (uint) this._mipmapLevels);
         }
 
         public void Add(UnpackedTexture unpackedTexture)
