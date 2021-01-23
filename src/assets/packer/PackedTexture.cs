@@ -40,6 +40,11 @@ namespace LifeSim.Assets
             int h = (int) (this.baseMap.height * deltaUV.Y);
             return new Vector2Int(w, h);
         }
+
+        void IAsset.Accept(IAssetProcessor assetProcessor)
+        {
+            assetProcessor.PackedTexture(this);
+        }
     }
 }
 

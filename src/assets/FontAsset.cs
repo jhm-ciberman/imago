@@ -28,5 +28,10 @@ namespace LifeSim.Assets
         {
             return this._fontSystem.GetFont(fontSize);
         }
+
+        public void Accept(IAssetProcessor assetProcessor)
+        {
+            assetProcessor.FontAsset(this);
+        }
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using LifeSim.Editor;
 using LifeSim.Engine.Rendering;
 using LifeSim.Simulation;
 using LifeSim.View3D;
@@ -17,6 +18,8 @@ namespace LifeSim.Assets
 
         public GPUTexture? mainAtlasTexture = null;
 
+        internal IEnumerable<string> assetsIDs => this._resources.Keys;
+
         public T Get<T>(string id) where T : IAsset
         {
             var asset = this._resources[id];
@@ -26,11 +29,16 @@ namespace LifeSim.Assets
             throw new Exception("The asset \"" + id + "\" is not of type " + typeof(T).Name);
         }
 
+        public IAsset Get(string id)
+        {
+            return this._resources[id];
+        }
+
         public PackedTexture GetWaterTexture()
         {
             return this.Get<PackedTexture>("tex:water");
         }
-
+        
         public PackedTexture GetPackedTexture(Cover cover)
         {
             return this.Get<PackedTexture>("tex:" + cover.id);

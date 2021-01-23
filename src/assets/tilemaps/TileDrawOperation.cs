@@ -93,7 +93,7 @@ namespace LifeSim.Assets
         private Color _Sample(Layer layer, Vector2Int pixel)
         {
             var p = layer.srcRect.coords + pixel - layer.dstOffset;
-            var texture = layer.tilemap.texture;
+            var texture = layer.tilemap.image;
             return texture[p.x, p.y];
         }
 

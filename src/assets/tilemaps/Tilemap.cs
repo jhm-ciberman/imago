@@ -6,7 +6,7 @@ namespace LifeSim.Assets
 {
     public class Tilemap : IAsset
     {
-        public Image<Rgba32> texture;
+        public Image<Rgba32> image;
 
         public enum Layout
         {
@@ -24,7 +24,7 @@ namespace LifeSim.Assets
 
         public Tilemap(Image<Rgba32> texture, Layout layout, int tileSize, bool centerRotable)
         {
-            this.texture = texture;
+            this.image = texture;
             this.layout = layout;
             this.tileSize = tileSize;
             this.centerRotable = centerRotable;
@@ -57,5 +57,10 @@ namespace LifeSim.Assets
         public Layer layerLateralTopRightPart    => new Layer(this, new RectInt(6, 0, 2, 1) , new Vector2Int(2, 0));
         public Layer layerLateralBottomLeftPart  => new Layer(this, new RectInt(4, 1, 2, 1) , new Vector2Int(0, 3));
         public Layer layerLateralBottomRightPart => new Layer(this, new RectInt(6, 1, 2, 1) , new Vector2Int(2, 3));
+
+        void IAsset.Accept(IAssetProcessor assetProcessor)
+        {
+            assetProcessor.Tilemap(this);
+        }
     }
 }
