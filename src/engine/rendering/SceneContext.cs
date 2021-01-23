@@ -81,8 +81,8 @@ namespace LifeSim.Engine.Rendering
             this._objectResourceSet = this._factory.CreateResourceSet(new ResourceSetDescription(layouts.renderables.regular, this.modelInfoBuffer));
             this._skinnedResourceSet = this._factory.CreateResourceSet(new ResourceSetDescription(layouts.renderables.skinned, this.modelInfoBuffer, this.bonesInfoBuffer));
 
-            uint shadowMapSize = 2048;
-            this.shadowmapTexture = this._factory.CreateTexture(TextureDescription.Texture2D(shadowMapSize, shadowMapSize, 1, 1, PixelFormat.D32_Float_S8_UInt, TextureUsage.DepthStencil | TextureUsage.Sampled));
+            uint shadowMapSize = 4096;
+            this.shadowmapTexture = this._factory.CreateTexture(TextureDescription.Texture2D(shadowMapSize, shadowMapSize, 1, 1, PixelFormat.R32_Float, TextureUsage.DepthStencil | TextureUsage.Sampled));
             this.shadowmapFramebuffer = this._factory.CreateFramebuffer(new FramebufferDescription(
                 this.shadowmapTexture, System.Array.Empty<Texture>()
             ));

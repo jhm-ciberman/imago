@@ -13,6 +13,8 @@ namespace LifeSim.Engine.Rendering
         {
             var sceneContext = resources.sceneContext;
             var shadowmapTexture = sceneContext.shadowmapTexture;
+
+
             var shadowMapSampler = gd.ResourceFactory.CreateSampler(new SamplerDescription (
                 SamplerAddressMode.Border, SamplerAddressMode.Border, SamplerAddressMode.Border,
                 SamplerFilter.MinLinear_MagLinear_MipLinear, null, 0, 0, 0, 0, SamplerBorderColor.OpaqueWhite
@@ -32,7 +34,7 @@ namespace LifeSim.Engine.Rendering
 
             this.shadowMap = new Pass(gd, "shadowmap", shadowmapPassResources, new Pass.Description {
                 blendState = BlendStateDescription.Empty,
-                faceCullMode = FaceCullMode.None,
+                faceCullMode = FaceCullMode.Front,
                 outputDescription = sceneContext.shadowmapFramebuffer.OutputDescription,
             });
 

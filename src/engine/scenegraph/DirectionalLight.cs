@@ -16,5 +16,7 @@ namespace LifeSim.Engine.SceneGraph
             return Matrix4x4.CreateLookAt(cameraPosition + this.direction, cameraPosition, Vector3.UnitY)
                 * Matrix4x4.CreateOrthographic(this.shadowMapSize.X, this.shadowMapSize.Y, this.shadowZNear, this.shadowZFar);
         }
+
+        
     }
 }

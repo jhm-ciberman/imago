@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using LifeSim.Engine.Rendering;
-using LifeSim.Engine.SceneGraph;
 using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
 
@@ -17,10 +16,14 @@ namespace LifeSim.Engine
         private InputInstance _input;
 
         private GPURenderer _renderer;
-        
-        private Stage _stage;
 
-        public App(string[] args, System.Func<App, Stage> stageFactory)
+        public uint selectedObjectID => this._renderer.selectedObjectID;
+        
+        public AssetManager assetManager => this._renderer.assetManager;
+
+        private Stage? _stage = null;
+
+        public App(string[] args)
         {
             WindowCreateInfo windowCI = new WindowCreateInfo(100, 100, 1024, 600, Veldrid.WindowState.Normal, "Medieval Life");
             this._window = VeldridStartup.CreateWindow(ref windowCI);
@@ -32,19 +35,18 @@ namespace LifeSim.Engine
             this._window.Resized += this.OnResize;
 
             this.OnResize();
-            this._stage = stageFactory.Invoke(this); 
 
             this._window.Resized += this.OnResize;
 
             this._input = new InputInstance(this._window);
             Input.SetInstance(this._input);
-
-            this._MainLoop();
         }
 
-        public uint selectedObjectID => this._renderer.selectedObjectID;
-        
-        public AssetManager assetManager => this._renderer.assetManager;
+        public void Run(Stage stage)
+        {
+            this.SetStage(stage);
+            this._MainLoop();
+        }
 
         private static Veldrid.GraphicsBackend ParseGraphicsBackend(string[] args)
         {
@@ -107,13 +109,13 @@ namespace LifeSim.Engine
                 }
 
                 this._renderer.Update(deltaTime, this._input.inputSnapshot);
-                this._stage.Update(deltaTime);
-                this._renderer.Render(this._stage);
+                if (this._stage != null) {
+                    this._stage.Update(deltaTime);
+                    this._renderer.Render(this._stage);
+                }
 
                 this._input.UpdateFrameInput(); // For next frame
             }
-
-
         }
     }
 
