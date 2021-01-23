@@ -69,10 +69,8 @@ namespace Sebastian.Geometry
                     vertexNode = nextVertexNode;
                 }
 
-                if (!hasRemovedEarThisIteration)
-                {
-                    System.Console.WriteLine("Error triangulating mesh. Aborted.");
-                    return null;
+                if (!hasRemovedEarThisIteration) {
+                    throw new System.Exception("Error triangulating mesh. Aborted.");
                 }
             }
             return tris;

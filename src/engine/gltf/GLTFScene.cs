@@ -59,7 +59,7 @@ namespace LifeSim.Engine.GLTF
             return n;
         }
 
-        public Node3D _InstantiateNodeRecursive(GLTFNode gltfNode, Dictionary<GLTFNode, Node3D> nodesCache)
+        private Node3D _InstantiateNodeRecursive(GLTFNode gltfNode, Dictionary<GLTFNode, Node3D> nodesCache)
         {
             var node3d = nodesCache.GetValueOrDefault(gltfNode);
             if (node3d != null) return node3d;

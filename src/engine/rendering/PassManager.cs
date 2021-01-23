@@ -17,7 +17,7 @@ namespace LifeSim.Engine.Rendering
 
             var shadowMapSampler = gd.ResourceFactory.CreateSampler(new SamplerDescription (
                 SamplerAddressMode.Border, SamplerAddressMode.Border, SamplerAddressMode.Border,
-                SamplerFilter.MinLinear_MagLinear_MipLinear, null, 0, 0, 0, 0, SamplerBorderColor.OpaqueWhite
+                SamplerFilter.MinLinear_MagLinear_MipPoint, null, 0, 0, 0, 0, SamplerBorderColor.OpaqueWhite
             ));
 
             IMaterialBuilder materialBuilder = resources;

@@ -31,12 +31,22 @@ namespace LifeSim.Engine
         private GraphicsDevice _gd;
 
         private GPUResourceManager _gpuResourceManager;
-        
+
+
         public AssetManager(GraphicsDevice gd, GPUResourceManager gpuResourceManager)
         {
             this._gd = gd;
             this._gpuResourceManager = gpuResourceManager;
-            
+        }
+        
+        private SurfaceMaterial? _cachedDefaultSurfaceMaterial;
+        public SurfaceMaterial defaultSurfaceMaterial
+        {
+            get
+            {
+                if (this._cachedDefaultSurfaceMaterial != null) return this._cachedDefaultSurfaceMaterial;
+                return this._cachedDefaultSurfaceMaterial = new SurfaceMaterial(this._gpuResourceManager, null);
+            }
         }
 
         public GPUTexture MakeTexture(string path, uint mipLevels = 0)

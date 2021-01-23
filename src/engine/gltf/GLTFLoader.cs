@@ -17,13 +17,12 @@ namespace LifeSim.Engine.GLTF
 
         public GLTFLoader(AssetManager assetsManager, SurfaceMaterial? material, string path)
         {
-            System.Console.WriteLine("Loading file " + path);
             this._assetsManager = assetsManager;
             this._path = path;
             this._model = glTFLoader.Interface.LoadModel(path);
             this._buffersCache = new GLTFBuffer[this._model.Buffers.Length];
             this._nodesCache = new GLTFNode[this._model.Nodes.Length];
-            this._material = material;
+            this._material = material ?? assetsManager.defaultSurfaceMaterial;
         }
 
         internal string GetNodeName(int index)

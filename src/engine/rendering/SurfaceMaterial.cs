@@ -20,10 +20,11 @@ namespace LifeSim.Engine.Rendering
         
         public bool castShadows = true;
 
-        public SurfaceMaterial(IMaterialBuilder builder, GPUTexture texture) 
+        public SurfaceMaterial(IMaterialBuilder builder, GPUTexture? texture) 
         {
             this._materialManager = builder;
             this._resourceLayout = builder.layouts.materials.surface;
+            texture = texture ?? builder.pinkTexture;
             this._resourceSet = builder.CreateResourceSet(this, texture.deviceTexture, texture.sampler);
         }
 

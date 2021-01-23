@@ -1,3 +1,5 @@
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using Veldrid;
 
 namespace LifeSim.Engine.Rendering
@@ -42,6 +44,18 @@ namespace LifeSim.Engine.Rendering
         ResourceSet IMaterialBuilder.CreateResourceSet(IMaterial material, params BindableResource[] resources)
         {
             return this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(material.resourceLayout, resources));
+        }
+
+        private GPUTexture? _cachedPinkTexture = null;
+        public GPUTexture pinkTexture 
+        {
+            get
+            {
+                if (this._cachedPinkTexture != null) return this._cachedPinkTexture;
+                
+                Image<Rgba32> image = new Image<Rgba32>(2, 2, new Rgba32(255, 0, 255));
+                return this._cachedPinkTexture = new GPUTexture(this._gd, image);
+            }
         }
     }
 }
