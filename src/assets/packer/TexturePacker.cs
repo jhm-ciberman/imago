@@ -13,13 +13,13 @@ namespace LifeSim.Assets
 
         private List<UnpackedTexture> _unpacked = new List<UnpackedTexture>(); 
         
-        private AssetManager _assetManager;
+        private ResourceFactory _assetManager;
 
         private BinPacker _packer;
         private AtlasBuilder _atlasBuilder;
         private GPUTexture _texture;
 
-        public TexturePacker(AssetManager assetManager, int mipmapLevels, int atlasSize)
+        public TexturePacker(ResourceFactory assetManager, int mipmapLevels, int atlasSize)
         {
             this._assetManager = assetManager;
             this._mipmapLevels = mipmapLevels;
@@ -82,7 +82,7 @@ namespace LifeSim.Assets
 
             int i = 0;
             foreach (UnpackedTexture texture in textures) {
-                var width = ((texture.width  - 1) >> this._mipmapLevels) + 1;
+                var width  = ((texture.width  - 1) >> this._mipmapLevels) + 1;
                 var height = ((texture.height - 1) >> this._mipmapLevels) + 1;
                 rects[i++] =  new BinRect<UnpackedTexture>((uint) width, (uint) height, texture);
             }

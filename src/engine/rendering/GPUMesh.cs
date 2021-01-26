@@ -39,7 +39,7 @@ namespace LifeSim.Engine.Rendering
             this.vertexCount = (uint) mesh.positions.Count;
             this.indexCount  = (uint) mesh.indices.Count;
 
-            ResourceFactory factory = graphicsDevice.ResourceFactory;
+            Veldrid.ResourceFactory factory = graphicsDevice.ResourceFactory;
             this._indexBuffer  = factory.CreateBuffer(new BufferDescription(this.indexCount * sizeof(ushort), BufferUsage.IndexBuffer));
             graphicsDevice.UpdateBuffer(this._indexBuffer, 0, indices);
 

@@ -1,13 +1,17 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using LifeSim.Engine;
 using LifeSim.Engine.Rendering;
+using LifeSim.Simulation;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
+using static LifeSim.Assets.Tilemap;
+using static LifeSim.Assets.TileRequest;
 
 namespace LifeSim.Assets
 {
-    public class TilemapManager
+    public class TextureManager
     {
         private readonly Vector2Int _gridSize;
 
@@ -29,9 +33,11 @@ namespace LifeSim.Assets
 
         private int textureMaxSize;
 
-        private TileDescriptorFactory _tileDescriptorFactory;
+        private Dictionary<string, Tilemap> _tilemaps = new Dictionary<string, Tilemap>();
 
-        public TilemapManager(AssetManager assetManager, AssetsContainer assetsContainer, int textureMaxSize, int mipMapLevels, int tileSize)
+        private Dictionary<string, PackedTexture> _packedTextures = new Dictionary<string, PackedTexture>();
+
+        public TextureManager(ResourceFactory assetManager, GPUTexture mainAtlasTexture, int textureMaxSize, int mipMapLevels, int tileSize)
         {
             this.textureMaxSize = textureMaxSize;
             this._gridSize = new Vector2Int(textureMaxSize, textureMaxSize) / tileSize;
@@ -48,20 +54,38 @@ namespace LifeSim.Assets
             this._image = new Image<Rgba32>(textureMaxSize, textureMaxSize);
             this._texture = assetManager.MakeTexture(this._image, (uint) this._mipMapLevels);
 
-            this._tileDescriptorFactory = new TileDescriptorFactory(assetsContainer);
-
-            var atlasTexture = assetsContainer.mainAtlasTexture;
-            if (atlasTexture == null) {
-                throw new System.Exception("No atlas texture registered");
-            }
-
             this._materialTerrain = assetManager.MakeSurfaceMaterial(this._texture);
-            this._materialHouses = assetManager.MakeSurfaceMaterial(atlasTexture);
-            this._materialWater = assetManager.MakeSurfaceMaterial(atlasTexture);
+            this._materialHouses = assetManager.MakeSurfaceMaterial(mainAtlasTexture);
+            this._materialWater = assetManager.MakeSurfaceMaterial(mainAtlasTexture);
             this._materialWater.castShadows = false;
             this._materialTerrain.castShadows = false;
 
             //GameStage.debugTexture = this._texture;
+        }
+
+        public void AddTilemap(string id, Tilemap tilemap)
+        {
+            this._tilemaps[id] = tilemap;
+        }
+
+        public void AddPackedTexture(string id, PackedTexture packedTexture)
+        {
+            this._packedTextures[id] = packedTexture;
+        }
+
+        public PackedTexture GetPackedTexture(Cover cover)
+        {
+            return this._packedTextures["tex:" + cover.id];
+        }
+
+        public PackedTexture GetWaterTexture()
+        {
+            return this._packedTextures["tex:water"];
+        }
+
+        public PackedTexture GetPackedTexture(Simulation.Object obj)
+        {
+            return this._packedTextures["tex:" + obj.id];
         }
 
         public SurfaceMaterial materialTerrain => this._materialTerrain;
@@ -91,7 +115,7 @@ namespace LifeSim.Assets
 
         private PackedTile _MakeNewTile(TileRequest request)
         {
-            var descriptor = this._tileDescriptorFactory.BuildDescriptor(request);
+            var descriptor = this._BuildDescriptor(request);
             
             Vector2Int coord = this._freeTiles.Dequeue();
             
@@ -104,6 +128,21 @@ namespace LifeSim.Assets
 
             packedTile.rotable = descriptor.rotable;
             return packedTile;
+        }
+
+        private TileDescriptor _BuildDescriptor(TileRequest request)
+        {
+            var centerTileMap = this._tilemaps["tilemap:" + request.center.id];
+            var descriptor = new TileDescriptor(centerTileMap);
+
+            foreach (var entry in request.layers.OrderBy(entry => entry.Key.dominance))
+            {
+                var bytemask = entry.Value;
+                var layerTileMap = this._tilemaps["tilemap:" + entry.Key.id];
+                descriptor.AddLayers(layerTileMap, bytemask);
+            }
+
+            return descriptor;
         }
     }
 }

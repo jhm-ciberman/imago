@@ -15,7 +15,7 @@ namespace LifeSim.Engine.Rendering
         private SceneContext _sceneContext;
         private bool _hasCommandsToSubmit;
 
-        public GPURenderer2D(GraphicsDevice gd, AssetManager assetManager, GPUResourceManager resources, PSOManager psoManager)
+        public GPURenderer2D(GraphicsDevice gd, ResourceFactory assetManager, GPUResourceManager resources, PSOManager psoManager)
         {
             var renderTexture = resources.mainRenderTexture;
             this._graphicsDevice = gd;

@@ -42,11 +42,11 @@ namespace LifeSim.Engine.Rendering
         private IRenderTexture _sourceTexture;
         private IMaterial? _material = null;
         private PSOManager _psoManager;
-        private AssetManager _assetManager;
+        private ResourceFactory _assetManager;
 
         private FullScreenQuad _quad;
 
-        public FullScreenRenderer(GraphicsDevice gd, AssetManager assetManager, PSOManager psoManager, GPUResourceManager resources)
+        public FullScreenRenderer(GraphicsDevice gd, ResourceFactory assetManager, PSOManager psoManager, GPUResourceManager resources)
         {
             this._gd = gd;
             this._assetManager = assetManager;

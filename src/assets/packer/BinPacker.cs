@@ -81,16 +81,21 @@ namespace LifeSim.Assets
 
             int i = 0;
             foreach (var rect in rects) {
-                Node? node = this._root.Find(rect.width, rect.height);
-                if (node != null) {
-                    node.Split(rect.width, rect.height);
-                    results[i++] = new Result<T>(new RectInt((int) node.x, (int) node.y, (int) node.width, (int) node.height), rect.element);
-                } else {
-                    throw new System.Exception("Cannot fit the rectangles in the atlas");
-                }
+                results[i++] = this.FitOne(rect);
             }
 
             return results;
+        }
+
+        public Result<T> FitOne<T>(BinRect<T> rect)
+        {
+            Node? node = this._root.Find(rect.width, rect.height);
+            if (node != null) {
+                node.Split(rect.width, rect.height);
+                return new Result<T>(new RectInt((int) node.x, (int) node.y, (int) node.width, (int) node.height), rect.element);
+            } else {
+                throw new System.Exception("Cannot fit the rectangles in the atlas");
+            }
         }
     }
 }

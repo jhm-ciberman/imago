@@ -5,13 +5,13 @@ namespace LifeSim.Engine.Rendering
 {
     public class PSOManager
     {
-        private ResourceFactory _factory; 
+        private Veldrid.ResourceFactory _factory; 
 
         private ShaderManager _shaderManager;
 
         private Dictionary<uint, Pipeline> _pipelines = new Dictionary<uint, Pipeline>();
 
-        public PSOManager(ResourceFactory factory)
+        public PSOManager(Veldrid.ResourceFactory factory)
         {
             this._factory = factory;
             this._shaderManager = new ShaderManager(factory);

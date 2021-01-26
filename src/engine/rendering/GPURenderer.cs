@@ -12,7 +12,7 @@ namespace LifeSim.Engine.Rendering
     public class GPURenderer : System.IDisposable
     {
         private GraphicsDevice _gd;
-        private ResourceFactory _factory;
+        private Veldrid.ResourceFactory _factory;
         
         private GPURenderer2D _renderer2d;
         private GPURenderer3D _renderer3d;
@@ -26,8 +26,8 @@ namespace LifeSim.Engine.Rendering
 
         private GPUResourceManager _gpuResources;
 
-        private AssetManager _assetManager;
-        public AssetManager assetManager => this._assetManager;
+        private ResourceFactory _assetManager;
+        public ResourceFactory assetManager => this._assetManager;
 
         private PSOManager _psoManager;
 
@@ -49,7 +49,7 @@ namespace LifeSim.Engine.Rendering
 
             this._psoManager = new PSOManager(this._factory);
 
-            this._assetManager = new AssetManager(this._gd, this._gpuResources);
+            this._assetManager = new ResourceFactory(this._gd, this._gpuResources);
 
             this._renderer2d     = new GPURenderer2D(this._gd, this._assetManager, this._gpuResources, this._psoManager);
             this._renderer3d     = new GPURenderer3D(this._gd, this._psoManager, this._gpuResources);

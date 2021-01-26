@@ -52,7 +52,7 @@ namespace LifeSim.Engine.Rendering
         public readonly DeviceBuffer modelInfoBuffer;
         public readonly DeviceBuffer bonesInfoBuffer;
 
-        private ResourceFactory _factory;
+        private Veldrid.ResourceFactory _factory;
         private Dictionary<Renderable3D, ResourceSet> _resourceSets = new Dictionary<Renderable3D, ResourceSet>();
 
         private readonly ResourceSet _objectResourceSet;

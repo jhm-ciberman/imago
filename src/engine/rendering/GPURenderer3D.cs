@@ -8,7 +8,7 @@ namespace LifeSim.Engine.Rendering
     {
         private GraphicsDevice _graphicsDevice;
         
-        private ResourceFactory _factory;
+        private Veldrid.ResourceFactory _factory;
         private CommandList _commandList;
 
         private IRenderTexture _renderTexture;

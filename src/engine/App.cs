@@ -19,7 +19,7 @@ namespace LifeSim.Engine
 
         public uint selectedObjectID => this._renderer.selectedObjectID;
         
-        public AssetManager assetManager => this._renderer.assetManager;
+        public ResourceFactory assetManager => this._renderer.assetManager;
 
         private Stage? _stage = null;
 

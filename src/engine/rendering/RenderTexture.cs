@@ -51,7 +51,7 @@ namespace LifeSim.Engine.Rendering
     {
         private uint _width;
         private uint _height;
-        private ResourceFactory _factory;
+        private Veldrid.ResourceFactory _factory;
         private Framebuffer _framebuffer;
         private Texture _depthTexture;
         private Texture _colorTexture;
@@ -59,7 +59,7 @@ namespace LifeSim.Engine.Rendering
 
         public event Action<IRenderTexture>? onResized;
 
-        public RenderTexture(ResourceFactory factory, uint width, uint height)
+        public RenderTexture(Veldrid.ResourceFactory factory, uint width, uint height)
         {
             this._factory = factory;
             this._width = width;

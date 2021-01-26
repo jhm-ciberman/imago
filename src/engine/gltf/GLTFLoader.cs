@@ -7,7 +7,7 @@ namespace LifeSim.Engine.GLTF
 {
     public class GLTFLoader
     {
-        private AssetManager _assetsManager;
+        private ResourceFactory _assetsManager;
         private string _path;
         private glTFLoader.Schema.Gltf _model;
 
@@ -15,7 +15,7 @@ namespace LifeSim.Engine.GLTF
         private GLTFNode?[] _nodesCache;
         private SurfaceMaterial? _material;
 
-        public GLTFLoader(AssetManager assetsManager, SurfaceMaterial? material, string path)
+        public GLTFLoader(ResourceFactory assetsManager, SurfaceMaterial? material, string path)
         {
             this._assetsManager = assetsManager;
             this._path = path;

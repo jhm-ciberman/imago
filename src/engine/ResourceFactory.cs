@@ -9,7 +9,7 @@ using Rectangle = System.Drawing.Rectangle;
 
 namespace LifeSim.Engine
 {
-    public class AssetManager : ITexture2DCreator
+    public class ResourceFactory : ITexture2DCreator
     {
         class FontTexture2D : GPUTexture, ITexture2D
         {
@@ -33,7 +33,7 @@ namespace LifeSim.Engine
         private GPUResourceManager _gpuResourceManager;
 
 
-        public AssetManager(GraphicsDevice gd, GPUResourceManager gpuResourceManager)
+        public ResourceFactory(GraphicsDevice gd, GPUResourceManager gpuResourceManager)
         {
             this._gd = gd;
             this._gpuResourceManager = gpuResourceManager;

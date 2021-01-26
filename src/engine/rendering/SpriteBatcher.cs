@@ -34,7 +34,7 @@ namespace LifeSim.Engine.Rendering
         }
 
         private CommandList _commandList;
-        private ResourceFactory _factory;
+        private Veldrid.ResourceFactory _factory;
         private GraphicsDevice _gd;
         private DeviceBuffer _vertexBuffer;
         private DeviceBuffer _indexBuffer;
@@ -49,10 +49,10 @@ namespace LifeSim.Engine.Rendering
         private int _totalSpritesToDraw = 0;
 
         private PSOManager _psoManager;
-        private AssetManager _assetManager;
+        private ResourceFactory _assetManager;
         private SpriteBatch _renderable = new SpriteBatch();
 
-        public SpriteBatcher(GraphicsDevice gd, PSOManager psoManager, AssetManager assetManager, CommandList commandList)
+        public SpriteBatcher(GraphicsDevice gd, PSOManager psoManager, ResourceFactory assetManager, CommandList commandList)
         {
             this._gd = gd;
             this._assetManager = assetManager;

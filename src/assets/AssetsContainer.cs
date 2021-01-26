@@ -16,8 +16,6 @@ namespace LifeSim.Assets
             this._resources.Add(id, asset);
         }
 
-        public GPUTexture? mainAtlasTexture = null;
-
         internal IEnumerable<string> assetsIDs => this._resources.Keys;
 
         public T Get<T>(string id) where T : IAsset
@@ -32,26 +30,6 @@ namespace LifeSim.Assets
         public IAsset Get(string id)
         {
             return this._resources[id];
-        }
-
-        public PackedTexture GetWaterTexture()
-        {
-            return this.Get<PackedTexture>("tex:water");
-        }
-        
-        public PackedTexture GetPackedTexture(Cover cover)
-        {
-            return this.Get<PackedTexture>("tex:" + cover.id);
-        }
-
-        public PackedTexture GetPackedTexture(Simulation.Object obj)
-        {
-            return this.Get<PackedTexture>("tex:" + obj.id);
-        }
-
-        public Tilemap GetTilemap(TileCover cover)
-        {
-            return this.Get<Tilemap>("tilemap:" + cover.id);
         }
 
         public ApertureAsset GetApertureAsset(Aperture aperture)

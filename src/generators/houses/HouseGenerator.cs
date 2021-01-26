@@ -34,7 +34,7 @@ namespace LifeSim.Generation
             Aperture.Model window = this._Choose(housePreset.windows);
             Aperture.Model door = this._Choose(housePreset.doors);
 
-            var storeyCount = this._random.Next(1, 3);
+            var storeyCount = this._random.Next(1, 1);
             house.SetStoreyCount(storeyCount);
             for (var i = 0; i < storeyCount; i++) {
                 this._AddStorey(house, floor, i == 0 ? null : ceiling, i);
@@ -100,14 +100,17 @@ namespace LifeSim.Generation
             Cover wallExterior = this._Choose(housePreset.wallsExterior);
             Cover wallInterior = this._Choose(housePreset.wallsInterior);
 
+            
+
             IRoofModel[] roofsModelsList = new IRoofModel[] {
                 HouseGenerator.ROOF_GABLE_HORIZONTAL,
                 HouseGenerator.ROOF_GABLE_VERTICAL,
                 HouseGenerator.ROOF_HIP,
-                //HouseGenerator.ROOF_FLAT,
+                HouseGenerator.ROOF_FLAT,
             };
             var mainRoof = this._Choose(roofsModelsList);
             var wall = new CoverPair(wallExterior, wallInterior);
+
             var style = new RoofStyle(roofExterior, roofInterior, wall);
 
             foreach (var cell in this.GetHighestCells(house)) {
@@ -166,21 +169,21 @@ namespace LifeSim.Generation
                 },
                 wallsExterior = new Cover[] {
                     //this._container.Get<Cover>("uvs"),
-                    this._container.Get<Cover>("wall.bricks"),
-                    this._container.Get<Cover>("wall.lumberjackdestiny"),
+                    //this._container.Get<Cover>("wall.bricks"),
+                    //this._container.Get<Cover>("wall.lumberjackdestiny"),
                     this._container.Get<Cover>("wall.mediewall"),
-                    this._container.Get<Cover>("wall.mediewallbricks"),
-                    this._container.Get<Cover>("wall.mediewallquad"),
-                    this._container.Get<Cover>("wall.woodenplanks"),
+                    //this._container.Get<Cover>("wall.mediewallbricks"),
+                    //this._container.Get<Cover>("wall.mediewallquad"),
+                    //this._container.Get<Cover>("wall.woodenplanks"),
                 },
                 wallsInterior = new Cover[] {
                     //this._container.Get<Cover>("uvs"),
-                    this._container.Get<Cover>("wall.bricks"),
-                    this._container.Get<Cover>("wall.lumberjackdestiny"),
+                    //this._container.Get<Cover>("wall.bricks"),
+                    //this._container.Get<Cover>("wall.lumberjackdestiny"),
                     this._container.Get<Cover>("wall.mediewall"),
-                    this._container.Get<Cover>("wall.mediewallbricks"),
-                    this._container.Get<Cover>("wall.mediewallquad"),
-                    this._container.Get<Cover>("wall.woodenplanks"),
+                    //this._container.Get<Cover>("wall.mediewallbricks"),
+                    //this._container.Get<Cover>("wall.mediewallquad"),
+                    //this._container.Get<Cover>("wall.woodenplanks"),
                 },
                 floors = new Cover[] {
                     this._container.Get<Cover>("floor.oakdream"),

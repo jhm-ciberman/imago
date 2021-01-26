@@ -28,7 +28,7 @@ namespace LifeSim.Engine.Rendering
         public Materials materials;
         public Renderables renderables;
 
-        public ResourceLayouts(ResourceFactory factory)
+        public ResourceLayouts(Veldrid.ResourceFactory factory)
         {
             this.passes = new Passes {
                 sprites = factory.CreateResourceLayout(new ResourceLayoutDescription(

@@ -16,11 +16,11 @@ namespace LifeSim.Engine.Rendering
 
         private string _shadersBasePath = "./res/shaders/";
 
-        private ResourceFactory _factory;
+        private Veldrid.ResourceFactory _factory;
 
         private Dictionary<ShaderVariant, Shader> _shaderVariants = new Dictionary<ShaderVariant, Shader>();
 
-        public ShaderManager(ResourceFactory factory)
+        public ShaderManager(Veldrid.ResourceFactory factory)
         {
             this._factory = factory;
         }   
