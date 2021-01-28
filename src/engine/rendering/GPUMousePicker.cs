@@ -5,9 +5,9 @@ namespace LifeSim.Engine.Rendering
 {
     public class GPUMousePicker
     {
-        private GraphicsDevice _gd;
-        private Texture _pixelTexture;
-        private CommandList _commandList;
+        private readonly GraphicsDevice _gd;
+        private readonly Texture _pixelTexture;
+        private readonly CommandList _commandList;
 
         private uint _objectID = 0;
         private bool _hasCommandsToSubmit = false;

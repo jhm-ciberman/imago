@@ -8,7 +8,7 @@ namespace LifeSim.Engine.Rendering
     public class GPUMesh :  System.IDisposable
     {
         [StructLayout(LayoutKind.Sequential)]
-        struct VertData
+        private struct VertData
         {           
             public Vector3 position;
             public Vector3 normal;
@@ -16,7 +16,7 @@ namespace LifeSim.Engine.Rendering
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        struct SkinnedVertData
+        private struct SkinnedVertData
         {
             public Vector3 position;
             public Vector3 normal;
@@ -25,9 +25,9 @@ namespace LifeSim.Engine.Rendering
             public Vector4 weights;
         }
 
-        private DeviceBuffer _vertexBuffer;
-        private DeviceBuffer _indexBuffer;
-        private VertexLayoutKind _vertexLayoutKind;
+        private readonly DeviceBuffer _vertexBuffer;
+        private readonly DeviceBuffer _indexBuffer;
+        private readonly VertexLayoutKind _vertexLayoutKind;
         public VertexLayoutKind vertexLayoutKind => this._vertexLayoutKind;
         public uint vertexCount;
         public uint indexCount;

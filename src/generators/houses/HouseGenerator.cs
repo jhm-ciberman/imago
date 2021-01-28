@@ -10,9 +10,9 @@ namespace LifeSim.Generation
         public static IRoofModel ROOF_HIP = new HipRoofModel();
         public static IRoofModel ROOF_FLAT = new FlatRoofModel();
 
-        private System.Random _random;
+        private readonly System.Random _random;
 
-        private IContainer _container;
+        private readonly IContainer _container;
 
         public HouseGenerator(IContainer container, System.Random random)
         {

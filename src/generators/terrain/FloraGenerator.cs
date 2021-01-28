@@ -5,13 +5,13 @@ namespace LifeSim.Generation
 {
     public class FloraGenerator : IWorldGenerationStep
     {
-        private System.Random _random;
+        private readonly System.Random _random;
 
-        private int _seed;
+        private readonly int _seed;
 
-        private float _floraDensity;
+        private readonly float _floraDensity;
 
-        private IContainer _container; 
+        private readonly IContainer _container; 
 
         public FloraGenerator(IContainer container, int seed, float floraDensity)
         {

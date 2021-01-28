@@ -8,14 +8,14 @@ namespace LifeSim.Generation
     {
         class TerrainPathfinder : Pathfinder
         {
-            private float _flatTileCost = 1.0f;
-            private float _slopeTileCost = 1.2f;
-            private float _diagonalSlopeTileCost = 2.5f;
-            private float _turnDirectionCost = 1.05f;
-            private float _biomeChangeCost = 1.1f;
+            private readonly float _flatTileCost = 1.0f;
+            private readonly float _slopeTileCost = 1.2f;
+            private readonly float _diagonalSlopeTileCost = 2.5f;
+            private readonly float _turnDirectionCost = 1.05f;
+            private readonly float _biomeChangeCost = 1.1f;
 
-            private World _world;
-            private float _heuristicMinWeight;
+            private readonly World _world;
+            private readonly float _heuristicMinWeight;
 
             public TerrainPathfinder(Tile start, Tile end, float quality = 1f) : base(start.world.size, start.coords, end.coords)
             {
@@ -69,9 +69,9 @@ namespace LifeSim.Generation
             }
         }
 
-        private System.Random _random;
+        private readonly System.Random _random;
 
-        private IContainer _container;
+        private readonly IContainer _container;
 
         public PathsGenerator(IContainer container, int seed)
         {

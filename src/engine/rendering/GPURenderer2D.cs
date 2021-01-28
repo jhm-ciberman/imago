@@ -6,13 +6,13 @@ namespace LifeSim.Engine.Rendering
 {
     public class GPURenderer2D
     {
-        private GraphicsDevice _graphicsDevice;
-        private SpriteBatcher _spriteBatcher;
+        private readonly GraphicsDevice _graphicsDevice;
+        private readonly SpriteBatcher _spriteBatcher;
 
 
-        private CommandList _commandList;
-        private IRenderTexture _renderTexture;
-        private SceneContext _sceneContext;
+        private readonly CommandList _commandList;
+        private readonly IRenderTexture _renderTexture;
+        private readonly SceneContext _sceneContext;
         private bool _hasCommandsToSubmit;
 
         public GPURenderer2D(GraphicsDevice gd, ResourceFactory assetManager, GPUResourceManager resources, PSOManager psoManager)

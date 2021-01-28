@@ -6,8 +6,8 @@ namespace LifeSim.Engine.Rendering
 {
     public class RenderList
     {
-        private List<Renderable3D> _shadowsRenderList = new List<Renderable3D>();
-        private List<Renderable3D> _regularRenderList = new List<Renderable3D>();
+        private readonly List<Renderable3D> _shadowsRenderList = new List<Renderable3D>();
+        private readonly List<Renderable3D> _regularRenderList = new List<Renderable3D>();
 
         public RenderList()
         {

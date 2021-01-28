@@ -47,18 +47,15 @@ namespace LifeSim.Engine.GLTF
 
     internal class GLTFBufferView : IGLTFBufferView
     {
-        private GLTFBuffer _buffer;
-        private int _byteLength;
-        private int _byteOffset;
-        private int _byteStride;
+        private readonly GLTFBuffer _buffer;
+        private readonly int _byteOffset;
+        private readonly int _byteStride;
 
-        public GLTFBufferView(GLTFBuffer buffer, int byteLength, int byteOffset, int? byteStride)
+        public GLTFBufferView(GLTFBuffer buffer, int byteOffset, int? byteStride)
         {
             this._buffer = buffer;
-            this._byteLength = byteLength;
             this._byteOffset = byteOffset;
             this._byteStride = byteStride ?? 0;
-
         }
 
         public T[] _Read<T>(int offset, int count, System.Func<int, T> reader) where T : struct

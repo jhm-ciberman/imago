@@ -15,7 +15,7 @@ namespace LifeSim.Engine.Anim
 
         public abstract class BaseChannel<T> : IChannel where T : struct
         {
-            private ISampler<T> _sampler;
+            private readonly ISampler<T> _sampler;
             public string targetName {get;}
 
             public float duration => this._sampler.duration;
@@ -64,7 +64,7 @@ namespace LifeSim.Engine.Anim
             protected float[] _times;
             protected T[] _values;
 
-            public float duration => this._times[this._times.Length - 1];
+            public float duration => this._times[^1];
 
             public BaseSampler(float[] times, T[] values)
             {
@@ -74,7 +74,9 @@ namespace LifeSim.Engine.Anim
 
             protected abstract T _Interpolate(int indexPrev, int indexNext, float time);
 
-            private int _FindNextIndex(float time, int lastTimeIndex) //TODO: optimize with lastTimeIndex
+#pragma warning disable IDE0060 //TODO: optimize with lastTimeIndex
+
+            private int _FindNextIndex(float time, int lastTimeIndex) 
             {
                 for (int i = 0; i < this._times.Length; i++) {
                     if (this._times[i] >= time) {
@@ -83,6 +85,8 @@ namespace LifeSim.Engine.Anim
                 }
                 return this._times.Length - 1;
             }
+
+#pragma warning restore
 
             public T Sample(float time, bool loop, ref int lastTimeIndex)
             {
@@ -124,9 +128,8 @@ namespace LifeSim.Engine.Anim
 
         public class SamplerStep<T> : BaseSampler<T> where T : struct
         {
-            public SamplerStep(float[] times, T[] values, IInterpolator<T> interpolator) : base(times, values) 
+            public SamplerStep(float[] times, T[] values) : base(times, values)
             {
-                //
             }
 
             protected override T _Interpolate(int indexPrev, int indexNext, float time)
@@ -187,10 +190,9 @@ namespace LifeSim.Engine.Anim
             }
         }
 
-        private Dictionary<string, List<IChannel>> _channels = new Dictionary<string, List<IChannel>>();
-        private string _name;
-        private float _duration;
-        public float duration => this._duration;
+        private readonly Dictionary<string, List<IChannel>> _channels = new Dictionary<string, List<IChannel>>();
+        private readonly string _name;
+        public float duration { get; }
 
         public Animation(string name, IReadOnlyList<IChannel> channels)
         {
@@ -208,7 +210,7 @@ namespace LifeSim.Engine.Anim
                     this._channels.Add(key, new List<IChannel> { channel });
                 }
             }
-            this._duration = duration;
+            this.duration = duration;
         }
 
         public IEnumerable<string> channelNames => this._channels.Keys;

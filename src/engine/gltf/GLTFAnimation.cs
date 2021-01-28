@@ -8,15 +8,15 @@ namespace LifeSim.Engine.GLTF
 {
     public class GLTFAnimation
     {
-        private GLTFLoader _model;
+        private readonly GLTFLoader _model;
 
-        private glTFLoader.Schema.AnimationSampler[] _samplers;
+        private readonly glTFLoader.Schema.AnimationSampler[] _samplers;
 
-        private glTFLoader.Schema.AnimationChannel[] _channels;
+        private readonly glTFLoader.Schema.AnimationChannel[] _channels;
 
-        private string _name;
+        private readonly string _name;
 
-        private Dictionary<int, float[]> _inputsCache = new Dictionary<int, float[]>();
+        private readonly Dictionary<int, float[]> _inputsCache = new Dictionary<int, float[]>();
 
         internal GLTFAnimation(GLTFLoader model, glTFLoader.Schema.Animation animation)
         {
@@ -57,16 +57,12 @@ namespace LifeSim.Engine.GLTF
 
         private IChannelFactory? _GetChannelFactory(PathEnum path)
         {
-            switch (path) {
-                case PathEnum.translation:
-                    return new PositionChannelFactory();
-                case PathEnum.rotation:
-                    return new RotationChannelFactory();
-                case PathEnum.scale:
-                    return new ScaleChannelFactory();
-                default: 
-                    return null; // Not supported
-            }
+            return path switch {
+                PathEnum.translation => new PositionChannelFactory(),
+                PathEnum.rotation    => new RotationChannelFactory(),
+                PathEnum.scale       => new ScaleChannelFactory(),
+                _                    => null, // Not supported
+            };
         }
 
         
@@ -95,16 +91,12 @@ namespace LifeSim.Engine.GLTF
             protected Animation.BaseSampler<T> _MakeSampler(float[] input, T[] values, InterpolationEnum type)
             {
                 var interpolator = this._MakeInterpolator();
-                switch (type) {
-                    case InterpolationEnum.STEP:
-                        return new Animation.SamplerStep<T>(input, values, interpolator);
-                    case InterpolationEnum.LINEAR:
-                        return new Animation.SamplerLinear<T>(input, values, interpolator);
-                    case InterpolationEnum.CUBICSPLINE:
-                        return new Animation.SamplerCubicSpline<T>(input, values, interpolator);
-                    default: 
-                        return new Animation.SamplerStep<T>(input, values, interpolator);
-                }
+                return type switch {
+                    InterpolationEnum.STEP        => new Animation.SamplerStep<T>(input, values),
+                    InterpolationEnum.LINEAR      => new Animation.SamplerLinear<T>(input, values, interpolator),
+                    InterpolationEnum.CUBICSPLINE => new Animation.SamplerCubicSpline<T>(input, values, interpolator),
+                    _                             => new Animation.SamplerStep<T>(input, values),
+                };
             }
         }
 

@@ -8,36 +8,32 @@ namespace LifeSim.Engine.GLTF
 {
     class GLTFAccessor
     {
-        private IGLTFBufferView _bufferView;
-        private int _byteOffset;
-        private int _count;
-        private Accessor.TypeEnum _type;
-        private ComponentTypeEnum _componentType;
-        private bool _normalized;
+        private readonly IGLTFBufferView _bufferView;
+        private readonly int _byteOffset;
+        private readonly int _count;
+        private readonly ComponentTypeEnum _componentType;
+        private readonly bool _normalized;
+        public TypeEnum type { get; }
 
-        public GLTFAccessor(IGLTFBufferView bufferView, int byteOffset, int count, ComponentTypeEnum componentType, Accessor.TypeEnum type, bool normalized)
+        public GLTFAccessor(IGLTFBufferView bufferView, int byteOffset, int count, ComponentTypeEnum componentType, TypeEnum type, bool normalized)
         {
             this._bufferView = bufferView;
             this._byteOffset = byteOffset;
             this._count = count;
             this._componentType = componentType;
-            this._type = type;
+            this.type = type;
             this._normalized = normalized;
         }
 
-        public TypeEnum type => this._type;
 
         public ushort[] AsIndicesArray()
         {
-            switch (this._componentType) {
-                case ComponentTypeEnum.UNSIGNED_BYTE:
-                    return this._Byte2UShort(this._bufferView.ReadByteArray(this._byteOffset, this._count));
-                case ComponentTypeEnum.UNSIGNED_SHORT:
-                    return this._bufferView.ReadUShortArray(this._byteOffset, this._count);
-                case ComponentTypeEnum.UNSIGNED_INT:
-                    return this._Int2UShort(this._bufferView.ReadUIntArray(this._byteOffset, this._count));
-            }
-            throw new System.NotSupportedException();
+            return this._componentType switch {
+                ComponentTypeEnum.UNSIGNED_BYTE  => this._Byte2UShort(this._bufferView.ReadByteArray(this._byteOffset, this._count)),
+                ComponentTypeEnum.UNSIGNED_SHORT => this._bufferView.ReadUShortArray(this._byteOffset, this._count),
+                ComponentTypeEnum.UNSIGNED_INT   => this._Int2UShort(this._bufferView.ReadUIntArray(this._byteOffset, this._count)),
+                _ => throw new NotSupportedException(),
+            };
         }
 
         private ushort[] _Int2UShort(uint[] sourceArr)
@@ -60,65 +56,55 @@ namespace LifeSim.Engine.GLTF
 
         public float[] AsFloatArray()
         {
-            switch (this._componentType) {
-                case ComponentTypeEnum.FLOAT:
-                    return this._bufferView.ReadFloatArray(this._byteOffset, this._count);
-            }
-            throw new System.NotSupportedException();
+            return this._componentType switch {
+                ComponentTypeEnum.FLOAT => this._bufferView.ReadFloatArray(this._byteOffset, this._count),
+                _ => throw new System.NotSupportedException(),
+            };
         }
 
         public Vector2[] AsVector2Array() 
         {
-            switch (this._componentType) {
-                case ComponentTypeEnum.FLOAT:
-                    return this._bufferView.ReadVector2Array(this._byteOffset, this._count);
-            }
-            throw new System.NotSupportedException();
+            return this._componentType switch {
+                ComponentTypeEnum.FLOAT => this._bufferView.ReadVector2Array(this._byteOffset, this._count),
+                _ => throw new System.NotSupportedException(),
+            };
         }
 
         public Vector3[] AsVector3Array() 
         {
-            switch (this._componentType) {
-                case ComponentTypeEnum.FLOAT:
-                    return this._bufferView.ReadVector3Array(this._byteOffset, this._count);
-            }
-            throw new System.NotSupportedException();
+            return this._componentType switch {
+                ComponentTypeEnum.FLOAT => this._bufferView.ReadVector3Array(this._byteOffset, this._count),
+                _ => throw new System.NotSupportedException(),
+            };
         }
 
         public Vector4[] AsVector4Array()
         {
-            switch (this._componentType) {
-                case ComponentTypeEnum.FLOAT:
-                    return this._bufferView.ReadVector4Array(this._byteOffset, this._count);
-            }
-            throw new System.NotSupportedException();
+            return this._componentType switch {
+                ComponentTypeEnum.FLOAT => this._bufferView.ReadVector4Array(this._byteOffset, this._count),
+                _ => throw new System.NotSupportedException(),
+            };
         }
 
         public Quaternion[] AsQuaternionArray()
         {
-            switch (this._componentType) {
-                case ComponentTypeEnum.FLOAT:
-                    return this._bufferView.ReadQuaternionArray(this._byteOffset, this._count);
-                case ComponentTypeEnum.BYTE:
-                    return this._normalizeToQuaternion(this._bufferView.ReadSByteArray(this._byteOffset, this._count));
-                case ComponentTypeEnum.UNSIGNED_BYTE:
-                    return this._normalizeToQuaternion(this._bufferView.ReadByteArray(this._byteOffset, this._count));
-                case ComponentTypeEnum.SHORT:
-                    return this._normalizeToQuaternion(this._bufferView.ReadShortArray(this._byteOffset, this._count));
-                case ComponentTypeEnum.UNSIGNED_SHORT:
-                    return this._normalizeToQuaternion(this._bufferView.ReadUShortArray(this._byteOffset, this._count));
-            }
-            throw new System.NotSupportedException();
+            return this._componentType switch {
+                ComponentTypeEnum.FLOAT          => this._bufferView.ReadQuaternionArray(this._byteOffset, this._count),
+                ComponentTypeEnum.BYTE           => this._normalizeToQuaternion(this._bufferView.ReadSByteArray(this._byteOffset, this._count)),
+                ComponentTypeEnum.UNSIGNED_BYTE  => this._normalizeToQuaternion(this._bufferView.ReadByteArray(this._byteOffset, this._count)),
+                ComponentTypeEnum.SHORT          => this._normalizeToQuaternion(this._bufferView.ReadShortArray(this._byteOffset, this._count)),
+                ComponentTypeEnum.UNSIGNED_SHORT => this._normalizeToQuaternion(this._bufferView.ReadUShortArray(this._byteOffset, this._count)),
+                _ => throw new System.NotSupportedException(),
+            };
         }
 
 
         public UShort4[] AsUShort4Array()
         {
-            switch (this._componentType) {
-                case ComponentTypeEnum.UNSIGNED_SHORT:
-                    return this._bufferView.ReadUShort4Array(this._byteOffset, this._count);
-            }
-            throw new System.NotSupportedException();
+            return this._componentType switch {
+                ComponentTypeEnum.UNSIGNED_SHORT => this._bufferView.ReadUShort4Array(this._byteOffset, this._count),
+                _ => throw new System.NotSupportedException(),
+            };
         }
 
 

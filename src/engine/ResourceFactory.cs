@@ -28,9 +28,9 @@ namespace LifeSim.Engine
             }
         }
 
-        private GraphicsDevice _gd;
+        private readonly GraphicsDevice _gd;
 
-        private GPUResourceManager _gpuResourceManager;
+        private readonly GPUResourceManager _gpuResourceManager;
 
 
         public ResourceFactory(GraphicsDevice gd, GPUResourceManager gpuResourceManager)

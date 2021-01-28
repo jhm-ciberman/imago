@@ -8,10 +8,10 @@ namespace LifeSim.Generation
         ///private float _distanceToWater = 15f;
         ///private float _distanceToWaterCost = 1.8f;
 
-        private float _distanceToNonEmpty = 18f;
-        private float _distanceToNonEmptyCost = 1.5f;
+        private readonly float _distanceToNonEmpty = 18f;
+        private readonly float _distanceToNonEmptyCost = 1.5f;
 
-        private float _baseCost = 3f;
+        private readonly float _baseCost = 3f;
 
 
         public void Handle(World world)

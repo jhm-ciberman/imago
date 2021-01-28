@@ -13,14 +13,14 @@ namespace LifeSim
             Female,
         }
 
-        private Random _random;
-        private RandomGauss _randomGauss;  
+        private readonly Random _random;
+        private readonly RandomGauss _randomGauss;  
 
-        private CharGenerator _male;
-        private CharGenerator _female;
-        private CharGenerator _other;
+        private readonly CharGenerator _male;
+        private readonly CharGenerator _female;
+        private readonly CharGenerator _other;
 
-        private EnglishAlphabetProvider _provider;
+        private readonly EnglishAlphabetProvider _provider;
 
         public NameGenerator(System.Random random, EnglishAlphabetProvider provider)
         {
@@ -37,7 +37,7 @@ namespace LifeSim
         {
             int tries = 0;
             StringBuilder str;
-            string name = "";
+            string name;
             do
             {
                 str = new StringBuilder();

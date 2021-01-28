@@ -16,7 +16,7 @@ namespace LifeSim.Engine.Rendering
 
     class SwapchainRenderTexture : IRenderTexture
     {
-        private Swapchain _swapchain; 
+        private readonly Swapchain _swapchain; 
         
         public SwapchainRenderTexture(Swapchain swapchain)
         {
@@ -49,9 +49,9 @@ namespace LifeSim.Engine.Rendering
 
     public class RenderTexture : IRenderTexture
     {
-        private uint _width;
-        private uint _height;
-        private Veldrid.ResourceFactory _factory;
+        private readonly uint _width;
+        private readonly uint _height;
+        private readonly Veldrid.ResourceFactory _factory;
         private Framebuffer _framebuffer;
         private Texture _depthTexture;
         private Texture _colorTexture;

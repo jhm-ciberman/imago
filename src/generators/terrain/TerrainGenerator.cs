@@ -5,9 +5,9 @@ namespace LifeSim.Generation
 {
     public class TerrainGenerator : IWorldGenerationStep
     {
-        private float _elevationAmount;
+        private readonly float _elevationAmount;
 
-        private IValueGenerator _valueGenerator;
+        private readonly IValueGenerator _valueGenerator;
 
         public TerrainGenerator(float elevationAmount, IValueGenerator valueGenerator)
         {

@@ -33,24 +33,24 @@ namespace LifeSim.Engine.Rendering
             }
         }
 
-        private CommandList _commandList;
-        private Veldrid.ResourceFactory _factory;
-        private GraphicsDevice _gd;
-        private DeviceBuffer _vertexBuffer;
-        private DeviceBuffer _indexBuffer;
-        private Dictionary<GPUTexture, IMaterial> _materials = new Dictionary<GPUTexture, IMaterial>();
+        private readonly CommandList _commandList;
+        private readonly Veldrid.ResourceFactory _factory;
+        private readonly GraphicsDevice _gd;
+        private readonly DeviceBuffer _vertexBuffer;
+        private readonly DeviceBuffer _indexBuffer;
+        private readonly Dictionary<GPUTexture, IMaterial> _materials = new Dictionary<GPUTexture, IMaterial>();
         
-        private int _maxBatchSize = 1000;
+        private readonly int _maxBatchSize = 1000;
         private GPUTexture? _batchTexture = null;
-        private Vertex[] _batchVertices;
+        private readonly Vertex[] _batchVertices;
         private int _batchCount = 0;
 
         private int _totalDrawCalls = 0;
         private int _totalSpritesToDraw = 0;
 
-        private PSOManager _psoManager;
-        private ResourceFactory _assetManager;
-        private SpriteBatch _renderable = new SpriteBatch();
+        private readonly PSOManager _psoManager;
+        private readonly ResourceFactory _assetManager;
+        private readonly SpriteBatch _renderable = new SpriteBatch();
 
         public SpriteBatcher(GraphicsDevice gd, PSOManager psoManager, ResourceFactory assetManager, CommandList commandList)
         {

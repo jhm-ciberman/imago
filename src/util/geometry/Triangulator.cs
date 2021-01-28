@@ -1,4 +1,6 @@
 ﻿#nullable disable 
+#pragma warning disable IDE0066, IDE1006
+
 using System.Collections.Generic;
 using System;
 using System.Numerics;
@@ -13,8 +15,8 @@ namespace Sebastian.Geometry
 
 	public class Triangulator
     {
-        LinkedList<Vertex> vertsInClippedPolygon;
-        ushort[] tris;
+        readonly LinkedList<Vertex> vertsInClippedPolygon;
+        readonly ushort[] tris;
         int triIndex;
 
         public Triangulator(Polygon polygon)
@@ -129,7 +131,7 @@ namespace Sebastian.Geometry
                 currentNode = vertexList.First;
                 while (currentNode != null)
                 {
-                    LinkedListNode<Vertex> nextNode = (currentNode.Next == null) ? vertexList.First : currentNode.Next;
+                    LinkedListNode<Vertex> nextNode = currentNode.Next ?? vertexList.First;
                     Vector2 p0 = currentNode.Value.position;
                     Vector2 p1 = nextNode.Value.position;
 
@@ -240,8 +242,8 @@ namespace Sebastian.Geometry
                 vertexList.AddAfter(currentNode, repeatStartHullVert);
 
                 //Set concavity of initial hull bridge vert, since it may have changed now that it leads to hole vert
-                LinkedListNode<Vertex> nodeBeforeStartBridgeNodeOnHull = (validBridgeNodeOnHull.Previous == null) ? vertexList.Last : validBridgeNodeOnHull.Previous;
-                LinkedListNode<Vertex> nodeAfterStartBridgeNodeOnHull = (validBridgeNodeOnHull.Next == null) ? vertexList.First : validBridgeNodeOnHull.Next;
+                LinkedListNode<Vertex> nodeBeforeStartBridgeNodeOnHull = validBridgeNodeOnHull.Previous ?? vertexList.Last;
+                LinkedListNode<Vertex> nodeAfterStartBridgeNodeOnHull = validBridgeNodeOnHull.Next ?? vertexList.First;
                 validBridgeNodeOnHull.Value.isConvex = IsConvex(nodeBeforeStartBridgeNodeOnHull.Value.position, validBridgeNodeOnHull.Value.position, nodeAfterStartBridgeNodeOnHull.Value.position);
             }
             return vertexList;

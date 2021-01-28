@@ -4,12 +4,12 @@ namespace LifeSim.Engine.Rendering
 {
     public class FullScreenMaterial : IMaterial
     {
-        private Pass _pass;
+        private readonly Pass _pass;
         public Pass pass => this._pass;
 
         public ResourceLayout resourceLayout { get; private set; }
 
-        private ResourceSet _resourceSet;
+        private readonly ResourceSet _resourceSet;
         public ResourceSet resourceSet => this._resourceSet;
 
         public FullScreenMaterial(IMaterialBuilder builder, Texture texture) 

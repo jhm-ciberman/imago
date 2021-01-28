@@ -6,13 +6,13 @@ namespace LifeSim.Engine.Rendering
 {
     public class GPUResourceManager : IMaterialBuilder 
     {
-        private GraphicsDevice _gd;
+        private readonly GraphicsDevice _gd;
 
-        private ResourceLayouts _layouts;
+        private readonly ResourceLayouts _layouts;
 
-        private PassManager _passes;
+        private readonly PassManager _passes;
 
-        private SceneContext _sceneContext;
+        private readonly SceneContext _sceneContext;
 
         public readonly IRenderTexture fullScreenRenderTexture;
 

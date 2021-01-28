@@ -6,10 +6,10 @@ namespace LifeSim.Engine.Rendering
 {
     public class ImguiRenderer : IDisposable
     {
-        private CommandList _commandList;
-        private GraphicsDevice _gd;
-        private Veldrid.ImGuiRenderer _imguiRenderer;
-        private RenderTexture _renderTexture;
+        private readonly CommandList _commandList;
+        private readonly GraphicsDevice _gd;
+        private readonly Veldrid.ImGuiRenderer _imguiRenderer;
+        private readonly RenderTexture _renderTexture;
 
         public ImguiRenderer(GraphicsDevice graphicsDevice, RenderTexture renderTexture)
         {

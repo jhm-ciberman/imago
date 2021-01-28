@@ -19,11 +19,11 @@ namespace LifeSim.Engine.Rendering
         struct LightInfo
         {
             public Vector3 ambientColor;
-            private float _padding0;
+            private readonly float _padding0;
             public Vector3 mainLightColor;
-            private float _padding1;
+            private readonly float _padding1;
             public Vector3 mainLightDirection;
-            private float _padding2;
+            private readonly float _padding2;
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -32,9 +32,9 @@ namespace LifeSim.Engine.Rendering
             public Matrix4x4 modelMatrix;
             public Vector4 albedoColor;
             public System.UInt32 pickingID;
-            private float _padding0;
-            private float _padding1;
-            private float _padding2;
+            private readonly float _padding0;
+            private readonly float _padding1;
+            private readonly float _padding2;
             public Vector4 textureST;
         }
 
@@ -52,8 +52,8 @@ namespace LifeSim.Engine.Rendering
         public readonly DeviceBuffer modelInfoBuffer;
         public readonly DeviceBuffer bonesInfoBuffer;
 
-        private Veldrid.ResourceFactory _factory;
-        private Dictionary<Renderable3D, ResourceSet> _resourceSets = new Dictionary<Renderable3D, ResourceSet>();
+        private readonly Veldrid.ResourceFactory _factory;
+        private readonly Dictionary<Renderable3D, ResourceSet> _resourceSets = new Dictionary<Renderable3D, ResourceSet>();
 
         private readonly ResourceSet _objectResourceSet;
         private readonly ResourceSet _skinnedResourceSet;

@@ -11,25 +11,25 @@ namespace LifeSim.Engine.Rendering
 {
     public class GPURenderer : System.IDisposable
     {
-        private GraphicsDevice _gd;
-        private Veldrid.ResourceFactory _factory;
+        private readonly GraphicsDevice _gd;
+        private readonly Veldrid.ResourceFactory _factory;
         
-        private GPURenderer2D _renderer2d;
-        private GPURenderer3D _renderer3d;
-        private ImguiRenderer _imguiRenderer;
+        private readonly GPURenderer2D _renderer2d;
+        private readonly GPURenderer3D _renderer3d;
+        private readonly ImguiRenderer _imguiRenderer;
 
-        private FullScreenRenderer _fullScreenQuad;
+        private readonly FullScreenRenderer _fullScreenQuad;
 
         public GraphicsBackend backendType => this._gd.BackendType;
 
-        private GPUMousePicker _mousePicker;
+        private readonly GPUMousePicker _mousePicker;
 
-        private GPUResourceManager _gpuResources;
+        private readonly GPUResourceManager _gpuResources;
 
-        private ResourceFactory _assetManager;
+        private readonly ResourceFactory _assetManager;
         public ResourceFactory assetManager => this._assetManager;
 
-        private PSOManager _psoManager;
+        private readonly PSOManager _psoManager;
 
         public GPURenderer(Sdl2Window window, GraphicsBackend graphicsBackend)
         {
@@ -72,7 +72,7 @@ namespace LifeSim.Engine.Rendering
             return this._imguiRenderer.Texture(texture);
         }
 
-        private List<Task> _renderTasks = new List<Task>();
+        private readonly List<Task> _renderTasks = new List<Task>();
 
         private bool _renderImGUI = false;
 

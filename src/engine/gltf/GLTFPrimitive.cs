@@ -6,9 +6,9 @@ namespace LifeSim.Engine.GLTF
 {
     class GLTFPrimitive
     {
-        private Dictionary<string, int> _attributes;
-        private GLTFAccessor? _indicesAccessor;
-        private GLTFLoader _model;
+        private readonly Dictionary<string, int> _attributes;
+        private readonly GLTFAccessor? _indicesAccessor;
+        private readonly GLTFLoader _model;
 
         public GLTFPrimitive(GLTFLoader model, int? indices, Dictionary<string, int> attributes)
         {
@@ -17,7 +17,7 @@ namespace LifeSim.Engine.GLTF
             this._attributes = attributes;
         }
 
-        private bool _loadSkinned = true;
+        private readonly bool _loadSkinned = true;
 
         public MeshData MakeMesh()
         {

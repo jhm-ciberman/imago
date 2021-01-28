@@ -4,7 +4,7 @@ namespace LifeSim
 {
     public class RandomGauss
     {
-        private Random _random;
+        private readonly Random _random;
 
         public RandomGauss() : this(new Random()) {}
 

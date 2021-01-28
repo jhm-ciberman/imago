@@ -13,7 +13,7 @@ namespace LifeSim.Engine.SceneGraph
         public float near = 0.01f;
         public float far = 1000.0f;
 
-        private Viewport _viewPort;
+        private readonly Viewport _viewPort;
 
         public Viewport viewport => this._viewPort;
  

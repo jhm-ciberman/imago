@@ -6,16 +6,16 @@ namespace LifeSim.Engine.Rendering
 {
     public class GPURenderer3D
     {
-        private GraphicsDevice _graphicsDevice;
+        private readonly GraphicsDevice _graphicsDevice;
         
-        private Veldrid.ResourceFactory _factory;
-        private CommandList _commandList;
+        private readonly Veldrid.ResourceFactory _factory;
+        private readonly CommandList _commandList;
 
-        private IRenderTexture _renderTexture;
-        private SceneContext _sceneContext;
-        private PSOManager _psoManager;
+        private readonly IRenderTexture _renderTexture;
+        private readonly SceneContext _sceneContext;
+        private readonly PSOManager _psoManager;
 
-        private RenderList _renderList = new RenderList();
+        private readonly RenderList _renderList = new RenderList();
         private bool _hasCommandsToSubmit;
 
         public GPURenderer3D(GraphicsDevice graphicsDevice, PSOManager psoManager, GPUResourceManager resources)

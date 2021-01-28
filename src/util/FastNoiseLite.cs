@@ -1,4 +1,5 @@
-﻿// MIT License
+﻿#pragma warning disable IDE1006, IDE0066
+// MIT License
 //
 // Copyright(c) 2020 Jordan Peck (jordan.me2@gmail.com)
 // Copyright(c) 2020 Contributors

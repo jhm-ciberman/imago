@@ -17,9 +17,9 @@ namespace LifeSim
             }
         }
 
-        private System.Random _random;
+        private readonly System.Random _random;
 
-        private List<Value> _weightedValues;
+        private readonly List<Value> _weightedValues;
 
         private float _sumOfProbabilities = 0f;
 

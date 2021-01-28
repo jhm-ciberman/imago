@@ -6,8 +6,8 @@ namespace LifeSim.Engine.GLTF
 {
     public class GLTFScene
     {
-        private List<GLTFNode> children = new List<GLTFNode>();
-        private Dictionary<string, GLTFNode> _nodesByName = new Dictionary<string, GLTFNode>();
+        private readonly List<GLTFNode> _children = new List<GLTFNode>();
+        private readonly Dictionary<string, GLTFNode> _nodesByName = new Dictionary<string, GLTFNode>();
 
         public readonly string name;
 
@@ -19,14 +19,12 @@ namespace LifeSim.Engine.GLTF
         private BindedSkin _BindSkin(Skin skin, Dictionary<GLTFNode, Node3D> nodesCache)
         {
             Node3D[] joints = new Node3D[skin.jointNames.Count];
-            var names = skin.jointNames;
-            for (int i = 0; i < names.Count; i++) {
-                var gltfNode = this._nodesByName.GetValueOrDefault(names[i]);
-                if (gltfNode != null) {
-                    joints[i] = this._InstantiateNodeRecursive(gltfNode, nodesCache);
-                } else {
-                    throw new System.Exception("Could not bind joint: " + names[i]);
-                }
+            IList<string>? names = skin.jointNames;
+            for (var i = 0; i < names.Count; i++) {
+                GLTFNode? gltfNode = _nodesByName.GetValueOrDefault(names[i]);
+                joints[i] = gltfNode != null
+                    ? _InstantiateNodeRecursive(gltfNode, nodesCache)
+                    : throw new System.Exception("Could not bind joint: " + names[i]);
             }
 
             return new BindedSkin(joints, skin.inverseBindMatrices);
@@ -34,45 +32,48 @@ namespace LifeSim.Engine.GLTF
 
         public void Add(GLTFNode node)
         {
-            this.children.Add(node);
-            this._AddToDictionaryRecursive(this.name, node);
-        } 
+            _children.Add(node);
+            _AddToDictionaryRecursive(name, node);
+        }
 
         private void _AddToDictionaryRecursive(string currentPath, GLTFNode node)
         {
-            //currentPath += "/" + node.name;
             currentPath = node.name;
-            this._nodesByName[currentPath] = node;
-            foreach (var child in node.children) {
-                this._AddToDictionaryRecursive(currentPath, child);
+            _nodesByName[currentPath] = node;
+            foreach (GLTFNode? child in node.children) {
+                _AddToDictionaryRecursive(currentPath, child);
             }
         }
 
         public Node3D Instantiate()
         {
-            var nodesCache = new Dictionary<GLTFNode, Node3D>();
+            Dictionary<GLTFNode, Node3D>? nodesCache = new Dictionary<GLTFNode, Node3D>();
 
-            var n = new Node3D();
-            foreach (var node in this.children) {
-                n.Add(this._InstantiateNodeRecursive(node, nodesCache));
+            Node3D? n = new Node3D();
+            foreach (GLTFNode? node in _children) {
+                n.Add(_InstantiateNodeRecursive(node, nodesCache));
             }
             return n;
         }
 
         private Node3D _InstantiateNodeRecursive(GLTFNode gltfNode, Dictionary<GLTFNode, Node3D> nodesCache)
         {
-            var node3d = nodesCache.GetValueOrDefault(gltfNode);
-            if (node3d != null) return node3d;
+            Node3D? node3d = nodesCache.GetValueOrDefault(gltfNode);
+            if (node3d != null) {
+                return node3d;
+            }
 
             Node3D node;
             if (gltfNode.mesh != null && gltfNode.material != null) {
                 if (gltfNode.skin != null) {
-                    var bindedSkin = this._BindSkin(gltfNode.skin, nodesCache);
+                    BindedSkin? bindedSkin = _BindSkin(gltfNode.skin, nodesCache);
                     node = new SkinnedRenderable3D(gltfNode.mesh, gltfNode.material, bindedSkin);
-                } else {
+                }
+                else {
                     node = new Renderable3D(gltfNode.mesh, gltfNode.material);
                 }
-            } else {
+            }
+            else {
                 node = new Node3D();
             }
             nodesCache[gltfNode] = node;
@@ -80,8 +81,8 @@ namespace LifeSim.Engine.GLTF
             node.position = gltfNode.position;
             node.rotation = gltfNode.rotation;
             node.scale = gltfNode.scale;
-            foreach (var child in gltfNode.children) {
-                node.Add(this._InstantiateNodeRecursive(child, nodesCache));
+            foreach (GLTFNode? child in gltfNode.children) {
+                node.Add(_InstantiateNodeRecursive(child, nodesCache));
             }
 
             return node;

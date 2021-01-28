@@ -7,13 +7,13 @@ namespace LifeSim.Engine.GLTF
 {
     public class GLTFLoader
     {
-        private ResourceFactory _assetsManager;
-        private string _path;
-        private glTFLoader.Schema.Gltf _model;
+        private readonly ResourceFactory _assetsManager;
+        private readonly string _path;
+        private readonly glTFLoader.Schema.Gltf _model;
 
-        private GLTFBuffer?[] _buffersCache;
-        private GLTFNode?[] _nodesCache;
-        private SurfaceMaterial? _material;
+        private readonly GLTFBuffer?[] _buffersCache;
+        private readonly GLTFNode?[] _nodesCache;
+        private readonly SurfaceMaterial? _material;
 
         public GLTFLoader(ResourceFactory assetsManager, SurfaceMaterial? material, string path)
         {
@@ -159,7 +159,6 @@ namespace LifeSim.Engine.GLTF
             GLTFBuffer? buffer = this._buffersCache[index];
             if (buffer != null) return buffer;
             
-            var data = this._model.Buffers[index];
             var bytes = this._model.LoadBinaryBuffer(index, this._path);
             buffer = new GLTFBuffer(bytes);
             this._buffersCache[index] = buffer;
@@ -173,7 +172,7 @@ namespace LifeSim.Engine.GLTF
             var data = this._model.BufferViews[index.Value];
             var buffer = this._GetBuffer(data.Buffer);
             
-            return new GLTFBufferView(buffer, data.ByteLength, data.ByteOffset, data.ByteStride);
+            return new GLTFBufferView(buffer, data.ByteOffset, data.ByteStride);
         }
     }
 }

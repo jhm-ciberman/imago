@@ -6,19 +6,19 @@ namespace LifeSim.Generation
 {
     class FlatSurfaceFinder 
     {
-        private World _world;
+        private readonly World _world;
 
-        private Grid<bool> _visitedTiles;
+        private readonly Grid<bool> _visitedTiles;
 
         private RectInt _currentBox = new RectInt();
 
-        private List<Vector2Int> _currentTilesCoordsList = new List<Vector2Int>();
+        private readonly List<Vector2Int> _currentTilesCoordsList = new List<Vector2Int>();
 
         private float _currentHeight = 0;
 
-        private List<FlatSurface> _surfaces = new List<FlatSurface>();
+        private readonly List<FlatSurface> _surfaces = new List<FlatSurface>();
 
-        private Stack<Vector2Int> _stack = new Stack<Vector2Int>(100);
+        private readonly Stack<Vector2Int> _stack = new Stack<Vector2Int>(100);
 
         public List<FlatSurface> surfaces => this._surfaces;
 

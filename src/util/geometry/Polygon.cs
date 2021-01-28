@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿#pragma warning disable IDE0066, IDE1006
+using System.Numerics;
 
 /*
  * Processes given arrays of hull and hole points into single array, enforcing correct -wiseness.

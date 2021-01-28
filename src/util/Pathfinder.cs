@@ -11,11 +11,11 @@ namespace LifeSim
 
         private Vector2Int _size;
 
-        private HashSet<Vector2Int> _closedSet;
+        private readonly HashSet<Vector2Int> _closedSet;
 
-        private PriorityQueue<Vector2Int> _openSet;
+        private readonly PriorityQueue<Vector2Int> _openSet;
 
-        private Dictionary<Vector2Int, Node> _nodes;
+        private readonly Dictionary<Vector2Int, Node> _nodes;
 
         public Pathfinder(Vector2Int size, Vector2Int start, Vector2Int end)
         {

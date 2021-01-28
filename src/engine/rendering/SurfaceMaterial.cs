@@ -10,13 +10,13 @@ namespace LifeSim.Engine.Rendering
         public Pass pass          => this._materialManager.passes.color;
         public Pass shadowmapPass => this._materialManager.passes.shadowMap;
 
-        private ResourceLayout _resourceLayout;
+        private readonly ResourceLayout _resourceLayout;
         public ResourceLayout resourceLayout => this._resourceLayout;
 
-        private ResourceSet _resourceSet;
+        private readonly ResourceSet _resourceSet;
         public ResourceSet resourceSet => this._resourceSet;
 
-        private IMaterialBuilder _materialManager;
+        private readonly IMaterialBuilder _materialManager;
         
         public bool castShadows = true;
 

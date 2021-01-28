@@ -14,11 +14,11 @@ namespace LifeSim.Engine.Rendering
             public Shader(Veldrid.Shader[] shaders) { this.shaders = shaders; }
         }
 
-        private string _shadersBasePath = "./res/shaders/";
+        private readonly string _shadersBasePath = "./res/shaders/";
 
-        private Veldrid.ResourceFactory _factory;
+        private readonly Veldrid.ResourceFactory _factory;
 
-        private Dictionary<ShaderVariant, Shader> _shaderVariants = new Dictionary<ShaderVariant, Shader>();
+        private readonly Dictionary<ShaderVariant, Shader> _shaderVariants = new Dictionary<ShaderVariant, Shader>();
 
         public ShaderManager(Veldrid.ResourceFactory factory)
         {

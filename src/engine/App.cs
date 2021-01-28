@@ -8,14 +8,13 @@ namespace LifeSim.Engine
 {
     public class App
     {
-        private Sdl2Window _window;
+        private readonly Sdl2Window _window;
 
-        private Viewport _viewport;
-        public Viewport viewport => this._viewport;
+        public Viewport viewport { get; }
 
-        private InputInstance _input;
+        private readonly InputInstance _input;
 
-        private GPURenderer _renderer;
+        private readonly GPURenderer _renderer;
 
         public uint selectedObjectID => this._renderer.selectedObjectID;
         
@@ -27,7 +26,7 @@ namespace LifeSim.Engine
         {
             WindowCreateInfo windowCI = new WindowCreateInfo(100, 100, 1024, 600, Veldrid.WindowState.Normal, "Medieval Life");
             this._window = VeldridStartup.CreateWindow(ref windowCI);
-            this._viewport = new Viewport((uint) this._window.Width, (uint) this._window.Height);
+            this.viewport = new Viewport((uint) this._window.Width, (uint) this._window.Height);
 
             var graphicsBackend = App.ParseGraphicsBackend(args);
             this._renderer = new GPURenderer(this._window, graphicsBackend);
@@ -67,7 +66,7 @@ namespace LifeSim.Engine
         {
             uint width = (uint) this._window.Width;
             uint height = (uint) this._window.Height;
-            this._viewport.Resize(width, height);
+            this.viewport.Resize(width, height);
             this._renderer.Resize(width, height);
         }
 

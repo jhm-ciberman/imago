@@ -5,13 +5,13 @@ namespace LifeSim.Generation
 {
     public class VillageGenerator : IWorldGenerationStep
     {
-        private FastNoiseLite _noise;
+        private readonly FastNoiseLite _noise;
 
-        private System.Random _random;
+        private readonly System.Random _random;
 
-        private HouseGenerator _houseGenerator;
+        private readonly HouseGenerator _houseGenerator;
 
-        private IContainer _container;
+        private readonly IContainer _container;
 
         public VillageGenerator(IContainer container, int seed)
         {

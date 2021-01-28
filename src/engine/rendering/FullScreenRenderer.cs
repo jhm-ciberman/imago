@@ -34,17 +34,17 @@ namespace LifeSim.Engine.Rendering
 
             public void Dispose() => this.vertexBuffer.Dispose();
         }
-        private GraphicsDevice _gd;
+        private readonly GraphicsDevice _gd;
 
 
-        private CommandList _commandList;
-        private IRenderTexture _destinationTexture;
+        private readonly CommandList _commandList;
+        private readonly IRenderTexture _destinationTexture;
         private IRenderTexture _sourceTexture;
         private IMaterial? _material = null;
-        private PSOManager _psoManager;
-        private ResourceFactory _assetManager;
+        private readonly PSOManager _psoManager;
+        private readonly ResourceFactory _assetManager;
 
-        private FullScreenQuad _quad;
+        private readonly FullScreenQuad _quad;
 
         public FullScreenRenderer(GraphicsDevice gd, ResourceFactory assetManager, PSOManager psoManager, GPUResourceManager resources)
         {

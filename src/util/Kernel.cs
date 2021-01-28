@@ -2,7 +2,7 @@ namespace LifeSim
 {
     public struct Kernel<T> : ISafeKernel<T>
     {
-        private IGridSource<T> _source;
+        private readonly IGridSource<T> _source;
 
         private Vector2Int _center;
 

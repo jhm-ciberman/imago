@@ -4,11 +4,11 @@ namespace LifeSim.Generation
 {
     class AbsValueGenerator : IValueGenerator 
     {
-        private IValueGenerator _generator;
+        private readonly IValueGenerator _generator;
 
-        private float _scale;
+        private readonly float _scale;
 
-        private float _offset;
+        private readonly float _offset;
 
         public AbsValueGenerator(IValueGenerator generator, float scale = 1f, float offset = 0f) 
         {

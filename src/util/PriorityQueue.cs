@@ -7,9 +7,9 @@ namespace LifeSim
     // From http://visualstudiomagazine.com/articles/2012/11/01/priority-queues-with-c.aspx
     public class PriorityQueue<T> : IEnumerable<T>
     {
-        private List<T> _data = new List<T>();
+        private readonly List<T> _data = new List<T>();
 
-        private IComparer<T> _comparer = Comparer<T>.Default;
+        private readonly IComparer<T> _comparer = Comparer<T>.Default;
 
         public PriorityQueue(IComparer<T> comparer) 
         {

@@ -6,10 +6,10 @@ namespace LifeSim
 {
     public static class Benchmark
     {
-        private static Action<object> _defaultLogger = System.Console.WriteLine;
+        private static readonly Action<object> _defaultLogger = System.Console.WriteLine;
         private static Action<object> _loggerFunction = Benchmark._defaultLogger;
 
-        private static Dictionary<string, Stopwatch> _parts = new Dictionary<string, Stopwatch>();
+        private static readonly Dictionary<string, Stopwatch> _parts = new Dictionary<string, Stopwatch>();
 
         public static void SetLogger(Action<object> logger)
         {

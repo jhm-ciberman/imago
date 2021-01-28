@@ -18,7 +18,7 @@ namespace LifeSim.Engine.GLTF
         public SurfaceMaterial? material = null;
         public GLTFNode? parent = null;
 
-        private List<GLTFNode> _children = new List<GLTFNode>();
+        private readonly List<GLTFNode> _children = new List<GLTFNode>();
         public IReadOnlyList<GLTFNode> children => this._children;
         
         public GLTFNode(string name)
