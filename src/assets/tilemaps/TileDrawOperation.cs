@@ -8,21 +8,21 @@ namespace LifeSim.Assets
 {
     public class TileDrawOperation
     {
-        private int _tileSize;
+        private uint _tileSize;
         private Image<Rgba32> _image;
         private Vector2Int _dstCoord;
 
         private IEnumerable<Layer> _layers;
 
-        public TileDrawOperation(TileDescriptor descriptor, int tileSize, Image<Rgba32> image, Vector2Int dstCoord)
+        public TileDrawOperation(TileDescriptor descriptor, uint tileSize, Image<Rgba32> image, Vector2Int dstCoord)
         {
             this._layers = descriptor.layers;
             this._tileSize = tileSize;
             this._image = image;
             this._dstCoord = dstCoord;
 
-            this._dstCoord.x *= this._tileSize;
-            this._dstCoord.y *= this._tileSize;
+            this._dstCoord.x *= (int) this._tileSize;
+            this._dstCoord.y *= (int) this._tileSize;
         }
 
         public void DrawTile()

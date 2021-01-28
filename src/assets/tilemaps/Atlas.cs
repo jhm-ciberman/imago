@@ -3,12 +3,15 @@ using static LifeSim.Assets.BinPacker;
 using System.Numerics;
 using LifeSim.Engine.Rendering;
 using LifeSim.Engine;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using System;
 
 namespace LifeSim.Assets
 {
-    public class TexturePacker 
+    public class Atlas 
     {
-        private int _mipmapLevels;
+        private uint _tileSize;
         private int _atlasSize;
 
         private List<UnpackedTexture> _unpacked = new List<UnpackedTexture>(); 
@@ -16,18 +19,19 @@ namespace LifeSim.Assets
         private ResourceFactory _assetManager;
 
         private BinPacker _packer;
-        private AtlasBuilder _atlasBuilder;
         private GPUTexture _texture;
+        private Image<Rgba32> _image;
 
-        public TexturePacker(ResourceFactory assetManager, int mipmapLevels, int atlasSize)
+        public Atlas(ResourceFactory assetManager, int atlasSize, uint tileSize)
         {
             this._assetManager = assetManager;
-            this._mipmapLevels = mipmapLevels;
+            this._tileSize = tileSize;
             this._atlasSize = atlasSize;
-            this._packer = new BinPacker((uint) (this._atlasSize >> this._mipmapLevels));
+            this._packer = new BinPacker((uint) (this._atlasSize / this._tileSize));
 
-            this._atlasBuilder = new AtlasBuilder(this._atlasSize, this._mipmapLevels);
-            this._texture = this._assetManager.MakeTexture(this._atlasBuilder.image, (uint) this._mipmapLevels);
+
+            this._image = new Image<Rgba32>(atlasSize, atlasSize);
+            this._texture = this._assetManager.MakeTexture(this._image, (uint) this._tileSize);
         }
 
         public void Add(UnpackedTexture unpackedTexture)
@@ -47,7 +51,6 @@ namespace LifeSim.Assets
             var sizes = this._GetBinRects(this._unpacked);
             var rects = this._packer.Fit(sizes);
 
-
             (string, PackedTexture)[] textures = new (string, PackedTexture)[this._unpacked.Count];
             int i = 0;
             foreach(var rect in rects) 
@@ -55,24 +58,26 @@ namespace LifeSim.Assets
                 UnpackedTexture texture = rect.element;
 
                 Vector2Int coord = new Vector2Int((int) rect.rect.x, (int) rect.rect.y);
-                this._atlasBuilder.Draw(texture.baseMap, coord);
-                //if (texture.normalMap != null) normalAtlas.Draw(texture.normalMap, coord);
+
+                var op = new ImageDrawOperation(this._image, texture.baseMap, coord, this._tileSize);
+                op.Draw();
 
                 (Vector2 uv1, Vector2 uv2) = this._GetUVs(coord, texture.size);
 
                 textures[i++] = (texture.id, new PackedTexture(uv1, uv2, this._texture));
             }
 
-            this._texture.Update(this._atlasBuilder.image);
+            this._texture.Update(this._image);
 
             return textures;
         }
 
         private (Vector2, Vector2) _GetUVs(Vector2Int coord, Vector2 size)
         {
-            Vector2 tl = new Vector2(coord.x << this._mipmapLevels, coord.y << this._mipmapLevels);
-            Vector2 uv1 = tl / this._atlasSize;
-            Vector2 uv2 = (tl + size) / this._atlasSize;
+            Vector2 imgSize = new Vector2(this._image.Width, this._image.Height);
+            Vector2 tl = new Vector2(coord.x * this._tileSize, coord.y * this._tileSize);
+            Vector2 uv1 = tl / imgSize;
+            Vector2 uv2 = (tl + size) / imgSize;
             return (uv1, uv2);
         }
 
@@ -82,9 +87,9 @@ namespace LifeSim.Assets
 
             int i = 0;
             foreach (UnpackedTexture texture in textures) {
-                var width  = ((texture.width  - 1) >> this._mipmapLevels) + 1;
-                var height = ((texture.height - 1) >> this._mipmapLevels) + 1;
-                rects[i++] =  new BinRect<UnpackedTexture>((uint) width, (uint) height, texture);
+                var width  = (uint) MathF.Ceiling(texture.width  / this._tileSize);
+                var height = (uint) MathF.Ceiling(texture.height / this._tileSize);
+                rects[i++] =  new BinRect<UnpackedTexture>(width, height, texture);
             }
 
             return rects;

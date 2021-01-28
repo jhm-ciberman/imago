@@ -18,6 +18,12 @@ namespace LifeSim
             this.y = y;
         }
 
+        public Vector2Int(uint x, uint y)
+        {
+            this.x = (int) x;
+            this.y = (int) y;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector2Int operator+(Vector2Int a, Vector2Int b)
         {
@@ -52,6 +58,18 @@ namespace LifeSim
         public static Vector2Int operator/(Vector2Int a, int b)
         {
             return new Vector2Int(a.x / b, a.y / b);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector2Int operator*(Vector2Int a, uint b)
+        {
+            return new Vector2Int(a.x * (int) b, a.y * (int) b);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector2Int operator/(Vector2Int a, uint b)
+        {
+            return new Vector2Int(a.x / (int) b, a.y / (int) b);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

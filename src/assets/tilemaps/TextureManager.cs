@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -6,8 +7,6 @@ using LifeSim.Engine.Rendering;
 using LifeSim.Simulation;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using static LifeSim.Assets.Tilemap;
-using static LifeSim.Assets.TileRequest;
 
 namespace LifeSim.Assets
 {
@@ -15,15 +14,14 @@ namespace LifeSim.Assets
     {
         private readonly Vector2Int _gridSize;
 
-        private int _mipMapLevels;
-
-        private int _tileSize;
+        private uint _tileSize;
 
         private Image<Rgba32> _image;
 
         private Queue<Vector2Int> _freeTiles;
 
         private Dictionary<TileRequest, PackedTile> _tiles = new Dictionary<TileRequest, PackedTile>();
+        
         private List<TileDrawOperation> _pendingOperations = new List<TileDrawOperation>();
 
         private GPUTexture _texture;
@@ -31,18 +29,18 @@ namespace LifeSim.Assets
         private SurfaceMaterial _materialHouses;
         private SurfaceMaterial _materialWater;
 
-        private int textureMaxSize;
-
         private Dictionary<string, Tilemap> _tilemaps = new Dictionary<string, Tilemap>();
 
         private Dictionary<string, PackedTexture> _packedTextures = new Dictionary<string, PackedTexture>();
 
-        public TextureManager(ResourceFactory assetManager, GPUTexture mainAtlasTexture, int textureMaxSize, int mipMapLevels, int tileSize)
+        public TextureManager(ResourceFactory assetManager, GPUTexture mainAtlasTexture, uint textureMaxSize, uint tileSize)
         {
-            this.textureMaxSize = textureMaxSize;
+            tileSize = this._NextPowOfTwo(tileSize);
+            textureMaxSize = (uint) 1 << BitOperations.Log2(textureMaxSize);
+            var mipMapLevels = (uint) BitOperations.Log2(tileSize);
+
             this._gridSize = new Vector2Int(textureMaxSize, textureMaxSize) / tileSize;
             this._tileSize = tileSize;
-            this._mipMapLevels = mipMapLevels > 0 ? mipMapLevels + 1 : 0;
 
             int count = this._gridSize.x * this._gridSize.y;
             this._freeTiles = new Queue<Vector2Int>(count);
@@ -51,16 +49,25 @@ namespace LifeSim.Assets
                 this._freeTiles.Enqueue(coord);
             }
 
-            this._image = new Image<Rgba32>(textureMaxSize, textureMaxSize);
-            this._texture = assetManager.MakeTexture(this._image, (uint) this._mipMapLevels);
+            this._image = new Image<Rgba32>((int) textureMaxSize, (int) textureMaxSize);
+            this._texture = assetManager.MakeTexture(this._image, mipMapLevels);
 
             this._materialTerrain = assetManager.MakeSurfaceMaterial(this._texture);
             this._materialHouses = assetManager.MakeSurfaceMaterial(mainAtlasTexture);
             this._materialWater = assetManager.MakeSurfaceMaterial(mainAtlasTexture);
             this._materialWater.castShadows = false;
             this._materialTerrain.castShadows = false;
+        }
 
-            //GameStage.debugTexture = this._texture;
+        private uint _NextPowOfTwo(uint x)
+        {
+            --x;
+            x |= x >> 1;
+            x |= x >> 2;
+            x |= x >> 4;
+            x |= x >> 8;
+            x |= x >> 16;
+            return x + 1;
         }
 
         public void AddTilemap(string id, Tilemap tilemap)
