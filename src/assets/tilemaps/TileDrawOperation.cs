@@ -6,36 +6,28 @@ using SixLabors.ImageSharp.PixelFormats;
 
 namespace LifeSim.Assets
 {
-    public class TileDrawOperation
+    public class TileDrawOperation : IDrawOperation
     {
         private uint _tileSize;
-        private Image<Rgba32> _image;
-        private Vector2Int _dstCoord;
-
         private IEnumerable<Layer> _layers;
 
-        public TileDrawOperation(TileDescriptor descriptor, uint tileSize, Image<Rgba32> image, Vector2Int dstCoord)
+        public Vector2Int size => new Vector2Int(this._tileSize, this._tileSize);
+
+        public TileDrawOperation(TileDescriptor descriptor, uint tileSize)
         {
             this._layers = descriptor.layers;
             this._tileSize = tileSize;
-            this._image = image;
-            this._dstCoord = dstCoord;
-
-            this._dstCoord.x *= (int) this._tileSize;
-            this._dstCoord.y *= (int) this._tileSize;
         }
 
-        public void DrawTile()
+        public void Draw(Image<Rgba32> dst, Vector2Int coord, Vector2Int size)
         {
-            for(int x = 0; x < this._tileSize; x++)
-            {
-                for(int y = 0; y < this._tileSize; y++)
-                {
+            for(int x = 0; x < this._tileSize; x++) {
+                for(int y = 0; y < this._tileSize; y++) {
                     Vector2Int pixel = new Vector2Int(x, y);
                     var col = this._Fragment(pixel);
-                    int px = this._dstCoord.x + pixel.x;
-                    int py = this._dstCoord.y + pixel.y;
-                    this._image[px, py] = col;
+                    int px = coord.x + pixel.x;
+                    int py = coord.y + pixel.y;
+                    dst[px, py] = col;
                 }
             }
         }
@@ -75,8 +67,7 @@ namespace LifeSim.Assets
             return new Rgba32(
                 (byte) (colA.R + (colB.R - colA.R) * amount),
                 (byte) (colA.G + (colB.G - colA.G) * amount),
-                (byte) (colA.B + (colB.B - colA.B) * amount),
-                (byte) (colA.A + (colB.A - colA.A) * amount)
+                (byte) (colA.B + (colB.B - colA.B) * amount)
             );
         }
 
@@ -96,6 +87,5 @@ namespace LifeSim.Assets
             var texture = layer.tilemap.image;
             return texture[p.x, p.y];
         }
-
     }
 }

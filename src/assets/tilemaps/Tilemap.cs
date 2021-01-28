@@ -6,6 +6,8 @@ namespace LifeSim.Assets
 {
     public class Tilemap : IAsset
     {
+        public string id;
+
         public Image<Rgba32> image;
 
         public enum Layout
@@ -22,14 +24,15 @@ namespace LifeSim.Assets
 
         public readonly bool centerRotable;
 
-        public Tilemap(Image<Rgba32> texture, Layout layout, int tileSize, bool centerRotable)
+        public Tilemap(string id, string texturePath, Layout layout, int tileSize, bool centerRotable)
         {
-            this.image = texture;
+            this.id = id;
+            this.image = Image.Load<Rgba32>(texturePath);
             this.layout = layout;
             this.tileSize = tileSize;
             this.centerRotable = centerRotable;
 
-            this.lut = new TilemapLUT(texture, this.layerBase.srcRect);
+            this.lut = new TilemapLUT(this.image, this.layerBase.srcRect);
         }
 
         public Layer layerBase                   => new Layer(this, new RectInt(0, 0, 4, 4) , new Vector2Int(0, 0));

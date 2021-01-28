@@ -16,99 +16,70 @@ namespace LifeSim.Assets
 
         private uint _tileSize;
 
-        private Image<Rgba32> _image;
-
-        private Queue<Vector2Int> _freeTiles;
-
         private Dictionary<TileRequest, PackedTile> _tiles = new Dictionary<TileRequest, PackedTile>();
         
         private List<TileDrawOperation> _pendingOperations = new List<TileDrawOperation>();
 
-        private GPUTexture _texture;
         private SurfaceMaterial _materialTerrain;
         private SurfaceMaterial _materialHouses;
         private SurfaceMaterial _materialWater;
+
+        private Atlas _atlas;
 
         private Dictionary<string, Tilemap> _tilemaps = new Dictionary<string, Tilemap>();
 
         private Dictionary<string, PackedTexture> _packedTextures = new Dictionary<string, PackedTexture>();
 
-        public TextureManager(ResourceFactory assetManager, GPUTexture mainAtlasTexture, uint textureMaxSize, uint tileSize)
+        public TextureManager(ResourceFactory assetManager, uint atlasSize, uint tileSize)
         {
-            tileSize = this._NextPowOfTwo(tileSize);
-            textureMaxSize = (uint) 1 << BitOperations.Log2(textureMaxSize);
-            var mipMapLevels = (uint) BitOperations.Log2(tileSize);
-
-            this._gridSize = new Vector2Int(textureMaxSize, textureMaxSize) / tileSize;
+            this._gridSize = new Vector2Int(atlasSize, atlasSize) / tileSize;
             this._tileSize = tileSize;
 
-            int count = this._gridSize.x * this._gridSize.y;
-            this._freeTiles = new Queue<Vector2Int>(count);
-            for (int index = 0; index < count; index++) {
-                Vector2Int coord = new Vector2Int(index % this._gridSize.x, index / this._gridSize.y);
-                this._freeTiles.Enqueue(coord);
-            }
+            this._atlas = new Atlas(assetManager, atlasSize, tileSize);
 
-            this._image = new Image<Rgba32>((int) textureMaxSize, (int) textureMaxSize);
-            this._texture = assetManager.MakeTexture(this._image, mipMapLevels);
-
-            this._materialTerrain = assetManager.MakeSurfaceMaterial(this._texture);
-            this._materialHouses = assetManager.MakeSurfaceMaterial(mainAtlasTexture);
-            this._materialWater = assetManager.MakeSurfaceMaterial(mainAtlasTexture);
-            this._materialWater.castShadows = false;
+            this._materialTerrain = assetManager.MakeSurfaceMaterial(this._atlas.texture);
             this._materialTerrain.castShadows = false;
+            this._materialHouses = assetManager.MakeSurfaceMaterial(this._atlas.texture);
+            this._materialHouses.castShadows = true;
+            this._materialWater = assetManager.MakeSurfaceMaterial(this._atlas.texture);
+            this._materialWater.castShadows = false;
         }
 
-        private uint _NextPowOfTwo(uint x)
+
+        public void RegisterTilemap(Tilemap tilemap)
         {
-            --x;
-            x |= x >> 1;
-            x |= x >> 2;
-            x |= x >> 4;
-            x |= x >> 8;
-            x |= x >> 16;
-            return x + 1;
+            this._tilemaps[tilemap.id] = tilemap;
         }
 
-        public void AddTilemap(string id, Tilemap tilemap)
+        public void RegisterTextures(IEnumerable<UnpackedTexture> textures)
         {
-            this._tilemaps[id] = tilemap;
+            foreach (var result in this._atlas.Pack(textures)) {
+                var packed = new PackedTexture(result.uv1, result.uv2, this._atlas.texture);
+                this._packedTextures[result.element.id] = packed;
+            }
         }
 
-        public void AddPackedTexture(string id, PackedTexture packedTexture)
+        public PackedTexture RequestTexture(Cover cover)
         {
-            this._packedTextures[id] = packedTexture;
-        }
-
-        public PackedTexture GetPackedTexture(Cover cover)
-        {
+            this._atlas.Apply();
             return this._packedTextures["tex:" + cover.id];
         }
 
-        public PackedTexture GetWaterTexture()
+        public PackedTexture RequestWaterTexture()
         {
+            this._atlas.Apply();
             return this._packedTextures["tex:water"];
         }
 
-        public PackedTexture GetPackedTexture(Simulation.Object obj)
+        public PackedTexture RequestPackedTexture(Simulation.Object obj)
         {
+            this._atlas.Apply();
             return this._packedTextures["tex:" + obj.id];
         }
 
         public SurfaceMaterial materialTerrain => this._materialTerrain;
         public SurfaceMaterial materialHouses  => this._materialHouses;
         public SurfaceMaterial materialWater   => this._materialWater;
-
-        public void UpdateTilemap()
-        {
-            foreach (var op in this._pendingOperations) {
-                op.DrawTile();
-            }
-
-            this._texture.Update(this._image);
-
-            this._pendingOperations.Clear();
-        }
 
         public PackedTile RequestPackedTile(TileRequest request)
         {
@@ -124,14 +95,10 @@ namespace LifeSim.Assets
         {
             var descriptor = this._BuildDescriptor(request);
             
-            Vector2Int coord = this._freeTiles.Dequeue();
-            
-            Vector2 uv1 = new Vector2(coord.x    , coord.y    ) / this._gridSize;
-            Vector2 uv2 = new Vector2(coord.x + 1, coord.y + 1) / this._gridSize;
-            var packedTile = new PackedTile(uv1, uv2, this._texture);
+            var op = new TileDrawOperation(descriptor, this._tileSize);
+            var result = this._atlas.PackOne(op);
 
-            var op = new TileDrawOperation(descriptor, this._tileSize, this._image, coord);
-            this._pendingOperations.Add(op);
+            var packedTile = new PackedTile(result.uv1, result.uv2, this._atlas.texture);
 
             packedTile.rotable = descriptor.rotable;
             return packedTile;

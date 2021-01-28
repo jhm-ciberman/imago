@@ -1,98 +1,145 @@
 using System.Collections.Generic;
-using static LifeSim.Assets.BinPacker;
 using System.Numerics;
 using LifeSim.Engine.Rendering;
 using LifeSim.Engine;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using System;
+using System.Linq;
 
 namespace LifeSim.Assets
 {
     public class Atlas 
     {
-        private uint _tileSize;
-        private int _atlasSize;
+        public readonly struct Result<T>
+        {
+            public readonly Vector2 uv1;
+            public readonly Vector2 uv2;
+            public readonly T element;
 
-        private List<UnpackedTexture> _unpacked = new List<UnpackedTexture>(); 
+            public Result(Vector2 uv1, Vector2 uv2, T element)
+            {
+                this.uv1 = uv1;
+                this.uv2 = uv2;
+                this.element = element;
+            }
+        }
+
+        private uint _tileSize;
+        private uint _atlasSize;
         
         private ResourceFactory _assetManager;
 
-        private BinPacker _packer;
         private GPUTexture _texture;
         private Image<Rgba32> _image;
+        private Node _root;
 
-        public Atlas(ResourceFactory assetManager, int atlasSize, uint tileSize)
+        private bool _isDirty = false;
+
+        public bool isDirty => this._isDirty;
+
+        public Atlas(ResourceFactory assetManager, uint atlasSize, uint tileSize)
         {
+            tileSize = this._NextPowOfTwo(tileSize);
+            atlasSize = (uint) 1 << BitOperations.Log2(atlasSize);
+            var mipMapLevels = (uint) BitOperations.Log2(tileSize);
+
             this._assetManager = assetManager;
+            this._root = new Node(0, 0, atlasSize / tileSize, atlasSize / tileSize);
             this._tileSize = tileSize;
             this._atlasSize = atlasSize;
-            this._packer = new BinPacker((uint) (this._atlasSize / this._tileSize));
 
-
-            this._image = new Image<Rgba32>(atlasSize, atlasSize);
-            this._texture = this._assetManager.MakeTexture(this._image, (uint) this._tileSize);
+            this._image = new Image<Rgba32>((int) atlasSize, (int) atlasSize);
+            this._texture = this._assetManager.MakeTexture(this._image, mipMapLevels);
         }
 
-        public void Add(UnpackedTexture unpackedTexture)
+        private uint _NextPowOfTwo(uint x)
         {
-            this._unpacked.Add(unpackedTexture);
+            --x;
+            x |= x >> 1;
+            x |= x >> 2;
+            x |= x >> 4;
+            x |= x >> 8;
+            x |= x >> 16;
+            return x + 1;
         }
 
-        public void AddRange(IEnumerable<UnpackedTexture> unpackedTextures)
+        private int _GetFillArea(int size)
         {
-            this._unpacked.AddRange(unpackedTextures);
+            return (int) (MathF.Ceiling(size / this._tileSize) * this._tileSize);
         }
 
         public GPUTexture texture => this._texture;
 
-        public (string, PackedTexture)[] Pack()
+        public void Apply()
         {
-            var sizes = this._GetBinRects(this._unpacked);
-            var rects = this._packer.Fit(sizes);
-
-            (string, PackedTexture)[] textures = new (string, PackedTexture)[this._unpacked.Count];
-            int i = 0;
-            foreach(var rect in rects) 
-            {
-                UnpackedTexture texture = rect.element;
-
-                Vector2Int coord = new Vector2Int((int) rect.rect.x, (int) rect.rect.y);
-
-                var op = new ImageDrawOperation(this._image, texture.baseMap, coord, this._tileSize);
-                op.Draw();
-
-                (Vector2 uv1, Vector2 uv2) = this._GetUVs(coord, texture.size);
-
-                textures[i++] = (texture.id, new PackedTexture(uv1, uv2, this._texture));
-            }
-
+            if (! this._isDirty) return;
             this._texture.Update(this._image);
-
-            return textures;
+            this._isDirty = false;
         }
 
-        private (Vector2, Vector2) _GetUVs(Vector2Int coord, Vector2 size)
+        public IEnumerable<Result<T>> Pack<T>(IEnumerable<T> elements) where T : IDrawOperation
         {
-            Vector2 imgSize = new Vector2(this._image.Width, this._image.Height);
-            Vector2 tl = new Vector2(coord.x * this._tileSize, coord.y * this._tileSize);
-            Vector2 uv1 = tl / imgSize;
-            Vector2 uv2 = (tl + size) / imgSize;
-            return (uv1, uv2);
+            var results = elements.OrderByDescending(a => a.size.x * a.size.y).Select(this.PackOne);
+            this._texture.Update(this._image);
+            return results;
         }
 
-        protected BinRect<UnpackedTexture>[] _GetBinRects(List<UnpackedTexture> textures)
+        public Result<T> PackOne<T>(T element) where T : IDrawOperation
         {
-            var rects = new BinRect<UnpackedTexture>[textures.Count];
-
-            int i = 0;
-            foreach (UnpackedTexture texture in textures) {
-                var width  = (uint) MathF.Ceiling(texture.width  / this._tileSize);
-                var height = (uint) MathF.Ceiling(texture.height / this._tileSize);
-                rects[i++] =  new BinRect<UnpackedTexture>(width, height, texture);
+            uint w = (uint) MathF.Ceiling(element.size.x / (float) this._tileSize);
+            uint h = (uint) MathF.Ceiling(element.size.y / (float) this._tileSize);
+            Node? node = this._root.Find(w, h);
+            if (node == null) {
+                throw new System.Exception("Cannot fit the rectangles in the atlas");
             }
 
-            return rects;
+            node.Split(w, h);
+            var coords = new Vector2Int(node.x, node.y) * this._tileSize;
+            var fillSize = new Vector2Int(w * this._tileSize, h * this._tileSize);
+            element.Draw(this._image, coords, fillSize);
+            this._isDirty = true;
+
+            Vector2 imgSize = new Vector2(this._image.Width, this._image.Height);
+            Vector2 uv1 = coords / imgSize;
+            Vector2 uv2 = (coords + element.size) / imgSize;
+            return new Result<T>(uv1, uv2, element);
+        }
+
+        private class Node
+        {
+            public uint x;
+            public uint y;
+            public uint width;
+            public uint height;
+            public Node? down = null;
+            public Node? right = null;
+
+            public Node(uint x, uint y, uint width, uint height)
+            {
+                this.x = x;
+                this.y = y;
+                this.width = width;
+                this.height = height;
+            }
+
+            public void Split(uint width, uint height) 
+            {
+                this.down  = new Node( this.x        , this.y + height, this.width        , this.height - height );
+                this.right = new Node( this.x + width, this.y         , this.width - width, height               );
+            }
+
+            public Node? Find(uint width, uint height) 
+            {
+                if (this.right != null) {
+                    return this.right.Find(width, height) ?? this.down?.Find(width, height);
+                } else if ((width <= this.width) && (height <= this.height)) {
+                    return this;
+                } else {
+                    return null;
+                }
+            }
+
         }
     }
 }
