@@ -1,6 +1,6 @@
 using System.Drawing;
 using System.Numerics;
-using LifeSim.Assets;
+using LifeSim.View3D;
 using LifeSim.Engine.Rendering;
 
 namespace LifeSim.Engine.SceneGraph
