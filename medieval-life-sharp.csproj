@@ -5,6 +5,7 @@
         <RootNamespace>LifeSim</RootNamespace>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <Nullable>enable</Nullable>
+        <ApplicationIcon>icon.ico</ApplicationIcon>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="clipper.NetStandard2" Version="6.4.2" />
