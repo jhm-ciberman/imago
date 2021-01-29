@@ -1,6 +1,7 @@
 using Veldrid;
 using System.Collections.Generic;
 using LifeSim.Engine.SceneGraph;
+using System.Runtime.CompilerServices;
 
 namespace LifeSim.Engine.Rendering
 {
@@ -33,14 +34,13 @@ namespace LifeSim.Engine.Rendering
             this._commandList.Dispose();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void Render(Scene3D scene)
         {
             this._renderList.UpdateRenderList(scene);
             scene.UpdateWorldMatrices();
 
             this._commandList.Begin();
-
-
 
             var camera = scene.activeCamera;
             if (camera != null) {

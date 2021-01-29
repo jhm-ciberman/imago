@@ -1,4 +1,5 @@
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using LifeSim.Engine.SceneGraph;
 using Veldrid;
 
@@ -25,6 +26,7 @@ namespace LifeSim.Engine.Rendering
             this._spriteBatcher = new SpriteBatcher(gd, psoManager, assetManager, this._commandList);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void Render(Canvas2D canvas)
         {
             Viewport viewport = canvas.viewport;

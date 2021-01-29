@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using LifeSim.Engine.SceneGraph;
 using Veldrid;
@@ -98,6 +99,7 @@ namespace LifeSim.Engine.Rendering
             layer.OnGUI();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void Render(Stage stage)
         {
             this._renderTasks.Clear();
