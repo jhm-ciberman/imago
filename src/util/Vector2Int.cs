@@ -95,18 +95,18 @@ namespace LifeSim
         {
             if (!(other is Vector2Int)) return false;
 
-            return Equals((Vector2Int)other);
+            return this.Equals((Vector2Int)other);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(Vector2Int other)
         {
-            return x == other.x && y == other.y;
+            return this.x == other.x && this.y == other.y;
         }
 
         public override int GetHashCode()
         {
-            return x.GetHashCode() ^ (y.GetHashCode() << 16);
+            return this.x.GetHashCode() ^ (this.y.GetHashCode() << 16);
         }
 
         public override string? ToString()

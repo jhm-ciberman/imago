@@ -4,7 +4,7 @@ using LifeSim.Simulation;
 
 namespace LifeSim.Generation
 {
-    class FlatSurfaceFinder 
+    internal class FlatSurfaceFinder 
     {
         private readonly World _world;
 

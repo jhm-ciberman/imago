@@ -19,35 +19,29 @@ namespace LifeSim.Engine.Rendering
 
         private Veldrid.VertexLayoutDescription _GetVertexLayout(VertexLayoutKind kind)
         {
-            switch (kind)
-            {
-                case VertexLayoutKind.PosOnly:
-                    return new VertexLayoutDescription(
-                        new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float4)
-                    );
-                case VertexLayoutKind.Regular:
-                    return new VertexLayoutDescription(
-                        new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
-                        new VertexElementDescription("Normal", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
-                        new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2)
-                    );
-                case VertexLayoutKind.Skinned:
-                    return new VertexLayoutDescription(
-                        new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
-                        new VertexElementDescription("Normal", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
-                        new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
-                        new VertexElementDescription("Joints", VertexElementSemantic.TextureCoordinate, VertexElementFormat.UShort4),
-                        new VertexElementDescription("Weights", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float4)
-                    );
-                case VertexLayoutKind.Sprite:
-                    return new VertexLayoutDescription(
-                        new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
-                        new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
-                        new VertexElementDescription("Color", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Byte4_Norm)
-                    );
-                default:
-                    throw new System.NotSupportedException();
-            }
+            return kind switch {
+                VertexLayoutKind.PosOnly => new VertexLayoutDescription(
+                    new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float4)
+                ),
+                VertexLayoutKind.Regular => new VertexLayoutDescription(
+                    new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
+                    new VertexElementDescription("Normal", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
+                    new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2)
+                ),
+                VertexLayoutKind.Skinned => new VertexLayoutDescription(
+                    new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
+                    new VertexElementDescription("Normal", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
+                    new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
+                    new VertexElementDescription("Joints", VertexElementSemantic.TextureCoordinate, VertexElementFormat.UShort4),
+                    new VertexElementDescription("Weights", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float4)
+                ),
+                VertexLayoutKind.Sprite => new VertexLayoutDescription(
+                    new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
+                    new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
+                    new VertexElementDescription("Color", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Byte4_Norm)
+                ),
+                _ => throw new System.NotSupportedException(),
+            };
         }
 
         public ResourceLayout[] _GetResourceLayouts(Pass pass, IMaterial material, IRenderable renderable)
@@ -60,7 +54,7 @@ namespace LifeSim.Engine.Rendering
             return list.ToArray();
         }
 
-        private uint _GetHash(Pass pass, IMaterial material, IRenderable renderable)
+        private uint _GetHash(Pass pass, IRenderable renderable)
         {
             uint kind = (uint) renderable.vertexLayoutKind;
             uint objectHash = kind;
@@ -69,7 +63,7 @@ namespace LifeSim.Engine.Rendering
 
         public Pipeline GetPipeline(Pass pass, IMaterial material, IRenderable renderable)
         {
-            uint hash = this._GetHash(pass, material, renderable);
+            uint hash = this._GetHash(pass, renderable);
             if (this._pipelines.TryGetValue(hash, out Pipeline? pipeline)) {
                 return pipeline;
             }

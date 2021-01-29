@@ -77,13 +77,12 @@ namespace LifeSim.Engine.GLTF
             return this._inputsCache[index];
         }
 
-
-        interface IChannelFactory
+        private interface IChannelFactory
         {
             Animation.IChannel MakeChannel(string targetName, float[] input, GLTFAccessor output, InterpolationEnum type);
         }
 
-        abstract class ChannelFactory<T> : IChannelFactory where T : struct
+        private abstract class ChannelFactory<T> : IChannelFactory where T : struct
         {
             public abstract Animation.IChannel MakeChannel(string targetName, float[] input, GLTFAccessor output, InterpolationEnum type);
             protected abstract Animation.IInterpolator<T> _MakeInterpolator();
@@ -100,7 +99,7 @@ namespace LifeSim.Engine.GLTF
             }
         }
 
-        class PositionChannelFactory : ChannelFactory<Vector3>
+        private class PositionChannelFactory : ChannelFactory<Vector3>
         {
             public override Animation.IChannel MakeChannel(string targetName, float[] input, GLTFAccessor output, InterpolationEnum type)
             {
@@ -111,7 +110,7 @@ namespace LifeSim.Engine.GLTF
             protected override Animation.IInterpolator<Vector3> _MakeInterpolator() => new Animation.Vector3Interpolator();
         }
 
-        class RotationChannelFactory : ChannelFactory<Quaternion>
+        private class RotationChannelFactory : ChannelFactory<Quaternion>
         {
             public override Animation.IChannel MakeChannel(string targetName, float[] input, GLTFAccessor output, InterpolationEnum type)
             {
@@ -122,7 +121,7 @@ namespace LifeSim.Engine.GLTF
             protected override Animation.IInterpolator<Quaternion> _MakeInterpolator() => new Animation.QuaternionInterpolator();
         }
 
-        class ScaleChannelFactory : ChannelFactory<Vector3>
+        private class ScaleChannelFactory : ChannelFactory<Vector3>
         {
             public override Animation.IChannel MakeChannel(string targetName, float[] input, GLTFAccessor output, InterpolationEnum type)
             {

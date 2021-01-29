@@ -13,14 +13,14 @@ namespace LifeSim
 
         public static void SetLogger(Action<object> logger)
         {
-            Benchmark._loggerFunction = (logger == null) ? Benchmark._defaultLogger : logger;
+            Benchmark._loggerFunction = logger ?? Benchmark._defaultLogger;
         }
 
         public static T Run<T>(string taskName, Func<T> callback)
         {
             Stopwatch sw = Stopwatch.StartNew();
             
-            T value = callback();
+            var value = callback();
 
             sw.Stop();
 
@@ -42,9 +42,7 @@ namespace LifeSim
 
         private static Stopwatch _GetStopWatch(string taskName)
         {
-            Stopwatch? sw;
-            if (! Benchmark._parts.TryGetValue(taskName, out sw))
-            {
+            if (!Benchmark._parts.TryGetValue(taskName, out Stopwatch? sw)) {
                 sw = new Stopwatch();
                 Benchmark._parts.Add(taskName, sw);
             }
@@ -62,7 +60,7 @@ namespace LifeSim
         }
 
         public static void Report(string taskName)
-        {   
+        {
             var sw = Benchmark._GetStopWatch(taskName);
             Benchmark._loggerFunction("\"" + taskName + "\" took " + sw.ElapsedMilliseconds + " milliseconds");
             Benchmark._parts.Remove(taskName);

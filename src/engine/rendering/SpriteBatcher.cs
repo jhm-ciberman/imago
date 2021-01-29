@@ -10,7 +10,7 @@ namespace LifeSim.Engine.Rendering
 {
     public class SpriteBatcher : IFontStashRenderer, System.IDisposable
     {
-        class SpriteBatch : IRenderable
+        private class SpriteBatch : IRenderable
         {
             public VertexLayoutKind vertexLayoutKind => VertexLayoutKind.Sprite;
 
@@ -19,7 +19,7 @@ namespace LifeSim.Engine.Rendering
             public string[] GetShaderKeywords() => System.Array.Empty<string>();
         }
 
-        struct Vertex
+        private struct Vertex
         {
             public Vector3 position;
             public Vector2 uv;
@@ -52,6 +52,9 @@ namespace LifeSim.Engine.Rendering
         private readonly ResourceFactory _assetManager;
         private readonly SpriteBatch _renderable = new SpriteBatch();
 
+        public int totalDrawCalls     => this._totalDrawCalls; 
+        public int totalSpritesToDraw => this._totalSpritesToDraw;
+
         public SpriteBatcher(GraphicsDevice gd, PSOManager psoManager, ResourceFactory assetManager, CommandList commandList)
         {
             this._gd = gd;
@@ -69,7 +72,6 @@ namespace LifeSim.Engine.Rendering
             this._batchVertices = new Vertex[this._maxBatchSize * 4];
             ushort[] indices = new ushort[this._maxBatchSize * 6];
 
-            ushort[] indicesTemplate = new ushort[] {};
             for (int i = 0; i < this._maxBatchSize; i++) {
                 int j = i * 6;
                 int offset = i * 4;

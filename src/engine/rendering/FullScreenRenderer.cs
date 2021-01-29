@@ -5,8 +5,7 @@ namespace LifeSim.Engine.Rendering
 {
     public class FullScreenRenderer : System.IDisposable
     {
-
-        class FullScreenQuad : IRenderable, System.IDisposable
+        private class FullScreenQuad : IRenderable, System.IDisposable
         {
             public DeviceBuffer vertexBuffer;
 

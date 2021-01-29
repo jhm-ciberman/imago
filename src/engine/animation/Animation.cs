@@ -191,12 +191,14 @@ namespace LifeSim.Engine.Anim
         }
 
         private readonly Dictionary<string, List<IChannel>> _channels = new Dictionary<string, List<IChannel>>();
-        private readonly string _name;
+
         public float duration { get; }
+
+        public string name { get; }
 
         public Animation(string name, IReadOnlyList<IChannel> channels)
         {
-            this._name = name;
+            this.name = name;
 
             float duration = 0;
             foreach (var channel in channels) {
@@ -214,6 +216,8 @@ namespace LifeSim.Engine.Anim
         }
 
         public IEnumerable<string> channelNames => this._channels.Keys;
+
+
 
         public IReadOnlyList<IChannel>? FindChannels(string targetName)
         {

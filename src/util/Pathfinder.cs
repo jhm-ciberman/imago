@@ -56,11 +56,9 @@ namespace LifeSim
 
         protected List<Vector2Int> _ReconstructPath(Vector2Int current)
         {
-            var path = new List<Vector2Int>();
+            var path = new List<Vector2Int> { current };
 
-            path.Add(current);
-            do
-            {
+            do {
                 current = this._nodes[current].cameFrom;
                 path.Add(current);
             } while (current != this._start);
@@ -68,7 +66,7 @@ namespace LifeSim
             return path;
         }
 
-        struct Node : IEquatable<Node>
+        private struct Node : IEquatable<Node>
         {
             public Vector2Int cameFrom;
             public Vector2Int coord;
@@ -97,7 +95,7 @@ namespace LifeSim
 
             this._openSet.Enqueue(this._start);
 
-            while (this._openSet.Count > 0)
+            while (this._openSet.count > 0)
             {
                 var currentCoord = this._openSet.Dequeue();
                 this._closedSet.Add(currentCoord);

@@ -1,4 +1,4 @@
-﻿#pragma warning disable IDE1006, IDE0066
+﻿#pragma warning disable IDE1006, IDE0066, IDE0009
 // MIT License
 //
 // Copyright(c) 2020 Jordan Peck (jordan.me2@gmail.com)

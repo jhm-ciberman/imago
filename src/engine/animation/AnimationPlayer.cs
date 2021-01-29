@@ -4,7 +4,7 @@ namespace LifeSim.Engine.Anim
 {
     public class AnimationPlayer
     {
-        private Node3D _root;
+        private readonly Node3D _root;
 
         private BindedAnimation? _animation = null;
 

@@ -3,7 +3,7 @@ using LifeSim.Simulation;
 
 namespace LifeSim.Generation
 {
-    class PotentialHouseLot 
+    internal class PotentialHouseLot 
     {
 
         public Vector2Int start;

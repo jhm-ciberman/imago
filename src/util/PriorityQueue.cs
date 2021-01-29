@@ -21,11 +21,11 @@ namespace LifeSim
             //
         }
 
-        public int Count => this._data.Count;
+        public int count => this._data.Count;
 
         public bool Contains(T item) => this._data.Contains(item);
 
-        public T Peek() => _data[0];
+        public T Peek() => this._data[0];
 
         public void Enqueue(T item) 
         {
@@ -37,7 +37,7 @@ namespace LifeSim
                 if (this._comparer.Compare(this._data[ci], this._data[pi]) >= 0)
                     break; // child item is larger than (or equal) parent so we're done
                 T tmp = this._data[ci];
-                this._data[ci] = _data[pi];
+                this._data[ci] = this._data[pi];
                 this._data[pi] = tmp;
                 ci = pi;
             }

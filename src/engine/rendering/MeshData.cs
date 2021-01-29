@@ -31,7 +31,7 @@ namespace LifeSim.Engine.Rendering
 
         public void RecomputeNormals()
         {
-            for (var i = 0; i < indices.Count; i += 3) {
+            for (var i = 0; i < this.indices.Count; i += 3) {
                 var index1 = this.indices[i + 0];
                 var index2 = this.indices[i + 1];
                 var index3 = this.indices[i + 2];

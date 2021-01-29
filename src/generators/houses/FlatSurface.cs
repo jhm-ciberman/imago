@@ -5,7 +5,7 @@ namespace LifeSim.Generation
     public class FlatSurface 
     {
         
-        private bool[,] _cells;
+        private readonly bool[,] _cells;
 
         /**
         * The coordinate of the flat surface in the world, measured in tiles

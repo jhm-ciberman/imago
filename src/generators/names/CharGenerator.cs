@@ -43,7 +43,7 @@ namespace LifeSim.Generation
             }
         }
 
-        private MonogramProvider _monograms;
+        private readonly MonogramProvider _monograms;
 
         public CharGenerator(MonogramProvider monograms)
         {

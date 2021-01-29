@@ -3,10 +3,10 @@ using System.Collections.Generic;
 
 namespace LifeSim 
 {
-    class MergeValueGenerator : IValueGenerator 
+    internal class MergeValueGenerator : IValueGenerator 
     {
 
-        private List<IValueGenerator> _generators = new List<IValueGenerator>();
+        private readonly List<IValueGenerator> _generators = new List<IValueGenerator>();
 
         public MergeValueGenerator() 
         {

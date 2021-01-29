@@ -1,4 +1,4 @@
-﻿#pragma warning disable IDE0066, IDE1006
+﻿#pragma warning disable IDE0066, IDE1006, IDE0009
 using System.Numerics;
 
 /*
@@ -17,8 +17,7 @@ namespace Sebastian.Geometry
 
         public readonly int[] numPointsPerHole;
         public readonly int numHoles;
-
-        readonly int[] holeStartIndices;
+        private readonly int[] holeStartIndices;
 
         public Polygon(Vector2[] hull, Vector2[][] holes)
         {
@@ -64,7 +63,7 @@ namespace Sebastian.Geometry
         {
         }
 
-        bool PointsAreCounterClockwise(Vector2[] testPoints)
+        private bool PointsAreCounterClockwise(Vector2[] testPoints)
         {
             float signedArea = 0;
             for (int i = 0; i < testPoints.Length; i++)

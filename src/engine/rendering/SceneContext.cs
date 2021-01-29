@@ -9,14 +9,14 @@ namespace LifeSim.Engine.Rendering
     public class SceneContext : System.IDisposable
     {
         [StructLayout(LayoutKind.Sequential)]
-        struct CameraInfo
+        private struct CameraInfo
         {
             public Matrix4x4 viewProjectionMatrix;
             public Matrix4x4 shadowMapMatrix;
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        struct LightInfo
+        private struct LightInfo
         {
             public Vector3 ambientColor;
             private readonly float _padding0;
@@ -27,7 +27,7 @@ namespace LifeSim.Engine.Rendering
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        struct ObjectInfo
+        private struct ObjectInfo
         {
             public Matrix4x4 modelMatrix;
             public Vector4 albedoColor;
@@ -39,7 +39,7 @@ namespace LifeSim.Engine.Rendering
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        struct ShadowMapInfo
+        private struct ShadowMapInfo
         {
             public Matrix4x4 shadowMatrix;
         }
@@ -76,7 +76,7 @@ namespace LifeSim.Engine.Rendering
             this.shadowmapInfoBuffer  = factory.CreateBuffer(new BufferDescription((uint) Marshal.SizeOf<ShadowMapInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
         
             this.modelInfoBuffer = factory.CreateBuffer(new BufferDescription((uint) Marshal.SizeOf<ObjectInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
-            this.bonesInfoBuffer = factory.CreateBuffer(new BufferDescription(64 * BonesInfo.maxNumberOfBones, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+            this.bonesInfoBuffer = factory.CreateBuffer(new BufferDescription(64 * BonesInfo.MAX_NUMBER_OF_BONES, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
         
             this._objectResourceSet = this._factory.CreateResourceSet(new ResourceSetDescription(layouts.renderables.regular, this.modelInfoBuffer));
             this._skinnedResourceSet = this._factory.CreateResourceSet(new ResourceSetDescription(layouts.renderables.skinned, this.modelInfoBuffer, this.bonesInfoBuffer));
@@ -108,11 +108,8 @@ namespace LifeSim.Engine.Rendering
             if (this._resourceSets.TryGetValue(renderable, out ResourceSet? resourceSet)) {
                 return resourceSet;
             }
-            if (renderable is SkinnedRenderable3D skinnedRenderable) {
-                resourceSet = this._skinnedResourceSet;
-            } else {
-                resourceSet = this._objectResourceSet;
-            }
+
+            resourceSet = renderable is SkinnedRenderable3D ? this._skinnedResourceSet : this._objectResourceSet;
 
             this._resourceSets[renderable] = resourceSet;
             return resourceSet;

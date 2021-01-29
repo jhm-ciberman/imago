@@ -84,7 +84,7 @@ namespace LifeSim
 
         private string _Capitalize(string str)
         {
-            return char.ToUpper(str[0]) + str.Substring(1).ToLower();
+            return char.ToUpper(str[0]) + str[1..].ToLower();
         }
 
         public string MakeFullName(Gender gender = Gender.Other, float legibility = 0.8f)
@@ -94,12 +94,11 @@ namespace LifeSim
 
         private CharGenerator _GetGenerator(Gender gender)
         {
-            switch(gender)
-            {
-                case Gender.Female: return this._female;
-                case Gender.Male: return this._male;
-                default: return this._other;
-            }
+            return gender switch {
+                Gender.Female => this._female,
+                Gender.Male => this._male,
+                _ => this._other,
+            };
         }
 
         private float _CheckErrorPercentage(string name)
@@ -162,7 +161,7 @@ namespace LifeSim
             }
             else
             {
-                c = str[str.Length - 1];
+                c = str[^1];
                 lastWasBowel = CharGenerator.IsBowel(c);
             }
 

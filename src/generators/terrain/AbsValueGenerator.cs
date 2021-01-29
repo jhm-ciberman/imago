@@ -2,7 +2,7 @@ using System;
 
 namespace LifeSim.Generation
 {
-    class AbsValueGenerator : IValueGenerator 
+    internal class AbsValueGenerator : IValueGenerator 
     {
         private readonly IValueGenerator _generator;
 

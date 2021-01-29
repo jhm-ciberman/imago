@@ -9,8 +9,8 @@ namespace LifeSim
         
         public float Value(float v)
         {
-            max = v > max ? v : max;
-            min = v < min ? v : min;
+            this.max = v > this.max ? v : this.max;
+            this.min = v < this.min ? v : this.min;
             return v;
         }
 

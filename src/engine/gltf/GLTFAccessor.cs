@@ -6,7 +6,7 @@ using static glTFLoader.Schema.Accessor;
 
 namespace LifeSim.Engine.GLTF
 {
-    class GLTFAccessor
+    internal class GLTFAccessor
     {
         private readonly IGLTFBufferView _bufferView;
         private readonly int _byteOffset;

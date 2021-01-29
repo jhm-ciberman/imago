@@ -12,7 +12,7 @@ namespace LifeSim.Generation
             public float lacunarity;
         }
 
-        private FastNoiseLite _sampler;
+        private readonly FastNoiseLite _sampler;
 
         public NoiseValueGenerator(int seed, Settings settings)
         {

@@ -4,7 +4,7 @@ namespace LifeSim.Generation
 {
     public class PlayerSpawner : IWorldGenerationStep
     {
-        private System.Random _random;
+        private readonly System.Random _random;
 
         public PlayerSpawner(int seed)
         {

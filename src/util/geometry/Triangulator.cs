@@ -1,5 +1,5 @@
 ﻿#nullable disable 
-#pragma warning disable IDE0066, IDE1006
+#pragma warning disable IDE0066, IDE1006, IDE0009
 
 using System.Collections.Generic;
 using System;
@@ -15,9 +15,9 @@ namespace Sebastian.Geometry
 
 	public class Triangulator
     {
-        readonly LinkedList<Vertex> vertsInClippedPolygon;
-        readonly ushort[] tris;
-        int triIndex;
+        private readonly LinkedList<Vertex> vertsInClippedPolygon;
+        private readonly ushort[] tris;
+        private int triIndex;
 
         public Triangulator(Polygon polygon)
         {
@@ -79,7 +79,7 @@ namespace Sebastian.Geometry
         }
 
         // Creates a linked list of all vertices in the polygon, with the hole vertices joined to the hull at optimal points.
-        LinkedList<Vertex> GenerateVertexList(Polygon polygon)
+        private LinkedList<Vertex> GenerateVertexList(Polygon polygon)
         {
             LinkedList<Vertex> vertexList = new LinkedList<Vertex>();
             LinkedListNode<Vertex> currentNode = null;
@@ -251,7 +251,7 @@ namespace Sebastian.Geometry
 
 
         // check if triangle contains any verts (note, only necessary to check reflex verts).
-        bool TriangleContainsVertex(Vertex v0, Vertex v1, Vertex v2)
+        private bool TriangleContainsVertex(Vertex v0, Vertex v1, Vertex v2)
         {
             LinkedListNode<Vertex> vertexNode = vertsInClippedPolygon.First;
             for (int i = 0; i < vertsInClippedPolygon.Count; i++)
@@ -273,13 +273,13 @@ namespace Sebastian.Geometry
             return false;
         }
 
-        bool _Approximately(float a, float b)
+        private bool _Approximately(float a, float b)
         {
             return (a >= b - float.Epsilon && a <= b + float.Epsilon);
         }
 
         // v1 is considered a convex vertex if v0-v1-v2 are wound in a counter-clockwise order.
-        bool IsConvex(Vector2 v0, Vector2 v1, Vector2 v2)
+        private bool IsConvex(Vector2 v0, Vector2 v1, Vector2 v2)
         {
             return SideOfLine(v0, v2, v1) == -1;
         }
@@ -315,11 +315,6 @@ namespace Sebastian.Geometry
         private int SideOfLine(Vector2 a, Vector2 b, Vector2 c)
         {
             return (int) MathF.Sign((c.X - a.X) * (-b.Y + a.Y) + (c.Y - a.Y) * (b.X - a.X));
-        }
-
-        private int SideOfLine(float ax, float ay, float bx, float by, float cx, float cy)
-        {
-            return (int) MathF.Sign((cx - ax) * (-by + ay) + (cy - ay) * (bx - ax));
         }
 
         private bool PointInTriangle(Vector2 a, Vector2 b, Vector2 c, Vector2 p)

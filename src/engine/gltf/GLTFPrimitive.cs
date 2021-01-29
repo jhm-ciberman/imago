@@ -4,7 +4,7 @@ using LifeSim.Engine.Rendering;
 
 namespace LifeSim.Engine.GLTF
 {
-    class GLTFPrimitive
+    internal class GLTFPrimitive
     {
         private readonly Dictionary<string, int> _attributes;
         private readonly GLTFAccessor? _indicesAccessor;

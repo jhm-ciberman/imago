@@ -5,10 +5,10 @@ namespace LifeSim.Generation
 {
     public class HouseGenerator 
     {
-        public static IRoofModel ROOF_GABLE_HORIZONTAL = new GableRoofModel(true);
-        public static IRoofModel ROOF_GABLE_VERTICAL = new GableRoofModel(false);
-        public static IRoofModel ROOF_HIP = new HipRoofModel();
-        public static IRoofModel ROOF_FLAT = new FlatRoofModel();
+        public static readonly IRoofModel ROOF_GABLE_HORIZONTAL = new GableRoofModel(true);
+        public static readonly IRoofModel ROOF_GABLE_VERTICAL = new GableRoofModel(false);
+        public static readonly IRoofModel ROOF_HIP = new HipRoofModel();
+        public static readonly IRoofModel ROOF_FLAT = new FlatRoofModel();
 
         private readonly System.Random _random;
 
@@ -198,7 +198,7 @@ namespace LifeSim.Generation
             };
         }
 
-        struct HousePreset
+        private struct HousePreset
         {
             public Cover[] roofsExterior;
 

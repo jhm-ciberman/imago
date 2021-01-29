@@ -36,17 +36,17 @@ namespace LifeSim.Engine
             for (int i = 0; i < this.inputSnapshot.KeyEvents.Count; i++) {
                 KeyEvent ke = this.inputSnapshot.KeyEvents[i];
                 if (ke.Down) {
-                    _KeyDown(ke.Key);
+                    this._KeyDown(ke.Key);
                 } else {
-                    _KeyUp(ke.Key);
+                    this._KeyUp(ke.Key);
                 }
             }
             for (int i = 0; i < this.inputSnapshot.MouseEvents.Count; i++) {
                 MouseEvent me = this.inputSnapshot.MouseEvents[i];
                 if (me.Down) {
-                    _MouseDown(me.MouseButton);
+                    this._MouseDown(me.MouseButton);
                 } else {
-                    _MouseUp(me.MouseButton);
+                    this._MouseUp(me.MouseButton);
                 }
             }
 

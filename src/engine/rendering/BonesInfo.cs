@@ -5,16 +5,16 @@ namespace LifeSim.Engine.Rendering
 {
     public unsafe struct BonesInfo
     {
-        public const int maxNumberOfBones = 64;
-
+        public const int MAX_NUMBER_OF_BONES = 64;
+        
         public Matrix4x4[] bonesMatrices;
 
         public Blittable GetBlittable()
         {
             Blittable b;
-            fixed (Matrix4x4* ptr = bonesMatrices)
+            fixed (Matrix4x4* ptr = this.bonesMatrices)
             {
-                Unsafe.CopyBlock(&b, ptr, BonesInfo.maxNumberOfBones * 4 * 16);
+                Unsafe.CopyBlock(&b, ptr, BonesInfo.MAX_NUMBER_OF_BONES * 4 * 16);
             }
 
             return b;
@@ -22,12 +22,12 @@ namespace LifeSim.Engine.Rendering
 
         public struct Blittable
         {
-            public fixed float BoneData[BonesInfo.maxNumberOfBones * 16];
+            public fixed float boneData[BonesInfo.MAX_NUMBER_OF_BONES * 16];
         }
 
         internal static BonesInfo New()
         {
-            return new BonesInfo() { bonesMatrices = new Matrix4x4[BonesInfo.maxNumberOfBones] };
+            return new BonesInfo() { bonesMatrices = new Matrix4x4[BonesInfo.MAX_NUMBER_OF_BONES] };
         }
     }
 }

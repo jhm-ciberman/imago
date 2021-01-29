@@ -6,7 +6,7 @@ namespace LifeSim.Engine.SceneGraph
 {
     public class SkinnedRenderable3D : Renderable3D
     {
-        private BindedSkin? _skin = null;
+        private readonly BindedSkin? _skin = null;
 
         public SkinnedRenderable3D(GPUMesh mesh, SurfaceMaterial material, BindedSkin skin) : base(mesh, material)
         {

@@ -5,13 +5,13 @@ namespace LifeSim
 {
     public class PickingList
     {
-        enum TargetType
+        private enum TargetType
         {
             None,
             Renderable,
         }
 
-        private List<Renderable3D> _list = new List<Renderable3D>();
+        private readonly List<Renderable3D> _list = new List<Renderable3D>();
 
         public PickingList()
         {

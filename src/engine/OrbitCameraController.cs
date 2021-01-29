@@ -4,7 +4,7 @@ using LifeSim.Engine.SceneGraph;
 
 namespace LifeSim
 {
-    class OrbitCameraController
+    internal class OrbitCameraController
     {
         public float direction = 0f;
         public float distance = 3f;

@@ -2,7 +2,7 @@ using LifeSim.Simulation;
 
 namespace LifeSim.Generation
 {
-    class FlatRoofModel : BaseRoofModel 
+    internal class FlatRoofModel : BaseRoofModel 
     {
         public override float GetRoofTileHeightValue(Roof roof)
         {

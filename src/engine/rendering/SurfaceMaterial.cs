@@ -24,7 +24,7 @@ namespace LifeSim.Engine.Rendering
         {
             this._materialManager = builder;
             this._resourceLayout = builder.layouts.materials.surface;
-            texture = texture ?? builder.pinkTexture;
+            texture ??= builder.pinkTexture;
             this._resourceSet = builder.CreateResourceSet(this, texture.deviceTexture, texture.sampler);
         }
 

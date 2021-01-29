@@ -11,7 +11,7 @@ namespace LifeSim.Engine
 {
     public class ResourceFactory : ITexture2DCreator
     {
-        class FontTexture2D : GPUTexture, ITexture2D
+        private class FontTexture2D : GPUTexture, ITexture2D
         {
             public FontTexture2D(GraphicsDevice gd, uint width, uint height) : base(gd, width, height)
             {

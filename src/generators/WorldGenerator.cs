@@ -7,7 +7,7 @@ namespace LifeSim.Generation
 {
     public class WorldGenerator
     {
-        private List<IWorldGenerationStep> _pipeline = new List<IWorldGenerationStep>();
+        private readonly List<IWorldGenerationStep> _pipeline = new List<IWorldGenerationStep>();
 
         private Vector2Int _size;
 

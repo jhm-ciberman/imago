@@ -6,7 +6,7 @@ namespace LifeSim.Generation
 {
     public class PathsGenerator : IWorldGenerationStep
     {
-        class TerrainPathfinder : Pathfinder
+        private class TerrainPathfinder : Pathfinder
         {
             private readonly float _flatTileCost = 1.0f;
             private readonly float _slopeTileCost = 1.2f;
@@ -82,8 +82,6 @@ namespace LifeSim.Generation
 
         public void Handle(World world)
         {
-            var center = world.size / 2;
-            
             var tileCovers = new TileCover[] {
                 this._container.Get<TileCover>("tilecover.mud"),
                 this._container.Get<TileCover>("tilecover.stone"),

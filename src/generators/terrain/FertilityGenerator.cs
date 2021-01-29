@@ -5,7 +5,7 @@ namespace LifeSim.Generation
 {
     public class FertilityGenerator : IWorldGenerationStep
     {
-        private FastNoiseLite _noise;
+        private readonly FastNoiseLite _noise;
 
         public FertilityGenerator(int seed)
         {

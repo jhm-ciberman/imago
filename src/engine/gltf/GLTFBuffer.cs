@@ -6,7 +6,7 @@ namespace LifeSim.Engine.GLTF
 {
     public class GLTFBuffer
     {
-        public readonly byte[] _bytes;
+        private readonly byte[] _bytes;
 
         public GLTFBuffer(byte[] bytes)
         {
@@ -26,10 +26,10 @@ namespace LifeSim.Engine.GLTF
         public UShort4 ReadUShort4(int offset)
         {
             UShort4 vector;
-            vector.X = BitConverter.ToUInt16(this._bytes, offset + 0);
-            vector.Y = BitConverter.ToUInt16(this._bytes, offset + 2);
-            vector.Z = BitConverter.ToUInt16(this._bytes, offset + 4);
-            vector.W = BitConverter.ToUInt16(this._bytes, offset + 6);
+            vector.x = BitConverter.ToUInt16(this._bytes, offset + 0);
+            vector.y = BitConverter.ToUInt16(this._bytes, offset + 2);
+            vector.z = BitConverter.ToUInt16(this._bytes, offset + 4);
+            vector.w = BitConverter.ToUInt16(this._bytes, offset + 6);
             return vector;
         }
 

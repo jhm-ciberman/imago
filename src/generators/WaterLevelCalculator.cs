@@ -6,7 +6,7 @@ namespace LifeSim.Generation
 {
     public class WaterLevelCalculator : IWorldGenerationStep
     {
-        private float _maximumWaterPercentage;
+        private readonly float _maximumWaterPercentage;
 
         public WaterLevelCalculator(float maximumWaterPercentage)
         {

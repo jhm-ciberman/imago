@@ -8,9 +8,9 @@ namespace LifeSim.Engine.SceneGraph
         private float      _rotation;
         private Vector2    _scale;
 
-        public Vector2    position { get => _position; set { _position = value; this._localMatrixDirty = true; } }
-        public float      rotation { get => _rotation; set { _rotation = value; this._localMatrixDirty = true; } }
-        public Vector2    scale    { get => _scale;    set { _scale = value;    this._localMatrixDirty = true; } }
+        public Vector2    position { get => this._position; set { this._position = value; this._localMatrixDirty = true; } }
+        public float      rotation { get => this._rotation; set { this._rotation = value; this._localMatrixDirty = true; } }
+        public Vector2    scale    { get => this._scale;    set { this._scale = value;    this._localMatrixDirty = true; } }
 
         private Matrix3x2 _localMatrix = Matrix3x2.Identity;
         private bool _localMatrixDirty = false;

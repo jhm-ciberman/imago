@@ -9,7 +9,7 @@ namespace LifeSim.Engine.SceneGraph
         private Container<TChildNode>? _parent = null;
         public Container<TChildNode>? parent => this._parent;
 
-        private List<TChildNode> _children = new List<TChildNode>();
+        private readonly List<TChildNode> _children = new List<TChildNode>();
         public IReadOnlyList<TChildNode> children => this._children;
 
         public void Add(TChildNode node)

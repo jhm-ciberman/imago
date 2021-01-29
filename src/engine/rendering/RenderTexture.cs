@@ -14,7 +14,7 @@ namespace LifeSim.Engine.Rendering
         void Resize(uint width, uint height);
     }
 
-    class SwapchainRenderTexture : IRenderTexture
+    internal class SwapchainRenderTexture : IRenderTexture
     {
         private readonly Swapchain _swapchain; 
         
@@ -49,8 +49,6 @@ namespace LifeSim.Engine.Rendering
 
     public class RenderTexture : IRenderTexture
     {
-        private readonly uint _width;
-        private readonly uint _height;
         private readonly Veldrid.ResourceFactory _factory;
         private Framebuffer _framebuffer;
         private Texture _depthTexture;
@@ -62,8 +60,6 @@ namespace LifeSim.Engine.Rendering
         public RenderTexture(Veldrid.ResourceFactory factory, uint width, uint height)
         {
             this._factory = factory;
-            this._width = width;
-            this._height = height;
             this._depthTexture = this._CreateDepthTexture(width, height);
             this._colorTexture = this._CreateColorTexture(width, height);
             this._pickingTexture = this._CreatePickingIDTexture(width, height);

@@ -6,41 +6,41 @@ namespace LifeSim.Engine.Rendering
     [StructLayout(LayoutKind.Sequential)]
     public struct UInt4
     {
-        public uint X;
-        public uint Y;
-        public uint Z;
-        public uint W;
+        public uint x;
+        public uint y;
+        public uint z;
+        public uint w;
 
         public UInt4(uint x, uint y, uint z, uint w)
         {
-            this.X = x;
-            this.Y = y;
-            this.Z = z;
-            this.W = w;
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.w = w;
         }
 
         public override bool Equals(object? obj)
         {
-            return obj is UInt4 @int &&
-                   X == @int.X &&
-                   Y == @int.Y &&
-                   Z == @int.Z &&
-                   W == @int.W;
+            return obj is UInt4 other &&
+                   this.x == other.x &&
+                   this.y == other.y &&
+                   this.z == other.z &&
+                   this.w == other.w;
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(X, Y, Z, W);
+            return HashCode.Combine(this.x, this.y, this.z, this.w);
         }
 
         public override string? ToString()
         {
-            return "<" + this.X + ", " + this.Y + ", " + this.Z + ", " + this.W + ">";
+            return "<" + this.x + ", " + this.y + ", " + this.z + ", " + this.w + ">";
         }
 
         public static implicit operator UInt4(UShort4 v)
         {
-            return new UInt4(v.X, v.Y, v.Z, v.Z);
+            return new UInt4(v.x, v.y, v.z, v.z);
         }
     }
 }

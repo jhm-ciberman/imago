@@ -3,7 +3,7 @@ using LifeSim.Simulation;
 
 namespace LifeSim.Generation
 {
-    class GableRoofModel : HipRoofModel 
+    internal class GableRoofModel : HipRoofModel 
     {
         protected Vector2Int _dir;
 
