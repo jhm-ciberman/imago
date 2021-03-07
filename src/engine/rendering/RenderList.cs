@@ -14,14 +14,14 @@ namespace LifeSim.Engine.Rendering
 
         }
 
-        public void UpdateRenderList(Container<Node3D> node)
+        public void UpdateRenderList(Node3D node)
         {
             this._shadowsRenderList.Clear();
             this._regularRenderList.Clear();
             this._UpdateRecursive(node);
         }
 
-        private void _UpdateRecursive(Container<Node3D> node)
+        private void _UpdateRecursive(Node3D node)
         {
             if (node is Renderable3D renderable && renderable.material != null) {
                 if (renderable.material.castShadows) {

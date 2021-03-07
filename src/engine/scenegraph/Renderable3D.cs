@@ -1,6 +1,7 @@
 using System.Numerics;
 using LifeSim.Engine.Rendering;
 using Veldrid;
+using Veldrid.Utilities;
 
 namespace LifeSim.Engine.SceneGraph
 {
@@ -8,7 +9,15 @@ namespace LifeSim.Engine.SceneGraph
     {
         public System.UInt32 pickingID = 0;
         
-        public GPUMesh? mesh;
+        private GPUMesh? _mesh;
+        public GPUMesh? mesh
+        {
+            get => this._mesh;
+            set
+            {
+                this._mesh = value;
+            }
+        }
         
         private SurfaceMaterial? _material;
         public SurfaceMaterial? material

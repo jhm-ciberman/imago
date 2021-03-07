@@ -40,6 +40,18 @@ namespace LifeSim
             Benchmark._loggerFunction("\"" + taskName + "\" took " + sw.ElapsedMilliseconds + " milliseconds");
         }
 
+        
+        public static void RunTicks(string taskName, Action callback)
+        {
+            Stopwatch sw = Stopwatch.StartNew();
+            
+            callback();
+
+            sw.Stop();
+
+            Benchmark._loggerFunction("\"" + taskName + "\" took " + sw.ElapsedTicks + " ticks");
+        }
+
         private static Stopwatch _GetStopWatch(string taskName)
         {
             if (!Benchmark._parts.TryGetValue(taskName, out Stopwatch? sw)) {

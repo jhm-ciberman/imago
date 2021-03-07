@@ -11,7 +11,7 @@ namespace LifeSim.Engine.Rendering
 
         public PassManager(GraphicsDevice gd, GPUResourceManager resources)
         {
-            var sceneContext = resources.sceneContext;
+            var sceneContext = resources.sceneManager;
             var shadowmapTexture = sceneContext.shadowmapTexture;
 
 

@@ -2,6 +2,7 @@ using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Veldrid;
+using Veldrid.Utilities;
 
 namespace LifeSim.Engine.Rendering
 {
@@ -32,6 +33,8 @@ namespace LifeSim.Engine.Rendering
         public uint vertexCount;
         public uint indexCount;
 
+        public BoundingSphere boundingSphere;
+
         public GPUMesh(GraphicsDevice graphicsDevice, MeshData mesh)
         {
             var indices = mesh.indices.ToArray();
@@ -54,6 +57,8 @@ namespace LifeSim.Engine.Rendering
                 graphicsDevice.UpdateBuffer(this._vertexBuffer, 0, this.GetVerts(mesh));
                 this._vertexLayoutKind = VertexLayoutKind.Regular;
             }
+
+            this.boundingSphere = BoundingSphere.CreateFromPoints(mesh.positions);
         }
 
         private VertData[] GetVerts(MeshData mesh)

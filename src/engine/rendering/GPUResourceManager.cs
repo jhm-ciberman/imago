@@ -12,7 +12,7 @@ namespace LifeSim.Engine.Rendering
 
         private readonly PassManager _passes;
 
-        private readonly SceneContext _sceneContext;
+        private readonly SceneManager _sceneManager;
 
         public readonly IRenderTexture fullScreenRenderTexture;
 
@@ -23,7 +23,7 @@ namespace LifeSim.Engine.Rendering
             this._gd = gd;
             var factory = gd.ResourceFactory;
             this._layouts = new ResourceLayouts(factory);
-            this._sceneContext = new SceneContext(this._layouts, this._gd);
+            this._sceneManager = new SceneManager(this._layouts, this._gd);
 
             this.fullScreenRenderTexture = new SwapchainRenderTexture(this._gd.MainSwapchain);
             this.mainRenderTexture = new RenderTexture(factory, width, height);
@@ -35,7 +35,7 @@ namespace LifeSim.Engine.Rendering
 
         PassManager IMaterialBuilder.passes => this._passes;
 
-        public SceneContext sceneContext => this._sceneContext;
+        public SceneManager sceneManager => this._sceneManager;
 
         Sampler IMaterialBuilder.linearSampler => this._gd.LinearSampler;
 

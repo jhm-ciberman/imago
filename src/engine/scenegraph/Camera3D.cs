@@ -16,10 +16,13 @@ namespace LifeSim.Engine.SceneGraph
         private readonly Viewport _viewPort;
 
         public Viewport viewport => this._viewPort;
+
+        public Camera3D frustumCullingCamera;
  
         public Camera3D(Viewport viewport)
         {
             this._viewPort = viewport;
+            this.frustumCullingCamera = this;
         }
 
         public Matrix4x4 viewProjectionMatrix => this.viewMatrix * this.projectionMatrix;

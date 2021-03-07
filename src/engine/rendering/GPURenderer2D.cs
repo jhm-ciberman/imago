@@ -13,7 +13,7 @@ namespace LifeSim.Engine.Rendering
 
         private readonly CommandList _commandList;
         private readonly IRenderTexture _renderTexture;
-        private readonly SceneContext _sceneContext;
+        private readonly SceneManager _sceneManager;
         private bool _hasCommandsToSubmit;
 
         public GPURenderer2D(GraphicsDevice gd, ResourceFactory assetManager, GPUResourceManager resources, PSOManager psoManager)
@@ -22,7 +22,7 @@ namespace LifeSim.Engine.Rendering
             this._graphicsDevice = gd;
             this._renderTexture = renderTexture;
             this._commandList = gd.ResourceFactory.CreateCommandList();
-            this._sceneContext = resources.sceneContext;
+            this._sceneManager = resources.sceneManager;
             this._spriteBatcher = new SpriteBatcher(gd, psoManager, assetManager, this._commandList);
         }
 
@@ -35,7 +35,7 @@ namespace LifeSim.Engine.Rendering
             this._commandList.SetFramebuffer(this._renderTexture.framebuffer);
             this._commandList.ClearDepthStencil(1f);
             Matrix4x4 projection = Matrix4x4.CreateOrthographicOffCenter(0, viewport.width, viewport.height, 0, -10f, 100f);
-            this._sceneContext.SetupCamera2DInfoBuffer(this._commandList, ref projection);
+            this._sceneManager.SetupCamera2DInfoBuffer(this._commandList, ref projection);
             this._spriteBatcher.BeginBatch();
 
             this._RenderRecursive(canvas);

@@ -6,7 +6,7 @@ using Veldrid;
 
 namespace LifeSim.Engine.Rendering
 {
-    public class SceneContext : System.IDisposable
+    public class SceneManager : System.IDisposable
     {
         [StructLayout(LayoutKind.Sequential)]
         private struct CameraInfo
@@ -65,7 +65,7 @@ namespace LifeSim.Engine.Rendering
 
         private Matrix4x4 _shadowMapScaling;
 
-        public SceneContext(ResourceLayouts layouts, GraphicsDevice graphicsDevice)
+        public SceneManager(ResourceLayouts layouts, GraphicsDevice graphicsDevice)
         {
             var factory = graphicsDevice.ResourceFactory;
             this._factory = factory;  

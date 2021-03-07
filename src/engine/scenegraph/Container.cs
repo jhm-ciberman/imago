@@ -4,6 +4,9 @@ namespace LifeSim.Engine.SceneGraph
 {
     public abstract class Container<TChildNode> where TChildNode : Container<TChildNode>
     {
+        public event System.Action<TChildNode>? onChildAdded;
+        public event System.Action<TChildNode>? onChildRemoved;
+
         public string name = string.Empty;
 
         private Container<TChildNode>? _parent = null;
@@ -14,20 +17,39 @@ namespace LifeSim.Engine.SceneGraph
 
         public void Add(TChildNode node)
         {
-            if (this._parent == this) return;
-            node.parent?.Remove(node);
-            if (! this._children.Contains(node)) {
-                this._children.Add(node);
-                node._parent = this;
+            if (node._parent == this) return;
+            if (node == this) return;
+            
+            if (node._parent != null) {
+                node._parent.Remove(node);
             }
+
+            this._children.Add(node);
+            node._parent = this;
+            node.onChildAdded += this._OnNodeAdded;
+            node.onChildRemoved += this._OnNodeRemoved;
+            this.onChildAdded?.Invoke(node);
         }
 
         public void Remove(TChildNode node)
         {
-            if (node.parent == this) {
-                this._children.Remove(node);
-                node._parent = null;
-            }
+            if (node._parent != this) return;
+
+            this._children.Remove(node);
+            node._parent = null;
+            node.onChildAdded -= this._OnNodeAdded;
+            node.onChildRemoved -= this._OnNodeRemoved;
+            this.onChildRemoved?.Invoke(node);
+        }
+
+        private void _OnNodeAdded(TChildNode node)
+        {
+            this.onChildAdded?.Invoke(node);
+        }
+
+        private void _OnNodeRemoved(TChildNode node)
+        {
+            this.onChildRemoved?.Invoke(node);
         }
 
         public T? Find<T>() where T : TChildNode
