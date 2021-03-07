@@ -1,16 +1,29 @@
+using System.Collections.Generic;
 using System.Numerics;
 
 namespace LifeSim.Engine.SceneGraph 
 {
-    public class Node3D : Container<Node3D>
+    public class Node3D
     {
+        public event System.Action<Node3D>? onTransformChanged;
+        public event System.Action<Node3D>? onChildAdded;
+        public event System.Action<Node3D>? onChildRemoved;
+
+        public string name = string.Empty;
+
+        private Node3D? _parent = null;
+        public Node3D? parent => this._parent;
+
+        private readonly List<Node3D> _children = new List<Node3D>();
+        public IReadOnlyList<Node3D> children => this._children;
+
         private Vector3    _position;
         private Quaternion _rotation;
         private Vector3    _scale;
 
-        public Vector3    position { get => this._position; set { this._position = value; this._localMatrixDirty = true; } }
-        public Quaternion rotation { get => this._rotation; set { this._rotation = value; this._localMatrixDirty = true; } }
-        public Vector3    scale    { get => this._scale;    set { this._scale = value;    this._localMatrixDirty = true; } }
+        public Vector3    position { get => this._position; set { this._position = value; this._localMatrixDirty = true; this.onTransformChanged?.Invoke(this); } }
+        public Quaternion rotation { get => this._rotation; set { this._rotation = value; this._localMatrixDirty = true; this.onTransformChanged?.Invoke(this); } }
+        public Vector3    scale    { get => this._scale;    set { this._scale = value;    this._localMatrixDirty = true; this.onTransformChanged?.Invoke(this); } }
 
         private Matrix4x4 _localMatrix = Matrix4x4.Identity;
         private bool _localMatrixDirty = false;
@@ -27,6 +40,43 @@ namespace LifeSim.Engine.SceneGraph
 
         public Vector3 worldPosition => Vector3.Transform(Vector3.Zero, this._worldMatrix);
         public Vector3 worldScale => Vector3.Transform(this._scale, this._worldMatrix);
+
+        public void Add(Node3D node)
+        {
+            if (node._parent == this) return;
+            if (node == this) return;
+            
+            if (node._parent != null) {
+                node._parent.Remove(node);
+            }
+
+            this._children.Add(node);
+            node._parent = this;
+            node.onChildAdded += this._OnNodeAdded;
+            node.onChildRemoved += this._OnNodeRemoved;
+            this.onChildAdded?.Invoke(node);
+        }
+
+        public void Remove(Node3D node)
+        {
+            if (node._parent != this) return;
+
+            this._children.Remove(node);
+            node._parent = null;
+            node.onChildAdded -= this._OnNodeAdded;
+            node.onChildRemoved -= this._OnNodeRemoved;
+            this.onChildRemoved?.Invoke(node);
+        }
+
+        private void _OnNodeAdded(Node3D node)
+        {
+            this.onChildAdded?.Invoke(node);
+        }
+
+        private void _OnNodeRemoved(Node3D node)
+        {
+            this.onChildRemoved?.Invoke(node);
+        }
 
         public void UpdateWorldMatrix()
         {
@@ -54,5 +104,80 @@ namespace LifeSim.Engine.SceneGraph
             }
             return ref this._localMatrix;
         }
+
+        public T? Find<T>() where T : Node3D
+        {
+            if (this is T childT) {
+                return childT;
+            }
+            foreach (var child in this.children) {
+                var result = child.Find<T>();
+                if (result != null) {
+                    return result;
+                }
+            }
+            return null;
+        }
+
+        public T? Find<T>(string name) where T : Node3D
+        {
+            if (this is T childT && this.name == name) {
+                return childT;
+            }
+            foreach (var child in this.children) {
+                var result = child.Find<T>();
+                if (result != null) {
+                    return result;
+                }
+            }
+            return null;
+        }
+
+        public void PrintHierarchyToConsole(string indent = "")
+        {
+            System.Console.WriteLine(indent + "- " + this.GetType().Name + ": " + this.name);
+            indent += "  ";
+            foreach (var child in this.children) {
+                child.PrintHierarchyToConsole(indent);
+            }
+        }
+
+        public void ForEachRecursive<T>(System.Action<T> action) where T : Node3D
+        {
+            if (this is T childT) {
+                action(childT);
+            }
+            foreach (var child in this.children) {
+                child.ForEachRecursive<T>(action);
+            }
+        }
+
+
+        public T? FindPath<T>(string name) where T : Node3D
+        {
+            var arrayPaths = name.Split('/');
+            int currentIndex = 0;
+            Node3D currentNode = this;
+            bool found = true;
+            while (found && currentIndex < arrayPaths.Length) {
+                var currentNameToFind = arrayPaths[currentIndex];
+                foreach (var child in currentNode.children) {
+                    if (child.name == currentNameToFind) {
+                        currentNode = child;
+                        currentIndex++;
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            if (currentIndex < arrayPaths.Length) {
+                return null;
+            } else if (currentNode is T nodeT) {
+                return nodeT;
+            } else {
+                return null;
+            }
+        }
+
     }
 }

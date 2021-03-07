@@ -38,7 +38,7 @@ namespace LifeSim.Engine.Rendering
             this._sceneManager.SetupCamera2DInfoBuffer(this._commandList, ref projection);
             this._spriteBatcher.BeginBatch();
 
-            this._RenderRecursive(canvas);
+            this._RenderRecursive(canvas.root);
 
             this._spriteBatcher.EndBatch();
             this._commandList.End();
@@ -46,9 +46,9 @@ namespace LifeSim.Engine.Rendering
             this._hasCommandsToSubmit = true;
         }
 
-        private void _RenderRecursive(Container<Node2D> container)
+        private void _RenderRecursive(Node2D node)
         {
-            foreach (var child in container.children) {
+            foreach (var child in node.children) {
                 if (child is Renderable2D renderable) {
                     renderable.Render(this._spriteBatcher);
                     this._RenderRecursive(child);
