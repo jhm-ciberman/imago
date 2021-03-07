@@ -22,10 +22,11 @@ namespace LifeSim.Engine.SceneGraph
         private List<Renderable3D> _renderables = new List<Renderable3D>();
         public IReadOnlyList<Renderable3D> renderables => this._renderables;
 
+        private List<Node3D> _dirtyList = new List<Node3D>();
+
         public Scene3D()
         {
-            this._root.onChildAdded += this._AddRenderables;
-            this._root.onChildRemoved += this._RemoveRenderables;
+            this._root.onEvent += this._OnEvent;
         }
 
         public void Add(Node3D node)
@@ -36,6 +37,24 @@ namespace LifeSim.Engine.SceneGraph
         public void Remove(Node3D node)
         {
             this._root.Remove(node);
+        }
+
+        private void _OnEvent(Event<Node3D> e)
+        {
+            switch (e.type)
+            {
+                case EventType.ChildAdded:
+                    this._AddRenderables(e.node);
+                    this._AddToDirtyList(e.node);
+                    break;
+                case EventType.ChildRemoved:
+                    this._RemoveRenderables(e.node);
+                    this._AddToDirtyList(e.node);
+                    break;
+                case EventType.TransformDirty:
+                    this._AddToDirtyList(e.node);
+                    break;   
+            }   
         }
 
         private void _AddRenderables(Node3D node)
@@ -58,9 +77,30 @@ namespace LifeSim.Engine.SceneGraph
             }
         }
 
+        private void _AddToDirtyList(Node3D node)
+        {
+            this._dirtyList.Add(node);
+        }
+
         public void UpdateWorldMatrices()
         {
-            this._root?.UpdateWorldMatrix();
+            if (this._dirtyList.Count > 0) {
+                foreach (var dirtyNode in this._dirtyList) {
+                    if (! dirtyNode.transformIsDirty) continue;
+                    this._SearchTopDirty(dirtyNode).UpdateWorldMatrix();
+                }
+                this._dirtyList.Clear();
+            }
+        }
+
+        private Node3D _SearchTopDirty(Node3D node)
+        {
+            Node3D topDirty = node;
+            while (true) {
+                if (node.transformIsDirty) topDirty = node;
+                if (node.parent == null) return topDirty;
+                node = node.parent;
+            }
         }
 
         void ILayer.Render(GPURenderer renderer)

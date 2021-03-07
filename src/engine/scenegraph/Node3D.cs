@@ -5,11 +5,9 @@ namespace LifeSim.Engine.SceneGraph
 {
     public class Node3D
     {
-        public event System.Action<Node3D>? onTransformChanged;
-        public event System.Action<Node3D>? onChildAdded;
-        public event System.Action<Node3D>? onChildRemoved;
+        public event System.Action<Event<Node3D>>? onEvent;
 
-        public string name = string.Empty;
+        public string name { get; set; } = string.Empty;
 
         private Node3D? _parent = null;
         public Node3D? parent => this._parent;
@@ -17,13 +15,13 @@ namespace LifeSim.Engine.SceneGraph
         private readonly List<Node3D> _children = new List<Node3D>();
         public IReadOnlyList<Node3D> children => this._children;
 
-        private Vector3    _position;
-        private Quaternion _rotation;
-        private Vector3    _scale;
+        private Vector3    _position = Vector3.Zero;
+        private Quaternion _rotation = Quaternion.Identity;
+        private Vector3    _scale = Vector3.One;
 
-        public Vector3    position { get => this._position; set { this._position = value; this._localMatrixDirty = true; this.onTransformChanged?.Invoke(this); } }
-        public Quaternion rotation { get => this._rotation; set { this._rotation = value; this._localMatrixDirty = true; this.onTransformChanged?.Invoke(this); } }
-        public Vector3    scale    { get => this._scale;    set { this._scale = value;    this._localMatrixDirty = true; this.onTransformChanged?.Invoke(this); } }
+        public Vector3    position { get => this._position; set { this._position = value; this._OnTransformDirty(); } }
+        public Quaternion rotation { get => this._rotation; set { this._rotation = value; this._OnTransformDirty(); } }
+        public Vector3    scale    { get => this._scale;    set { this._scale = value;    this._OnTransformDirty(); } }
 
         private Matrix4x4 _localMatrix = Matrix4x4.Identity;
         private bool _localMatrixDirty = false;
@@ -31,12 +29,7 @@ namespace LifeSim.Engine.SceneGraph
         private Matrix4x4 _worldMatrix;
         public ref Matrix4x4 worldMatrix => ref this._worldMatrix;
 
-        public Node3D()
-        {
-            this._position = Vector3.Zero;
-            this._rotation = Quaternion.Identity;
-            this._scale = Vector3.One;
-        }
+        public bool transformIsDirty => this._localMatrixDirty;
 
         public Vector3 worldPosition => Vector3.Transform(Vector3.Zero, this._worldMatrix);
         public Vector3 worldScale => Vector3.Transform(this._scale, this._worldMatrix);
@@ -52,9 +45,8 @@ namespace LifeSim.Engine.SceneGraph
 
             this._children.Add(node);
             node._parent = this;
-            node.onChildAdded += this._OnNodeAdded;
-            node.onChildRemoved += this._OnNodeRemoved;
-            this.onChildAdded?.Invoke(node);
+            node.onEvent += this._OnNotified;
+            this._Notify(node, EventType.ChildAdded);
         }
 
         public void Remove(Node3D node)
@@ -63,24 +55,33 @@ namespace LifeSim.Engine.SceneGraph
 
             this._children.Remove(node);
             node._parent = null;
-            node.onChildAdded -= this._OnNodeAdded;
-            node.onChildRemoved -= this._OnNodeRemoved;
-            this.onChildRemoved?.Invoke(node);
+            node.onEvent -= this._OnNotified;
+            this._Notify(node, EventType.ChildRemoved);
         }
 
-        private void _OnNodeAdded(Node3D node)
+        private void _OnNotified(Event<Node3D> e)
         {
-            this.onChildAdded?.Invoke(node);
+            this.onEvent?.Invoke(e);
         }
 
-        private void _OnNodeRemoved(Node3D node)
+        protected void _Notify(Node3D node, EventType eventType)
         {
-            this.onChildRemoved?.Invoke(node);
+            this.onEvent?.Invoke(new Event<Node3D>(node, eventType));
+        }
+
+        private void _OnTransformDirty()
+        {
+            if (this._localMatrixDirty) return;
+            this._localMatrixDirty = true;
+            this._Notify(this, EventType.TransformDirty);
         }
 
         public void UpdateWorldMatrix()
         {
             this._worldMatrix = this.GetLocalMatrix();
+            if (this._parent != null) {
+                this._worldMatrix *= this._parent._localMatrix;
+            }
             for(int i = 0; i < this.children.Count; i++) {
                 this.children[i]._UpdateWorldMatrix(ref this._worldMatrix);
             }
@@ -152,7 +153,6 @@ namespace LifeSim.Engine.SceneGraph
             }
         }
 
-
         public T? FindPath<T>(string name) where T : Node3D
         {
             var arrayPaths = name.Split('/');
@@ -178,6 +178,5 @@ namespace LifeSim.Engine.SceneGraph
                 return null;
             }
         }
-
     }
 }

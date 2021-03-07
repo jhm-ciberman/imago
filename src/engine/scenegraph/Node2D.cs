@@ -5,11 +5,9 @@ namespace LifeSim.Engine.SceneGraph
 {
     public class Node2D
     {
-        public event System.Action<Node2D>? onTransformChanged;
-        public event System.Action<Node2D>? onChildAdded;
-        public event System.Action<Node2D>? onChildRemoved;
+        public event System.Action<Event<Node2D>>? onEvent;
 
-        public string name = string.Empty;
+        public string name {get; set;} = string.Empty;
 
         private Node2D? _parent = null;
         public Node2D? parent => this._parent;
@@ -21,9 +19,9 @@ namespace LifeSim.Engine.SceneGraph
         private float      _rotation;
         private Vector2    _scale;
 
-        public Vector2    position { get => this._position; set { this._position = value; this._localMatrixDirty = true; } }
-        public float      rotation { get => this._rotation; set { this._rotation = value; this._localMatrixDirty = true; } }
-        public Vector2    scale    { get => this._scale;    set { this._scale = value;    this._localMatrixDirty = true; } }
+        public Vector2    position { get => this._position; set { this._position = value; this._OnTransformDirty(); } }
+        public float      rotation { get => this._rotation; set { this._rotation = value; this._OnTransformDirty(); } }
+        public Vector2    scale    { get => this._scale;    set { this._scale = value;    this._OnTransformDirty(); } }
 
         private Matrix3x2 _localMatrix = Matrix3x2.Identity;
         private bool _localMatrixDirty = false;
@@ -44,9 +42,8 @@ namespace LifeSim.Engine.SceneGraph
 
             this._children.Add(node);
             node._parent = this;
-            node.onChildAdded += this._OnNodeAdded;
-            node.onChildRemoved += this._OnNodeRemoved;
-            this.onChildAdded?.Invoke(node);
+            node.onEvent += this._OnNotified;
+            this._Notify(node, EventType.ChildAdded);
         }
 
         public void Remove(Node2D node)
@@ -55,19 +52,25 @@ namespace LifeSim.Engine.SceneGraph
 
             this._children.Remove(node);
             node._parent = null;
-            node.onChildAdded -= this._OnNodeAdded;
-            node.onChildRemoved -= this._OnNodeRemoved;
-            this.onChildRemoved?.Invoke(node);
+            node.onEvent -= this._OnNotified;
+            this._Notify(node, EventType.ChildRemoved);
         }
 
-        private void _OnNodeAdded(Node2D node)
+        private void _OnNotified(Event<Node2D> e)
         {
-            this.onChildAdded?.Invoke(node);
+            this.onEvent?.Invoke(e);
         }
 
-        private void _OnNodeRemoved(Node2D node)
+        protected void _Notify(Node2D node, EventType eventType)
         {
-            this.onChildRemoved?.Invoke(node);
+            this.onEvent?.Invoke(new Event<Node2D>(node, eventType));
+        }
+
+        private void _OnTransformDirty()
+        {
+            if (this._localMatrixDirty) return;
+            this._localMatrixDirty = true;
+            this._Notify(this, EventType.TransformDirty);
         }
 
         public void UpdateWorldMatrix()
