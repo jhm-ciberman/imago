@@ -44,6 +44,7 @@ namespace LifeSim.Engine.Rendering
             );
 
             this._gd = VeldridStartup.CreateGraphicsDevice(window, options, graphicsBackend);
+
             this._factory = this._gd.ResourceFactory;
 
             this._gpuResources = new GPUResourceManager(this._gd, (uint) window.Width, (uint) window.Height);
@@ -62,6 +63,9 @@ namespace LifeSim.Engine.Rendering
         public uint selectedObjectID => this._mousePicker.objectID;
 
         public Vector2 mousePickingPosition = Vector2.Zero;
+
+        public FrameProfiler.FrameStats baseStats => this._renderer3d.frameProfilerBase.stats;
+        public FrameProfiler.FrameStats shadowmapStats => this._renderer3d.frameProfilerShadowmap.stats;
 
         public void Update(float deltaTime, InputSnapshot inputSnapshot)
         {

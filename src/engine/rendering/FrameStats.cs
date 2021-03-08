@@ -1,0 +1,69 @@
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.Contracts;
+using Veldrid;
+
+namespace LifeSim.Engine.Rendering
+{
+    public class FrameProfiler
+    {
+        public class FrameStats
+        {
+            public int pipelineChanges;
+            public int meshChanges;
+            public int materialChanges;
+            public int drawCalls;
+            public int uniqueMaterials;
+            public int uniqueMeshes;
+            public long passTime;
+        }
+
+        public readonly FrameStats stats = new FrameStats();
+
+        private HashSet<IMaterial> _uniqueMaterials = new HashSet<IMaterial>();
+        private HashSet<GPUMesh> _uniqueMeshes = new HashSet<GPUMesh>();
+
+        private Stopwatch _stopwatch = new Stopwatch();
+
+        public void BeginFrame()
+        {
+            this._uniqueMaterials.Clear();
+            this._uniqueMeshes.Clear();
+            this.stats.pipelineChanges = 0;
+            this.stats.meshChanges = 0;
+            this.stats.materialChanges = 0;
+            this.stats.drawCalls = 0;
+            this._stopwatch.Restart();
+        }
+
+        public void ChangeMesh(GPUMesh mesh)
+        {
+            this._uniqueMeshes.Add(mesh);
+            this.stats.meshChanges++;
+        }
+
+        public void ChangePipeline(Pipeline pipeline)
+        {
+            this.stats.pipelineChanges++;
+        }
+
+        public void ChangeMaterial(IMaterial material)
+        {
+            this._uniqueMaterials.Add(material);
+            this.stats.materialChanges++;
+        }
+
+        public void DrawCall()
+        {
+            this.stats.drawCalls++;
+        }
+
+        public void EndFrame()
+        {
+            this.stats.uniqueMaterials = this._uniqueMaterials.Count;
+            this.stats.uniqueMeshes = this._uniqueMeshes.Count;
+            this._stopwatch.Stop();
+            this.stats.passTime = this._stopwatch.ElapsedTicks;
+        }
+    }
+}

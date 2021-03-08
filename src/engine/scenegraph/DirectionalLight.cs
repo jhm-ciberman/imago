@@ -10,7 +10,7 @@ namespace LifeSim.Engine.SceneGraph
         public Vector2 shadowMapSize = new Vector2(20f, 20f);
         public float shadowZNear = 2f;
         public float shadowZFar = 100f;
-
+        
         public Matrix4x4 GetShadowMapMatrix(Vector3 cameraPosition)
         {
             return Matrix4x4.CreateLookAt(cameraPosition + this.direction, cameraPosition, Vector3.UnitY)

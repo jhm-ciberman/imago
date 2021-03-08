@@ -16,7 +16,17 @@ namespace LifeSim.Engine.Rendering
         private readonly SceneManager _sceneManager;
         private readonly PSOManager _psoManager;
 
-        private readonly RenderQueue _renderList = new RenderQueue();
+        private readonly RenderQueue _baseRQ = new RenderQueue();
+        private readonly RenderQueue _shadowmapRQ = new RenderQueue();
+
+        private Pipeline? _currentPipeline;
+        private GPUMesh? _currentMesh;
+        private Pass? _currentPass;
+        private IMaterial? _currentMaterial;
+
+        public FrameProfiler frameProfilerBase = new FrameProfiler();
+        public FrameProfiler frameProfilerShadowmap = new FrameProfiler();
+
         private bool _hasCommandsToSubmit;
 
         public GPURenderer3D(GraphicsDevice graphicsDevice, PSOManager psoManager, GPUResourceManager resources)
@@ -37,23 +47,38 @@ namespace LifeSim.Engine.Rendering
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void Render(Scene3D scene)
         {
+            this._currentPipeline = null;
+            this._currentMesh = null;
+            this._currentPass = null;
+            this._currentMaterial = null;
+
             var camera = scene.activeCamera;
             if (camera != null) {
                 scene.UpdateWorldMatrices();
-                this._renderList.Update(scene, camera);
+                this._baseRQ.Update(scene, camera);
+                this._shadowmapRQ.Update(scene, scene.mainLight, camera);
+
+                //if (! Input.GetKey(Key.Space)) {
+                    this._baseRQ.Sort();
+                    this._shadowmapRQ.Sort();
+                //}
             }
+
+            //System.Console.WriteLine(this._baseRQ.count + " sh: " + this._shadowmapRQ.count);
 
             this._commandList.Begin();
 
             if (camera != null) {
                 // Shadowmap
+                this.frameProfilerShadowmap.BeginFrame();
                 this._commandList.SetFramebuffer(this._sceneManager.shadowmapFramebuffer);
                 this._commandList.ClearDepthStencil(1f);
                 this._sceneManager.SetupShadowMapBuffer(this._commandList, camera, scene.mainLight);
-                foreach (var renderable in this._renderList.shadowRenderables) {
+                foreach (var renderable in this._shadowmapRQ) {
                     if (renderable.material == null) continue;
-                    this._DrawRenderable(renderable, renderable.material.shadowmapPass);
+                    this._DrawRenderable(renderable, renderable.material.shadowmapPass, this.frameProfilerShadowmap);
                 }
+                this.frameProfilerShadowmap.EndFrame();
             }
 
             // Opaques
@@ -64,19 +89,20 @@ namespace LifeSim.Engine.Rendering
             this._commandList.ClearColorTarget(1, RgbaFloat.Black);
 
             if (camera != null) {
+                this.frameProfilerBase.BeginFrame();
                 this._commandList.ClearDepthStencil(1f);
                 this._sceneManager.SetupCamera3DInfoBuffer(this._commandList, camera, scene.mainLight);
-                foreach (var renderable in this._renderList.baseRenderables) {
+                foreach (var renderable in this._baseRQ) {
                     if (renderable.material == null) continue;
-                    this._DrawRenderable(renderable, renderable.material.pass);
+                    this._DrawRenderable(renderable, renderable.material.pass, this.frameProfilerBase);
                 }
+                this.frameProfilerBase.EndFrame();
             }
-
             this._commandList.End();
             this._hasCommandsToSubmit = true;
         }
 
-        public void _DrawRenderable(Renderable3D renderable, Pass pass)
+        public void _DrawRenderable(Renderable3D renderable, Pass pass, FrameProfiler frameProfiler)
         {
             var mesh = renderable.mesh;
             var material = renderable.material;
@@ -84,15 +110,37 @@ namespace LifeSim.Engine.Rendering
             
             var objectResourceSet = this._sceneManager.GetObjectResourceSet(renderable);
 
-            var pipeline = this._psoManager.GetPipeline(pass, material, renderable);
-
             this._UpdatePerObjectBuffers(renderable);
-            this._commandList.SetVertexBuffer(0, mesh.vertexBuffer);
-            this._commandList.SetIndexBuffer(mesh.indexBuffer, IndexFormat.UInt16);
-            this._commandList.SetPipeline(pipeline);
-            this._commandList.SetGraphicsResourceSet(0, pass.resourceSet); // Per pass
-            this._commandList.SetGraphicsResourceSet(1, material.resourceSet); // Per Material
+
+            if (this._currentMesh != mesh) {
+                this._commandList.SetVertexBuffer(0, mesh.vertexBuffer);
+                this._commandList.SetIndexBuffer(mesh.indexBuffer, IndexFormat.UInt16);
+                this._currentMesh = mesh;
+                frameProfiler.ChangeMesh(mesh);
+            }
+
+            var pipeline = this._psoManager.GetPipeline(pass, material, renderable);
+            if (this._currentPipeline != pipeline) {
+                this._commandList.SetPipeline(pipeline);
+                this._currentPipeline = pipeline;
+                this._currentPass = null;
+                this._currentMaterial = null;
+                frameProfiler.ChangePipeline(pipeline);
+            }
+
+            if (this._currentPass != pass) {
+                this._commandList.SetGraphicsResourceSet(0, pass.resourceSet); // Per pass
+                this._currentPass = pass;
+            }
+
+            if (this._currentMaterial != material) {
+                this._commandList.SetGraphicsResourceSet(1, material.resourceSet); // Per Material
+                this._currentMaterial = material;
+                frameProfiler.ChangeMaterial(material);
+            }
+
             this._commandList.SetGraphicsResourceSet(2, objectResourceSet); // Per object
+
             this._commandList.DrawIndexed(
                 indexCount: mesh.indexCount,
                 instanceCount: 1,
@@ -100,6 +148,7 @@ namespace LifeSim.Engine.Rendering
                 vertexOffset: 0,
                 instanceStart: 0
             );
+            frameProfiler.DrawCall();
         }
 
         private void _UpdatePerObjectBuffers(Renderable3D renderable)

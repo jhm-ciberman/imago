@@ -47,6 +47,9 @@ namespace LifeSim.Engine
             this._MainLoop();
         }
 
+        public FrameProfiler.FrameStats opaqueDrawStats => this._renderer.baseStats;
+        public FrameProfiler.FrameStats shadowmapDrawStats => this._renderer.shadowmapStats;
+
         private static Veldrid.GraphicsBackend ParseGraphicsBackend(string[] args)
         {
             Veldrid.GraphicsBackend backend = Veldrid.GraphicsBackend.Vulkan;

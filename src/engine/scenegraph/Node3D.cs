@@ -69,7 +69,7 @@ namespace LifeSim.Engine.SceneGraph
             this.onEvent?.Invoke(new Event<Node3D>(node, eventType));
         }
 
-        private void _OnTransformDirty()
+        protected void _OnTransformDirty()
         {
             if (this._localMatrixDirty) return;
             this._localMatrixDirty = true;
@@ -82,6 +82,7 @@ namespace LifeSim.Engine.SceneGraph
             if (this._parent != null) {
                 this._worldMatrix *= this._parent._localMatrix;
             }
+            this._AfterMatrixUpdate();
             for(int i = 0; i < this.children.Count; i++) {
                 this.children[i]._UpdateWorldMatrix(ref this._worldMatrix);
             }
@@ -90,9 +91,15 @@ namespace LifeSim.Engine.SceneGraph
         private void _UpdateWorldMatrix(ref Matrix4x4 parentMatrix)
         {
             this._worldMatrix = this.GetLocalMatrix() * parentMatrix;
+            this._AfterMatrixUpdate();
             for(int i = 0; i < this.children.Count; i++) {
                 this.children[i]._UpdateWorldMatrix(ref this._worldMatrix);
             }
+        }
+
+        protected virtual void _AfterMatrixUpdate()
+        {
+            // 
         }
 
         public ref Matrix4x4 GetLocalMatrix()

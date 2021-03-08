@@ -16,6 +16,7 @@ namespace LifeSim.Engine.SceneGraph
             set
             {
                 this._mesh = value;
+                this._OnTransformDirty();
             }
         }
         
@@ -38,6 +39,11 @@ namespace LifeSim.Engine.SceneGraph
 
         public VertexLayoutKind vertexLayoutKind => this.mesh != null ? this.mesh.vertexLayoutKind : VertexLayoutKind.Regular;
 
+        private BoundingBox _boundingBox;
+
+        private Vector3 _worldSpaceCenter;
+        public Vector3 worldSpaceCenter => this._worldSpaceCenter;
+
         public Renderable3D()
         {
             this.mesh = null;
@@ -54,6 +60,18 @@ namespace LifeSim.Engine.SceneGraph
         public virtual string[] GetShaderKeywords()
         {
             return System.Array.Empty<string>();
+        }
+
+        public bool Cull(ref BoundingFrustum frustum)
+        {
+            return (frustum.Contains(ref this._boundingBox) != ContainmentType.Disjoint);
+        }
+
+        protected override void _AfterMatrixUpdate()
+        {
+            if (this.mesh == null) return;
+            this._boundingBox = BoundingBox.Transform(this.mesh.boundingBox, this.worldMatrix);
+            this._worldSpaceCenter = this._boundingBox.GetCenter();
         }
     }
 }

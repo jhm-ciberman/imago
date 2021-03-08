@@ -33,7 +33,7 @@ namespace LifeSim.Engine.Rendering
         public uint vertexCount;
         public uint indexCount;
 
-        public BoundingSphere boundingSphere;
+        public BoundingBox boundingBox;
 
         public GPUMesh(GraphicsDevice graphicsDevice, MeshData mesh)
         {
@@ -58,7 +58,7 @@ namespace LifeSim.Engine.Rendering
                 this._vertexLayoutKind = VertexLayoutKind.Regular;
             }
 
-            this.boundingSphere = BoundingSphere.CreateFromPoints(mesh.positions);
+            this.boundingBox = BoundingBox.CreateFromVertices(mesh.positions.ToArray());
         }
 
         private VertData[] GetVerts(MeshData mesh)
