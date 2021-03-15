@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -37,7 +38,7 @@ namespace LifeSim.Engine.Rendering
             GraphicsDeviceOptions options = new GraphicsDeviceOptions(
                 debug: false,
                 swapchainDepthFormat: PixelFormat.R16_UNorm,
-                syncToVerticalBlank: true,
+                syncToVerticalBlank: false,
                 resourceBindingModel: ResourceBindingModel.Default,
                 preferDepthRangeZeroToOne: true,
                 preferStandardClipSpaceYDirection: true
@@ -103,6 +104,8 @@ namespace LifeSim.Engine.Rendering
             layer.OnGUI();
         }
 
+        private Stopwatch _stopwatch = new Stopwatch();
+
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void Render(Stage stage)
         {
@@ -119,8 +122,9 @@ namespace LifeSim.Engine.Rendering
             }));
 
             Task.WaitAll(this._renderTasks.ToArray());
-
+            
             this._gd.WaitForIdle();
+
             this._renderer3d.Submit();
             this._renderer2d.Submit();
             this._mousePicker.Submit();
@@ -130,15 +134,13 @@ namespace LifeSim.Engine.Rendering
             this._gd.SwapBuffers();
         }
 
-        internal void Resize(uint width, uint height)
+        internal void Resize(uint width, uint height, uint viewportWidth, uint viewportHeight)
         {
             this._gd.ResizeMainWindow(width, height);
             this._gd.WaitForIdle();
-
             this._gpuResources.fullScreenRenderTexture.Resize(width, height);
-            this._gpuResources.mainRenderTexture.Resize(width, height);
-
-            this._imguiRenderer.Resize(width, height);
+            this._gpuResources.mainRenderTexture.Resize(viewportWidth, viewportHeight);
+            this._imguiRenderer.Resize(viewportWidth, viewportHeight);
         }
 
         public void Dispose()

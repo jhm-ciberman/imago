@@ -17,6 +17,11 @@ namespace LifeSim.Engine.Rendering
         {
             public ulong key;
             public Renderable3D renderable;
+
+            public override string ToString()
+            {
+                return Convert.ToString((long) key, 16).PadLeft(16, '0');
+            }
         }
 
         private readonly List<RenderItem> _renderList = new List<RenderItem>(defaultCapacity);
@@ -44,7 +49,9 @@ namespace LifeSim.Engine.Rendering
 
         public void Sort()
         {
-            this._renderList.Sort(this);
+            if (Input.GetKey(Key.Space)) {
+                this._renderList.Sort(this);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
@@ -55,10 +62,13 @@ namespace LifeSim.Engine.Rendering
             if (renderable.Cull(ref frustum)) {
 
                 float cameraDistance = Vector3.DistanceSquared(renderable.worldSpaceCenter, cameraPosition);
-                ulong cameraDistanceInt = (ulong) Math.Min(uint.MaxValue, (cameraDistance * 1000f));
-                ulong materialHash = (ulong) renderable.material.GetHashCode(); 
-                ulong key = (materialHash << 32) | cameraDistanceInt;
-                //System.Console.WriteLine(Convert.ToString((long) key, 2));
+
+                ulong distanceHash = (ulong) Math.Min(uint.MaxValue, (cameraDistance * 1000f)) & 0xFFFFFFFF;
+                ulong materialHash = (ulong) (renderable.material.GetHashCode() & 0xFFFF);
+                ulong meshHash     = (ulong) (renderable.mesh.GetHashCode() & 0xFFFF); 
+                
+                ulong key = (materialHash << 48) | (meshHash << 32) | (distanceHash << 0);
+
                 this._renderList.Add(new RenderItem() {
                     key = key,
                     renderable = renderable
@@ -78,7 +88,7 @@ namespace LifeSim.Engine.Rendering
 
         int IComparer<RenderItem>.Compare(RenderItem x, RenderItem y)
         {
-            return (int) (x.key - y.key);
+            return (x.key > y.key) ? - 1 : 1;
         }
 
         private struct Enumerator : IEnumerator<Renderable3D>

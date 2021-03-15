@@ -62,6 +62,8 @@ namespace LifeSim.Engine.SceneGraph
             return System.Array.Empty<string>();
         }
 
+        
+
         public bool Cull(ref BoundingFrustum frustum)
         {
             return (frustum.Contains(ref this._boundingBox) != ContainmentType.Disjoint);

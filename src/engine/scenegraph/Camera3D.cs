@@ -14,9 +14,9 @@ namespace LifeSim.Engine.SceneGraph
         public float near = 0.01f;
         public float far = 1000.0f;
 
-        private readonly Viewport _viewPort;
+        private Viewport _viewPort;
 
-        public Viewport viewport => this._viewPort;
+        public Viewport viewport { get => this._viewPort; set => this._viewPort = value; }
 
         public Camera3D frustumCullingCamera;
  

@@ -7,7 +7,8 @@ namespace LifeSim.Engine.SceneGraph
 {
     public class Scene3D : ILayer
     {
-        public Camera3D? activeCamera = null;
+        private List<Camera3D> _cameras = new List<Camera3D>();
+        public IReadOnlyList<Camera3D> cameras => this._cameras;
 
         public DirectionalLight mainLight = new DirectionalLight();
         
@@ -34,9 +35,19 @@ namespace LifeSim.Engine.SceneGraph
             this._root.Add(node);
         }
 
+        public void AddCamera(Camera3D camera)
+        {
+            this._cameras.Add(camera);
+        }
+
         public void Remove(Node3D node)
         {
             this._root.Remove(node);
+        }
+
+        public void RemoveCamera(Camera3D camera)
+        {
+            this._cameras.Remove(camera);
         }
 
         private void _OnEvent(Event<Node3D> e)

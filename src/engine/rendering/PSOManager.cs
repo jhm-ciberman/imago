@@ -88,7 +88,7 @@ namespace LifeSim.Engine.Rendering
                 PolygonFillMode.Solid,
                 FrontFace.Clockwise,
                 depthClipEnabled: true,
-                scissorTestEnabled: false
+                scissorTestEnabled: true
             );
             pipelineDescription.PrimitiveTopology = PrimitiveTopology.TriangleList;
             pipelineDescription.ResourceLayouts = this._GetResourceLayouts(pass, material, renderable);

@@ -106,7 +106,7 @@ namespace LifeSim.Generation
                 HouseGenerator.ROOF_GABLE_HORIZONTAL,
                 HouseGenerator.ROOF_GABLE_VERTICAL,
                 HouseGenerator.ROOF_HIP,
-                HouseGenerator.ROOF_FLAT,
+                //HouseGenerator.ROOF_FLAT,
             };
             var mainRoof = this._Choose(roofsModelsList);
             var wall = new CoverPair(wallExterior, wallInterior);

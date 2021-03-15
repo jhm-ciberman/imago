@@ -52,54 +52,62 @@ namespace LifeSim.Engine.Rendering
             this._currentPass = null;
             this._currentMaterial = null;
 
-            var camera = scene.activeCamera;
-            if (camera != null) {
-                scene.UpdateWorldMatrices();
-                this._baseRQ.Update(scene, camera);
-                this._shadowmapRQ.Update(scene, scene.mainLight, camera);
-
-                //if (! Input.GetKey(Key.Space)) {
-                    this._baseRQ.Sort();
-                    this._shadowmapRQ.Sort();
-                //}
-            }
-
-            //System.Console.WriteLine(this._baseRQ.count + " sh: " + this._shadowmapRQ.count);
+            scene.UpdateWorldMatrices();
 
             this._commandList.Begin();
 
-            if (camera != null) {
-                // Shadowmap
-                this.frameProfilerShadowmap.BeginFrame();
-                this._commandList.SetFramebuffer(this._sceneManager.shadowmapFramebuffer);
-                this._commandList.ClearDepthStencil(1f);
-                this._sceneManager.SetupShadowMapBuffer(this._commandList, camera, scene.mainLight);
-                foreach (var renderable in this._shadowmapRQ) {
-                    if (renderable.material == null) continue;
-                    this._DrawRenderable(renderable, renderable.material.shadowmapPass, this.frameProfilerShadowmap);
-                }
-                this.frameProfilerShadowmap.EndFrame();
+            int i = 0;
+            foreach (var camera in scene.cameras) {
+                this._baseRQ.Update(scene, camera);
+                this._shadowmapRQ.Update(scene, scene.mainLight, camera);
+                this._baseRQ.Sort();
+                this._shadowmapRQ.Sort();
+                
+                this._RenderShadowmap(camera, scene.mainLight);
+                this._RenderCamera(scene, camera, i == 0);
+                i++;
             }
-
-            // Opaques
-            this._commandList.SetFramebuffer(this._renderTexture.framebuffer);
-            this._sceneManager.SetupLightInfoBuffer(this._commandList, scene);
-
-            this._commandList.ClearColorTarget(0, scene.clearColor);
-            this._commandList.ClearColorTarget(1, RgbaFloat.Black);
-
-            if (camera != null) {
-                this.frameProfilerBase.BeginFrame();
-                this._commandList.ClearDepthStencil(1f);
-                this._sceneManager.SetupCamera3DInfoBuffer(this._commandList, camera, scene.mainLight);
-                foreach (var renderable in this._baseRQ) {
-                    if (renderable.material == null) continue;
-                    this._DrawRenderable(renderable, renderable.material.pass, this.frameProfilerBase);
-                }
-                this.frameProfilerBase.EndFrame();
-            }
+            
             this._commandList.End();
             this._hasCommandsToSubmit = true;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        private void _RenderShadowmap(Camera3D camera, DirectionalLight mainLight)
+        {
+            // Shadowmap
+            this.frameProfilerShadowmap.BeginFrame();
+            this._commandList.SetFramebuffer(this._sceneManager.shadowmapFramebuffer);
+            this._commandList.ClearDepthStencil(1f);
+            this._sceneManager.SetupShadowMapBuffer(this._commandList, camera, mainLight);
+            foreach (var renderable in this._shadowmapRQ) {
+                if (renderable.material == null) continue;
+                this._DrawRenderable(renderable, renderable.material.shadowmapPass, this.frameProfilerShadowmap);
+            }
+            this.frameProfilerShadowmap.EndFrame();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        private void _RenderCamera(Scene3D scene, Camera3D camera, bool clear)
+        {
+            // Opaques
+            this._sceneManager.SetupLightInfoBuffer(this._commandList, scene);
+
+            this._commandList.SetFramebuffer(this._renderTexture.framebuffer);
+            this._commandList.SetViewport(0, new Veldrid.Viewport(camera.viewport.x, camera.viewport.y, camera.viewport.width, camera.viewport.height, 0f, 1f));
+            this._commandList.SetViewport(1, new Veldrid.Viewport(camera.viewport.x, camera.viewport.y, camera.viewport.width, camera.viewport.height, 0f, 1f));
+            this._commandList.SetScissorRect(0, camera.viewport.x, camera.viewport.y, camera.viewport.width, camera.viewport.height);
+            this._commandList.SetScissorRect(1, camera.viewport.x, camera.viewport.y, camera.viewport.width, camera.viewport.height);
+            if (clear) this._commandList.ClearColorTarget(0, scene.clearColor);
+            if (clear) this._commandList.ClearColorTarget(1, RgbaFloat.Black);
+            this.frameProfilerBase.BeginFrame();
+            this._commandList.ClearDepthStencil(1f);
+            this._sceneManager.SetupCamera3DInfoBuffer(this._commandList, camera, scene.mainLight);
+            foreach (var renderable in this._baseRQ) {
+                if (renderable.material == null) continue;
+                this._DrawRenderable(renderable, renderable.material.pass, this.frameProfilerBase);
+            }
+            this.frameProfilerBase.EndFrame();
         }
 
         public void _DrawRenderable(Renderable3D renderable, Pass pass, FrameProfiler frameProfiler)
@@ -122,15 +130,11 @@ namespace LifeSim.Engine.Rendering
             var pipeline = this._psoManager.GetPipeline(pass, material, renderable);
             if (this._currentPipeline != pipeline) {
                 this._commandList.SetPipeline(pipeline);
+                this._commandList.SetGraphicsResourceSet(0, pass.resourceSet); // Per pass
                 this._currentPipeline = pipeline;
-                this._currentPass = null;
+                this._currentPass = pass;
                 this._currentMaterial = null;
                 frameProfiler.ChangePipeline(pipeline);
-            }
-
-            if (this._currentPass != pass) {
-                this._commandList.SetGraphicsResourceSet(0, pass.resourceSet); // Per pass
-                this._currentPass = pass;
             }
 
             if (this._currentMaterial != material) {

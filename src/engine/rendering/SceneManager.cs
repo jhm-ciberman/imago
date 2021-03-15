@@ -140,7 +140,7 @@ namespace LifeSim.Engine.Rendering
         public void SetupShadowMapBuffer(CommandList commandList, Camera3D camera, DirectionalLight mainLight)
         {
             ShadowMapInfo shadowMapInfo = new ShadowMapInfo();
-            shadowMapInfo.shadowMatrix = mainLight.GetShadowMapMatrix(camera.position);
+            shadowMapInfo.shadowMatrix = mainLight.GetShadowMapMatrix(camera.frustumCullingCamera.position);
             commandList.UpdateBuffer(this.shadowmapInfoBuffer, 0, ref shadowMapInfo);
         }
 

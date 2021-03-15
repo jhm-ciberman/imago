@@ -16,7 +16,7 @@ namespace LifeSim.Engine.Rendering
         {
             this._pass = builder.passes.fullscreen;
             this.resourceLayout = builder.layouts.materials.fullscreen;
-            this._resourceSet = builder.CreateResourceSet(this, texture, builder.linearSampler);
+            this._resourceSet = builder.CreateResourceSet(this, texture, builder.pointSampler);
         }
 
         public void Dispose()

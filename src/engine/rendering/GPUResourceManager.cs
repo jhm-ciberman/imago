@@ -26,7 +26,7 @@ namespace LifeSim.Engine.Rendering
             this._sceneManager = new SceneManager(this._layouts, this._gd);
 
             this.fullScreenRenderTexture = new SwapchainRenderTexture(this._gd.MainSwapchain);
-            this.mainRenderTexture = new RenderTexture(factory, width, height);
+            this.mainRenderTexture = new RenderTexture(factory, width >> 2, height >> 2);
 
             this._passes = new PassManager(this._gd, this);
         }

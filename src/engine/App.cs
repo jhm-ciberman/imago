@@ -35,8 +35,6 @@ namespace LifeSim.Engine
 
             this.OnResize();
 
-            this._window.Resized += this.OnResize;
-
             this._input = new InputInstance(this._window);
             Input.SetInstance(this._input);
         }
@@ -70,7 +68,7 @@ namespace LifeSim.Engine
             uint width = (uint) this._window.Width;
             uint height = (uint) this._window.Height;
             this.viewport.Resize(width, height);
-            this._renderer.Resize(width, height);
+            this._renderer.Resize(width, height, this.viewport.width, this.viewport.height);
         }
 
         public void SetStage(Stage stage)
