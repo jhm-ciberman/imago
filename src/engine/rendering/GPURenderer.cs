@@ -82,11 +82,11 @@ namespace LifeSim.Engine.Rendering
 
         private bool _renderImGUI = false;
 
-        public void RenderScene3D(Scene3D scene)
+        public void RenderScene3D(Scene3D scene, Camera3D camera)
         {
             if (scene == null) return;
             this._renderTasks.Add(Task.Run(() => {
-                this._renderer3d.Render(scene);
+                this._renderer3d.Render(scene, camera);
             }));
         }
 
@@ -107,13 +107,11 @@ namespace LifeSim.Engine.Rendering
         private Stopwatch _stopwatch = new Stopwatch();
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public void Render(Stage stage)
+        public void Render(IStage stage)
         {
             this._renderTasks.Clear();
             this._renderImGUI = false;
-            foreach (var layer in stage.GetLayers()) {
-                layer.Render(this);
-            }
+            stage.RenderFrame(this);
 
             this._renderTasks.Add(Task.Run(() => {
                 this._mousePicker.Update(this._gpuResources.mainRenderTexture, this.mousePickingPosition);

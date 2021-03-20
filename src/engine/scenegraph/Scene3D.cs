@@ -5,11 +5,8 @@ using Veldrid;
 
 namespace LifeSim.Engine.SceneGraph
 {
-    public class Scene3D : ILayer
+    public class Scene3D
     {
-        private List<Camera3D> _cameras = new List<Camera3D>();
-        public IReadOnlyList<Camera3D> cameras => this._cameras;
-
         public DirectionalLight mainLight = new DirectionalLight();
         
         public Vector3 ambientColor = new Vector3(.2f, .2f, .2f);
@@ -20,8 +17,8 @@ namespace LifeSim.Engine.SceneGraph
         private Node3D _root = new Node3D();
         public Node3D root => this._root;
 
-        private List<Renderable3D> _renderables = new List<Renderable3D>();
-        public IReadOnlyList<Renderable3D> renderables => this._renderables;
+        private List<RenderNode3D> _renderables = new List<RenderNode3D>();
+        public IReadOnlyList<RenderNode3D> renderables => this._renderables;
 
         private List<Node3D> _dirtyList = new List<Node3D>();
 
@@ -35,19 +32,9 @@ namespace LifeSim.Engine.SceneGraph
             this._root.Add(node);
         }
 
-        public void AddCamera(Camera3D camera)
-        {
-            this._cameras.Add(camera);
-        }
-
         public void Remove(Node3D node)
         {
             this._root.Remove(node);
-        }
-
-        public void RemoveCamera(Camera3D camera)
-        {
-            this._cameras.Remove(camera);
         }
 
         private void _OnEvent(Event<Node3D> e)
@@ -70,7 +57,7 @@ namespace LifeSim.Engine.SceneGraph
 
         private void _AddRenderables(Node3D node)
         {
-            if (node is Renderable3D renderable) {
+            if (node is RenderNode3D renderable) {
                 this._renderables.Add(renderable);
             }
             foreach (var child in node.children) {
@@ -80,7 +67,7 @@ namespace LifeSim.Engine.SceneGraph
 
         private void _RemoveRenderables(Node3D node)
         {
-            if (node is Renderable3D renderable) {
+            if (node is RenderNode3D renderable) {
                 this._renderables.Remove(renderable);
             }
             foreach (var child in node.children) {
@@ -112,11 +99,6 @@ namespace LifeSim.Engine.SceneGraph
                 if (node.parent == null) return topDirty;
                 node = node.parent;
             }
-        }
-
-        void ILayer.Render(GPURenderer renderer)
-        {
-            renderer.RenderScene3D(this);
         }
     }
 }

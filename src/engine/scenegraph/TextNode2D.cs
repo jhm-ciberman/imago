@@ -5,7 +5,7 @@ using LifeSim.Engine.Rendering;
 
 namespace LifeSim.Engine.SceneGraph
 {
-    public class Text2D : Renderable2D
+    public class TextNode2D : RenderNode2D
     {
         public string text;
 
@@ -15,9 +15,9 @@ namespace LifeSim.Engine.SceneGraph
 
         public int fontSize = 30;
 
-        public Text2D() : this("", FontAsset.GetDefaultFont()) { }
-        public Text2D(string text) : this(text, FontAsset.GetDefaultFont()) { }
-        public Text2D(string text, FontAsset font)
+        public TextNode2D() : this("", FontAsset.GetDefaultFont()) { }
+        public TextNode2D(string text) : this(text, FontAsset.GetDefaultFont()) { }
+        public TextNode2D(string text, FontAsset font)
         {
             this.text = text;
             this.font = font;

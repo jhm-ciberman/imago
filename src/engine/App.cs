@@ -20,7 +20,7 @@ namespace LifeSim.Engine
         
         public ResourceFactory assetManager => this._renderer.assetManager;
 
-        private Stage? _stage = null;
+        private IStage? _stage = null;
 
         public App(string[] args)
         {
@@ -39,7 +39,7 @@ namespace LifeSim.Engine
             Input.SetInstance(this._input);
         }
 
-        public void Run(Stage stage)
+        public void Run(IStage stage)
         {
             this.SetStage(stage);
             this._MainLoop();
@@ -71,7 +71,7 @@ namespace LifeSim.Engine
             this._renderer.Resize(width, height, this.viewport.width, this.viewport.height);
         }
 
-        public void SetStage(Stage stage)
+        public void SetStage(IStage stage)
         {
             this._stage = stage;
         }

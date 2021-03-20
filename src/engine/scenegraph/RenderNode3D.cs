@@ -5,7 +5,7 @@ using Veldrid.Utilities;
 
 namespace LifeSim.Engine.SceneGraph
 {
-    public class Renderable3D : Node3D, IRenderable
+    public class RenderNode3D : Node3D, IRenderable
     {
         public System.UInt32 pickingID = 0;
         
@@ -44,17 +44,23 @@ namespace LifeSim.Engine.SceneGraph
         private Vector3 _worldSpaceCenter;
         public Vector3 worldSpaceCenter => this._worldSpaceCenter;
 
-        public Renderable3D()
+        public RenderNode3D()
         {
             this.mesh = null;
             this.material = null;
         }
 
-        public Renderable3D(GPUMesh mesh, SurfaceMaterial material)
+        public RenderNode3D(GPUMesh mesh, SurfaceMaterial material)
         {
             this.mesh = mesh;
             this.material = material;
             this.resourceLayout = material.GetObjectResourceLayout(this);
+        }
+
+        public RenderNode3D(GPUMesh mesh)
+        {
+            this._mesh = mesh;
+            this.material = null;
         }
 
         public virtual string[] GetShaderKeywords()

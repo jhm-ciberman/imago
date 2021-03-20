@@ -49,7 +49,7 @@ namespace LifeSim.Engine.Rendering
         private void _RenderRecursive(Node2D node)
         {
             foreach (var child in node.children) {
-                if (child is Renderable2D renderable) {
+                if (child is RenderNode2D renderable) {
                     renderable.Render(this._spriteBatcher);
                     this._RenderRecursive(child);
                 }

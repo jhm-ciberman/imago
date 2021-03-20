@@ -53,7 +53,7 @@ namespace LifeSim.Engine.Rendering
         public readonly DeviceBuffer bonesInfoBuffer;
 
         private readonly Veldrid.ResourceFactory _factory;
-        private readonly Dictionary<Renderable3D, ResourceSet> _resourceSets = new Dictionary<Renderable3D, ResourceSet>();
+        private readonly Dictionary<RenderNode3D, ResourceSet> _resourceSets = new Dictionary<RenderNode3D, ResourceSet>();
 
         private readonly ResourceSet _objectResourceSet;
         private readonly ResourceSet _skinnedResourceSet;
@@ -103,13 +103,13 @@ namespace LifeSim.Engine.Rendering
             this.bonesInfoBuffer.Dispose();
         }
 
-        public ResourceSet GetObjectResourceSet(Renderable3D renderable)
+        public ResourceSet GetObjectResourceSet(RenderNode3D renderable)
         {
             if (this._resourceSets.TryGetValue(renderable, out ResourceSet? resourceSet)) {
                 return resourceSet;
             }
 
-            resourceSet = renderable is SkinnedRenderable3D ? this._skinnedResourceSet : this._objectResourceSet;
+            resourceSet = renderable is SkinRenderNode3D ? this._skinnedResourceSet : this._objectResourceSet;
 
             this._resourceSets[renderable] = resourceSet;
             return resourceSet;
@@ -144,7 +144,7 @@ namespace LifeSim.Engine.Rendering
             commandList.UpdateBuffer(this.shadowmapInfoBuffer, 0, ref shadowMapInfo);
         }
 
-        public void SetupObjectInfoBuffer(CommandList commandList, Renderable3D renderable)
+        public void SetupObjectInfoBuffer(CommandList commandList, RenderNode3D renderable)
         {
             ObjectInfo objectInfo = new ObjectInfo();
             objectInfo.modelMatrix = renderable.worldMatrix;
@@ -154,7 +154,7 @@ namespace LifeSim.Engine.Rendering
             commandList.UpdateBuffer(this.modelInfoBuffer, 0, ref objectInfo);
         }
 
-        public void SetupBonesInfoBuffer(CommandList commandList, SkinnedRenderable3D skinnedRenderable)
+        public void SetupBonesInfoBuffer(CommandList commandList, SkinRenderNode3D skinnedRenderable)
         {
             skinnedRenderable.CopyMatricesToBuffer(ref this._bonesInfo);
             commandList.UpdateBuffer(this.bonesInfoBuffer, 0, this._bonesInfo.GetBlittable());

@@ -4,16 +4,16 @@ using LifeSim.Engine.Rendering;
 
 namespace LifeSim.Engine.SceneGraph
 {
-    public class SkinnedRenderable3D : Renderable3D
+    public class SkinRenderNode3D : RenderNode3D
     {
         private readonly BindedSkin? _skin = null;
 
-        public SkinnedRenderable3D(GPUMesh mesh, SurfaceMaterial material, BindedSkin skin) : base(mesh, material)
+        public SkinRenderNode3D(GPUMesh mesh, SurfaceMaterial material, BindedSkin skin) : base(mesh, material)
         {
             this._skin = skin;
         }
 
-        public SkinnedRenderable3D() : base()
+        public SkinRenderNode3D() : base()
         {
 
         }

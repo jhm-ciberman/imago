@@ -7,6 +7,12 @@
         <Nullable>enable</Nullable>
         <ApplicationIcon>icon.ico</ApplicationIcon>
         <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+        <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+        <Optimization>true</Optimization>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(CompileConfig)' == 'RELEASE'" >
+        <PublishSingleFile>true</PublishSingleFile>
+        <DebugSymbols>false</DebugSymbols>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="clipper.NetStandard2" Version="6.4.2" />

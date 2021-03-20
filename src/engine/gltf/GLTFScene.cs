@@ -66,10 +66,10 @@ namespace LifeSim.Engine.GLTF
             if (gltfNode.mesh != null && gltfNode.material != null) {
                 if (gltfNode.skin != null) {
                     BindedSkin? bindedSkin = this._BindSkin(gltfNode.skin, nodesCache);
-                    node = new SkinnedRenderable3D(gltfNode.mesh, gltfNode.material, bindedSkin);
+                    node = new SkinRenderNode3D(gltfNode.mesh, gltfNode.material, bindedSkin);
                 }
                 else {
-                    node = new Renderable3D(gltfNode.mesh, gltfNode.material);
+                    node = new RenderNode3D(gltfNode.mesh, gltfNode.material);
                 }
             }
             else {

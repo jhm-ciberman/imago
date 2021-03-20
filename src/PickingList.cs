@@ -11,7 +11,7 @@ namespace LifeSim
             Renderable,
         }
 
-        private readonly List<Renderable3D> _list = new List<Renderable3D>();
+        private readonly List<RenderNode3D> _list = new List<RenderNode3D>();
 
         public PickingList()
         {
@@ -19,7 +19,7 @@ namespace LifeSim
         }
 
 
-        public void Add(Renderable3D renderable)
+        public void Add(RenderNode3D renderable)
         {
             renderable.pickingID = (uint) (this._list.Count + 1); 
             this._list.Add(renderable); 
@@ -27,7 +27,7 @@ namespace LifeSim
 
         public void AddAllRecursive(Node3D container)
         {
-            if (container is Renderable3D renderable) {
+            if (container is RenderNode3D renderable) {
                 this.Add(renderable);
             }
 
@@ -36,7 +36,7 @@ namespace LifeSim
             }
         }
 
-        public Renderable3D? FindByIndex(uint index)
+        public RenderNode3D? FindByIndex(uint index)
         {
             index--;
             if (this._list.Count < index) {

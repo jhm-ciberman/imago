@@ -14,7 +14,7 @@ namespace LifeSim.Generation
         public void Handle(World world)
         {
             Tile tile = this._GetRandomEmptyTile(world);
-            var player = new Player(tile.baseCell);
+            var player = new Character(tile.baseCell);
             world.AddEntity(player);
             world.player = player;
 

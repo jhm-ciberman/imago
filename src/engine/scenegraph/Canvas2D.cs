@@ -2,7 +2,7 @@ using LifeSim.Engine.Rendering;
 
 namespace LifeSim.Engine.SceneGraph
 {
-    public class Canvas2D : ILayer
+    public class Canvas2D
     {
         public Viewport viewport;
 
@@ -29,11 +29,6 @@ namespace LifeSim.Engine.SceneGraph
             foreach (var child in this._root.children) {
                 child.UpdateWorldMatrix();
             }
-        }
-
-        void ILayer.Render(GPURenderer renderer)
-        {
-            renderer.RenderCanvas2D(this);
         }
     }
 }

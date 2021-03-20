@@ -10,11 +10,11 @@ namespace LifeSim
         public float distance = 3f;
         public float rotationSpeed = 0.2f;
         public Vector3 target = Vector3.Zero;
-        public Camera3D camera;
+        public readonly Camera3D camera;
 
-        public OrbitCameraController(Camera3D camera)
+        public OrbitCameraController(Viewport viewport)
         {
-            this.camera = camera;
+            this.camera = new Camera3D(viewport);
         }
 
         public void UpdateKeyboard(float deltaTime)

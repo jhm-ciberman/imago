@@ -45,7 +45,7 @@ namespace LifeSim.Engine.Rendering
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public void Render(Scene3D scene)
+        public void Render(Scene3D scene, Camera3D camera)
         {
             this._currentPipeline = null;
             this._currentMesh = null;
@@ -56,17 +56,13 @@ namespace LifeSim.Engine.Rendering
 
             this._commandList.Begin();
 
-            int i = 0;
-            foreach (var camera in scene.cameras) {
-                this._baseRQ.Update(scene, camera);
-                this._shadowmapRQ.Update(scene, scene.mainLight, camera);
-                this._baseRQ.Sort();
-                this._shadowmapRQ.Sort();
-                
-                this._RenderShadowmap(camera, scene.mainLight);
-                this._RenderCamera(scene, camera, i == 0);
-                i++;
-            }
+            this._baseRQ.Update(scene, camera);
+            this._shadowmapRQ.Update(scene, scene.mainLight, camera);
+            this._baseRQ.Sort();
+            this._shadowmapRQ.Sort();
+            
+            this._RenderShadowmap(camera, scene.mainLight);
+            this._RenderCamera(scene, camera);
             
             this._commandList.End();
             this._hasCommandsToSubmit = true;
@@ -88,18 +84,18 @@ namespace LifeSim.Engine.Rendering
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        private void _RenderCamera(Scene3D scene, Camera3D camera, bool clear)
+        private void _RenderCamera(Scene3D scene, Camera3D camera)
         {
             // Opaques
             this._sceneManager.SetupLightInfoBuffer(this._commandList, scene);
 
             this._commandList.SetFramebuffer(this._renderTexture.framebuffer);
-            this._commandList.SetViewport(0, new Veldrid.Viewport(camera.viewport.x, camera.viewport.y, camera.viewport.width, camera.viewport.height, 0f, 1f));
-            this._commandList.SetViewport(1, new Veldrid.Viewport(camera.viewport.x, camera.viewport.y, camera.viewport.width, camera.viewport.height, 0f, 1f));
-            this._commandList.SetScissorRect(0, camera.viewport.x, camera.viewport.y, camera.viewport.width, camera.viewport.height);
-            this._commandList.SetScissorRect(1, camera.viewport.x, camera.viewport.y, camera.viewport.width, camera.viewport.height);
-            if (clear) this._commandList.ClearColorTarget(0, scene.clearColor);
-            if (clear) this._commandList.ClearColorTarget(1, RgbaFloat.Black);
+            //this._commandList.SetViewport(0, new Veldrid.Viewport(camera.viewport.x, camera.viewport.y, camera.viewport.width, camera.viewport.height, 0f, 1f));
+            //this._commandList.SetViewport(1, new Veldrid.Viewport(camera.viewport.x, camera.viewport.y, camera.viewport.width, camera.viewport.height, 0f, 1f));
+            //this._commandList.SetScissorRect(0, camera.viewport.x, camera.viewport.y, camera.viewport.width, camera.viewport.height);
+            //this._commandList.SetScissorRect(1, camera.viewport.x, camera.viewport.y, camera.viewport.width, camera.viewport.height);
+            this._commandList.ClearColorTarget(0, scene.clearColor);
+            this._commandList.ClearColorTarget(1, RgbaFloat.Black);
             this.frameProfilerBase.BeginFrame();
             this._commandList.ClearDepthStencil(1f);
             this._sceneManager.SetupCamera3DInfoBuffer(this._commandList, camera, scene.mainLight);
@@ -110,7 +106,7 @@ namespace LifeSim.Engine.Rendering
             this.frameProfilerBase.EndFrame();
         }
 
-        public void _DrawRenderable(Renderable3D renderable, Pass pass, FrameProfiler frameProfiler)
+        public void _DrawRenderable(RenderNode3D renderable, Pass pass, FrameProfiler frameProfiler)
         {
             var mesh = renderable.mesh;
             var material = renderable.material;
@@ -155,10 +151,10 @@ namespace LifeSim.Engine.Rendering
             frameProfiler.DrawCall();
         }
 
-        private void _UpdatePerObjectBuffers(Renderable3D renderable)
+        private void _UpdatePerObjectBuffers(RenderNode3D renderable)
         {
             this._sceneManager.SetupObjectInfoBuffer(this._commandList, renderable);
-            if (renderable is SkinnedRenderable3D skinnedRenderable) {
+            if (renderable is SkinRenderNode3D skinnedRenderable) {
                 this._sceneManager.SetupBonesInfoBuffer(this._commandList, skinnedRenderable);
             }
         }

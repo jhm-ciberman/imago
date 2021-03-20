@@ -9,14 +9,14 @@ using Veldrid.Utilities;
 
 namespace LifeSim.Engine.Rendering
 {
-    public class RenderQueue : IEnumerable<Renderable3D>, IComparer<RenderQueue.RenderItem>
+    public class RenderQueue : IEnumerable<RenderNode3D>, IComparer<RenderQueue.RenderItem>
     {
         private const int defaultCapacity = 250;
 
         private struct RenderItem
         {
             public ulong key;
-            public Renderable3D renderable;
+            public RenderNode3D renderable;
 
             public override string ToString()
             {
@@ -55,7 +55,7 @@ namespace LifeSim.Engine.Rendering
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        private void _AddToRenderQueue(Renderable3D renderable, ref BoundingFrustum frustum, Vector3 cameraPosition)
+        private void _AddToRenderQueue(RenderNode3D renderable, ref BoundingFrustum frustum, Vector3 cameraPosition)
         {
             if (renderable.material == null || renderable.mesh == null) return;
 
@@ -76,7 +76,7 @@ namespace LifeSim.Engine.Rendering
             }
         }
 
-        public IEnumerator<Renderable3D> GetEnumerator()
+        public IEnumerator<RenderNode3D> GetEnumerator()
         {
             return new Enumerator(this._renderList);
         }
@@ -91,11 +91,11 @@ namespace LifeSim.Engine.Rendering
             return (x.key > y.key) ? - 1 : 1;
         }
 
-        private struct Enumerator : IEnumerator<Renderable3D>
+        private struct Enumerator : IEnumerator<RenderNode3D>
         {
             private readonly List<RenderItem> _renderItems;
             private int _nextItemIndex;
-            private Renderable3D? _current;
+            private RenderNode3D? _current;
 
             public Enumerator(List<RenderItem> renderItems)
             {
@@ -104,7 +104,7 @@ namespace LifeSim.Engine.Rendering
                 this._current = null;
             }
 
-            public Renderable3D Current => this._current ?? throw new System.Exception("Current should not be used in the current state");
+            public RenderNode3D Current => this._current ?? throw new System.Exception("Current should not be used in the current state");
             object? IEnumerator.Current => this.Current;
 
             public void Dispose()

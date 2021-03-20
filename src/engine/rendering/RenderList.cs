@@ -6,8 +6,8 @@ namespace LifeSim.Engine.Rendering
 {
     public class RenderList
     {
-        private readonly List<Renderable3D> _shadowsRenderList = new List<Renderable3D>();
-        private readonly List<Renderable3D> _regularRenderList = new List<Renderable3D>();
+        private readonly List<RenderNode3D> _shadowsRenderList = new List<RenderNode3D>();
+        private readonly List<RenderNode3D> _regularRenderList = new List<RenderNode3D>();
 
         public RenderList()
         {
@@ -23,7 +23,7 @@ namespace LifeSim.Engine.Rendering
 
         private void _UpdateRecursive(Node3D node)
         {
-            if (node is Renderable3D renderable && renderable.material != null) {
+            if (node is RenderNode3D renderable && renderable.material != null) {
                 if (renderable.material.castShadows) {
                     this._shadowsRenderList.Add(renderable);
                 }
@@ -34,7 +34,7 @@ namespace LifeSim.Engine.Rendering
             }
         }
 
-        public IReadOnlyList<Renderable3D> baseRenderables => this._regularRenderList;
-        public IReadOnlyList<Renderable3D> shadowRenderables => this._shadowsRenderList;
+        public IReadOnlyList<RenderNode3D> baseRenderables => this._regularRenderList;
+        public IReadOnlyList<RenderNode3D> shadowRenderables => this._shadowsRenderList;
     }
 }

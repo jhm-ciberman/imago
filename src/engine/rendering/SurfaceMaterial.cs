@@ -26,9 +26,9 @@ namespace LifeSim.Engine.Rendering
             this._resourceSet = builder.CreateResourceSet(this, texture.deviceTexture, texture.sampler);
         }
 
-        public ResourceLayout GetObjectResourceLayout(Renderable3D renderable)
+        public ResourceLayout GetObjectResourceLayout(RenderNode3D renderable)
         {
-            return (renderable is SkinnedRenderable3D)
+            return (renderable is SkinRenderNode3D)
                 ? this._materialManager.layouts.renderables.skinned
                 : this._materialManager.layouts.renderables.regular;
         } 
