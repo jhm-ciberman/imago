@@ -95,7 +95,7 @@ namespace LifeSim
 
             this._openSet.Enqueue(this._start);
 
-            while (this._openSet.count > 0)
+            while (this._openSet.Count > 0)
             {
                 var currentCoord = this._openSet.Dequeue();
                 this._closedSet.Add(currentCoord);
@@ -116,11 +116,9 @@ namespace LifeSim
 
                     var neighbourGScore = this.FindGScore(neighbourCoord);
 
-                    if (gScoreTentative < neighbourGScore)
-                    {
+                    if (gScoreTentative < neighbourGScore) {
                         // This path to neighbor is better than any previous one. Record it!
-                        if (! this._closedSet.Contains(neighbourCoord))
-                        {
+                        if (! this._closedSet.Contains(neighbourCoord)) {
                             this._nodes[neighbourCoord] = new Node {
                                 coord = neighbourCoord,
                                 cameFrom = currentCoord,

@@ -6,7 +6,7 @@ namespace LifeSim.Generation
 {
     public class PathsGenerator : IWorldGenerationStep
     {
-        private class TerrainPathfinder : Pathfinder
+        private class TerrainNavigator : INavigator<Tile>
         {
             private readonly float _flatTileCost = 1.0f;
             private readonly float _slopeTileCost = 1.2f;
@@ -14,20 +14,15 @@ namespace LifeSim.Generation
             private readonly float _turnDirectionCost = 1.05f;
             private readonly float _biomeChangeCost = 1.1f;
 
-            private readonly World _world;
             private readonly float _heuristicMinWeight;
 
-            public TerrainPathfinder(Tile start, Tile end, float quality = 1f) : base(start.world.size, start.coords, end.coords)
-            {
-                this._world = start.world;
-                var minMax = this._world.minMaxNavgridCost;
-                this._heuristicMinWeight = minMax.min + (minMax.max - minMax.min) * quality;
-            }
+            private Vector2Int _size;
 
-            protected override float _HeuristicDistance(Vector2Int start, Vector2Int end)
+            public TerrainNavigator(World world, float quality = 1f)
             {
-                var v = (end - start);
-                return (System.Math.Abs(v.x) + System.Math.Abs(v.y)) * this._heuristicMinWeight;
+                var minMax = world.minMaxNavgridCost;
+                this._size = world.size;
+                this._heuristicMinWeight = minMax.min + (minMax.max - minMax.min) * quality;
             }
 
             private float _GetGradientCost(Tile tile, Vector2Int dir)
@@ -52,13 +47,17 @@ namespace LifeSim.Generation
                 return this._diagonalSlopeTileCost;
             }
 
-            protected override float _WeightFunction(Vector2Int fromCoord, Vector2Int toCoord, Vector2Int cameFromCoord)
+            float INavigator<Tile>.HeuristicDistance(Tile start, Tile end)
             {
-                var toTile = this._world.GetTileAt(toCoord);
-                var fromTile = this._world.GetTileAt(fromCoord);
-                float weight = toTile.GetCellAtLevel(0).navgridCost;
+                var v = (end.coords - start.coords);
+                return (System.Math.Abs(v.x) + System.Math.Abs(v.y)) * this._heuristicMinWeight;
+            }
 
-                Vector2Int dir = (cameFromCoord - toCoord);
+            float INavigator<Tile>.WeightFunction(Tile fromTile, Tile toTile, Tile cameFromTile)
+            {
+                float weight = toTile.baseCell.navgridCost;
+
+                Vector2Int dir = (cameFromTile.coords - toTile.coords);
                 if (dir.x != 0 && dir.y != 0) weight *= this._turnDirectionCost;
 
                 if (fromTile.biome != toTile.biome) weight *= this._biomeChangeCost;
@@ -66,6 +65,22 @@ namespace LifeSim.Generation
                 weight *= this._GetGradientCost(toTile, dir);
 
                 return weight;
+            }
+
+            void INavigator<Tile>.VisitNodeNeighbours(INodeVisitor<Tile> nodeVisitor, Tile node)
+            {
+                var coords = node.coords;
+                if (coords.x - 1 >= 0)
+                    nodeVisitor.VisitNode(node.west);
+
+                if (coords.x + 1 < this._size.x)
+                    nodeVisitor.VisitNode(node.east);
+
+                if (coords.y + 1 < this._size.y)
+                    nodeVisitor.VisitNode(node.north);
+
+                if (coords.y - 1 >= 0)
+                    nodeVisitor.VisitNode(node.south);
             }
         }
 
@@ -87,7 +102,7 @@ namespace LifeSim.Generation
                 this._container.Get<TileCover>("tilecover.stone"),
             };
 
-            for(var i = 0; i < 5; i ++)
+            for(var i = 0; i < 30; i ++)
             {
                 Tile start, end;
                 int tries = 0;
@@ -102,31 +117,19 @@ namespace LifeSim.Generation
                     end = world.GetTileAt(new Vector2Int(x2, y2));
                 } while (! start.isWalkable || ! end.isWalkable);
 
-                var pathfinder = new TerrainPathfinder(start, end);
-                var list = pathfinder.Pathfind();
+                var navigator = new TerrainNavigator(world);
+                var pathfinder = new AStarPathfinder<Tile>(navigator);
+                var list = pathfinder.Pathfind(start, end);
                 if (list == null) 
                 {
-                    System.Console.WriteLine("Path not found");
                     continue;
                 }
 
                 var tilecover = tileCovers[this._random.Next(tileCovers.Length)];
-                foreach (var coord in list)
+                foreach (var tile in list)
                 {
-                    var tile = world.GetTileAt(coord);
-                    //if (this._random.NextDouble() > 0.2)
-                    //{
-                        tile.SetTileCoverData(new TileCoverData(tilecover));
-
-                    //}
-                    //else
-                    //{
-                    //    tile.SetDecorationTilemap(tilecover);
-                    //    tile.SetDecorationStyle(Tile.DecorationStyle.DiagonalBottomLeft);
-                    //}
-                    var cell = tile.GetCellAtLevel(0);
-                    
-                    cell.SetNavgridCost(cell.navgridCost * 0.75f);
+                    tile.SetTileCoverData(new TileCoverData(tilecover));                    
+                    tile.baseCell.SetNavgridCost(tile.baseCell.navgridCost * 0.75f);
                 }
 
             }

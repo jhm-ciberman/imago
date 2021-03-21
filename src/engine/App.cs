@@ -104,8 +104,11 @@ namespace LifeSim.Engine
                     this._window.Close();
                     return;
                 }
+                
                 if (Input.GetKeyDown(Veldrid.Key.F4)) {
-                    this._window.WindowState = Veldrid.WindowState.BorderlessFullScreen;
+                    this._window.WindowState = this._window.WindowState == Veldrid.WindowState.BorderlessFullScreen
+                        ? Veldrid.WindowState.Normal
+                        : Veldrid.WindowState.BorderlessFullScreen;
                 }
 
                 this._renderer.Update(deltaTime, this._input.inputSnapshot);

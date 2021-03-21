@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -21,9 +20,11 @@ namespace LifeSim
             //
         }
 
-        public int count => this._data.Count;
+        public int Count => this._data.Count;
 
         public bool Contains(T item) => this._data.Contains(item);
+
+        public void Clear() => this._data.Clear();
 
         public T Peek() => this._data[0];
 
