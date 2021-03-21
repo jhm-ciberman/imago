@@ -4,11 +4,11 @@ namespace LifeSim.Generation
 {
     public class PlantProbabilityLayer
     {
-        public Plant.Model model { get; }
+        public PlantModel model { get; }
 
         private readonly FastNoiseLite _noise;
 
-        public PlantProbabilityLayer(int seed, Plant.Model model)
+        public PlantProbabilityLayer(int seed, PlantModel model)
         {
             this.model = model;
 
@@ -22,9 +22,10 @@ namespace LifeSim.Generation
 
         public float GetProbability(Tile tile)
         {
-            var coords = tile.coords;
-            if (! this.model.CanBePlantedIn(tile.world, coords)) return 0f;
+            var cell = tile.baseCell;
+            if (! this.model.CanBePlacedIn(cell)) return 0f;
 
+            var coords = cell.coords;
             return (this._noise.GetNoise(coords.x, coords.y) + 1f) / 2f;
         }
     }

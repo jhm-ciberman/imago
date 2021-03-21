@@ -71,9 +71,9 @@ namespace LifeSim.Generation
 
         private readonly System.Random _random;
 
-        private readonly IContainer _container;
+        private readonly Container _container;
 
-        public PathsGenerator(IContainer container, int seed)
+        public PathsGenerator(Container container, int seed)
         {
             this._container = container;
             this._random = new System.Random(seed);

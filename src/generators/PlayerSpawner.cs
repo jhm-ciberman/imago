@@ -14,11 +14,11 @@ namespace LifeSim.Generation
         public void Handle(World world)
         {
             Tile tile = this._GetRandomEmptyTile(world);
-            var player = new Character(tile.baseCell);
+            var player = new SimCharacter(tile.baseCell);
             world.AddEntity(player);
             world.player = player;
 
-            Character character = new Character(tile.baseCell);
+            SimCharacter character = new SimCharacter(tile.baseCell);
             world.AddEntity(character);
         }
 

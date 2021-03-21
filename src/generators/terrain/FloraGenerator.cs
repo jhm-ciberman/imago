@@ -11,9 +11,9 @@ namespace LifeSim.Generation
 
         private readonly float _floraDensity;
 
-        private readonly IContainer _container; 
+        private readonly Container _container; 
 
-        public FloraGenerator(IContainer container, int seed, float floraDensity)
+        public FloraGenerator(Container container, int seed, float floraDensity)
         {
             this._container = container;
             this._seed = seed;
@@ -25,18 +25,18 @@ namespace LifeSim.Generation
         {
             if (this._floraDensity == 0f) return;
 
-            var plantsModels = new Plant.Model[] {
-                this._container.Get<Plant.Model>("plant.bush"),
-                this._container.Get<Plant.Model>("plant.spruce"),
-                this._container.Get<Plant.Model>("plant.pine"),
+            var plantsModels = new PlantModel[] {
+                this._container.Get<PlantModel>("plant.bush"),
+                this._container.Get<PlantModel>("plant.spruce"),
+                this._container.Get<PlantModel>("plant.pine"),
             };
 
             List<PlantProbabilityLayer> plantProbabilityLayers = new List<PlantProbabilityLayer>();
-            foreach (Plant.Model plant in plantsModels) {
+            foreach (PlantModel plant in plantsModels) {
                 plantProbabilityLayers.Add(new PlantProbabilityLayer(this._seed, plant));
             }
 
-            var wr = new WeightedRandom<Plant.Model>(this._random);
+            var wr = new WeightedRandom<PlantModel>(this._random);
 
             int c = 0;
             foreach (Tile tile in world.tiles)
@@ -53,7 +53,7 @@ namespace LifeSim.Generation
                 }
 
                 if (wr.hasNext) {
-                    wr.Next().PlantIn(tile);
+                    wr.Next().Create(tile.baseCell);
                     c++;
                 }
             }

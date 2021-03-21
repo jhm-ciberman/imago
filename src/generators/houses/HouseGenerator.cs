@@ -12,9 +12,9 @@ namespace LifeSim.Generation
 
         private readonly System.Random _random;
 
-        private readonly IContainer _container;
+        private readonly Container _container;
 
-        public HouseGenerator(IContainer container, System.Random random)
+        public HouseGenerator(Container container, System.Random random)
         {
             this._container = container;
             this._random = random;
@@ -31,8 +31,8 @@ namespace LifeSim.Generation
             Cover floor   = this._Choose(housePreset.floors);
             Cover ceiling = this._Choose(housePreset.floors);
             
-            Aperture.Model window = this._Choose(housePreset.windows);
-            Aperture.Model door = this._Choose(housePreset.doors);
+            ApertureModel window = this._Choose(housePreset.windows);
+            ApertureModel door = this._Choose(housePreset.doors);
 
             var storeyCount = this._random.Next(1, 1);
             house.SetStoreyCount(storeyCount);
@@ -52,11 +52,11 @@ namespace LifeSim.Generation
             return array[this._random.Next(0, array.Length)];
         }
 
-        private void _AddApertures(House house, Aperture.Model window, Aperture.Model door)
+        private void _AddApertures(House house, ApertureModel window, ApertureModel door)
         {
             if (house.size.y >= 5) {
                 var wall = house.GetCell(new Vector2Int(0, 4), 0).wallWest;
-                var aperture = new Aperture(door, wall);
+                var aperture = new SimAperture(door, wall);
                 wall.SetAperture(aperture);
                 house.AddSubentity(aperture);
             }
@@ -66,7 +66,7 @@ namespace LifeSim.Generation
                     if (wall.aperture != null) continue;
                     if (this._random.NextDouble() < 0.8f) continue;
 
-                    var aperture = new Aperture(window, wall.sideInt);
+                    var aperture = new SimAperture(window, wall.sideInt);
                     wall.SetAperture(aperture);
                     house.AddSubentity(aperture);
                 }
@@ -189,11 +189,11 @@ namespace LifeSim.Generation
                     this._container.Get<Cover>("floor.oakdream"),
                     this._container.Get<Cover>("floor.lumberjackdestiny"),
                 },
-                windows = new Aperture.Model[] {
-                    this._container.Get<Aperture.Model>("aperture.mediewindow"),
+                windows = new ApertureModel[] {
+                    this._container.Get<ApertureModel>("aperture.mediewindow"),
                 },
-                doors = new Aperture.Model[] {
-                    this._container.Get<Aperture.Model>("aperture.mediedoor"),
+                doors = new ApertureModel[] {
+                    this._container.Get<ApertureModel>("aperture.mediedoor"),
                 },
             };
         }
@@ -210,9 +210,9 @@ namespace LifeSim.Generation
 
             public Cover[] floors;
 
-            public Aperture.Model[] windows;
+            public ApertureModel[] windows;
 
-            public Aperture.Model[] doors;
+            public ApertureModel[] doors;
         }
 
     } 

@@ -11,9 +11,9 @@ namespace LifeSim.Generation
 
         private readonly HouseGenerator _houseGenerator;
 
-        private readonly IContainer _container;
+        private readonly Container _container;
 
-        public VillageGenerator(IContainer container, int seed)
+        public VillageGenerator(Container container, int seed)
         {
             this._container = container;
             this._random = new System.Random(seed);
@@ -47,19 +47,14 @@ namespace LifeSim.Generation
                     House house = this._houseGenerator.Generate(houseLot);
                     house.AttachToWorld();
 
-                    var bed = new Furniture(this._container.Get<Furniture.Model>("furniture.beds.bed"), house.GetCell(new Vector2Int(0, 0), 0));
+                    var bed = this._container.Get<ObjectModel>("furniture.beds.bed").Create(house.GetCell(new Vector2Int(0, 0), 0));
                     world.AddEntity(bed);
 
-                    var table = new Furniture(this._container.Get<Furniture.Model>("furniture.tables.table"), house.GetCell(new Vector2Int(1, 2), 0));
+                    var table = this._container.Get<ObjectModel>("furniture.tables.table").Create(house.GetCell(new Vector2Int(1, 2), 0));
                     world.AddEntity(table);
 
-                    var waterthrough = new Furniture(this._container.Get<Furniture.Model>("furniture.waterthrough"), house.GetCell(new Vector2Int(-1, 0), 0));
+                    var waterthrough = this._container.Get<ObjectModel>("furniture.waterthrough").Create(house.GetCell(new Vector2Int(-1, 0), 0));
                     world.AddEntity(waterthrough);
-
-                    //Character character = new Character(world);
-                    //character.position = house.lot.coords * Tile.size + new Vector2(1.5f, 1.5f);
-                    //character.direction = 90f;
-                    //world.characters.Add(character);
                 }
             }
 

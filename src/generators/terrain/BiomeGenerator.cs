@@ -13,9 +13,9 @@ namespace LifeSim.Generation
         }
 
         private readonly FastNoiseLite _noise;
-        private readonly IContainer _container; 
+        private readonly Container _container; 
 
-        public BiomeGenerator(IContainer container, int seed)
+        public BiomeGenerator(Container container, int seed)
         {
             this._container = container;
             this._noise = new FastNoiseLite(seed + 123);
