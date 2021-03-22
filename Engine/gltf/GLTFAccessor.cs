@@ -1,6 +1,5 @@
 using System;
 using System.Numerics;
-using glTFLoader.Schema;
 using LifeSim.Engine.Rendering;
 using static glTFLoader.Schema.Accessor;
 

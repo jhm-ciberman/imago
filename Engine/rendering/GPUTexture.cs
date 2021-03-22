@@ -43,12 +43,12 @@ namespace LifeSim.Engine.Rendering
         public Veldrid.Texture deviceTexture => this._deviceTexture;
         public Veldrid.Sampler sampler => this._sampler;
 
-        private void Update(RectInt bounds, byte[] data, bool generateMipmaps = true)
+        private void Update(uint x, uint y, uint width, uint height, byte[] data, bool generateMipmaps = true)
         {
             this._gd.UpdateTexture(
                 this._deviceTexture, data, 
-                x: (uint) bounds.x, y: (uint) bounds.y, z: 0, 
-                width: (uint) bounds.width, height: (uint) bounds.height, depth: 1, 
+                x: x, y: y, z: 0, 
+                width: width, height: height, depth: 1, 
                 mipLevel: 0, arrayLayer: 0
             );
 

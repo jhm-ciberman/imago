@@ -1,6 +1,5 @@
 using System.Drawing;
-using System.Numerics;
-using LifeSim.View3D;
+using FontStashSharp;
 using LifeSim.Engine.Rendering;
 
 namespace LifeSim.Engine.SceneGraph
@@ -11,13 +10,12 @@ namespace LifeSim.Engine.SceneGraph
 
         public Color color = Color.OrangeRed;
 
-        public FontAsset font;
+        public FontSystem? font;
 
         public int fontSize = 30;
 
-        public TextNode2D() : this("", FontAsset.GetDefaultFont()) { }
-        public TextNode2D(string text) : this(text, FontAsset.GetDefaultFont()) { }
-        public TextNode2D(string text, FontAsset font)
+        public TextNode2D() : this("") { }
+        public TextNode2D(string text, FontSystem? font = null)
         {
             this.text = text;
             this.font = font;
@@ -25,7 +23,7 @@ namespace LifeSim.Engine.SceneGraph
 
         public override void Render(SpriteBatcher spriteBatcher)
         {
-            //string text = "The quick brown fox jumps over the lazy dog\nいろはにほへ\nEmoji Font: 🙌📦👏👏";
+            if (this.font == null) return;
             var fontSize = this.font.GetFont(this.fontSize);
             var pos = this.worldMatrix.Translation;
             fontSize.DrawText(spriteBatcher, pos.X, pos.Y, this.text, this.color);
