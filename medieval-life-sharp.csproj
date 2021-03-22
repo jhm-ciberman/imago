@@ -9,8 +9,11 @@
         <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
         <RuntimeIdentifier>win-x64</RuntimeIdentifier>
         <Optimization>true</Optimization>
+        <StartupObject>LifeSim.Program</StartupObject>
+        <TieredCompilationQuickJit>true</TieredCompilationQuickJit>
+        <TieredCompilationQuickJitForLoops>false</TieredCompilationQuickJitForLoops>
     </PropertyGroup>
-    <PropertyGroup Condition="'$(CompileConfig)' == 'RELEASE'" >
+    <PropertyGroup Condition="'$(CompileConfig)' == 'RELEASE'">
         <PublishSingleFile>true</PublishSingleFile>
         <DebugSymbols>false</DebugSymbols>
     </PropertyGroup>

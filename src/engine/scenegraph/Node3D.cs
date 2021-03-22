@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 
 namespace LifeSim.Engine.SceneGraph 
 {
@@ -19,17 +20,31 @@ namespace LifeSim.Engine.SceneGraph
         private Quaternion _rotation = Quaternion.Identity;
         private Vector3    _scale = Vector3.One;
 
-        public Vector3    position { get => this._position; set { this._position = value; this._OnTransformDirty(); } }
-        public Quaternion rotation { get => this._rotation; set { this._rotation = value; this._OnTransformDirty(); } }
-        public Vector3    scale    { get => this._scale;    set { this._scale = value;    this._OnTransformDirty(); } }
+        public Vector3 position 
+        { 
+            get => this._position;
+            set { var old = this._position; this._position = value; if (old != value) this._OnTransformDirty(); } 
+        }
+
+        public Quaternion rotation 
+        { 
+            get => this._rotation;
+            set { var old = this._rotation; this._rotation = value; if (old != value) this._OnTransformDirty(); } 
+        }
+        
+        public Vector3 scale    
+        { 
+            get => this._scale;
+            set { var old = this._scale; this._scale = value; if (old != value) this._OnTransformDirty(); } 
+        }
 
         private Matrix4x4 _localMatrix = Matrix4x4.Identity;
-        private bool _localMatrixDirty = false;
 
-        private Matrix4x4 _worldMatrix;
+        private Matrix4x4 _worldMatrix = Matrix4x4.Identity;
         public ref Matrix4x4 worldMatrix => ref this._worldMatrix;
 
-        public bool transformIsDirty => this._localMatrixDirty;
+        private bool _transformIsDirty = false;
+        public bool transformIsDirty => this._transformIsDirty;
 
         public Vector3 worldPosition => Vector3.Transform(Vector3.Zero, this._worldMatrix);
         public Vector3 worldScale => Vector3.Transform(this._scale, this._worldMatrix);
@@ -45,6 +60,7 @@ namespace LifeSim.Engine.SceneGraph
 
             this._children.Add(node);
             node._parent = this;
+            node._transformIsDirty = true;
             node.onEvent += this._OnNotified;
             this._Notify(node, EventType.ChildAdded);
         }
@@ -71,23 +87,25 @@ namespace LifeSim.Engine.SceneGraph
 
         protected void _OnTransformDirty()
         {
-            if (this._localMatrixDirty) return;
-            this._localMatrixDirty = true;
+            if (this._transformIsDirty) return;
+            this._transformIsDirty = true;
             this._Notify(this, EventType.TransformDirty);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void UpdateWorldMatrix()
         {
-            this._worldMatrix = this.GetLocalMatrix();
-            if (this._parent != null) {
-                this._worldMatrix *= this._parent._localMatrix;
-            }
+            this._worldMatrix = (this._parent != null)
+                ? this.GetLocalMatrix() * this._parent._worldMatrix
+                : this.GetLocalMatrix();
+
             this._AfterMatrixUpdate();
             for(int i = 0; i < this.children.Count; i++) {
                 this.children[i]._UpdateWorldMatrix(ref this._worldMatrix);
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private void _UpdateWorldMatrix(ref Matrix4x4 parentMatrix)
         {
             this._worldMatrix = this.GetLocalMatrix() * parentMatrix;
@@ -99,16 +117,16 @@ namespace LifeSim.Engine.SceneGraph
 
         protected virtual void _AfterMatrixUpdate()
         {
-            // 
+            // Used by RenderNode3D to update bounding boxes (it's ugly I know, but I can't think any better)
         }
 
         public ref Matrix4x4 GetLocalMatrix()
         {
-            if (this._localMatrixDirty) {
+            if (this._transformIsDirty) {
                 this._localMatrix = Matrix4x4.CreateScale(this._scale)
                     * Matrix4x4.CreateFromQuaternion(this._rotation)
                     * Matrix4x4.CreateTranslation(this._position);
-                this._localMatrixDirty = false;
+                this._transformIsDirty = false;
             }
             return ref this._localMatrix;
         }
@@ -143,7 +161,7 @@ namespace LifeSim.Engine.SceneGraph
 
         public void PrintHierarchyToConsole(string indent = "")
         {
-            System.Console.WriteLine(indent + "- " + this.GetType().Name + ": " + this.name);
+            System.Console.WriteLine(indent + "- " + this.GetType().Name + ": " + this.name + "(scale: " + this.scale + ")");
             indent += "  ";
             foreach (var child in this.children) {
                 child.PrintHierarchyToConsole(indent);
