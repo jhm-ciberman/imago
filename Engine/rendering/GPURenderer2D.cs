@@ -26,7 +26,6 @@ namespace LifeSim.Engine.Rendering
             this._spriteBatcher = new SpriteBatcher(gd, psoManager, assetManager, this._commandList);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void Render(Canvas2D canvas)
         {
             Viewport viewport = canvas.viewport;

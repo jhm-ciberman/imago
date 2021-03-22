@@ -92,7 +92,6 @@ namespace LifeSim.Engine.SceneGraph
             this._Notify(this, EventType.TransformDirty);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void UpdateWorldMatrix()
         {
             this._worldMatrix = (this._parent != null)
@@ -105,7 +104,6 @@ namespace LifeSim.Engine.SceneGraph
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private void _UpdateWorldMatrix(ref Matrix4x4 parentMatrix)
         {
             this._worldMatrix = this.GetLocalMatrix() * parentMatrix;

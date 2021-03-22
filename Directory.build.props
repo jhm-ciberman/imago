@@ -8,5 +8,6 @@
     <Optimization>true</Optimization>
     <TieredCompilationQuickJit>true</TieredCompilationQuickJit>
     <TieredCompilationQuickJitForLoops>false</TieredCompilationQuickJitForLoops>
+    <Disabletransitiveprojectreferences>true</Disabletransitiveprojectreferences>
   </PropertyGroup>
 </Project>

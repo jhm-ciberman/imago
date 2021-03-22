@@ -54,7 +54,6 @@ namespace LifeSim.Engine.Rendering
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private void _AddToRenderQueue(RenderNode3D renderable, ref BoundingFrustum frustum, Vector3 cameraPosition)
         {
             if (renderable.material == null || renderable.mesh == null) return;

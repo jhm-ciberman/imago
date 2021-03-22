@@ -44,7 +44,6 @@ namespace LifeSim.Engine.Rendering
             this._commandList.Dispose();
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void Render(Scene3D scene, Camera3D camera)
         {
             this._currentPipeline = null;
@@ -68,7 +67,6 @@ namespace LifeSim.Engine.Rendering
             this._hasCommandsToSubmit = true;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private void _RenderShadowmap(Camera3D camera, DirectionalLight mainLight)
         {
             // Shadowmap
@@ -83,7 +81,6 @@ namespace LifeSim.Engine.Rendering
             this.frameProfilerShadowmap.EndFrame();
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private void _RenderCamera(Scene3D scene, Camera3D camera)
         {
             // Opaques

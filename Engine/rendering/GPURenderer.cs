@@ -106,7 +106,6 @@ namespace LifeSim.Engine.Rendering
 
         private Stopwatch _stopwatch = new Stopwatch();
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void Render(IStage stage)
         {
             this._renderTasks.Clear();
