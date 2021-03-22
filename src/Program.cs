@@ -1,4 +1,3 @@
-using BenchmarkDotNet.Running;
 using LifeSim.Demo;
 using LifeSim.Engine;
 
