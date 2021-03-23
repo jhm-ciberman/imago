@@ -91,7 +91,7 @@ namespace LifeSim.Engine.Rendering
             //this._commandList.SetViewport(1, new Veldrid.Viewport(camera.viewport.x, camera.viewport.y, camera.viewport.width, camera.viewport.height, 0f, 1f));
             //this._commandList.SetScissorRect(0, camera.viewport.x, camera.viewport.y, camera.viewport.width, camera.viewport.height);
             //this._commandList.SetScissorRect(1, camera.viewport.x, camera.viewport.y, camera.viewport.width, camera.viewport.height);
-            this._commandList.ClearColorTarget(0, scene.clearColor);
+            this._commandList.ClearColorTarget(0, new RgbaFloat(scene.clearColor.r, scene.clearColor.g, scene.clearColor.b, scene.clearColor.a));
             this._commandList.ClearColorTarget(1, RgbaFloat.Black);
             this.frameProfilerBase.BeginFrame();
             this._commandList.ClearDepthStencil(1f);

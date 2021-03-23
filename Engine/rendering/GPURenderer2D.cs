@@ -1,5 +1,4 @@
 using System.Numerics;
-using System.Runtime.CompilerServices;
 using LifeSim.Engine.SceneGraph;
 using Veldrid;
 

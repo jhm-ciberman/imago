@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using System.Numerics;
-using Veldrid;
 
 namespace LifeSim.Engine.SceneGraph
 {
@@ -8,9 +6,9 @@ namespace LifeSim.Engine.SceneGraph
     {
         public DirectionalLight mainLight = new DirectionalLight();
         
-        public Vector3 ambientColor = new Vector3(.2f, .2f, .2f);
+        public ColorF ambientColor = new ColorF(.2f, .2f, .2f);
 
-        public RgbaFloat clearColor = new RgbaFloat(0.84f, 0.84f, 0.86f, 1.0f);
+        public ColorF clearColor = new ColorF(0.84f, 0.84f, 0.86f, 1.0f);
         //private RgbaFloat _clearColor = new RgbaFloat(0.04f, 0.04f, 0.06f, 1.0f);
 
         private Node3D _root = new Node3D();

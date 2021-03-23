@@ -5,7 +5,7 @@ namespace LifeSim.Engine.SceneGraph
     public class DirectionalLight
     {
         public Vector3 direction = new Vector3(100, 200, 100);
-        public Vector3 color = new Vector3(1f, 1f, 1f);
+        public ColorF color = ColorF.white;
 
         public Vector2 shadowMapSize = new Vector2(20f, 20f);
         public float shadowZNear = 2f;

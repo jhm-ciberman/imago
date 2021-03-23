@@ -92,7 +92,7 @@ namespace LifeSim.Engine.Rendering
         }
 
         void IFontStashRenderer.Draw(
-            ITexture2D texture, PointF position, Rectangle? sourceRectangle, Color color, 
+            ITexture2D texture, PointF position, Rectangle? sourceRectangle, System.Drawing.Color color, 
             float rotation, PointF origin, PointF scale, float depth
         )
         {

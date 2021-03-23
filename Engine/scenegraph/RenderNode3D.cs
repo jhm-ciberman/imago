@@ -31,7 +31,7 @@ namespace LifeSim.Engine.SceneGraph
             }
         }
         
-        public Vector4 albedoColor = new Vector4(1f, 1f, 1f, 0f);
+        public ColorF albedoColor = new ColorF(1f, 1f, 1f, 0f);
 
         public Vector4 textureST = new Vector4(1f, 1f, 0f, 0f);
 

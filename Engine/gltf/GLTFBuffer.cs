@@ -1,6 +1,5 @@
 using System;
 using System.Numerics;
-using LifeSim.Engine.Rendering;
 
 namespace LifeSim.Engine.GLTF
 {

@@ -8,7 +8,7 @@ namespace LifeSim.Engine.SceneGraph
     {
         public string text;
 
-        public Color color = Color.OrangeRed;
+        public Color color = new Color(0xFFFF4500);
 
         public FontSystem? font;
 

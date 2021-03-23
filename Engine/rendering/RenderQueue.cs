@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
-using System.Runtime.CompilerServices;
 using LifeSim.Engine.SceneGraph;
 using Veldrid;
 using Veldrid.Utilities;

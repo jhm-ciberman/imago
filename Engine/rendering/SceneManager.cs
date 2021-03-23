@@ -18,19 +18,17 @@ namespace LifeSim.Engine.Rendering
         [StructLayout(LayoutKind.Sequential)]
         private struct LightInfo
         {
-            public Vector3 ambientColor;
-            private readonly float _padding0;
-            public Vector3 mainLightColor;
-            private readonly float _padding1;
+            public ColorF ambientColor;
+            public ColorF mainLightColor;
             public Vector3 mainLightDirection;
-            private readonly float _padding2;
+            private readonly float _padding0;
         }
 
         [StructLayout(LayoutKind.Sequential)]
         private struct ObjectInfo
         {
             public Matrix4x4 modelMatrix;
-            public Vector4 albedoColor;
+            public ColorF albedoColor;
             public System.UInt32 pickingID;
             private readonly float _padding0;
             private readonly float _padding1;
