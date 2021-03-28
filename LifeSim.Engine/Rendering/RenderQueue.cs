@@ -48,9 +48,7 @@ namespace LifeSim.Engine.Rendering
 
         public void Sort()
         {
-            if (Input.GetKey(Key.Space)) {
-                this._renderList.Sort(this);
-            }
+            this._renderList.Sort(this);
         }
 
         private void _AddToRenderQueue(RenderNode3D renderable, ref BoundingFrustum frustum, Vector3 cameraPosition)
