@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using LifeSim.Core;
 
 namespace LifeSim.Engine.SceneGraph
 {
@@ -14,7 +15,7 @@ namespace LifeSim.Engine.SceneGraph
         private Node3D _root = new Node3D();
         public Node3D root => this._root;
 
-        private List<RenderNode3D> _renderables = new List<RenderNode3D>();
+        private SwapPopList<RenderNode3D> _renderables = new SwapPopList<RenderNode3D>();
         public IReadOnlyList<RenderNode3D> renderables => this._renderables;
 
         private List<Node3D> _dirtyList = new List<Node3D>();

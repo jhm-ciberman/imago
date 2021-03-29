@@ -134,3 +134,6 @@ _NCrunch*
 
 # Crash Dumps
 *.stackdump
+
+# LifeSim artifacts folder
+artifacts/
