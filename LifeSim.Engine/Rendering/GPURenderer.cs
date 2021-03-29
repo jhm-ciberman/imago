@@ -40,7 +40,8 @@ namespace LifeSim.Engine.Rendering
                 syncToVerticalBlank: false,
                 resourceBindingModel: ResourceBindingModel.Default,
                 preferDepthRangeZeroToOne: true,
-                preferStandardClipSpaceYDirection: true
+                preferStandardClipSpaceYDirection: true,
+                swapchainSrgbFormat: false
             );
 
             this._gd = VeldridStartup.CreateGraphicsDevice(window, options, graphicsBackend);
