@@ -5,8 +5,6 @@ namespace LifeSim.Engine.SceneGraph
 {
     public class Node2D
     {
-        public event System.Action<Event<Node2D>>? onEvent;
-
         public string name {get; set;} = string.Empty;
 
         private Node2D? _parent = null;
@@ -42,8 +40,6 @@ namespace LifeSim.Engine.SceneGraph
 
             this._children.Add(node);
             node._parent = this;
-            node.onEvent += this._OnNotified;
-            this._Notify(node, EventType.ChildAdded);
         }
 
         public void Remove(Node2D node)
@@ -52,25 +48,12 @@ namespace LifeSim.Engine.SceneGraph
 
             this._children.Remove(node);
             node._parent = null;
-            node.onEvent -= this._OnNotified;
-            this._Notify(node, EventType.ChildRemoved);
-        }
-
-        private void _OnNotified(Event<Node2D> e)
-        {
-            this.onEvent?.Invoke(e);
-        }
-
-        protected void _Notify(Node2D node, EventType eventType)
-        {
-            this.onEvent?.Invoke(new Event<Node2D>(node, eventType));
         }
 
         private void _OnTransformDirty()
         {
             if (this._localMatrixDirty) return;
             this._localMatrixDirty = true;
-            this._Notify(this, EventType.TransformDirty);
         }
 
         public void UpdateWorldMatrix()

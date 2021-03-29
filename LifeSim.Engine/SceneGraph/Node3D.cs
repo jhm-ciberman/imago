@@ -5,12 +5,13 @@ namespace LifeSim.Engine.SceneGraph
 {
     public class Node3D
     {
-        public event System.Action<Event<Node3D>>? onEvent;
-
         public string name { get; set; } = string.Empty;
 
         private Node3D? _parent = null;
         public Node3D? parent => this._parent;
+
+        internal Scene3D? _scene = null;
+        public Scene3D? scene => this._scene;
 
         private readonly List<Node3D> _children = new List<Node3D>();
         public IReadOnlyList<Node3D> children => this._children;
@@ -56,12 +57,11 @@ namespace LifeSim.Engine.SceneGraph
             if (node._parent != null) {
                 node._parent.Remove(node);
             }
-
             this._children.Add(node);
             node._parent = this;
+            node._scene = this._scene;
+            node._scene?._OnChildAdded(node);
             node._transformIsDirty = true;
-            node.onEvent += this._OnNotified;
-            this._Notify(node, EventType.ChildAdded);
         }
 
         public void Remove(Node3D node)
@@ -70,25 +70,15 @@ namespace LifeSim.Engine.SceneGraph
 
             this._children.Remove(node);
             node._parent = null;
-            node.onEvent -= this._OnNotified;
-            this._Notify(node, EventType.ChildRemoved);
-        }
-
-        private void _OnNotified(Event<Node3D> e)
-        {
-            this.onEvent?.Invoke(e);
-        }
-
-        protected void _Notify(Node3D node, EventType eventType)
-        {
-            this.onEvent?.Invoke(new Event<Node3D>(node, eventType));
+            node._scene?._OnChildRemoved(node);
+            node._scene = null;
         }
 
         protected void _OnTransformDirty()
         {
             if (this._transformIsDirty) return;
             this._transformIsDirty = true;
-            this._Notify(this, EventType.TransformDirty);
+            this._scene?._OnTransformDirty(this);
         }
 
         public void UpdateWorldMatrix()

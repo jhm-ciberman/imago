@@ -12,70 +12,68 @@ namespace LifeSim.Engine.SceneGraph
         public ColorF clearColor = new ColorF(0.84f, 0.84f, 0.86f, 1.0f);
         //private RgbaFloat _clearColor = new RgbaFloat(0.04f, 0.04f, 0.06f, 1.0f);
 
-        private Node3D _root = new Node3D();
-        public Node3D root => this._root;
-
         private SwapPopList<RenderNode3D> _renderables = new SwapPopList<RenderNode3D>();
         public IReadOnlyList<RenderNode3D> renderables => this._renderables;
 
         private List<Node3D> _dirtyList = new List<Node3D>();
 
+        private readonly SwapPopList<Node3D> _children = new SwapPopList<Node3D>();
+        public IReadOnlyList<Node3D> children => this._children;
+
         public Scene3D()
         {
-            this._root.onEvent += this._OnEvent;
+            //
         }
 
         public void Add(Node3D node)
         {
-            this._root.Add(node);
+            this._children.Add(node);
+            this._OnChildAdded(node);
         }
 
         public void Remove(Node3D node)
         {
-            this._root.Remove(node);
+            this._children.Remove(node);
+            this._OnChildRemoved(node);
         }
 
-        private void _OnEvent(Event<Node3D> e)
+        internal void _OnChildAdded(Node3D node)
         {
-            switch (e.type)
-            {
-                case EventType.ChildAdded:
-                    this._AddRenderables(e.node);
-                    this._AddToDirtyList(e.node);
-                    break;
-                case EventType.ChildRemoved:
-                    this._RemoveRenderables(e.node);
-                    this._AddToDirtyList(e.node);
-                    break;
-                case EventType.TransformDirty:
-                    this._AddToDirtyList(e.node);
-                    break;   
-            }   
+            this._OnTransformDirty(node);
+            this._AddNodeToRecursive(node);
         }
 
-        private void _AddRenderables(Node3D node)
+        internal void _OnChildRemoved(Node3D node)
         {
+            this._OnTransformDirty(node);
+            this._RemoveNodeRecursive(node);
+        }
+
+        internal void _OnTransformDirty(Node3D node)
+        {
+            this._dirtyList.Add(node);
+        }
+
+        private void _AddNodeToRecursive(Node3D node)
+        {
+            node._scene = this;
             if (node is RenderNode3D renderable) {
                 this._renderables.Add(renderable);
             }
-            foreach (var child in node.children) {
-                this._AddRenderables(child);
+            for (int i = 0; i < node.children.Count; i++) {
+                this._AddNodeToRecursive(node.children[i]);
             }
         }
 
-        private void _RemoveRenderables(Node3D node)
+        private void _RemoveNodeRecursive(Node3D node)
         {
+            node._scene = null;
             if (node is RenderNode3D renderable) {
                 this._renderables.Remove(renderable);
             }
-            foreach (var child in node.children) {
-                this._RemoveRenderables(child);
+            for (int i = 0; i < node.children.Count; i++) {
+                this._RemoveNodeRecursive(node.children[i]);
             }
-        }
-
-        private void _AddToDirtyList(Node3D node)
-        {
-            this._dirtyList.Add(node);
         }
 
         public void UpdateWorldMatrices()
