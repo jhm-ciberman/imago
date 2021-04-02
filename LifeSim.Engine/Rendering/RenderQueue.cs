@@ -12,10 +12,16 @@ namespace LifeSim.Engine.Rendering
     {
         private const int defaultCapacity = 250;
 
-        private struct RenderItem
+        private readonly struct RenderItem
         {
-            public ulong key;
-            public RenderNode3D renderable;
+            public readonly ulong key;
+            public readonly RenderNode3D renderable;
+
+            public RenderItem(ulong key, RenderNode3D renderable)
+            {
+                this.key = key;
+                this.renderable = renderable;
+            }
 
             public override string ToString()
             {
@@ -31,8 +37,9 @@ namespace LifeSim.Engine.Rendering
         {
             this._renderList.Clear();
             var frustum = camera.occlusionFrustum;
-            foreach (var renderable in scene.renderables) {
-                this._AddToRenderQueue(renderable, ref frustum, camera.position);
+            var list = scene.renderables;
+            for (int i = 0; i < list.Count; i++) {
+                this._AddToRenderQueue(list[i], ref frustum, camera.position);
             }
         }
 
@@ -41,8 +48,9 @@ namespace LifeSim.Engine.Rendering
             this._renderList.Clear();
             var matrix = light.GetShadowMapMatrix(camera.position);
             var frustum = new BoundingFrustum(matrix);
-            foreach (var renderable in scene.renderables) {
-                this._AddToRenderQueue(renderable, ref frustum, camera.position);
+            var list = scene.renderables;
+            for (int i = 0; i < list.Count; i++) {
+                this._AddToRenderQueue(list[i], ref frustum, camera.position);
             }
         }
 
@@ -65,10 +73,7 @@ namespace LifeSim.Engine.Rendering
                 
                 ulong key = (materialHash << 48) | (meshHash << 32) | (distanceHash << 0);
 
-                this._renderList.Add(new RenderItem() {
-                    key = key,
-                    renderable = renderable
-                });
+                this._renderList.Add(new RenderItem(key, renderable));
             }
         }
 

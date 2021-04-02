@@ -79,7 +79,8 @@ namespace LifeSim.Engine.SceneGraph
         public void UpdateWorldMatrices()
         {
             if (this._dirtyList.Count > 0) {
-                foreach (var dirtyNode in this._dirtyList) {
+                for (int i = 0; i < this._dirtyList.Count; i++) {
+                    var dirtyNode = this._dirtyList[i];
                     if (! dirtyNode.transformIsDirty) continue;
                     this._SearchTopDirty(dirtyNode).UpdateWorldMatrix();
                 }
