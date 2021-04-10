@@ -38,6 +38,7 @@ namespace LifeSim.Engine.Rendering
         private readonly GraphicsDevice _gd;
         private readonly DeviceBuffer _vertexBuffer;
         private readonly DeviceBuffer _indexBuffer;
+        private readonly Pass _pass;
         private readonly Dictionary<GPUTexture, IMaterial> _materials = new Dictionary<GPUTexture, IMaterial>();
         
         private readonly int _maxBatchSize = 1000;
@@ -55,12 +56,13 @@ namespace LifeSim.Engine.Rendering
         public int totalDrawCalls     => this._totalDrawCalls; 
         public int totalSpritesToDraw => this._totalSpritesToDraw;
 
-        public SpriteBatcher(GraphicsDevice gd, PSOManager psoManager, ResourceFactory assetManager, CommandList commandList)
+        public SpriteBatcher(GraphicsDevice gd, PSOManager psoManager, ResourceFactory assetManager, Pass pass, CommandList commandList)
         {
             this._gd = gd;
             this._assetManager = assetManager;
             this._psoManager = psoManager;
             this._commandList = commandList;
+            this._pass = pass;
             this._factory = gd.ResourceFactory;
 
             var indexBufferSize = sizeof(ushort) * 6 * this._maxBatchSize;
@@ -177,9 +179,9 @@ namespace LifeSim.Engine.Rendering
                 this._commandList.UpdateBuffer(this._vertexBuffer, 0, this._batchVertices);
 
                 var material = this._GetMaterialOrNew(this._batchTexture);
-                var pipeline = this._psoManager.GetPipeline(material.pass, material, this._renderable);
+                var pipeline = this._psoManager.GetPipeline(this._pass, material, this._renderable);
                 this._commandList.SetPipeline(pipeline);
-                this._commandList.SetGraphicsResourceSet(0, material.pass.resourceSet);
+                this._commandList.SetGraphicsResourceSet(0, this._pass.resourceSet);
                 this._commandList.SetGraphicsResourceSet(1, material.resourceSet);
                 this._commandList.SetIndexBuffer(this._indexBuffer, IndexFormat.UInt16);
                 this._commandList.SetVertexBuffer(0, this._vertexBuffer);

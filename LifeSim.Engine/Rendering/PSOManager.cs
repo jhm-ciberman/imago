@@ -21,8 +21,10 @@ namespace LifeSim.Engine.Rendering
         {
             List<ResourceLayout> list = new List<ResourceLayout>(3);
             list.Add(pass.resourceLayout);
-            if (material.resourceLayout != null)     list.Add(material.resourceLayout);
-            if (renderable.resourceLayout != null)   list.Add(renderable.resourceLayout);
+            list.Add(material.resourceLayout);
+            if (renderable.resourceLayout != null) {
+                list.Add(renderable.resourceLayout);
+            }
 
             return list.ToArray();
         }

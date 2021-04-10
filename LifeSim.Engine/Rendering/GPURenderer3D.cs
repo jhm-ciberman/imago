@@ -28,6 +28,8 @@ namespace LifeSim.Engine.Rendering
         public FrameProfiler frameProfilerShadowmap = new FrameProfiler();
 
         private bool _hasCommandsToSubmit;
+        private Pass _colorPass;
+        private Pass _shadowmapPass;
 
         public GPURenderer3D(GraphicsDevice graphicsDevice, PSOManager psoManager, GPUResourceManager resources)
         {
@@ -36,6 +38,8 @@ namespace LifeSim.Engine.Rendering
             this._psoManager = psoManager;
             this._factory = this._graphicsDevice.ResourceFactory;
             this._sceneManager = resources.sceneManager;
+            this._colorPass = resources.colorPass;
+            this._shadowmapPass = resources.shadowMapPass;
             this._commandList = this._factory.CreateCommandList();
         }
 
@@ -76,7 +80,7 @@ namespace LifeSim.Engine.Rendering
             this._sceneManager.SetupShadowMapBuffer(this._commandList, camera, mainLight);
             foreach (var renderable in this._shadowmapRQ) {
                 if (renderable.material == null) continue;
-                this._DrawRenderable(renderable, renderable.material.shadowmapPass, this.frameProfilerShadowmap);
+                this._DrawRenderable(renderable, this._shadowmapPass, this.frameProfilerShadowmap);
             }
             this.frameProfilerShadowmap.EndFrame();
         }
@@ -98,7 +102,7 @@ namespace LifeSim.Engine.Rendering
             this._sceneManager.SetupCamera3DInfoBuffer(this._commandList, camera, scene.mainLight);
             foreach (var renderable in this._baseRQ) {
                 if (renderable.material == null) continue;
-                this._DrawRenderable(renderable, renderable.material.pass, this.frameProfilerBase);
+                this._DrawRenderable(renderable, this._colorPass, this.frameProfilerBase);
             }
             this.frameProfilerBase.EndFrame();
         }

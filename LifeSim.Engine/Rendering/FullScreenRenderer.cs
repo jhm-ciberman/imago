@@ -42,6 +42,7 @@ namespace LifeSim.Engine.Rendering
         private IMaterial? _material = null;
         private readonly PSOManager _psoManager;
         private readonly ResourceFactory _assetManager;
+        private readonly Pass _pass;
 
         private readonly FullScreenQuad _quad;
 
@@ -51,6 +52,7 @@ namespace LifeSim.Engine.Rendering
             this._assetManager = assetManager;
             this._destinationTexture = resources.fullScreenRenderTexture;
             this._sourceTexture = resources.mainRenderTexture;
+            this._pass = resources.fullscreenPass;
             this._sourceTexture.onResized += this._OnSourceTextureResized;
             this._psoManager = psoManager;
             this._quad = new FullScreenQuad(gd);
@@ -85,12 +87,12 @@ namespace LifeSim.Engine.Rendering
                 this._material = this._assetManager.MakeFullScreenMaterial(this._sourceTexture.colorTexture);
             }
 
-            var pipeline = this._psoManager.GetPipeline(this._material.pass, this._material, this._quad);
+            var pipeline = this._psoManager.GetPipeline(this._pass, this._material, this._quad);
             this._commandList.Begin();
             this._commandList.SetFramebuffer(this._destinationTexture.framebuffer);
             this._commandList.SetPipeline(pipeline);
             this._commandList.SetVertexBuffer(0, this._quad.vertexBuffer);
-            this._commandList.SetGraphicsResourceSet(0, this._material.pass.resourceSet);
+            this._commandList.SetGraphicsResourceSet(0, this._pass.resourceSet);
             this._commandList.SetGraphicsResourceSet(1, this._material.resourceSet);
             this._commandList.Draw(6);
             this._commandList.End();

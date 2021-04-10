@@ -22,7 +22,7 @@ namespace LifeSim.Engine.Rendering
             this._renderTexture = renderTexture;
             this._commandList = gd.ResourceFactory.CreateCommandList();
             this._sceneManager = resources.sceneManager;
-            this._spriteBatcher = new SpriteBatcher(gd, psoManager, assetManager, this._commandList);
+            this._spriteBatcher = new SpriteBatcher(gd, psoManager, assetManager, resources.spritesPass, this._commandList);
         }
 
         public void Render(Canvas2D canvas)
