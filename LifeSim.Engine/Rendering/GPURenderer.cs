@@ -123,7 +123,7 @@ namespace LifeSim.Engine.Rendering
             }));
 
             Task.WaitAll(this._renderTasks.ToArray());
-
+            this.WaitForGPU();
 
             this._renderer3d.Submit();
             this._renderer2d.Submit();
