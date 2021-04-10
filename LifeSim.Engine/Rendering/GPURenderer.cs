@@ -32,6 +32,8 @@ namespace LifeSim.Engine.Rendering
 
         private readonly PSOManager _psoManager;
 
+        private readonly Fence _fence;
+
         public GPURenderer(Sdl2Window window, GraphicsBackend graphicsBackend)
         {
             GraphicsDeviceOptions options = new GraphicsDeviceOptions(
@@ -59,6 +61,8 @@ namespace LifeSim.Engine.Rendering
             this._imguiRenderer  = new ImguiRenderer(this._gd, this._gpuResources.mainRenderTexture);
             this._mousePicker    = new GPUMousePicker(this._gd);
             this._fullScreenQuad = new FullScreenRenderer(this._gd, this._assetManager, this._psoManager, this._gpuResources);
+
+            this._fence = this._factory.CreateFence(false);
         }
 
         public uint selectedObjectID => this._mousePicker.objectID;
@@ -119,16 +123,24 @@ namespace LifeSim.Engine.Rendering
             }));
 
             Task.WaitAll(this._renderTasks.ToArray());
-            
-            this._gd.WaitForIdle();
+
 
             this._renderer3d.Submit();
             this._renderer2d.Submit();
             this._mousePicker.Submit();
             if (this._renderImGUI) this._imguiRenderer.Submit();
-            this._fullScreenQuad.Submit();
-
+            this._fullScreenQuad.Submit(this._fence);
             this._gd.SwapBuffers();
+        }
+
+        private void WaitForGPU()
+        {
+            if (! this._fence.Signaled) {
+                // If we are GPU bound, then maybe it's a good moment to do a GC :)
+                this._fence.Reset();
+                GC.Collect(0, GCCollectionMode.Optimized);
+            }
+            this._gd.WaitForIdle();
         }
 
         internal void Resize(uint width, uint height, uint viewportWidth, uint viewportHeight)

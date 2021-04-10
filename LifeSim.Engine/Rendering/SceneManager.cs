@@ -63,7 +63,7 @@ namespace LifeSim.Engine.Rendering
 
         private Matrix4x4 _shadowMapScaling;
 
-        public SceneManager(ResourceLayouts layouts, GraphicsDevice graphicsDevice)
+        public SceneManager(ShaderLayouts layouts, GraphicsDevice graphicsDevice)
         {
             var factory = graphicsDevice.ResourceFactory;
             this._factory = factory;  

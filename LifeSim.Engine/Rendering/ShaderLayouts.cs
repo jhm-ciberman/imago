@@ -2,7 +2,7 @@ using Veldrid;
 
 namespace LifeSim.Engine.Rendering
 {
-    public class ResourceLayouts
+    public class ShaderLayouts
     {
         public struct Passes
         {
@@ -28,7 +28,7 @@ namespace LifeSim.Engine.Rendering
         public Materials materials;
         public Renderables renderables;
 
-        public ResourceLayouts(Veldrid.ResourceFactory factory)
+        public ShaderLayouts(Veldrid.ResourceFactory factory)
         {
             this.passes = new Passes {
                 sprites = factory.CreateResourceLayout(new ResourceLayoutDescription(
@@ -74,6 +74,34 @@ namespace LifeSim.Engine.Rendering
                     new ResourceLayoutElementDescription("ObjectInfo", ResourceKind.UniformBuffer, ShaderStages.Vertex),
                     new ResourceLayoutElementDescription("BonesInfo", ResourceKind.UniformBuffer, ShaderStages.Vertex)
                 )),
+            };
+        }
+
+        
+        public static Veldrid.VertexLayoutDescription GetVertexLayout(VertexLayoutKind kind)
+        {
+            return kind switch {
+                VertexLayoutKind.PosOnly => new VertexLayoutDescription(
+                    new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float4)
+                ),
+                VertexLayoutKind.Regular => new VertexLayoutDescription(
+                    new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
+                    new VertexElementDescription("Normal", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
+                    new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2)
+                ),
+                VertexLayoutKind.Skinned => new VertexLayoutDescription(
+                    new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
+                    new VertexElementDescription("Normal", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
+                    new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
+                    new VertexElementDescription("Joints", VertexElementSemantic.TextureCoordinate, VertexElementFormat.UShort4),
+                    new VertexElementDescription("Weights", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float4)
+                ),
+                VertexLayoutKind.Sprite => new VertexLayoutDescription(
+                    new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
+                    new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
+                    new VertexElementDescription("Color", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Byte4_Norm)
+                ),
+                _ => throw new System.NotSupportedException(),
             };
         }
     }

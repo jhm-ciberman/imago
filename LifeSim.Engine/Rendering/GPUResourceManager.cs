@@ -8,7 +8,7 @@ namespace LifeSim.Engine.Rendering
     {
         private readonly GraphicsDevice _gd;
 
-        private readonly ResourceLayouts _layouts;
+        private readonly ShaderLayouts _layouts;
 
         private readonly PassManager _passes;
 
@@ -22,7 +22,7 @@ namespace LifeSim.Engine.Rendering
         {
             this._gd = gd;
             var factory = gd.ResourceFactory;
-            this._layouts = new ResourceLayouts(factory);
+            this._layouts = new ShaderLayouts(factory);
             this._sceneManager = new SceneManager(this._layouts, this._gd);
 
             this.fullScreenRenderTexture = new SwapchainRenderTexture(this._gd.MainSwapchain);
@@ -31,7 +31,7 @@ namespace LifeSim.Engine.Rendering
             this._passes = new PassManager(this._gd, this);
         }
 
-        ResourceLayouts IMaterialBuilder.layouts => this._layouts;
+        ShaderLayouts IMaterialBuilder.layouts => this._layouts;
 
         PassManager IMaterialBuilder.passes => this._passes;
 

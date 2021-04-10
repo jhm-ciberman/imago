@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Runtime;
 using LifeSim.Engine.Rendering;
 using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
@@ -24,6 +25,8 @@ namespace LifeSim.Engine
 
         public App(string[] args)
         {
+            GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
+            
             WindowCreateInfo windowCI = new WindowCreateInfo(100, 100, 1024, 600, Veldrid.WindowState.Normal, "Medieval Life");
             this._window = VeldridStartup.CreateWindow(ref windowCI);
             this.viewport = new Viewport((uint) this._window.Width, (uint) this._window.Height);

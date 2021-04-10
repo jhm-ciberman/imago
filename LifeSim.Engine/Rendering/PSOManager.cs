@@ -17,33 +17,6 @@ namespace LifeSim.Engine.Rendering
             this._shaderManager = new ShaderManager(factory);
         }
 
-        private Veldrid.VertexLayoutDescription _GetVertexLayout(VertexLayoutKind kind)
-        {
-            return kind switch {
-                VertexLayoutKind.PosOnly => new VertexLayoutDescription(
-                    new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float4)
-                ),
-                VertexLayoutKind.Regular => new VertexLayoutDescription(
-                    new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
-                    new VertexElementDescription("Normal", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
-                    new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2)
-                ),
-                VertexLayoutKind.Skinned => new VertexLayoutDescription(
-                    new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
-                    new VertexElementDescription("Normal", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
-                    new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
-                    new VertexElementDescription("Joints", VertexElementSemantic.TextureCoordinate, VertexElementFormat.UShort4),
-                    new VertexElementDescription("Weights", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float4)
-                ),
-                VertexLayoutKind.Sprite => new VertexLayoutDescription(
-                    new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
-                    new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
-                    new VertexElementDescription("Color", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Byte4_Norm)
-                ),
-                _ => throw new System.NotSupportedException(),
-            };
-        }
-
         public ResourceLayout[] _GetResourceLayouts(Pass pass, IMaterial material, IRenderable renderable)
         {
             List<ResourceLayout> list = new List<ResourceLayout>(3);
@@ -79,7 +52,7 @@ namespace LifeSim.Engine.Rendering
 
         private Pipeline _MakePSO(Pass pass, IMaterial material, IRenderable renderable)
         {
-            var vertexLayout = this._GetVertexLayout(renderable.vertexLayoutKind);
+            var vertexLayout = ShaderLayouts.GetVertexLayout(renderable.vertexLayoutKind);
             var shaders = this._shaderManager.GetShader(new ShaderVariant(pass.shaderName, renderable.GetShaderKeywords()));
 
             GraphicsPipelineDescription pipelineDescription = new GraphicsPipelineDescription();

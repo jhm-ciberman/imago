@@ -4,7 +4,7 @@ namespace LifeSim.Engine.Rendering
 {
     public interface IMaterialBuilder
     {
-        ResourceLayouts layouts { get; }
+        ShaderLayouts layouts { get; }
         PassManager passes { get; }
 
         Sampler linearSampler { get; }

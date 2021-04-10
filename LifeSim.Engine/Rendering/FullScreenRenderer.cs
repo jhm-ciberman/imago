@@ -99,5 +99,10 @@ namespace LifeSim.Engine.Rendering
         {
             this._gd.SubmitCommands(this._commandList);
         }
+
+        public void Submit(Fence fence)
+        {
+            this._gd.SubmitCommands(this._commandList, fence);
+        }
     }
 }

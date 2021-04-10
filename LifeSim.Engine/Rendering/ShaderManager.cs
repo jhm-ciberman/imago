@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using Veldrid;
 using Veldrid.SPIRV;
 
@@ -37,25 +39,58 @@ namespace LifeSim.Engine.Rendering
             return shaders;
         }
 
+        private static readonly Regex _includeRegex = new Regex("^#include\\s+\"([^\"]+)\"");
+
+        private string _GetGlsl(string path)
+        {
+            // Substitute include files
+            using StreamReader reader = new StreamReader(path);
+            var sb = new StringBuilder();
+            while (! reader.EndOfStream) {
+                var line = reader.ReadLine();
+                if (line == null) break;
+                var match = ShaderManager._includeRegex.Match(line);
+                if (match.Success) {
+                    var filename = match.Groups[1].Value;
+                    var fullFilePath = this._ResolvePath(filename);
+                    var includedContent = this._GetGlsl(fullFilePath);
+                    sb.AppendLine(includedContent);
+                } else {
+                    sb.AppendLine(line);
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        private string _ResolvePath(string filename)
+        {
+            var fullFilePath = Path.Combine(this._shadersBasePath, filename);
+            if (! File.Exists(fullFilePath)) {
+                throw new Exception($"The shader file \"{fullFilePath}\" was not found");
+            }
+            return fullFilePath;
+        }
+
+        private SpirvCompilationResult _CompileGlslToSpirv(string filename, ShaderStages shaderStages, GlslCompileOptions options)
+        {
+            var fullPath = this._ResolvePath(filename);
+            var text = this._GetGlsl(fullPath);
+            return SpirvCompilation.CompileGlslToSpirv(text.ToString(), fullPath, shaderStages, options);
+        }
+
         private Shader _MakeShader(ShaderVariant shaderVariant)
         {
-            StringBuilder vert = new StringBuilder();
-            StringBuilder frag = new StringBuilder();
-
-            var filenameVert = Path.Combine(this._shadersBasePath, shaderVariant.shaderName + ".vert.glsl");
-            var filenameFrag = Path.Combine(this._shadersBasePath, shaderVariant.shaderName + ".frag.glsl");
-            var textVert = File.ReadAllText(filenameVert);
-            var textFrag = File.ReadAllText(filenameFrag);
-            
             var macros = new MacroDefinition[shaderVariant.keywords.Length];
             for (int i = 0; i < shaderVariant.keywords.Length; i++) {
                 macros[i++].Name = shaderVariant.keywords[i];
             }
 
             var options = new GlslCompileOptions(true, macros);
-            var vertResult = SpirvCompilation.CompileGlslToSpirv(textVert.ToString(), filenameVert, ShaderStages.Vertex, options);
-            var fragResult = SpirvCompilation.CompileGlslToSpirv(textFrag.ToString(), filenameFrag, ShaderStages.Fragment, options);
 
+            var vertResult = this._CompileGlslToSpirv(shaderVariant.shaderName + ".vert.glsl", ShaderStages.Vertex, options);
+            var fragResult = this._CompileGlslToSpirv(shaderVariant.shaderName + ".frag.glsl", ShaderStages.Fragment, options);
+            
             return new Shader(this._factory.CreateFromSpirv(
                 new ShaderDescription(ShaderStages.Vertex, vertResult.SpirvBytes, "main"),
                 new ShaderDescription(ShaderStages.Fragment, fragResult.SpirvBytes, "main")
