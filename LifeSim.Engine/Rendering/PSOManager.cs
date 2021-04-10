@@ -53,10 +53,11 @@ namespace LifeSim.Engine.Rendering
         private Pipeline _MakePSO(Pass pass, IMaterial material, IRenderable renderable)
         {
             var vertexLayout = ShaderLayouts.GetVertexLayout(renderable.vertexLayoutKind);
-            var shaders = this._shaderManager.GetShader(new ShaderVariant(pass.shaderName, renderable.GetShaderKeywords()));
+            var description = new ShaderVariantDescription(pass.shaderName, renderable.GetShaderKeywords());
+            var shaderVariant = this._shaderManager.GetShaderVariant(description);
 
             GraphicsPipelineDescription pipelineDescription = new GraphicsPipelineDescription();
-            pipelineDescription.ShaderSet = new ShaderSetDescription(new [] { vertexLayout }, shaders.shaders); 
+            pipelineDescription.ShaderSet = new ShaderSetDescription(new [] { vertexLayout }, shaderVariant.shaders); 
             pipelineDescription.BlendState = pass.description.blendState;
             pipelineDescription.DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual;
             pipelineDescription.RasterizerState = new RasterizerStateDescription(

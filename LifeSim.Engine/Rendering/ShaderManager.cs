@@ -10,33 +10,33 @@ namespace LifeSim.Engine.Rendering
 {
     public class ShaderManager
     {
-        public struct Shader
-        {
-            public Veldrid.Shader[] shaders;
-            public Shader(Veldrid.Shader[] shaders) { this.shaders = shaders; }
-        }
-
         private readonly string _shadersBasePath = "./res/shaders/";
 
         private readonly Veldrid.ResourceFactory _factory;
 
-        private readonly Dictionary<ShaderVariant, Shader> _shaderVariants = new Dictionary<ShaderVariant, Shader>();
+        private readonly Dictionary<ShaderVariantDescription, ShaderVariant> _shaderVariants = new Dictionary<ShaderVariantDescription, ShaderVariant>();
 
         public ShaderManager(Veldrid.ResourceFactory factory)
         {
             this._factory = factory;
         }   
     
-        public Shader GetShader(ShaderVariant shaderVariant)
+        public ShaderVariant GetShaderVariant(ShaderVariantDescription description)
         {
-            if (! this._shaderVariants.TryGetValue(shaderVariant, out Shader shaders)) {
-                shaders = this._MakeShader(shaderVariant);
-                lock (this._shaderVariants) {
-                    this._shaderVariants.Add(shaderVariant, shaders);
+            ShaderVariant? shaderVariant;
+            lock (this._shaderVariants) {
+                if (this._shaderVariants.TryGetValue(description, out shaderVariant)) {
+                    return shaderVariant;
                 }
-                return shaders;
             }
-            return shaders;
+
+            shaderVariant = this._MakeShaderVariant(description);
+
+            lock (this._shaderVariants) {
+                this._shaderVariants.Add(description, shaderVariant);
+            }
+
+            return shaderVariant;
         }
 
         private static readonly Regex _includeRegex = new Regex("^#include\\s+\"([^\"]+)\"");
@@ -79,22 +79,24 @@ namespace LifeSim.Engine.Rendering
             return SpirvCompilation.CompileGlslToSpirv(text.ToString(), fullPath, shaderStages, options);
         }
 
-        private Shader _MakeShader(ShaderVariant shaderVariant)
+        private ShaderVariant _MakeShaderVariant(ShaderVariantDescription description)
         {
-            var macros = new MacroDefinition[shaderVariant.keywords.Length];
-            for (int i = 0; i < shaderVariant.keywords.Length; i++) {
-                macros[i++].Name = shaderVariant.keywords[i];
+            var macros = new MacroDefinition[description.keywords.Length];
+            for (int i = 0; i < description.keywords.Length; i++) {
+                macros[i++].Name = description.keywords[i];
             }
 
             var options = new GlslCompileOptions(true, macros);
 
-            var vertResult = this._CompileGlslToSpirv(shaderVariant.shaderName + ".vert.glsl", ShaderStages.Vertex, options);
-            var fragResult = this._CompileGlslToSpirv(shaderVariant.shaderName + ".frag.glsl", ShaderStages.Fragment, options);
+            var vertResult = this._CompileGlslToSpirv(description.shaderName + ".vert.glsl", ShaderStages.Vertex, options);
+            var fragResult = this._CompileGlslToSpirv(description.shaderName + ".frag.glsl", ShaderStages.Fragment, options);
             
-            return new Shader(this._factory.CreateFromSpirv(
+            var shaders = this._factory.CreateFromSpirv(
                 new ShaderDescription(ShaderStages.Vertex, vertResult.SpirvBytes, "main"),
                 new ShaderDescription(ShaderStages.Fragment, fragResult.SpirvBytes, "main")
-            ));
+            );
+
+            return new ShaderVariant(description, shaders);
         }
     }
 }

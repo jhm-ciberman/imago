@@ -1,27 +1,41 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
+using Veldrid;
 
 namespace LifeSim.Engine.Rendering
 {
-    public struct ShaderVariant : IEquatable<ShaderVariant>
+    public class ShaderVariant : IEquatable<ShaderVariant>
     {
-        public string shaderName;
-        public string[] keywords;
+        public ShaderVariantDescription description;
 
-        public ShaderVariant(string shaderName, string[] keywords)
+        public Veldrid.Shader[] shaders;
+
+        //public ResourceLayout[] resourceLayouts;
+
+        public ShaderVariant(ShaderVariantDescription description, Veldrid.Shader[] shaders) //, ResourceLayout[] resourceLayouts)
         {
-            this.shaderName = shaderName;
-            this.keywords = keywords;
+            this.description = description;
+            this.shaders = shaders;
+            //this.resourceLayouts = resourceLayouts;
         }
 
-        public bool Equals([AllowNull] ShaderVariant other)
+        public override bool Equals(object? obj)
         {
-            return (this.shaderName == other.shaderName && Array.Equals(this.keywords, other.keywords));
+            if (obj is ShaderVariant other) {
+                return this.Equals(other);
+            }
+            return false;
+        }
+
+        public bool Equals(ShaderVariant? other)
+        {
+            if (other == null) return false;
+            return this.description.Equals(other.description);
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(this.shaderName, this.keywords);
+            return base.GetHashCode();
         }
     }
 }
