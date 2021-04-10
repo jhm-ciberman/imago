@@ -16,7 +16,6 @@ namespace LifeSim.Engine.Rendering
         public struct Materials
         {
             public ResourceLayout surface;
-            public ResourceLayout fullscreen;
             public ResourceLayout sprites;
         }
 
@@ -36,11 +35,6 @@ namespace LifeSim.Engine.Rendering
                 surface = factory.CreateResourceLayout(new ResourceLayoutDescription(
                     new ResourceLayoutElementDescription("SurfaceTexture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
                     new ResourceLayoutElementDescription("SurfaceSampler", ResourceKind.Sampler, ShaderStages.Fragment)
-                )),
-
-                fullscreen = factory.CreateResourceLayout(new ResourceLayoutDescription(
-                    new ResourceLayoutElementDescription("Texture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
-                    new ResourceLayoutElementDescription("Sampler", ResourceKind.Sampler, ShaderStages.Fragment)
                 )),
 
                 sprites = factory.CreateResourceLayout(new ResourceLayoutDescription(

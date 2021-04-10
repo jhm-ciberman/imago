@@ -87,7 +87,17 @@ namespace LifeSim.Engine.Rendering
             });
         }
 
-        ShaderLayouts IMaterialBuilder.layouts => this._layouts;
+        public SurfaceMaterial MakeSurfaceMaterial(GPUTexture texture)
+        {
+            return new SurfaceMaterial(this, texture);
+        }
+
+        public SpriteMaterial MakeSpritesMaterial(Veldrid.Texture texture)
+        {
+            return new SpriteMaterial(this, texture);
+        }
+
+        public ShaderLayouts layouts => this._layouts;
 
         public SceneManager sceneManager => this._sceneManager;
 

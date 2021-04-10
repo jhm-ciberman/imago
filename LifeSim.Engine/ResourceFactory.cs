@@ -44,8 +44,10 @@ namespace LifeSim.Engine
         {
             get
             {
-                if (this._cachedDefaultSurfaceMaterial != null) return this._cachedDefaultSurfaceMaterial;
-                return this._cachedDefaultSurfaceMaterial = new SurfaceMaterial(this._gpuResourceManager, null);
+                if (this._cachedDefaultSurfaceMaterial != null) {
+                    return this._cachedDefaultSurfaceMaterial;
+                }
+                return this._cachedDefaultSurfaceMaterial = new SurfaceMaterial(this._gpuResourceManager, this._gpuResourceManager.pinkTexture);
             }
         }
 
@@ -72,17 +74,12 @@ namespace LifeSim.Engine
 
         public SurfaceMaterial MakeSurfaceMaterial(GPUTexture texture)
         {
-            return new SurfaceMaterial(this._gpuResourceManager, texture);
+            return this._gpuResourceManager.MakeSurfaceMaterial(texture);
         }
 
         public SpriteMaterial MakeSpritesMaterial(Veldrid.Texture texture)
         {
-            return new SpriteMaterial(this._gpuResourceManager, texture);
-        }
-
-        public FullScreenMaterial MakeFullScreenMaterial(Veldrid.Texture texture)
-        {
-            return new FullScreenMaterial(this._gpuResourceManager, texture);
+            return this._gpuResourceManager.MakeSpritesMaterial(texture);
         }
 
         public FontSystem MakeFontSystem(string[] paths)

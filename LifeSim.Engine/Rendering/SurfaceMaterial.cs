@@ -18,11 +18,11 @@ namespace LifeSim.Engine.Rendering
         public GPUTexture _texture;
         public GPUTexture texture => this._texture;
 
-        public SurfaceMaterial(IMaterialBuilder builder, GPUTexture? texture) 
+        public SurfaceMaterial(IMaterialBuilder builder, GPUTexture texture) 
         {
             this._materialManager = builder;
             this._resourceLayout = builder.layouts.materials.surface;
-            this._texture = texture ?? builder.pinkTexture;
+            this._texture = texture;
             this._resourceSet = builder.CreateResourceSet(this, this._texture.deviceTexture, this._texture.sampler);
         }
 

@@ -39,7 +39,7 @@ namespace LifeSim.Engine.Rendering
         private readonly CommandList _commandList;
         private readonly IRenderTexture _destinationTexture;
         private IRenderTexture _sourceTexture;
-        private IMaterial? _material = null;
+        private IMaterial? _material;
         private readonly PSOManager _psoManager;
         private readonly ResourceFactory _assetManager;
         private readonly Pass _pass;
@@ -56,7 +56,9 @@ namespace LifeSim.Engine.Rendering
             this._sourceTexture.onResized += this._OnSourceTextureResized;
             this._psoManager = psoManager;
             this._quad = new FullScreenQuad(gd);
-            this._commandList = gd.ResourceFactory.CreateCommandList();
+
+            var factory = gd.ResourceFactory;
+            this._commandList = factory.CreateCommandList();
         }
 
         public void Dispose()
@@ -84,7 +86,7 @@ namespace LifeSim.Engine.Rendering
         public void Render()
         {
             if (this._material == null) {
-                this._material = this._assetManager.MakeFullScreenMaterial(this._sourceTexture.colorTexture);
+                this._material = this._assetManager.MakeSpritesMaterial(this._sourceTexture.colorTexture);
             }
 
             var pipeline = this._psoManager.GetPipeline(this._pass, this._material, this._quad);
