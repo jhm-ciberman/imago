@@ -90,7 +90,8 @@ namespace LifeSim.Engine.Rendering
             this._commandList.SetFramebuffer(this._destinationTexture.framebuffer);
             this._commandList.SetPipeline(pipeline);
             this._commandList.SetVertexBuffer(0, this._quad.vertexBuffer);
-            this._commandList.SetGraphicsResourceSet(0, this._material.resourceSet);
+            this._commandList.SetGraphicsResourceSet(0, this._material.pass.resourceSet);
+            this._commandList.SetGraphicsResourceSet(1, this._material.resourceSet);
             this._commandList.Draw(6);
             this._commandList.End();
         }

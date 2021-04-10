@@ -1,3 +1,4 @@
+using System;
 using Veldrid;
 
 namespace LifeSim.Engine.Rendering
@@ -9,6 +10,7 @@ namespace LifeSim.Engine.Rendering
             public ResourceLayout color;
             public ResourceLayout shadowMap;
             public ResourceLayout sprites;
+            public ResourceLayout fullscreen;
         }
 
         public struct Materials
@@ -30,24 +32,6 @@ namespace LifeSim.Engine.Rendering
 
         public ShaderLayouts(Veldrid.ResourceFactory factory)
         {
-            this.passes = new Passes {
-                sprites = factory.CreateResourceLayout(new ResourceLayoutDescription(
-                    new ResourceLayoutElementDescription("CameraInfo", ResourceKind.UniformBuffer, ShaderStages.Vertex)
-                )),
-
-                shadowMap = factory.CreateResourceLayout(new ResourceLayoutDescription(
-                    new ResourceLayoutElementDescription("ShadowMapInfo", ResourceKind.UniformBuffer, ShaderStages.Vertex)
-                )),
-
-                color = factory.CreateResourceLayout(new ResourceLayoutDescription(
-                    new ResourceLayoutElementDescription("CameraInfo", ResourceKind.UniformBuffer, ShaderStages.Vertex),
-                    new ResourceLayoutElementDescription("LightInfo", ResourceKind.UniformBuffer, ShaderStages.Fragment),
-                    new ResourceLayoutElementDescription("ShadowMapTexture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
-                    new ResourceLayoutElementDescription("ShadowMapSampler", ResourceKind.Sampler, ShaderStages.Fragment)
-                )),
-            };
-
-
             this.materials = new Materials {
                 surface = factory.CreateResourceLayout(new ResourceLayoutDescription(
                     new ResourceLayoutElementDescription("SurfaceTexture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),

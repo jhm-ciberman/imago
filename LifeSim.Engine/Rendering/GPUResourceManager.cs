@@ -1,3 +1,4 @@
+using System;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using Veldrid;
@@ -6,11 +7,14 @@ namespace LifeSim.Engine.Rendering
 {
     public class GPUResourceManager : IMaterialBuilder 
     {
+        public Pass colorPass { get; private set; }
+        public Pass shadowMapPass { get; private set; }
+        public Pass fullscreenPass { get; private set; }
+        public Pass spritesPass { get; private set; }
+
         private readonly GraphicsDevice _gd;
 
         private readonly ShaderLayouts _layouts;
-
-        private readonly PassManager _passes;
 
         private readonly SceneManager _sceneManager;
 
@@ -28,12 +32,62 @@ namespace LifeSim.Engine.Rendering
             this.fullScreenRenderTexture = new SwapchainRenderTexture(this._gd.MainSwapchain);
             this.mainRenderTexture = new RenderTexture(factory, width, height);
 
-            this._passes = new PassManager(this._gd, this);
+            var shadowMapSampler = factory.CreateSampler(new SamplerDescription (
+                SamplerAddressMode.Border, SamplerAddressMode.Border, SamplerAddressMode.Border,
+                SamplerFilter.MinLinear_MagLinear_MipPoint, null, 0, 0, 0, 0, SamplerBorderColor.OpaqueWhite
+            ));
+
+            var colorPassLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
+                new ResourceLayoutElementDescription("CameraInfo", ResourceKind.UniformBuffer, ShaderStages.Vertex),
+                new ResourceLayoutElementDescription("LightInfo", ResourceKind.UniformBuffer, ShaderStages.Fragment),
+                new ResourceLayoutElementDescription("ShadowMapTexture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
+                new ResourceLayoutElementDescription("ShadowMapSampler", ResourceKind.Sampler, ShaderStages.Fragment)
+            ));
+
+            var shadowmapPässLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
+                new ResourceLayoutElementDescription("ShadowMapInfo", ResourceKind.UniformBuffer, ShaderStages.Vertex)
+            ));
+
+            var spritesPassLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
+                new ResourceLayoutElementDescription("CameraInfo", ResourceKind.UniformBuffer, ShaderStages.Vertex)
+            ));
+
+            var fullscreenPassLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
+                Array.Empty<ResourceLayoutElementDescription>()
+            ));
+
+            var ctx = this._sceneManager;
+            var colorPassResources     = factory.CreateResourceSet(new ResourceSetDescription(colorPassLayout, ctx.camera3DInfoBuffer, ctx.lightInfoBuffer, ctx.shadowmapTexture, shadowMapSampler));
+            var shadowmapPassResources = factory.CreateResourceSet(new ResourceSetDescription(shadowmapPässLayout, ctx.shadowmapInfoBuffer));
+            var spritesPassResources   = factory.CreateResourceSet(new ResourceSetDescription(spritesPassLayout, ctx.camera2DInfoBuffer));
+            var fullscreenPassResource = factory.CreateResourceSet(new ResourceSetDescription(fullscreenPassLayout));
+
+            this.colorPass = new Pass("base", colorPassResources, colorPassLayout, new Pass.Description {
+                blendState = new BlendStateDescription(RgbaFloat.Black, BlendAttachmentDescription.OverrideBlend, BlendAttachmentDescription.Disabled),
+                faceCullMode = FaceCullMode.Front,
+                outputDescription = this.mainRenderTexture.outputDescription,
+            });
+
+            this.shadowMapPass = new Pass("shadowmap", shadowmapPassResources, shadowmapPässLayout, new Pass.Description {
+                blendState = BlendStateDescription.Empty,
+                faceCullMode = FaceCullMode.Front,
+                outputDescription = ctx.shadowmapFramebuffer.OutputDescription,
+            });
+
+            this.spritesPass = new Pass("sprites", spritesPassResources, spritesPassLayout, new Pass.Description {
+                blendState = BlendStateDescription.SingleAlphaBlend,
+                faceCullMode = FaceCullMode.None,
+                outputDescription = this.mainRenderTexture.outputDescription,
+            });
+
+            this.fullscreenPass = new Pass("fullscreen", fullscreenPassResource, fullscreenPassLayout, new Pass.Description {
+                blendState = BlendStateDescription.SingleOverrideBlend,
+                faceCullMode = FaceCullMode.None,
+                outputDescription = this.fullScreenRenderTexture.outputDescription,
+            });
         }
 
         ShaderLayouts IMaterialBuilder.layouts => this._layouts;
-
-        PassManager IMaterialBuilder.passes => this._passes;
 
         public SceneManager sceneManager => this._sceneManager;
 

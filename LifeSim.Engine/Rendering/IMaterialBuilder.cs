@@ -4,8 +4,12 @@ namespace LifeSim.Engine.Rendering
 {
     public interface IMaterialBuilder
     {
+        Pass colorPass { get; }
+        Pass shadowMapPass { get; }
+        Pass fullscreenPass { get; }
+        Pass spritesPass { get; }
+        
         ShaderLayouts layouts { get; }
-        PassManager passes { get; }
 
         Sampler linearSampler { get; }
         Sampler pointSampler { get; }

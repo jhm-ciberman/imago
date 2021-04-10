@@ -14,7 +14,7 @@ namespace LifeSim.Engine.Rendering
 
         public SpriteMaterial(IMaterialBuilder builder, Texture texture) 
         {
-            this._pass = builder.passes.sprites;
+            this._pass = builder.spritesPass;
             this.resourceLayout = builder.layouts.materials.sprites;
             this._resourceSet = builder.CreateResourceSet(this, texture, builder.linearSampler);
         }

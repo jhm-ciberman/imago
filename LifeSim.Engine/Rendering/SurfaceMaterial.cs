@@ -5,8 +5,8 @@ namespace LifeSim.Engine.Rendering
 {
     public class SurfaceMaterial : IMaterial
     {
-        public Pass pass          => this._materialManager.passes.color;
-        public Pass shadowmapPass => this._materialManager.passes.shadowMap;
+        public Pass pass          => this._materialManager.colorPass;
+        public Pass shadowmapPass => this._materialManager.shadowMapPass;
 
         private readonly ResourceLayout _resourceLayout;
         public ResourceLayout resourceLayout => this._resourceLayout;

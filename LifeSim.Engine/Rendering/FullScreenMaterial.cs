@@ -14,7 +14,7 @@ namespace LifeSim.Engine.Rendering
 
         public FullScreenMaterial(IMaterialBuilder builder, Texture texture) 
         {
-            this._pass = builder.passes.fullscreen;
+            this._pass = builder.fullscreenPass;
             this.resourceLayout = builder.layouts.materials.fullscreen;
             this._resourceSet = builder.CreateResourceSet(this, texture, builder.pointSampler);
         }

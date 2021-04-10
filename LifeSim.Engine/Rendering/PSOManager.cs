@@ -20,7 +20,7 @@ namespace LifeSim.Engine.Rendering
         public ResourceLayout[] _GetResourceLayouts(Pass pass, IMaterial material, IRenderable renderable)
         {
             List<ResourceLayout> list = new List<ResourceLayout>(3);
-            if (pass.resourceLayout != null)         list.Add(pass.resourceLayout);
+            list.Add(pass.resourceLayout);
             if (material.resourceLayout != null)     list.Add(material.resourceLayout);
             if (renderable.resourceLayout != null)   list.Add(renderable.resourceLayout);
 
