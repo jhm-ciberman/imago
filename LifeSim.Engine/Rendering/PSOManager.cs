@@ -64,8 +64,11 @@ namespace LifeSim.Engine.Rendering
         public Pipeline GetPipeline(Pass pass, IMaterial material, IRenderable renderable)
         {
             uint hash = this._GetHash(pass, renderable);
-            if (this._pipelines.TryGetValue(hash, out Pipeline? pipeline)) {
-                return pipeline;
+            Pipeline? pipeline;
+            lock (this._pipelines) {
+                if (this._pipelines.TryGetValue(hash, out pipeline)) {
+                    return pipeline;
+                }
             }
             pipeline = this._MakePSO(pass, material, renderable);
             lock (this._pipelines) {

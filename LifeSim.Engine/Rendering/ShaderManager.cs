@@ -39,40 +39,26 @@ namespace LifeSim.Engine.Rendering
 
         private Shader _MakeShader(ShaderVariant shaderVariant)
         {
-            StringBuilder vertex = new StringBuilder();
-            StringBuilder fragment = new StringBuilder();
+            StringBuilder vert = new StringBuilder();
+            StringBuilder frag = new StringBuilder();
 
-            var filename = Path.Combine(this._shadersBasePath, shaderVariant.shaderName + ".glsl");
-            var lines = File.ReadAllLines(filename);
-            StringBuilder? current = null;
-            foreach (var line in lines) {
-                if (line.Contains("#shader")) {
-                    if (line.Contains("vertex")) {
-                        current = vertex;
-                    } else if (line.Contains("fragment")) {
-                        current = fragment;
-                    } else {
-                        throw new System.Exception("Unrecognized type of shader: " + line);
-                    }
-                } else {
-                    current?.AppendLine(line);
-                }
-            }
+            var filenameVert = Path.Combine(this._shadersBasePath, shaderVariant.shaderName + ".vert.glsl");
+            var filenameFrag = Path.Combine(this._shadersBasePath, shaderVariant.shaderName + ".frag.glsl");
+            var textVert = File.ReadAllText(filenameVert);
+            var textFrag = File.ReadAllText(filenameFrag);
             
-            StringBuilder macros = new StringBuilder();
-            macros.AppendLine("#version 450");
-            if (shaderVariant.keywords != null) {
-                foreach (var keyword in shaderVariant.keywords) {
-                    macros.AppendJoin(" ", "#define", keyword).AppendLine();
-                }
+            var macros = new MacroDefinition[shaderVariant.keywords.Length];
+            for (int i = 0; i < shaderVariant.keywords.Length; i++) {
+                macros[i++].Name = shaderVariant.keywords[i];
             }
-            var macrosStr = macros.ToString();
 
-            var vertBytes = Encoding.UTF8.GetBytes(macrosStr + vertex.ToString());
-            var fragBytes = Encoding.UTF8.GetBytes(macrosStr + fragment.ToString());
+            var options = new GlslCompileOptions(true, macros);
+            var vertResult = SpirvCompilation.CompileGlslToSpirv(textVert.ToString(), filenameVert, ShaderStages.Vertex, options);
+            var fragResult = SpirvCompilation.CompileGlslToSpirv(textFrag.ToString(), filenameFrag, ShaderStages.Fragment, options);
+
             return new Shader(this._factory.CreateFromSpirv(
-                new Veldrid.ShaderDescription(ShaderStages.Vertex  , vertBytes, "main"),
-                new Veldrid.ShaderDescription(ShaderStages.Fragment, fragBytes, "main")
+                new ShaderDescription(ShaderStages.Vertex, vertResult.SpirvBytes, "main"),
+                new ShaderDescription(ShaderStages.Fragment, fragResult.SpirvBytes, "main")
             ));
         }
     }
