@@ -86,7 +86,7 @@ namespace LifeSim.Engine.GLTF
         }
 
 
-        private GPUMesh _GetMesh(int index)
+        private Mesh _GetMesh(int index)
         {
             return this._assetsManager.MakeMesh(this.GetPrimitive(index).MakeMesh());
         }

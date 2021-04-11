@@ -9,8 +9,8 @@ namespace LifeSim.Engine.SceneGraph
     {
         public System.UInt32 pickingID = 0;
         
-        private GPUMesh? _mesh;
-        public GPUMesh? mesh
+        private Mesh? _mesh;
+        public Mesh? mesh
         {
             get => this._mesh;
             set
@@ -50,14 +50,14 @@ namespace LifeSim.Engine.SceneGraph
             this.material = null;
         }
 
-        public RenderNode3D(GPUMesh mesh, SurfaceMaterial material)
+        public RenderNode3D(Mesh mesh, SurfaceMaterial material)
         {
             this.mesh = mesh;
             this.material = material;
             this.resourceLayout = material.GetObjectResourceLayout(this);
         }
 
-        public RenderNode3D(GPUMesh mesh)
+        public RenderNode3D(Mesh mesh)
         {
             this._mesh = mesh;
             this.material = null;

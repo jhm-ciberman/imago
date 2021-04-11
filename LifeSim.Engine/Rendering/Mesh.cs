@@ -6,7 +6,7 @@ using Veldrid.Utilities;
 
 namespace LifeSim.Engine.Rendering
 {
-    public class GPUMesh :  System.IDisposable
+    public class Mesh :  System.IDisposable
     {
         [StructLayout(LayoutKind.Sequential)]
         private struct VertData
@@ -35,7 +35,7 @@ namespace LifeSim.Engine.Rendering
 
         public BoundingBox boundingBox;
 
-        public GPUMesh(GraphicsDevice graphicsDevice, MeshData mesh)
+        public Mesh(GraphicsDevice graphicsDevice, MeshData mesh)
         {
             var indices = mesh.indices.ToArray();
 
@@ -95,7 +95,7 @@ namespace LifeSim.Engine.Rendering
             this._indexBuffer.Dispose();
         }
 
-        ~GPUMesh() {
+        ~Mesh() {
             this.Dispose();
         }
     }

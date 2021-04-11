@@ -15,7 +15,7 @@ namespace LifeSim.Engine
 
         private readonly InputInstance _input;
 
-        private readonly GPURenderer _renderer;
+        private readonly Renderer _renderer;
 
         public uint selectedObjectID => this._renderer.selectedObjectID;
         
@@ -32,7 +32,7 @@ namespace LifeSim.Engine
             this.viewport = new Viewport((uint) this._window.Width, (uint) this._window.Height);
 
             var graphicsBackend = App.ParseGraphicsBackend(args);
-            this._renderer = new GPURenderer(this._window, graphicsBackend);
+            this._renderer = new Renderer(this._window, graphicsBackend);
 
             this._window.Resized += this.OnResize;
 
@@ -79,7 +79,7 @@ namespace LifeSim.Engine
             this._stage = stage;
         }
 
-        public IntPtr GetImGUITexture(GPUTexture texture)
+        public IntPtr GetImGUITexture(Texture texture)
         {
             return this._renderer.GetImGUITexture(texture);
         }

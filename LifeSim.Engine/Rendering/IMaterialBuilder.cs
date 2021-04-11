@@ -13,7 +13,7 @@ namespace LifeSim.Engine.Rendering
 
         Sampler linearSampler { get; }
         Sampler pointSampler { get; }
-        GPUTexture pinkTexture { get; }
+        Texture pinkTexture { get; }
 
         ResourceSet CreateResourceSet(IMaterial material, params BindableResource[] resources);
     }

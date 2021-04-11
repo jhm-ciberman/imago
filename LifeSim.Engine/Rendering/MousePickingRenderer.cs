@@ -3,16 +3,16 @@ using Veldrid;
 
 namespace LifeSim.Engine.Rendering
 {
-    public class GPUMousePicker
+    public class MousePickingRenderer
     {
         private readonly GraphicsDevice _gd;
-        private readonly Texture _pixelTexture;
+        private readonly Veldrid.Texture _pixelTexture;
         private readonly CommandList _commandList;
 
         private uint _objectID = 0;
         private bool _hasCommandsToSubmit = false;
 
-        public GPUMousePicker(GraphicsDevice graphicsDevice)
+        public MousePickingRenderer(GraphicsDevice graphicsDevice)
         {
             this._gd = graphicsDevice;
             var factory = graphicsDevice.ResourceFactory;

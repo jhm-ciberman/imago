@@ -10,20 +10,20 @@ using Veldrid.StartupUtilities;
 
 namespace LifeSim.Engine.Rendering
 {
-    public class GPURenderer : System.IDisposable
+    public class Renderer : System.IDisposable
     {
         private readonly GraphicsDevice _gd;
         private readonly Veldrid.ResourceFactory _factory;
         
-        private readonly GPURenderer2D _renderer2d;
-        private readonly GPURenderer3D _renderer3d;
+        private readonly CanvasRenderer _renderer2d;
+        private readonly SceneRenderer _renderer3d;
         private readonly ImguiRenderer _imguiRenderer;
 
         private readonly FullScreenRenderer _fullScreenQuad;
 
         public GraphicsBackend backendType => this._gd.BackendType;
 
-        private readonly GPUMousePicker _mousePicker;
+        private readonly MousePickingRenderer _mousePicker;
 
         private readonly GPUResourceManager _gpuResources;
 
@@ -34,7 +34,7 @@ namespace LifeSim.Engine.Rendering
 
         private readonly Fence _fence;
 
-        public GPURenderer(Sdl2Window window, GraphicsBackend graphicsBackend)
+        public Renderer(Sdl2Window window, GraphicsBackend graphicsBackend)
         {
             GraphicsDeviceOptions options = new GraphicsDeviceOptions(
                 debug: false,
@@ -56,10 +56,10 @@ namespace LifeSim.Engine.Rendering
 
             this._assetManager = new ResourceFactory(this._gd, this._gpuResources);
 
-            this._renderer2d     = new GPURenderer2D(this._gd, this._assetManager, this._gpuResources, this._psoManager);
-            this._renderer3d     = new GPURenderer3D(this._gd, this._psoManager, this._gpuResources);
+            this._renderer2d     = new CanvasRenderer(this._gd, this._assetManager, this._gpuResources, this._psoManager);
+            this._renderer3d     = new SceneRenderer(this._gd, this._psoManager, this._gpuResources);
             this._imguiRenderer  = new ImguiRenderer(this._gd, this._gpuResources.mainRenderTexture);
-            this._mousePicker    = new GPUMousePicker(this._gd);
+            this._mousePicker    = new MousePickingRenderer(this._gd);
             this._fullScreenQuad = new FullScreenRenderer(this._gd, this._assetManager, this._psoManager, this._gpuResources);
 
             this._fence = this._factory.CreateFence(false);
@@ -77,7 +77,7 @@ namespace LifeSim.Engine.Rendering
             this._imguiRenderer.Update(deltaTime, inputSnapshot);
         }
 
-        public IntPtr GetImGUITexture(GPUTexture texture)
+        public IntPtr GetImGUITexture(Texture texture)
         {
             return this._imguiRenderer.Texture(texture);
         }

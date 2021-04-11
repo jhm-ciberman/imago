@@ -9,7 +9,7 @@ namespace LifeSim.Engine.Rendering
         private readonly ResourceSet _resourceSet;
         public ResourceSet resourceSet => this._resourceSet;
 
-        public SpriteMaterial(IMaterialBuilder builder, Texture texture) 
+        public SpriteMaterial(IMaterialBuilder builder, Veldrid.Texture texture) 
         {
             this.resourceLayout = builder.layouts.materials.sprites;
             this._resourceSet = builder.CreateResourceSet(this, texture, builder.linearSampler);

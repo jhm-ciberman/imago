@@ -38,7 +38,7 @@ namespace LifeSim.Engine.Rendering
             this._imguiRenderer.WindowResized((int) width, (int) height);
         }
 
-        public IntPtr Texture(GPUTexture texture)
+        public IntPtr Texture(Texture texture)
         {
             return this._imguiRenderer.GetOrCreateImGuiBinding(this._gd.ResourceFactory, texture.deviceTexture);
         }

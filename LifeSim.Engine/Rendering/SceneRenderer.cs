@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace LifeSim.Engine.Rendering
 {
-    public class GPURenderer3D
+    public class SceneRenderer
     {
         private readonly GraphicsDevice _graphicsDevice;
         
@@ -20,7 +20,7 @@ namespace LifeSim.Engine.Rendering
         private readonly RenderQueue _shadowmapRQ = new RenderQueue();
 
         private Pipeline? _currentPipeline;
-        private GPUMesh? _currentMesh;
+        private Mesh? _currentMesh;
         private Pass? _currentPass;
         private IMaterial? _currentMaterial;
 
@@ -31,7 +31,7 @@ namespace LifeSim.Engine.Rendering
         private Pass _colorPass;
         private Pass _shadowmapPass;
 
-        public GPURenderer3D(GraphicsDevice graphicsDevice, PSOManager psoManager, GPUResourceManager resources)
+        public SceneRenderer(GraphicsDevice graphicsDevice, PSOManager psoManager, GPUResourceManager resources)
         {
             this._graphicsDevice = graphicsDevice;
             this._renderTexture = resources.mainRenderTexture;
@@ -167,7 +167,7 @@ namespace LifeSim.Engine.Rendering
             this._hasCommandsToSubmit = false;
         }
 
-        ~GPURenderer3D() {
+        ~SceneRenderer() {
             this.Dispose();
         }
     }

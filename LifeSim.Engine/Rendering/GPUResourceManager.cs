@@ -87,7 +87,7 @@ namespace LifeSim.Engine.Rendering
             });
         }
 
-        public SurfaceMaterial MakeSurfaceMaterial(GPUTexture texture)
+        public SurfaceMaterial MakeSurfaceMaterial(Texture texture)
         {
             return new SurfaceMaterial(this, texture);
         }
@@ -110,15 +110,15 @@ namespace LifeSim.Engine.Rendering
             return this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(material.resourceLayout, resources));
         }
 
-        private GPUTexture? _cachedPinkTexture = null;
-        public GPUTexture pinkTexture 
+        private Texture? _cachedPinkTexture = null;
+        public Texture pinkTexture 
         {
             get
             {
                 if (this._cachedPinkTexture != null) return this._cachedPinkTexture;
                 
                 Image<Rgba32> image = new Image<Rgba32>(2, 2, new Rgba32(255, 0, 255));
-                return this._cachedPinkTexture = new GPUTexture(this._gd, image);
+                return this._cachedPinkTexture = new Texture(this._gd, image);
             }
         }
     }

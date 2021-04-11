@@ -57,7 +57,7 @@ namespace LifeSim.Engine.Rendering
         private readonly ResourceSet _skinnedResourceSet;
 
         public readonly  Framebuffer shadowmapFramebuffer;
-        public readonly  Texture shadowmapTexture;
+        public readonly  Veldrid.Texture shadowmapTexture;
 
         private BonesInfo _bonesInfo = BonesInfo.New();
 
@@ -82,7 +82,7 @@ namespace LifeSim.Engine.Rendering
             uint shadowMapSize = 4096;
             this.shadowmapTexture = this._factory.CreateTexture(TextureDescription.Texture2D(shadowMapSize, shadowMapSize, 1, 1, PixelFormat.R32_Float, TextureUsage.DepthStencil | TextureUsage.Sampled));
             this.shadowmapFramebuffer = this._factory.CreateFramebuffer(new FramebufferDescription(
-                this.shadowmapTexture, System.Array.Empty<Texture>()
+                this.shadowmapTexture, System.Array.Empty<Veldrid.Texture>()
             ));
 
             if (graphicsDevice.IsUvOriginTopLeft) {

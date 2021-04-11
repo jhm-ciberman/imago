@@ -39,10 +39,10 @@ namespace LifeSim.Engine.Rendering
         private readonly DeviceBuffer _vertexBuffer;
         private readonly DeviceBuffer _indexBuffer;
         private readonly Pass _pass;
-        private readonly Dictionary<GPUTexture, IMaterial> _materials = new Dictionary<GPUTexture, IMaterial>();
+        private readonly Dictionary<Texture, IMaterial> _materials = new Dictionary<Texture, IMaterial>();
         
         private readonly int _maxBatchSize = 1000;
-        private GPUTexture? _batchTexture = null;
+        private Texture? _batchTexture = null;
         private readonly Vertex[] _batchVertices;
         private int _batchCount = 0;
 
@@ -98,7 +98,7 @@ namespace LifeSim.Engine.Rendering
             float rotation, PointF origin, PointF scale, float depth
         )
         {
-            GPUTexture gpuTexture = (GPUTexture) texture;
+            Texture gpuTexture = (Texture) texture;
             int color32 = (color.A << 24) + (color.B << 16) + (color.G << 8) + (color.R << 0);
 
             Vector2 pos = new Vector2(position.X, position.Y);
@@ -121,12 +121,12 @@ namespace LifeSim.Engine.Rendering
             this.Draw(gpuTexture, pos, size, uv, deltaUV, (uint) color32, depth);
         }
 
-        public void Draw(GPUTexture texture, Vector2 position, Vector2 size)
+        public void Draw(Texture texture, Vector2 position, Vector2 size)
         {
             this.Draw(texture, position, size, Vector2.Zero, Vector2.One, 0xffffffff, 0f);
         }
 
-        public void Draw(GPUTexture texture, Vector2 position, Vector2 size, Vector2 uv, Vector2 deltaUV, uint color32, float depth = 0f)
+        public void Draw(Texture texture, Vector2 position, Vector2 size, Vector2 uv, Vector2 deltaUV, uint color32, float depth = 0f)
         {
             if (this._batchTexture != texture) {
                 this.FlushCurrentBatch();
@@ -163,7 +163,7 @@ namespace LifeSim.Engine.Rendering
             this._totalSpritesToDraw = 0;
         }
 
-        private IMaterial _GetMaterialOrNew(GPUTexture texture)
+        private IMaterial _GetMaterialOrNew(Texture texture)
         {
             if (! this._materials.TryGetValue(texture, out IMaterial? material)) {
                 material = this._assetManager.MakeSpritesMaterial(texture.deviceTexture);

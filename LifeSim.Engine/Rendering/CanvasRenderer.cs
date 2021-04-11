@@ -4,7 +4,7 @@ using Veldrid;
 
 namespace LifeSim.Engine.Rendering
 {
-    public class GPURenderer2D
+    public class CanvasRenderer
     {
         private readonly GraphicsDevice _graphicsDevice;
         private readonly SpriteBatcher _spriteBatcher;
@@ -15,7 +15,7 @@ namespace LifeSim.Engine.Rendering
         private readonly SceneManager _sceneManager;
         private bool _hasCommandsToSubmit;
 
-        public GPURenderer2D(GraphicsDevice gd, ResourceFactory assetManager, GPUResourceManager resources, PSOManager psoManager)
+        public CanvasRenderer(GraphicsDevice gd, ResourceFactory assetManager, GPUResourceManager resources, PSOManager psoManager)
         {
             var renderTexture = resources.mainRenderTexture;
             this._graphicsDevice = gd;

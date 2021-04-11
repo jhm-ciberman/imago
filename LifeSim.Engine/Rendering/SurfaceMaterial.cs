@@ -15,15 +15,14 @@ namespace LifeSim.Engine.Rendering
         
         public bool castShadows = true;
 
-        public GPUTexture _texture;
-        public GPUTexture texture => this._texture;
+        public Texture texture { get; private set; }
 
-        public SurfaceMaterial(IMaterialBuilder builder, GPUTexture texture) 
+        public SurfaceMaterial(IMaterialBuilder builder, Texture texture) 
         {
             this._materialManager = builder;
             this._resourceLayout = builder.layouts.materials.surface;
-            this._texture = texture;
-            this._resourceSet = builder.CreateResourceSet(this, this._texture.deviceTexture, this._texture.sampler);
+            this.texture = texture;
+            this._resourceSet = builder.CreateResourceSet(this, this.texture.deviceTexture, this.texture.sampler);
         }
 
         public ResourceLayout GetObjectResourceLayout(RenderNode3D renderable)

@@ -6,19 +6,19 @@ using SixLabors.ImageSharp.PixelFormats;
 
 namespace LifeSim.Engine.Rendering
 {
-    public class GPUTexture : System.IDisposable
+    public class Texture : System.IDisposable
     {
         protected Veldrid.Texture _deviceTexture;
         protected Veldrid.Sampler _sampler;
         protected Veldrid.GraphicsDevice _gd;
 
-        public GPUTexture(Veldrid.GraphicsDevice gd, Image<Rgba32> image, uint mipLevels = 0)
+        public Texture(Veldrid.GraphicsDevice gd, Image<Rgba32> image, uint mipLevels = 0)
             : this(gd, (uint) image.Width, (uint) image.Height, mipLevels)
         {
             this.Update(image, true);
         }
 
-        public GPUTexture(Veldrid.GraphicsDevice gd, uint width, uint height, uint mipLevels = 0)
+        public Texture(Veldrid.GraphicsDevice gd, uint width, uint height, uint mipLevels = 0)
         {
             this._gd = gd;
             var factory = this._gd.ResourceFactory;

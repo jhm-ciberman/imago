@@ -11,7 +11,7 @@ namespace LifeSim.Engine
 {
     public class ResourceFactory : ITexture2DCreator
     {
-        private class FontTexture2D : GPUTexture, ITexture2D
+        private class FontTexture2D : Rendering.Texture, ITexture2D
         {
             public FontTexture2D(GraphicsDevice gd, uint width, uint height) : base(gd, width, height)
             {
@@ -51,15 +51,15 @@ namespace LifeSim.Engine
             }
         }
 
-        public GPUTexture MakeTexture(string path, uint mipLevels = 0)
+        public Rendering.Texture MakeTexture(string path, uint mipLevels = 0)
         {
             Image<Rgba32> image = Image.Load<Rgba32>(path);
-            return new GPUTexture(this._gd, image, mipLevels);
+            return new Rendering.Texture(this._gd, image, mipLevels);
         }
 
-        public GPUTexture MakeTexture(Image<Rgba32> image, uint mipLevels = 0)
+        public Rendering.Texture MakeTexture(Image<Rgba32> image, uint mipLevels = 0)
         {
-            return new GPUTexture(this._gd, image, mipLevels);
+            return new Rendering.Texture(this._gd, image, mipLevels);
         }
 
         public GLTF.GLTFLoader LoadGLTF(string path, SurfaceMaterial? defaultMaterial = null)
@@ -67,12 +67,12 @@ namespace LifeSim.Engine
             return new GLTF.GLTFLoader(this, defaultMaterial, path);
         }
 
-        public GPUMesh MakeMesh(MeshData meshData)
+        public Mesh MakeMesh(MeshData meshData)
         {
-            return new GPUMesh(this._gd, meshData);
+            return new Mesh(this._gd, meshData);
         }
 
-        public SurfaceMaterial MakeSurfaceMaterial(GPUTexture texture)
+        public SurfaceMaterial MakeSurfaceMaterial(Rendering.Texture texture)
         {
             return this._gpuResourceManager.MakeSurfaceMaterial(texture);
         }

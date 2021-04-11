@@ -12,7 +12,7 @@ namespace LifeSim.Engine.GLTF
         public Quaternion rotation;
         public Vector3 scale;
 
-        public GPUMesh? mesh = null;
+        public Mesh? mesh = null;
         public Skin? skin = null;
         public SurfaceMaterial? material = null;
         public GLTFNode? parent = null;

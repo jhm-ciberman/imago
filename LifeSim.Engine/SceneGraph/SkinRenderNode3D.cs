@@ -8,7 +8,7 @@ namespace LifeSim.Engine.SceneGraph
     {
         private readonly BindedSkin? _skin = null;
 
-        public SkinRenderNode3D(GPUMesh mesh, SurfaceMaterial material, BindedSkin skin) : base(mesh, material)
+        public SkinRenderNode3D(Mesh mesh, SurfaceMaterial material, BindedSkin skin) : base(mesh, material)
         {
             this._skin = skin;
         }
