@@ -19,7 +19,7 @@ namespace LifeSim.Engine.Rendering
 
         public readonly FrameStats stats = new FrameStats();
 
-        private HashSet<IMaterial> _uniqueMaterials = new HashSet<IMaterial>();
+        private HashSet<Material> _uniqueMaterials = new HashSet<Material>();
         private HashSet<Mesh> _uniqueMeshes = new HashSet<Mesh>();
 
         private Stopwatch _stopwatch = new Stopwatch();
@@ -46,7 +46,7 @@ namespace LifeSim.Engine.Rendering
             this.stats.pipelineChanges++;
         }
 
-        public void ChangeMaterial(IMaterial material)
+        public void ChangeMaterial(Material material)
         {
             this._uniqueMaterials.Add(material);
             this.stats.materialChanges++;

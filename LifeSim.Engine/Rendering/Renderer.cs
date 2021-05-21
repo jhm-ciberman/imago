@@ -12,26 +12,19 @@ namespace LifeSim.Engine.Rendering
 {
     public class Renderer : System.IDisposable
     {
+        public readonly IRenderTexture fullScreenRenderTexture;
+        public readonly RenderTexture mainRenderTexture;
+        public ResourceFactory assetManager => this._assetManager;
+        public GraphicsBackend backendType => this._gd.BackendType;
+        
         private readonly GraphicsDevice _gd;
         private readonly Veldrid.ResourceFactory _factory;
-        
-        private readonly CanvasRenderer _renderer2d;
-        private readonly SceneRenderer _renderer3d;
+        private readonly CanvasRenderer _canvasRenderer;
+        private readonly SceneRenderer _sceneRenderer;
         private readonly ImguiRenderer _imguiRenderer;
-
         private readonly FullScreenRenderer _fullScreenQuad;
-
-        public GraphicsBackend backendType => this._gd.BackendType;
-
         private readonly MousePickingRenderer _mousePicker;
-
-        private readonly GPUResourceManager _gpuResources;
-
         private readonly ResourceFactory _assetManager;
-        public ResourceFactory assetManager => this._assetManager;
-
-        private readonly PSOManager _psoManager;
-
         private readonly Fence _fence;
 
         public Renderer(Sdl2Window window, GraphicsBackend graphicsBackend)
@@ -50,27 +43,24 @@ namespace LifeSim.Engine.Rendering
 
             this._factory = this._gd.ResourceFactory;
 
-            this._gpuResources = new GPUResourceManager(this._gd, (uint) window.Width, (uint) window.Height);
 
-            this._psoManager = new PSOManager(this._factory);
 
-            this._assetManager = new ResourceFactory(this._gd, this._gpuResources);
+            this.fullScreenRenderTexture = new SwapchainRenderTexture(this._gd.MainSwapchain);
+            this.mainRenderTexture = new RenderTexture(this._gd.ResourceFactory, (uint) window.Width, (uint) window.Height);
 
-            this._renderer2d     = new CanvasRenderer(this._gd, this._assetManager, this._gpuResources, this._psoManager);
-            this._renderer3d     = new SceneRenderer(this._gd, this._psoManager, this._gpuResources);
-            this._imguiRenderer  = new ImguiRenderer(this._gd, this._gpuResources.mainRenderTexture);
+            this._canvasRenderer = new CanvasRenderer(this._gd, this.mainRenderTexture);
+            this._sceneRenderer  = new SceneRenderer(this._gd, this.mainRenderTexture);
+            this._imguiRenderer  = new ImguiRenderer(this._gd, this.mainRenderTexture);
             this._mousePicker    = new MousePickingRenderer(this._gd);
-            this._fullScreenQuad = new FullScreenRenderer(this._gd, this._assetManager, this._psoManager, this._gpuResources);
+            this._fullScreenQuad = new FullScreenRenderer(this._gd, this.mainRenderTexture, this.fullScreenRenderTexture);
 
             this._fence = this._factory.CreateFence(false);
+            this._assetManager = new ResourceFactory(this._gd, this._sceneRenderer);
         }
 
         public uint selectedObjectID => this._mousePicker.objectID;
 
         public Vector2 mousePickingPosition = Vector2.Zero;
-
-        public FrameProfiler.FrameStats baseStats => this._renderer3d.frameProfilerBase.stats;
-        public FrameProfiler.FrameStats shadowmapStats => this._renderer3d.frameProfilerShadowmap.stats;
 
         public void Update(float deltaTime, InputSnapshot inputSnapshot)
         {
@@ -89,17 +79,17 @@ namespace LifeSim.Engine.Rendering
         public void RenderScene3D(Scene3D scene, Camera3D camera)
         {
             if (scene == null) return;
-            this._renderTasks.Add(Task.Run(() => {
-                this._renderer3d.Render(scene, camera);
-            }));
+            //this._renderTasks.Add(Task.Run(() => {
+                this._sceneRenderer.Render(scene, camera);
+            //}));
         }
 
         public void RenderCanvas2D(Canvas2D canvas)
         {
             if (canvas == null) return;
-            this._renderTasks.Add(Task.Run(() => {
-                this._renderer2d.Render(canvas);
-            }));
+            //this._renderTasks.Add(Task.Run(() => {
+                this._canvasRenderer.Render(canvas);
+            //}));
         }
 
         public void RenderImGUI(ImGUILayer layer)
@@ -116,17 +106,17 @@ namespace LifeSim.Engine.Rendering
             this._renderImGUI = false;
             stage.RenderFrame(this);
 
-            this._renderTasks.Add(Task.Run(() => {
-                this._mousePicker.Update(this._gpuResources.mainRenderTexture, this.mousePickingPosition);
+            //this._renderTasks.Add(Task.Run(() => {
+                this._mousePicker.Update(this.mainRenderTexture, this.mousePickingPosition);
                 if (this._renderImGUI) this._imguiRenderer.Render();
                 this._fullScreenQuad.Render();
-            }));
+            //}));
 
-            Task.WaitAll(this._renderTasks.ToArray());
+            //Task.WaitAll(this._renderTasks.ToArray());
             this.WaitForGPU();
 
-            this._renderer3d.Submit();
-            this._renderer2d.Submit();
+            this._sceneRenderer.Submit();
+            this._canvasRenderer.Submit();
             this._mousePicker.Submit();
             if (this._renderImGUI) this._imguiRenderer.Submit();
             this._fullScreenQuad.Submit(this._fence);
@@ -147,8 +137,8 @@ namespace LifeSim.Engine.Rendering
         {
             this._gd.ResizeMainWindow(width, height);
             this._gd.WaitForIdle();
-            this._gpuResources.fullScreenRenderTexture.Resize(width, height);
-            this._gpuResources.mainRenderTexture.Resize(viewportWidth, viewportHeight);
+            this.fullScreenRenderTexture.Resize(width, height);
+            this.mainRenderTexture.Resize(viewportWidth, viewportHeight);
             this._imguiRenderer.Resize(viewportWidth, viewportHeight);
         }
 

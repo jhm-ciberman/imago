@@ -6,11 +6,11 @@ namespace LifeSim.Engine.SceneGraph
 {
     public class SkinRenderNode3D : RenderNode3D
     {
-        private readonly BindedSkin? _skin = null;
+        public readonly BindedSkin? skin = null;
 
         public SkinRenderNode3D(Mesh mesh, SurfaceMaterial material, BindedSkin skin) : base(mesh, material)
         {
-            this._skin = skin;
+            this.skin = skin;
         }
 
         public SkinRenderNode3D() : base()
@@ -18,20 +18,17 @@ namespace LifeSim.Engine.SceneGraph
 
         }
 
-        public void CopyMatricesToBuffer(ref BonesInfo buffer)
+        public void Update()
         {
-            if (this._skin == null) return; // TODO: write identity matrices to the buffer
-            
-            Matrix4x4.Invert(this.worldMatrix, out Matrix4x4 inverseMeshWorldMatrix);
-            var joints = this._skin.joints;
-            for (int i = 0; i < joints.Count; i++) {
-                buffer.bonesMatrices[i] = this._skin.inverseBindMatrices[i] * joints[i].worldMatrix * inverseMeshWorldMatrix;
-            }
-        }
+            if (this.skin == null || this._renderable == null) return;
 
-        public override string[] GetShaderKeywords()
-        {
-            return new string[] { "USE_SKINNED_MESH" };
+            Matrix4x4.Invert(this.worldMatrix, out Matrix4x4 inverseMeshWorldMatrix);
+            var joints = this.skin.joints;
+            var invBindMatrices = this.skin.inverseBindMatrices;
+            var skeleton = this._renderable.skeleton;
+            for (int i = 0; i < joints.Count; i++) {
+                skeleton.bonesMatrices[i] = invBindMatrices[i] * joints[i].worldMatrix * inverseMeshWorldMatrix;
+            }
         }
     }
 }

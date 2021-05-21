@@ -1,0 +1,24 @@
+using Veldrid;
+
+namespace LifeSim.Engine.Rendering
+{
+    public readonly struct RenderItem
+    {
+        public readonly Shader shader;
+        public readonly Veldrid.ResourceSet instanceResourceSet;
+        public readonly Veldrid.ResourceSet materialResourceSet;
+        public readonly Mesh mesh;
+        public readonly uint transformBufferOffset;
+        public readonly uint instanceBufferOffset;
+
+        public RenderItem(Mesh mesh, Shader shader, uint transformBufferOffset, ResourceSet materialResourceSet, ResourceSet instanceResourceSet, uint instanceBufferOffset)
+        {
+            this.mesh = mesh;
+            this.shader = shader;
+            this.transformBufferOffset = transformBufferOffset;
+            this.materialResourceSet = materialResourceSet;
+            this.instanceResourceSet = instanceResourceSet;
+            this.instanceBufferOffset = instanceBufferOffset;
+        }
+    }
+}

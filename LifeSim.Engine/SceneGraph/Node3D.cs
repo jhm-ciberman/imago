@@ -104,7 +104,7 @@ namespace LifeSim.Engine.SceneGraph
 
         protected virtual void _AfterMatrixUpdate()
         {
-            // Used by RenderNode3D to update bounding boxes (it's ugly I know, but I can't think any better)
+            // Template method used by RenderNode3D to update bounding boxes (it's ugly I know, but I can't think any better)
         }
 
         public ref Matrix4x4 GetLocalMatrix()

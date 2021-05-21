@@ -2,6 +2,7 @@ using System.IO;
 using FontStashSharp;
 using FontStashSharp.Interfaces;
 using LifeSim.Engine.Rendering;
+using LifeSim.Engine.SceneGraph;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using Veldrid;
@@ -9,7 +10,7 @@ using Rectangle = System.Drawing.Rectangle;
 
 namespace LifeSim.Engine
 {
-    public class ResourceFactory : ITexture2DCreator
+    public class ResourceFactory : ITexture2DCreator 
     {
         private class FontTexture2D : Rendering.Texture, ITexture2D
         {
@@ -29,14 +30,12 @@ namespace LifeSim.Engine
         }
 
         private readonly GraphicsDevice _gd;
+        private readonly SceneRenderer _sceneRenderer;
 
-        private readonly GPUResourceManager _gpuResourceManager;
-
-
-        public ResourceFactory(GraphicsDevice gd, GPUResourceManager gpuResourceManager)
+        public ResourceFactory(GraphicsDevice gd, SceneRenderer sceneRenderer)
         {
             this._gd = gd;
-            this._gpuResourceManager = gpuResourceManager;
+            this._sceneRenderer = sceneRenderer;
         }
         
         private SurfaceMaterial? _cachedDefaultSurfaceMaterial;
@@ -47,14 +46,24 @@ namespace LifeSim.Engine
                 if (this._cachedDefaultSurfaceMaterial != null) {
                     return this._cachedDefaultSurfaceMaterial;
                 }
-                return this._cachedDefaultSurfaceMaterial = new SurfaceMaterial(this._gpuResourceManager, this._gpuResourceManager.pinkTexture);
+                return this._cachedDefaultSurfaceMaterial = this._sceneRenderer.CreateSurfaceMaterial(this.pinkTexture);
             }
+        }
+
+        public Scene3D CreateScene()
+        {
+            return new Scene3D(this._sceneRenderer.sceneStorage);
         }
 
         public Rendering.Texture MakeTexture(string path, uint mipLevels = 0)
         {
             Image<Rgba32> image = Image.Load<Rgba32>(path);
             return new Rendering.Texture(this._gd, image, mipLevels);
+        }
+
+        public SurfaceMaterial MakeSurfaceMaterial(Rendering.Texture texture)
+        {
+            return this._sceneRenderer.CreateSurfaceMaterial(texture);
         }
 
         public Rendering.Texture MakeTexture(Image<Rgba32> image, uint mipLevels = 0)
@@ -72,16 +81,6 @@ namespace LifeSim.Engine
             return new Mesh(this._gd, meshData);
         }
 
-        public SurfaceMaterial MakeSurfaceMaterial(Rendering.Texture texture)
-        {
-            return this._gpuResourceManager.MakeSurfaceMaterial(texture);
-        }
-
-        public SpriteMaterial MakeSpritesMaterial(Veldrid.Texture texture)
-        {
-            return this._gpuResourceManager.MakeSpritesMaterial(texture);
-        }
-
         public FontSystem MakeFontSystem(string[] paths)
         {
             var fontLoader = StbTrueTypeSharpFontLoader.Instance;
@@ -91,6 +90,18 @@ namespace LifeSim.Engine
                 fontSystem.AddFont(File.ReadAllBytes(path));
             }
             return fontSystem;
+        }
+
+        private Rendering.Texture? _cachedPinkTexture = null;
+        public Rendering.Texture pinkTexture 
+        {
+            get
+            {
+                if (this._cachedPinkTexture != null) return this._cachedPinkTexture;
+                
+                Image<Rgba32> image = new Image<Rgba32>(2, 2, new Rgba32(255, 0, 255));
+                return this._cachedPinkTexture = new Rendering.Texture(this._gd, image);
+            }
         }
 
         ITexture2D ITexture2DCreator.Create(int width, int height)

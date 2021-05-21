@@ -1,19 +1,22 @@
 using System.Collections.Generic;
 using LifeSim.Engine.Anim;
+using LifeSim.Engine.Rendering;
 using LifeSim.Engine.SceneGraph;
 
 namespace LifeSim.Engine.GLTF
 {
     public class GLTFScene
     {
+        public delegate RenderNode3D RenderNodeFactory(Mesh mesh, SurfaceMaterial material, BindedSkin? skin);
         private readonly List<GLTFNode> _children = new List<GLTFNode>();
         private readonly Dictionary<string, GLTFNode> _nodesByName = new Dictionary<string, GLTFNode>();
-
         public readonly string name;
+        private RenderNodeFactory _renderNodeFactory;
 
         public GLTFScene(string name)
         {
             this.name = name;
+            this._renderNodeFactory = this._CreateRenderNodeFunction;
         }
 
         private BindedSkin _BindSkin(Skin skin, Dictionary<GLTFNode, Node3D> nodesCache)
@@ -44,6 +47,17 @@ namespace LifeSim.Engine.GLTF
             }
         }
 
+
+        public void WithRenderNode(RenderNodeFactory factory)
+        {
+            this._renderNodeFactory = factory;
+        }
+
+        private RenderNode3D _CreateRenderNodeFunction(Mesh mesh, SurfaceMaterial material, BindedSkin? skin)
+        {
+            return skin != null ? new SkinRenderNode3D(mesh, material, skin) : new RenderNode3D(mesh, material);
+        }
+
         public Node3D Instantiate()
         {
             Dictionary<GLTFNode, Node3D>? nodesCache = new Dictionary<GLTFNode, Node3D>();
@@ -66,10 +80,10 @@ namespace LifeSim.Engine.GLTF
             if (gltfNode.mesh != null && gltfNode.material != null) {
                 if (gltfNode.skin != null) {
                     BindedSkin? bindedSkin = this._BindSkin(gltfNode.skin, nodesCache);
-                    node = new SkinRenderNode3D(gltfNode.mesh, gltfNode.material, bindedSkin);
+                    node = this._renderNodeFactory.Invoke(gltfNode.mesh, gltfNode.material, bindedSkin);
                 }
                 else {
-                    node = new RenderNode3D(gltfNode.mesh, gltfNode.material);
+                    node = this._renderNodeFactory.Invoke(gltfNode.mesh, gltfNode.material, null);
                 }
             }
             else {

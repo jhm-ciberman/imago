@@ -1,44 +1,47 @@
+using System;
 using System.Numerics;
 using LifeSim.Engine.SceneGraph;
 using Veldrid;
 
 namespace LifeSim.Engine.Rendering
 {
-    public class CanvasRenderer
+    public class CanvasRenderer : IDisposable
     {
         private readonly GraphicsDevice _graphicsDevice;
-        private readonly SpriteBatcher _spriteBatcher;
-
 
         private readonly CommandList _commandList;
         private readonly IRenderTexture _renderTexture;
-        private readonly SceneManager _sceneManager;
         private bool _hasCommandsToSubmit;
+        private readonly SpritesPass _pass;
 
-        public CanvasRenderer(GraphicsDevice gd, ResourceFactory assetManager, GPUResourceManager resources, PSOManager psoManager)
+        private readonly SpriteBatcher _spriteBatcher;
+        public CanvasRenderer(GraphicsDevice gd, IRenderTexture renderTexture)
         {
-            var renderTexture = resources.mainRenderTexture;
             this._graphicsDevice = gd;
             this._renderTexture = renderTexture;
-            this._commandList = gd.ResourceFactory.CreateCommandList();
-            this._sceneManager = resources.sceneManager;
-            this._spriteBatcher = new SpriteBatcher(gd, psoManager, assetManager, resources.spritesPass, this._commandList);
+            var factory = gd.ResourceFactory;
+            this._commandList = factory.CreateCommandList();
+
+            this._pass = new SpritesPass(gd, this._renderTexture);
+            var spritesShader = ShaderRegistry.CreateSpritesShader(gd, this._pass);
+
+            this._spriteBatcher = new SpriteBatcher(gd, spritesShader);
         }
 
         public void Render(Canvas2D canvas)
         {
             Viewport viewport = canvas.viewport;
+            Matrix4x4 projection = Matrix4x4.CreateOrthographicOffCenter(0, viewport.width, viewport.height, 0, -10f, 100f);
+
             canvas.UpdateWorldMatrices();
             this._commandList.Begin();
-            this._commandList.SetFramebuffer(this._renderTexture.framebuffer);
-            this._commandList.ClearDepthStencil(1f);
-            Matrix4x4 projection = Matrix4x4.CreateOrthographicOffCenter(0, viewport.width, viewport.height, 0, -10f, 100f);
-            this._sceneManager.SetupCamera2DInfoBuffer(this._commandList, ref projection);
-            this._spriteBatcher.BeginBatch();
 
+
+            this._spriteBatcher.BeginBatch();
             this._RenderRecursive(canvas.root);
 
-            this._spriteBatcher.EndBatch();
+            this._pass.BeginPass(this._commandList, ref projection);
+            this._spriteBatcher.Submit(this._pass, this._commandList);
             this._commandList.End();
 
             this._hasCommandsToSubmit = true;
@@ -49,8 +52,8 @@ namespace LifeSim.Engine.Rendering
             foreach (var child in node.children) {
                 if (child is RenderNode2D renderable) {
                     renderable.Render(this._spriteBatcher);
-                    this._RenderRecursive(child);
                 }
+                this._RenderRecursive(child);
             }
         }
 
@@ -61,5 +64,9 @@ namespace LifeSim.Engine.Rendering
             this._hasCommandsToSubmit = false;
         }
 
+        public void Dispose()
+        {
+            this._pass.Dispose();
+        }
     }
 }

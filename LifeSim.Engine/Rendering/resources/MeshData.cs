@@ -32,15 +32,15 @@ namespace LifeSim.Engine.Rendering
         public void RecomputeNormals()
         {
             for (var i = 0; i < this.indices.Count; i += 3) {
-                var index1 = this.indices[i + 0];
-                var index2 = this.indices[i + 1];
-                var index3 = this.indices[i + 2];
+                ushort index1 = this.indices[i + 0];
+                ushort index2 = this.indices[i + 1];
+                ushort index3 = this.indices[i + 2];
 
-                var p1 = this.positions[index1];
-                var p2 = this.positions[index2];
-                var p3 = this.positions[index3];
+                Vector3 p1 = this.positions[index1];
+                Vector3 p2 = this.positions[index2];
+                Vector3 p3 = this.positions[index3];
 
-                var normal = Vector3.Cross((p3 - p2), (p1 - p2));
+                Vector3 normal = Vector3.Cross((p3 - p2), (p1 - p2));
 
                 this.normals[index1] = normal;
                 this.normals[index2] = normal;

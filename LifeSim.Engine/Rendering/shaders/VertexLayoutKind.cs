@@ -1,6 +1,6 @@
 namespace LifeSim.Engine.Rendering
 {
-    public enum VertexLayoutKind
+    public enum VertexFormat
     {
         Regular = 0,
         Skinned = 1,

@@ -1,15 +1,13 @@
+using System;
 using System.Numerics;
 using LifeSim.Engine.Rendering;
-using Veldrid;
 using Veldrid.Utilities;
 
 namespace LifeSim.Engine.SceneGraph
 {
-    public class RenderNode3D : Node3D, IRenderable
+    public class RenderNode3D : Node3D
     {
-        public System.UInt32 pickingID = 0;
-        
-        private Mesh? _mesh;
+        private Mesh? _mesh = null;
         public Mesh? mesh
         {
             get => this._mesh;
@@ -20,66 +18,44 @@ namespace LifeSim.Engine.SceneGraph
             }
         }
         
-        private SurfaceMaterial? _material;
+        private SurfaceMaterial? _material = null;
         public SurfaceMaterial? material
         {
             get => this._material;
-            set
-            {
-                this._material = value;
-                this.resourceLayout = value?.GetObjectResourceLayout(this);
-            }
+            set => this._material = value;
         }
-        
-        public ColorF albedoColor = new ColorF(1f, 1f, 1f, 0f);
 
-        public Vector4 textureST = new Vector4(1f, 1f, 0f, 0f);
-
-        public ResourceLayout? resourceLayout { get; private set; }
-
-        public VertexLayoutKind vertexLayoutKind => this.mesh != null ? this.mesh.vertexLayoutKind : VertexLayoutKind.Regular;
-
-        private BoundingBox _boundingBox;
-
-        private Vector3 _worldSpaceCenter;
-        public Vector3 worldSpaceCenter => this._worldSpaceCenter;
+        internal Renderable? _renderable = null;
 
         public RenderNode3D()
         {
-            this.mesh = null;
-            this.material = null;
+            //
         }
 
-        public RenderNode3D(Mesh mesh, SurfaceMaterial material)
+        public RenderNode3D(Mesh? mesh = null, SurfaceMaterial? material = null)
         {
             this.mesh = mesh;
             this.material = material;
-            this.resourceLayout = material.GetObjectResourceLayout(this);
         }
 
-        public RenderNode3D(Mesh mesh)
+        protected void _SetInstanceDataDirty()
         {
-            this._mesh = mesh;
-            this.material = null;
-        }
-
-        public virtual string[] GetShaderKeywords()
-        {
-            return System.Array.Empty<string>();
-        }
-
-        
-
-        public bool Cull(ref BoundingFrustum frustum)
-        {
-            return (frustum.Contains(ref this._boundingBox) != ContainmentType.Disjoint);
+            this.scene?._OnInstanceDataDirty(this);
         }
 
         protected override void _AfterMatrixUpdate()
         {
-            if (this.mesh == null) return;
-            this._boundingBox = BoundingBox.Transform(this.mesh.boundingBox, this.worldMatrix);
-            this._worldSpaceCenter = this._boundingBox.GetCenter();
+            this._renderable?.UpdateTransform(ref this.worldMatrix);
+        }
+
+        protected void _SetInstanceData<T>(ref T data) where T : struct
+        {
+            this._renderable?.SetInstanceData<T>(ref data);
+        }
+
+        internal virtual void UpdateInstanceData()
+        {
+            // Nothing should be implemented in each child
         }
     }
 }

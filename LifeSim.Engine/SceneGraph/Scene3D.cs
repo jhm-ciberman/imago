@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using LifeSim.Core;
+using LifeSim.Engine.Rendering;
 
 namespace LifeSim.Engine.SceneGraph
 {
@@ -12,17 +13,17 @@ namespace LifeSim.Engine.SceneGraph
         public ColorF clearColor = new ColorF(0.84f, 0.84f, 0.86f, 1.0f);
         //private RgbaFloat _clearColor = new RgbaFloat(0.04f, 0.04f, 0.06f, 1.0f);
 
-        private SwapPopList<RenderNode3D> _renderables = new SwapPopList<RenderNode3D>();
-        public IReadOnlyList<RenderNode3D> renderables => this._renderables;
-
-        private List<Node3D> _dirtyList = new List<Node3D>();
-
         private readonly SwapPopList<Node3D> _children = new SwapPopList<Node3D>();
         public IReadOnlyList<Node3D> children => this._children;
 
-        public Scene3D()
+        private List<RenderNode3D> _instanceDataDirtyList = new List<RenderNode3D>();
+        private List<Node3D> _transformDirtyList = new List<Node3D>();
+
+        internal SceneStorage storage { get; private set; }
+
+        public Scene3D(SceneStorage sceneStorage)
         {
-            //
+            this.storage = sceneStorage;
         }
 
         public void Add(Node3D node)
@@ -51,14 +52,19 @@ namespace LifeSim.Engine.SceneGraph
 
         internal void _OnTransformDirty(Node3D node)
         {
-            this._dirtyList.Add(node);
+            this._transformDirtyList.Add(node);
+        }
+
+        internal void _OnInstanceDataDirty(RenderNode3D node)
+        {
+            this._instanceDataDirtyList.Add(node);
         }
 
         private void _AddNodeToRecursive(Node3D node)
         {
             node._scene = this;
             if (node is RenderNode3D renderable) {
-                this._renderables.Add(renderable);
+                this._AddToRenderList(renderable);
             }
             for (int i = 0; i < node.children.Count; i++) {
                 this._AddNodeToRecursive(node.children[i]);
@@ -69,23 +75,48 @@ namespace LifeSim.Engine.SceneGraph
         {
             node._scene = null;
             if (node is RenderNode3D renderable) {
-                this._renderables.Remove(renderable);
+                this._RemoveFromRenderList(renderable);
             }
             for (int i = 0; i < node.children.Count; i++) {
                 this._RemoveNodeRecursive(node.children[i]);
             }
         }
 
+        private void _AddToRenderList(RenderNode3D node)
+        {
+            if (node._renderable != null) return;
+            if (node.mesh == null) return;
+            if (node.material == null) return;
+
+            node._renderable = this.storage.CreateRenderable(node.mesh, node.material);
+        }
+
+        private void _RemoveFromRenderList(RenderNode3D node)
+        {
+            if (node._renderable == null) return;
+            this.storage.RemoveRenderable(node._renderable);
+            node._renderable = null;
+        }
+
         public void UpdateWorldMatrices()
         {
-            if (this._dirtyList.Count > 0) {
-                for (int i = 0; i < this._dirtyList.Count; i++) {
-                    var dirtyNode = this._dirtyList[i];
+            if (this._transformDirtyList.Count > 0) {
+                for (int i = 0; i < this._transformDirtyList.Count; i++) {
+                    var dirtyNode = this._transformDirtyList[i];
                     if (! dirtyNode.transformIsDirty) continue;
                     this._SearchTopDirty(dirtyNode).UpdateWorldMatrix();
                 }
-                this._dirtyList.Clear();
+                this._transformDirtyList.Clear();
             }
+        }
+
+        public void UpdateInstanceData()
+        {
+            for (int i = 0; i < this._instanceDataDirtyList.Count; i++) {
+                var node = this._instanceDataDirtyList[i];
+                node.UpdateInstanceData();
+            }
+            this._instanceDataDirtyList.Clear();
         }
 
         private Node3D _SearchTopDirty(Node3D node)
