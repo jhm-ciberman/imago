@@ -38,14 +38,17 @@ namespace LifeSim.Engine.Rendering
             this._instanceResourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
                 new ResourceLayoutElementDescription("InstanceData", ResourceKind.StructuredBufferReadOnly, ShaderStages.Vertex | ShaderStages.Fragment, ResourceLayoutElementOptions.DynamicBinding)
             ));
+            this._instanceResourceLayout.Name = "InstanceData Resource Layout";
 
             this._transformResourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
                 new ResourceLayoutElementDescription("TransformData", ResourceKind.StructuredBufferReadOnly, ShaderStages.Vertex, ResourceLayoutElementOptions.DynamicBinding)
             ));
+            this._transformResourceLayout.Name = "TransformData Resource Layout";
 
             this._bonesResourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
-                new ResourceLayoutElementDescription("BonesData", ResourceKind.StructuredBufferReadOnly, ShaderStages.Vertex)
+                new ResourceLayoutElementDescription("BonesData", ResourceKind.StructuredBufferReadOnly, ShaderStages.Vertex, ResourceLayoutElementOptions.DynamicBinding)
             ));
+            this._bonesResourceLayout.Name = "BonesData Resource Layout";
 
             this.sceneStorage = new SceneStorage(gd, this._transformResourceLayout, this._instanceResourceLayout, this._bonesResourceLayout);
             this._shadowmapPass = new ShadowmapPass(gd, this);
@@ -75,7 +78,7 @@ namespace LifeSim.Engine.Rendering
 
             this._commandList.Begin();
             scene.storage.UpdateBuffers(this._commandList);
-            this._shadowmapPass.Render(this._commandList, scene, camera, scene.mainLight);
+            //this._shadowmapPass.Render(this._commandList, scene, camera, scene.mainLight);
             this._forwardPass.Render(this._commandList, scene, camera);
             this._commandList.End();
 

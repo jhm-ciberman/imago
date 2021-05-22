@@ -56,6 +56,7 @@ namespace LifeSim.Engine.Rendering
         {
             this._transform = transform;
             this._aabb = BoundingBox.Transform(this.mesh.aabb, this._transform);
+            this.transformDataBlock.Write(ref this._transform);
             this._centerPosition = this._aabb.GetCenter();
         }
 

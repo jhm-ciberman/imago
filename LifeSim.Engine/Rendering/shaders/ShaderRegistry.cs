@@ -5,7 +5,7 @@ namespace LifeSim.Engine.Rendering
 {
     public static class ShaderRegistry
     {
-        public static Shader CreateBaseShader(Veldrid.GraphicsDevice gd, PipelineCache.IPipelineFactory pass)
+        public static Shader CreateBaseShader(Veldrid.GraphicsDevice gd, ForwardPass pass)
         {
             return new Shader(gd, pass,
                 new[] { VertexFormat.Regular, VertexFormat.Skinned }, 
@@ -22,7 +22,7 @@ namespace LifeSim.Engine.Rendering
             );
         }
 
-        public static Shader CreateShadowmapShader(Veldrid.GraphicsDevice gd, PipelineCache.IPipelineFactory pass)
+        public static Shader CreateShadowmapShader(Veldrid.GraphicsDevice gd, ShadowmapPass pass)
         {
             return new Shader(gd, pass,
                 new[] { VertexFormat.Regular, VertexFormat.Skinned }, 
@@ -39,7 +39,7 @@ namespace LifeSim.Engine.Rendering
             );
         }
 
-        public static Shader CreateSpritesShader(Veldrid.GraphicsDevice gd, PipelineCache.IPipelineFactory pass)
+        public static Shader CreateSpritesShader(Veldrid.GraphicsDevice gd, SpritesPass pass)
         {
             return new Shader(gd, pass,
                 new[] { VertexFormat.Sprite }, 
@@ -52,7 +52,7 @@ namespace LifeSim.Engine.Rendering
             );
         }
 
-        public static Shader CreateFullScreenShader(Veldrid.GraphicsDevice gd, PipelineCache.IPipelineFactory pass)
+        public static Shader CreateFullScreenShader(Veldrid.GraphicsDevice gd, FullscreenPass pass)
         {
             return new Shader(gd, pass,
                 new[] { VertexFormat.PosOnly }, 

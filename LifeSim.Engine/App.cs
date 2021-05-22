@@ -53,11 +53,23 @@ namespace LifeSim.Engine
             Veldrid.GraphicsBackend backend = Veldrid.GraphicsBackend.Vulkan;
             if (args.Length > 0) {
                 switch (args[0]) {
-                    case "vulkan": backend = Veldrid.GraphicsBackend.Vulkan; break;
-                    case "metal": backend = Veldrid.GraphicsBackend.Metal; break;
-                    case "directx11": backend = Veldrid.GraphicsBackend.Direct3D11; break;
-                    case "opengl": backend = Veldrid.GraphicsBackend.OpenGL; break;
-                    case "opengles": backend = Veldrid.GraphicsBackend.OpenGLES; break;
+                    case "vulkan": 
+                        backend = Veldrid.GraphicsBackend.Vulkan; 
+                        break;
+                    case "metal": 
+                        backend = Veldrid.GraphicsBackend.Metal; 
+                        break;
+                    case "directx":
+                    case "dx11":
+                    case "dx":
+                    case "directx11": 
+                        backend = Veldrid.GraphicsBackend.Direct3D11; 
+                        break;
+                    case "gl":
+                    case "opengl": backend = Veldrid.GraphicsBackend.OpenGL; 
+                        break;
+                    case "opengles": backend = Veldrid.GraphicsBackend.OpenGLES; 
+                        break;
                 }
             }
             return backend;

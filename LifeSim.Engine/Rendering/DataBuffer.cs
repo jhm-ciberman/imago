@@ -34,6 +34,7 @@ namespace LifeSim.Engine.Rendering
             public void FreeBlock()
             {
                 this.buffer.FreeBlock(this.offset);
+                this.offset = -1;
             }
         }
 
@@ -54,6 +55,8 @@ namespace LifeSim.Engine.Rendering
 
         public event Action? onResourceSetChanged;
 
+        public string name { get => this.deviceBuffer.Name; set { this.deviceBuffer.Name = value; } }
+
         public DataBuffer(GraphicsDevice gd, int blocksCount, int blockSize, ResourceLayout resourceLayout)
         {
             this._gd = gd;
@@ -61,7 +64,13 @@ namespace LifeSim.Engine.Rendering
             this._blocksCount = blocksCount;
             this._data = Marshal.AllocHGlobal((int) this.sizeInBytes);
             this._resourceLayout = resourceLayout;
-            this.deviceBuffer = this._gd.ResourceFactory.CreateBuffer(new BufferDescription((uint)this.sizeInBytes, BufferUsage.StructuredBufferReadOnly | BufferUsage.Dynamic, (uint) this._blockSize));
+
+            this.deviceBuffer = this._gd.ResourceFactory.CreateBuffer(new BufferDescription(
+                (uint)this.sizeInBytes, 
+                BufferUsage.StructuredBufferReadOnly | BufferUsage.Dynamic, 
+                (uint) this._blockSize
+            ));
+
             this.resourceSet = this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(this._resourceLayout, this.deviceBuffer));
             System.Console.WriteLine("StructuredBufferMinOffsetAlignment: " + this._gd.StructuredBufferMinOffsetAlignment);
             System.Console.WriteLine("UniformBufferMinOffsetAlignment: " + this._gd.UniformBufferMinOffsetAlignment);
@@ -69,7 +78,7 @@ namespace LifeSim.Engine.Rendering
             for (int i = 0; i < blocksCount; i++) {
                 this._freeList[i] = (this._blocksCount - i - 1) * this._blockSize;
             }
-            this._freeListCount = this._blocksCount - 1;
+            this._freeListCount = this._blocksCount;
         }
 
         public void Resize(int newBlockCount)
@@ -111,6 +120,7 @@ namespace LifeSim.Engine.Rendering
             }
 
             this._freeListCount--;
+            Console.WriteLine($"Request block from {this.name}: {this._freeList[this._freeListCount]}");
             return new Block(this, this._freeList[this._freeListCount]);
         }
 
@@ -124,6 +134,10 @@ namespace LifeSim.Engine.Rendering
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Write<T>(int offset, ref T data) where T : struct
         {
+            if (offset < 0) {
+                throw new Exception("Trying to write to an invalid data block");
+            }
+            Console.WriteLine($"Write to data {this.name}");
             Marshal.StructureToPtr(data, this._data + offset, false);
             this._dirty = true;
         }
@@ -131,6 +145,9 @@ namespace LifeSim.Engine.Rendering
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Read<T>(int offset) where T : struct
         {
+            if (offset < 0) {
+                throw new Exception("Trying to read from an invalid data block");
+            }
             return Marshal.PtrToStructure<T>(this._data + offset);
         }
 

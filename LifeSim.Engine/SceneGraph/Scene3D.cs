@@ -64,6 +64,7 @@ namespace LifeSim.Engine.SceneGraph
         {
             node._scene = this;
             if (node is RenderNode3D renderable) {
+                this._OnInstanceDataDirty(renderable);
                 this._AddToRenderList(renderable);
             }
             for (int i = 0; i < node.children.Count; i++) {
@@ -115,6 +116,7 @@ namespace LifeSim.Engine.SceneGraph
             for (int i = 0; i < this._instanceDataDirtyList.Count; i++) {
                 var node = this._instanceDataDirtyList[i];
                 node.UpdateInstanceData();
+                System.Console.WriteLine("Update node " + node);
             }
             this._instanceDataDirtyList.Clear();
         }

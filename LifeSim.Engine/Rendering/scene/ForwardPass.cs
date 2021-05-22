@@ -112,11 +112,17 @@ namespace LifeSim.Engine.Rendering
                 scissorTestEnabled: true
             );
 
+            Console.WriteLine("device.Features.IndependentBlend = " + this._gd.Features.IndependentBlend);
+
             return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription() {
                 DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
                 PrimitiveTopology = PrimitiveTopology.TriangleList,
                 ShaderSet = shaderVariant.shaderSetDescription,
-                BlendState = new BlendStateDescription(RgbaFloat.Black, BlendAttachmentDescription.OverrideBlend, BlendAttachmentDescription.Disabled),
+                BlendState = new BlendStateDescription(
+                    RgbaFloat.Black, 
+                    BlendAttachmentDescription.OverrideBlend, 
+                    BlendAttachmentDescription.Disabled
+                ),
                 RasterizerState = rasterizerState,
                 Outputs = this._renderTexture.outputDescription,
                 ResourceLayouts = this._renderer.GetShaderVariantResourceLayouts(this._resourceLayout, shaderVariant),

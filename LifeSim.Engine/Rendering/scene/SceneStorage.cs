@@ -39,7 +39,7 @@ namespace LifeSim.Engine.Rendering
             this._bonesResourceLayout = bonesResourceLayout;
 
             this._tranformDataBuffer = new DataBuffer(this._gd, MIN_BUFFER_BLOCKS, Marshal.SizeOf<Matrix4x4>(), this._transformResourceLayout);
-            
+            this._tranformDataBuffer.name = "Transforms Buffer";
             //this._bonesInfoBuffer = factory.CreateBuffer(new BufferDescription(64 * Skeleton.MAX_NUMBER_OF_BONES, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
             //this._skinnedResourceSet = factory.CreateResourceSet(new ResourceSetDescription(skinnedMeshLayout, this._modelInfoBuffer, this._bonesInfoBuffer));
 
@@ -70,6 +70,7 @@ namespace LifeSim.Engine.Rendering
             if (buffer == null) {
                 System.Console.WriteLine("Creating Instance data buffer: " + indicesCount);
                 buffer = new DataBuffer(this._gd, MIN_BUFFER_BLOCKS, indicesCount * 16, this._instanceResourceLayout);
+                buffer.name = "InstanceData Buffer ("+indicesCount+" uniforms)";
                 this._buffers[indicesCount] = buffer;
             }
             return buffer;
