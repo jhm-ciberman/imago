@@ -43,8 +43,8 @@ namespace LifeSim.Engine.Rendering
             this._renderer = renderer;
 
             this._resourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
-                new ResourceLayoutElementDescription("CameraData", ResourceKind.UniformBuffer, ShaderStages.Vertex),
-                new ResourceLayoutElementDescription("LightData", ResourceKind.UniformBuffer, ShaderStages.Fragment),
+                new ResourceLayoutElementDescription("CameraDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex),
+                new ResourceLayoutElementDescription("LightDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Fragment),
                 new ResourceLayoutElementDescription("ShadowMapTexture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
                 new ResourceLayoutElementDescription("ShadowMapSampler", ResourceKind.Sampler, ShaderStages.Fragment)
             ));
@@ -64,7 +64,7 @@ namespace LifeSim.Engine.Rendering
 
             this._renderTexture = mainRenderTexture;
 
-            this._renderJob = new RenderJob(this._resourceSet);
+            this._renderJob = new RenderJob(this._gd, this._resourceSet);
             this._renderQueue = new RenderQueue();
         }
 
@@ -72,7 +72,7 @@ namespace LifeSim.Engine.Rendering
         {
             var cameraFrustum = new BoundingFrustum(camera.frustumCullingCamera.viewProjectionMatrix);
             this._renderQueue.AddToRenderQueue(scene.storage, ref cameraFrustum, camera.position, false);
-            this._renderQueue.Sort();
+            //this._renderQueue.Sort();
 
             commandList.SetFramebuffer(this._renderTexture.framebuffer);
             commandList.ClearColorTarget(0, new RgbaFloat(scene.clearColor.r, scene.clearColor.g, scene.clearColor.b, scene.clearColor.a));
@@ -91,6 +91,7 @@ namespace LifeSim.Engine.Rendering
             commandList.UpdateBuffer(this._camera3DInfoBuffer, 0, ref cameraInfo);
             commandList.UpdateBuffer(this._lightInfoBuffer, 0, ref lightInfo);
 
+            this._renderJob.FillOffsets(commandList, this._renderQueue);
             this._renderJob.DrawRenderList(commandList, scene.storage.transformsResourceSet, this._renderQueue);
         }
 
@@ -111,8 +112,6 @@ namespace LifeSim.Engine.Rendering
                 depthClipEnabled: true,
                 scissorTestEnabled: true
             );
-
-            Console.WriteLine("device.Features.IndependentBlend = " + this._gd.Features.IndependentBlend);
 
             return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription() {
                 DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,

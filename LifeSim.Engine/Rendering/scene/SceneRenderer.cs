@@ -20,6 +20,7 @@ namespace LifeSim.Engine.Rendering
 
         internal SceneStorage sceneStorage;
 
+        private readonly DeviceBuffer _offsetsVertexBuffer;
         private readonly ResourceLayout _instanceResourceLayout;
         private readonly ResourceLayout _transformResourceLayout;
         private readonly ResourceLayout _bonesResourceLayout;
@@ -36,17 +37,17 @@ namespace LifeSim.Engine.Rendering
             this._commandList = this._factory.CreateCommandList();
 
             this._instanceResourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
-                new ResourceLayoutElementDescription("InstanceData", ResourceKind.StructuredBufferReadOnly, ShaderStages.Vertex | ShaderStages.Fragment, ResourceLayoutElementOptions.DynamicBinding)
+                new ResourceLayoutElementDescription("InstanceDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex | ShaderStages.Fragment)
             ));
             this._instanceResourceLayout.Name = "InstanceData Resource Layout";
 
             this._transformResourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
-                new ResourceLayoutElementDescription("TransformData", ResourceKind.StructuredBufferReadOnly, ShaderStages.Vertex, ResourceLayoutElementOptions.DynamicBinding)
+                new ResourceLayoutElementDescription("TransformDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
             ));
             this._transformResourceLayout.Name = "TransformData Resource Layout";
 
             this._bonesResourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
-                new ResourceLayoutElementDescription("BonesData", ResourceKind.StructuredBufferReadOnly, ShaderStages.Vertex, ResourceLayoutElementOptions.DynamicBinding)
+                new ResourceLayoutElementDescription("BonesDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
             ));
             this._bonesResourceLayout.Name = "BonesData Resource Layout";
 
@@ -105,10 +106,6 @@ namespace LifeSim.Engine.Rendering
             if (! this._hasCommandsToSubmit) return;
             this._gd.SubmitCommands(this._commandList);
             this._hasCommandsToSubmit = false;
-        }
-
-        ~SceneRenderer() {
-            this.Dispose();
         }
     }
 }

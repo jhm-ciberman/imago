@@ -63,7 +63,6 @@ namespace LifeSim.Engine.Rendering
                 for (int i = 0; i < this._freeList.Count; i++) {
                     var batch = this._freeList[i];
                     if (batch.texture == texture && batch.shader == shader && ! batch.isFull) {
-                        batch.SetMaterial(shader, texture);
                         this._batches.Add(batch);
                         this._freeList.RemoveAt(i);
                         return batch;

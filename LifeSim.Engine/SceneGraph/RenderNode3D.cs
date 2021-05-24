@@ -1,7 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Numerics;
+using LifeSim.Engine.Anim;
 using LifeSim.Engine.Rendering;
-using Veldrid.Utilities;
 
 namespace LifeSim.Engine.SceneGraph
 {
@@ -18,6 +19,16 @@ namespace LifeSim.Engine.SceneGraph
             }
         }
         
+        private BindedSkin? _skin = null;
+        public BindedSkin? skin
+        {
+            get => this._skin;
+            set
+            {
+                this._skin = value;
+            }
+        }
+
         private SurfaceMaterial? _material = null;
         public SurfaceMaterial? material
         {
@@ -48,14 +59,27 @@ namespace LifeSim.Engine.SceneGraph
             this._renderable?.UpdateTransform(ref this.worldMatrix);
         }
 
-        protected void _SetInstanceData<T>(ref T data) where T : struct
+        public void SetInstanceData<T>(ref T data) where T : struct
         {
             this._renderable?.SetInstanceData<T>(ref data);
         }
 
-        internal virtual void UpdateInstanceData()
+        protected internal virtual void UpdateInstanceData()
         {
             // Nothing should be implemented in each child
+        }
+
+        public void Update()
+        {
+            if (this.skin == null || this._renderable == null) return;
+
+            Matrix4x4.Invert(this.worldMatrix, out Matrix4x4 inverseMeshWorldMatrix);
+            var joints = this.skin.joints;
+            var invBindMatrices = this.skin.inverseBindMatrices;
+            var skeleton = this._renderable.skeleton;
+            for (int i = 0; i < joints.Count; i++) {
+                skeleton.bonesMatrices[i] = invBindMatrices[i] * joints[i].worldMatrix * inverseMeshWorldMatrix;
+            }
         }
     }
 }

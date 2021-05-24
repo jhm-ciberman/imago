@@ -63,9 +63,5 @@ namespace LifeSim.Engine.Rendering
             this._vertexBuffer.Dispose();
             this._indexBuffer.Dispose();
         }
-
-        ~SkinnedMesh() {
-            this.Dispose();
-        }
     }
 }

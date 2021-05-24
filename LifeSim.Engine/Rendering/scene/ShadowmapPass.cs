@@ -30,7 +30,7 @@ namespace LifeSim.Engine.Rendering
             this._renderer = renderer;
 
             this._resourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
-                new ResourceLayoutElementDescription("ShadowMapInfo", ResourceKind.UniformBuffer, ShaderStages.Vertex)
+                new ResourceLayoutElementDescription("ShadowMapDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
             ));
 
             uint shadowMapSize = 4096;
@@ -45,7 +45,7 @@ namespace LifeSim.Engine.Rendering
             this._resourceSet = factory.CreateResourceSet(new ResourceSetDescription(this._resourceLayout, this._shadowmapInfoBuffer));
 
             this._renderQueue = new RenderQueue();
-            this._renderJob = new RenderJob(this._resourceSet);
+            this._renderJob = new RenderJob(this._gd, this._resourceSet);
         }
         
         public void Render(CommandList commandList, Scene3D scene, Camera3D camera, DirectionalLight mainLight)
@@ -60,6 +60,7 @@ namespace LifeSim.Engine.Rendering
             commandList.ClearDepthStencil(1f);
             commandList.UpdateBuffer(this._shadowmapInfoBuffer, 0, ref shadowmapMatrix);
 
+            this._renderJob.FillOffsets(commandList, this._renderQueue);
             this._renderJob.DrawRenderList(commandList, scene.storage.transformsResourceSet, this._renderQueue);
         }
 

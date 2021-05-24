@@ -73,7 +73,7 @@ namespace LifeSim.Engine
 
         public GLTF.GLTFLoader LoadGLTF(string path, SurfaceMaterial? defaultMaterial = null)
         {
-            return new GLTF.GLTFLoader(this, defaultMaterial, path);
+            return new GLTF.GLTFLoader(this, path, defaultMaterial);
         }
 
         public Mesh MakeMesh(MeshData meshData)

@@ -25,6 +25,9 @@ namespace LifeSim.Engine.Rendering
             });
         }
         
-        public void Dispose() => this.vertexBuffer.Dispose();
+        public void Dispose()
+        {
+            this.vertexBuffer.Dispose();
+        }
     }
 }

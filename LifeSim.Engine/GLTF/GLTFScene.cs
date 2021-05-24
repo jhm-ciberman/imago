@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using LifeSim.Engine.Anim;
 using LifeSim.Engine.Rendering;
@@ -7,26 +8,24 @@ namespace LifeSim.Engine.GLTF
 {
     public class GLTFScene
     {
-        public delegate RenderNode3D RenderNodeFactory(Mesh mesh, SurfaceMaterial material, BindedSkin? skin);
+        public delegate RenderNode3D RenderNodeFactory();
         private readonly List<GLTFNode> _children = new List<GLTFNode>();
         private readonly Dictionary<string, GLTFNode> _nodesByName = new Dictionary<string, GLTFNode>();
         public readonly string name;
-        private RenderNodeFactory _renderNodeFactory;
 
         public GLTFScene(string name)
         {
             this.name = name;
-            this._renderNodeFactory = this._CreateRenderNodeFunction;
         }
 
-        private BindedSkin _BindSkin(Skin skin, Dictionary<GLTFNode, Node3D> nodesCache)
+        private BindedSkin _BindSkin(Skin skin, Dictionary<GLTFNode, Node3D> nodesCache, Func<RenderNode3D> nodeFactory)
         {
             Node3D[] joints = new Node3D[skin.jointNames.Count];
             IList<string>? names = skin.jointNames;
             for (var i = 0; i < names.Count; i++) {
                 GLTFNode? gltfNode = this._nodesByName.GetValueOrDefault(names[i]);
                 joints[i] = gltfNode != null
-                    ? this._InstantiateNodeRecursive(gltfNode, nodesCache)
+                    ? this._InstantiateNodeRecursive(gltfNode, nodesCache, nodeFactory)
                     : throw new System.Exception("Could not bind joint: " + names[i]);
             }
 
@@ -47,29 +46,24 @@ namespace LifeSim.Engine.GLTF
             }
         }
 
-
-        public void WithRenderNode(RenderNodeFactory factory)
+        private RenderNode3D _CreateRenderNode()
         {
-            this._renderNodeFactory = factory;
+            return new RenderNode3D();
         }
 
-        private RenderNode3D _CreateRenderNodeFunction(Mesh mesh, SurfaceMaterial material, BindedSkin? skin)
-        {
-            return skin != null ? new SkinRenderNode3D(mesh, material, skin) : new RenderNode3D(mesh, material);
-        }
-
-        public Node3D Instantiate()
+        public Node3D Instantiate(Func<RenderNode3D>? nodeFactory = null)
         {
             Dictionary<GLTFNode, Node3D>? nodesCache = new Dictionary<GLTFNode, Node3D>();
+            nodeFactory ??= this._CreateRenderNode;
 
             Node3D? n = new Node3D();
             foreach (GLTFNode? node in this._children) {
-                n.Add(this._InstantiateNodeRecursive(node, nodesCache));
+                n.Add(this._InstantiateNodeRecursive(node, nodesCache, nodeFactory));
             }
             return n;
         }
 
-        private Node3D _InstantiateNodeRecursive(GLTFNode gltfNode, Dictionary<GLTFNode, Node3D> nodesCache)
+        private Node3D _InstantiateNodeRecursive(GLTFNode gltfNode, Dictionary<GLTFNode, Node3D> nodesCache, Func<RenderNode3D> nodeFactory)
         {
             Node3D? node3d = nodesCache.GetValueOrDefault(gltfNode);
             if (node3d != null) {
@@ -78,13 +72,13 @@ namespace LifeSim.Engine.GLTF
 
             Node3D node;
             if (gltfNode.mesh != null && gltfNode.material != null) {
+                var renderNode = nodeFactory.Invoke();
+                renderNode.mesh = gltfNode.mesh;
+                renderNode.material = gltfNode.material;
                 if (gltfNode.skin != null) {
-                    BindedSkin? bindedSkin = this._BindSkin(gltfNode.skin, nodesCache);
-                    node = this._renderNodeFactory.Invoke(gltfNode.mesh, gltfNode.material, bindedSkin);
+                    renderNode.skin = this._BindSkin(gltfNode.skin, nodesCache, nodeFactory);
                 }
-                else {
-                    node = this._renderNodeFactory.Invoke(gltfNode.mesh, gltfNode.material, null);
-                }
+                node = renderNode;
             }
             else {
                 node = new Node3D();
@@ -95,7 +89,7 @@ namespace LifeSim.Engine.GLTF
             node.rotation = gltfNode.rotation;
             node.scale = gltfNode.scale;
             foreach (GLTFNode? child in gltfNode.children) {
-                node.Add(this._InstantiateNodeRecursive(child, nodesCache));
+                node.Add(this._InstantiateNodeRecursive(child, nodesCache, nodeFactory));
             }
 
             return node;

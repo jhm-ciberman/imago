@@ -51,36 +51,48 @@ namespace LifeSim.Engine.Rendering
 
         private Veldrid.VertexLayoutDescription[] _GetVertexLayout(VertexFormat format)
         {
-            return format switch {
-                VertexFormat.PosOnly => new [] {
-                    new VertexLayoutDescription(
-                        new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float4)
-                    ),
-                },
-                VertexFormat.Regular => new [] {
-                    new VertexLayoutDescription(
-                        new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
-                        new VertexElementDescription("Normal", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
-                        new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2)
-                    ),
-                },
-                VertexFormat.Skinned => new [] {
-                    new VertexLayoutDescription(
-                        new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
-                        new VertexElementDescription("Normal", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
-                        new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
-                        new VertexElementDescription("Joints", VertexElementSemantic.TextureCoordinate, VertexElementFormat.UShort4),
-                        new VertexElementDescription("Weights", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float4)
-                    ),
-                },
-                VertexFormat.Sprite => new [] {
-                    new VertexLayoutDescription(
-                        new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
-                        new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
-                        new VertexElementDescription("Color", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Byte4_Norm)
-                    ),
-                },
-                _ => throw new System.NotSupportedException(),
+            switch (format) 
+            {
+                case VertexFormat.PosOnly:
+                    return new [] {
+                        new VertexLayoutDescription(
+                            new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float4)
+                        ),
+                    };
+                case VertexFormat.Regular:
+                    return new [] {
+                        new VertexLayoutDescription(
+                            new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
+                            new VertexElementDescription("Normal", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
+                            new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2)
+                        ),
+                        new VertexLayoutDescription(stride: 16, instanceStepRate: 1,
+                            new VertexElementDescription("Offsets", VertexElementSemantic.TextureCoordinate, VertexElementFormat.UInt4)
+                        ),
+                    };
+                case VertexFormat.Skinned:
+                    return new [] {
+                        new VertexLayoutDescription(
+                            new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
+                            new VertexElementDescription("Normal", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
+                            new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
+                            new VertexElementDescription("Joints", VertexElementSemantic.TextureCoordinate, VertexElementFormat.UShort4),
+                            new VertexElementDescription("Weights", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float4)
+                        ),
+                        new VertexLayoutDescription(stride: 16, instanceStepRate: 1,
+                            new VertexElementDescription("Offsets", VertexElementSemantic.TextureCoordinate, VertexElementFormat.UInt4)
+                        ),
+                    };
+                case VertexFormat.Sprite:
+                    return new [] {
+                        new VertexLayoutDescription(
+                            new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
+                            new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
+                            new VertexElementDescription("Color", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Byte4_Norm)
+                        ),
+                    };
+                default: 
+                    throw new System.NotSupportedException();
             };
         }
 

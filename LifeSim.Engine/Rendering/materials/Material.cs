@@ -4,10 +4,6 @@ namespace LifeSim.Engine.Rendering
 {
     public abstract class Material
     {
-        public delegate void OnMaterialDirtyCallback(Material material, bool texturesDirty, bool uniformsDirty);
-
-        public static event OnMaterialDirtyCallback? onMaterialDirty;
-
         public Shader shader { get; private set; }
 
         private ResourceSet? _resourceSet = null;
@@ -28,9 +24,6 @@ namespace LifeSim.Engine.Rendering
             if (this._dirty || this._resourceSet == null) {
                 this._dirty = false;
                 this._resourceSet?.Dispose();
-                foreach (var res in this._resources) {
-                    System.Console.WriteLine(res);
-                }
                 this._resourceSet = this.shader.CreateResourceSet(this._resources);
             }
 
@@ -40,7 +33,6 @@ namespace LifeSim.Engine.Rendering
         protected void _SetDirty()
         {
             this._dirty = true;
-            Material.onMaterialDirty?.Invoke(this, true, false);
         }
 
         public void Dispose()

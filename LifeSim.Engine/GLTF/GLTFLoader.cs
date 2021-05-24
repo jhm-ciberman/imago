@@ -13,16 +13,16 @@ namespace LifeSim.Engine.GLTF
 
         private readonly GLTFBuffer?[] _buffersCache;
         private readonly GLTFNode?[] _nodesCache;
-        private readonly SurfaceMaterial? _material;
+        private readonly SurfaceMaterial? _defaultMaterial;
 
-        public GLTFLoader(ResourceFactory assetsManager, SurfaceMaterial? material, string path)
+        public GLTFLoader(ResourceFactory assetsManager, string path, SurfaceMaterial? defaultMaterial = null)
         {
             this._assetsManager = assetsManager;
             this._path = path;
             this._model = glTFLoader.Interface.LoadModel(path);
             this._buffersCache = new GLTFBuffer[this._model.Buffers.Length];
             this._nodesCache = new GLTFNode[this._model.Nodes.Length];
-            this._material = material ?? assetsManager.defaultSurfaceMaterial;
+            this._defaultMaterial = defaultMaterial;
         }
 
         internal string GetNodeName(int index)
@@ -42,7 +42,7 @@ namespace LifeSim.Engine.GLTF
             node = new GLTFNode(name);
 
             if (data.Mesh.HasValue) {
-                node.material = this._material;
+                node.material = this._defaultMaterial;
                 node.mesh = this._GetMesh(data.Mesh.Value);
                 if (data.Skin.HasValue) {
                     node.skin = this._GetSkin(data.Skin.Value);
@@ -88,7 +88,8 @@ namespace LifeSim.Engine.GLTF
 
         private Mesh _GetMesh(int index)
         {
-            return this._assetsManager.MakeMesh(this.GetPrimitive(index).MakeMesh());
+            var meshData = this.GetPrimitive(index).MakeMesh();
+            return this._assetsManager.MakeMesh(meshData);
         }
 
         public Animation[] LoadAnimations()
