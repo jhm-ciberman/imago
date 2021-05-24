@@ -101,11 +101,6 @@ namespace LifeSim.Engine.Rendering
             this.Draw(pos, size, uv, deltaUV, (uint) color32, depth);
         }
 
-        public void UpdateDeviceBuffer()
-        {
-            this._gd.UpdateBuffer(this.vertexBuffer, 0, this.vertices);
-        }
-
         public void SetMaterial(Shader shader, Texture texture)
         {
             this.resourceSet.Dispose();

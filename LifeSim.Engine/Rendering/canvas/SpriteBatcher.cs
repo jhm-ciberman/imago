@@ -77,8 +77,6 @@ namespace LifeSim.Engine.Rendering
 
             }
 
-            Console.WriteLine("New batch!" + this._batches.Count);
-
             var newBatch = new SpriteBatch(this._gd, shader, texture, this._maxBatchSize);
             this._batches.Add(newBatch);
             return newBatch;
@@ -125,10 +123,6 @@ namespace LifeSim.Engine.Rendering
 
         public void Submit(SpritesPass pass, CommandList commandList)
         {
-            for (int i = 0; i < this._batches.Count; i++) {
-                this._batches[i].UpdateDeviceBuffer();
-            }
-
             pass.SubmitBatches(commandList, this._indexBuffer, this._batches);
 
             for (int i = 0; i < this._batches.Count; i++) {
@@ -143,6 +137,9 @@ namespace LifeSim.Engine.Rendering
             this._indexBuffer.Dispose();
             for (int i = 0; i < this._batches.Count; i++) {
                 this._batches[i].Dispose();
+            }
+            for (int i = 0; i < this._freeList.Count; i++) {
+                this._freeList[i].Dispose();
             }
         }
     }

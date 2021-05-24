@@ -122,7 +122,6 @@ namespace LifeSim.Engine.Rendering
             }
 
             this._freeListCount--;
-            Console.WriteLine($"Request block from {this.name}: {this._freeList[this._freeListCount]} (Only left: {this._freeListCount})");
             return new Block(this, this._freeList[this._freeListCount]);
         }
 
@@ -136,13 +135,15 @@ namespace LifeSim.Engine.Rendering
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Write<T>(int offset, ref T data) where T : struct
         {
+            /*
             if (offset < 0) {
                 throw new Exception("Trying to write to an invalid data block");
             }
             if (Marshal.SizeOf<T>() > this._blockSize) {
                 throw new Exception($"The size of {typeof(T)} is bigger than the block size");
             }
-            Console.WriteLine($"Write to data {this.name}@{offset}");
+            */
+
             Marshal.StructureToPtr(data, this._data + offset, false);
             this._dirty = true;
         }

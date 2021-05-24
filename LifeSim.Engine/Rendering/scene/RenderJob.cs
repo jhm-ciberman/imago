@@ -138,7 +138,7 @@ namespace LifeSim.Engine.Rendering
                 drawCallCount++;
             }
 
-            Console.WriteLine("DrawCalls: " + drawCallCount);
+            //Console.WriteLine("DrawCalls: " + drawCallCount);
         }
     }
 }

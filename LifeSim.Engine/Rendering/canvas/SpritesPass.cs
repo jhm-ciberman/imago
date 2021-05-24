@@ -1,9 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using System.Runtime.InteropServices;
-using FontStashSharp.Interfaces;
-using LifeSim.Core;
 using Veldrid;
 
 namespace LifeSim.Engine.Rendering
@@ -25,7 +22,7 @@ namespace LifeSim.Engine.Rendering
             var factory = gd.ResourceFactory;
 
             this._resourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
-                new ResourceLayoutElementDescription("CameraData", ResourceKind.UniformBuffer, ShaderStages.Vertex)
+                new ResourceLayoutElementDescription("CameraDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
             ));
 
             this._camera2DInfoBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
@@ -69,15 +66,18 @@ namespace LifeSim.Engine.Rendering
             for (int i = 0; i < batches.Count; i++) {
                 var batch = batches[i];
 
+                commandList.UpdateBuffer(batch.vertexBuffer, 0, batch.vertices);
+
                 if (this._currentShader != batch.shader) {
                     this._currentShader = batch.shader;
                     var pipeline = batch.shader.GetPipeline(VertexFormat.Sprite);
             
                     commandList.SetPipeline(pipeline);
                     commandList.SetGraphicsResourceSet(0, this._passResourceSet);
-                    commandList.SetVertexBuffer(0, batch.vertexBuffer);
-                    commandList.SetIndexBuffer(sharedIndexBuffer, IndexFormat.UInt16);
                 }
+
+                commandList.SetVertexBuffer(0, batch.vertexBuffer);
+                commandList.SetIndexBuffer(sharedIndexBuffer, IndexFormat.UInt16);
 
                 commandList.SetGraphicsResourceSet(1, batch.resourceSet);
                 commandList.DrawIndexed(
