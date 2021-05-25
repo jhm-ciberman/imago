@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
-using LifeSim.Engine.SceneGraph;
 using Veldrid.Utilities;
 
 namespace LifeSim.Engine.Rendering
@@ -26,6 +25,7 @@ namespace LifeSim.Engine.Rendering
         public void AddToRenderQueue(SceneStorage sceneStorage, ref BoundingFrustum frustum, Vector3 cameraPosition, bool useShadowmapShader)
         {
             this._indices.Clear();
+            this._items.Clear();
             var renderables = sceneStorage.renderables;
             for (int i = 0; i < renderables.Count; i++) {
                 Renderable renderable = renderables[i];
@@ -37,10 +37,11 @@ namespace LifeSim.Engine.Rendering
                     this._items.Add(new RenderItem(
                         mesh: renderable.mesh,
                         shader: useShadowmapShader ? material.shadowmapShader : material.shader,
-                        transformBufferOffset: (uint) renderable.transformDataBlock.offset,
+                        transformBufferOffset: renderable.transformDataBlock.offset,
+                        instanceBufferOffset: renderable.instanceDataBlock.offset,
+                        transformResourceSet: renderable.transformResourceSet,
                         materialResourceSet: material.GetMaterialResourceSet(),
-                        instanceResourceSet: renderable.instanceDataBlock.buffer.resourceSet,
-                        instanceBufferOffset: (uint) renderable.instanceDataBlock.offset
+                        instanceResourceSet: renderable.instanceResourceSet
                     ));
                 }
             }

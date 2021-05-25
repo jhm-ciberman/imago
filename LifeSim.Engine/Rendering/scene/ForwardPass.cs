@@ -91,8 +91,7 @@ namespace LifeSim.Engine.Rendering
             commandList.UpdateBuffer(this._camera3DInfoBuffer, 0, ref cameraInfo);
             commandList.UpdateBuffer(this._lightInfoBuffer, 0, ref lightInfo);
 
-            this._renderJob.FillOffsets(commandList, this._renderQueue);
-            this._renderJob.DrawRenderList(commandList, scene.storage.transformsResourceSet, this._renderQueue);
+            this._renderJob.DrawRenderList(commandList, this._renderQueue);
         }
 
         public void Dispose()

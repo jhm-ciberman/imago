@@ -19,8 +19,6 @@ namespace LifeSim.Engine.Rendering
         private ShadowmapPass _shadowmapPass;
 
         internal SceneStorage sceneStorage;
-
-        private readonly DeviceBuffer _offsetsVertexBuffer;
         private readonly ResourceLayout _instanceResourceLayout;
         private readonly ResourceLayout _transformResourceLayout;
         private readonly ResourceLayout _bonesResourceLayout;
@@ -79,7 +77,7 @@ namespace LifeSim.Engine.Rendering
 
             this._commandList.Begin();
             scene.storage.UpdateBuffers(this._commandList);
-            //this._shadowmapPass.Render(this._commandList, scene, camera, scene.mainLight);
+            this._shadowmapPass.Render(this._commandList, scene, camera, scene.mainLight);
             this._forwardPass.Render(this._commandList, scene, camera);
             this._commandList.End();
 

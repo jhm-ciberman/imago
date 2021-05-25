@@ -10,9 +10,9 @@ namespace LifeSim.Engine.Rendering
         public struct Block
         {
             public DataBuffer buffer;
-            public int offset;
+            public uint offset;
 
-            public Block(DataBuffer buffer, int offset)
+            public Block(DataBuffer buffer, uint offset)
             {
                 this.buffer = buffer;
                 this.offset = offset;
@@ -34,17 +34,17 @@ namespace LifeSim.Engine.Rendering
             public void FreeBlock()
             {
                 this.buffer.FreeBlock(this.offset);
-                this.offset = -1;
             }
         }
 
+        private static int _count = 0;
         private IntPtr _data;
 
-        private int _blocksCount;
-        private int _blockSize;
-        private int _sizeInBytes;
+        public int blocksCount { get; private set; }
+        public int blockSize { get; private set; }
+        public int sizeInBytes { get; private set; }
 
-        private int[] _freeList;
+        private uint[] _freeList;
         private int _freeListCount = 0;
 
         private GraphicsDevice _gd;
@@ -57,83 +57,62 @@ namespace LifeSim.Engine.Rendering
 
         public string name { get => this.deviceBuffer.Name; set { this.deviceBuffer.Name = value; } }
 
+        public int id { get; private set; }
+
         public DataBuffer(GraphicsDevice gd, int blocksCount, int blockSize, ResourceLayout resourceLayout)
         {
+            this.id = ++DataBuffer._count;
             this._gd = gd;
-            this._blockSize = blockSize;
-            this._blocksCount = blocksCount;
-            this._sizeInBytes = this._blocksCount * this._blockSize;
-            this._data = Marshal.AllocHGlobal((int) this._sizeInBytes);
+            this.blockSize = blockSize;
+            this.blocksCount = blocksCount;
+            this.sizeInBytes = this.blocksCount * this.blockSize;
+            this._data = Marshal.AllocHGlobal((int) this.sizeInBytes);
             this._resourceLayout = resourceLayout;
             
             System.Console.WriteLine($"Creating buffer with { blocksCount } blocks of { blockSize } bytes each");
 
             this.deviceBuffer = this._gd.ResourceFactory.CreateBuffer(new BufferDescription(
-                (uint) this._sizeInBytes, BufferUsage.UniformBuffer | BufferUsage.Dynamic
+                (uint) this.sizeInBytes, BufferUsage.UniformBuffer | BufferUsage.Dynamic
             ));
 
             this.resourceSet = this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(
                 this._resourceLayout, this.deviceBuffer
             ));
 
-            this._freeList = new int[blocksCount];
+            this._freeList = new uint[blocksCount];
             for (int i = 0; i < blocksCount; i++) {
-                this._freeList[i] = (this._blocksCount - i - 1) * this._blockSize;
+                this._freeList[i] = (uint)(this.blocksCount - i - 1);
             }
-            this._freeListCount = this._blocksCount;
-        }
-
-        public void Resize(int newBlockCount)
-        {
-            if (this._blocksCount == newBlockCount) return;
-            int oldBlocksCount = this._blocksCount;
-
-            this._blocksCount = newBlockCount;
-            this._sizeInBytes = this._blocksCount * this._blockSize;
-            this._data = Marshal.ReAllocHGlobal(this._data, (IntPtr) this._blocksCount);
-            Array.Resize(ref this._freeList, newBlockCount);
-
-            int extraBlocks = newBlockCount - oldBlocksCount;
-            if (extraBlocks > 0) {
-                for (int i = 0; i < extraBlocks; i++) {
-                    this._freeList[this._freeListCount + i] = (newBlockCount - i - 1) * this._blockSize;
-                }
-            }
-            this._freeListCount += extraBlocks;
-
-            this._gd.DisposeWhenIdle(this.deviceBuffer);
-            this.deviceBuffer = this._gd.ResourceFactory.CreateBuffer(new BufferDescription((uint)this._sizeInBytes, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
-            this.resourceSet = this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(this._resourceLayout, this.deviceBuffer));
-            this.onResourceSetChanged?.Invoke();
+            this._freeListCount = this.blocksCount;
         }
 
         public void UploadToGPU(CommandList commandList)
         {
             if (! this._dirty) return;
-            commandList.UpdateBuffer(this.deviceBuffer, 0, this._data, (uint) this._sizeInBytes);
+            commandList.UpdateBuffer(this.deviceBuffer, 0, this._data, (uint) this.sizeInBytes);
             this._dirty = false;
         }
+
+        public bool isFull => (this._freeListCount == 0);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Block RequestBlock()
         {
-            if (this._freeListCount == 0) {
-                throw new Exception("No new Blocks available in the DataBuffer. This should never happen.");
-            }
+            if (this._freeListCount == 0) throw new Exception($"Buffer {this.name} is full. This should not happen.");
 
             this._freeListCount--;
             return new Block(this, this._freeList[this._freeListCount]);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void FreeBlock(int offset)
+        public void FreeBlock(uint offset)
         {
             this._freeList[this._freeListCount] = offset;
             this._freeListCount++;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Write<T>(int offset, ref T data) where T : struct
+        public void Write<T>(uint offset, ref T data) where T : struct
         {
             /*
             if (offset < 0) {
@@ -143,18 +122,15 @@ namespace LifeSim.Engine.Rendering
                 throw new Exception($"The size of {typeof(T)} is bigger than the block size");
             }
             */
-
-            Marshal.StructureToPtr(data, this._data + offset, false);
+            
+            Marshal.StructureToPtr(data, this._data + (int) offset * this.blockSize, false);
             this._dirty = true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T Read<T>(int offset) where T : struct
+        public T Read<T>(uint offset) where T : struct
         {
-            if (offset < 0) {
-                throw new Exception("Trying to read from an invalid data block");
-            }
-            return Marshal.PtrToStructure<T>(this._data + offset);
+            return Marshal.PtrToStructure<T>(this._data + (int) offset * this.blockSize);
         }
 
         public void Dispose()

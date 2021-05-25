@@ -8,7 +8,6 @@ namespace LifeSim.Engine.Rendering
     public class Renderable
     {
         public int renderListIndex;
-
         private Matrix4x4 _transform;
         private Vector3 _centerPosition;
         private BoundingBox _aabb;
@@ -16,6 +15,7 @@ namespace LifeSim.Engine.Rendering
 
         public Veldrid.ResourceSet materialResourceSet { get; private set; }
         public Veldrid.ResourceSet instanceResourceSet { get; private set; }
+        public Veldrid.ResourceSet transformResourceSet { get; private set; }
 
         public DataBuffer.Block transformDataBlock;
         public DataBuffer.Block instanceDataBlock;
@@ -35,7 +35,7 @@ namespace LifeSim.Engine.Rendering
             this.transformDataBlock = transformDataBuffer.RequestBlock();
 
             this.instanceResourceSet = instanceDataBuffer.resourceSet;
-            instanceDataBuffer.onResourceSetChanged += this._OnInstanceDataResourceSetChanged;
+            this.transformResourceSet = transformDataBuffer.resourceSet;
 
             this.materialResourceSet = material.GetMaterialResourceSet();
             this._cachedSortKey = this._RecomputeSortKey();
@@ -73,9 +73,12 @@ namespace LifeSim.Engine.Rendering
 
         protected ulong _RecomputeSortKey()
         {
-            ulong materialHash = (ulong) (this.material.shader.GetHashCode() & 0xFFFF);
-            ulong meshHash     = (ulong) (this.mesh.GetHashCode() & 0xFFFF);
-            return (materialHash << 48) | (meshHash << 32);
+            ulong materialHash        = (ulong) (this.material.id & 0xFFFF);
+            ulong meshHash            = (ulong) (this.mesh.id & 0xFFF);
+            ulong transformBufferHash = (ulong) (this.transformDataBlock.buffer.id & 0xF);
+            ulong key = (materialHash << 48) | (meshHash << 36) | (transformBufferHash << 32);
+            Console.WriteLine(Convert.ToString((long) key, 16).PadLeft(16, '0'));
+            return key;
         }
 
         public ulong GetSortKey(Vector3 cameraPosition)

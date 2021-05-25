@@ -22,14 +22,10 @@ namespace LifeSim.Engine.Rendering
         private Pipeline? _currentPipeline;
         private Mesh? _currentMesh;
         private ResourceSet? _currentMaterialResourceSet;
+        private ResourceSet? _currentTransformResourceSet;
         private ResourceSet? _currentInstanceResourceSet;
         private ResourceSet _passResourceSet;
-
-        private uint[] _instanceOffsets = new uint[1];
-        private uint[] _transformOffsets = new uint[1];
-
-        private DeviceBuffer _offsetsVertexBuffer;
-        private uint _maxInstancesPerBatch = 1024;
+        private DeviceBuffer? _offsetsVertexBuffer;
 
         private OffsetVertexData[] _offsetVertexData;
 
@@ -42,58 +38,88 @@ namespace LifeSim.Engine.Rendering
             this._gd = gd;
             this._passResourceSet = passResourceSet;
 
-            this._offsetsVertexBuffer = gd.ResourceFactory.CreateBuffer(new BufferDescription(
-                16 * this._maxInstancesPerBatch, BufferUsage.VertexBuffer | BufferUsage.Dynamic
-            ));
-
-            this._offsetVertexData = new OffsetVertexData[this._maxInstancesPerBatch];
-            this._instanceRepeat = new uint[this._maxInstancesPerBatch];
+            this._offsetVertexData = new OffsetVertexData[1024];
+            this._instanceRepeat = new uint[1024];
         }
 
-        public void FillOffsets(CommandList commandList, IReadOnlyList<RenderItem> renderables)
+        private DeviceBuffer _GetVertexOffsetBuffer()
+        {
+            uint requiredSizeInBytes = (uint) (this._offsetVertexData.Length * 16);
+            if (this._offsetsVertexBuffer == null || this._offsetsVertexBuffer.SizeInBytes < requiredSizeInBytes) {
+                if (this._offsetsVertexBuffer != null) {
+                    this._gd.DisposeWhenIdle(this._offsetsVertexBuffer);
+                }
+                this._offsetsVertexBuffer = this._gd.ResourceFactory.CreateBuffer(new BufferDescription(
+                    requiredSizeInBytes, BufferUsage.VertexBuffer | BufferUsage.Dynamic
+                ));
+            }
+
+            return this._offsetsVertexBuffer;
+        }
+
+        private void _PrepareBatches(IReadOnlyList<RenderItem> renderables)
         {
             if (renderables.Count == 0) return;
 
             ResourceSet prevInstanceRs = renderables[0].instanceResourceSet;
             ResourceSet prevMaterialRs = renderables[0].materialResourceSet;
+            ResourceSet prevTrasnformRs = renderables[0].transformResourceSet;
             Mesh prevMesh = renderables[0].mesh;
 
             uint instanceRepeatCount = 0;
-            int repeatArrayIndex = 0;
+            int repeatArrayCount = 0;
+            if (this._offsetVertexData.Length < renderables.Count) {
+                Array.Resize(ref this._offsetVertexData, renderables.Count * 2);
+            }
             for (int i = 0; i < renderables.Count; i++) {
                 RenderItem item = renderables[i];
 
                 this._offsetVertexData[i] = new OffsetVertexData {
-                    transformDataOffset = item.transformBufferOffset / 64,
-                    instanceDataOffset = item.instanceBufferOffset / 48,
+                    transformDataOffset = item.transformBufferOffset,
+                    instanceDataOffset = item.instanceBufferOffset,
                     pickingId = 0,
                 };
 
-                if (item.mesh == prevMesh && item.materialResourceSet == prevMaterialRs && item.instanceResourceSet == prevInstanceRs) {
+                if ( // If it's batcheable, add to current batch
+                    item.mesh == prevMesh 
+                    && item.materialResourceSet == prevMaterialRs 
+                    && item.instanceResourceSet == prevInstanceRs 
+                    && item.transformResourceSet == prevTrasnformRs
+                ) {
                     instanceRepeatCount++;
                 } else {
-                    this._instanceRepeat[repeatArrayIndex++] = instanceRepeatCount;
+                    if (repeatArrayCount == this._instanceRepeat.Length) {
+                        Array.Resize(ref this._instanceRepeat, this._instanceRepeat.Length * 2);
+                    }
+                    this._instanceRepeat[repeatArrayCount++] = instanceRepeatCount;
                     instanceRepeatCount = 1;
                     prevInstanceRs = item.instanceResourceSet;
                     prevMaterialRs = item.materialResourceSet;
                     prevMesh = item.mesh;
                 }
             }
-            this._instanceRepeat[repeatArrayIndex++] = instanceRepeatCount;
 
-            commandList.UpdateBuffer(this._offsetsVertexBuffer, 0, this._offsetVertexData);
+            this._instanceRepeat[repeatArrayCount++] = instanceRepeatCount;
         }
 
-        public void DrawRenderList(CommandList commandList, ResourceSet transformsResourceSet, IReadOnlyList<RenderItem> renderables)
+        public void DrawRenderList(CommandList commandList, IReadOnlyList<RenderItem> renderables)
         {
+            this._PrepareBatches(renderables);
+            
+            DeviceBuffer offsetsVertexBuffer = this._GetVertexOffsetBuffer();
+
+            commandList.UpdateBuffer(offsetsVertexBuffer, 0, this._offsetVertexData);
+
             this._currentPipeline = null;
             this._currentMesh = null;
             this._currentMaterialResourceSet = null;
+            this._currentTransformResourceSet = null;
             this._currentInstanceResourceSet = null;
 
             int instanceRepeatArrayIndex = 0;
             int drawCallCount = 0;
             uint instanceIndex = 0;
+
             while (instanceIndex < renderables.Count) {
                 RenderItem item = renderables[(int) instanceIndex];
 
@@ -102,9 +128,13 @@ namespace LifeSim.Engine.Rendering
                 if (this._currentPipeline != pipeline) {
                     commandList.SetPipeline(pipeline);
                     commandList.SetGraphicsResourceSet(BINDING_PASS, this._passResourceSet);
-                    commandList.SetGraphicsResourceSet(BINDING_TRANSFORM, transformsResourceSet);
                     this._currentPipeline = pipeline;
                     this._currentMaterialResourceSet = null;
+                }
+                
+                if (this._currentMaterialResourceSet != item.transformResourceSet) {
+                    commandList.SetGraphicsResourceSet(BINDING_TRANSFORM, item.transformResourceSet);
+                    this._currentTransformResourceSet = item.transformResourceSet;
                 }
 
                 if (this._currentMaterialResourceSet != item.materialResourceSet) {

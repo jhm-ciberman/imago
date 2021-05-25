@@ -8,6 +8,8 @@ namespace LifeSim.Engine.Rendering
 {
     public class Mesh : IGeometry, System.IDisposable
     {
+        static int _count = 0;
+
         [StructLayout(LayoutKind.Sequential)]
         private struct VertData
         {           
@@ -16,6 +18,7 @@ namespace LifeSim.Engine.Rendering
             public Vector2 uv;
         }
 
+        public int id { get ; private set; }
         public uint vertexCount;
         public uint indexCount;
         public VertexFormat vertexFormat => VertexFormat.Regular;
@@ -28,6 +31,7 @@ namespace LifeSim.Engine.Rendering
 
         public Mesh(GraphicsDevice graphicsDevice, MeshData mesh)
         {
+            this.id = ++Mesh._count;
             var indices = mesh.indices.ToArray();
 
             this.vertexCount = (uint) mesh.positions.Count;

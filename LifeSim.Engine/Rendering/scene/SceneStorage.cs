@@ -9,17 +9,13 @@ namespace LifeSim.Engine.Rendering
 {
     public class SceneStorage : IDisposable
     {
-        public const int MAX_INSTANCE_UNIFORM_INDICES = 16;
-
-        public const int MIN_BUFFER_BLOCKS = 4096;
-
-        private DataBuffer?[] _buffers;
+        public const int MIN_BUFFER_BLOCKS = 2048;
 
         private SwapPopList<Renderable> _renderables = new SwapPopList<Renderable>();
         public IReadOnlyList<Renderable> renderables => this._renderables;
         private GraphicsDevice _gd;
-
-        private DataBuffer _tranformDataBuffer;
+        private List<DataBuffer> _instanceDataBuffers = new List<DataBuffer>();
+        private List<DataBuffer> _transformDataBuffers = new List<DataBuffer>();
         private Skeleton _bonesInfo = new Skeleton();
         private readonly ResourceLayout _transformResourceLayout;
         private readonly ResourceLayout _instanceResourceLayout;
@@ -31,26 +27,23 @@ namespace LifeSim.Engine.Rendering
         public SceneStorage(GraphicsDevice gd, ResourceLayout transformResourceLayout, ResourceLayout instanceResourceLayout, ResourceLayout bonesResourceLayout)
         {
             this._gd = gd;
-            this._buffers = new DataBuffer?[MAX_INSTANCE_UNIFORM_INDICES];
             var factory = gd.ResourceFactory;
 
             this._transformResourceLayout = transformResourceLayout;
             this._instanceResourceLayout = instanceResourceLayout;
             this._bonesResourceLayout = bonesResourceLayout;
 
-            this._tranformDataBuffer = new DataBuffer(this._gd, MIN_BUFFER_BLOCKS, Marshal.SizeOf<Matrix4x4>(), this._transformResourceLayout);
-            this._tranformDataBuffer.name = "TransformsBuffer";
             //this._bonesInfoBuffer = factory.CreateBuffer(new BufferDescription(64 * Skeleton.MAX_NUMBER_OF_BONES, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
             //this._skinnedResourceSet = factory.CreateResourceSet(new ResourceSetDescription(skinnedMeshLayout, this._modelInfoBuffer, this._bonesInfoBuffer));
 
         }
 
-        public Veldrid.ResourceSet transformsResourceSet => this._tranformDataBuffer.resourceSet;
-
         public Renderable CreateRenderable(Mesh mesh, SurfaceMaterial material)
         {
+            var transformDataBuffer = this._GetTransformDataBuffer();
             var instanceDataBuffer = this._GetInstanceDataBuffer(material.shader);
-            var renderable = new Renderable(mesh, material, instanceDataBuffer, this._tranformDataBuffer);
+
+            var renderable = new Renderable(mesh, material, instanceDataBuffer, transformDataBuffer);
             renderable.renderListIndex = this._renderables.Count;
             this._renderables.Add(renderable);
             return renderable;
@@ -63,34 +56,57 @@ namespace LifeSim.Engine.Rendering
             renderable.Free();
         }
 
+        private DataBuffer _GetTransformDataBuffer()
+        {
+            for (int i = 0; i < this._transformDataBuffers.Count; i++) {
+                var buffer = this._transformDataBuffers[i];
+                if (! buffer.isFull) {
+                    return buffer;
+                }
+            }
+
+            System.Console.WriteLine("Creating Transform data buffer");
+            var newBuffer = new DataBuffer(this._gd, MIN_BUFFER_BLOCKS, 64, this._transformResourceLayout);
+            newBuffer.name = "TransformDataBuffer";
+            this._transformDataBuffers.Add(newBuffer);
+            return newBuffer;
+        }
+
         private DataBuffer _GetInstanceDataBuffer(Shader shader)
         {
-            var indicesCount = shader.instanceUniformData.Count;
-            var buffer = this._buffers[indicesCount];
-            if (buffer == null) {
-                System.Console.WriteLine("Creating Instance data buffer: " + indicesCount);
-                buffer = new DataBuffer(this._gd, MIN_BUFFER_BLOCKS, indicesCount * 16, this._instanceResourceLayout);
-                buffer.name = "InstanceData";
-                this._buffers[indicesCount] = buffer;
+            var blockSize = shader.instanceUniformData.Count * 16;
+            for (int i = 0; i < this._instanceDataBuffers.Count; i++) {
+                var buffer = this._instanceDataBuffers[i];
+                if (buffer.blockSize == blockSize && ! buffer.isFull) {
+                    return buffer;
+                }
             }
-            return buffer;
+
+            System.Console.WriteLine("Creating Instance data buffer: " + blockSize);
+            var newBuffer = new DataBuffer(this._gd, MIN_BUFFER_BLOCKS, blockSize, this._instanceResourceLayout);
+            newBuffer.name = "InstanceDataBuffer";
+            this._instanceDataBuffers.Add(newBuffer);
+            return newBuffer;
         }
 
         public void UpdateBuffers(Veldrid.CommandList commandList)
         {
-            this._tranformDataBuffer.UploadToGPU(commandList);
-            for (int i = 0; i < this._buffers.Length; i++) {
-                this._buffers[i]?.UploadToGPU(commandList);
+            for (int i = 0; i < this._instanceDataBuffers.Count; i++) {
+                this._instanceDataBuffers[i].UploadToGPU(commandList);
+            }
+            for (int i = 0; i < this._transformDataBuffers.Count; i++) {
+                this._transformDataBuffers[i].UploadToGPU(commandList);
             }
         }
 
         public void Dispose()
         {
-            for (int i = 0; i < this._buffers.Length; i++) {
-                this._buffers[i]?.Dispose();
+            for (int i = 0; i < this._instanceDataBuffers.Count; i++) {
+                this._instanceDataBuffers[i].Dispose();
             }
-
-            this._tranformDataBuffer.Dispose();
+            for (int i = 0; i < this._transformDataBuffers.Count; i++) {
+                this._transformDataBuffers[i].Dispose();
+            }
         }
     }
 }

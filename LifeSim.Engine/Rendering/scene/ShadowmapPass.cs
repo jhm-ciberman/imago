@@ -60,8 +60,7 @@ namespace LifeSim.Engine.Rendering
             commandList.ClearDepthStencil(1f);
             commandList.UpdateBuffer(this._shadowmapInfoBuffer, 0, ref shadowmapMatrix);
 
-            this._renderJob.FillOffsets(commandList, this._renderQueue);
-            this._renderJob.DrawRenderList(commandList, scene.storage.transformsResourceSet, this._renderQueue);
+            this._renderJob.DrawRenderList(commandList, this._renderQueue);
         }
 
         public void Dispose()
