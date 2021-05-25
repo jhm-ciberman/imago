@@ -90,7 +90,7 @@ namespace LifeSim.Engine.Rendering
             resources.Add(shaderVariant.materialResourceLayout);
             resources.Add(this._instanceResourceLayout);
 
-            if (shaderVariant.vertexFormat == VertexFormat.Skinned) {
+            if (shaderVariant.vertexFormat == ShaderRegistry.skinnedVertexFormat) {
                 resources.Add(this._bonesResourceLayout);
             }
 

@@ -167,7 +167,7 @@ namespace LifeSim.Engine.Rendering
             for(var i = 0; i < this.positions.Count; i++) {
                 vertices[i] = new VertData(this.positions[i], this.normals[i], this.uvs[i]);
             }
-            var mesh = meshFactory.CreateMesh(VertexFormat.Regular, vertices, this.indices.ToArray(), ref boundingBox);
+            var mesh = meshFactory.CreateMesh(ShaderRegistry.regularVertexFormat, vertices, this.indices.ToArray(), ref boundingBox);
 
             ArrayPool<VertData>.Shared.Return(vertices);
 

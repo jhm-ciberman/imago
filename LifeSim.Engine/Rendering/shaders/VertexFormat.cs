@@ -1,10 +1,19 @@
+using System;
+using Veldrid;
+using Veldrid.SPIRV;
+
 namespace LifeSim.Engine.Rendering
 {
-    public enum VertexFormat
+    public class VertexFormat
     {
-        Regular = 0,
-        Skinned = 1,
-        Sprite  = 2,
-        PosOnly = 3,
+        public VertexLayoutDescription[] layout;
+
+        public MacroDefinition[] macroDefinitions;
+
+        public VertexFormat(VertexLayoutDescription[] layout, MacroDefinition[]? macroDefinitions = null)
+        {
+            this.layout = layout;
+            this.macroDefinitions = macroDefinitions ?? Array.Empty<MacroDefinition>();
+        }
     }
 }

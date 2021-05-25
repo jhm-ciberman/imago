@@ -76,11 +76,6 @@ namespace LifeSim.Engine.Rendering
             this.id = ++Shader._count;
             this._source = source;
 
-            int vertexFlags = 0;
-            for (int i = 0; i< vertexFormats.Length; i++) {
-                vertexFlags |= 1 << (int) vertexFormats[i];
-            }
-
             this._gd = gd;
             this._factory = gd.ResourceFactory;
             this._materialResourceLayout = this._factory.CreateResourceLayout(materialResourceLayout);

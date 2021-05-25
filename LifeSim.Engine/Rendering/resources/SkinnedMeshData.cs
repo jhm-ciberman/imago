@@ -49,7 +49,7 @@ namespace LifeSim.Engine.Rendering
             for(var i = 0; i < this.positions.Count; i++) {
                 vertices[i] = new SkinnedVertData(this.positions[i], this.normals[i], this.uvs[i], this.joints[i], this.weights[i]);
             }
-            var mesh = meshFactory.CreateMesh(VertexFormat.Skinned, vertices, this.indices.ToArray(), ref boundingBox);
+            var mesh = meshFactory.CreateMesh(ShaderRegistry.skinnedVertexFormat, vertices, this.indices.ToArray(), ref boundingBox);
 
             ArrayPool<SkinnedVertData>.Shared.Return(vertices);
 

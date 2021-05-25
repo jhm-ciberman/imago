@@ -70,7 +70,7 @@ namespace LifeSim.Engine.Rendering
 
                 if (this._currentShader != batch.shader) {
                     this._currentShader = batch.shader;
-                    var pipeline = batch.shader.GetPipeline(VertexFormat.Sprite);
+                    var pipeline = batch.shader.GetPipeline(ShaderRegistry.spritesVertexFormat);
             
                     commandList.SetPipeline(pipeline);
                     commandList.SetGraphicsResourceSet(0, this._passResourceSet);
