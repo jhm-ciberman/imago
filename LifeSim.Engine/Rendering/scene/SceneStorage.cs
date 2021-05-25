@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Numerics;
-using System.Runtime.InteropServices;
 using LifeSim.Core;
 using Veldrid;
 
@@ -9,7 +7,7 @@ namespace LifeSim.Engine.Rendering
 {
     public class SceneStorage : IDisposable
     {
-        public const int MIN_BUFFER_BLOCKS = 2048;
+        public const int MIN_BUFFER_BLOCKS = 1024;
 
         private SwapPopList<Renderable> _renderables = new SwapPopList<Renderable>();
         public IReadOnlyList<Renderable> renderables => this._renderables;

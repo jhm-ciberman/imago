@@ -77,7 +77,6 @@ namespace LifeSim.Engine.Rendering
             ulong meshHash            = (ulong) (this.mesh.id & 0xFFF);
             ulong transformBufferHash = (ulong) (this.transformDataBlock.buffer.id & 0xF);
             ulong key = (materialHash << 48) | (meshHash << 36) | (transformBufferHash << 32);
-            Console.WriteLine(Convert.ToString((long) key, 16).PadLeft(16, '0'));
             return key;
         }
 

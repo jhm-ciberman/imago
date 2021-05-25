@@ -72,7 +72,7 @@ namespace LifeSim.Engine.Rendering
         {
             var cameraFrustum = new BoundingFrustum(camera.frustumCullingCamera.viewProjectionMatrix);
             this._renderQueue.AddToRenderQueue(scene.storage, ref cameraFrustum, camera.position, false);
-            //this._renderQueue.Sort();
+            this._renderQueue.Sort();
 
             commandList.SetFramebuffer(this._renderTexture.framebuffer);
             commandList.ClearColorTarget(0, new RgbaFloat(scene.clearColor.r, scene.clearColor.g, scene.clearColor.b, scene.clearColor.a));

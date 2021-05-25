@@ -95,6 +95,7 @@ namespace LifeSim.Engine.Rendering
                     instanceRepeatCount = 1;
                     prevInstanceRs = item.instanceResourceSet;
                     prevMaterialRs = item.materialResourceSet;
+                    prevTrasnformRs = item.transformResourceSet;
                     prevMesh = item.mesh;
                 }
             }
@@ -130,9 +131,11 @@ namespace LifeSim.Engine.Rendering
                     commandList.SetGraphicsResourceSet(BINDING_PASS, this._passResourceSet);
                     this._currentPipeline = pipeline;
                     this._currentMaterialResourceSet = null;
+                    this._currentTransformResourceSet = null;
+                    this._currentInstanceResourceSet = null;
                 }
                 
-                if (this._currentMaterialResourceSet != item.transformResourceSet) {
+                if (this._currentTransformResourceSet != item.transformResourceSet) {
                     commandList.SetGraphicsResourceSet(BINDING_TRANSFORM, item.transformResourceSet);
                     this._currentTransformResourceSet = item.transformResourceSet;
                 }

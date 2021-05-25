@@ -22,8 +22,6 @@ namespace LifeSim.Engine.Rendering
         private readonly ResourceLayout _instanceResourceLayout;
         private readonly ResourceLayout _transformResourceLayout;
         private readonly ResourceLayout _bonesResourceLayout;
-
-        private readonly Dictionary<RenderNode3D, ResourceSet> _resourceSets = new Dictionary<RenderNode3D, ResourceSet>();
         private Shader _surfaceShader;
         private Shader _shadowmapShader;
         public SceneRenderer(GraphicsDevice gd, RenderTexture mainRenderTexture)
