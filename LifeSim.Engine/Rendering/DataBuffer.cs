@@ -68,8 +68,6 @@ namespace LifeSim.Engine.Rendering
             this.sizeInBytes = this.blocksCount * this.blockSize;
             this._data = Marshal.AllocHGlobal((int) this.sizeInBytes);
             this._resourceLayout = resourceLayout;
-            
-            System.Console.WriteLine($"Creating buffer with { blocksCount } blocks of { blockSize } bytes each");
 
             this.deviceBuffer = this._gd.ResourceFactory.CreateBuffer(new BufferDescription(
                 (uint) this.sizeInBytes, BufferUsage.UniformBuffer | BufferUsage.Dynamic

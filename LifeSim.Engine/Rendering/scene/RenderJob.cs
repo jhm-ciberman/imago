@@ -57,59 +57,48 @@ namespace LifeSim.Engine.Rendering
             return this._offsetsVertexBuffer;
         }
 
-        private void _PrepareBatches(IReadOnlyList<RenderItem> renderables)
+        private void _PrepareBatches(IReadOnlyList<Renderable> renderables)
         {
             if (renderables.Count == 0) return;
 
-            ResourceSet prevInstanceRs = renderables[0].instanceResourceSet;
-            ResourceSet prevMaterialRs = renderables[0].materialResourceSet;
-            ResourceSet prevTrasnformRs = renderables[0].transformResourceSet;
-            Mesh prevMesh = renderables[0].mesh;
-
+            int prevVatchingHashKey = renderables[0].batchingHashKey;
             uint instanceRepeatCount = 0;
             int repeatArrayCount = 0;
             if (this._offsetVertexData.Length < renderables.Count) {
-                Array.Resize(ref this._offsetVertexData, renderables.Count * 2);
+                Array.Resize(ref this._offsetVertexData, (int) (renderables.Count * 1.2f));
+            }
+            if (this._instanceRepeat.Length < renderables.Count) { // Ensure capacity for worst case scenario, nothing batcheable
+                Array.Resize(ref this._instanceRepeat, (int) (renderables.Count * 1.2f));
             }
             for (int i = 0; i < renderables.Count; i++) {
-                RenderItem item = renderables[i];
+                Renderable renderable = renderables[i];
 
                 this._offsetVertexData[i] = new OffsetVertexData {
-                    transformDataOffset = item.transformBufferOffset,
-                    instanceDataOffset = item.instanceBufferOffset,
-                    pickingId = 0,
+                    transformDataOffset = renderable.transformDataBlock.offset,
+                    instanceDataOffset = renderable.instanceDataBlock.offset,
+                    pickingId = renderable.pickingID,
                 };
 
-                if ( // If it's batcheable, add to current batch
-                    item.mesh == prevMesh 
-                    && item.materialResourceSet == prevMaterialRs 
-                    && item.instanceResourceSet == prevInstanceRs 
-                    && item.transformResourceSet == prevTrasnformRs
-                ) {
+                // If it's batcheable, add to current batch
+                if (renderable.batchingHashKey == prevVatchingHashKey) {
                     instanceRepeatCount++;
                 } else {
-                    if (repeatArrayCount == this._instanceRepeat.Length) {
-                        Array.Resize(ref this._instanceRepeat, this._instanceRepeat.Length * 2);
-                    }
                     this._instanceRepeat[repeatArrayCount++] = instanceRepeatCount;
                     instanceRepeatCount = 1;
-                    prevInstanceRs = item.instanceResourceSet;
-                    prevMaterialRs = item.materialResourceSet;
-                    prevTrasnformRs = item.transformResourceSet;
-                    prevMesh = item.mesh;
+                    prevVatchingHashKey = renderable.batchingHashKey;
                 }
             }
 
             this._instanceRepeat[repeatArrayCount++] = instanceRepeatCount;
         }
 
-        public void DrawRenderList(CommandList commandList, IReadOnlyList<RenderItem> renderables)
+        public void DrawRenderList(CommandList commandList, IReadOnlyList<Renderable> renderables, bool shadowMapPass)
         {
             this._PrepareBatches(renderables);
             
             DeviceBuffer offsetsVertexBuffer = this._GetVertexOffsetBuffer();
 
-            commandList.UpdateBuffer(offsetsVertexBuffer, 0, this._offsetVertexData);
+            this._gd.UpdateBuffer(offsetsVertexBuffer, 0, this._offsetVertexData);
 
             this._currentPipeline = null;
             this._currentMesh = null;
@@ -122,9 +111,10 @@ namespace LifeSim.Engine.Rendering
             uint instanceIndex = 0;
 
             while (instanceIndex < renderables.Count) {
-                RenderItem item = renderables[(int) instanceIndex];
+                Renderable renderable = renderables[(int) instanceIndex];
 
-                var pipeline = item.shader.GetPipeline(item.mesh.vertexFormat);
+                var shader = shadowMapPass ? renderable.material.shadowmapShader : renderable.material.shader;
+                var pipeline = shader.GetPipeline(renderable.mesh.vertexFormat);
 
                 if (this._currentPipeline != pipeline) {
                     commandList.SetPipeline(pipeline);
@@ -135,32 +125,32 @@ namespace LifeSim.Engine.Rendering
                     this._currentInstanceResourceSet = null;
                 }
                 
-                if (this._currentTransformResourceSet != item.transformResourceSet) {
-                    commandList.SetGraphicsResourceSet(BINDING_TRANSFORM, item.transformResourceSet);
-                    this._currentTransformResourceSet = item.transformResourceSet;
+                if (this._currentTransformResourceSet != renderable.transformResourceSet) {
+                    commandList.SetGraphicsResourceSet(BINDING_TRANSFORM, renderable.transformResourceSet);
+                    this._currentTransformResourceSet = renderable.transformResourceSet;
                 }
 
-                if (this._currentMaterialResourceSet != item.materialResourceSet) {
-                    commandList.SetGraphicsResourceSet(BINDING_MATERIAL, item.materialResourceSet);
-                    this._currentMaterialResourceSet = item.materialResourceSet;
+                if (this._currentMaterialResourceSet != renderable.materialResourceSet) {
+                    commandList.SetGraphicsResourceSet(BINDING_MATERIAL, renderable.materialResourceSet);
+                    this._currentMaterialResourceSet = renderable.materialResourceSet;
                 }
 
-                if (this._currentInstanceResourceSet != item.instanceResourceSet) {
-                    commandList.SetGraphicsResourceSet(BINDING_INSTANCE, item.instanceResourceSet);
-                    this._currentInstanceResourceSet = item.instanceResourceSet;
+                if (this._currentInstanceResourceSet != renderable.instanceResourceSet) {
+                    commandList.SetGraphicsResourceSet(BINDING_INSTANCE, renderable.instanceResourceSet);
+                    this._currentInstanceResourceSet = renderable.instanceResourceSet;
                 }
 
-                if (this._currentMesh != item.mesh) {
-                    commandList.SetVertexBuffer(0, item.mesh.vertexBuffer, 0);
+                if (this._currentMesh != renderable.mesh) {
+                    commandList.SetVertexBuffer(0, renderable.mesh.vertexBuffer, 0);
                     commandList.SetVertexBuffer(1, this._offsetsVertexBuffer, 0);
-                    commandList.SetIndexBuffer(item.mesh.indexBuffer, Veldrid.IndexFormat.UInt16);
-                    this._currentMesh = item.mesh;
+                    commandList.SetIndexBuffer(renderable.mesh.indexBuffer, Veldrid.IndexFormat.UInt16);
+                    this._currentMesh = renderable.mesh;
                 }
 
                 uint instanceRepeat = this._instanceRepeat[instanceRepeatArrayIndex++];
 
                 commandList.DrawIndexed(
-                    indexCount: item.mesh.indexCount,
+                    indexCount: renderable.mesh.indexCount,
                     instanceCount: instanceRepeat,
                     indexStart: 0,
                     vertexOffset: 0,

@@ -13,6 +13,8 @@ namespace LifeSim.Engine.Rendering
         private BoundingBox _aabb;
         private ulong _cachedSortKey;
 
+        public int batchingHashKey { get; private set; }
+
         public Veldrid.ResourceSet materialResourceSet { get; private set; }
         public Veldrid.ResourceSet instanceResourceSet { get; private set; }
         public Veldrid.ResourceSet transformResourceSet { get; private set; }
@@ -20,7 +22,8 @@ namespace LifeSim.Engine.Rendering
         public DataBuffer.Block transformDataBlock;
         public DataBuffer.Block instanceDataBlock;
         public Mesh mesh { get; private set; }
-
+        public uint pickingID { get; set; } = 0;
+ 
         public Skeleton? skeleton  { get; private set; }
 
         public SurfaceMaterial material { get; private set; }
@@ -39,6 +42,7 @@ namespace LifeSim.Engine.Rendering
 
             this.materialResourceSet = material.GetMaterialResourceSet();
             this._cachedSortKey = this._RecomputeSortKey();
+            this.batchingHashKey = this._RecomputeBatchingHashKey();
         }
 
         private void _OnInstanceDataResourceSetChanged()
@@ -78,6 +82,16 @@ namespace LifeSim.Engine.Rendering
             ulong transformBufferHash = (ulong) (this.transformDataBlock.buffer.id & 0xF);
             ulong key = (materialHash << 48) | (meshHash << 36) | (transformBufferHash << 32);
             return key;
+        }
+
+        private int _RecomputeBatchingHashKey()
+        {
+            return HashCode.Combine(
+                this.mesh.id, 
+                this.materialResourceSet,
+                this.instanceResourceSet, 
+                this.transformResourceSet
+            );
         }
 
         public ulong GetSortKey(Vector3 cameraPosition)

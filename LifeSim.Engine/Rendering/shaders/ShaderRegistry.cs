@@ -16,9 +16,7 @@ namespace LifeSim.Engine.Rendering
                 ),
                 new [] {
                     new Shader.Uniform("AlbedoColor", Shader.UniformType.Vec4),
-                    new Shader.Uniform("PickingID", Shader.UniformType.UVec4),
                     new Shader.Uniform("TextureST", Shader.UniformType.Vec4),
-                    //new Shader.Uniform("__padding", Shader.UniformType.Vec4),
                 }
             );
         }
@@ -34,9 +32,7 @@ namespace LifeSim.Engine.Rendering
                 ),
                 new [] {
                     new Shader.Uniform("AlbedoColor", Shader.UniformType.Vec4),
-                    new Shader.Uniform("PickingID", Shader.UniformType.UVec4),
                     new Shader.Uniform("TextureST", Shader.UniformType.Vec4),
-                    //new Shader.Uniform("__padding", Shader.UniformType.Vec4),
                 }
             );
         }

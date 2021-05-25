@@ -12,10 +12,13 @@ namespace LifeSim.Engine.Rendering
         public readonly uint transformBufferOffset;
         public readonly uint instanceBufferOffset;
 
-        public RenderItem(Mesh mesh, Shader shader, uint transformBufferOffset, ResourceSet transformResourceSet, ResourceSet materialResourceSet, ResourceSet instanceResourceSet, uint instanceBufferOffset)
+        public readonly uint pickingID;
+
+        public RenderItem(Mesh mesh, Shader shader, uint transformBufferOffset, uint pickingID, ResourceSet transformResourceSet, ResourceSet materialResourceSet, ResourceSet instanceResourceSet, uint instanceBufferOffset)
         {
             this.mesh = mesh;
             this.shader = shader;
+            this.pickingID = pickingID;
             this.transformBufferOffset = transformBufferOffset;
             this.transformResourceSet = transformResourceSet;
             this.materialResourceSet = materialResourceSet;

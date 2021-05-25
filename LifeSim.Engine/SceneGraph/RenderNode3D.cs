@@ -8,6 +8,13 @@ namespace LifeSim.Engine.SceneGraph
 {
     public class RenderNode3D : Node3D
     {
+        private uint _pickingID = 0;
+        public uint pickingID
+        {
+            get => this._pickingID;
+            set { this._pickingID = value; if (this._renderable != null) { this._renderable.pickingID = value; }}
+        }
+
         private Mesh? _mesh = null;
         public Mesh? mesh
         {
