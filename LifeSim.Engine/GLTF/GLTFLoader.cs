@@ -89,7 +89,7 @@ namespace LifeSim.Engine.GLTF
         private Mesh _GetMesh(int index)
         {
             var meshData = this.GetPrimitive(index).MakeMesh();
-            return this._assetsManager.MakeMesh(meshData);
+            return meshData.CreateMesh(this._assetsManager);
         }
 
         public Animation[] LoadAnimations()

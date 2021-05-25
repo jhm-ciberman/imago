@@ -1,15 +1,35 @@
+using System.Buffers;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
+using System.Runtime.InteropServices;
+using Veldrid;
+using Veldrid.Utilities;
 
 namespace LifeSim.Engine.Rendering
 {
-    public class MeshData
+    public class MeshData : IMeshFactory
     {
+        [StructLayout(LayoutKind.Sequential)]
+        private struct VertData
+        {           
+            public Vector3 position;
+            public Vector3 normal;
+            public Vector2 uv;
+
+            public VertData(Vector3 position, Vector3 normal, Vector2 uv)
+            {
+                this.position = position;
+                this.normal = normal;
+                this.uv = uv;
+            }
+        }
+
         public readonly IList<Vector3> positions;
         public readonly IList<Vector3> normals;
         public readonly IList<Vector2> uvs;
         public readonly IList<ushort> indices;
-        
+
         public MeshData(IList<Vector3> positions, IList<ushort> indices, IList<Vector2>? uvs = null, IList<Vector3>? normals = null) 
         {
             this.positions = positions;
@@ -59,7 +79,6 @@ namespace LifeSim.Engine.Rendering
                 this.indices[i + 1] = b;
                 this.indices[i + 2] = a;
             }
-
         }
 
         public void FlipNormals()
@@ -140,5 +159,19 @@ namespace LifeSim.Engine.Rendering
             return new MeshData(positions, indices, uvs, normals);
         }
 
+        public virtual Mesh CreateMesh(IRenderingResourcesFactory meshFactory)
+        {
+            var boundingBox = BoundingBox.CreateFromVertices(this.positions.ToArray());
+
+            VertData[] vertices = ArrayPool<VertData>.Shared.Rent(this.positions.Count);
+            for(var i = 0; i < this.positions.Count; i++) {
+                vertices[i] = new VertData(this.positions[i], this.normals[i], this.uvs[i]);
+            }
+            var mesh = meshFactory.CreateMesh(VertexFormat.Regular, vertices, this.indices.ToArray(), ref boundingBox);
+
+            ArrayPool<VertData>.Shared.Return(vertices);
+
+            return mesh;
+        }
     }
 }

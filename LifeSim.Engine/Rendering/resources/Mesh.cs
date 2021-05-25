@@ -1,68 +1,36 @@
-using System.Linq;
-using System.Numerics;
 using System.Runtime.InteropServices;
 using Veldrid;
 using Veldrid.Utilities;
 
 namespace LifeSim.Engine.Rendering
 {
-    public class Mesh : IGeometry, System.IDisposable
+    public partial class Mesh : IGeometry, System.IDisposable
     {
         static int _count = 0;
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct VertData
-        {           
-            public Vector3 position;
-            public Vector3 normal;
-            public Vector2 uv;
-        }
 
         public int id { get ; private set; }
         public uint vertexCount;
         public uint indexCount;
-        public VertexFormat vertexFormat => VertexFormat.Regular;
-        public DeviceBuffer vertexBuffer => this._vertexBuffer;
-        public DeviceBuffer indexBuffer => this._indexBuffer;
+        public VertexFormat vertexFormat { get; private set; }
+        public DeviceBuffer vertexBuffer { get; private set; }
+        public DeviceBuffer indexBuffer { get; private set; }
         public BoundingBox aabb;
 
-        private readonly DeviceBuffer _vertexBuffer;
-        private readonly DeviceBuffer _indexBuffer;
-
-        public Mesh(GraphicsDevice graphicsDevice, MeshData mesh)
+        public Mesh(VertexFormat vertexFormat, uint vertexCount, uint indexCount, ref BoundingBox boundingBox, Veldrid.DeviceBuffer vertexBuffer, Veldrid.DeviceBuffer indexBuffer)
         {
             this.id = ++Mesh._count;
-            var indices = mesh.indices.ToArray();
-
-            this.vertexCount = (uint) mesh.positions.Count;
-            this.indexCount  = (uint) mesh.indices.Count;
-
-            var factory = graphicsDevice.ResourceFactory;
-            this._indexBuffer  = factory.CreateBuffer(new BufferDescription(this.indexCount * sizeof(ushort), BufferUsage.IndexBuffer));
-            graphicsDevice.UpdateBuffer(this._indexBuffer, 0, indices);
-
-            uint size = (uint) Marshal.SizeOf<VertData>() * this.vertexCount;
-            this._vertexBuffer = factory.CreateBuffer(new BufferDescription(size, BufferUsage.VertexBuffer));
-            graphicsDevice.UpdateBuffer(this._vertexBuffer, 0, this.GetVerts(mesh));
-
-            this.aabb = BoundingBox.CreateFromVertices(mesh.positions.ToArray());
+            this.vertexFormat = vertexFormat;
+            this.vertexCount = vertexCount;
+            this.indexCount  = indexCount;
+            this.aabb = boundingBox;
+            this.indexBuffer = indexBuffer;
+            this.vertexBuffer = vertexBuffer;
         }
 
-        private VertData[] GetVerts(MeshData mesh)
+        public virtual void Dispose()
         {
-            VertData[] vertices = new VertData[mesh.positions.Count];
-            for(var i = 0; i < mesh.positions.Count; i++) {
-                vertices[i].position = mesh.positions[i];
-                vertices[i].normal   = mesh.normals[i];
-                vertices[i].uv       = mesh.uvs[i];
-            }
-            return vertices;
-        }
-
-        public void Dispose()
-        {
-            this._vertexBuffer.Dispose();
-            this._indexBuffer.Dispose();
+            this.vertexBuffer.Dispose();
+            this.indexBuffer.Dispose();
         }
     }
 }

@@ -33,7 +33,7 @@ namespace LifeSim.Engine.Rendering
         public void Render(CommandList cl, Material material)
         {
             cl.SetFramebuffer(this._renderTexture.framebuffer);
-            var pipeline = material.shader.GetPipeline(this._quad.vertexFormat);
+            var pipeline = material.shader.GetPipeline(VertexFormat.PosOnly);
             cl.SetPipeline(pipeline);
             cl.SetVertexBuffer(0, this._quad.vertexBuffer);
             cl.SetGraphicsResourceSet(0, this._resourceSet);

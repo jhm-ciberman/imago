@@ -1,4 +1,5 @@
 using System.IO;
+using System.Runtime.InteropServices;
 using FontStashSharp;
 using FontStashSharp.Interfaces;
 using LifeSim.Engine.Rendering;
@@ -6,11 +7,12 @@ using LifeSim.Engine.SceneGraph;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using Veldrid;
+using Veldrid.Utilities;
 using Rectangle = System.Drawing.Rectangle;
 
 namespace LifeSim.Engine
 {
-    public class ResourceFactory : ITexture2DCreator 
+    public class ResourceFactory : ITexture2DCreator, IRenderingResourcesFactory
     {
         private class FontTexture2D : Rendering.Texture, ITexture2D
         {
@@ -76,9 +78,17 @@ namespace LifeSim.Engine
             return new GLTF.GLTFLoader(this, path, defaultMaterial);
         }
 
-        public Mesh MakeMesh(MeshData meshData)
+        Mesh IRenderingResourcesFactory.CreateMesh<T>(VertexFormat vertexFormat, T[] vertices, ushort[] indices, ref BoundingBox boundingBox)
         {
-            return new Mesh(this._gd, meshData);
+            uint vertexBufferSize = (uint) (Marshal.SizeOf<T>() * vertices.Length);
+            DeviceBuffer vertexBuffer = this._gd.ResourceFactory.CreateBuffer(new BufferDescription(vertexBufferSize, BufferUsage.VertexBuffer));
+            this._gd.UpdateBuffer<T>(vertexBuffer, 0, vertices);
+
+            uint indexBufferSize = (uint) (sizeof(ushort) * indices.Length);
+            DeviceBuffer indexBuffer = this._gd.ResourceFactory.CreateBuffer(new BufferDescription(indexBufferSize, BufferUsage.IndexBuffer));
+            this._gd.UpdateBuffer(indexBuffer, 0, indices);
+
+            return new Mesh(vertexFormat, (uint) vertices.Length, (uint) indices.Length, ref boundingBox, vertexBuffer, indexBuffer);
         }
 
         public FontSystem MakeFontSystem(string[] paths)

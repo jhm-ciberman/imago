@@ -3,11 +3,9 @@ using Veldrid;
 
 namespace LifeSim.Engine.Rendering
 {
-    internal class FullScreenQuad : IGeometry, System.IDisposable
+    internal class FullScreenQuad : System.IDisposable
     {
         public DeviceBuffer vertexBuffer;
-
-        public VertexFormat vertexFormat => VertexFormat.PosOnly;
 
         public FullScreenQuad(GraphicsDevice gd)
         {
