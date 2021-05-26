@@ -8,9 +8,6 @@ namespace LifeSim.Engine.Rendering
     public class SceneStorage : IDisposable
     {
         public const int MIN_BUFFER_BLOCKS = 1024;
-
-        private SwapPopList<Renderable> _renderables = new SwapPopList<Renderable>();
-        public IReadOnlyList<Renderable> renderables => this._renderables;
         private GraphicsDevice _gd;
         private List<DataBuffer> _instanceDataBuffers = new List<DataBuffer>();
         private List<DataBuffer> _transformDataBuffers = new List<DataBuffer>();
@@ -35,31 +32,13 @@ namespace LifeSim.Engine.Rendering
             //this._skinnedResourceSet = factory.CreateResourceSet(new ResourceSetDescription(skinnedMeshLayout, this._modelInfoBuffer, this._bonesInfoBuffer));
 
         }
-
-        public Renderable CreateRenderable(Mesh mesh, SurfaceMaterial material)
-        {
-            var transformDataBuffer = this._GetTransformDataBuffer();
-            var instanceDataBuffer = this._GetInstanceDataBuffer(material.shader);
-
-            var renderable = new Renderable(mesh, material, instanceDataBuffer, transformDataBuffer);
-            renderable.renderListIndex = this._renderables.Count;
-            this._renderables.Add(renderable);
-            return renderable;
-        }
-
-        public void RemoveRenderable(Renderable renderable)
-        {
-            this._renderables[this._renderables.Count - 1].renderListIndex = renderable.renderListIndex;
-            this._renderables.RemoveAt(renderable.renderListIndex);
-            renderable.Free();
-        }
-
-        private DataBuffer _GetTransformDataBuffer()
+        
+        public DataBuffer.Block RequestTransformDataBlock()
         {
             for (int i = 0; i < this._transformDataBuffers.Count; i++) {
                 var buffer = this._transformDataBuffers[i];
                 if (! buffer.isFull) {
-                    return buffer;
+                    return buffer.RequestBlock();
                 }
             }
 
@@ -67,16 +46,16 @@ namespace LifeSim.Engine.Rendering
             var newBuffer = new DataBuffer(this._gd, MIN_BUFFER_BLOCKS, 64, this._transformResourceLayout);
             newBuffer.name = "TransformDataBuffer";
             this._transformDataBuffers.Add(newBuffer);
-            return newBuffer;
+            return newBuffer.RequestBlock();
         }
 
-        private DataBuffer _GetInstanceDataBuffer(Shader shader)
+        public DataBuffer.Block RequestInstanceDataBlock(Shader shader)
         {
             var blockSize = shader.instanceUniformData.Count * 16;
             for (int i = 0; i < this._instanceDataBuffers.Count; i++) {
                 var buffer = this._instanceDataBuffers[i];
                 if (buffer.blockSize == blockSize && ! buffer.isFull) {
-                    return buffer;
+                    return buffer.RequestBlock();
                 }
             }
 
@@ -84,7 +63,7 @@ namespace LifeSim.Engine.Rendering
             var newBuffer = new DataBuffer(this._gd, MIN_BUFFER_BLOCKS, blockSize, this._instanceResourceLayout);
             newBuffer.name = "InstanceDataBuffer";
             this._instanceDataBuffers.Add(newBuffer);
-            return newBuffer;
+            return newBuffer.RequestBlock();
         }
 
         public void UpdateBuffers(Veldrid.CommandList commandList)

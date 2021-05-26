@@ -18,9 +18,14 @@ namespace LifeSim.Engine.Rendering
         public Veldrid.ResourceSet materialResourceSet { get; private set; }
         public Veldrid.ResourceSet instanceResourceSet { get; private set; }
         public Veldrid.ResourceSet transformResourceSet { get; private set; }
+        public Veldrid.ResourceSet? skeletonResourceSet { get; private set; }
 
-        public DataBuffer.Block transformDataBlock;
-        public DataBuffer.Block instanceDataBlock;
+        public OffsetVertexData offsetVertexData;
+
+        private DataBuffer.Block _transformDataBlock;
+        private DataBuffer.Block _instanceDataBlock;
+        private DataBuffer.Block _skeletonDataBlock;
+
         public Mesh mesh { get; private set; }
         public uint pickingID { get; set; } = 0;
  
@@ -28,26 +33,37 @@ namespace LifeSim.Engine.Rendering
 
         public SurfaceMaterial material { get; private set; }
 
-        public Renderable(Mesh mesh, SurfaceMaterial material, DataBuffer instanceDataBuffer, DataBuffer transformDataBuffer)
+        public Renderable(SceneStorage storage, Mesh mesh, SurfaceMaterial material)
         {
             this.mesh = mesh;
             this.material = material;
             this.skeleton = null;
             
-            this.instanceDataBlock = instanceDataBuffer.RequestBlock();
-            this.transformDataBlock = transformDataBuffer.RequestBlock();
-
-            this.instanceResourceSet = instanceDataBuffer.resourceSet;
-            this.transformResourceSet = transformDataBuffer.resourceSet;
-
             this.materialResourceSet = material.GetMaterialResourceSet();
+
+            this._instanceDataBlock = storage.RequestInstanceDataBlock(material.shader);
+            this._transformDataBlock = storage.RequestTransformDataBlock();
+
+            this.instanceResourceSet = this._instanceDataBlock.buffer.resourceSet;
+            this.transformResourceSet = this._transformDataBlock.buffer.resourceSet;
+
             this._cachedSortKey = this._RecomputeSortKey();
             this.batchingHashKey = this._RecomputeBatchingHashKey();
+
+            this.offsetVertexData = new OffsetVertexData(this._transformDataBlock.offset, this._instanceDataBlock.offset, this._skeletonDataBlock.offset, this.pickingID);
+        }
+
+        public void SetSkeleton(Skeleton skeleton, DataBuffer boneDataBuffer)
+        {
+            this._skeletonDataBlock = boneDataBuffer.RequestBlock();
+            this.skeletonResourceSet = boneDataBuffer.resourceSet;
+            this.skeleton = skeleton;
+            this.offsetVertexData = new OffsetVertexData(this._transformDataBlock.offset, this._instanceDataBlock.offset, this._skeletonDataBlock.offset, this.pickingID);
         }
 
         private void _OnInstanceDataResourceSetChanged()
         {
-            this.instanceResourceSet = this.instanceDataBlock.buffer.resourceSet;
+            this.instanceResourceSet = this._instanceDataBlock.buffer.resourceSet;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -59,27 +75,30 @@ namespace LifeSim.Engine.Rendering
         public void UpdateTransform(ref Matrix4x4 transform)
         {
             this._transform = transform;
+            this._transformDataBlock.Write(ref transform);
             this._aabb = BoundingBox.Transform(this.mesh.aabb, this._transform);
-            this.transformDataBlock.Write(ref this._transform);
             this._centerPosition = this._aabb.GetCenter();
         }
 
         public void SetInstanceData<T>(ref T data) where T : struct
         {
-            this.instanceDataBlock.Write(ref data);
+            this._instanceDataBlock.Write(ref data);
         }
 
         public void Free()
         {
-            this.instanceDataBlock.FreeBlock();
-            this.transformDataBlock.FreeBlock();
+            this._instanceDataBlock.FreeBlock();
+            this._transformDataBlock.FreeBlock();
+            if (this.skeleton != null) {
+                this._skeletonDataBlock.FreeBlock();
+            }
         }
 
         protected ulong _RecomputeSortKey()
         {
             ulong materialHash        = (ulong) (this.material.id & 0xFFFF);
             ulong meshHash            = (ulong) (this.mesh.id & 0xFFF);
-            ulong transformBufferHash = (ulong) (this.transformDataBlock.buffer.id & 0xF);
+            ulong transformBufferHash = (ulong) (this._transformDataBlock.buffer.id & 0xF);
             ulong key = (materialHash << 48) | (meshHash << 36) | (transformBufferHash << 32);
             return key;
         }

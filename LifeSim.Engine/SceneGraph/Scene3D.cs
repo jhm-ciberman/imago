@@ -16,6 +16,9 @@ namespace LifeSim.Engine.SceneGraph
         private readonly SwapPopList<Node3D> _children = new SwapPopList<Node3D>();
         public IReadOnlyList<Node3D> children => this._children;
 
+        private SwapPopList<Renderable> _renderables = new SwapPopList<Renderable>();
+        public IReadOnlyList<Renderable> renderables => this._renderables;
+
         private List<RenderNode3D> _instanceDataDirtyList = new List<RenderNode3D>();
         private List<Node3D> _transformDirtyList = new List<Node3D>();
 
@@ -89,15 +92,31 @@ namespace LifeSim.Engine.SceneGraph
             if (node.mesh == null) return;
             if (node.material == null) return;
 
-            node._renderable = this.storage.CreateRenderable(node.mesh, node.material);
+            var renderable = new Renderable(this.storage, node.mesh, node.material);
+            this.AddRenderable(renderable);
+            node._renderable = renderable;
         }
 
         private void _RemoveFromRenderList(RenderNode3D node)
         {
             if (node._renderable == null) return;
-            this.storage.RemoveRenderable(node._renderable);
+            this.RemoveRenderable(node._renderable);
             node._renderable = null;
         }
+
+        public void AddRenderable(Renderable renderable)
+        {
+            renderable.renderListIndex = this._renderables.Count;
+            this._renderables.Add(renderable);
+        }
+
+        public void RemoveRenderable(Renderable renderable)
+        {
+            this._renderables[this._renderables.Count - 1].renderListIndex = renderable.renderListIndex;
+            this._renderables.RemoveAt(renderable.renderListIndex);
+            renderable.Free();
+        }
+
 
         public void UpdateWorldMatrices()
         {

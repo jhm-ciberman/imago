@@ -32,7 +32,12 @@ namespace LifeSim.Engine.SceneGraph
             get => this._skin;
             set
             {
-                this._skin = value;
+                if (value != this._skin) {
+                    this._skin = value;
+                    if (value != null) {
+                        
+                    }
+                }
             }
         }
 

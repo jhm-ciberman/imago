@@ -64,14 +64,14 @@ namespace LifeSim.Engine.Rendering
 
             this._renderTexture = mainRenderTexture;
 
-            this._renderJob = new RenderJob(this._gd, this._resourceSet);
+            this._renderJob = new RenderJob(this._gd, this._resourceSet, false);
             this._renderQueue = new RenderQueue();
         }
 
         public void Render(CommandList commandList, Scene3D scene, Camera3D camera)
         {
             var cameraFrustum = new BoundingFrustum(camera.frustumCullingCamera.viewProjectionMatrix);
-            this._renderQueue.AddToRenderQueue(scene.storage, ref cameraFrustum, camera.position, false);
+            this._renderQueue.AddToRenderQueue(scene.renderables, ref cameraFrustum, camera.position);
             this._renderQueue.Sort();
 
             commandList.SetFramebuffer(this._renderTexture.framebuffer);
@@ -91,7 +91,7 @@ namespace LifeSim.Engine.Rendering
             commandList.UpdateBuffer(this._camera3DInfoBuffer, 0, ref cameraInfo);
             commandList.UpdateBuffer(this._lightInfoBuffer, 0, ref lightInfo);
 
-            this._renderJob.DrawRenderList(commandList, this._renderQueue, false);
+            this._renderJob.DrawRenderList(commandList, this._renderQueue);
         }
 
         public void Dispose()

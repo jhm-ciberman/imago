@@ -45,14 +45,14 @@ namespace LifeSim.Engine.Rendering
             this._resourceSet = factory.CreateResourceSet(new ResourceSetDescription(this._resourceLayout, this._shadowmapInfoBuffer));
 
             this._renderQueue = new RenderQueue();
-            this._renderJob = new RenderJob(this._gd, this._resourceSet);
+            this._renderJob = new RenderJob(this._gd, this._resourceSet, true);
         }
         
         public void Render(CommandList commandList, Scene3D scene, Camera3D camera, DirectionalLight mainLight)
         {
             var matrix = mainLight.GetShadowMapMatrix(camera.position);
             var frustum = new BoundingFrustum(matrix);
-            this._renderQueue.AddToRenderQueue(scene.storage, ref frustum, camera.position, true);
+            this._renderQueue.AddToRenderQueue(scene.renderables, ref frustum, camera.position);
             this._renderQueue.Sort();
 
             var shadowmapMatrix = mainLight.GetShadowMapMatrix(camera.frustumCullingCamera.position);
@@ -60,7 +60,7 @@ namespace LifeSim.Engine.Rendering
             commandList.ClearDepthStencil(1f);
             commandList.UpdateBuffer(this._shadowmapInfoBuffer, 0, ref shadowmapMatrix);
 
-            this._renderJob.DrawRenderList(commandList, this._renderQueue, true);
+            this._renderJob.DrawRenderList(commandList, this._renderQueue);
         }
 
         public void Dispose()

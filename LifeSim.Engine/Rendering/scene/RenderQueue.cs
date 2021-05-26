@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
-using LifeSim.Engine.Rendering;
 using Veldrid.Utilities;
 
 namespace LifeSim.Engine.Rendering
@@ -23,11 +22,10 @@ namespace LifeSim.Engine.Rendering
             this._indices.Sort();
         }
 
-        public void AddToRenderQueue(SceneStorage sceneStorage, ref BoundingFrustum frustum, Vector3 cameraPosition, bool useShadowmapShader)
+        public void AddToRenderQueue(IReadOnlyList<Renderable> renderables, ref BoundingFrustum frustum, Vector3 cameraPosition)
         {
             this._indices.Clear();
             this._items.Clear();
-            var renderables = sceneStorage.renderables;
             for (int i = 0; i < renderables.Count; i++) {
                 Renderable renderable = renderables[i];
 
@@ -36,17 +34,6 @@ namespace LifeSim.Engine.Rendering
                     var material = renderable.material;
                     this._indices.Add(new RenderIndex(key, this._items.Count));
                     this._items.Add(renderable);
-
-                    /*
-                        mesh: renderable.mesh,
-                        shader: useShadowmapShader ? material.shadowmapShader : material.shader,
-                        pickingID: renderable.pickingID,
-                        transformBufferOffset: renderable.transformDataBlock.offset,
-                        instanceBufferOffset: renderable.instanceDataBlock.offset,
-                        transformResourceSet: renderable.transformResourceSet,
-                        materialResourceSet: material.GetMaterialResourceSet(),
-                        instanceResourceSet: renderable.instanceResourceSet
-                    */
                 }
             }
         }
@@ -73,10 +60,10 @@ namespace LifeSim.Engine.Rendering
                 this._indices = indices;
                 this._items = items;
                 this._nextItemIndex = 0;
-                this._current = null;
+                this._current = default(Renderable);
             }
 
-            public Renderable Current => this._current ?? throw new Exception("Cannot call current");
+            public Renderable Current => this._current ?? throw new Exception();
             object? IEnumerator.Current => this.Current;
 
             public void Dispose()
