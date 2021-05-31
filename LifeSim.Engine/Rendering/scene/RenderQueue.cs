@@ -32,7 +32,7 @@ namespace LifeSim.Engine.Rendering
                 
                 if (renderable.Cull(ref frustum)) {
                     ulong key = renderable.GetSortKey(cameraPosition);
-                    renderable.Update();
+                    renderable.Update(); // TODO: Remove this from here!
                     var material = renderable.material;
                     this._indices.Add(new RenderIndex(key, this._items.Count));
                     this._items.Add(renderable);
@@ -109,7 +109,7 @@ namespace LifeSim.Engine.Rendering
 
             int IComparable<RenderIndex>.CompareTo(RenderIndex other)
             {
-                return (this.key < other.key) ? - 1 : 1;
+                return (this.key < other.key) ? - 1 : (this.key == other.key) ? 0 : 1;
             }
         }
     }

@@ -152,11 +152,18 @@ namespace LifeSim.Engine.Rendering
         {
             ulong materialHash        = (ulong) (this.material!.id & 0xFFF);
             ulong meshHash            = (ulong) (this.mesh!.id & 0xFFF);
-            //ulong transformBufferHash = (ulong) (this._transformDataBlock.buffer.id & 0xF);
-            ulong key = (materialHash       << 48)  // 16 bits
-                | (meshHash            << 32); // 16 bits
-                //| (transformBufferHash << 32); // 4 bits
+            ulong transformBufferHash = (ulong) (this._transformDataBlock.buffer.id & 0xFF);
+            ulong instanceBufferHash  = (ulong) (this._instanceDataBlock.buffer.id & 0xFF);
+            ulong skekeletonBufferHash = 0;
+            if (this._skeletonDataBlock.buffer != null) {
+                skekeletonBufferHash = (ulong) (this._skeletonDataBlock.buffer.id & 0xF);
+            }
 
+            ulong key = (materialHash   << 56) // 8 bits
+                | (transformBufferHash  << 48) // 8 bits
+                | (transformBufferHash  << 40) // 8 bits
+                | (skekeletonBufferHash << 36) // 4 bits
+                | (meshHash             << 24); // 12 bits
 
             this._cachedSortKey = key;
         }
@@ -193,7 +200,7 @@ namespace LifeSim.Engine.Rendering
         {
             float dist = Vector3.DistanceSquared(this._centerPosition, cameraPosition);
             uint cameraDistance = Math.Min(uint.MaxValue, (uint) (dist * 1000f));
-            return this._cachedSortKey | (cameraDistance & 0xFFFFFFFF);
+            return this._cachedSortKey | (cameraDistance & 0xFFFFFF); // 24 bits
         }
     }
 }
