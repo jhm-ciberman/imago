@@ -15,15 +15,17 @@ namespace LifeSim.Engine.Rendering
 
         private bool _hasCommandsToSubmit;
 
-        private ForwardPass _forwardPass;
-        private ShadowmapPass _shadowmapPass;
+        private readonly ForwardPass _forwardPass;
+        private readonly ShadowmapPass _shadowmapPass;
 
-        internal SceneStorage sceneStorage;
+        private readonly SceneStorage _storage;
         private readonly ResourceLayout _instanceResourceLayout;
         private readonly ResourceLayout _transformResourceLayout;
         private readonly ResourceLayout _bonesResourceLayout;
         private Shader _surfaceShader;
         private Shader _shadowmapShader;
+        internal SceneStorage storage => this._storage;
+
         public SceneRenderer(GraphicsDevice gd, RenderTexture mainRenderTexture)
         {
             this._gd = gd;
@@ -47,7 +49,7 @@ namespace LifeSim.Engine.Rendering
             ));
             this._bonesResourceLayout.Name = "BonesData Resource Layout";
 
-            this.sceneStorage = new SceneStorage(gd, this._transformResourceLayout, this._instanceResourceLayout, this._bonesResourceLayout);
+            this._storage = new SceneStorage(gd, this._transformResourceLayout, this._instanceResourceLayout, this._bonesResourceLayout);
             this._shadowmapPass = new ShadowmapPass(gd, this);
             this._forwardPass = new ForwardPass(gd, this, this._mainRenderTexture, this._shadowmapPass.shadowmapTexture);
 
@@ -70,11 +72,10 @@ namespace LifeSim.Engine.Rendering
         public void Render(Scene3D scene, Camera3D camera)
         {
             scene.UpdateWorldMatrices();
-            scene.UpdateInstanceData();
             
 
             this._commandList.Begin();
-            scene.storage.UpdateBuffers(this._commandList);
+            this._storage.UpdateBuffers(this._commandList);
             this._shadowmapPass.Render(this._commandList, scene, camera, scene.mainLight);
             this._forwardPass.Render(this._commandList, scene, camera);
             this._commandList.End();

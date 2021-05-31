@@ -28,12 +28,11 @@ namespace LifeSim.Engine.Rendering
             this._batches.Clear();
             if (renderables.Count == 0) return;
 
-            uint instanceRepeatCount = 0;
+            uint instanceCount = 0;
 
             if (this._offsetVertexData.Length < renderables.Count) {
                 Array.Resize(ref this._offsetVertexData, (int) (renderables.Count * 1.2f));
             }
-
             Renderable prevRenderable = renderables[0];
             int prevBatchingHashKey = prevRenderable.batchingHashKey;
             int i = 0;
@@ -43,20 +42,21 @@ namespace LifeSim.Engine.Rendering
 
                 // If it's batcheable, add to current batch. If not, finish batch
                 if (renderable.batchingHashKey == prevBatchingHashKey) {
-                    instanceRepeatCount++;
+                    instanceCount++;
                 } else {
-                    this._batches.Add(new RenderBatch(instanceRepeatCount, prevRenderable, this._shadowMapPass));
+                    this._batches.Add(new RenderBatch(instanceCount, prevRenderable, this._shadowMapPass));
                     prevRenderable = renderable;
-                    instanceRepeatCount = 1;
+                    instanceCount = 1;
                     prevBatchingHashKey = renderable.batchingHashKey;
                 }
 
                 i++;
             }
-            this._batches.Add(new RenderBatch(instanceRepeatCount, prevRenderable, this._shadowMapPass));
+
+            this._batches.Add(new RenderBatch(instanceCount, prevRenderable, this._shadowMapPass));
         }
 
-        public DeviceBuffer GetVertexOffsetBuffer()
+        public DeviceBuffer GetVertexOffsetBuffer(CommandList commandList)
         {
             uint requiredSizeInBytes = (uint) (this._offsetVertexData.Length * 16);
             if (this._offsetsVertexBuffer == null || this._offsetsVertexBuffer.SizeInBytes < requiredSizeInBytes) {
@@ -68,7 +68,7 @@ namespace LifeSim.Engine.Rendering
                 ));
             }
 
-            this._gd.UpdateBuffer(this._offsetsVertexBuffer, 0, this._offsetVertexData);
+            commandList.UpdateBuffer(this._offsetsVertexBuffer, 0, this._offsetVertexData);
 
             return this._offsetsVertexBuffer;
         }

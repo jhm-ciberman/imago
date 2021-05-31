@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using LifeSim.Core;
 using Veldrid;
 
 namespace LifeSim.Engine.Rendering
@@ -11,26 +10,19 @@ namespace LifeSim.Engine.Rendering
         private GraphicsDevice _gd;
         private List<DataBuffer> _instanceDataBuffers = new List<DataBuffer>();
         private List<DataBuffer> _transformDataBuffers = new List<DataBuffer>();
-        private Skeleton _bonesInfo = new Skeleton();
+        private List<DataBuffer> _skeletonDataBuffers = new List<DataBuffer>();
         private readonly ResourceLayout _transformResourceLayout;
         private readonly ResourceLayout _instanceResourceLayout;
-        private readonly ResourceLayout _bonesResourceLayout;
+        private readonly ResourceLayout _skeletonResourceLayout;
 
-        //private readonly DeviceBuffer _bonesInfoBuffer;
-        //private readonly ResourceSet _skinnedResourceSet;
-
-        public SceneStorage(GraphicsDevice gd, ResourceLayout transformResourceLayout, ResourceLayout instanceResourceLayout, ResourceLayout bonesResourceLayout)
+        public SceneStorage(GraphicsDevice gd, ResourceLayout transformResourceLayout, ResourceLayout instanceResourceLayout, ResourceLayout sleletonResourceLayout)
         {
             this._gd = gd;
             var factory = gd.ResourceFactory;
 
             this._transformResourceLayout = transformResourceLayout;
             this._instanceResourceLayout = instanceResourceLayout;
-            this._bonesResourceLayout = bonesResourceLayout;
-
-            //this._bonesInfoBuffer = factory.CreateBuffer(new BufferDescription(64 * Skeleton.MAX_NUMBER_OF_BONES, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
-            //this._skinnedResourceSet = factory.CreateResourceSet(new ResourceSetDescription(skinnedMeshLayout, this._modelInfoBuffer, this._bonesInfoBuffer));
-
+            this._skeletonResourceLayout = sleletonResourceLayout;
         }
         
         public DataBuffer.Block RequestTransformDataBlock()
@@ -49,9 +41,9 @@ namespace LifeSim.Engine.Rendering
             return newBuffer.RequestBlock();
         }
 
-        public DataBuffer.Block RequestInstanceDataBlock(Shader shader)
+        public DataBuffer.Block RequestInstanceDataBlock(Material material)
         {
-            var blockSize = shader.instanceUniformData.Count * 16;
+            var blockSize = material.shader.instanceUniformData.Count * 16;
             for (int i = 0; i < this._instanceDataBuffers.Count; i++) {
                 var buffer = this._instanceDataBuffers[i];
                 if (buffer.blockSize == blockSize && ! buffer.isFull) {
@@ -66,6 +58,22 @@ namespace LifeSim.Engine.Rendering
             return newBuffer.RequestBlock();
         }
 
+        public DataBuffer.Block RequestSkeletonDataBlock()
+        {
+            for (int i = 0; i < this._skeletonDataBuffers.Count; i++) {
+                var buffer = this._skeletonDataBuffers[i];
+                if (! buffer.isFull) {
+                    return buffer.RequestBlock();
+                }
+            }
+
+            System.Console.WriteLine("Creating skeleton data buffer");
+            var newBuffer = new DataBuffer(this._gd, MIN_BUFFER_BLOCKS, Skeleton.MAX_NUMBER_OF_BONES * 64, this._skeletonResourceLayout);
+            newBuffer.name = "SkeletonDataBuffer";
+            this._skeletonDataBuffers.Add(newBuffer);
+            return newBuffer.RequestBlock();
+        }
+
         public void UpdateBuffers(Veldrid.CommandList commandList)
         {
             for (int i = 0; i < this._instanceDataBuffers.Count; i++) {
@@ -73,6 +81,9 @@ namespace LifeSim.Engine.Rendering
             }
             for (int i = 0; i < this._transformDataBuffers.Count; i++) {
                 this._transformDataBuffers[i].UploadToGPU(commandList);
+            }
+            for (int i = 0; i < this._skeletonDataBuffers.Count; i++) {
+                this._skeletonDataBuffers[i].UploadToGPU(commandList);
             }
         }
 

@@ -52,11 +52,6 @@ namespace LifeSim.Engine
             }
         }
 
-        public Scene3D CreateScene()
-        {
-            return new Scene3D(this._sceneRenderer.sceneStorage);
-        }
-
         public Rendering.Texture MakeTexture(string path, uint mipLevels = 0)
         {
             Image<Rgba32> image = Image.Load<Rgba32>(path);

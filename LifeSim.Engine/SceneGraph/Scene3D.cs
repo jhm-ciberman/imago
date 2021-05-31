@@ -19,14 +19,12 @@ namespace LifeSim.Engine.SceneGraph
         private SwapPopList<Renderable> _renderables = new SwapPopList<Renderable>();
         public IReadOnlyList<Renderable> renderables => this._renderables;
 
-        private List<RenderNode3D> _instanceDataDirtyList = new List<RenderNode3D>();
+
         private List<Node3D> _transformDirtyList = new List<Node3D>();
 
-        internal SceneStorage storage { get; private set; }
-
-        public Scene3D(SceneStorage sceneStorage)
+        public Scene3D()
         {
-            this.storage = sceneStorage;
+            //
         }
 
         public void Add(Node3D node)
@@ -43,13 +41,13 @@ namespace LifeSim.Engine.SceneGraph
 
         internal void _OnChildAdded(Node3D node)
         {
-            this._OnTransformDirty(node);
+            this._transformDirtyList.Add(node);
             this._AddNodeToRecursive(node);
         }
 
         internal void _OnChildRemoved(Node3D node)
         {
-            this._OnTransformDirty(node);
+            this._transformDirtyList.Add(node);
             this._RemoveNodeRecursive(node);
         }
 
@@ -58,17 +56,12 @@ namespace LifeSim.Engine.SceneGraph
             this._transformDirtyList.Add(node);
         }
 
-        internal void _OnInstanceDataDirty(RenderNode3D node)
-        {
-            this._instanceDataDirtyList.Add(node);
-        }
 
         private void _AddNodeToRecursive(Node3D node)
         {
             node._scene = this;
-            if (node is RenderNode3D renderable) {
-                this._OnInstanceDataDirty(renderable);
-                this._AddToRenderList(renderable);
+            if (node.renderable != null) {
+                this.AddRenderable(node.renderable);
             }
             for (int i = 0; i < node.children.Count; i++) {
                 this._AddNodeToRecursive(node.children[i]);
@@ -78,30 +71,12 @@ namespace LifeSim.Engine.SceneGraph
         private void _RemoveNodeRecursive(Node3D node)
         {
             node._scene = null;
-            if (node is RenderNode3D renderable) {
-                this._RemoveFromRenderList(renderable);
+            if (node.renderable != null) {
+                this.RemoveRenderable(node.renderable);
             }
             for (int i = 0; i < node.children.Count; i++) {
                 this._RemoveNodeRecursive(node.children[i]);
             }
-        }
-
-        private void _AddToRenderList(RenderNode3D node)
-        {
-            if (node._renderable != null) return;
-            if (node.mesh == null) return;
-            if (node.material == null) return;
-
-            var renderable = new Renderable(this.storage, node.mesh, node.material);
-            this.AddRenderable(renderable);
-            node._renderable = renderable;
-        }
-
-        private void _RemoveFromRenderList(RenderNode3D node)
-        {
-            if (node._renderable == null) return;
-            this.RemoveRenderable(node._renderable);
-            node._renderable = null;
         }
 
         public void AddRenderable(Renderable renderable)
@@ -128,15 +103,6 @@ namespace LifeSim.Engine.SceneGraph
                 }
                 this._transformDirtyList.Clear();
             }
-        }
-
-        public void UpdateInstanceData()
-        {
-            for (int i = 0; i < this._instanceDataDirtyList.Count; i++) {
-                var node = this._instanceDataDirtyList[i];
-                node.UpdateInstanceData();
-            }
-            this._instanceDataDirtyList.Clear();
         }
 
         private Node3D _SearchTopDirty(Node3D node)

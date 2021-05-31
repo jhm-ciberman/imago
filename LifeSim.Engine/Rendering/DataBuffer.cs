@@ -10,30 +10,54 @@ namespace LifeSim.Engine.Rendering
         public struct Block
         {
             public DataBuffer buffer;
-            public uint offset;
+            public int offset;
 
-            public Block(DataBuffer buffer, uint offset)
+            public bool isValid => this.buffer != null;
+
+            public int blockSize => this.buffer == null ? 0 : this.buffer.blockSize;
+
+            public uint blockIndex => (uint) (this.offset / this.buffer.blockSize);
+
+            public Block(DataBuffer buffer, int offset)
             {
                 this.buffer = buffer;
                 this.offset = offset;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public T Read<T>() where T : struct
+            public T Read<T>() where T : unmanaged
             {
                 return this.buffer.Read<T>(this.offset);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void Write<T>(ref T data) where T : struct
+            public void Write<T>(ref T data) where T : unmanaged
             {
                 this.buffer.Write<T>(this.offset, ref data);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void Write<T>(int offset, ref T data) where T : unmanaged
+            {
+                this.buffer.Write<T>(this.offset + offset, ref data);
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void WriteSpan<T>(ReadOnlySpan<T> data) where T : unmanaged
+            {
+                this.buffer.WriteSpan<T>(this.offset, data);
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void WriteSpan<T>(Span<T> data) where T : unmanaged
+            {
+                this.buffer.WriteSpan<T>(this.offset, data);
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void FreeBlock()
             {
-                this.buffer.FreeBlock(this.offset);
+                this.buffer?.FreeBlock(this.offset);
             }
         }
 
@@ -44,7 +68,7 @@ namespace LifeSim.Engine.Rendering
         public int blockSize { get; private set; }
         public int sizeInBytes { get; private set; }
 
-        private uint[] _freeList;
+        private int[] _freeList;
         private int _freeListCount = 0;
 
         private GraphicsDevice _gd;
@@ -53,9 +77,9 @@ namespace LifeSim.Engine.Rendering
         public DeviceBuffer deviceBuffer { get; private set; }
         private bool _dirty = true;
 
-        public event Action? onResourceSetChanged;
-
         public string name { get => this.deviceBuffer.Name; set { this.deviceBuffer.Name = value; } }
+
+        public bool isFull => (this._freeListCount == 0);
 
         public int id { get; private set; }
 
@@ -77,9 +101,9 @@ namespace LifeSim.Engine.Rendering
                 this._resourceLayout, this.deviceBuffer
             ));
 
-            this._freeList = new uint[blocksCount];
+            this._freeList = new int[blocksCount];
             for (int i = 0; i < blocksCount; i++) {
-                this._freeList[i] = (uint)(this.blocksCount - i - 1);
+                this._freeList[i] = (this.blocksCount - i - 1) * this.blockSize;
             }
             this._freeListCount = this.blocksCount;
         }
@@ -91,8 +115,6 @@ namespace LifeSim.Engine.Rendering
             this._dirty = false;
         }
 
-        public bool isFull => (this._freeListCount == 0);
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Block RequestBlock()
         {
@@ -103,32 +125,33 @@ namespace LifeSim.Engine.Rendering
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void FreeBlock(uint offset)
+        public void FreeBlock(int offset)
         {
             this._freeList[this._freeListCount] = offset;
             this._freeListCount++;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Write<T>(uint offset, ref T data) where T : struct
+        public void Write<T>(int offset, ref T data) where T : unmanaged
         {
-            /*
-            if (offset < 0) {
-                throw new Exception("Trying to write to an invalid data block");
-            }
-            if (Marshal.SizeOf<T>() > this._blockSize) {
-                throw new Exception($"The size of {typeof(T)} is bigger than the block size");
-            }
-            */
-            
-            Marshal.StructureToPtr(data, this._data + (int) offset * this.blockSize, false);
+            Marshal.StructureToPtr(data, this._data + offset, false);
             this._dirty = true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T Read<T>(uint offset) where T : struct
+        public unsafe void WriteSpan<T>(int offset, ReadOnlySpan<T> data) where T : unmanaged
         {
-            return Marshal.PtrToStructure<T>(this._data + (int) offset * this.blockSize);
+            fixed(T* ptr = data) {
+                var byteLen = (long)(data.Length * sizeof(T));
+                Buffer.MemoryCopy(ptr, (void*)(this._data + offset), byteLen, byteLen);
+            }
+            this._dirty = true;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public T Read<T>(int offset) where T : struct
+        {
+            return Marshal.PtrToStructure<T>(this._data + offset);
         }
 
         public void Dispose()

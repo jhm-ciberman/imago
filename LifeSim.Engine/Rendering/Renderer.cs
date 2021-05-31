@@ -99,6 +99,7 @@ namespace LifeSim.Engine.Rendering
         }
 
         private Stopwatch _stopwatch = new Stopwatch();
+        internal SceneStorage sceneStorage => this._sceneRenderer.storage;
 
         public void Render(IStage stage)
         {

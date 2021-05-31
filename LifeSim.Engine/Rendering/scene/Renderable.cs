@@ -12,58 +12,96 @@ namespace LifeSim.Engine.Rendering
         private Vector3 _centerPosition;
         private BoundingBox _aabb;
         private ulong _cachedSortKey;
-
         public int batchingHashKey { get; private set; }
 
-        public Veldrid.ResourceSet materialResourceSet { get; private set; }
-        public Veldrid.ResourceSet instanceResourceSet { get; private set; }
-        public Veldrid.ResourceSet transformResourceSet { get; private set; }
-        public Veldrid.ResourceSet? skeletonResourceSet { get; private set; }
+        internal Veldrid.ResourceSet transformResourceSet { get; private set; }
+        internal Veldrid.ResourceSet? materialResourceSet { get; private set; } = null;
+        internal Veldrid.ResourceSet? instanceResourceSet { get; private set; } = null;
+        internal Veldrid.ResourceSet? skeletonResourceSet { get; private set; }
 
         public OffsetVertexData offsetVertexData;
 
         private DataBuffer.Block _transformDataBlock;
-        private DataBuffer.Block _instanceDataBlock;
         private DataBuffer.Block _skeletonDataBlock;
 
-        public Mesh mesh { get; private set; }
-        public uint pickingID { get; set; } = 0;
+        public Mesh? mesh { get; private set; } = null;
+
+        private uint _pickingID = 0;
+        public uint pickingID
+        { 
+            get => this._pickingID; 
+            set { this._pickingID = value; this._RecomputeOffsetVertexData(); }
+        }
  
         public Skeleton? skeleton  { get; private set; }
+        public SurfaceMaterial? material { get; private set; }
+        internal DataBuffer.Block _instanceDataBlock;
 
-        public SurfaceMaterial material { get; private set; }
+        private SceneStorage _storage;
 
-        public Renderable(SceneStorage storage, Mesh mesh, SurfaceMaterial material)
+        public Renderable(SceneStorage storage)
+        {
+            this._storage = storage;
+            
+            this._transformDataBlock = storage.RequestTransformDataBlock();
+            this.transformResourceSet = this._transformDataBlock.buffer.resourceSet;
+        }
+
+        public Renderable(SceneStorage storage, Mesh mesh) : this(storage)
+        {
+            this.SetMesh(mesh);
+        }
+
+        public void SetMesh(Mesh mesh)
         {
             this.mesh = mesh;
+            if (this.mesh != null && this.material != null) {
+                this._RecomputeBatchingHashKey();
+            }
+        }
+
+        public void SetMaterial(SurfaceMaterial material)
+        {
             this.material = material;
-            this.skeleton = null;
-            
+            if (this._instanceDataBlock.blockSize != material.shader.instanceUniformData.Count * 16) {
+                this._instanceDataBlock.FreeBlock();
+                this._instanceDataBlock = this._storage.RequestInstanceDataBlock(material);
+            }
             this.materialResourceSet = material.GetMaterialResourceSet();
-
-            this._instanceDataBlock = storage.RequestInstanceDataBlock(material.shader);
-            this._transformDataBlock = storage.RequestTransformDataBlock();
-
             this.instanceResourceSet = this._instanceDataBlock.buffer.resourceSet;
-            this.transformResourceSet = this._transformDataBlock.buffer.resourceSet;
-
-            this._cachedSortKey = this._RecomputeSortKey();
-            this.batchingHashKey = this._RecomputeBatchingHashKey();
-
-            this.offsetVertexData = new OffsetVertexData(this._transformDataBlock.offset, this._instanceDataBlock.offset, this._skeletonDataBlock.offset, this.pickingID);
+            material.SetDefaultInstanceData(this);
+            this._RecomputeOffsetVertexData();
+            this._RecomputeBatchingHashKey();
+            this._RecomputeSortKey();
         }
 
-        public void SetSkeleton(Skeleton skeleton, DataBuffer boneDataBuffer)
+        public void SetSkeleton(Skeleton skeleton)
         {
-            this._skeletonDataBlock = boneDataBuffer.RequestBlock();
-            this.skeletonResourceSet = boneDataBuffer.resourceSet;
+            if (this.skeleton == skeleton) return;
+            if (this.skeleton == null) {
+                this._skeletonDataBlock = this._storage.RequestSkeletonDataBlock();
+                this.skeletonResourceSet = this._skeletonDataBlock.buffer.resourceSet;
+                this._RecomputeOffsetVertexData();
+            }
             this.skeleton = skeleton;
-            this.offsetVertexData = new OffsetVertexData(this._transformDataBlock.offset, this._instanceDataBlock.offset, this._skeletonDataBlock.offset, this.pickingID);
         }
 
-        private void _OnInstanceDataResourceSetChanged()
+        public void Update()
         {
-            this.instanceResourceSet = this._instanceDataBlock.buffer.resourceSet;
+            if (this.skeleton != null) {
+                this._UpdateSkeletonMatrices(this.skeleton);
+            }
+        }
+        private void _UpdateSkeletonMatrices(Skeleton skeleton)
+        {
+            Matrix4x4.Invert(this._transform, out Matrix4x4 inverseMeshWorldMatrix);
+            var joints = skeleton.joints;
+            var invBindMatrices = skeleton.inverseBindMatrices;
+            Span<Matrix4x4> bonesMatrices = stackalloc Matrix4x4[joints.Count];
+            for (int i = 0; i < joints.Count; i++) {
+                bonesMatrices[i] = invBindMatrices[i] * joints[i].worldMatrix * inverseMeshWorldMatrix;
+            }
+            this._skeletonDataBlock.WriteSpan(bonesMatrices);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -72,17 +110,32 @@ namespace LifeSim.Engine.Rendering
             return (frustum.Contains(this._aabb) != ContainmentType.Disjoint);
         }
 
-        public void UpdateTransform(ref Matrix4x4 transform)
+        public void SetTransform(ref Matrix4x4 transform)
         {
             this._transform = transform;
             this._transformDataBlock.Write(ref transform);
-            this._aabb = BoundingBox.Transform(this.mesh.aabb, this._transform);
-            this._centerPosition = this._aabb.GetCenter();
+            if (this.mesh != null) {
+                this._RecomputeBoundingBox();
+            }
         }
 
-        public void SetInstanceData<T>(ref T data) where T : struct
+        public void SetPosition(Vector3 position)
+        {
+            var mat = Matrix4x4.CreateTranslation(position);
+            this.SetTransform(ref mat);
+        }
+
+
+        public void SetInstanceData<T>(ref T data) where T : unmanaged
         {
             this._instanceDataBlock.Write(ref data);
+        }
+
+        public void SetInstanceData<T>(string name, T data) where T : unmanaged
+        {
+            if (this.material == null) throw new Exception("No material set");
+            var offset = this.material.shader.instanceUniformData[name];
+            this._instanceDataBlock.Write(offset, ref data);
         }
 
         public void Free()
@@ -94,26 +147,47 @@ namespace LifeSim.Engine.Rendering
             }
         }
 
-        protected ulong _RecomputeSortKey()
+        protected void _RecomputeSortKey()
         {
-            ulong materialHash        = (ulong) (this.material.id & 0xFFFF);
-            ulong meshHash            = (ulong) (this.mesh.id & 0xFFF);
-            ulong transformBufferHash = (ulong) (this._transformDataBlock.buffer.id & 0xF);
-            ulong key = (materialHash << 48) | (meshHash << 36) | (transformBufferHash << 32);
-            return key;
+            ulong materialHash        = (ulong) (this.material!.id & 0xFFF);
+            ulong meshHash            = (ulong) (this.mesh!.id & 0xFFF);
+            //ulong transformBufferHash = (ulong) (this._transformDataBlock.buffer.id & 0xF);
+            ulong key = (materialHash       << 48)  // 16 bits
+                | (meshHash            << 32); // 16 bits
+                //| (transformBufferHash << 32); // 4 bits
+
+
+            this._cachedSortKey = key;
         }
 
-        private int _RecomputeBatchingHashKey()
+        private void _RecomputeBatchingHashKey()
         {
-            return HashCode.Combine(
-                this.mesh.id, 
-                this.materialResourceSet,
-                this.instanceResourceSet, 
-                this.transformResourceSet
+            // This key is used to fast check if two instances can be batched together. (They must have the same hash)
+            this.batchingHashKey = HashCode.Combine(
+                this.mesh!.id, 
+                this.material!.id,
+                this._instanceDataBlock.buffer.id, 
+                this._transformDataBlock.buffer.id
             );
         }
 
-        public ulong GetSortKey(Vector3 cameraPosition)
+        private void _RecomputeOffsetVertexData()
+        {
+            this.offsetVertexData = new OffsetVertexData(
+                this._transformDataBlock.blockIndex, 
+                this._instanceDataBlock.blockIndex, 
+                this._skeletonDataBlock.isValid ? this._skeletonDataBlock.blockIndex : 0, 
+                this.pickingID
+            );
+        }
+
+        private void _RecomputeBoundingBox()
+        {
+            this._aabb = BoundingBox.Transform(this.mesh!.aabb, this._transform);
+            this._centerPosition = this._aabb.GetCenter();
+        }
+
+        internal ulong GetSortKey(Vector3 cameraPosition)
         {
             float dist = Vector3.DistanceSquared(this._centerPosition, cameraPosition);
             uint cameraDistance = Math.Min(uint.MaxValue, (uint) (dist * 1000f));

@@ -47,7 +47,7 @@ namespace LifeSim.Engine.Rendering
 
         private ResourceLayout _materialResourceLayout;
 
-        public IReadOnlyDictionary<string, uint> instanceUniformData;
+        public IReadOnlyDictionary<string, int> instanceUniformData;
 
         private List<ShaderVariant> _variants = new List<ShaderVariant>();
 
@@ -82,9 +82,9 @@ namespace LifeSim.Engine.Rendering
             this._resources = materialResourceLayout.Elements;
             this._pipelineCache = new PipelineCache(this._factory, pass, this, this._materialResourceLayout);
 
-            var dict = new Dictionary<string, uint>();
+            var dict = new Dictionary<string, int>();
             for (int i = 0; i < uniforms.Length; i++) {
-                dict.Add(uniforms[i].name, (uint) i);
+                dict.Add(uniforms[i].name, i * 16);
             }
             this.instanceUniformData = dict;
         }

@@ -1,5 +1,6 @@
+using System.Collections.Generic;
 using System.Numerics;
-using System.Runtime.CompilerServices;
+using LifeSim.Engine.SceneGraph;
 
 namespace LifeSim.Engine.Rendering
 {
@@ -7,22 +8,13 @@ namespace LifeSim.Engine.Rendering
     {
         public const int MAX_NUMBER_OF_BONES = 64;
 
-        public unsafe struct BonesData
-        {
-            public fixed float boneData[Skeleton.MAX_NUMBER_OF_BONES * 16];
-        }
+        public readonly IList<Node3D> joints = new List<Node3D>();
+        public readonly IList<Matrix4x4> inverseBindMatrices;
 
-        public Matrix4x4[] bonesMatrices = new Matrix4x4[Skeleton.MAX_NUMBER_OF_BONES];
-
-        /*
-        public unsafe BonesData StoreBoneData(Skeleton skeleton)
+        public Skeleton(IList<Node3D> joints, IList<Matrix4x4> inverseBindMatrices)
         {
-            BonesData b;
-            fixed (Matrix4x4* ptr = skeleton.bonesMatrices) {
-                Unsafe.CopyBlock(&b, ptr, Skeleton.MAX_NUMBER_OF_BONES * 4 * 16);
-            }
-            return b;
+            this.joints = joints;
+            this.inverseBindMatrices = inverseBindMatrices;
         }
-        */
     }
 }

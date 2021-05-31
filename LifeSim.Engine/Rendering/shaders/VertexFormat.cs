@@ -10,10 +10,20 @@ namespace LifeSim.Engine.Rendering
 
         public MacroDefinition[] macroDefinitions;
 
-        public VertexFormat(VertexLayoutDescription[] layout, MacroDefinition[]? macroDefinitions = null)
+        public VertexFormat(bool isSurface, VertexLayoutDescription layout, MacroDefinition[]? macroDefinitions = null)
         {
-            this.layout = layout;
+            this.layout = isSurface 
+                ? new VertexLayoutDescription[] { GetOffsetLayoutDescription(), layout } 
+                : new VertexLayoutDescription[] { layout };
+
             this.macroDefinitions = macroDefinitions ?? Array.Empty<MacroDefinition>();
+        }
+
+        private static VertexLayoutDescription GetOffsetLayoutDescription()
+        {
+            return new VertexLayoutDescription(stride: 16, instanceStepRate: 1,
+                new VertexElementDescription("Offsets", VertexElementSemantic.TextureCoordinate, VertexElementFormat.UInt4)
+            );
         }
     }
 }

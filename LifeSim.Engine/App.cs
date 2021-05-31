@@ -42,6 +42,8 @@ namespace LifeSim.Engine
             Input.SetInstance(this._input);
         }
 
+        public SceneStorage storage => this._renderer.sceneStorage;
+
         public void Run(IStage stage)
         {
             this.SetStage(stage);

@@ -1,3 +1,4 @@
+using System.Diagnostics.Contracts;
 using Veldrid;
 
 namespace LifeSim.Engine.Rendering
@@ -14,6 +15,11 @@ namespace LifeSim.Engine.Rendering
 
         public RenderBatch(uint instanceCount, Renderable renderable, bool shadowmapPass)
         {
+            Contract.Assume(renderable.mesh != null);
+            Contract.Assume(renderable.material != null);
+            Contract.Assume(renderable.materialResourceSet != null);
+            Contract.Assume(renderable.instanceResourceSet != null);
+
             this.instanceCount = instanceCount;
             this.mesh = renderable.mesh;
             var shader = shadowmapPass ? renderable.material.shadowmapShader : renderable.material.shader;

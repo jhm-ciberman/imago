@@ -1,3 +1,4 @@
+using System.Numerics;
 using Veldrid;
 
 namespace LifeSim.Engine.Rendering
@@ -34,6 +35,12 @@ namespace LifeSim.Engine.Rendering
 
                 return this._resourceSet; 
             }
+        }
+
+        public void SetDefaultInstanceData(Renderable renderable)
+        {
+            renderable.SetInstanceData("AlbedoColor", new ColorF(.1f, .3f, .8f, 0.0f));
+            renderable.SetInstanceData("TextureST", new Vector4(1f, 1f, 0f, 0f));
         }
 
         protected void _SetDirty()
