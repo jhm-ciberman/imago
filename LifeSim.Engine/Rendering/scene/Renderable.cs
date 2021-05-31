@@ -78,10 +78,12 @@ namespace LifeSim.Engine.Rendering
         public void SetSkeleton(Skeleton skeleton)
         {
             if (this.skeleton == skeleton) return;
-            if (this.skeleton == null) {
+            if (! this._skeletonDataBlock.isValid) {
                 this._skeletonDataBlock = this._storage.RequestSkeletonDataBlock();
                 this.skeletonResourceSet = this._skeletonDataBlock.buffer.resourceSet;
                 this._RecomputeOffsetVertexData();
+                this._RecomputeBatchingHashKey();
+                this._RecomputeSortKey();
             }
             this.skeleton = skeleton;
         }
@@ -92,6 +94,7 @@ namespace LifeSim.Engine.Rendering
                 this._UpdateSkeletonMatrices(this.skeleton);
             }
         }
+
         private void _UpdateSkeletonMatrices(Skeleton skeleton)
         {
             Matrix4x4.Invert(this._transform, out Matrix4x4 inverseMeshWorldMatrix);
@@ -142,9 +145,7 @@ namespace LifeSim.Engine.Rendering
         {
             this._instanceDataBlock.FreeBlock();
             this._transformDataBlock.FreeBlock();
-            if (this.skeleton != null) {
-                this._skeletonDataBlock.FreeBlock();
-            }
+            this._skeletonDataBlock.FreeBlock();
         }
 
         protected void _RecomputeSortKey()
@@ -167,6 +168,7 @@ namespace LifeSim.Engine.Rendering
                 this.mesh!.id, 
                 this.material!.id,
                 this._instanceDataBlock.buffer.id, 
+                this._skeletonDataBlock.isValid ? this._skeletonDataBlock.buffer.id : 0,
                 this._transformDataBlock.buffer.id
             );
         }
@@ -176,7 +178,7 @@ namespace LifeSim.Engine.Rendering
             this.offsetVertexData = new OffsetVertexData(
                 this._transformDataBlock.blockIndex, 
                 this._instanceDataBlock.blockIndex, 
-                this._skeletonDataBlock.isValid ? this._skeletonDataBlock.blockIndex : 0, 
+                this._skeletonDataBlock.isValid ? this._skeletonDataBlock.blockIndex * Skeleton.MAX_NUMBER_OF_BONES : 0, 
                 this.pickingID
             );
         }

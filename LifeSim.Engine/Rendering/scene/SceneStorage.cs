@@ -68,7 +68,7 @@ namespace LifeSim.Engine.Rendering
             }
 
             System.Console.WriteLine("Creating skeleton data buffer");
-            var newBuffer = new DataBuffer(this._gd, MIN_BUFFER_BLOCKS, Skeleton.MAX_NUMBER_OF_BONES * 64, this._skeletonResourceLayout);
+            var newBuffer = new DataBuffer(this._gd, MIN_BUFFER_BLOCKS / Skeleton.MAX_NUMBER_OF_BONES, Skeleton.MAX_NUMBER_OF_BONES * 64, this._skeletonResourceLayout);
             newBuffer.name = "SkeletonDataBuffer";
             this._skeletonDataBuffers.Add(newBuffer);
             return newBuffer.RequestBlock();

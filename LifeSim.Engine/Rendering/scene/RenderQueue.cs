@@ -32,6 +32,7 @@ namespace LifeSim.Engine.Rendering
                 
                 if (renderable.Cull(ref frustum)) {
                     ulong key = renderable.GetSortKey(cameraPosition);
+                    renderable.Update();
                     var material = renderable.material;
                     this._indices.Add(new RenderIndex(key, this._items.Count));
                     this._items.Add(renderable);

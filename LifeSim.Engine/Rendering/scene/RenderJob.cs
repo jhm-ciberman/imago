@@ -44,12 +44,6 @@ namespace LifeSim.Engine.Rendering
             for (int batchIndex = 0; batchIndex < batches.Count; batchIndex++) {
                 RenderBatch batch = batches[batchIndex];
 
-                if (currentMesh != batch.mesh) {
-                    commandList.SetVertexBuffer(1, batch.mesh.vertexBuffer, 0);
-                    commandList.SetIndexBuffer(batch.mesh.indexBuffer, Veldrid.IndexFormat.UInt16);
-                    currentMesh = batch.mesh;
-                }
-
                 if (currentPipeline != batch.pipeline) {
                     commandList.SetPipeline(batch.pipeline);
                     commandList.SetGraphicsResourceSet(BINDING_PASS, this._passResourceSet);
@@ -74,6 +68,12 @@ namespace LifeSim.Engine.Rendering
                 if (batch.skeletonResourceSet != null && currentSkeletonRS != batch.skeletonResourceSet) {
                     currentSkeletonRS = batch.skeletonResourceSet;
                     commandList.SetGraphicsResourceSet(BINDING_SKELETON, batch.skeletonResourceSet);
+                }
+
+                if (currentMesh != batch.mesh) {
+                    commandList.SetVertexBuffer(1, batch.mesh.vertexBuffer, 0);
+                    commandList.SetIndexBuffer(batch.mesh.indexBuffer, Veldrid.IndexFormat.UInt16);
+                    currentMesh = batch.mesh;
                 }
 
                 commandList.DrawIndexed(

@@ -91,6 +91,7 @@ namespace LifeSim.Engine.Rendering
             this.blocksCount = blocksCount;
             this.sizeInBytes = this.blocksCount * this.blockSize;
             this._data = Marshal.AllocHGlobal((int) this.sizeInBytes);
+            
             this._resourceLayout = resourceLayout;
 
             this.deviceBuffer = this._gd.ResourceFactory.CreateBuffer(new BufferDescription(
@@ -138,9 +139,14 @@ namespace LifeSim.Engine.Rendering
             this._dirty = true;
         }
 
+        private System.Numerics.Matrix4x4[] _mats = new System.Numerics.Matrix4x4[1];
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void WriteSpan<T>(int offset, ReadOnlySpan<T> data) where T : unmanaged
         {
+            this._mats[0] = System.Numerics.Matrix4x4.Identity;
+            var data2 = new ReadOnlySpan<System.Numerics.Matrix4x4>(this._mats);
+
             fixed(T* ptr = data) {
                 var byteLen = (long)(data.Length * sizeof(T));
                 Buffer.MemoryCopy(ptr, (void*)(this._data + offset), byteLen, byteLen);

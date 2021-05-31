@@ -4,7 +4,7 @@ using Veldrid.Utilities;
 
 namespace LifeSim.Engine.Rendering
 {
-    public partial class Mesh : IGeometry, System.IDisposable
+    public class Mesh : IGeometry, System.IDisposable
     {
         static int _count = 0;
 
