@@ -9,7 +9,7 @@ namespace LifeSim.Engine.Rendering
         uint width {get;}
         uint height {get;}
         Framebuffer framebuffer {get;}
-        Texture colorTexture {get;}
+        Veldrid.Texture colorTexture {get;}
         OutputDescription outputDescription {get;}
         void Resize(uint width, uint height);
     }
@@ -25,7 +25,7 @@ namespace LifeSim.Engine.Rendering
 
         public Framebuffer framebuffer => this._swapchain.Framebuffer;
 
-        public Texture colorTexture => this.framebuffer.ColorTargets[0].Target;
+        public Veldrid.Texture colorTexture => this.framebuffer.ColorTargets[0].Target;
 
         public OutputDescription outputDescription => this.framebuffer.OutputDescription;
 
@@ -51,9 +51,9 @@ namespace LifeSim.Engine.Rendering
     {
         private readonly Veldrid.ResourceFactory _factory;
         private Framebuffer _framebuffer;
-        private Texture _depthTexture;
-        private Texture _colorTexture;
-        private Texture _pickingTexture;
+        private Veldrid.Texture _depthTexture;
+        private Veldrid.Texture _colorTexture;
+        private Veldrid.Texture _pickingTexture;
 
         public event Action<IRenderTexture>? onResized;
 
@@ -66,7 +66,7 @@ namespace LifeSim.Engine.Rendering
             this._framebuffer = this._CreateFramebuffer();
         }
 
-        private Texture _CreateDepthTexture(uint width, uint height)
+        private Veldrid.Texture _CreateDepthTexture(uint width, uint height)
         {
             return this._factory.CreateTexture(new TextureDescription(
                 width, height, depth: 1, mipLevels: 1, arrayLayers: 1, 
@@ -76,7 +76,7 @@ namespace LifeSim.Engine.Rendering
             ));
         }
 
-        private Texture _CreateColorTexture(uint width, uint height)
+        private Veldrid.Texture _CreateColorTexture(uint width, uint height)
         {
             return this._factory.CreateTexture(new TextureDescription(
                 width, height, depth: 1, mipLevels: 1, arrayLayers: 1, 
@@ -86,7 +86,7 @@ namespace LifeSim.Engine.Rendering
             ));
         }
 
-        private Texture _CreatePickingIDTexture(uint width, uint height)
+        private Veldrid.Texture _CreatePickingIDTexture(uint width, uint height)
         {
             return this._factory.CreateTexture(new TextureDescription(
                 width, height, depth: 1, mipLevels: 1, arrayLayers: 1, 
@@ -105,11 +105,11 @@ namespace LifeSim.Engine.Rendering
 
         public Framebuffer framebuffer => this._framebuffer;
 
-        public Texture colorTexture => this._colorTexture;
+        public Veldrid.Texture colorTexture => this._colorTexture;
         
-        public Texture depthTexture => this._depthTexture;
+        public Veldrid.Texture depthTexture => this._depthTexture;
 
-        public Texture pickingTexture => this._pickingTexture;
+        public Veldrid.Texture pickingTexture => this._pickingTexture;
         
         public OutputDescription outputDescription => this._framebuffer.OutputDescription;
 

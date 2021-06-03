@@ -15,7 +15,7 @@ namespace LifeSim.Engine
 
         private readonly InputInstance _input;
 
-        private readonly GPURenderer _renderer;
+        private readonly Renderer _renderer;
 
         public uint selectedObjectID => this._renderer.selectedObjectID;
         
@@ -32,7 +32,7 @@ namespace LifeSim.Engine
             this.viewport = new Viewport((uint) this._window.Width, (uint) this._window.Height);
 
             var graphicsBackend = App.ParseGraphicsBackend(args);
-            this._renderer = new GPURenderer(this._window, graphicsBackend);
+            this._renderer = new Renderer(this._window, graphicsBackend);
 
             this._window.Resized += this.OnResize;
 
@@ -42,25 +42,36 @@ namespace LifeSim.Engine
             Input.SetInstance(this._input);
         }
 
+        public SceneStorage storage => this._renderer.sceneStorage;
+
         public void Run(IStage stage)
         {
             this.SetStage(stage);
             this._MainLoop();
         }
 
-        public FrameProfiler.FrameStats opaqueDrawStats => this._renderer.baseStats;
-        public FrameProfiler.FrameStats shadowmapDrawStats => this._renderer.shadowmapStats;
-
         private static Veldrid.GraphicsBackend ParseGraphicsBackend(string[] args)
         {
             Veldrid.GraphicsBackend backend = Veldrid.GraphicsBackend.Vulkan;
             if (args.Length > 0) {
                 switch (args[0]) {
-                    case "vulkan": backend = Veldrid.GraphicsBackend.Vulkan; break;
-                    case "metal": backend = Veldrid.GraphicsBackend.Metal; break;
-                    case "directx11": backend = Veldrid.GraphicsBackend.Direct3D11; break;
-                    case "opengl": backend = Veldrid.GraphicsBackend.OpenGL; break;
-                    case "opengles": backend = Veldrid.GraphicsBackend.OpenGLES; break;
+                    case "vulkan": 
+                        backend = Veldrid.GraphicsBackend.Vulkan; 
+                        break;
+                    case "metal": 
+                        backend = Veldrid.GraphicsBackend.Metal; 
+                        break;
+                    case "directx":
+                    case "dx11":
+                    case "dx":
+                    case "directx11": 
+                        backend = Veldrid.GraphicsBackend.Direct3D11; 
+                        break;
+                    case "gl":
+                    case "opengl": backend = Veldrid.GraphicsBackend.OpenGL; 
+                        break;
+                    case "opengles": backend = Veldrid.GraphicsBackend.OpenGLES; 
+                        break;
                 }
             }
             return backend;
@@ -79,7 +90,7 @@ namespace LifeSim.Engine
             this._stage = stage;
         }
 
-        public IntPtr GetImGUITexture(GPUTexture texture)
+        public IntPtr GetImGUITexture(Texture texture)
         {
             return this._renderer.GetImGUITexture(texture);
         }

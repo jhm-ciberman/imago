@@ -1,17 +1,20 @@
 using System.IO;
+using System.Runtime.InteropServices;
 using FontStashSharp;
 using FontStashSharp.Interfaces;
 using LifeSim.Engine.Rendering;
+using LifeSim.Engine.SceneGraph;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using Veldrid;
+using Veldrid.Utilities;
 using Rectangle = System.Drawing.Rectangle;
 
 namespace LifeSim.Engine
 {
-    public class ResourceFactory : ITexture2DCreator
+    public class ResourceFactory : ITexture2DCreator, IRenderingResourcesFactory
     {
-        private class FontTexture2D : GPUTexture, ITexture2D
+        private class FontTexture2D : Rendering.Texture, ITexture2D
         {
             public FontTexture2D(GraphicsDevice gd, uint width, uint height) : base(gd, width, height)
             {
@@ -29,14 +32,12 @@ namespace LifeSim.Engine
         }
 
         private readonly GraphicsDevice _gd;
+        private readonly SceneRenderer _sceneRenderer;
 
-        private readonly GPUResourceManager _gpuResourceManager;
-
-
-        public ResourceFactory(GraphicsDevice gd, GPUResourceManager gpuResourceManager)
+        public ResourceFactory(GraphicsDevice gd, SceneRenderer sceneRenderer)
         {
             this._gd = gd;
-            this._gpuResourceManager = gpuResourceManager;
+            this._sceneRenderer = sceneRenderer;
         }
         
         private SurfaceMaterial? _cachedDefaultSurfaceMaterial;
@@ -44,45 +45,45 @@ namespace LifeSim.Engine
         {
             get
             {
-                if (this._cachedDefaultSurfaceMaterial != null) return this._cachedDefaultSurfaceMaterial;
-                return this._cachedDefaultSurfaceMaterial = new SurfaceMaterial(this._gpuResourceManager, null);
+                if (this._cachedDefaultSurfaceMaterial != null) {
+                    return this._cachedDefaultSurfaceMaterial;
+                }
+                return this._cachedDefaultSurfaceMaterial = this._sceneRenderer.CreateSurfaceMaterial(this.pinkTexture);
             }
         }
 
-        public GPUTexture MakeTexture(string path, uint mipLevels = 0)
+        public Rendering.Texture MakeTexture(string path, uint mipLevels = 0)
         {
             Image<Rgba32> image = Image.Load<Rgba32>(path);
-            return new GPUTexture(this._gd, image, mipLevels);
+            return new Rendering.Texture(this._gd, image, mipLevels);
         }
 
-        public GPUTexture MakeTexture(Image<Rgba32> image, uint mipLevels = 0)
+        public SurfaceMaterial MakeSurfaceMaterial(Rendering.Texture texture)
         {
-            return new GPUTexture(this._gd, image, mipLevels);
+            return this._sceneRenderer.CreateSurfaceMaterial(texture);
+        }
+
+        public Rendering.Texture MakeTexture(Image<Rgba32> image, uint mipLevels = 0)
+        {
+            return new Rendering.Texture(this._gd, image, mipLevels);
         }
 
         public GLTF.GLTFLoader LoadGLTF(string path, SurfaceMaterial? defaultMaterial = null)
         {
-            return new GLTF.GLTFLoader(this, defaultMaterial, path);
+            return new GLTF.GLTFLoader(this, path, defaultMaterial);
         }
 
-        public GPUMesh MakeMesh(MeshData meshData)
+        Mesh IRenderingResourcesFactory.CreateMesh<T>(VertexFormat vertexFormat, T[] vertices, ushort[] indices, ref BoundingBox boundingBox)
         {
-            return new GPUMesh(this._gd, meshData);
-        }
+            uint vertexBufferSize = (uint) (Marshal.SizeOf<T>() * vertices.Length);
+            DeviceBuffer vertexBuffer = this._gd.ResourceFactory.CreateBuffer(new BufferDescription(vertexBufferSize, BufferUsage.VertexBuffer));
+            this._gd.UpdateBuffer<T>(vertexBuffer, 0, vertices);
 
-        public SurfaceMaterial MakeSurfaceMaterial(GPUTexture texture)
-        {
-            return new SurfaceMaterial(this._gpuResourceManager, texture);
-        }
+            uint indexBufferSize = (uint) (sizeof(ushort) * indices.Length);
+            DeviceBuffer indexBuffer = this._gd.ResourceFactory.CreateBuffer(new BufferDescription(indexBufferSize, BufferUsage.IndexBuffer));
+            this._gd.UpdateBuffer(indexBuffer, 0, indices);
 
-        public SpriteMaterial MakeSpritesMaterial(Veldrid.Texture texture)
-        {
-            return new SpriteMaterial(this._gpuResourceManager, texture);
-        }
-
-        public FullScreenMaterial MakeFullScreenMaterial(Veldrid.Texture texture)
-        {
-            return new FullScreenMaterial(this._gpuResourceManager, texture);
+            return new Mesh(vertexFormat, (uint) vertices.Length, (uint) indices.Length, ref boundingBox, vertexBuffer, indexBuffer);
         }
 
         public FontSystem MakeFontSystem(string[] paths)
@@ -94,6 +95,18 @@ namespace LifeSim.Engine
                 fontSystem.AddFont(File.ReadAllBytes(path));
             }
             return fontSystem;
+        }
+
+        private Rendering.Texture? _cachedPinkTexture = null;
+        public Rendering.Texture pinkTexture 
+        {
+            get
+            {
+                if (this._cachedPinkTexture != null) return this._cachedPinkTexture;
+                
+                Image<Rgba32> image = new Image<Rgba32>(2, 2, new Rgba32(255, 0, 255));
+                return this._cachedPinkTexture = new Rendering.Texture(this._gd, image);
+            }
         }
 
         ITexture2D ITexture2DCreator.Create(int width, int height)
