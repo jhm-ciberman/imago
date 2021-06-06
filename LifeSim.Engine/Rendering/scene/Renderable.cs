@@ -36,7 +36,6 @@ namespace LifeSim.Engine.Rendering
         public Skeleton? skeleton  { get; private set; }
         public SurfaceMaterial? material { get; private set; }
         internal DataBuffer.Block _instanceDataBlock;
-
         private SceneStorage _storage;
 
         public Renderable(SceneStorage storage)
@@ -55,9 +54,7 @@ namespace LifeSim.Engine.Rendering
         public void SetMesh(Mesh mesh)
         {
             this.mesh = mesh;
-            if (this.mesh != null && this.material != null) {
-                this._RecomputeBatchingHashKey();
-            }
+            this._RecomputeSortKey();
         }
 
         public void SetMaterial(SurfaceMaterial material)
@@ -71,7 +68,6 @@ namespace LifeSim.Engine.Rendering
             this.instanceResourceSet = this._instanceDataBlock.buffer.resourceSet;
             material.SetDefaultInstanceData(this);
             this._RecomputeOffsetVertexData();
-            this._RecomputeBatchingHashKey();
             this._RecomputeSortKey();
         }
 
@@ -82,7 +78,6 @@ namespace LifeSim.Engine.Rendering
                 this._skeletonDataBlock = this._storage.RequestSkeletonDataBlock();
                 this.skeletonResourceSet = this._skeletonDataBlock.buffer.resourceSet;
                 this._RecomputeOffsetVertexData();
-                this._RecomputeBatchingHashKey();
                 this._RecomputeSortKey();
             }
             this.skeleton = skeleton;
@@ -150,8 +145,10 @@ namespace LifeSim.Engine.Rendering
 
         protected void _RecomputeSortKey()
         {
-            ulong materialHash        = (ulong) (this.material!.id & 0xFFF);
-            ulong meshHash            = (ulong) (this.mesh!.id & 0xFFF);
+            if (this.material == null || this.mesh == null) return;
+
+            ulong materialHash        = (ulong) (this.material.id & 0xFFF);
+            ulong meshHash            = (ulong) (this.mesh.id & 0xFFF);
             ulong transformBufferHash = (ulong) (this._transformDataBlock.buffer.id & 0xFF);
             ulong instanceBufferHash  = (ulong) (this._instanceDataBlock.buffer.id & 0xFF);
             ulong skekeletonBufferHash = 0;
@@ -166,22 +163,21 @@ namespace LifeSim.Engine.Rendering
                 | (meshHash             << 24); // 12 bits
 
             this._cachedSortKey = key;
-        }
 
-        private void _RecomputeBatchingHashKey()
-        {
             // This key is used to fast check if two instances can be batched together. (They must have the same hash)
             this.batchingHashKey = HashCode.Combine(
-                this.mesh!.id, 
-                this.material!.id,
+                this.mesh.id, 
+                this.material.id,
                 this._instanceDataBlock.buffer.id, 
-                this._skeletonDataBlock.isValid ? this._skeletonDataBlock.buffer.id : 0,
+                this._skeletonDataBlock.buffer != null ? this._skeletonDataBlock.buffer.id : 0,
                 this._transformDataBlock.buffer.id
             );
         }
 
         private void _RecomputeOffsetVertexData()
         {
+            if (! this._instanceDataBlock.isValid) return;
+
             this.offsetVertexData = new OffsetVertexData(
                 this._transformDataBlock.blockIndex, 
                 this._instanceDataBlock.blockIndex, 

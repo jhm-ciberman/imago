@@ -29,11 +29,13 @@ namespace LifeSim.Engine.GLTF
             return n;
         }
 
-        private Renderable _CreateRenderable(ISceneTemplate scene, Mesh mesh, SurfaceMaterial material, Skin? skin)
+        private Renderable _CreateRenderable(ISceneTemplate scene, Mesh mesh, SurfaceMaterial? material, Skin? skin)
         {
             Renderable renderable = new Renderable(this._storage);
             renderable.SetMesh(mesh);
-            renderable.SetMaterial(material);
+            if (material != null) {
+                renderable.SetMaterial(material);
+            }
             if (skin != null) {
                 var skeleton = this._CreateSkeleton(scene, skin);
                 renderable.SetSkeleton(skeleton);
@@ -49,15 +51,15 @@ namespace LifeSim.Engine.GLTF
             }
 
             Renderable? renderable = null;
-            if (gltfNode.mesh != null && gltfNode.material != null) {
-                renderable = this._CreateRenderable(scene, gltfNode.mesh, gltfNode.material, gltfNode.skin);
-            }
             Node3D node = new Node3D(renderable);
             this._nodesCache[gltfNode] = node;
             node.name = gltfNode.name;
             node.position = gltfNode.position;
             node.rotation = gltfNode.rotation;
             node.scale = gltfNode.scale;
+            if (gltfNode.mesh != null) {
+                node.renderable = this._CreateRenderable(scene, gltfNode.mesh, gltfNode.material, gltfNode.skin);
+            }
             foreach (GLTFNode? child in gltfNode.children) {
                 node.Add(this._InstantiateNodeRecursive(scene, child));
             }
