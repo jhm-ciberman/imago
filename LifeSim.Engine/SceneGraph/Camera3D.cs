@@ -1,11 +1,11 @@
 using System.Numerics;
-using Veldrid.Utilities;
+using LifeSim.Engine.Rendering;
 
 namespace LifeSim.Engine.SceneGraph
 {
-    public class Camera3D
+    public class Camera3D : ICamera
     {
-        public Vector3 position;
+        public Vector3 position { get; set; } = Vector3.Zero;
         public Quaternion rotation = Quaternion.Identity;
 
         public float fov = 60 * System.MathF.PI / 180f;
@@ -17,7 +17,7 @@ namespace LifeSim.Engine.SceneGraph
 
         public Viewport viewport { get => this._viewPort; set => this._viewPort = value; }
 
-        public Camera3D frustumCullingCamera;
+        public ICamera frustumCullingCamera { get; private set; }
  
         public Camera3D(Viewport viewport)
         {

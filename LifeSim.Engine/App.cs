@@ -11,15 +11,11 @@ namespace LifeSim.Engine
     {
         private readonly Sdl2Window _window;
 
-        public Viewport viewport { get; }
+
 
         private readonly InputInstance _input;
 
         private readonly Renderer _renderer;
-
-        public uint selectedObjectID => this._renderer.selectedObjectID;
-        
-        public ResourceFactory resourceFactory => this._renderer.assetManager;
 
         private IStage? _stage = null;
 
@@ -41,6 +37,10 @@ namespace LifeSim.Engine
             this._input = new InputInstance(this._window);
             Input.SetInstance(this._input);
         }
+
+        public Viewport viewport { get; }
+
+        public uint selectedObjectID => this._renderer.selectedObjectID;
 
         public SceneStorage storage => this._renderer.sceneStorage;
 
@@ -90,11 +90,6 @@ namespace LifeSim.Engine
             this._stage = stage;
         }
 
-        public IntPtr GetImGUITexture(Texture texture)
-        {
-            return this._renderer.GetImGUITexture(texture);
-        }
-
         private void _MainLoop()
         {
             Stopwatch sw = Stopwatch.StartNew();
@@ -106,7 +101,7 @@ namespace LifeSim.Engine
                 float deltaTime = (float)(newElapsed - previousElapsed);
                 previousElapsed = newElapsed;
 
-                this._renderer.mousePickingPosition = Input.mousePosition;
+                this._renderer.UpdateMousePicking(Input.mousePosition);
                 
                 var fps = (1f / deltaTime).ToString("0.00");
                 var dt = (deltaTime * 1000).ToString("0.00");
@@ -128,7 +123,8 @@ namespace LifeSim.Engine
                 this._renderer.Update(deltaTime, this._input.inputSnapshot);
                 if (this._stage != null) {
                     this._stage.Update(deltaTime);
-                    this._renderer.Render(this._stage);
+                    this._stage.RenderFrame(this._renderer);
+                    this._renderer.Render();
                 }
 
                 this._input.UpdateFrameInput(); // For next frame

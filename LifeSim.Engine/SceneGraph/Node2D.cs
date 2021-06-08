@@ -7,6 +7,8 @@ namespace LifeSim.Engine.SceneGraph
     {
         public string name {get; set;} = string.Empty;
 
+        private Canvas2D? _canvas = null;
+
         private Node2D? _parent = null;
         public Node2D? parent => this._parent;
 
@@ -38,8 +40,10 @@ namespace LifeSim.Engine.SceneGraph
                 node._parent.Remove(node);
             }
 
-            this._children.Add(node);
+            node._canvas = this._canvas;
             node._parent = this;
+            this._children.Add(node);
+            this._canvas?._AddNodeToRecursive(node);
         }
 
         public void Remove(Node2D node)
@@ -47,7 +51,9 @@ namespace LifeSim.Engine.SceneGraph
             if (node._parent != this) return;
 
             this._children.Remove(node);
+            node._canvas = null;
             node._parent = null;
+            this._canvas?._RemoveNodeRecursive(node);
         }
 
         private void _OnTransformDirty()

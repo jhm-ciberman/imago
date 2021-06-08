@@ -29,7 +29,7 @@ namespace LifeSim.Engine.GLTF
             return n;
         }
 
-        private Renderable _CreateRenderable(ISceneTemplate scene, Mesh mesh, SurfaceMaterial? material, Skin? skin)
+        private Renderable _CreateRenderable(ISceneTemplate scene, Mesh mesh, Material? material, Skin? skin)
         {
             Renderable renderable = new Renderable(this._storage);
             renderable.SetMesh(mesh);

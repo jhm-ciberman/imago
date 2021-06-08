@@ -10,12 +10,12 @@ namespace LifeSim.Engine.SceneGraph
 
         public Color color = new Color(0xFFFF4500);
 
-        public FontSystem? font;
+        public Font? font;
 
         public int fontSize = 30;
 
         public TextNode2D() : this("") { }
-        public TextNode2D(string text, FontSystem? font = null)
+        public TextNode2D(string text, Font? font = null)
         {
             this.text = text;
             this.font = font;

@@ -14,7 +14,7 @@ namespace LifeSim.Engine.GLTF
 
         public Mesh? mesh = null;
         public Skin? skin = null;
-        public SurfaceMaterial? material = null;
+        public Material? material = null;
         public GLTFNode? parent = null;
 
         private readonly List<GLTFNode> _children = new List<GLTFNode>();

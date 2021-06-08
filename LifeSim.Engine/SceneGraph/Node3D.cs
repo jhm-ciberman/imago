@@ -80,8 +80,8 @@ namespace LifeSim.Engine.SceneGraph
             this._children.Add(node);
             node._parent = this;
             node._scene = this._scene;
-            node._scene?._OnChildAdded(node);
             node._transformIsDirty = true;
+            node._scene?._OnChildAdded(node);
         }
 
         public void Remove(Node3D node)
