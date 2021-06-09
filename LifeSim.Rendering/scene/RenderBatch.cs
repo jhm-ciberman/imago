@@ -1,7 +1,7 @@
 using System.Diagnostics.Contracts;
 using Veldrid;
 
-namespace LifeSim.Engine.Rendering
+namespace LifeSim.Rendering
 {
     public readonly struct RenderBatch
     {

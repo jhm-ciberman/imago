@@ -1,6 +1,6 @@
 using System.Numerics;
 
-namespace LifeSim.Engine.Rendering
+namespace LifeSim.Rendering
 {
     public interface ISkeleton 
     {

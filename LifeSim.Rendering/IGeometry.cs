@@ -1,6 +1,6 @@
 using Veldrid;
 
-namespace LifeSim.Engine.Rendering
+namespace LifeSim.Rendering
 {
     public interface IGeometry
     {

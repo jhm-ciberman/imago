@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Veldrid;
 
-namespace LifeSim.Engine.Rendering
+namespace LifeSim.Rendering
 {
     public class FrameProfiler
     {

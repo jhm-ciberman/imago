@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Numerics;
 using Veldrid;
 
-namespace LifeSim.Engine.Rendering
+namespace LifeSim.Rendering
 {
     public class CanvasRenderer : IDisposable
     {

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Veldrid;
 using Veldrid.SPIRV;
 
-namespace LifeSim.Engine.Rendering
+namespace LifeSim.Rendering
 {
     public partial class PipelineCache
     {

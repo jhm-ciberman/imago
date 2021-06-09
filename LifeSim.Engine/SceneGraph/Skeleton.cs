@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using LifeSim.Engine.Rendering;
+using LifeSim.Rendering;
 
 namespace LifeSim.Engine.SceneGraph
 {

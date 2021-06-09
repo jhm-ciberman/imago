@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Veldrid;
 
-namespace LifeSim.Engine.Rendering
+namespace LifeSim.Rendering
 {
     internal partial class DataBuffer : IDisposable
     {

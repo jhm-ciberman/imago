@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using Veldrid.Utilities;
 
-namespace LifeSim.Engine.Rendering
+namespace LifeSim.Rendering
 {
     public class SceneRenderer
     {

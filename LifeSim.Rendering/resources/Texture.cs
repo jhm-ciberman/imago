@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
-namespace LifeSim.Engine.Rendering
+namespace LifeSim.Rendering
 {
     public class Texture : System.IDisposable, FontStashSharp.Interfaces.ITexture2D
     {

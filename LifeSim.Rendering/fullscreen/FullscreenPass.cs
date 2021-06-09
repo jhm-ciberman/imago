@@ -2,7 +2,7 @@ using System;
 using System.Numerics;
 using Veldrid;
 
-namespace LifeSim.Engine.Rendering
+namespace LifeSim.Rendering
 {
     public class FullscreenPass : IDisposable, IPass
     {

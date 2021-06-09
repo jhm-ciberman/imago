@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace LifeSim.Engine.Rendering
+namespace LifeSim.Rendering
 {
     public struct Uniform<T> : MaterialDefinition.IUniform where T : unmanaged
     {

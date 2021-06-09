@@ -1,7 +1,7 @@
 using System.Numerics;
 using Veldrid;
 
-namespace LifeSim.Engine.Rendering
+namespace LifeSim.Rendering
 {
     public class MousePickingRenderer
     {

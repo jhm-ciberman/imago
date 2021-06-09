@@ -1,7 +1,7 @@
 using System;
 using Veldrid;
 
-namespace LifeSim.Engine.Rendering
+namespace LifeSim.Rendering
 {
     public interface IRenderTexture : System.IDisposable
     {

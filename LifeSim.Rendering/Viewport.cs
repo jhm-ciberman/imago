@@ -1,4 +1,4 @@
-namespace LifeSim.Engine
+namespace LifeSim.Rendering
 {
     public class Viewport
     {

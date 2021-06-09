@@ -2,7 +2,7 @@ using System;
 using ImGuiNET;
 using Veldrid;
 
-namespace LifeSim.Engine.Rendering
+namespace LifeSim.Rendering
 {
     public class ImguiRenderer : IDisposable
     {

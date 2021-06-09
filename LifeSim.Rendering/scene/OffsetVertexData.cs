@@ -1,4 +1,4 @@
-namespace LifeSim.Engine.Rendering
+namespace LifeSim.Rendering
 {
     public struct OffsetVertexData // It's 16 bytes only! 
     {

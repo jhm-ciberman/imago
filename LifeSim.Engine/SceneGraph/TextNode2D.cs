@@ -1,6 +1,6 @@
 using System.Drawing;
 using FontStashSharp;
-using LifeSim.Engine.Rendering;
+using LifeSim.Rendering;
 
 namespace LifeSim.Engine.SceneGraph
 {

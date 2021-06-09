@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace LifeSim.Engine.Rendering
+namespace LifeSim.Rendering
 {
     internal struct DataBlock
     {

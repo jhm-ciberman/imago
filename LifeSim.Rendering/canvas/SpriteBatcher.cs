@@ -6,7 +6,7 @@ using FontStashSharp.Interfaces;
 using LifeSim.Core;
 using Veldrid;
 
-namespace LifeSim.Engine.Rendering
+namespace LifeSim.Rendering
 {
     public class SpriteBatcher : IFontStashRenderer, IDisposable
     {

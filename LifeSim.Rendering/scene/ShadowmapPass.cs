@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using Veldrid;
 using Veldrid.Utilities;
 
-namespace LifeSim.Engine.Rendering
+namespace LifeSim.Rendering
 {
     public class ShadowmapPass : IDisposable, IPass
     {

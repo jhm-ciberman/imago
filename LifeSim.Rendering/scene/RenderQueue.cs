@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using Veldrid.Utilities;
 
-namespace LifeSim.Engine.Rendering
+namespace LifeSim.Rendering
 {
     public class RenderQueue : IEnumerable<Renderable>, IReadOnlyList<Renderable>, IReadOnlyCollection<Renderable>
     {

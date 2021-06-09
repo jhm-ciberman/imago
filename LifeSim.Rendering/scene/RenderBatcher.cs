@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Veldrid;
 
-namespace LifeSim.Engine.Rendering
+namespace LifeSim.Rendering
 {
     public partial class RenderBatcher
     {

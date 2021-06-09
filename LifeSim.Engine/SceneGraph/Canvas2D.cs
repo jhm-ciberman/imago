@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using LifeSim.Core;
-using LifeSim.Engine.Rendering;
+using LifeSim.Rendering;
 
 namespace LifeSim.Engine.SceneGraph
 {

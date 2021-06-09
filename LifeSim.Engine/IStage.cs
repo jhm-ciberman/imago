@@ -1,5 +1,5 @@
 using System;
-using LifeSim.Engine.Rendering;
+using LifeSim.Rendering;
 using LifeSim.Engine.SceneGraph;
 
 namespace LifeSim.Engine

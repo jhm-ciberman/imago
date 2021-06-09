@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using Veldrid;
 
-namespace LifeSim.Engine.Rendering
+namespace LifeSim.Rendering
 {
     public class SpritesPass : IDisposable, IPass
     {

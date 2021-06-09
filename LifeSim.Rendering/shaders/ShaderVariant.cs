@@ -2,7 +2,7 @@ using System;
 using Veldrid;
 using Veldrid.SPIRV;
 
-namespace LifeSim.Engine.Rendering
+namespace LifeSim.Rendering
 {
     public class ShaderVariant : IDisposable
     {

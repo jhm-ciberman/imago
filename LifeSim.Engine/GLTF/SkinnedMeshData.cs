@@ -7,7 +7,7 @@ using Veldrid;
 using Veldrid.SPIRV;
 using Veldrid.Utilities;
 
-namespace LifeSim.Engine.Rendering
+namespace LifeSim.Rendering
 {
     public class SkinnedMeshData : MeshData
     {

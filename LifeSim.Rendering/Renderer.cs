@@ -5,7 +5,7 @@ using Veldrid;
 using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
 
-namespace LifeSim.Engine.Rendering
+namespace LifeSim.Rendering
 {
     public class Renderer : System.IDisposable
     {
