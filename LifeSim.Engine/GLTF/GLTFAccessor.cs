@@ -97,7 +97,7 @@ namespace LifeSim.Engine.GLTF
         }
 
 
-        public UShort4[] AsUShort4Array()
+        public Vector4UShort[] AsUShort4Array()
         {
             return this._componentType switch {
                 ComponentTypeEnum.UNSIGNED_SHORT => this._bufferView.ReadUShort4Array(this._byteOffset, this._count),

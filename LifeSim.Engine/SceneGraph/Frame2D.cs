@@ -3,7 +3,7 @@ using LifeSim.Rendering;
 
 namespace LifeSim.Engine.SceneGraph
 {
-    public class Frame2D : RenderNode2D
+    public class Frame2D : RenderNode2D, ICanvasItem
     {
         public Texture texture;
 

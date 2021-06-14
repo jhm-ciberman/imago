@@ -9,7 +9,7 @@ namespace LifeSim.Engine.GLTF
         Vector3[] ReadVector3Array(int offset, int count);
         Vector4[] ReadVector4Array(int offset, int count);
         ushort[] ReadUShortArray(int offset, int count);
-        UShort4[] ReadUShort4Array(int offset, int count);
+        Vector4UShort[] ReadUShort4Array(int offset, int count);
         uint[] ReadUIntArray(int offset, int count);
         byte[] ReadByteArray(int offset, int count);
         float[] ReadFloatArray(int offset, int count);
@@ -26,7 +26,7 @@ namespace LifeSim.Engine.GLTF
         public Vector3[] ReadVector3Array(int offset, int count)       => new Vector3[count];
         public Vector4[] ReadVector4Array(int offset, int count)       => new Vector4[count];
         public ushort[]  ReadUShortArray(int offset, int count)        => new ushort[count];
-        public UShort4[] ReadUShort4Array(int offset, int count)       => new UShort4[count];
+        public Vector4UShort[] ReadUShort4Array(int offset, int count)       => new Vector4UShort[count];
         public uint[]    ReadUIntArray(int offset, int count)          => new uint[count];
         public byte[]    ReadByteArray(int offset, int count)          => new byte[count];
         public float[]   ReadFloatArray(int offset, int count)         => new float[count];
@@ -72,7 +72,7 @@ namespace LifeSim.Engine.GLTF
         public Vector3[] ReadVector3Array(int offset, int count)       => this._Read<Vector3>(offset, count, this._buffer.ReadVector3);
         public Vector4[] ReadVector4Array(int offset, int count)       => this._Read<Vector4>(offset, count, this._buffer.ReadVector4);
         
-        public UShort4[] ReadUShort4Array(int offset, int count)       => this._Read<UShort4>(offset, count, this._buffer.ReadUShort4);
+        public Vector4UShort[] ReadUShort4Array(int offset, int count)       => this._Read<Vector4UShort>(offset, count, this._buffer.ReadUShort4);
         public ushort[]  ReadUShortArray(int offset, int count)        => this._Read<ushort>(offset, count, this._buffer.ReadUShort);
         public uint[]    ReadUIntArray(int offset, int count)          => this._Read<uint>(offset, count, this._buffer.ReadUInt);
         public byte[]    ReadByteArray(int offset, int count)          => this._Read<byte>(offset, count, this._buffer.ReadByte);

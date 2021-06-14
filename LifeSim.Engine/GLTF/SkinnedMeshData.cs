@@ -17,10 +17,10 @@ namespace LifeSim.Rendering
             public Vector3 position;
             public Vector3 normal;
             public Vector2 uv;
-            public UShort4 joints;
+            public Vector4UShort joints;
             public Vector4 weights;
 
-            public SkinnedVertData(Vector3 position, Vector3 normal, Vector2 uv, UShort4 joints, Vector4 weights)
+            public SkinnedVertData(Vector3 position, Vector3 normal, Vector2 uv, Vector4UShort joints, Vector4 weights)
             {
                 this.position = position;
                 this.normal = normal;
@@ -30,12 +30,12 @@ namespace LifeSim.Rendering
             }
         }
 
-        public readonly IList<UShort4> joints;
+        public readonly IList<Vector4UShort> joints;
         public readonly IList<Vector4> weights;
 
         public SkinnedMeshData(
             IList<Vector3> positions, IList<ushort> indices, IList<Vector2>? uvs, IList<Vector3>? normals, 
-            IList<UShort4> joints, IList<Vector4> weights
+            IList<Vector4UShort> joints, IList<Vector4> weights
         ) 
             : base(positions, indices, uvs, normals)
         {

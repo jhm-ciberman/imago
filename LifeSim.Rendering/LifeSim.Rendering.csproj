@@ -9,7 +9,7 @@
     </PropertyGroup>
     <ItemGroup>
         <ProjectReference Include="../LifeSim.Core/LifeSim.Core.csproj" />
-        <PackageReference Include="FontStashSharp" Version="0.8.8" />
+        <PackageReference Include="FontStashSharp" Version="0.9.3" />
         <PackageReference Include="SixLabors.ImageSharp" Version="1.0.2" />
         <PackageReference Include="Veldrid" Version="4.9.0-gbe8e5a15f4" />
         <PackageReference Include="Veldrid.ImGui" Version="5.72.0" />

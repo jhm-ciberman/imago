@@ -1,5 +1,4 @@
-using System.Drawing;
-using FontStashSharp;
+using System.Numerics;
 using LifeSim.Rendering;
 
 namespace LifeSim.Engine.SceneGraph
@@ -26,7 +25,7 @@ namespace LifeSim.Engine.SceneGraph
             if (this.font == null) return;
             var fontSize = this.font.GetFont(this.fontSize);
             var pos = this.worldMatrix.Translation;
-            fontSize.DrawText(spriteBatcher, pos.X, pos.Y, this.text, this.color);
+            fontSize.DrawText(spriteBatcher, this.text, pos, this.color);
         }
     }
 }

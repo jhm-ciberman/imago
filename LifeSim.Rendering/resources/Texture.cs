@@ -6,7 +6,7 @@ using SixLabors.ImageSharp.PixelFormats;
 
 namespace LifeSim.Rendering
 {
-    public class Texture : System.IDisposable, FontStashSharp.Interfaces.ITexture2D
+    public class Texture : System.IDisposable
     {
         protected Veldrid.Texture _deviceTexture;
         protected Veldrid.Sampler _sampler;
@@ -49,7 +49,7 @@ namespace LifeSim.Rendering
         public Veldrid.Texture deviceTexture => this._deviceTexture;
         public Veldrid.Sampler sampler => this._sampler;
 
-        private void Update(uint x, uint y, uint width, uint height, byte[] data, bool generateMipmaps = true)
+        public void Update(uint x, uint y, uint width, uint height, byte[] data, bool generateMipmaps = true)
         {
             this._gd.UpdateTexture(
                 this._deviceTexture, data, 
@@ -80,16 +80,6 @@ namespace LifeSim.Rendering
             }
 
             if (generateMipmaps) this.RegenerateMipmaps();
-        }
-
-        void FontStashSharp.Interfaces.ITexture2D.SetData(System.Drawing.Rectangle bounds, byte[] data)
-        {
-            this._gd.UpdateTexture(
-                this._deviceTexture, data, 
-                x: (uint) bounds.X, y: (uint) bounds.Y, z: 0, 
-                width: (uint) bounds.Width, height: (uint) bounds.Height, depth: 1, 
-                mipLevel: 0, arrayLayer: 0
-            );
         }
 
         public void RegenerateMipmaps()

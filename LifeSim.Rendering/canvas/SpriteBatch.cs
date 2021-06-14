@@ -13,12 +13,27 @@ namespace LifeSim.Rendering
             public Vector2 uv;
             public uint color;
 
-            public Vertex(Vector3 position, Vector2 uv, uint color)
+            public Vertex(Vector3 position, Vector2 uv, Color color)
             {
                 this.position = position;
                 this.uv = uv;
-                this.color = color;
+                this.color = color.ToPackedUInt();
             }
+
+            public Vertex(float x, float y, float z, float u, float v, Color color)
+            {
+                this.position = new Vector3(x, y, z);
+                this.uv = new Vector2(u, v);
+                this.color = color.ToPackedUInt();
+            }
+        }
+
+        public struct Item
+        {
+            public Vertex tl;
+            public Vertex tr;
+            public Vertex br;
+            public Vertex bl;
         }
 
         public Texture texture { get; private set; }
@@ -29,7 +44,7 @@ namespace LifeSim.Rendering
         public int count { get; private set; } = 0;
 
         private readonly int capacity = 1000;
-        public readonly Vertex[] vertices;
+        public readonly Item[] items;
 
         public Veldrid.ResourceSet resourceSet;
         private Veldrid.GraphicsDevice _gd;
@@ -42,63 +57,76 @@ namespace LifeSim.Rendering
             var factory = this._gd.ResourceFactory;
             this.resourceSet = shader.CreateResourceSet(this.texture.deviceTexture, this.texture.sampler);
             this.capacity = batchCapacity;
-            this.vertices = new Vertex[batchCapacity * 4];
+            this.items = new Item[batchCapacity * 4];
 
-            var vertexBufferSize = (uint) (Marshal.SizeOf<SpriteBatch.Vertex>() * 4 * batchCapacity);
+            var vertexBufferSize = (uint) (Marshal.SizeOf<SpriteBatch.Item>() * 4 * batchCapacity);
             this.vertexBuffer = factory.CreateBuffer(new BufferDescription((uint) vertexBufferSize, BufferUsage.VertexBuffer | BufferUsage.Dynamic));
         }
 
         public bool isFull => (this.count >= this.capacity);
 
-        public void Draw(Vector2 position, Vector2 size, Vector2 uv, Vector2 deltaUV, uint color32, float depth = 0f)
+        public void Draw(Vector2 position, Vector2 size, Vector2 uv, Vector2 deltaUV, Color color, float depth = 0f)
         {
-            float x = position.X;
-            float y = position.Y;
             float w = size.X;
             float h = size.Y;
-            float u = uv.X;
-            float v = uv.Y;
             float du = deltaUV.X;
             float dv = deltaUV.Y;
 
-            int i = this.count * 4;
-            this.vertices[i + 0] = new Vertex(new Vector3(x    , y    , depth), new Vector2(u     , v     ), color32);
-            this.vertices[i + 1] = new Vertex(new Vector3(x + w, y    , depth), new Vector2(u + du, v     ), color32);
-            this.vertices[i + 2] = new Vertex(new Vector3(x + w, y + h, depth), new Vector2(u + du, v + dv), color32);
-            this.vertices[i + 3] = new Vertex(new Vector3(x    , y + h, depth), new Vector2(u     , v + dv), color32);
+            int i = this.count;
+            this.items[i].tl = new Vertex(position.X    , position.Y    , depth, uv.X     , uv.Y     , color);
+            this.items[i].tr = new Vertex(position.X + w, position.Y    , depth, uv.X + du, uv.Y     , color);
+            this.items[i].br = new Vertex(position.X + w, position.Y + h, depth, uv.X + du, uv.Y + dv, color);
+            this.items[i].bl = new Vertex(position.X    , position.Y + h, depth, uv.X     , uv.Y + dv, color);
             this.count++;
         }
 
-        public void Draw(
-            System.Drawing.PointF position, 
-            System.Drawing.Rectangle? sourceRectangle, 
-            System.Drawing.Color color, 
-            float rotation, 
-            System.Drawing.PointF origin, 
-            System.Drawing.PointF scale, 
-            float depth
-        )
+        public void Draw(Vector2 position, Vector2 size, Vector2 uv, Vector2 deltaUV, Color color, Vector2 scale, float rotation, Vector2 origin, float depth = 0f)
         {
-            int color32 = (color.A << 24) + (color.B << 16) + (color.G << 8) + (color.R << 0);
+            // Adapted from https://github.com/ThomasMiz/TrippyGL/blob/109eaf483d3289c0214963b7d22bdbd320d243ed/TrippyGL/TextureBatchItem.cs#L90
+            // Thank you! :D 
+            float sin = MathF.Sin(rotation);
+            float cos = MathF.Cos(rotation);
 
+            var tl = -origin * scale;
+            var tr = new Vector2(tl.X + size.X * scale.X, tl.Y);
+            var bl = new Vector2(tl.X, tl.Y + size.Y * scale.Y);
+            var br = new Vector2(tr.X, bl.Y);
+
+            var tlPos = new Vector3(cos * tl.X - sin * tl.Y + position.X, sin * tl.X + cos * tl.Y + position.Y, depth);
+            var trPos = new Vector3(cos * tr.X - sin * tr.Y + position.X, sin * tr.X + cos * tr.Y + position.Y, depth);
+            var blPos = new Vector3(cos * bl.X - sin * bl.Y + position.X, sin * bl.X + cos * bl.Y + position.Y, depth);
+            var brPos = new Vector3(cos * br.X - sin * br.Y + position.X, sin * br.X + cos * br.Y + position.Y, depth);
+
+            var tlUVs = new Vector2(uv.X            , uv.Y            );
+            var trUVs = new Vector2(uv.X + deltaUV.X, uv.Y            );
+            var blUVs = new Vector2(uv.X            , uv.Y + deltaUV.Y);
+            var brUVs = new Vector2(uv.X + deltaUV.X, uv.Y + deltaUV.Y);
+
+            int i = this.count;
+            this.items[i].tl = new Vertex(tlPos, tlUVs, color);
+            this.items[i].tr = new Vertex(trPos, trUVs, color);
+            this.items[i].bl = new Vertex(blPos, blUVs, color);
+            this.items[i].br = new Vertex(brPos, brUVs, color);
+            this.count++;
+        }
+
+        public void Draw(Vector2 position, System.Drawing.Rectangle? source, Color color, float rotation, Vector2 origin, Vector2 scale, float depth)
+        {
             Vector2 pos = new Vector2(position.X, position.Y);
+            Vector2 textureSize = new Vector2(this.texture.width, this.texture.height);
             Vector2 size, uv, deltaUV;
-            if (sourceRectangle == null) {
-                size.X = this.texture.width;
-                size.Y = this.texture.height;
+            if (source == null) {
+                size = textureSize;
                 uv = Vector2.Zero;
                 deltaUV = Vector2.One;
             } else {
-                var r = sourceRectangle.Value;
-                size.X = r.Width;
-                size.Y = r.Height;
-                uv.X = (float) r.X / (float) this.texture.width;
-                uv.Y = (float) r.Y / (float) this.texture.height;
-                deltaUV.X = size.X / (float) this.texture.width;
-                deltaUV.Y = size.Y / (float) this.texture.height;
+                var r = source.Value;
+                size = new Vector2(r.Width, r.Height);
+                uv = new Vector2(r.X, r.Y) / textureSize;
+                deltaUV = size / textureSize;
             }
 
-            this.Draw(pos, size, uv, deltaUV, (uint) color32, depth);
+            this.Draw(pos, size, uv, deltaUV, color, scale, rotation, origin, depth);
         }
 
         public void SetMaterial(Shader shader, Texture texture)

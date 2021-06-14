@@ -103,27 +103,27 @@ namespace LifeSim.Rendering
         public void Draw(Texture texture, Vector2 position, Vector2 size)
         {
             this._FindBatch(this._defaultShader, texture)
-                .Draw(position, size, Vector2.Zero, Vector2.One, 0xffffffff, 0f);
+                .Draw(position, size, Vector2.Zero, Vector2.One, Color.white, 0f);
 
             this._totalSpritesToDraw++;
         }
 
-        public void Draw(Texture texture, Vector2 position, Vector2 size, Vector2 uv, Vector2 deltaUV, uint color32, float depth = 0f)
+        public void Draw(Texture texture, Vector2 position, Vector2 size, Vector2 uv, Vector2 deltaUV, Color color, float depth = 0f)
         {
             this._FindBatch(this._defaultShader, texture)
-                .Draw(position, size, uv, deltaUV, color32, depth);
+                .Draw(position, size, uv, deltaUV, color, depth);
 
             this._totalSpritesToDraw++;
         }
 
         void IFontStashRenderer.Draw(
-            ITexture2D texture, 
-            System.Drawing.PointF position, 
+            object texture, 
+            Vector2 position, 
             System.Drawing.Rectangle? sourceRectangle, 
             System.Drawing.Color color, 
             float rotation, 
-            System.Drawing.PointF origin, 
-            System.Drawing.PointF scale, 
+            Vector2 origin, 
+            Vector2 scale, 
             float depth
         )
         {

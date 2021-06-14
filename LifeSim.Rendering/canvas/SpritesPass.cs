@@ -82,7 +82,7 @@ namespace LifeSim.Rendering
             for (int i = 0; i < batches.Count; i++) {
                 var batch = batches[i];
 
-                commandList.UpdateBuffer(batch.vertexBuffer, 0, batch.vertices);
+                commandList.UpdateBuffer(batch.vertexBuffer, 0, batch.items);
 
                 if (this._currentShader != batch.shader) {
                     this._currentShader = batch.shader;

@@ -4,7 +4,7 @@ using FontStashSharp.Interfaces;
 
 namespace LifeSim.Engine
 {
-    public class Font : ITexture2DCreator
+    public class Font : FontStashSharp.Interfaces.ITexture2DManager
     {
         private FontStashSharp.FontSystem _fontSystem;
 
@@ -22,10 +22,16 @@ namespace LifeSim.Engine
         {
             return this._fontSystem.GetFont(size);
         }
-
-        ITexture2D ITexture2DCreator.Create(int width, int height)
+        
+        object ITexture2DManager.CreateTexture(int width, int height)
         {
             return new Rendering.Texture((uint) width, (uint) height);
+        }
+
+        void ITexture2DManager.SetTextureData(object texture, System.Drawing.Rectangle bounds, byte[] data)
+        {
+            var t = (Rendering.Texture) texture;
+            t.Update((uint) bounds.X, (uint) bounds.Y, (uint)bounds.Width, (uint) bounds.Height, data, false);
         }
     }
 }
