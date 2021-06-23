@@ -20,6 +20,13 @@ namespace LifeSim.Rendering
                 this.color = color.ToPackedUInt();
             }
 
+            public Vertex(Vector2 position, float depth, Vector2 uv, Color color)
+            {
+                this.position = new Vector3(position, depth);
+                this.uv = uv;
+                this.color = color.ToPackedUInt();
+            }
+
             public Vertex(float x, float y, float z, float u, float v, Color color)
             {
                 this.position = new Vector3(x, y, z);
@@ -107,6 +114,26 @@ namespace LifeSim.Rendering
             this.items[i].tr = new Vertex(trPos, trUVs, color);
             this.items[i].bl = new Vertex(blPos, blUVs, color);
             this.items[i].br = new Vertex(brPos, brUVs, color);
+            this.count++;
+        }
+
+        public void Draw(Vector2 position, Vector2 size, Vector2 uv, Vector2 deltaUV, in Matrix3x2 transform, Color color, float depth = 0f)
+        {
+            var tl = position;
+            var tr = position + new Vector2(size.X, 0f);
+            var bl = position + new Vector2(0f, size.Y);
+            var br = position + size;
+
+            var tlUVs = uv;
+            var trUVs = uv + new Vector2(deltaUV.X, 0f);
+            var blUVs = uv + new Vector2(0f, deltaUV.Y);
+            var brUVs = uv + deltaUV;
+
+            int i = this.count;
+            this.items[i].tl = new Vertex(Vector2.Transform(tl, transform), depth, tlUVs, color);
+            this.items[i].tr = new Vertex(Vector2.Transform(tr, transform), depth, trUVs, color);
+            this.items[i].bl = new Vertex(Vector2.Transform(bl, transform), depth, blUVs, color);
+            this.items[i].br = new Vertex(Vector2.Transform(br, transform), depth, brUVs, color);
             this.count++;
         }
 

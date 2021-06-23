@@ -15,9 +15,9 @@ namespace LifeSim.Engine.SceneGraph
         private readonly List<Node2D> _children = new List<Node2D>();
         public IReadOnlyList<Node2D> children => this._children;
 
-        private Vector2    _position;
-        private float      _rotation;
-        private Vector2    _scale;
+        private Vector2    _position = Vector2.Zero;
+        private float      _rotation = 0f;
+        private Vector2    _scale = Vector2.One;
 
         public Vector2    position { get => this._position; set { this._position = value; this._OnTransformDirty(); } }
         public float      rotation { get => this._rotation; set { this._rotation = value; this._OnTransformDirty(); } }
@@ -56,7 +56,7 @@ namespace LifeSim.Engine.SceneGraph
             this._canvas?._RemoveNodeRecursive(node);
         }
 
-        private void _OnTransformDirty()
+        protected void _OnTransformDirty()
         {
             if (this._localMatrixDirty) return;
             this._localMatrixDirty = true;

@@ -9,6 +9,13 @@ namespace LifeSim.Engine.SceneGraph
 
         public Vector2 size;
 
+        private Vector2 _pivot = Vector2.Zero;
+        public Vector2 pivot 
+        { 
+            get => this._pivot; 
+            set { this._pivot = value; this._OnTransformDirty(); }
+        }
+
         public Frame2D(Texture texture) : this(texture, new Vector2(texture.width, texture.height)) { }
 
         public Frame2D(Texture texture, Vector2 size)
@@ -19,7 +26,7 @@ namespace LifeSim.Engine.SceneGraph
 
         public override void Render(SpriteBatcher spriteBatcher)
         {
-            spriteBatcher.Draw(this.texture, this.worldMatrix.Translation, this.size);
+            spriteBatcher.Draw(this.texture, -this.pivot, this.size, in this.worldMatrix, Color.white, 0f);
         }
     }
 }
