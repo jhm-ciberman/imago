@@ -1,0 +1,138 @@
+using System.Collections.Generic;
+using System.Numerics;
+using System.Runtime.InteropServices;
+using Veldrid;
+using Veldrid.Utilities;
+
+namespace LifeSim.Rendering
+{
+    public abstract class BaseMeshData<TVertex> : IMeshData where TVertex : unmanaged
+    {
+        private static VertexFormat? _cachedVertexFormat;
+
+        public ushort[] indices { get; private set; }
+
+        public TVertex[] vertices { get; private set; }
+
+        public BaseMeshData(ushort[] indices, TVertex[] vertices) 
+        {
+            this.indices = indices;
+            this.vertices = vertices;
+        }
+
+        protected abstract VertexFormat MakeVertexFormat();
+        protected abstract Vector3 GetPosition(int index);
+
+        public void FlipIndices()
+        {
+            for (var i = 0; i < this.indices.Length; i += 3) {
+                var a = this.indices[i + 0];
+                var b = this.indices[i + 1];
+                var c = this.indices[i + 2];
+
+                this.indices[i + 0] = c;
+                this.indices[i + 1] = b;
+                this.indices[i + 2] = a;
+            }
+        }
+
+        public VertexFormat GetVertexFormat()
+        {
+            if (_cachedVertexFormat == null) {
+                _cachedVertexFormat = this.MakeVertexFormat();
+            }
+            return _cachedVertexFormat;
+        }
+
+        public DeviceBuffer CreateVertexBuffer(ResourceFactory factory, CommandList cl)
+        {
+            DeviceBuffer vertexBuffer = factory.CreateBuffer(new BufferDescription((uint) (Marshal.SizeOf<TVertex>() * this.vertices.Length), BufferUsage.VertexBuffer));
+            cl.UpdateBuffer<TVertex>(vertexBuffer, 0, this.vertices);
+            return vertexBuffer;
+        }
+
+        public DeviceBuffer CreateIndexBuffer(ResourceFactory factory, CommandList cl, out int indexCount)
+        {
+            indexCount = this.indices.Length;
+            DeviceBuffer indexBuffer = factory.CreateBuffer(new BufferDescription((uint) (sizeof(ushort) * indexCount), BufferUsage.IndexBuffer));
+            cl.UpdateBuffer<ushort>(indexBuffer, 0, this.indices);
+            return indexBuffer;
+        }
+
+        public bool RayCast(Ray ray, out float distance)
+        {
+            distance = float.MaxValue;
+            bool result = false;
+            for (int i = 0; i < this.indices.Length - 2; i += 3) {
+                Vector3 v0 = this.GetPosition(this.indices[i + 0]);
+                Vector3 v1 = this.GetPosition(this.indices[i + 1]);
+                Vector3 v2 = this.GetPosition(this.indices[i + 2]);
+
+                if (ray.Intersects(ref v0, ref v1, ref v2, out float newDistance)) {
+                    if (newDistance < distance) {
+                        distance = newDistance;
+                    }
+
+                    result = true;
+                }
+            }
+
+            return result;
+        }
+
+        public int RayCast(Ray ray, List<float> distances)
+        {
+            int hits = 0;
+            for (int i = 0; i < this.indices.Length - 2; i += 3) {
+                Vector3 v0 = this.GetPosition(this.indices[i + 0]);
+                Vector3 v1 = this.GetPosition(this.indices[i + 1]);
+                Vector3 v2 = this.GetPosition(this.indices[i + 2]);
+
+                if (ray.Intersects(ref v0, ref v1, ref v2, out float newDistance)) {
+                    hits++;
+                    distances.Add(newDistance);
+                }
+            }
+
+            return hits;
+        }
+
+        public Vector3[] GetVertexPositions()
+        {
+            var positions = new Vector3[this.vertices.Length];
+            for (int i = 0; i < 0; i++) {
+                positions[i] = this.GetPosition(i);
+            }
+            return positions;
+        }
+
+        public ushort[] GetIndices()
+        {
+            return this.indices;
+        }
+
+        public unsafe BoundingBox GetBoundingBox()
+        {
+            fixed (TVertex* vertexPtr = &this.vertices[0])
+            {
+                Vector3* positionPtr = (Vector3*)vertexPtr;
+                return BoundingBox.CreateFromPoints(
+                    positionPtr,
+                    this.vertices.Length,
+                    Marshal.SizeOf<TVertex>(),
+                    Quaternion.Identity,
+                    Vector3.Zero,
+                    Vector3.One);
+            }
+        }
+
+        public unsafe BoundingSphere GetBoundingSphere()
+        {
+            fixed (TVertex* vertexPtr = &this.vertices[0])
+            {
+                Vector3* positionPtr = (Vector3*)vertexPtr;
+                return BoundingSphere.CreateFromPoints(positionPtr, this.vertices.Length, Marshal.SizeOf<TVertex>());
+            }
+        }
+    }
+}

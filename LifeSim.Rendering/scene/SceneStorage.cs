@@ -34,7 +34,6 @@ namespace LifeSim.Rendering
                 }
             }
 
-            System.Console.WriteLine("Creating Transform data buffer");
             var newBuffer = new DataBuffer(this._gd, MIN_BUFFER_BLOCKS, 64, this._transformResourceLayout);
             newBuffer.name = "TransformDataBuffer " + this._transformDataBuffers.Count;
             this._transformDataBuffers.Add(newBuffer);
@@ -51,7 +50,6 @@ namespace LifeSim.Rendering
                 }
             }
 
-            System.Console.WriteLine("Creating Instance data buffer: " + blockSize);
             var newBuffer = new DataBuffer(this._gd, MIN_BUFFER_BLOCKS, blockSize, this._instanceResourceLayout);
             newBuffer.name = "InstanceDataBuffer " + this._instanceDataBuffers.Count;
             this._instanceDataBuffers.Add(newBuffer);
@@ -67,7 +65,6 @@ namespace LifeSim.Rendering
                 }
             }
 
-            System.Console.WriteLine("Creating skeleton data buffer");
             var newBuffer = new DataBuffer(this._gd, MIN_BUFFER_BLOCKS / Renderable.MAX_NUMBER_OF_BONES, Renderable.MAX_NUMBER_OF_BONES * 64, this._skeletonResourceLayout);
             newBuffer.name = "SkeletonDataBuffer " + this._skeletonDataBuffers.Count;
             this._skeletonDataBuffers.Add(newBuffer);

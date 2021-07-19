@@ -19,7 +19,7 @@ namespace LifeSim.Engine.GLTF
 
         private readonly bool _loadSkinned = true;
 
-        public MeshData MakeMesh()
+        public IMeshData MakeMeshData()
         {
             var positionAccessor = this._GetAttributeAccessor("POSITION");
             Debug.Assert(positionAccessor != null);
@@ -40,10 +40,9 @@ namespace LifeSim.Engine.GLTF
             if (this._loadSkinned && weightsAccessor != null && jointsAccessor != null) {
                 var joints = jointsAccessor.AsUShort4Array();
                 var weights = weightsAccessor.AsVector4Array();
-                return new SkinnedMeshData(positions, indices, texCoords, normals, joints, weights);
+                return SkinnedMeshData.CreateMesh(indices, positions, normals, texCoords, joints, weights);
             } else {
-                var mesh = new MeshData(positions, indices, texCoords, normals);
-                return mesh;
+                return BasicMeshData.CreateMesh(indices, positions, normals, texCoords);
             }
         }
 

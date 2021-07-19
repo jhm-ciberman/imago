@@ -1,44 +1,46 @@
-using System.Runtime.InteropServices;
 using Veldrid;
 using Veldrid.Utilities;
 
 namespace LifeSim.Rendering
 {
-    public class Mesh : IGeometry, System.IDisposable
+    public class Mesh : System.IDisposable
     {
         static int _count = 0;
 
         public int id { get ; private set; }
-        public uint vertexCount;
-        public uint indexCount;
+        public uint indexCount { get ; private set; }
         public VertexFormat vertexFormat { get; private set; }
         public DeviceBuffer vertexBuffer { get; private set; }
         public DeviceBuffer indexBuffer { get; private set; }
-        public BoundingBox aabb;
+        public BoundingBox aabb { get ; private set; }
 
-        public Mesh(VertexFormat vertexFormat, uint vertexCount, uint indexCount, ref BoundingBox boundingBox, Veldrid.DeviceBuffer vertexBuffer, Veldrid.DeviceBuffer indexBuffer)
+        protected Mesh(VertexFormat vertexFormat, uint indexCount, Veldrid.DeviceBuffer vertexBuffer, Veldrid.DeviceBuffer indexBuffer, ref BoundingBox boundingBox)
         {
             this.id = ++Mesh._count;
             this.vertexFormat = vertexFormat;
-            this.vertexCount = vertexCount;
             this.indexCount  = indexCount;
             this.aabb = boundingBox;
             this.indexBuffer = indexBuffer;
             this.vertexBuffer = vertexBuffer;
         }
 
-        public static Mesh Create<T>(VertexFormat vertexFormat, T[] vertices, ushort[] indices, ref BoundingBox boundingBox) where T : unmanaged
+        public static Mesh CreateFromData(IMeshData meshData)
         {
             var gd = Renderer.graphicsDevice;
-            uint vertexBufferSize = (uint) (Marshal.SizeOf<T>() * vertices.Length);
-            DeviceBuffer vertexBuffer = gd.ResourceFactory.CreateBuffer(new BufferDescription(vertexBufferSize, BufferUsage.VertexBuffer));
-            gd.UpdateBuffer<T>(vertexBuffer, 0, vertices);
+            var factory = gd.ResourceFactory;
 
-            uint indexBufferSize = (uint) (sizeof(ushort) * indices.Length);
-            DeviceBuffer indexBuffer = gd.ResourceFactory.CreateBuffer(new BufferDescription(indexBufferSize, BufferUsage.IndexBuffer));
-            gd.UpdateBuffer<ushort>(indexBuffer, 0, indices);
+            var boundingBox = meshData.GetBoundingBox();
+            var vertexFormat = meshData.GetVertexFormat();
 
-            return new Mesh(vertexFormat, (uint) vertices.Length, (uint) indices.Length, ref boundingBox, vertexBuffer, indexBuffer);
+            var cl = factory.CreateCommandList();
+            cl.Begin();
+            var indexBuffer = meshData.CreateIndexBuffer(factory, cl, out int indexCount);
+            var vertexBuffer = meshData.CreateVertexBuffer(factory, cl);
+            cl.End();
+            gd.SubmitCommands(cl);
+            cl.Dispose();
+            
+            return new Mesh(vertexFormat, (uint) indexCount, vertexBuffer, indexBuffer, ref boundingBox);
         }
 
         public virtual void Dispose()
