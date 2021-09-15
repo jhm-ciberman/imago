@@ -92,6 +92,9 @@ namespace LifeSim.Rendering
             for (int i = 0; i < this._transformDataBuffers.Count; i++) {
                 this._transformDataBuffers[i].Dispose();
             }
+            for (int i = 0; i < this._skeletonDataBuffers.Count; i++) {
+                this._skeletonDataBuffers[i].Dispose();
+            }
         }
     }
 }

@@ -11,15 +11,13 @@ namespace LifeSim.Engine
     {
         private readonly Sdl2Window _window;
 
-
-
         private readonly InputInstance _input;
 
         private readonly Renderer _renderer;
 
         private IStage? _stage = null;
 
-        public App(string[] args)
+        public App()
         {
             GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
             
@@ -27,7 +25,7 @@ namespace LifeSim.Engine
             this._window = VeldridStartup.CreateWindow(ref windowCI);
             this.viewport = new Viewport((uint) this._window.Width, (uint) this._window.Height);
 
-            var graphicsBackend = App.ParseGraphicsBackend(args);
+            var graphicsBackend = App.ParseGraphicsBackend(Environment.GetCommandLineArgs());
             this._renderer = new Renderer(this._window, graphicsBackend);
 
             this._window.Resized += this.OnResize;
@@ -88,6 +86,12 @@ namespace LifeSim.Engine
         public void SetStage(IStage stage)
         {
             this._stage = stage;
+        }
+
+        public void Quit()
+        {
+            this._renderer.WaitForGPU();
+            this._window.Close();
         }
 
         private void _MainLoop()

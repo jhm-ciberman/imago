@@ -98,7 +98,7 @@ namespace LifeSim.Rendering
             this._gd.SwapBuffers();
         }
 
-        private void WaitForGPU()
+        public void WaitForGPU()
         {
             if (! this._fence.Signaled) { // If we are GPU bound, then maybe it's a good moment to do a GC :)
                 this._fence.Reset();
