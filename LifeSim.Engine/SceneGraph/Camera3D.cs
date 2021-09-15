@@ -1,5 +1,6 @@
 using System.Numerics;
 using LifeSim.Rendering;
+using Veldrid.Utilities;
 
 namespace LifeSim.Engine.SceneGraph
 {
@@ -18,6 +19,8 @@ namespace LifeSim.Engine.SceneGraph
         public Viewport viewport { get => this._viewPort; set => this._viewPort = value; }
 
         public ICamera frustumCullingCamera { get; private set; }
+
+        public BoundingFrustum frustumForCulling => new BoundingFrustum(this.viewProjectionMatrix);
  
         public Camera3D(Viewport viewport)
         {

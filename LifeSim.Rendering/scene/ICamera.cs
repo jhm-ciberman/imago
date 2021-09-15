@@ -1,4 +1,5 @@
 using System.Numerics;
+using Veldrid.Utilities;
 
 namespace LifeSim.Rendering
 {
@@ -6,6 +7,6 @@ namespace LifeSim.Rendering
     {
         Vector3 position { get; }
         Matrix4x4 viewProjectionMatrix { get; }
-        ICamera frustumCullingCamera { get; }
+        BoundingFrustum frustumForCulling { get; }
     }
 }

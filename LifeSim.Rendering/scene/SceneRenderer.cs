@@ -62,14 +62,8 @@ namespace LifeSim.Rendering
             this._commandList.Dispose();
         }
 
-        public void Render(
-            IReadOnlyList<Renderable> renderables, 
-            DirectionalLight mainLight,
-            ColorF ambientColor,
-            ColorF clearColor,
-            ICamera camera
-        ) {
-            
+        public void Render(IReadOnlyList<Renderable> renderables, DirectionalLight mainLight,ColorF ambientColor,ColorF clearColor,ICamera camera) 
+        {
             this._commandList.Begin();
             this._storage.UpdateBuffers(this._commandList);
             this._shadowmapPass.Render(this._commandList, renderables, camera, mainLight);

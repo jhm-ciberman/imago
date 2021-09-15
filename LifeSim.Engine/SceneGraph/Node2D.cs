@@ -29,6 +29,12 @@ namespace LifeSim.Engine.SceneGraph
         public bool visible = true;
         
         private Matrix3x2 _worldMatrix;
+
+        public Node2D()
+        {
+            //
+        }
+
         public ref Matrix3x2 worldMatrix => ref this._worldMatrix;
 
         public void Add(Node2D node)

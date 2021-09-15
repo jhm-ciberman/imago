@@ -83,16 +83,6 @@ namespace LifeSim.Rendering
 
         public uint selectedObjectID => this._mousePicker.objectID;
 
-        public void RenderImGui()
-        {
-
-        }
-
-        public void RegisterShader(string name)
-        {
-            
-        }
-
         public void Render()
         {
             this._imguiRenderer.Render();

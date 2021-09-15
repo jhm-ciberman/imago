@@ -75,7 +75,7 @@ namespace LifeSim.Rendering
             ColorF clearColor,
             ICamera camera
         ) {
-            var cameraFrustum = new BoundingFrustum(camera.frustumCullingCamera.viewProjectionMatrix);
+            var cameraFrustum = camera.frustumForCulling;
             this._renderQueue.AddToRenderQueue(renderables, ref cameraFrustum, camera.position);
             this._renderQueue.Sort();
 

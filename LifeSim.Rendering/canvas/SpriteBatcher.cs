@@ -105,18 +105,18 @@ namespace LifeSim.Rendering
             this.Draw(texture, position, size, Vector2.Zero, Vector2.One, Color.white, 0f);
         }
 
-        public void Draw(Texture texture, Vector2 position, Vector2 size, in Matrix3x2 transform, Color color, float depth = 0f)
+        public void Draw(Texture texture, Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, in Matrix3x2 transform, Color color, float depth = 0f)
         {
             this._FindBatch(this._defaultShader, texture)
-                .Draw(position, size, Vector2.Zero, Vector2.One, in transform, color, depth);
+                .Draw(position, size, uvTopLeft, uvBottomRight, in transform, color, depth);
 
             this._totalSpritesToDraw++;
         }
 
-        public void Draw(Texture texture, Vector2 position, Vector2 size, Vector2 uv, Vector2 deltaUV, Color color, float depth = 0f)
+        public void Draw(Texture texture, Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, Color color, float depth = 0f)
         {
             this._FindBatch(this._defaultShader, texture)
-                .Draw(position, size, uv, deltaUV, color, depth);
+                .Draw(position, size, uvTopLeft, uvBottomRight, color, depth);
 
             this._totalSpritesToDraw++;
         }
