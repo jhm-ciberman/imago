@@ -5,55 +5,55 @@ namespace LifeSim.Rendering
 {
     internal struct DataBlock
     {
-        internal DataBuffer buffer;
-        public int offset;
+        internal DataBuffer Buffer { get; set; }
+        public int Offset { get; set; }
 
-        public bool isValid => this.buffer != null;
+        public bool IsValid => this.Buffer != null;
 
-        public int blockSize => this.buffer == null ? 0 : this.buffer.blockSize;
+        public int BlockSize => this.Buffer == null ? 0 : this.Buffer.BlockSize;
 
-        public uint blockIndex => (uint) (this.offset / this.buffer.blockSize);
+        public uint BlockIndex => (uint) (this.Offset / this.Buffer.BlockSize);
 
         internal DataBlock(DataBuffer buffer, int offset)
         {
-            this.buffer = buffer;
-            this.offset = offset;
+            this.Buffer = buffer;
+            this.Offset = offset;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Read<T>() where T : unmanaged
         {
-            return this.buffer.Read<T>(this.offset);
+            return this.Buffer.Read<T>(this.Offset);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Write<T>(ref T data) where T : unmanaged
         {
-            this.buffer.Write<T>(this.offset, ref data);
+            this.Buffer.Write<T>(this.Offset, ref data);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Write<T>(int offset, ref T data) where T : unmanaged
         {
-            this.buffer.Write<T>(this.offset + offset, ref data);
+            this.Buffer.Write<T>(this.Offset + offset, ref data);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteSpan<T>(ReadOnlySpan<T> data) where T : unmanaged
         {
-            this.buffer.WriteSpan<T>(this.offset, data);
+            this.Buffer.WriteSpan<T>(this.Offset, data);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteSpan<T>(Span<T> data) where T : unmanaged
         {
-            this.buffer.WriteSpan<T>(this.offset, data);
+            this.Buffer.WriteSpan<T>(this.Offset, data);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void FreeBlock()
         {
-            this.buffer?.FreeBlock(this.offset);
+            this.Buffer?.FreeBlock(this.Offset);
         }
     }
 }

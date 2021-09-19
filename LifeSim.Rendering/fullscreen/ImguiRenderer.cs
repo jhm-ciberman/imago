@@ -16,7 +16,7 @@ namespace LifeSim.Rendering
             this._gd = graphicsDevice;
             this._commandList = graphicsDevice.ResourceFactory.CreateCommandList();
             this._renderTexture = renderTexture;
-            this._imguiRenderer = new ImGuiRenderer(this._gd, renderTexture.outputDescription, (int) renderTexture.width, (int) renderTexture.height);
+            this._imguiRenderer = new ImGuiRenderer(this._gd, renderTexture.OutputDescription, (int) renderTexture.Width, (int) renderTexture.Height);
             unsafe {
                 ImGui.GetIO().NativePtr->IniFilename = null;
             }
@@ -40,13 +40,13 @@ namespace LifeSim.Rendering
 
         public IntPtr Texture(Texture texture)
         {
-            return this._imguiRenderer.GetOrCreateImGuiBinding(this._gd.ResourceFactory, texture.deviceTexture);
+            return this._imguiRenderer.GetOrCreateImGuiBinding(this._gd.ResourceFactory, texture.DeviceTexture);
         }
 
         public void Render()
         {
             this._commandList.Begin();
-            this._commandList.SetFramebuffer(this._renderTexture.framebuffer);
+            this._commandList.SetFramebuffer(this._renderTexture.Framebuffer);
             this._imguiRenderer.Render(this._gd, this._commandList);
             this._commandList.End();
 

@@ -11,12 +11,12 @@ namespace LifeSim.Rendering
     {
         // This is the only global variable! I swear!! 
         // Please don't point your finger at me with that face (?)
-        public static GraphicsDevice graphicsDevice = null!;
+        public static GraphicsDevice GraphicsDevice = null!;
 
-        public readonly IRenderTexture fullScreenRenderTexture;
-        public readonly RenderTexture mainRenderTexture;
+        public readonly IRenderTexture FullScreenRenderTexture;
+        public readonly RenderTexture MainRenderTexture;
         private readonly GraphicsDevice _gd;
-        private readonly Veldrid.ResourceFactory _factory;
+        private readonly ResourceFactory _factory;
         private readonly CanvasRenderer _canvasRenderer;
         private readonly SceneRenderer _sceneRenderer;
         private readonly ImguiRenderer _imguiRenderer;
@@ -37,24 +37,24 @@ namespace LifeSim.Rendering
             );
 
             this._gd = VeldridStartup.CreateGraphicsDevice(window, options, graphicsBackend);
-            Renderer.graphicsDevice = this._gd;
+            Renderer.GraphicsDevice = this._gd;
 
             this._factory = this._gd.ResourceFactory;
 
-            this.fullScreenRenderTexture = new SwapchainRenderTexture(this._gd.MainSwapchain);
-            this.mainRenderTexture = new RenderTexture(this._gd.ResourceFactory, (uint) window.Width, (uint) window.Height);
+            this.FullScreenRenderTexture = new SwapchainRenderTexture(this._gd.MainSwapchain);
+            this.MainRenderTexture = new RenderTexture(this._gd.ResourceFactory, (uint) window.Width, (uint) window.Height);
 
-            this._canvasRenderer = new CanvasRenderer(this._gd, this.mainRenderTexture);
-            this._sceneRenderer  = new SceneRenderer(this._gd, this.mainRenderTexture);
-            this._imguiRenderer  = new ImguiRenderer(this._gd, this.mainRenderTexture);
+            this._canvasRenderer = new CanvasRenderer(this._gd, this.MainRenderTexture);
+            this._sceneRenderer  = new SceneRenderer(this._gd, this.MainRenderTexture);
+            this._imguiRenderer  = new ImguiRenderer(this._gd, this.MainRenderTexture);
             this._mousePicker    = new MousePickingRenderer(this._gd);
-            this._fullScreenRenderer = new FullScreenRenderer(this._gd, this.mainRenderTexture, this.fullScreenRenderTexture);
+            this._fullScreenRenderer = new FullScreenRenderer(this._gd, this.MainRenderTexture, this.FullScreenRenderTexture);
 
             this._fence = this._factory.CreateFence(false);
         }
 
-        public SceneStorage sceneStorage => this._sceneRenderer.storage;
-        public GraphicsBackend backendType => this._gd.BackendType;
+        public SceneStorage SceneStorage => this._sceneRenderer.Storage;
+        public GraphicsBackend BackendType => this._gd.BackendType;
 
         public void Update(float deltaTime, InputSnapshot inputSnapshot)
         {
@@ -78,10 +78,10 @@ namespace LifeSim.Rendering
 
         public void UpdateMousePicking(Vector2 mousePickingPosition)
         {
-            this._mousePicker.Update(this.mainRenderTexture, mousePickingPosition);
+            this._mousePicker.Update(this.MainRenderTexture, mousePickingPosition);
         }
 
-        public uint selectedObjectID => this._mousePicker.objectID;
+        public uint SelectedObjectID => this._mousePicker.ObjectID;
 
         public void Render()
         {
@@ -111,8 +111,8 @@ namespace LifeSim.Rendering
         {
             this._gd.ResizeMainWindow(width, height);
             this._gd.WaitForIdle();
-            this.fullScreenRenderTexture.Resize(width, height);
-            this.mainRenderTexture.Resize(viewportWidth, viewportHeight);
+            this.FullScreenRenderTexture.Resize(width, height);
+            this.MainRenderTexture.Resize(viewportWidth, viewportHeight);
             this._imguiRenderer.Resize(viewportWidth, viewportHeight);
         }
 

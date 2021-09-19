@@ -26,7 +26,7 @@ namespace LifeSim.Rendering
 
         public Texture(uint width, uint height, uint mipLevels = 0)
         {
-            this._gd = Renderer.graphicsDevice;
+            this._gd = Renderer.GraphicsDevice;
             var factory = this._gd.ResourceFactory;
             if (mipLevels == 0) {
                 mipLevels = (uint) BitOperations.Log2(Math.Min(width, height));
@@ -43,11 +43,11 @@ namespace LifeSim.Rendering
             this._sampler = this._gd.PointSampler;
         }
 
-        public uint width => this._deviceTexture.Width;
-        public uint height => this._deviceTexture.Height;
+        public uint Width => this._deviceTexture.Width;
+        public uint Height => this._deviceTexture.Height;
 
-        public Veldrid.Texture deviceTexture => this._deviceTexture;
-        public Veldrid.Sampler sampler => this._sampler;
+        public Veldrid.Texture DeviceTexture => this._deviceTexture;
+        public Veldrid.Sampler Sampler => this._sampler;
 
         public void Update(uint x, uint y, uint width, uint height, byte[] data, bool generateMipmaps = true)
         {

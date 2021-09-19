@@ -9,25 +9,25 @@ namespace LifeSim.Rendering
     {
         private readonly string _shadersBasePath = "./res/shaders/";
 
-        public string vertFilename;
-        public string fragFilename;
-        public string vertCode;
-        public string fragCode;
+        public string VertFilename;
+        public string FragFilename;
+        public string VertCode;
+        public string FragCode;
 
         public ShaderSource(string vertFilename, string fragFilename, string vertCode, string fragCode)
         {
-            this.vertFilename = vertFilename;
-            this.fragFilename = fragFilename;
-            this.vertCode = vertCode;
-            this.fragCode = fragCode;
+            this.VertFilename = vertFilename;
+            this.FragFilename = fragFilename;
+            this.VertCode = vertCode;
+            this.FragCode = fragCode;
         }
 
         public ShaderSource(string vertFilename, string fragFilename)
         {
-            this.vertFilename = vertFilename;
-            this.fragFilename = fragFilename;
-            this.vertCode = this._Load(vertFilename);
-            this.fragCode = this._Load(fragFilename);;
+            this.VertFilename = vertFilename;
+            this.FragFilename = fragFilename;
+            this.VertCode = this._Load(vertFilename);
+            this.FragCode = this._Load(fragFilename);;
         }
 
         private static readonly Regex _includeRegex = new Regex("^#include\\s+\"([^\"]+)\"");

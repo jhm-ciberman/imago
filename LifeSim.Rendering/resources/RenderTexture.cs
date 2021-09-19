@@ -3,14 +3,14 @@ using Veldrid;
 
 namespace LifeSim.Rendering
 {
-    public interface IRenderTexture : System.IDisposable
+    public interface IRenderTexture : IDisposable
     {
-        event System.Action<IRenderTexture>? onResized;
-        uint width {get;}
-        uint height {get;}
-        Framebuffer framebuffer {get;}
-        Veldrid.Texture colorTexture {get;}
-        OutputDescription outputDescription {get;}
+        event Action<IRenderTexture>? onResized;
+        uint Width { get; }
+        uint Height { get; }
+        Framebuffer Framebuffer { get; }
+        Veldrid.Texture ColorTexture { get; }
+        OutputDescription OutputDescription { get; }
         void Resize(uint width, uint height);
     }
 
@@ -23,15 +23,15 @@ namespace LifeSim.Rendering
             this._swapchain = swapchain;
         }
 
-        public Framebuffer framebuffer => this._swapchain.Framebuffer;
+        public Framebuffer Framebuffer => this._swapchain.Framebuffer;
 
-        public Veldrid.Texture colorTexture => this.framebuffer.ColorTargets[0].Target;
+        public Veldrid.Texture ColorTexture => this.Framebuffer.ColorTargets[0].Target;
 
-        public OutputDescription outputDescription => this.framebuffer.OutputDescription;
+        public OutputDescription OutputDescription => this.Framebuffer.OutputDescription;
 
-        public uint width => this.framebuffer.Width;
+        public uint Width => this.Framebuffer.Width;
 
-        public uint height => this.framebuffer.Height;
+        public uint Height => this.Framebuffer.Height;
 
         public event Action<IRenderTexture>? onResized;
 
@@ -51,18 +51,16 @@ namespace LifeSim.Rendering
     {
         private readonly Veldrid.ResourceFactory _factory;
         private Framebuffer _framebuffer;
-        private Veldrid.Texture _depthTexture;
         private Veldrid.Texture _colorTexture;
-        private Veldrid.Texture _pickingTexture;
 
         public event Action<IRenderTexture>? onResized;
 
         public RenderTexture(Veldrid.ResourceFactory factory, uint width, uint height)
         {
             this._factory = factory;
-            this._depthTexture = this._CreateDepthTexture(width, height);
+            this.DepthTexture = this._CreateDepthTexture(width, height);
             this._colorTexture = this._CreateColorTexture(width, height);
-            this._pickingTexture = this._CreatePickingIDTexture(width, height);
+            this.PickingTexture = this._CreatePickingIDTexture(width, height);
             this._framebuffer = this._CreateFramebuffer();
         }
 
@@ -99,37 +97,37 @@ namespace LifeSim.Rendering
         private Framebuffer _CreateFramebuffer()
         {
             return this._factory.CreateFramebuffer(new FramebufferDescription(
-                this._depthTexture, this._colorTexture, this._pickingTexture
+                this.DepthTexture, this._colorTexture, this.PickingTexture
             ));
         }
 
-        public Framebuffer framebuffer => this._framebuffer;
+        public Framebuffer Framebuffer => this._framebuffer;
 
-        public Veldrid.Texture colorTexture => this._colorTexture;
-        
-        public Veldrid.Texture depthTexture => this._depthTexture;
+        public Veldrid.Texture ColorTexture => this._colorTexture;
 
-        public Veldrid.Texture pickingTexture => this._pickingTexture;
-        
-        public OutputDescription outputDescription => this._framebuffer.OutputDescription;
+        public Veldrid.Texture DepthTexture { get; private set; }
 
-        public uint width => this.framebuffer.Width;
-        public uint height => this.framebuffer.Height;
+        public Veldrid.Texture PickingTexture { get; private set; }
+
+        public OutputDescription OutputDescription => this._framebuffer.OutputDescription;
+
+        public uint Width => this.Framebuffer.Width;
+        public uint Height => this.Framebuffer.Height;
 
         public void Dispose()
         {
-            this._depthTexture?.Dispose();
+            this.DepthTexture?.Dispose();
             this._colorTexture?.Dispose();
-            this._pickingTexture?.Dispose();
+            this.PickingTexture?.Dispose();
             this._framebuffer?.Dispose();
         }
 
         public void Resize(uint width, uint height)
         {
             this.Dispose();
-            this._depthTexture = this._CreateDepthTexture(width, height);
+            this.DepthTexture = this._CreateDepthTexture(width, height);
             this._colorTexture = this._CreateColorTexture(width, height);
-            this._pickingTexture = this._CreatePickingIDTexture(width, height);
+            this.PickingTexture = this._CreatePickingIDTexture(width, height);
             this._framebuffer = this._CreateFramebuffer();
             this.onResized?.Invoke(this);
         }

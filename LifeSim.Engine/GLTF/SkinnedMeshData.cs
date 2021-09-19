@@ -16,18 +16,18 @@ namespace LifeSim.Engine.GLTF
         {
             SkinnedVertex[] vertices = ArrayPool<SkinnedVertex>.Shared.Rent(positions.Length);
             for(var i = 0; i < positions.Length; i++) {
-                vertices[i].position = positions[i];
-                vertices[i].joints = joints[i];
-                vertices[i].weights = weights[i];
+                vertices[i].Position = positions[i];
+                vertices[i].Joints = joints[i];
+                vertices[i].Weights = weights[i];
             }
             if (normals != null) {
                 for(var i = 0; i < normals.Length; i++) {
-                    vertices[i].normal = normals[i];
+                    vertices[i].Normal = normals[i];
                 }
             }
             if (uvs != null) {
                 for(var i = 0; i < uvs.Length; i++) {
-                    vertices[i].uv = uvs[i];
+                    vertices[i].Uv = uvs[i];
                 }
             }
             var mesh = new SkinnedMeshData(indices, vertices);
@@ -37,12 +37,12 @@ namespace LifeSim.Engine.GLTF
 
         protected override VertexFormat MakeVertexFormat()
         {
-            return SkinnedVertex.vertexFormat;
+            return SkinnedVertex.VertexFormat;
         }
 
         protected override Vector3 GetPosition(int index)
         {
-            return this.vertices[index].position;
+            return this.Vertices[index].Position;
         }
     }
 }

@@ -7,15 +7,14 @@ namespace LifeSim.Engine.Anim
     {
         private struct BindedChannel
         {
-            private readonly Node3D _target;
-            public Node3D target => this._target;
+            public Node3D Target { get; }
 
             private readonly IReadOnlyList<Animation.IChannel> _channel;
-            private int _lastTimeIndex; 
+            private int _lastTimeIndex;
 
             public BindedChannel(Node3D target, IReadOnlyList<Animation.IChannel> channels) 
             {
-                this._target = target;
+                this.Target = target;
                 this._channel = channels;
                 this._lastTimeIndex = 0;
             }
@@ -23,7 +22,7 @@ namespace LifeSim.Engine.Anim
             public void Update(float time, bool loop)
             {
                 for (int i = 0; i < this._channel.Count; i++) {
-                    this._channel[i].UpdateTarget(this._target, time, loop, ref this._lastTimeIndex);
+                    this._channel[i].UpdateTarget(this.Target, time, loop, ref this._lastTimeIndex);
                 }
             }
         }
@@ -41,12 +40,12 @@ namespace LifeSim.Engine.Anim
             this._animation = animation;
         }
 
-        public IEnumerable<Node3D> nodes
+        public IEnumerable<Node3D> Nodes
         {
             get
             {
                 foreach (var channel in this._channels) {
-                    yield return channel.target;
+                    yield return channel.Target;
                 }
             }
         }
@@ -60,7 +59,7 @@ namespace LifeSim.Engine.Anim
         {
             this._time += deltaTime;
             if (this._loop) {
-                this._time %= this._animation.duration;
+                this._time %= this._animation.Duration;
             }
 
             foreach (var channel in this._channels) {

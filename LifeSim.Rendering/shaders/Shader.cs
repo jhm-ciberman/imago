@@ -4,39 +4,63 @@ using Veldrid;
 
 namespace LifeSim.Rendering
 {
-    public class Shader : IDisposable, PipelineCache.IShaderVariantProvider
+    public class Shader : IDisposable
     {
         private static int _count = 0;
-        public int id;
+        public int Id;
+        private readonly List<CachedPipeline> _pipelines = new List<CachedPipeline>();
+        private readonly ResourceLayout _materialResourceLayout;
+        private readonly List<ShaderVariant> _variants = new List<ShaderVariant>();
+        private readonly ResourceFactory _factory;
+        private readonly ShaderSource _source;
 
-        private ResourceLayout _materialResourceLayout;
+        public IPass Pass { get; private set; }
 
-        private List<ShaderVariant> _variants = new List<ShaderVariant>();
-
-        private Veldrid.ResourceFactory _factory;
-
-        private ShaderSource _source;
-
-        private PipelineCache _pipelineCache;
-        public IPass pass { get; private set; }
-
-        internal Shader(IPass pass, ShaderSource source, Veldrid.ResourceLayout materialResourceLayout)
+        internal Shader(IPass pass, ShaderSource source, ResourceLayout materialResourceLayout)
         {
-            this.id = ++Shader._count;
+            this.Id = ++Shader._count;
 
-            this.pass = pass;
+            this.Pass = pass;
 
             this._source = source;
 
-            this._factory = Renderer.graphicsDevice.ResourceFactory;
+            this._factory = Renderer.GraphicsDevice.ResourceFactory;
 
             this._materialResourceLayout = materialResourceLayout;
-            this._pipelineCache = new PipelineCache(this._factory, pass, this);
+        }
+
+        public ResourceSet CreateResourceSet(params BindableResource[] resources)
+        {
+            return this._factory.CreateResourceSet(new ResourceSetDescription(this._materialResourceLayout, resources));
         }
 
         public Pipeline GetPipeline(VertexFormat vertexFormat)
         {
-            return this._pipelineCache.GetPipeline(vertexFormat);
+            lock (this._pipelines) {
+                for (int i = 0; i < this._pipelines.Count; i++) {
+                    if (this._pipelines[i].VertexFormat == vertexFormat) {
+                        return this._pipelines[i].Pipeline;
+                    }
+                }
+
+                ShaderVariant shaderVariant = this._GetShaderVariant(vertexFormat);
+                var pipeline = this.Pass.MakePipeline(shaderVariant);
+                this._pipelines.Add(new CachedPipeline(vertexFormat, pipeline));
+                return pipeline;
+            }
+        }
+
+        private ShaderVariant _GetShaderVariant(VertexFormat vertexFormat)
+        {
+            for (int i = 0; i < this._variants.Count; i++) {
+                if (this._variants[i].VertexFormat == vertexFormat) {
+                    return this._variants[i];
+                }
+            }
+
+            var variant = new ShaderVariant(this._factory, vertexFormat, this._materialResourceLayout, this._source);
+            this._variants.Add(variant);
+            return variant;
         }
 
         public void Dispose()
@@ -47,26 +71,16 @@ namespace LifeSim.Rendering
             this._materialResourceLayout.Dispose();
         }
 
-
-
-        public Veldrid.ResourceSet CreateResourceSet(params BindableResource[] resources)
+        private struct CachedPipeline
         {
-            return this._factory.CreateResourceSet(new ResourceSetDescription(this._materialResourceLayout, resources));
-        }
+            public VertexFormat VertexFormat;
+            public Pipeline Pipeline;
 
-        ShaderVariant PipelineCache.IShaderVariantProvider.GetShaderVariant(VertexFormat vertexFormat)
-        {
-            for (int i = 0; i < this._variants.Count; i++) {
-                if (this._variants[i].vertexFormat == vertexFormat) {
-                    return this._variants[i];
-                }
+            public CachedPipeline(VertexFormat vertexFormat, Pipeline pipeline)
+            {
+                this.VertexFormat = vertexFormat;
+                this.Pipeline = pipeline;
             }
-
-            var variant = new ShaderVariant(this._factory, vertexFormat, this._materialResourceLayout, this._source);
-            this._variants.Add(variant);
-            return variant;
         }
-
-
     }
 }

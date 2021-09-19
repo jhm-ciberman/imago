@@ -8,8 +8,6 @@ namespace LifeSim.Rendering
         private readonly GraphicsDevice _gd;
         private readonly Veldrid.Texture _pixelTexture;
         private readonly CommandList _commandList;
-
-        private uint _objectID = 0;
         private bool _hasCommandsToSubmit = false;
 
         public MousePickingRenderer(GraphicsDevice graphicsDevice)
@@ -24,13 +22,13 @@ namespace LifeSim.Rendering
             this._commandList = factory.CreateCommandList();
         }
 
-        public uint objectID => this._objectID;
+        public uint ObjectID { get; private set; } = 0;
 
         private bool _MouseIsInside(RenderTexture mainRenderTexture, Vector2 mousePos)
         {
             if (mousePos.X < 0) return false;
             if (mousePos.Y < 0) return false;
-            var texture = mainRenderTexture.pickingTexture;
+            var texture = mainRenderTexture.PickingTexture;
             if (mousePos.X >= texture.Width) return false;
             if (mousePos.Y >= texture.Height) return false;
             return true;
@@ -44,11 +42,11 @@ namespace LifeSim.Rendering
                 if (this._gd.IsUvOriginTopLeft) {
                     y = (uint) (mousePos.Y);
                 } else {
-                    y = (uint) (mainRenderTexture.pickingTexture.Height - 1 - mousePos.Y);
+                    y = (uint) (mainRenderTexture.PickingTexture.Height - 1 - mousePos.Y);
                 }
                 this._commandList.Begin();
                 this._commandList.CopyTexture(
-                    source: mainRenderTexture.pickingTexture, 
+                    source: mainRenderTexture.PickingTexture, 
                     srcX: x, srcY: y, srcZ: 0, srcMipLevel: 0, srcBaseArrayLayer: 0, 
                     destination: this._pixelTexture, 
                     dstX: 0, dstY: 0, dstZ: 0, dstMipLevel: 0, dstBaseArrayLayer: 0, 
@@ -59,7 +57,7 @@ namespace LifeSim.Rendering
             }
 
             var mappedResource = this._gd.Map<uint>(this._pixelTexture, MapMode.Read);
-            this._objectID = mappedResource[0, 0];
+            this.ObjectID = mappedResource[0, 0];
             this._gd.Unmap(this._pixelTexture);
         }
 

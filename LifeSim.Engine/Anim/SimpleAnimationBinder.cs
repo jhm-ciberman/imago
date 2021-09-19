@@ -17,7 +17,7 @@ namespace LifeSim.Engine.Anim
             Dictionary<string, Node3D> dictionary = new Dictionary<string, Node3D>();
             this._AddToDictionaryRecursive(dictionary, root);
 
-            foreach (var channelName in animation.channelNames) {
+            foreach (var channelName in animation.ChannelNames) {
                 if (dictionary.TryGetValue(channelName, out Node3D? node)) {
                     var channels = animation.FindChannels(channelName);
                     if (channels != null) {
@@ -39,9 +39,9 @@ namespace LifeSim.Engine.Anim
 
         private void _AddToDictionaryRecursive(Dictionary<string, Node3D> dictionary, Node3D node)
         {
-            dictionary[node.name] = node;
+            dictionary[node.Name] = node;
 
-            foreach (var child in node.children) {
+            foreach (var child in node.Children) {
                 this._AddToDictionaryRecursive(dictionary, child);    
             }
         }

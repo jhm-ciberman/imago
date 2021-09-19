@@ -10,9 +10,8 @@ namespace LifeSim.Engine.GLTF
 
         public delegate Renderable RenderableFactory();
 
-        private Dictionary<GLTFNode, Node3D> _nodesCache = new Dictionary<GLTFNode, Node3D>();
-
-        private SceneStorage _storage;
+        private readonly Dictionary<GLTFNode, Node3D> _nodesCache = new Dictionary<GLTFNode, Node3D>();
+        private readonly SceneStorage _storage;
 
         public SceneInstantiator(SceneStorage storage)
         {
@@ -23,7 +22,7 @@ namespace LifeSim.Engine.GLTF
         {
             this._nodesCache.Clear();
             Node3D n = new Node3D();
-            foreach (GLTFNode? node in scene.children) {
+            foreach (GLTFNode? node in scene.Children) {
                 n.Add(this._InstantiateNodeRecursive(scene, node));
             }
             return n;
@@ -53,14 +52,14 @@ namespace LifeSim.Engine.GLTF
             Renderable? renderable = null;
             Node3D node = new Node3D(renderable);
             this._nodesCache[gltfNode] = node;
-            node.name = gltfNode.name;
-            node.position = gltfNode.position;
-            node.rotation = gltfNode.rotation;
-            node.scale = gltfNode.scale;
-            if (gltfNode.mesh != null) {
-                node.renderable = this._CreateRenderable(scene, gltfNode.mesh, gltfNode.material, gltfNode.skin);
+            node.Name = gltfNode.Name;
+            node.Position = gltfNode.Position;
+            node.Rotation = gltfNode.Rotation;
+            node.Scale = gltfNode.Scale;
+            if (gltfNode.Mesh != null) {
+                node.Renderable = this._CreateRenderable(scene, gltfNode.Mesh, gltfNode.Material, gltfNode.Skin);
             }
-            foreach (GLTFNode? child in gltfNode.children) {
+            foreach (GLTFNode? child in gltfNode.Children) {
                 node.Add(this._InstantiateNodeRecursive(scene, child));
             }
 
@@ -69,15 +68,15 @@ namespace LifeSim.Engine.GLTF
 
         private Skeleton _CreateSkeleton(ISceneTemplate scene, Skin skin)
         {
-            Node3D[] joints = new Node3D[skin.jointNames.Count];
-            IList<string> names = skin.jointNames;
+            Node3D[] joints = new Node3D[skin.JointNames.Count];
+            IList<string> names = skin.JointNames;
             for (var i = 0; i < names.Count; i++) {
                 GLTFNode? gltfNode = scene.FindNodeByName(names[i]);
                 joints[i] = gltfNode != null
                     ? this._InstantiateNodeRecursive(scene, gltfNode)
                     : throw new System.Exception("Could not bind joint: " + names[i]);
             }
-            return new Skeleton(joints, skin.inverseBindMatrices);
+            return new Skeleton(joints, skin.InverseBindMatrices);
         }
     }
 }

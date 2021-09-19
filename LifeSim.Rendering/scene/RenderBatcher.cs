@@ -4,17 +4,17 @@ using Veldrid;
 
 namespace LifeSim.Rendering
 {
-    public partial class RenderBatcher
+    public class RenderBatcher
     {
-
         private DeviceBuffer? _offsetsVertexBuffer = null;
         private OffsetVertexData[] _offsetVertexData;
-        private List<RenderBatch> _batches;
-        public IReadOnlyList<RenderBatch> batches => this._batches;
+        private readonly List<RenderBatch> _batches;
 
-        private GraphicsDevice _gd;
+        public IReadOnlyList<RenderBatch> Batches => this._batches;
 
-        private bool _shadowMapPass;
+        private readonly GraphicsDevice _gd;
+        private readonly bool _shadowMapPass;
+
         public RenderBatcher(GraphicsDevice gd, bool shadowMapPass)
         {
             this._gd = gd;
@@ -34,23 +34,20 @@ namespace LifeSim.Rendering
                 Array.Resize(ref this._offsetVertexData, (int) (renderables.Count * 1.2f));
             }
             Renderable prevRenderable = renderables[0];
-            int prevBatchingHashKey = prevRenderable.batchingHashKey;
-            int i = 0;
-            while (i < renderables.Count) {
+            int prevBatchingHashKey = prevRenderable.BatchingHashKey;
+            for (int i = 0; i < renderables.Count; i++) {
                 Renderable renderable = renderables[i];
-                this._offsetVertexData[i] = renderable.offsetVertexData;
+                this._offsetVertexData[i] = renderable.OffsetVertexData;
 
                 // If it's batcheable, add to current batch. If not, finish batch
-                if (renderable.batchingHashKey == prevBatchingHashKey) {
+                if (renderable.BatchingHashKey == prevBatchingHashKey) {
                     instanceCount++;
                 } else {
                     this._batches.Add(new RenderBatch(instanceCount, prevRenderable, this._shadowMapPass));
                     prevRenderable = renderable;
                     instanceCount = 1;
-                    prevBatchingHashKey = renderable.batchingHashKey;
+                    prevBatchingHashKey = renderable.BatchingHashKey;
                 }
-
-                i++;
             }
 
             this._batches.Add(new RenderBatch(instanceCount, prevRenderable, this._shadowMapPass));

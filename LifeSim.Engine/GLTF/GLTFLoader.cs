@@ -40,25 +40,25 @@ namespace LifeSim.Engine.GLTF
             node = new GLTFNode(name);
 
             if (data.Mesh.HasValue) {
-                node.material = this._defaultMaterial;
-                node.mesh = this._GetMesh(data.Mesh.Value);
+                node.Material = this._defaultMaterial;
+                node.Mesh = this._GetMesh(data.Mesh.Value);
                 if (data.Skin.HasValue) {
-                    node.skin = this._GetSkin(data.Skin.Value);
+                    node.Skin = this._GetSkin(data.Skin.Value);
                 }
             }
 
             if (data.Matrix.Length == 0) {
                 Matrix4x4.Decompose(this._ToMatrix(data.Matrix), out Vector3 scale, out Quaternion rotation, out Vector3 position);
-                node.scale = scale;
-                node.rotation = rotation;
-                node.position = position;
+                node.Scale = scale;
+                node.Rotation = rotation;
+                node.Position = position;
             } else {
                 var rot = data.Rotation;
                 var scale = data.Scale;
                 var trans = data.Translation;
-                node.scale = new Vector3(scale[0], scale[1], scale[2]);
-                node.rotation = new Quaternion(rot[0], rot[1], rot[2], rot[3]);
-                node.position = new Vector3(trans[0], trans[1], trans[2]);
+                node.Scale = new Vector3(scale[0], scale[1], scale[2]);
+                node.Rotation = new Quaternion(rot[0], rot[1], rot[2], rot[3]);
+                node.Position = new Vector3(trans[0], trans[1], trans[2]);
             }
 
             this._nodesCache[index] = node;

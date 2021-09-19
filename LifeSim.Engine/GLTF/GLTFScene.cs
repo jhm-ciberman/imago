@@ -8,14 +8,14 @@ namespace LifeSim.Engine.GLTF
     {
         private readonly List<GLTFNode> _children = new List<GLTFNode>();
         private readonly Dictionary<string, GLTFNode> _nodesByName = new Dictionary<string, GLTFNode>();
-        public readonly string name;
+        public readonly string Name;
 
         public GLTFScene(string name)
         {
-            this.name = name;
+            this.Name = name;
         }
 
-        public IReadOnlyList<GLTFNode> children => this._children;
+        public IReadOnlyList<GLTFNode> Children => this._children;
 
         public GLTFNode? FindNodeByName(string name)
         {
@@ -30,8 +30,8 @@ namespace LifeSim.Engine.GLTF
 
         private void _AddToDictionaryRecursive(GLTFNode node)
         {
-            this._nodesByName[node.name] = node;
-            foreach (GLTFNode? child in node.children) {
+            this._nodesByName[node.Name] = node;
+            foreach (GLTFNode? child in node.Children) {
                 this._AddToDictionaryRecursive(child);
             }
         }

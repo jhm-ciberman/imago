@@ -23,7 +23,7 @@ namespace LifeSim.Engine
             
             WindowCreateInfo windowCI = new WindowCreateInfo(100, 100, 1024, 600, Veldrid.WindowState.Normal, "Medieval Life");
             this._window = VeldridStartup.CreateWindow(ref windowCI);
-            this.viewport = new Viewport((uint) this._window.Width, (uint) this._window.Height);
+            this.Viewport = new Viewport((uint) this._window.Width, (uint) this._window.Height);
 
             var graphicsBackend = App.ParseGraphicsBackend(Environment.GetCommandLineArgs());
             this._renderer = new Renderer(this._window, graphicsBackend);
@@ -36,11 +36,11 @@ namespace LifeSim.Engine
             Input.SetInstance(this._input);
         }
 
-        public Viewport viewport { get; }
+        public Viewport Viewport { get; }
 
-        public uint selectedObjectID => this._renderer.selectedObjectID;
+        public uint SelectedObjectID => this._renderer.SelectedObjectID;
 
-        public SceneStorage storage => this._renderer.sceneStorage;
+        public SceneStorage Storage => this._renderer.SceneStorage;
 
         public void Run(IStage stage)
         {
@@ -79,8 +79,8 @@ namespace LifeSim.Engine
         {
             uint width = (uint) this._window.Width;
             uint height = (uint) this._window.Height;
-            this.viewport.Resize(width, height);
-            this._renderer.Resize(width, height, this.viewport.width, this.viewport.height);
+            this.Viewport.Resize(width, height);
+            this._renderer.Resize(width, height, this.Viewport.Width, this.Viewport.Height);
         }
 
         public void SetStage(IStage stage)
@@ -105,15 +105,15 @@ namespace LifeSim.Engine
                 float deltaTime = (float)(newElapsed - previousElapsed);
                 previousElapsed = newElapsed;
 
-                this._renderer.UpdateMousePicking(Input.mousePosition);
+                this._renderer.UpdateMousePicking(Input.MousePosition);
                 
                 var fps = (1f / deltaTime).ToString("0.00");
                 var dt = (deltaTime * 1000).ToString("0.00");
 
-                var mouse = "(" + Input.mousePosition.X + ", " +Input.mousePosition.Y + ")";
-                this._window.Title = "Medieval Life" + " (" + this._renderer.backendType.ToString() + ") frame = " + dt + "ms FPS = " + fps + " Mouse: " + mouse;
+                var mouse = "(" + Input.MousePosition.X + ", " +Input.MousePosition.Y + ")";
+                this._window.Title = "Medieval Life" + " (" + this._renderer.BackendType.ToString() + ") frame = " + dt + "ms FPS = " + fps + " Mouse: " + mouse;
 
-                if (Input.GetKeyDown(Veldrid.Key.Escape) && ! Input.mouseIsLocked) {
+                if (Input.GetKeyDown(Veldrid.Key.Escape) && ! Input.MouseIsLocked) {
                     this._window.Close();
                     return;
                 }
@@ -124,7 +124,7 @@ namespace LifeSim.Engine
                         : Veldrid.WindowState.BorderlessFullScreen;
                 }
 
-                this._renderer.Update(deltaTime, this._input.inputSnapshot);
+                this._renderer.Update(deltaTime, this._input.InputSnapshot);
                 if (this._stage != null) {
                     this._stage.Update(deltaTime);
                     this._stage.RenderFrame(this._renderer);

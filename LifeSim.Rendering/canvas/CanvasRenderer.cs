@@ -24,12 +24,12 @@ namespace LifeSim.Rendering
 
             this._pass = new SpritesPass(gd, this._renderTexture);
 
-            this._spriteBatcher = new SpriteBatcher(gd, this._pass);
+            this._spriteBatcher = new SpriteBatcher(gd, this._pass.Shader);
         }
 
         public void Render(Viewport viewport, IReadOnlyList<ICanvasItem> items)
         {
-            Matrix4x4 projection = Matrix4x4.CreateOrthographicOffCenter(0, viewport.width, viewport.height, 0, -10f, 100f);
+            Matrix4x4 projection = Matrix4x4.CreateOrthographicOffCenter(0, viewport.Width, viewport.Height, 0, -10f, 100f);
 
             this._spriteBatcher.BeginBatch();
             for (int i = 0; i < items.Count; i++) {
@@ -38,7 +38,7 @@ namespace LifeSim.Rendering
 
             this._commandList.Begin();
             this._pass.BeginPass(this._commandList, ref projection);
-            this._pass.SubmitBatches(this._commandList, this._spriteBatcher.indexBuffer, this._spriteBatcher.batches);
+            this._pass.SubmitBatches(this._commandList, this._spriteBatcher.IndexBuffer, this._spriteBatcher.Batches);
             this._commandList.End();
 
 

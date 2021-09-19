@@ -23,9 +23,9 @@ namespace LifeSim.Engine
         public static bool GetMouseButton(MouseButton button)     => Input._GetInstance().GetMouseButton(button);
         public static bool GetMouseButtonDown(MouseButton button) => Input._GetInstance().GetMouseButtonDown(button);
 
-        public static Vector2 mouseDelta      => Input._GetInstance().mouseDelta;
-        public static Vector2 mousePosition   => Input._GetInstance().mousePosition;
-        public static bool mouseIsLocked      => Input._GetInstance().mouseIsLocked;
+        public static Vector2 MouseDelta      => Input._GetInstance().MouseDelta;
+        public static Vector2 MousePosition   => Input._GetInstance().MousePosition;
+        public static bool MouseIsLocked      => Input._GetInstance().MouseIsLocked;
         public static void LockMouse()        => Input._GetInstance().LockMouse();
         public static void UnlockMouse()      => Input._GetInstance().UnlockMouse();
     }

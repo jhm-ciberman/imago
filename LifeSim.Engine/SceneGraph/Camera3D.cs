@@ -6,49 +6,44 @@ namespace LifeSim.Engine.SceneGraph
 {
     public class Camera3D : ICamera
     {
-        public Vector3 position { get; set; } = Vector3.Zero;
-        public Quaternion rotation = Quaternion.Identity;
+        public Vector3 Position { get; set; } = Vector3.Zero;
+        public Quaternion Rotation = Quaternion.Identity;
 
-        public float fov = 60 * System.MathF.PI / 180f;
-        public float aspect => (float) this._viewPort.width / (float) this._viewPort.height;
-        public float near = 0.01f;
-        public float far = 100.0f;
+        public float FieldOfView = 60 * System.MathF.PI / 180f;
+        public float Aspect => (float) this.Viewport.Width / (float) this.Viewport.Height;
+        public float Near = 0.01f;
+        public float Far = 100.0f;
 
-        private Viewport _viewPort;
+        public Viewport Viewport { get; set; }
 
-        public Viewport viewport { get => this._viewPort; set => this._viewPort = value; }
+        public ICamera FrustumCullingCamera { get; private set; }
 
-        public ICamera frustumCullingCamera { get; private set; }
-
-        public BoundingFrustum frustumForCulling => new BoundingFrustum(this.viewProjectionMatrix);
+        public BoundingFrustum FrustumForCulling => new BoundingFrustum(this.ViewProjectionMatrix);
  
         public Camera3D(Viewport viewport)
         {
-            this._viewPort = viewport;
-            this.frustumCullingCamera = this;
+            this.Viewport = viewport;
+            this.FrustumCullingCamera = this;
         }
 
-        public Matrix4x4 viewProjectionMatrix => this.viewMatrix * this.projectionMatrix;
+        public Matrix4x4 ViewProjectionMatrix => this.ViewMatrix * this.ProjectionMatrix;
 
-        public Matrix4x4 projectionMatrix
-        {
-            get => Matrix4x4.CreatePerspectiveFieldOfView(this.fov, this.aspect, this.near, this.far);
-        }
+        public Matrix4x4 ProjectionMatrix => Matrix4x4.CreatePerspectiveFieldOfView(this.FieldOfView, this.Aspect, this.Near, this.Far);
 
-        public Matrix4x4 viewMatrix
+        public Matrix4x4 ViewMatrix
         {
             get
             {
-                Matrix4x4 worldMatrix = Matrix4x4.CreateFromQuaternion(this.rotation) * Matrix4x4.CreateTranslation(this.position);
-                Matrix4x4.Invert(worldMatrix, out worldMatrix);
+                Matrix4x4 worldMatrix = Matrix4x4.CreateFromQuaternion(this.Rotation) * Matrix4x4.CreateTranslation(this.Position);
+                _ = Matrix4x4.Invert(worldMatrix, out worldMatrix);
                 return worldMatrix;
             }
         }
 
         public void LookAt(Vector3 destPoint)
         {
-            Matrix4x4 worldMat = Matrix4x4.CreateWorld(this.position, destPoint - this.position, Vector3.UnitY);
-            this.rotation = Quaternion.CreateFromRotationMatrix(worldMat);
+            Matrix4x4 worldMat = Matrix4x4.CreateWorld(this.Position, destPoint - this.Position, Vector3.UnitY);
+            this.Rotation = Quaternion.CreateFromRotationMatrix(worldMat);
         }
     }
 }

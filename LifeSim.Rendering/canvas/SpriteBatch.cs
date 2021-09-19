@@ -9,81 +9,79 @@ namespace LifeSim.Rendering
     {
         public struct Vertex
         {
-            public Vector3 position;
-            public Vector2 uv;
-            public uint color;
+            public Vector3 Position;
+            public Vector2 Uv;
+            public uint Color;
 
             public Vertex(Vector3 position, Vector2 uv, Color color)
             {
-                this.position = position;
-                this.uv = uv;
-                this.color = color.ToPackedUInt();
+                this.Position = position;
+                this.Uv = uv;
+                this.Color = color.ToPackedUInt();
             }
 
             public Vertex(Vector2 position, float depth, Vector2 uv, Color color)
             {
-                this.position = new Vector3(position, depth);
-                this.uv = uv;
-                this.color = color.ToPackedUInt();
+                this.Position = new Vector3(position, depth);
+                this.Uv = uv;
+                this.Color = color.ToPackedUInt();
             }
 
             public Vertex(float x, float y, float z, float u, float v, Color color)
             {
-                this.position = new Vector3(x, y, z);
-                this.uv = new Vector2(u, v);
-                this.color = color.ToPackedUInt();
+                this.Position = new Vector3(x, y, z);
+                this.Uv = new Vector2(u, v);
+                this.Color = color.ToPackedUInt();
             }
         }
 
         public struct Item
         {
-            public Vertex tl;
-            public Vertex tr;
-            public Vertex br;
-            public Vertex bl;
+            public Vertex TopLeft;
+            public Vertex TopRight;
+            public Vertex BottomRight;
+            public Vertex BottomLeft;
         }
 
-        public Texture texture { get; private set; }
-        public Shader shader { get; private set; }
+        public Texture Texture { get; private set; }
+        public Shader Shader { get; private set; }
 
-        public Veldrid.DeviceBuffer vertexBuffer { get; private set; }
+        public DeviceBuffer VertexBuffer { get; private set; }
 
-        public int count { get; private set; } = 0;
+        public int Count { get; private set; } = 0;
 
-        private readonly int capacity = 1000;
-        public readonly Item[] items;
+        private readonly int _capacity = 1000;
+        public readonly Item[] Items;
 
-        public Veldrid.ResourceSet resourceSet;
-        private Veldrid.GraphicsDevice _gd;
+        public ResourceSet ResourceSet;
+        private readonly GraphicsDevice _gd;
 
-        public SpriteBatch(Veldrid.GraphicsDevice gd, Shader shader, Texture texture, int batchCapacity)
+        public SpriteBatch(GraphicsDevice gd, Shader shader, Texture texture, int batchCapacity)
         {
             this._gd = gd;
-            this.shader = shader;
-            this.texture = texture;
+            this.Shader = shader;
+            this.Texture = texture;
             var factory = this._gd.ResourceFactory;
-            this.resourceSet = shader.CreateResourceSet(this.texture.deviceTexture, this.texture.sampler);
-            this.capacity = batchCapacity;
-            this.items = new Item[batchCapacity * 4];
+            this.ResourceSet = shader.CreateResourceSet(this.Texture.DeviceTexture, this.Texture.Sampler);
+            this._capacity = batchCapacity;
+            this.Items = new Item[batchCapacity * 4];
 
             var vertexBufferSize = (uint) (Marshal.SizeOf<SpriteBatch.Item>() * 4 * batchCapacity);
-            this.vertexBuffer = factory.CreateBuffer(new BufferDescription((uint) vertexBufferSize, BufferUsage.VertexBuffer | BufferUsage.Dynamic));
+            this.VertexBuffer = factory.CreateBuffer(new BufferDescription((uint) vertexBufferSize, BufferUsage.VertexBuffer | BufferUsage.Dynamic));
         }
 
-        public bool isFull => (this.count >= this.capacity);
+        public bool IsFull => this.Count >= this._capacity;
 
         public void Draw(Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, Color color, float depth = 0f)
         {
             float w = size.X;
             float h = size.Y;
-            float du = uvBottomRight.X;
-            float dv = uvBottomRight.Y;
 
-            this.items[this.count++] = new Item {
-                tl = new Vertex(position.X    , position.Y    , depth, uvTopLeft.X    , uvTopLeft.Y    , color),
-                tr = new Vertex(position.X + w, position.Y    , depth, uvBottomRight.X, uvTopLeft.Y    , color),
-                bl = new Vertex(position.X    , position.Y + h, depth, uvTopLeft.X    , uvBottomRight.Y, color),
-                br = new Vertex(position.X + w, position.Y + h, depth, uvBottomRight.X, uvBottomRight.Y, color),
+            this.Items[this.Count++] = new Item {
+                TopLeft = new Vertex(position.X    , position.Y    , depth, uvTopLeft.X    , uvTopLeft.Y    , color),
+                TopRight = new Vertex(position.X + w, position.Y    , depth, uvBottomRight.X, uvTopLeft.Y    , color),
+                BottomLeft = new Vertex(position.X    , position.Y + h, depth, uvTopLeft.X    , uvBottomRight.Y, color),
+                BottomRight = new Vertex(position.X + w, position.Y + h, depth, uvBottomRight.X, uvBottomRight.Y, color),
             };
         }
 
@@ -109,11 +107,11 @@ namespace LifeSim.Rendering
             var blUVs = new Vector2(uvTopLeft.X, uvBottomRight.Y);
             var brUVs = uvBottomRight;
 
-            this.items[this.count++] = new Item {
-                tl = new Vertex(tlPos, tlUVs, color),
-                tr = new Vertex(trPos, trUVs, color),
-                bl = new Vertex(blPos, blUVs, color),
-                br = new Vertex(brPos, brUVs, color),
+            this.Items[this.Count++] = new Item {
+                TopLeft = new Vertex(tlPos, tlUVs, color),
+                TopRight = new Vertex(trPos, trUVs, color),
+                BottomLeft = new Vertex(blPos, blUVs, color),
+                BottomRight = new Vertex(brPos, brUVs, color),
             };
         }
 
@@ -129,18 +127,18 @@ namespace LifeSim.Rendering
             var blUVs = new Vector2(uvTopLeft.X, uvBottomRight.Y);
             var brUVs = uvBottomRight;
 
-            this.items[this.count++] = new Item {
-                tl = new Vertex(Vector2.Transform(tl, transform), depth, tlUVs, color),
-                tr = new Vertex(Vector2.Transform(tr, transform), depth, trUVs, color),
-                bl = new Vertex(Vector2.Transform(bl, transform), depth, blUVs, color),
-                br = new Vertex(Vector2.Transform(br, transform), depth, brUVs, color),
+            this.Items[this.Count++] = new Item {
+                TopLeft = new Vertex(Vector2.Transform(tl, transform), depth, tlUVs, color),
+                TopRight = new Vertex(Vector2.Transform(tr, transform), depth, trUVs, color),
+                BottomLeft = new Vertex(Vector2.Transform(bl, transform), depth, blUVs, color),
+                BottomRight = new Vertex(Vector2.Transform(br, transform), depth, brUVs, color),
             };
         }
 
         public void Draw(Vector2 position, System.Drawing.Rectangle? source, Color color, float rotation, Vector2 origin, Vector2 scale, float depth)
         {
             Vector2 pos = new Vector2(position.X, position.Y);
-            Vector2 textureSize = new Vector2(this.texture.width, this.texture.height);
+            Vector2 textureSize = new Vector2(this.Texture.Width, this.Texture.Height);
             Vector2 size, uvTopLeft, uvBottomRight;
             if (source == null) {
                 size = textureSize;
@@ -158,20 +156,20 @@ namespace LifeSim.Rendering
 
         public void SetMaterial(Shader shader, Texture texture)
         {
-            this.resourceSet.Dispose();
-            this.shader = shader;
-            this.texture = texture;
-            this.resourceSet = shader.CreateResourceSet(this.texture.deviceTexture, this.texture.sampler);
+            this.ResourceSet.Dispose();
+            this.Shader = shader;
+            this.Texture = texture;
+            this.ResourceSet = shader.CreateResourceSet(this.Texture.DeviceTexture, this.Texture.Sampler);
         }
 
         public void Clear()
         {
-            this.count = 0;
+            this.Count = 0;
         }
 
         public void Dispose()
         {
-            this.vertexBuffer.Dispose();
+            this.VertexBuffer.Dispose();
         }
     }
 }

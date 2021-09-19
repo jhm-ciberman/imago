@@ -25,10 +25,10 @@ namespace LifeSim.Engine.GLTF
         public Vector4UShort ReadUShort4(int offset)
         {
             Vector4UShort vector;
-            vector.x = BitConverter.ToUInt16(this._bytes, offset + 0);
-            vector.y = BitConverter.ToUInt16(this._bytes, offset + 2);
-            vector.z = BitConverter.ToUInt16(this._bytes, offset + 4);
-            vector.w = BitConverter.ToUInt16(this._bytes, offset + 6);
+            vector.X = BitConverter.ToUInt16(this._bytes, offset + 0);
+            vector.Y = BitConverter.ToUInt16(this._bytes, offset + 2);
+            vector.Z = BitConverter.ToUInt16(this._bytes, offset + 4);
+            vector.W = BitConverter.ToUInt16(this._bytes, offset + 6);
             return vector;
         }
 

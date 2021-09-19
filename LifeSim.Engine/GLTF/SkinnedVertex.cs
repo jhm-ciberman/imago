@@ -8,24 +8,24 @@ namespace LifeSim.Engine.GLTF
     [StructLayout(LayoutKind.Sequential)]
     public struct SkinnedVertex
     {
-        public Vector3 position;
-        public Vector3 normal;
-        public Vector2 uv;
-        public Vector4UShort joints;
-        public Vector4 weights;
+        public Vector3 Position;
+        public Vector3 Normal;
+        public Vector2 Uv;
+        public Vector4UShort Joints;
+        public Vector4 Weights;
 
         public SkinnedVertex(Vector3 position, Vector3 normal, Vector2 uv, Vector4UShort joints, Vector4 weights)
         {
-            this.position = position;
-            this.normal = normal;
-            this.uv = uv;
-            this.joints = joints;
-            this.weights = weights;
+            this.Position = position;
+            this.Normal = normal;
+            this.Uv = uv;
+            this.Joints = joints;
+            this.Weights = weights;
         }
 
         private static VertexFormat? _vertexFormat;
 
-        public static VertexFormat vertexFormat
+        public static VertexFormat VertexFormat
         {
             get
             {
@@ -38,8 +38,8 @@ namespace LifeSim.Engine.GLTF
                     new VertexElementDescription("Joints", VertexElementSemantic.TextureCoordinate, VertexElementFormat.UShort4),
                     new VertexElementDescription("Weights", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float4)
                 ));
-                _vertexFormat.isSkinned = true;
-                _vertexFormat.isSurface = true;
+                _vertexFormat.IsSkinned = true;
+                _vertexFormat.IsSurface = true;
                 return _vertexFormat;
             }
         }

@@ -10,31 +10,25 @@ namespace LifeSim.Rendering
 {
     public class SpriteBatcher : IFontStashRenderer, IDisposable
     {
-        private int _maxBatchSize = 1000;
-        private int _totalSpritesToDraw = 0;
-        public int totalSpritesToDraw => this._totalSpritesToDraw;
+        private readonly int _maxBatchSize = 1000;
 
-        private List<SpriteBatch> _batches = new List<SpriteBatch>();
-        private SwapPopList<SpriteBatch> _freeList = new SwapPopList<SpriteBatch>();
-        
-        private Shader _defaultShader;
+        public int TotalSpritesToDraw { get; private set; } = 0;
 
-        private readonly DeviceBuffer _indexBuffer;
+        private readonly List<SpriteBatch> _batches = new List<SpriteBatch>();
+        private readonly SwapPopList<SpriteBatch> _freeList = new SwapPopList<SpriteBatch>();
+        private readonly Shader _defaultShader;
+        private readonly GraphicsDevice _gd;
 
-        private SpritesPass _pass;
-
-        private GraphicsDevice _gd;
-        public SpriteBatcher(GraphicsDevice gd, SpritesPass pass)
+        public SpriteBatcher(GraphicsDevice gd, Shader defaultShader)
         {
             this._gd = gd;
-            this._pass = pass;
-            this._defaultShader = pass.shader;
+            this._defaultShader = defaultShader;
 
             var indexBufferSize = (uint) (sizeof(ushort) * 6 * this._maxBatchSize);
 
             var factory = this._gd.ResourceFactory;
 
-            this._indexBuffer = factory.CreateBuffer(new BufferDescription((uint) indexBufferSize, BufferUsage.IndexBuffer));
+            this.IndexBuffer = factory.CreateBuffer(new BufferDescription((uint) indexBufferSize, BufferUsage.IndexBuffer));
             ushort[] indices = new ushort[this._maxBatchSize * 6];
 
             for (int i = 0; i < this._maxBatchSize; i++) {
@@ -48,7 +42,7 @@ namespace LifeSim.Rendering
                 indices[j + 5] = (ushort) (offset + 2);
             }
 
-            this._gd.UpdateBuffer(this._indexBuffer, 0, indices);
+            this._gd.UpdateBuffer(this.IndexBuffer, 0, indices);
 
         }
 
@@ -56,7 +50,7 @@ namespace LifeSim.Rendering
         {
             for (int i = 0; i < this._batches.Count; i++) {
                 var batch = this._batches[i];
-                if (batch.texture == texture && batch.shader == shader && ! batch.isFull) {
+                if (batch.Texture == texture && batch.Shader == shader && ! batch.IsFull) {
                     return batch;
                 }
             }
@@ -65,7 +59,7 @@ namespace LifeSim.Rendering
             if (this._freeList.Count > 0) {
                 for (int i = 0; i < this._freeList.Count; i++) {
                     var batch = this._freeList[i];
-                    if (batch.texture == texture && batch.shader == shader && ! batch.isFull) {
+                    if (batch.Texture == texture && batch.Shader == shader && ! batch.IsFull) {
                         this._batches.Add(batch);
                         this._freeList.RemoveAt(i);
                         return batch;
@@ -87,7 +81,7 @@ namespace LifeSim.Rendering
 
         public void BeginBatch()
         {
-            this._totalSpritesToDraw = 0;
+            this.TotalSpritesToDraw = 0;
 
             for (int i = 0; i < this._batches.Count; i++) {
                 this._batches[i].Clear();
@@ -96,13 +90,13 @@ namespace LifeSim.Rendering
             this._batches.Clear();
         }
 
-        public Veldrid.DeviceBuffer indexBuffer => this._indexBuffer;
+        public DeviceBuffer IndexBuffer { get; }
 
-        public IReadOnlyList<SpriteBatch> batches => this._batches;
+        public IReadOnlyList<SpriteBatch> Batches => this._batches;
         
         public void Draw(Texture texture, Vector2 position, Vector2 size)
         {
-            this.Draw(texture, position, size, Vector2.Zero, Vector2.One, Color.white, 0f);
+            this.Draw(texture, position, size, Vector2.Zero, Vector2.One, Color.White, 0f);
         }
 
         public void Draw(Texture texture, Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, in Matrix3x2 transform, Color color, float depth = 0f)
@@ -110,7 +104,7 @@ namespace LifeSim.Rendering
             this._FindBatch(this._defaultShader, texture)
                 .Draw(position, size, uvTopLeft, uvBottomRight, in transform, color, depth);
 
-            this._totalSpritesToDraw++;
+            this.TotalSpritesToDraw++;
         }
 
         public void Draw(Texture texture, Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, Color color, float depth = 0f)
@@ -118,7 +112,7 @@ namespace LifeSim.Rendering
             this._FindBatch(this._defaultShader, texture)
                 .Draw(position, size, uvTopLeft, uvBottomRight, color, depth);
 
-            this._totalSpritesToDraw++;
+            this.TotalSpritesToDraw++;
         }
 
         void IFontStashRenderer.Draw(
@@ -135,13 +129,13 @@ namespace LifeSim.Rendering
             this._FindBatch(this._defaultShader, (Texture) texture)
                 .Draw(position, sourceRectangle, color, rotation, origin, scale, depth);
 
-            this._totalSpritesToDraw++;
+            this.TotalSpritesToDraw++;
         }
 
 
         public void Dispose()
         {
-            this._indexBuffer.Dispose();
+            this.IndexBuffer.Dispose();
             for (int i = 0; i < this._batches.Count; i++) {
                 this._batches[i].Dispose();
             }

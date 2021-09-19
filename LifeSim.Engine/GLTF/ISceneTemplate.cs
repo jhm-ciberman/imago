@@ -4,7 +4,7 @@ namespace LifeSim.Engine.GLTF
 {
     public interface ISceneTemplate
     {
-        IReadOnlyList<GLTFNode> children { get; }
+        IReadOnlyList<GLTFNode> Children { get; }
 
         GLTFNode? FindNodeByName(string name);
     }

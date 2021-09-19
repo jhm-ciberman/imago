@@ -7,36 +7,36 @@ namespace LifeSim.Engine.GLTF
 {
     public class GLTFNode
     {
-        public string name;
-        public Vector3 position;
-        public Quaternion rotation;
-        public Vector3 scale;
+        public string Name;
+        public Vector3 Position;
+        public Quaternion Rotation;
+        public Vector3 Scale;
 
-        public Mesh? mesh = null;
-        public Skin? skin = null;
-        public Material? material = null;
-        public GLTFNode? parent = null;
+        public Mesh? Mesh = null;
+        public Skin? Skin = null;
+        public Material? Material = null;
+        public GLTFNode? Parent = null;
 
         private readonly List<GLTFNode> _children = new List<GLTFNode>();
-        public IReadOnlyList<GLTFNode> children => this._children;
+        public IReadOnlyList<GLTFNode> Children => this._children;
         
         public GLTFNode(string name)
         {
-            this.name = name;
+            this.Name = name;
         }
 
         public void Add(GLTFNode node)
         {
-            node.parent = this;
+            node.Parent = this;
             this._children.Add(node);
         } 
     
         public string GetFullPathName()
         {
-            if (this.parent != null) {
-                return this.parent.GetFullPathName() + "/" + this.name;
+            if (this.Parent != null) {
+                return this.Parent.GetFullPathName() + "/" + this.Name;
             } 
-            return "/" + this.name;
+            return "/" + this.Name;
         }
     }
 }

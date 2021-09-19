@@ -11,7 +11,7 @@ namespace LifeSim.Engine.GLTF
         private readonly int _count;
         private readonly ComponentTypeEnum _componentType;
         private readonly bool _normalized;
-        public TypeEnum type { get; }
+        public TypeEnum Type { get; }
 
         public GLTFAccessor(IGLTFBufferView bufferView, int byteOffset, int count, ComponentTypeEnum componentType, TypeEnum type, bool normalized)
         {
@@ -19,7 +19,7 @@ namespace LifeSim.Engine.GLTF
             this._byteOffset = byteOffset;
             this._count = count;
             this._componentType = componentType;
-            this.type = type;
+            this.Type = type;
             this._normalized = normalized;
         }
 

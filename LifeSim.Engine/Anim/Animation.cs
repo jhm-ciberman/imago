@@ -8,22 +8,22 @@ namespace LifeSim.Engine.Anim
     {
         public interface IChannel
         {
-            string targetName {get;}
-            float duration {get;}
+            string TargetName { get; }
+            float Duration { get; }
             void UpdateTarget(Node3D target, float time, bool loop, ref int lastTimeIndex);
         }
 
         public abstract class BaseChannel<T> : IChannel where T : struct
         {
             private readonly ISampler<T> _sampler;
-            public string targetName {get;}
+            public string TargetName {get;}
 
-            public float duration => this._sampler.duration;
+            public float Duration => this._sampler.Duration;
 
             public BaseChannel(string targetName, ISampler<T> sampler)
             {
                 this._sampler = sampler;
-                this.targetName = targetName;
+                this.TargetName = targetName;
             }
 
             protected abstract void SetTargetValue(Node3D node, ref T value);
@@ -38,24 +38,24 @@ namespace LifeSim.Engine.Anim
         public class PositionChannel : BaseChannel<Vector3>
         {
             public PositionChannel(string targetName, ISampler<Vector3> sampler) : base(targetName, sampler) { }
-            protected override void SetTargetValue(Node3D node, ref Vector3 value) => node.position = value;
+            protected override void SetTargetValue(Node3D node, ref Vector3 value) => node.Position = value;
         }
 
         public class ScaleChannel : BaseChannel<Vector3>
         {
             public ScaleChannel(string targetName, ISampler<Vector3> sampler) : base(targetName, sampler) { }
-            protected override void SetTargetValue(Node3D node, ref Vector3 value) => node.scale = value;
+            protected override void SetTargetValue(Node3D node, ref Vector3 value) => node.Scale = value;
         }
 
         public class RotationChannel : BaseChannel<Quaternion>
         {
             public RotationChannel(string targetName, ISampler<Quaternion> sampler) : base(targetName, sampler) { }
-            protected override void SetTargetValue(Node3D node, ref Quaternion value) => node.rotation = value;
+            protected override void SetTargetValue(Node3D node, ref Quaternion value) => node.Rotation = value;
         }
 
         public interface ISampler<T> where T : struct
         {
-            float duration { get; }
+            float Duration { get; }
             T Sample(float time, bool loop, ref int lastTimeIndex);
         }
 
@@ -64,7 +64,7 @@ namespace LifeSim.Engine.Anim
             protected float[] _times;
             protected T[] _values;
 
-            public float duration => this._times[^1];
+            public float Duration => this._times[^1];
 
             public BaseSampler(float[] times, T[] values)
             {
@@ -192,19 +192,19 @@ namespace LifeSim.Engine.Anim
 
         private readonly Dictionary<string, List<IChannel>> _channels = new Dictionary<string, List<IChannel>>();
 
-        public float duration { get; }
+        public float Duration { get; }
 
-        public string name { get; }
+        public string Name { get; }
 
         public Animation(string name, IReadOnlyList<IChannel> channels)
         {
-            this.name = name;
+            this.Name = name;
 
             float duration = 0;
             foreach (var channel in channels) {
-                duration = System.Math.Max(channel.duration, duration);
+                duration = System.Math.Max(channel.Duration, duration);
 
-                string key = channel.targetName;
+                string key = channel.TargetName;
                 key = key.Replace("mixamorig:", "");
                 if (this._channels.TryGetValue(key, out List<IChannel>? list)) {
                     list.Add(channel);
@@ -212,12 +212,10 @@ namespace LifeSim.Engine.Anim
                     this._channels.Add(key, new List<IChannel> { channel });
                 }
             }
-            this.duration = duration;
+            this.Duration = duration;
         }
 
-        public IEnumerable<string> channelNames => this._channels.Keys;
-
-
+        public IEnumerable<string> ChannelNames => this._channels.Keys;
 
         public IReadOnlyList<IChannel>? FindChannels(string targetName)
         {

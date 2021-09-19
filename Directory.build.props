@@ -1,14 +1,14 @@
 <Project>
-  <PropertyGroup>
-    <Nullable>enable</Nullable>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-    <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)\bin\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
-    <BaseOutputPath>$(MSBuildThisFileDirectory)\bin\$(MSBuildProjectName)\</BaseOutputPath>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Optimization>true</Optimization>
-    <TieredCompilationQuickJit>true</TieredCompilationQuickJit>
-    <TieredCompilationQuickJitForLoops>false</TieredCompilationQuickJitForLoops>
-    <Disabletransitiveprojectreferences>true</Disabletransitiveprojectreferences>
-  </PropertyGroup>
+    <PropertyGroup>
+        <Nullable>enable</Nullable>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+        <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)\bin\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+        <BaseOutputPath>$(MSBuildThisFileDirectory)\bin\$(MSBuildProjectName)\</BaseOutputPath>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <Optimization>true</Optimization>
+        <TieredCompilationQuickJit>true</TieredCompilationQuickJit>
+        <TieredCompilationQuickJitForLoops>false</TieredCompilationQuickJitForLoops>
+        <Disabletransitiveprojectreferences>true</Disabletransitiveprojectreferences>
+    </PropertyGroup>
 </Project>

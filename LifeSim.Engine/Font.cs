@@ -6,7 +6,7 @@ namespace LifeSim.Engine
 {
     public class Font : FontStashSharp.Interfaces.ITexture2DManager
     {
-        private FontStashSharp.FontSystem _fontSystem;
+        private readonly FontSystem _fontSystem;
 
         public Font(string[] paths)
         {
