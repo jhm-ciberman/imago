@@ -8,7 +8,7 @@ namespace LifeSim.Engine.SceneGraph
     {
         public string Name { get; set; } = string.Empty;
         public Node3D? Parent { get; private set; } = null;
-        public Scene3D? Scene { get; internal set; }
+        public SceneLayer? Scene { get; internal set; }
 
         private readonly List<Node3D> _children = new List<Node3D>();
         public IReadOnlyList<Node3D> Children => this._children;

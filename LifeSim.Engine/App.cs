@@ -38,8 +38,6 @@ namespace LifeSim.Engine
 
         public Viewport Viewport { get; }
 
-        public uint SelectedObjectID => this._renderer.SelectedObjectID;
-
         public SceneStorage Storage => this._renderer.SceneStorage;
 
         public void Run(IStage stage)
@@ -52,8 +50,9 @@ namespace LifeSim.Engine
         {
             Veldrid.GraphicsBackend backend = Veldrid.GraphicsBackend.Vulkan;
             if (args.Length > 0) {
-                switch (args[0]) {
+                switch (args[0].ToLower()) {
                     case "vulkan": 
+                    case "vk":
                         backend = Veldrid.GraphicsBackend.Vulkan; 
                         break;
                     case "metal": 
@@ -66,9 +65,12 @@ namespace LifeSim.Engine
                         backend = Veldrid.GraphicsBackend.Direct3D11; 
                         break;
                     case "gl":
-                    case "opengl": backend = Veldrid.GraphicsBackend.OpenGL; 
+                    case "opengl": 
+                        backend = Veldrid.GraphicsBackend.OpenGL; 
                         break;
-                    case "opengles": backend = Veldrid.GraphicsBackend.OpenGLES; 
+                    case "gles":
+                    case "opengles": 
+                        backend = Veldrid.GraphicsBackend.OpenGLES; 
                         break;
                 }
             }
@@ -105,7 +107,7 @@ namespace LifeSim.Engine
                 float deltaTime = (float)(newElapsed - previousElapsed);
                 previousElapsed = newElapsed;
 
-                this._renderer.UpdateMousePicking(Input.MousePosition);
+                this._renderer.MousePicker.Update(Input.MousePosition);
                 
                 var fps = (1f / deltaTime).ToString("0.00");
                 var dt = (deltaTime * 1000).ToString("0.00");
@@ -117,14 +119,15 @@ namespace LifeSim.Engine
                     this._window.Close();
                     return;
                 }
-                
+              
                 if (Input.GetKeyDown(Veldrid.Key.F4)) {
                     this._window.WindowState = this._window.WindowState == Veldrid.WindowState.BorderlessFullScreen
                         ? Veldrid.WindowState.Normal
                         : Veldrid.WindowState.BorderlessFullScreen;
                 }
 
-                this._renderer.Update(deltaTime, this._input.InputSnapshot);
+                this._renderer.ImguiRenderer.Update(deltaTime, this._input.InputSnapshot);
+
                 if (this._stage != null) {
                     this._stage.Update(deltaTime);
                     this._stage.RenderFrame(this._renderer);

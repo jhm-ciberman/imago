@@ -4,7 +4,7 @@ using LifeSim.Rendering;
 
 namespace LifeSim.Engine.SceneGraph
 {
-    public class Canvas2D
+    public class CanvasLayer
     {
         public Viewport Viewport;
         private readonly SwapPopList<ICanvasItem> _items = new SwapPopList<ICanvasItem>();
@@ -13,7 +13,7 @@ namespace LifeSim.Engine.SceneGraph
 
         private readonly Node2D _root = new Node2D();
         
-        public Canvas2D(Viewport viewport)
+        public CanvasLayer(Viewport viewport)
         {
             this.Viewport = viewport;
         }

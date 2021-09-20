@@ -7,7 +7,7 @@ namespace LifeSim.Engine.SceneGraph
     {
         public string Name { get; set; } = string.Empty;
 
-        private Canvas2D? _canvas = null;
+        private CanvasLayer? _canvas = null;
 
         public Node2D? Parent { get; private set; } = null;
 

@@ -1,16 +1,19 @@
+using System;
 using System.Numerics;
 using Veldrid;
 
 namespace LifeSim.Rendering
 {
-    public class MousePickingRenderer
+    public class MousePickingRenderer : IDisposable
     {
         private readonly GraphicsDevice _gd;
         private readonly Veldrid.Texture _pixelTexture;
         private readonly CommandList _commandList;
         private bool _hasCommandsToSubmit = false;
 
-        public MousePickingRenderer(GraphicsDevice graphicsDevice)
+        public RenderTexture RenderTexture { get; set;}
+
+        public MousePickingRenderer(GraphicsDevice graphicsDevice, RenderTexture renderTexture)
         {
             this._gd = graphicsDevice;
             var factory = graphicsDevice.ResourceFactory;
@@ -19,35 +22,30 @@ namespace LifeSim.Rendering
                 PixelFormat.R32_UInt, TextureUsage.Staging, TextureType.Texture2D
             ));
 
+            this.RenderTexture = renderTexture;
+
             this._commandList = factory.CreateCommandList();
         }
 
         public uint ObjectID { get; private set; } = 0;
 
-        private bool _MouseIsInside(RenderTexture mainRenderTexture, Vector2 mousePos)
+        private bool _MouseIsInside(Vector2 mousePos)
         {
-            if (mousePos.X < 0) return false;
-            if (mousePos.Y < 0) return false;
-            var texture = mainRenderTexture.PickingTexture;
-            if (mousePos.X >= texture.Width) return false;
-            if (mousePos.Y >= texture.Height) return false;
+            if (mousePos.X < 0 || mousePos.Y < 0) return false;
+            var texture = this.RenderTexture.PickingTexture;
+            if (mousePos.X >= texture.Width || mousePos.Y >= texture.Height) return false;
             return true;
         }
 
-        public void Update(RenderTexture mainRenderTexture, Vector2 mousePos)
+        public void Update(Vector2 mousePos)
         {
-            if (this._MouseIsInside(mainRenderTexture, mousePos)) {
+            if (this._MouseIsInside(mousePos)) {
                 uint x = (uint) mousePos.X;
-                uint y;
-                if (this._gd.IsUvOriginTopLeft) {
-                    y = (uint) (mousePos.Y);
-                } else {
-                    y = (uint) (mainRenderTexture.PickingTexture.Height - 1 - mousePos.Y);
-                }
+                uint y = this._gd.IsUvOriginTopLeft ? (uint) mousePos.Y : (uint) (this.RenderTexture.PickingTexture.Height - 1 - mousePos.Y);
                 this._commandList.Begin();
                 this._commandList.CopyTexture(
-                    source: mainRenderTexture.PickingTexture, 
-                    srcX: x, srcY: y, srcZ: 0, srcMipLevel: 0, srcBaseArrayLayer: 0, 
+                    source: this.RenderTexture.PickingTexture, 
+                    srcX: x, srcY: y, srcZ: 0, srcMipLevel: 0, srcBaseArrayLayer: 0,
                     destination: this._pixelTexture, 
                     dstX: 0, dstY: 0, dstZ: 0, dstMipLevel: 0, dstBaseArrayLayer: 0, 
                     width: 1, height: 1, depth: 1, layerCount: 1
@@ -67,6 +65,12 @@ namespace LifeSim.Rendering
             
             this._gd.SubmitCommands(this._commandList);
             this._hasCommandsToSubmit = false;
+        }
+
+        public void Dispose()
+        {
+            this._pixelTexture.Dispose();
+            this._commandList.Dispose();
         }
     }
 }

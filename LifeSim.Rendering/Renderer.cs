@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Numerics;
 using Veldrid;
 using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
@@ -17,15 +15,20 @@ namespace LifeSim.Rendering
         public readonly RenderTexture MainRenderTexture;
         private readonly GraphicsDevice _gd;
         private readonly ResourceFactory _factory;
-        private readonly CanvasRenderer _canvasRenderer;
-        private readonly SceneRenderer _sceneRenderer;
-        private readonly ImguiRenderer _imguiRenderer;
         private readonly FullScreenRenderer _fullScreenRenderer;
-        private readonly MousePickingRenderer _mousePicker;
 
-        private readonly DebugRenderer _debugRenderer;
+        public GizmosRenderer GizmosRenderer { get; }
 
-        public DebugRenderer DebugRenderer => this._debugRenderer;
+        public SceneRenderer SceneRenderer { get; }
+
+        public ImguiRenderer ImguiRenderer { get; }
+
+        public CanvasRenderer CanvasRenderer { get; }
+
+        public MousePickingRenderer MousePicker { get; }
+
+        public SceneStorage SceneStorage => this.SceneRenderer.Storage;
+        public GraphicsBackend BackendType => this._gd.BackendType;
 
         private readonly Fence _fence;
 
@@ -49,58 +52,28 @@ namespace LifeSim.Rendering
             this.FullScreenRenderTexture = new SwapchainRenderTexture(this._gd.MainSwapchain);
             this.MainRenderTexture = new RenderTexture(this._gd.ResourceFactory, (uint) window.Width, (uint) window.Height);
 
-            this._canvasRenderer = new CanvasRenderer(this._gd, this.MainRenderTexture);
-            this._sceneRenderer = new SceneRenderer(this._gd, this.MainRenderTexture);
-            this._imguiRenderer = new ImguiRenderer(this._gd, this.MainRenderTexture);
-            this._mousePicker = new MousePickingRenderer(this._gd);
+            this.CanvasRenderer = new CanvasRenderer(this._gd, this.MainRenderTexture);
+            this.SceneRenderer = new SceneRenderer(this._gd, this.MainRenderTexture);
+            this.ImguiRenderer = new ImguiRenderer(this._gd, this.MainRenderTexture);
+            this.MousePicker = new MousePickingRenderer(this._gd, this.MainRenderTexture);
+            this.GizmosRenderer = new GizmosRenderer(this._gd, this.MainRenderTexture);
             this._fullScreenRenderer = new FullScreenRenderer(this._gd, this.MainRenderTexture, this.FullScreenRenderTexture);
-            this._debugRenderer = new DebugRenderer(this._gd, this.MainRenderTexture);
-            
+
             this._fence = this._factory.CreateFence(false);
         }
 
-        public SceneStorage SceneStorage => this._sceneRenderer.Storage;
-        public GraphicsBackend BackendType => this._gd.BackendType;
-
-        public void Update(float deltaTime, InputSnapshot inputSnapshot)
-        {
-            this._imguiRenderer.Update(deltaTime, inputSnapshot);
-        }
-
-        public IntPtr GetImGUITexture(Texture texture)
-        {
-            return this._imguiRenderer.Texture(texture);
-        }
-
-        public void RenderScene3D(IReadOnlyList<Renderable> renderable, DirectionalLight mainLight, ColorF ambientColor, ColorF clearColor, ICamera camera)
-        {
-            this._sceneRenderer.Render(renderable, mainLight, ambientColor, clearColor, camera);
-        }
-
-        public void RenderCanvas2D(Viewport viewport, IReadOnlyList<ICanvasItem> canvasItems)
-        {
-            this._canvasRenderer.Render(viewport, canvasItems);
-        }
-
-        public void UpdateMousePicking(Vector2 mousePickingPosition)
-        {
-            this._mousePicker.Update(this.MainRenderTexture, mousePickingPosition);
-        }
-
-        public uint SelectedObjectID => this._mousePicker.ObjectID;
-
         public void Render()
         {
-            this._imguiRenderer.Render();
+            this.ImguiRenderer.Render();
             this._fullScreenRenderer.Render();
 
             this.WaitForGPU();
 
-            this._sceneRenderer.Submit();
-            this._debugRenderer.Submit();
-            this._canvasRenderer.Submit();
-            this._mousePicker.Submit();
-            this._imguiRenderer.Submit();
+            this.SceneRenderer.Submit();
+            this.GizmosRenderer.Submit();
+            this.CanvasRenderer.Submit();
+            this.MousePicker.Submit();
+            this.ImguiRenderer.Submit();
             this._fullScreenRenderer.Submit(this._fence);
             this._gd.SwapBuffers();
         }
@@ -120,11 +93,20 @@ namespace LifeSim.Rendering
             this._gd.WaitForIdle();
             this.FullScreenRenderTexture.Resize(width, height);
             this.MainRenderTexture.Resize(viewportWidth, viewportHeight);
-            this._imguiRenderer.Resize(viewportWidth, viewportHeight);
+            this.ImguiRenderer.Resize(viewportWidth, viewportHeight);
         }
 
         public void Dispose()
         {
+            this.FullScreenRenderTexture.Dispose();
+            this.MainRenderTexture.Dispose();
+            this.CanvasRenderer.Dispose();
+            this.SceneRenderer.Dispose();
+            this.ImguiRenderer.Dispose();
+            this.MousePicker.Dispose();
+            this.GizmosRenderer.Dispose();
+            this._fullScreenRenderer.Dispose();
+            this._fence.Dispose();
             this._gd.Dispose();
         }
     }

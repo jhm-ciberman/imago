@@ -4,7 +4,7 @@ using LifeSim.Rendering;
 
 namespace LifeSim.Engine.SceneGraph
 {
-    public class Scene3D
+    public class SceneLayer
     {
         public DirectionalLight MainLight = new DirectionalLight();
         
@@ -22,7 +22,7 @@ namespace LifeSim.Engine.SceneGraph
 
         private readonly List<Node3D> _transformDirtyList = new List<Node3D>();
 
-        public Scene3D()
+        public SceneLayer()
         {
             //
         }

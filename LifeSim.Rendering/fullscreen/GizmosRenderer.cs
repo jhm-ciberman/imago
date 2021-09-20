@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using LifeSim.Core;
@@ -6,18 +7,11 @@ using Veldrid;
 
 namespace LifeSim.Rendering
 {
-    public class DebugRenderer : IPass, IDisposable
+    public class GizmosRenderer : IPass, IDisposable
     {
         private const int VERTICES_PER_BATCH = 1000;
 
-        protected struct DebugLine
-        {
-            public Vector3 Start;
-            public Vector3 End;
-            public Color Color;
-            public float LifeTime;
-            public bool DrawInFront;
-        }
+
 
         [StructLayout(LayoutKind.Sequential)]
         private struct Vertex
@@ -26,7 +20,7 @@ namespace LifeSim.Rendering
             public uint Color;
         }
         
-        private readonly SwapPopList<DebugLine> _lines = new SwapPopList<DebugLine>();
+
         private int _verticesCount = 0;
         private readonly Vertex[] _vertices = new Vertex[VERTICES_PER_BATCH];
         private readonly Shader _lineShader;
@@ -46,7 +40,7 @@ namespace LifeSim.Rendering
 
         private bool _hasCommandsToSubmit = false;
 
-        public DebugRenderer(GraphicsDevice gd, IRenderTexture renderTexture)
+        public GizmosRenderer(GraphicsDevice gd, IRenderTexture renderTexture)
         {
             this._renderTexture = renderTexture;
             this._gd = gd;
@@ -66,22 +60,11 @@ namespace LifeSim.Rendering
                 new VertexElementDescription("Color", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Byte4_Norm)
             ));
 
-            this._lineShader = new Shader(this, new ShaderSource("debugdraw.vert.glsl", "debugdraw.frag.glsl"));
+            this._lineShader = new Shader(this, new ShaderSource("lines.vert.glsl", "lines.frag.glsl"));
             this._commandList = factory.CreateCommandList();
         }
 
-        public void DrawLine(Vector3 start, Vector3 end, Color color, float lifeTime = 0, bool drawInFront = false)
-        {
-            this._lines.Add(new DebugLine {
-                Start = start,
-                End = end,
-                Color = color,
-                LifeTime = lifeTime,
-                DrawInFront = drawInFront
-            });
-        }
-
-        public void Render(ICamera camera, float deltaTime = 0)
+        public void Render(IReadOnlyList<DebugLine> lines, ICamera camera)
         {
             this._currentShader = null;
 
@@ -91,7 +74,7 @@ namespace LifeSim.Rendering
             var viewProjectionMatrix = camera.ViewProjectionMatrix;
             this._commandList.UpdateBuffer(this._viewProjectionBuffer, 0, ref viewProjectionMatrix);
 
-            this._RenderLinesVertices(deltaTime);
+            this._RenderLinesVertices(lines);
 
             this._commandList.End();
             this._hasCommandsToSubmit = true;
@@ -104,12 +87,12 @@ namespace LifeSim.Rendering
             this._hasCommandsToSubmit = false;
         }
 
-        private void _RenderLinesVertices(float deltaTime)
+        private void _RenderLinesVertices(IReadOnlyList<DebugLine> lines)
         {
             this._verticesCount = 0;
 
-            for (var i = 0; i < this._lines.Count; i++) {
-                var line = this._lines[i];
+            for (var i = 0; i < lines.Count; i++) {
+                var line = lines[i];
 
                 if (this._verticesCount + 2 >= VERTICES_PER_BATCH) {
                     this._FlushVertices(this._lineShader);
@@ -117,15 +100,6 @@ namespace LifeSim.Rendering
 
                 this._vertices[this._verticesCount++] = new Vertex { Position = line.Start, Color = line.Color.ToPackedUInt() };
                 this._vertices[this._verticesCount++] = new Vertex { Position = line.End, Color = line.Color.ToPackedUInt() };
-
-                if (line.LifeTime >= 0) {
-                    line.LifeTime -= deltaTime;
-                    this._lines[i] = line;
-                    if (line.LifeTime <= 0) {
-                        this._lines.RemoveAt(i);
-                        i--;
-                    }
-                }
             }
 
             if (this._verticesCount > 0) {

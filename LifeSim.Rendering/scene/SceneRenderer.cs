@@ -59,7 +59,7 @@ namespace LifeSim.Rendering
             this._commandList.Dispose();
         }
 
-        public void Render(IReadOnlyList<Renderable> renderables, DirectionalLight mainLight,ColorF ambientColor,ColorF clearColor,ICamera camera) 
+        public void Render(IReadOnlyList<Renderable> renderables, DirectionalLight mainLight, ColorF ambientColor, ColorF clearColor, ICamera camera)
         {
             this._commandList.Begin();
             this.Storage.UpdateBuffers(this._commandList);
@@ -70,7 +70,7 @@ namespace LifeSim.Rendering
             this._hasCommandsToSubmit = true;
         }
 
-        internal ResourceLayout[] GetShaderVariantResourceLayouts(Veldrid.ResourceLayout passResourceLayout, ShaderVariant shaderVariant)
+        internal ResourceLayout[] GetShaderVariantResourceLayouts(ResourceLayout passResourceLayout, ShaderVariant shaderVariant)
         {
             Debug.Assert(shaderVariant.MaterialResourceLayout != null);
 
