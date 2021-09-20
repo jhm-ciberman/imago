@@ -1,5 +1,6 @@
 using Veldrid;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace LifeSim.Rendering
 {
@@ -69,8 +70,10 @@ namespace LifeSim.Rendering
             this._hasCommandsToSubmit = true;
         }
 
-        internal Veldrid.ResourceLayout[] GetShaderVariantResourceLayouts(Veldrid.ResourceLayout passResourceLayout, ShaderVariant shaderVariant)
+        internal ResourceLayout[] GetShaderVariantResourceLayouts(Veldrid.ResourceLayout passResourceLayout, ShaderVariant shaderVariant)
         {
+            Debug.Assert(shaderVariant.MaterialResourceLayout != null);
+
             var resources = new List<ResourceLayout> {
                 passResourceLayout,
                 this._transformResourceLayout,

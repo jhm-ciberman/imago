@@ -7,7 +7,7 @@ using Veldrid.StartupUtilities;
 
 namespace LifeSim.Rendering
 {
-    public class Renderer : System.IDisposable
+    public class Renderer : IDisposable
     {
         // This is the only global variable! I swear!! 
         // Please don't point your finger at me with that face (?)
@@ -22,6 +22,11 @@ namespace LifeSim.Rendering
         private readonly ImguiRenderer _imguiRenderer;
         private readonly FullScreenRenderer _fullScreenRenderer;
         private readonly MousePickingRenderer _mousePicker;
+
+        private readonly DebugRenderer _debugRenderer;
+
+        public DebugRenderer DebugRenderer => this._debugRenderer;
+
         private readonly Fence _fence;
 
         public Renderer(Sdl2Window window, GraphicsBackend graphicsBackend)
@@ -45,11 +50,12 @@ namespace LifeSim.Rendering
             this.MainRenderTexture = new RenderTexture(this._gd.ResourceFactory, (uint) window.Width, (uint) window.Height);
 
             this._canvasRenderer = new CanvasRenderer(this._gd, this.MainRenderTexture);
-            this._sceneRenderer  = new SceneRenderer(this._gd, this.MainRenderTexture);
-            this._imguiRenderer  = new ImguiRenderer(this._gd, this.MainRenderTexture);
-            this._mousePicker    = new MousePickingRenderer(this._gd);
+            this._sceneRenderer = new SceneRenderer(this._gd, this.MainRenderTexture);
+            this._imguiRenderer = new ImguiRenderer(this._gd, this.MainRenderTexture);
+            this._mousePicker = new MousePickingRenderer(this._gd);
             this._fullScreenRenderer = new FullScreenRenderer(this._gd, this.MainRenderTexture, this.FullScreenRenderTexture);
-
+            this._debugRenderer = new DebugRenderer(this._gd, this.MainRenderTexture);
+            
             this._fence = this._factory.CreateFence(false);
         }
 
@@ -91,6 +97,7 @@ namespace LifeSim.Rendering
             this.WaitForGPU();
 
             this._sceneRenderer.Submit();
+            this._debugRenderer.Submit();
             this._canvasRenderer.Submit();
             this._mousePicker.Submit();
             this._imguiRenderer.Submit();

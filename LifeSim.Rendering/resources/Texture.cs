@@ -6,7 +6,7 @@ using SixLabors.ImageSharp.PixelFormats;
 
 namespace LifeSim.Rendering
 {
-    public class Texture : System.IDisposable
+    public class Texture : IDisposable
     {
         protected Veldrid.Texture _deviceTexture;
         protected Veldrid.Sampler _sampler;

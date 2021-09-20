@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Numerics;
 using Veldrid;
 
@@ -67,7 +68,7 @@ namespace LifeSim.Rendering
             this._currentShader = null;
         }
 
-        public void SubmitBatches(CommandList commandList, Veldrid.DeviceBuffer sharedIndexBuffer, IReadOnlyList<SpriteBatch> batches)
+        public void SubmitBatches(CommandList commandList, DeviceBuffer sharedIndexBuffer, IReadOnlyList<SpriteBatch> batches)
         {
             for (int i = 0; i < batches.Count; i++) {
                 var batch = batches[i];
@@ -77,7 +78,7 @@ namespace LifeSim.Rendering
                 if (this._currentShader != batch.Shader) {
                     this._currentShader = batch.Shader;
                     var pipeline = batch.Shader.GetPipeline(this._vertexFormat);
-            
+
                     commandList.SetPipeline(pipeline);
                     commandList.SetGraphicsResourceSet(0, this._passResourceSet);
                 }
@@ -98,6 +99,8 @@ namespace LifeSim.Rendering
 
         Pipeline IPass.MakePipeline(ShaderVariant shaderVariant)
         {
+            Debug.Assert(shaderVariant.MaterialResourceLayout != null);
+            
             var rasterizerState = new RasterizerStateDescription(
                 FaceCullMode.None,
                 PolygonFillMode.Solid,
@@ -106,7 +109,7 @@ namespace LifeSim.Rendering
                 scissorTestEnabled: true
             );
 
-            var resources = new Veldrid.ResourceLayout[] {
+            var resources = new ResourceLayout[] {
                 this._passResourceLayout,
                 shaderVariant.MaterialResourceLayout,
             };

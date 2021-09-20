@@ -11,9 +11,9 @@ namespace LifeSim.Rendering
 
         public ShaderSetDescription ShaderSetDescription;
 
-        public ResourceLayout MaterialResourceLayout;
+        public ResourceLayout? MaterialResourceLayout;
 
-        public ShaderVariant(Veldrid.ResourceFactory factory, VertexFormat vertexFormat, ResourceLayout materialResourceLayout, ShaderSource source)
+        public ShaderVariant(ResourceFactory factory, VertexFormat vertexFormat, ResourceLayout? materialResourceLayout, ShaderSource source)
         {
             var macros = this.GetMacroDefinitions(vertexFormat);
             var options = new GlslCompileOptions(debug: true, macros);
@@ -30,8 +30,6 @@ namespace LifeSim.Rendering
         private MacroDefinition[] GetMacroDefinitions(VertexFormat vertexFormat)
         {
             var macros = new List<MacroDefinition>();
-            //if (vertexFormat.isSkinned)
-            //    macros.Add(new MacroDefinition("USE_SKINNED_MESH"));
 
             foreach (var element in vertexFormat.Layout.Elements)
                 macros.Add(new MacroDefinition("USE_" + element.Name.ToUpperInvariant()));
@@ -52,11 +50,11 @@ namespace LifeSim.Rendering
             };
         }
 
-        private Veldrid.ShaderDescription _CompileGlslToSpirv(string sourceText, string fileName, ShaderStages stage, GlslCompileOptions options)
+        private ShaderDescription _CompileGlslToSpirv(string sourceText, string fileName, ShaderStages stage, GlslCompileOptions options)
         {
             try {
                 var result = SpirvCompilation.CompileGlslToSpirv(sourceText, fileName, stage, options);
-                return new Veldrid.ShaderDescription(stage, result.SpirvBytes, "main");
+                return new ShaderDescription(stage, result.SpirvBytes, "main");
             } catch (SpirvCompilationException e) {
                 Console.WriteLine(sourceText);
                 throw e;

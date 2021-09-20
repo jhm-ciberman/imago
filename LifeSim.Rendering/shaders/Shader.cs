@@ -9,14 +9,14 @@ namespace LifeSim.Rendering
         private static int _count = 0;
         public int Id;
         private readonly List<CachedPipeline> _pipelines = new List<CachedPipeline>();
-        private readonly ResourceLayout _materialResourceLayout;
+        private readonly ResourceLayout? _materialResourceLayout;
         private readonly List<ShaderVariant> _variants = new List<ShaderVariant>();
         private readonly ResourceFactory _factory;
         private readonly ShaderSource _source;
 
         public IPass Pass { get; private set; }
 
-        internal Shader(IPass pass, ShaderSource source, ResourceLayout materialResourceLayout)
+        internal Shader(IPass pass, ShaderSource source, ResourceLayout? materialResourceLayout = null)
         {
             this.Id = ++Shader._count;
 
@@ -68,7 +68,7 @@ namespace LifeSim.Rendering
             for (int i = 0; i < this._variants.Count; i++) {
                 this._variants[i].Dispose();
             }
-            this._materialResourceLayout.Dispose();
+            this._materialResourceLayout?.Dispose();
         }
 
         private struct CachedPipeline

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Numerics;
 using Veldrid;
 
@@ -114,6 +115,8 @@ namespace LifeSim.Rendering
 
         Pipeline IPass.MakePipeline(ShaderVariant shaderVariant)
         {
+            Debug.Assert(shaderVariant.MaterialResourceLayout != null);
+            
             var rasterizerState = new RasterizerStateDescription(
                 FaceCullMode.None,
                 PolygonFillMode.Solid,
@@ -129,7 +132,7 @@ namespace LifeSim.Rendering
                 BlendState = BlendStateDescription.SingleOverrideBlend,
                 RasterizerState = rasterizerState,
                 Outputs = this._destinationTexture.OutputDescription,
-                ResourceLayouts = new Veldrid.ResourceLayout[] {shaderVariant.MaterialResourceLayout},
+                ResourceLayouts = new ResourceLayout[] { shaderVariant.MaterialResourceLayout },
             });
         }
 
