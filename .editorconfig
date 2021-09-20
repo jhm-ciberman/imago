@@ -35,8 +35,8 @@ csharp_style_prefer_index_operator = false
 dotnet_naming_symbols.private_fields.applicable_kinds           = property, field
 dotnet_naming_symbols.private_fields.applicable_accessibilities = private, protected
 # members_and_fields
-dotnet_naming_symbols.members_and_fields.applicable_kinds           = property, field
-dotnet_naming_symbols.members_and_fields.applicable_accessibilities = *
+dotnet_naming_symbols.public_fields.applicable_kinds           = property, field
+dotnet_naming_symbols.public_fields.applicable_accessibilities = public, internal
 # static_readonly
 dotnet_naming_symbols.static_readonly.applicable_kinds           = property, field
 dotnet_naming_symbols.static_readonly.applicable_accessibilities = public
@@ -51,6 +51,7 @@ dotnet_naming_style.prefix_underscore.capitalization = camel_case
 dotnet_naming_style.prefix_underscore.required_prefix = _
 # pascal_case
 dotnet_naming_style.pascal_case.capitalization = pascal_case
+
 # uppercase
 dotnet_naming_style.uppercase.capitalization = all_upper
 dotnet_naming_style.uppercase.word_separator = _
@@ -61,9 +62,9 @@ dotnet_naming_rule.private_members_with_underscore.style    = prefix_underscore
 dotnet_naming_rule.private_members_with_underscore.severity = suggestion
 
 # public int fooBar = 5;
-dotnet_naming_rule.members_and_fields_with_lowercase.symbols  = members_and_fields
-dotnet_naming_rule.members_and_fields_with_lowercase.style    = pascal_case
-dotnet_naming_rule.members_and_fields_with_lowercase.severity = suggestion
+dotnet_naming_rule.public_fields_with_pascal_case.symbols  = public_fields
+dotnet_naming_rule.public_fields_with_pascal_case.style    = pascal_case
+dotnet_naming_rule.public_fields_with_pascal_case.severity = suggestion
 
 # public static readonly FOO_BAR = 5;
 dotnet_naming_rule.static_readonly_with_uppercase.symbols  = static_readonly
