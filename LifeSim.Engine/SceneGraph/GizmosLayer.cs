@@ -265,7 +265,7 @@ namespace LifeSim.Engine.SceneGraph
             this.DrawArrow(position, position + planeNormal, normalColor, -1f, lifeTime, drawInFront);
         }
 
-        public void DrawWireMesh(IMeshData mesh, Matrix4x4 transform, Color color, float lifeTime = 0, bool drawInFront = false)
+        public void DrawWireMesh(IMeshData mesh, ref Matrix4x4 transform, Color color, float lifeTime = 0, bool drawInFront = false)
         {
             var vertices = mesh.GetVertexPositions();
             var indices = mesh.GetIndices();

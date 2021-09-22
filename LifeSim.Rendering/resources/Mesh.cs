@@ -14,7 +14,9 @@ namespace LifeSim.Rendering
         public DeviceBuffer IndexBuffer { get; private set; }
         public BoundingBox AABB { get; private set; }
 
-        protected Mesh(VertexFormat vertexFormat, uint indexCount, Veldrid.DeviceBuffer vertexBuffer, Veldrid.DeviceBuffer indexBuffer, ref BoundingBox boundingBox)
+        public IMeshData MeshData { get; private set; }
+
+        protected Mesh(VertexFormat vertexFormat, uint indexCount, Veldrid.DeviceBuffer vertexBuffer, Veldrid.DeviceBuffer indexBuffer, ref BoundingBox boundingBox, IMeshData meshData)
         {
             this.Id = ++Mesh._count;
             this.VertexFormat = vertexFormat;
@@ -22,6 +24,7 @@ namespace LifeSim.Rendering
             this.AABB = boundingBox;
             this.IndexBuffer = indexBuffer;
             this.VertexBuffer = vertexBuffer;
+            this.MeshData = meshData;
         }
 
         public static Mesh CreateFromData(IMeshData meshData)
@@ -39,8 +42,8 @@ namespace LifeSim.Rendering
             cl.End();
             gd.SubmitCommands(cl);
             cl.Dispose();
-            
-            return new Mesh(vertexFormat, (uint) indexCount, vertexBuffer, indexBuffer, ref boundingBox);
+
+            return new Mesh(vertexFormat, (uint) indexCount, vertexBuffer, indexBuffer, ref boundingBox, meshData);
         }
 
         public virtual void Dispose()

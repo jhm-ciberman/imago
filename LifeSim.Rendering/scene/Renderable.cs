@@ -27,6 +27,8 @@ namespace LifeSim.Rendering
 
         public Mesh? Mesh { get; private set; } = null;
 
+        public bool Visible { get; set; } = true;
+
         private uint _pickingID = 0;
         public uint PickingID
         { 
@@ -97,7 +99,7 @@ namespace LifeSim.Rendering
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Cull(ref BoundingFrustum frustum)
         {
-            return (frustum.Contains(this._aabb) != ContainmentType.Disjoint);
+            return frustum.Contains(this._aabb) != ContainmentType.Disjoint;
         }
 
         public void SetTransform(ref Matrix4x4 transform)

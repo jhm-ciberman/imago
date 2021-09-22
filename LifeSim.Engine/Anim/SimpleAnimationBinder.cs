@@ -39,7 +39,8 @@ namespace LifeSim.Engine.Anim
 
         private void _AddToDictionaryRecursive(Dictionary<string, Node3D> dictionary, Node3D node)
         {
-            dictionary[node.Name] = node;
+            if (node is Node3D spatialNode)
+                dictionary[node.Name] = spatialNode;
 
             foreach (var child in node.Children) {
                 this._AddToDictionaryRecursive(dictionary, child);    

@@ -28,7 +28,7 @@ namespace LifeSim.Rendering
             this._items.Clear();
             for (int i = 0; i < renderables.Count; i++) {
                 Renderable renderable = renderables[i];
-                if (renderable.Material == null || renderable.Mesh == null) continue;
+                if (renderable.Visible == false || renderable.Material == null || renderable.Mesh == null) continue;
                 
                 if (renderable.Cull(ref frustum)) {
                     ulong key = renderable.GetSortKey(cameraPosition);
