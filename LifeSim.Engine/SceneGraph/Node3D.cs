@@ -9,6 +9,8 @@ namespace LifeSim.Engine.SceneGraph
     public class Node3D
     {
         public event Action<Node3D>? OnTransformDirty;
+        public event Action<Node3D, Node3D>? OnNodeAdded;
+        public event Action<Node3D, Node3D>? OnNodeRemoved;
 
         public string Name { get; set; } = string.Empty;
         public Node3D? Parent { get; private set; } = null;
@@ -65,9 +67,7 @@ namespace LifeSim.Engine.SceneGraph
                 this._children.Add(node);
                 node.Parent = this;
                 node.Scene = this.Scene;
-                if (this.Scene != null && node.Scene != this.Scene) {
-                    this.Scene.OnNodeAdded(node);
-                }
+                this.OnNodeAdded?.Invoke(this, node);
             }
         }
 
@@ -77,8 +77,8 @@ namespace LifeSim.Engine.SceneGraph
 
             this._children.Remove(node);
             node.Parent = null;
-            node.Scene?.OnNodeRemoved(node);
             node.Scene = null;
+            this.OnNodeRemoved?.Invoke(this, node);
         }
         
         protected void _NotifyTransformDirty()

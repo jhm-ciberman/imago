@@ -39,7 +39,7 @@ namespace LifeSim.Engine.SceneGraph
         {
             this._root.Add(node);
             this._transformDirtyList.Add(node);
-            this._AddObserversRecursively(node);
+            this._SubscribeRecursively(node);
         }
 
         public void Remove(Node3D node)
@@ -48,12 +48,14 @@ namespace LifeSim.Engine.SceneGraph
             if (node.TransformIsDirty) {
                 this._transformDirtyList.Remove(node);
             }
-            this._RemoveObserversRecursively(node);
+            this._UnsubscribeRecursively(node);
         }
 
-        private void _AddObserversRecursively(Node3D node)
+        private void _SubscribeRecursively(Node3D node)
         {
             node.OnTransformDirty += this._OnTransformDirtyEvent;
+            node.OnNodeAdded += this._OnNodeAddedEvent;
+            node.OnNodeRemoved += this._OnNodeRemovedEvent;
 
             if (node is RenderNode3D renderNode) {
                 if (renderNode.Renderable != null) {
@@ -64,13 +66,15 @@ namespace LifeSim.Engine.SceneGraph
             }
 
             for (int i = 0; i < node.Children.Count; i++) {
-                this._AddObserversRecursively(node.Children[i]);
+                this._SubscribeRecursively(node.Children[i]);
             }
         }
 
-        private void _RemoveObserversRecursively(Node3D node)
+        private void _UnsubscribeRecursively(Node3D node)
         {
             node.OnTransformDirty -= this._OnTransformDirtyEvent;
+            node.OnNodeAdded -= this._OnNodeAddedEvent;
+            node.OnNodeRemoved -= this._OnNodeRemovedEvent;
 
             if (node is RenderNode3D renderNode) {
                 if (renderNode.Renderable != null) {
@@ -81,16 +85,26 @@ namespace LifeSim.Engine.SceneGraph
             }
 
             for (int i = 0; i < node.Children.Count; i++) {
-                this._RemoveObserversRecursively(node.Children[i]);
+                this._UnsubscribeRecursively(node.Children[i]);
             }
         }
 
-        private void _OnRenderableRemovedEvent(Node3D node, Renderable renderable)
+        private void _OnNodeRemovedEvent(Node3D sender, Node3D node)
+        {
+            this._UnsubscribeRecursively(node);
+        }
+
+        private void _OnNodeAddedEvent(Node3D sender, Node3D node)
+        {
+            this._SubscribeRecursively(node);
+        }
+
+        private void _OnRenderableRemovedEvent(Node3D sender, Renderable renderable)
         {
             this.AddRenderable(renderable);
         }
 
-        private void _OnRenderableAddedEvent(Node3D node, Renderable renderable)
+        private void _OnRenderableAddedEvent(Node3D sender, Renderable renderable)
         {
             this.RemoveRenderable(renderable);
         }
@@ -116,7 +130,7 @@ namespace LifeSim.Engine.SceneGraph
         }
 
 
-        public void UpdateWorldMatrices()
+        public void Update()
         {
             if (this._transformDirtyList.Count > 0) {
                 Matrix4x4 identity = Matrix4x4.Identity;
