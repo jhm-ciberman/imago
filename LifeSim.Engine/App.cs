@@ -50,28 +50,30 @@ namespace LifeSim.Engine
         {
             Veldrid.GraphicsBackend backend = Veldrid.GraphicsBackend.Vulkan;
             if (args.Length > 0) {
-                switch (args[0].ToLower()) {
-                    case "vulkan": 
-                    case "vk":
-                        backend = Veldrid.GraphicsBackend.Vulkan; 
-                        break;
-                    case "metal": 
-                        backend = Veldrid.GraphicsBackend.Metal; 
-                        break;
-                    case "directx":
-                    case "dx11":
-                    case "dx":
-                    case "directx11": 
-                        backend = Veldrid.GraphicsBackend.Direct3D11; 
-                        break;
-                    case "gl":
-                    case "opengl": 
-                        backend = Veldrid.GraphicsBackend.OpenGL; 
-                        break;
-                    case "gles":
-                    case "opengles": 
-                        backend = Veldrid.GraphicsBackend.OpenGLES; 
-                        break;
+                foreach (var arg in args) {
+                    switch (arg.ToLower()) {
+                        case "vulkan": 
+                        case "vk":
+                            backend = Veldrid.GraphicsBackend.Vulkan; 
+                            break;
+                        case "metal": 
+                            backend = Veldrid.GraphicsBackend.Metal; 
+                            break;
+                        case "directx":
+                        case "dx11":
+                        case "dx":
+                        case "directx11": 
+                            backend = Veldrid.GraphicsBackend.Direct3D11; 
+                            break;
+                        case "gl":
+                        case "opengl": 
+                            backend = Veldrid.GraphicsBackend.OpenGL; 
+                            break;
+                        case "gles":
+                        case "opengles": 
+                            backend = Veldrid.GraphicsBackend.OpenGLES; 
+                            break;
+                    }
                 }
             }
             return backend;
