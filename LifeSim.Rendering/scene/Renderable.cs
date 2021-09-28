@@ -9,9 +9,9 @@ namespace LifeSim.Rendering
     {
         public const int MAX_NUMBER_OF_BONES = 64;
         public int RenderListIndex { get; set; }
-        private Matrix4x4 _transform;
+        private Matrix4x4 _transform = Matrix4x4.Identity;
         private Vector3 _centerPosition;
-        private BoundingBox _aabb;
+        public BoundingBox BoundingBox { get; private set; }
         private ulong _cachedSortKey;
         public int BatchingHashKey { get; private set; }
 
@@ -99,7 +99,7 @@ namespace LifeSim.Rendering
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Cull(ref BoundingFrustum frustum)
         {
-            return frustum.Contains(this._aabb) != ContainmentType.Disjoint;
+            return frustum.Contains(this.BoundingBox) != ContainmentType.Disjoint;
         }
 
         public void SetTransform(ref Matrix4x4 transform)
@@ -182,8 +182,8 @@ namespace LifeSim.Rendering
 
         private void _RecomputeBoundingBox()
         {
-            this._aabb = BoundingBox.Transform(this.Mesh!.AABB, this._transform);
-            this._centerPosition = this._aabb.GetCenter();
+            this.BoundingBox = BoundingBox.Transform(this.Mesh!.AABB, this._transform);
+            this._centerPosition = this.BoundingBox.GetCenter();
         }
 
         internal ulong GetSortKey(Vector3 cameraPosition)

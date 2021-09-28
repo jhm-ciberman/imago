@@ -47,7 +47,7 @@ namespace LifeSim.Engine.SceneGraph
         protected Matrix4x4 _worldMatrix = Matrix4x4.Identity;
         public ref Matrix4x4 WorldMatrix => ref this._worldMatrix;
 
-        protected bool _transformIsDirty = false;
+        protected bool _transformIsDirty = true;
         public bool TransformIsDirty => this._transformIsDirty;
 
         public Vector3 WorldPosition => Vector3.Transform(Vector3.Zero, this._worldMatrix);

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime;
 using LifeSim.Rendering;
+using Veldrid;
 using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
 
@@ -23,7 +25,7 @@ namespace LifeSim.Engine
             
             WindowCreateInfo windowCI = new WindowCreateInfo(100, 100, 1024, 600, Veldrid.WindowState.Normal, "Medieval Life");
             this._window = VeldridStartup.CreateWindow(ref windowCI);
-            this.Viewport = new Viewport((uint) this._window.Width, (uint) this._window.Height);
+            this.Viewport = new Rendering.Viewport((uint) this._window.Width, (uint) this._window.Height);
 
             var graphicsBackend = App.ParseGraphicsBackend(Environment.GetCommandLineArgs());
             this._renderer = new Renderer(this._window, graphicsBackend);
@@ -36,7 +38,7 @@ namespace LifeSim.Engine
             Input.SetInstance(this._input);
         }
 
-        public Viewport Viewport { get; }
+        public Rendering.Viewport Viewport { get; }
 
         public SceneStorage Storage => this._renderer.SceneStorage;
 
@@ -46,37 +48,45 @@ namespace LifeSim.Engine
             this._MainLoop();
         }
 
-        private static Veldrid.GraphicsBackend ParseGraphicsBackend(string[] args)
+        private static GraphicsBackend ParseGraphicsBackend(string[] args)
         {
-            Veldrid.GraphicsBackend backend = Veldrid.GraphicsBackend.Vulkan;
+            GraphicsBackend? backend = null;
             if (args.Length > 0) {
                 foreach (var arg in args) {
-                    switch (arg.ToLower()) {
-                        case "vulkan": 
-                        case "vk":
-                            backend = Veldrid.GraphicsBackend.Vulkan; 
-                            break;
-                        case "metal": 
-                            backend = Veldrid.GraphicsBackend.Metal; 
-                            break;
-                        case "directx":
-                        case "dx11":
-                        case "dx":
-                        case "directx11": 
-                            backend = Veldrid.GraphicsBackend.Direct3D11; 
-                            break;
-                        case "gl":
-                        case "opengl": 
-                            backend = Veldrid.GraphicsBackend.OpenGL; 
-                            break;
-                        case "gles":
-                        case "opengles": 
-                            backend = Veldrid.GraphicsBackend.OpenGLES; 
-                            break;
-                    }
+                    backend = GetBackend(arg);
+                    if (backend != null) break;
                 }
             }
-            return backend;
+
+            if (backend == null && File.Exists("./backend.txt")) {
+                var backendName = File.ReadAllText("./backend.txt");
+                backend = GetBackend(backendName);
+            }
+
+            return backend ?? VeldridStartup.GetPlatformDefaultBackend();
+        }
+
+        public static GraphicsBackend? GetBackend(string name)
+        {
+            switch (name.ToLower()) {
+                case "vulkan":
+                case "vk":
+                    return GraphicsBackend.Vulkan;
+                case "metal":
+                    return GraphicsBackend.Metal;
+                case "directx":
+                case "dx11":
+                case "dx":
+                case "directx11":
+                    return GraphicsBackend.Direct3D11;
+                case "gl":
+                case "opengl":
+                    return GraphicsBackend.OpenGL;
+                case "gles":
+                case "opengles":
+                    return GraphicsBackend.OpenGLES;
+            }
+            return null;
         }
 
         private void OnResize() 

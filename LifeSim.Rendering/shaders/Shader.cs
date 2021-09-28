@@ -36,7 +36,14 @@ namespace LifeSim.Rendering
 
         public Pipeline GetPipeline(VertexFormat vertexFormat)
         {
+            for (int i = 0; i < this._pipelines.Count; i++) {
+                if (this._pipelines[i].VertexFormat == vertexFormat) {
+                    return this._pipelines[i].Pipeline;
+                }
+            }
+
             lock (this._pipelines) {
+                // Search again, but this time with locking
                 for (int i = 0; i < this._pipelines.Count; i++) {
                     if (this._pipelines[i].VertexFormat == vertexFormat) {
                         return this._pipelines[i].Pipeline;

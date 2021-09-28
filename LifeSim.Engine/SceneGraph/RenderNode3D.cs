@@ -23,8 +23,10 @@ namespace LifeSim.Engine.SceneGraph
 
                 this._renderable = value;
 
-                if (this._renderable != null && ! this.TransformIsDirty) {
-                    this._renderable.SetTransform(ref this._worldMatrix);
+                if (this._renderable != null) {
+                    if (! this.TransformIsDirty) {
+                        this._renderable.SetTransform(ref this._worldMatrix);
+                    }
                     this.OnRenderableAdded?.Invoke(this, this._renderable);
                 }
             }

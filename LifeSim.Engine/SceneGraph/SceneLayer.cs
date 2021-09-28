@@ -80,7 +80,7 @@ namespace LifeSim.Engine.SceneGraph
                 if (renderNode.Renderable != null) {
                     this.RemoveRenderable(renderNode.Renderable);
                 }
-                renderNode.OnRenderableRemoved -= this._OnRenderableAddedEvent;
+                renderNode.OnRenderableAdded -= this._OnRenderableAddedEvent;
                 renderNode.OnRenderableRemoved -= this._OnRenderableRemovedEvent;
             }
 
@@ -101,12 +101,12 @@ namespace LifeSim.Engine.SceneGraph
 
         private void _OnRenderableRemovedEvent(Node3D sender, Renderable renderable)
         {
-            this.AddRenderable(renderable);
+            this.RemoveRenderable(renderable);
         }
 
         private void _OnRenderableAddedEvent(Node3D sender, Renderable renderable)
         {
-            this.RemoveRenderable(renderable);
+            this.AddRenderable(renderable);
         }
 
         internal void _OnTransformDirtyEvent(Node3D node)
