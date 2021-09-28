@@ -19,6 +19,8 @@ namespace LifeSim.Rendering
 
         public GizmosRenderer GizmosRenderer { get; }
 
+        public ParticlesRenderer ParticlesRenderer { get; }
+
         public SceneRenderer SceneRenderer { get; }
 
         public ImguiRenderer ImguiRenderer { get; }
@@ -57,6 +59,7 @@ namespace LifeSim.Rendering
             this.ImguiRenderer = new ImguiRenderer(this._gd, this.MainRenderTexture);
             this.MousePicker = new MousePickingRenderer(this._gd, this.MainRenderTexture);
             this.GizmosRenderer = new GizmosRenderer(this._gd, this.MainRenderTexture);
+            this.ParticlesRenderer = new ParticlesRenderer(this._gd, this.MainRenderTexture);
             this._fullScreenRenderer = new FullScreenRenderer(this._gd, this.MainRenderTexture, this.FullScreenRenderTexture);
 
             this._fence = this._factory.CreateFence(false);
@@ -66,10 +69,12 @@ namespace LifeSim.Rendering
         {
             this.ImguiRenderer.Render();
             this._fullScreenRenderer.Render();
+            
 
             this.WaitForGPU();
 
             this.SceneRenderer.Submit();
+            this.ParticlesRenderer.Submit();
             this.GizmosRenderer.Submit();
             this.CanvasRenderer.Submit();
             this.MousePicker.Submit();

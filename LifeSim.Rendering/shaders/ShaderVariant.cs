@@ -31,8 +31,11 @@ namespace LifeSim.Rendering
         {
             var macros = new List<MacroDefinition>();
 
-            foreach (var element in vertexFormat.Layout.Elements)
-                macros.Add(new MacroDefinition("USE_" + element.Name.ToUpperInvariant()));
+            foreach (var lqayot in vertexFormat.Layouts) {
+                foreach (var element in lqayot.Elements) {
+                    macros.Add(new MacroDefinition("USE_" + element.Name.ToUpperInvariant()));
+                }
+            }
 
             return macros.ToArray();
         }
@@ -40,14 +43,14 @@ namespace LifeSim.Rendering
         private VertexLayoutDescription[] GetVertexLayout(VertexFormat vertexFormat)
         {
             if (! vertexFormat.IsSurface) 
-                return new VertexLayoutDescription[] { vertexFormat.Layout };
+                return vertexFormat.Layouts;
 
-            return new VertexLayoutDescription[] {
-                new VertexLayoutDescription(stride: 16, instanceStepRate: 1,
-                    new VertexElementDescription("Offsets", VertexElementSemantic.TextureCoordinate, VertexElementFormat.UInt4)
-                ),
-                vertexFormat.Layout
-            };
+            var arr = new VertexLayoutDescription[vertexFormat.Layouts.Length + 1];
+            arr[0] = new VertexLayoutDescription(stride: 16, instanceStepRate: 1,
+                new VertexElementDescription("Offsets", VertexElementSemantic.TextureCoordinate, VertexElementFormat.UInt4)
+            );
+            Array.Copy(vertexFormat.Layouts, 0, arr, 1, vertexFormat.Layouts.Length);
+            return arr;
         }
 
         private ShaderDescription _CompileGlslToSpirv(string sourceText, string fileName, ShaderStages stage, GlslCompileOptions options)

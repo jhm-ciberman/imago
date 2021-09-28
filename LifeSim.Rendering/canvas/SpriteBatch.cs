@@ -62,7 +62,7 @@ namespace LifeSim.Rendering
             this.Shader = shader;
             this.Texture = texture;
             var factory = this._gd.ResourceFactory;
-            this.ResourceSet = shader.CreateResourceSet(this.Texture.DeviceTexture, this.Texture.Sampler);
+            this.ResourceSet = shader.CreateResourceSet(this.Texture.Resource, this.Texture.Sampler);
             this._capacity = batchCapacity;
             this.Items = new Item[batchCapacity * 4];
 
@@ -159,7 +159,7 @@ namespace LifeSim.Rendering
             this.ResourceSet.Dispose();
             this.Shader = shader;
             this.Texture = texture;
-            this.ResourceSet = shader.CreateResourceSet(this.Texture.DeviceTexture, this.Texture.Sampler);
+            this.ResourceSet = shader.CreateResourceSet(this.Texture.Resource, this.Texture.Sampler);
         }
 
         public void Clear()

@@ -46,7 +46,7 @@ namespace LifeSim.Rendering
         public uint Width => this._deviceTexture.Width;
         public uint Height => this._deviceTexture.Height;
 
-        public Veldrid.Texture DeviceTexture => this._deviceTexture;
+        public Veldrid.Texture Resource => this._deviceTexture;
         public Veldrid.Sampler Sampler => this._sampler;
 
         public void Update(uint x, uint y, uint width, uint height, byte[] data, bool generateMipmaps = true)

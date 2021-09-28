@@ -9,6 +9,7 @@ namespace LifeSim.Engine.SceneGraph
     public partial class GizmosLayer
     {
         private readonly SwapPopList<DebugLine> _lines = new SwapPopList<DebugLine>();
+        public IReadOnlyList<DebugLine> Lines => this._lines;
 
         public static GizmosLayer Default { get; private set; } = null!;
 
@@ -17,7 +18,6 @@ namespace LifeSim.Engine.SceneGraph
             Default = this;
         }
 
-        public IReadOnlyList<DebugLine> Lines => this._lines;
 
         /// <summary>
         /// Updates the gizmos layer.

@@ -40,7 +40,7 @@ namespace LifeSim.Rendering
 
         public IntPtr Texture(Texture texture)
         {
-            return this._imguiRenderer.GetOrCreateImGuiBinding(this._gd.ResourceFactory, texture.DeviceTexture);
+            return this._imguiRenderer.GetOrCreateImGuiBinding(this._gd.ResourceFactory, texture.Resource);
         }
 
         public void Render()
