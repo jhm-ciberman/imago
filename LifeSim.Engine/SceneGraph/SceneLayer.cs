@@ -20,6 +20,10 @@ namespace LifeSim.Engine.SceneGraph
 
         private readonly List<Node3D> _transformDirtyList = new List<Node3D>();
 
+        public GizmosLayer Gizmos { get; } = new GizmosLayer();
+
+        private List<ParticleSystem> _particleSystems = new List<ParticleSystem>();
+
         private readonly Node3D _root;
 
         protected class RootNode : Node3D
@@ -30,22 +34,44 @@ namespace LifeSim.Engine.SceneGraph
             }
         }
 
+        public void Render(Renderer renderer, Camera3D camera3D)
+        {
+            renderer.SceneRenderer.Render(this.Renderables, this.MainLight, this.AmbientColor, this.ClearColor, camera3D);
+            renderer.GizmosRenderer.Render(this.Gizmos.Lines, camera3D);
+
+            for (int i = 0; i < this._particleSystems.Count; i++)
+            {
+                this._particleSystems[i].Render(renderer, camera3D);
+            }
+        }
+
         public SceneLayer()
         {
             this._root = new RootNode(this);
         }
 
-        public void Add(Node3D node)
+        public void AddParticleSystem(ParticleSystem particleSystem)
+        {
+            this._particleSystems.Add(particleSystem);
+        }
+
+        public void RemoveParticleSystem(ParticleSystem particleSystem)
+        {
+            this._particleSystems.Remove(particleSystem);
+        }
+
+        public void AddNode(Node3D node)
         {
             this._root.Add(node);
             this._transformDirtyList.Add(node);
             this._SubscribeRecursively(node);
         }
 
-        public void Remove(Node3D node)
+        public void RemoveNode(Node3D node)
         {
             this._root.Remove(node);
-            if (node.TransformIsDirty) {
+            if (node.TransformIsDirty) 
+            {
                 this._transformDirtyList.Remove(node);
             }
             this._UnsubscribeRecursively(node);
@@ -57,15 +83,18 @@ namespace LifeSim.Engine.SceneGraph
             node.OnNodeAdded += this._OnNodeAddedEvent;
             node.OnNodeRemoved += this._OnNodeRemovedEvent;
 
-            if (node is RenderNode3D renderNode) {
-                if (renderNode.Renderable != null) {
+            if (node is RenderNode3D renderNode) 
+            {
+                if (renderNode.Renderable != null) 
+                {
                     this.AddRenderable(renderNode.Renderable);
                 }
                 renderNode.OnRenderableAdded += this._OnRenderableAddedEvent;
                 renderNode.OnRenderableRemoved += this._OnRenderableRemovedEvent;
             }
 
-            for (int i = 0; i < node.Children.Count; i++) {
+            for (int i = 0; i < node.Children.Count; i++) 
+            {
                 this._SubscribeRecursively(node.Children[i]);
             }
         }

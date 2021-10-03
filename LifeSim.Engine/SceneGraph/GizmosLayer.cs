@@ -6,7 +6,7 @@ using LifeSim.Rendering;
 
 namespace LifeSim.Engine.SceneGraph
 {
-    public partial class GizmosLayer
+    public class GizmosLayer
     {
         private readonly SwapPopList<DebugLine> _lines = new SwapPopList<DebugLine>();
         public IReadOnlyList<DebugLine> Lines => this._lines;
