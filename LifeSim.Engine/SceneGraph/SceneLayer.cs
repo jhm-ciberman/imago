@@ -22,7 +22,7 @@ namespace LifeSim.Engine.SceneGraph
 
         public GizmosLayer Gizmos { get; } = new GizmosLayer();
 
-        private List<ParticleSystem> _particleSystems = new List<ParticleSystem>();
+        private readonly List<ParticleSystem> _particleSystems = new List<ParticleSystem>();
 
         private readonly Node3D _root;
 
