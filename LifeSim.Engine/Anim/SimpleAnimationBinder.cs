@@ -28,14 +28,11 @@ namespace LifeSim.Engine.Anim
                         dictionary.Remove(channelName);
                     }
                 }
-                //else {
-                //    System.Console.WriteLine("Unbound channel: " + channelName);
-                //}
+                else
+                {
+                    System.Console.WriteLine("Unbound channel: " + channelName);
+                }
             }
-
-            //foreach (var nodeName in dictionary.Keys) {
-            //    System.Console.WriteLine("Unbound node: " + nodeName);
-            //}
 
             return binded;
         }

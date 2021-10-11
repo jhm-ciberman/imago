@@ -23,6 +23,8 @@ dotnet_diagnostic.IDE0040.severity = warning # access modifier required
 dotnet_diagnostic.IDE0008.severity = none # Use explicit type instead of 'var'
 dotnet_diagnostic.IDE0007.severity = none # Use 'var' instead of explicit type
 dotnet_diagnostic.IDE0055.severity = suggestion # Fix Formating
+dotnet_diagnostic.IDE0130.severity = none # "Namespace 'Foo' does not match folder structure (https://github.com/dotnet/roslyn/issues/55014)
+dotnet_diagnostic.IDE0036.severity = suggestion # "Modifiers are not ordered" (static public instead of public static)
 
 dotnet_style_require_accessibility_modifiers = always
 dotnet_style_object_initializer = false

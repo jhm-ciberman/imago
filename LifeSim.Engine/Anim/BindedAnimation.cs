@@ -30,7 +30,9 @@ namespace LifeSim.Engine.Anim
 
         private readonly IList<BindedChannel> _channels = new List<BindedChannel>();
 
-        private float _time = 0f;
+        private float _currentTime = 0f;
+
+        public float CurrentTime { get => this._currentTime; set => this._currentTime = value % this._animation.Duration; }
 
         private readonly bool _loop = true;
 
@@ -59,15 +61,15 @@ namespace LifeSim.Engine.Anim
 
         public void Update(float deltaTime)
         {
-            this._time += deltaTime;
+            this._currentTime += deltaTime;
             if (this._loop)
             {
-                this._time %= this._animation.Duration;
+                this._currentTime %= this._animation.Duration;
             }
 
             foreach (var channel in this._channels)
             {
-                channel.Update(this._time, this._loop);
+                channel.Update(this._currentTime, this._loop);
             }
         }
     }

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Numerics;
 using LifeSim.Core;
@@ -36,8 +35,15 @@ namespace LifeSim.Engine.SceneGraph
 
         public void Render(Renderer renderer, Camera3D camera3D)
         {
-            renderer.SceneRenderer.Render(this.Renderables, this.MainLight, this.AmbientColor, this.ClearColor, camera3D);
-            renderer.GizmosRenderer.Render(this.Gizmos.Lines, camera3D);
+            if (this.Renderables.Count > 0)
+            {
+                renderer.SceneRenderer.Render(this.Renderables, this.MainLight, this.AmbientColor, this.ClearColor, camera3D);
+            }
+
+            if (this.Gizmos.Lines.Count > 0)
+            {
+                renderer.GizmosRenderer.Render(this.Gizmos.Lines, camera3D);
+            }
 
             for (int i = 0; i < this._particleSystems.Count; i++)
             {

@@ -145,6 +145,8 @@ namespace LifeSim.Engine.SceneGraph
             }
         }
 
+
+
         public Matrix4x4 ViewMatrix
         {
             get
@@ -168,7 +170,7 @@ namespace LifeSim.Engine.SceneGraph
 
         public void LookAt(Vector3 destPoint)
         {
-            Matrix4x4 worldMat = Matrix4x4.CreateWorld(this.Position, destPoint - this.Position, Vector3.UnitY);
+            Matrix4x4 worldMat = Matrix4x4.CreateWorld(this.Position, this.Position - destPoint, Vector3.UnitY);
             this.Rotation = Quaternion.CreateFromRotationMatrix(worldMat);
         }
     }

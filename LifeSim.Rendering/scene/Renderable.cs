@@ -58,6 +58,7 @@ namespace LifeSim.Rendering
         {
             this.Mesh = mesh;
             this._RecomputeSortKey();
+            this._RecomputeBoundingBox();
         }
 
         public void SetMaterial(Material material)

@@ -13,6 +13,8 @@ namespace LifeSim.Engine.Anim
             this._root = root;
         }
 
+        public float CurrentTime => this._animation?.CurrentTime ?? 0;
+
         public void Play(BindedAnimation animation)
         {
             this._animation = animation;
