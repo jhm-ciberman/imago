@@ -47,8 +47,8 @@ namespace LifeSim.Rendering
                 new ResourceLayoutElementDescription("ShadowMapSampler", ResourceKind.Sampler, ShaderStages.Fragment)
             ));
 
-            this._camera3DInfoBuffer = factory.CreateBuffer(new BufferDescription((uint) Marshal.SizeOf<CameraInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
-            this._lightInfoBuffer = factory.CreateBuffer(new BufferDescription((uint) Marshal.SizeOf<LightInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+            this._camera3DInfoBuffer = factory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<CameraInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+            this._lightInfoBuffer = factory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<LightInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
             var shadowMapSampler = factory.CreateSampler(new SamplerDescription (
                 SamplerAddressMode.Border, SamplerAddressMode.Border, SamplerAddressMode.Border,
@@ -67,13 +67,14 @@ namespace LifeSim.Rendering
         }
 
         public void Render(
-            CommandList commandList, 
-            IReadOnlyList<Renderable> renderables, 
+            CommandList commandList,
+            IReadOnlyList<Renderable> renderables,
             DirectionalLight mainLight,
             ColorF ambientColor,
             ColorF clearColor,
             ICamera camera
-        ) {
+        )
+        {
             var cameraFrustum = camera.FrustumForCulling;
             this._renderQueue.AddToRenderQueue(renderables, ref cameraFrustum, camera.Position);
             this._renderQueue.Sort();
@@ -91,7 +92,7 @@ namespace LifeSim.Rendering
             lightInfo.AmbientColor = ambientColor;
             lightInfo.MainLightColor = mainLight.Color;
             lightInfo.MainLightDirection = Vector3.Normalize(mainLight.Direction);
-            
+
             commandList.UpdateBuffer(this._camera3DInfoBuffer, 0, ref cameraInfo);
             commandList.UpdateBuffer(this._lightInfoBuffer, 0, ref lightInfo);
 
@@ -116,13 +117,14 @@ namespace LifeSim.Rendering
                 scissorTestEnabled: true
             );
 
-            return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription() {
+            return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
+            {
                 DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
                 PrimitiveTopology = PrimitiveTopology.TriangleList,
                 ShaderSet = shaderVariant.ShaderSetDescription,
                 BlendState = new BlendStateDescription(
-                    RgbaFloat.Black, 
-                    BlendAttachmentDescription.OverrideBlend, 
+                    RgbaFloat.Black,
+                    BlendAttachmentDescription.OverrideBlend,
                     BlendAttachmentDescription.Disabled
                 ),
                 RasterizerState = rasterizerState,

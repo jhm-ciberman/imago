@@ -16,8 +16,8 @@ namespace LifeSim.Rendering
 
     internal class SwapchainRenderTexture : IRenderTexture
     {
-        private readonly Swapchain _swapchain; 
-        
+        private readonly Swapchain _swapchain;
+
         public SwapchainRenderTexture(Swapchain swapchain)
         {
             this._swapchain = swapchain;
@@ -67,9 +67,9 @@ namespace LifeSim.Rendering
         private Veldrid.Texture _CreateDepthTexture(uint width, uint height)
         {
             return this._factory.CreateTexture(new TextureDescription(
-                width, height, depth: 1, mipLevels: 1, arrayLayers: 1, 
-                PixelFormat.D32_Float_S8_UInt, 
-                TextureUsage.DepthStencil | TextureUsage.Sampled, 
+                width, height, depth: 1, mipLevels: 1, arrayLayers: 1,
+                PixelFormat.D32_Float_S8_UInt,
+                TextureUsage.DepthStencil | TextureUsage.Sampled,
                 TextureType.Texture2D
             ));
         }
@@ -77,9 +77,9 @@ namespace LifeSim.Rendering
         private Veldrid.Texture _CreateColorTexture(uint width, uint height)
         {
             return this._factory.CreateTexture(new TextureDescription(
-                width, height, depth: 1, mipLevels: 1, arrayLayers: 1, 
-                PixelFormat.R8_G8_B8_A8_UNorm, 
-                TextureUsage.RenderTarget | TextureUsage.Sampled, 
+                width, height, depth: 1, mipLevels: 1, arrayLayers: 1,
+                PixelFormat.R8_G8_B8_A8_UNorm,
+                TextureUsage.RenderTarget | TextureUsage.Sampled,
                 TextureType.Texture2D
             ));
         }
@@ -87,8 +87,8 @@ namespace LifeSim.Rendering
         private Veldrid.Texture _CreatePickingIDTexture(uint width, uint height)
         {
             return this._factory.CreateTexture(new TextureDescription(
-                width, height, depth: 1, mipLevels: 1, arrayLayers: 1, 
-                PixelFormat.R32_UInt, 
+                width, height, depth: 1, mipLevels: 1, arrayLayers: 1,
+                PixelFormat.R32_UInt,
                 TextureUsage.RenderTarget | TextureUsage.Sampled,
                 TextureType.Texture2D
             ));

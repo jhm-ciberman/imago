@@ -14,7 +14,7 @@ insert_final_newline = false
 [*.{cs,vb}]
 
 dotnet_sort_system_directives_first = true
-csharp_new_line_before_open_brace = methods, types
+csharp_new_line_before_open_brace = all
 csharp_space_around_declaration_statements = ignore
 csharp_prefer_braces = when_multiline
 csharp_prefer_simple_default_expression = false
@@ -22,6 +22,7 @@ csharp_prefer_simple_default_expression = false
 dotnet_diagnostic.IDE0040.severity = warning # access modifier required
 dotnet_diagnostic.IDE0008.severity = none # Use explicit type instead of 'var'
 dotnet_diagnostic.IDE0007.severity = none # Use 'var' instead of explicit type
+dotnet_diagnostic.IDE0055.severity = suggestion # Fix Formating
 
 dotnet_style_require_accessibility_modifiers = always
 dotnet_style_object_initializer = false

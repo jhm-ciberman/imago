@@ -31,7 +31,8 @@ namespace LifeSim.Engine.GLTF
         private void _AddToDictionaryRecursive(GLTFNode node)
         {
             this._nodesByName[node.Name] = node;
-            foreach (GLTFNode? child in node.Children) {
+            foreach (GLTFNode? child in node.Children)
+            {
                 this._AddToDictionaryRecursive(child);
             }
         }

@@ -14,16 +14,21 @@ namespace LifeSim.Engine.GLTF
         public static BasicMeshData CreateMesh(ushort[] indices, Vector3[] positions, Vector3[]? normals, Vector2[]? uvs)
         {
             BasicVertex[] vertices = ArrayPool<BasicVertex>.Shared.Rent(positions.Length);
-            for(var i = 0; i < positions.Length; i++) {
+            for (var i = 0; i < positions.Length; i++)
+            {
                 vertices[i].Position = positions[i];
             }
-            if (normals != null) {
-                for(var i = 0; i < normals.Length; i++) {
+            if (normals != null)
+            {
+                for (var i = 0; i < normals.Length; i++)
+                {
                     vertices[i].Normal = normals[i];
                 }
             }
-            if (uvs != null) {
-                for(var i = 0; i < uvs.Length; i++) {
+            if (uvs != null)
+            {
+                for (var i = 0; i < uvs.Length; i++)
+                {
                     vertices[i].Uv = uvs[i];
                 }
             }
@@ -35,7 +40,8 @@ namespace LifeSim.Engine.GLTF
 
         public void Translate(Vector3 translation)
         {
-            for (var i = 0; i < this.Vertices.Length; i++) {
+            for (var i = 0; i < this.Vertices.Length; i++)
+            {
                 this.Vertices[i].Position += translation;
             }
         }
@@ -50,7 +56,8 @@ namespace LifeSim.Engine.GLTF
 
         public void RecomputeNormals()
         {
-            for (var i = 0; i < this.Indices.Length; i += 3) {
+            for (var i = 0; i < this.Indices.Length; i += 3)
+            {
                 ushort index1 = this.Indices[i + 0];
                 ushort index2 = this.Indices[i + 1];
                 ushort index3 = this.Indices[i + 2];
@@ -67,10 +74,11 @@ namespace LifeSim.Engine.GLTF
             }
         }
 
-        
+
         public void FlipNormals()
         {
-            for (int i = 0; i < this.Vertices.Length; i++) {
+            for (int i = 0; i < this.Vertices.Length; i++)
+            {
                 this.Vertices[i].Normal = -this.Vertices[i].Normal;
             }
         }
@@ -85,25 +93,29 @@ namespace LifeSim.Engine.GLTF
         {
             BasicVertex[] vertices = new BasicVertex[mesh.Vertices.Length + this.Vertices.Length];
             ushort[] indices = new ushort[mesh.Indices.Length + this.Indices.Length];
-            
-            for (int i = 0; i < this.Vertices.Length; i++) {
+
+            for (int i = 0; i < this.Vertices.Length; i++)
+            {
                 vertices[i] = this.Vertices[i];
             }
 
-            for (int i = 0; i < mesh.Vertices.Length; i++) {
+            for (int i = 0; i < mesh.Vertices.Length; i++)
+            {
                 int j = i + this.Vertices.Length;
                 vertices[j] = mesh.Vertices[i];
             }
 
-            for (int i = 0; i < this.Indices.Length; i++) {
+            for (int i = 0; i < this.Indices.Length; i++)
+            {
                 indices[i] = this.Indices[i];
             }
 
-            for (int i = 0; i < mesh.Indices.Length; i++) {
+            for (int i = 0; i < mesh.Indices.Length; i++)
+            {
                 int j = i + this.Indices.Length;
-                indices[j] = (ushort) ((int)mesh.Indices[i] + this.Vertices.Length);
+                indices[j] = (ushort)((int)mesh.Indices[i] + this.Vertices.Length);
             }
-            
+
             return new BasicMeshData(indices, vertices);
         }
 

@@ -36,7 +36,7 @@ namespace LifeSim.Rendering
                 this.ShadowmapTexture, System.Array.Empty<Veldrid.Texture>()
             ));
 
-            this._shadowmapInfoBuffer = factory.CreateBuffer(new BufferDescription((uint) Marshal.SizeOf<Matrix4x4>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+            this._shadowmapInfoBuffer = factory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<Matrix4x4>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
 
             this._resourceSet = factory.CreateResourceSet(new ResourceSetDescription(this._resourceLayout, this._shadowmapInfoBuffer));
@@ -44,7 +44,7 @@ namespace LifeSim.Rendering
             this._renderQueue = new RenderQueue();
             this._renderJob = new RenderJob(this._gd, this._resourceSet, true);
         }
-        
+
         public void Render(CommandList commandList, IReadOnlyList<Renderable> renderables, ICamera camera, DirectionalLight mainLight)
         {
             var matrix = mainLight.GetShadowMapMatrix(camera.Position);
@@ -78,7 +78,8 @@ namespace LifeSim.Rendering
                 scissorTestEnabled: true
             );
 
-            return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription() {
+            return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
+            {
                 DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
                 PrimitiveTopology = PrimitiveTopology.TriangleList,
                 ShaderSet = shaderVariant.ShaderSetDescription,

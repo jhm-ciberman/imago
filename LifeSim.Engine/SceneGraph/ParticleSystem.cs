@@ -4,7 +4,7 @@ using System.Numerics;
 using LifeSim.Core;
 using LifeSim.Rendering;
 
-namespace LifeSim.Engine.SceneGraph 
+namespace LifeSim.Engine.SceneGraph
 {
     public abstract class ParticleSystem
     {
@@ -25,7 +25,7 @@ namespace LifeSim.Engine.SceneGraph
         public void Render(Renderer renderer, ICamera camera)
         {
             this._SortParticles(camera.Position);
-            renderer.ParticlesRenderer.Render(this._particles , this.Texture, camera);
+            renderer.ParticlesRenderer.Render(this._particles, this.Texture, camera);
         }
 
         private void _SortParticles(Vector3 cameraPosition)

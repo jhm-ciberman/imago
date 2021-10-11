@@ -30,18 +30,20 @@ namespace LifeSim.Rendering
             this._textures = new Dictionary<string, int>();
             this.ResourceCount = textures.Length * 2;
             var elements = new ResourceLayoutElementDescription[this.ResourceCount];
-            for (int i = 0, j = 0; i < textures.Length; i++) {
+            for (int i = 0, j = 0; i < textures.Length; i++)
+            {
                 var name = textures[i];
                 this._textures.Add(name, i);
-                elements[j++] = new ResourceLayoutElementDescription(name + "Texture", ResourceKind.TextureReadOnly, ShaderStages.Fragment); 
-                elements[j++] = new ResourceLayoutElementDescription(name + "Sampler", ResourceKind.Sampler, ShaderStages.Fragment); 
+                elements[j++] = new ResourceLayoutElementDescription(name + "Texture", ResourceKind.TextureReadOnly, ShaderStages.Fragment);
+                elements[j++] = new ResourceLayoutElementDescription(name + "Sampler", ResourceKind.Sampler, ShaderStages.Fragment);
             }
 
             this._resourceLayout = Renderer.GraphicsDevice.ResourceFactory.CreateResourceLayout(new ResourceLayoutDescription(elements));
 
             this.InstanceDataBlockSize = uniforms.Length * 16;
             this._instanceDefaultData = new Memory<byte>(new byte[this.InstanceDataBlockSize]);
-            for (int i = 0; i < uniforms.Length; i++) {
+            for (int i = 0; i < uniforms.Length; i++)
+            {
                 this._instanceUniformData.Add(uniforms[i].Name, i * 16);
                 var dest = this._instanceDefaultData.Span.Slice(i * 16, 16);
                 uniforms[i].CopyTo(dest);
@@ -62,8 +64,10 @@ namespace LifeSim.Rendering
 
         public Shader GetShader(IPass pass)
         {
-            for (int i = 0; i < this._shaders.Count; i++) {
-                if (this._shaders[i].Pass == pass) {
+            for (int i = 0; i < this._shaders.Count; i++)
+            {
+                if (this._shaders[i].Pass == pass)
+                {
                     return this._shaders[i];
                 }
             }

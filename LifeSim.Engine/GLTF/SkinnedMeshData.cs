@@ -15,18 +15,23 @@ namespace LifeSim.Engine.GLTF
         public static SkinnedMeshData CreateMesh(ushort[] indices, Vector3[] positions, Vector3[]? normals, Vector2[]? uvs, Vector4UShort[] joints, Vector4[] weights)
         {
             SkinnedVertex[] vertices = ArrayPool<SkinnedVertex>.Shared.Rent(positions.Length);
-            for(var i = 0; i < positions.Length; i++) {
+            for (var i = 0; i < positions.Length; i++)
+            {
                 vertices[i].Position = positions[i];
                 vertices[i].Joints = joints[i];
                 vertices[i].Weights = weights[i];
             }
-            if (normals != null) {
-                for(var i = 0; i < normals.Length; i++) {
+            if (normals != null)
+            {
+                for (var i = 0; i < normals.Length; i++)
+                {
                     vertices[i].Normal = normals[i];
                 }
             }
-            if (uvs != null) {
-                for(var i = 0; i < uvs.Length; i++) {
+            if (uvs != null)
+            {
+                for (var i = 0; i < uvs.Length; i++)
+                {
                     vertices[i].Uv = uvs[i];
                 }
             }

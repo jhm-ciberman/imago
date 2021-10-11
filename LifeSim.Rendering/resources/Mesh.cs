@@ -20,7 +20,7 @@ namespace LifeSim.Rendering
         {
             this.Id = ++Mesh._count;
             this.VertexFormat = vertexFormat;
-            this.IndexCount  = indexCount;
+            this.IndexCount = indexCount;
             this.AABB = boundingBox;
             this.IndexBuffer = indexBuffer;
             this.VertexBuffer = vertexBuffer;
@@ -43,7 +43,7 @@ namespace LifeSim.Rendering
             gd.SubmitCommands(cl);
             cl.Dispose();
 
-            return new Mesh(vertexFormat, (uint) indexCount, vertexBuffer, indexBuffer, ref boundingBox, meshData);
+            return new Mesh(vertexFormat, (uint)indexCount, vertexBuffer, indexBuffer, ref boundingBox, meshData);
         }
 
         public virtual void Dispose()

@@ -31,8 +31,10 @@ namespace LifeSim.Rendering
         {
             var macros = new List<MacroDefinition>();
 
-            foreach (var lqayot in vertexFormat.Layouts) {
-                foreach (var element in lqayot.Elements) {
+            foreach (var lqayot in vertexFormat.Layouts)
+            {
+                foreach (var element in lqayot.Elements)
+                {
                     macros.Add(new MacroDefinition("USE_" + element.Name.ToUpperInvariant()));
                 }
             }
@@ -42,7 +44,7 @@ namespace LifeSim.Rendering
 
         private VertexLayoutDescription[] GetVertexLayout(VertexFormat vertexFormat)
         {
-            if (! vertexFormat.IsSurface) 
+            if (!vertexFormat.IsSurface)
                 return vertexFormat.Layouts;
 
             var arr = new VertexLayoutDescription[vertexFormat.Layouts.Length + 1];
@@ -55,10 +57,13 @@ namespace LifeSim.Rendering
 
         private ShaderDescription _CompileGlslToSpirv(string sourceText, string fileName, ShaderStages stage, GlslCompileOptions options)
         {
-            try {
+            try
+            {
                 var result = SpirvCompilation.CompileGlslToSpirv(sourceText, fileName, stage, options);
                 return new ShaderDescription(stage, result.SpirvBytes, "main");
-            } catch (SpirvCompilationException e) {
+            }
+            catch (SpirvCompilationException e)
+            {
                 Console.WriteLine(sourceText);
                 throw e;
             }
@@ -67,7 +72,8 @@ namespace LifeSim.Rendering
         public void Dispose()
         {
             var nativeShaders = this.ShaderSetDescription.Shaders;
-            for (int i = 0; i < nativeShaders.Length; i++) {
+            for (int i = 0; i < nativeShaders.Length; i++)
+            {
                 nativeShaders[i].Dispose();
             }
         }

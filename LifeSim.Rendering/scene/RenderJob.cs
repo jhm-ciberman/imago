@@ -23,7 +23,7 @@ namespace LifeSim.Rendering
         public void DrawRenderList(CommandList commandList, IReadOnlyList<Renderable> renderItems)
         {
             this._batcher.PrepareBatches(renderItems);
-            
+
             DeviceBuffer offsetsVertexBuffer = this._batcher.GetVertexOffsetBuffer(commandList);
 
             Pipeline? currentPipeline = null;
@@ -40,10 +40,12 @@ namespace LifeSim.Rendering
             commandList.SetVertexBuffer(0, offsetsVertexBuffer, 0);
 
 
-            for (int batchIndex = 0; batchIndex < batches.Count; batchIndex++) {
+            for (int batchIndex = 0; batchIndex < batches.Count; batchIndex++)
+            {
                 RenderBatch batch = batches[batchIndex];
 
-                if (currentPipeline != batch.Pipeline) {
+                if (currentPipeline != batch.Pipeline)
+                {
                     commandList.SetPipeline(batch.Pipeline);
                     commandList.SetGraphicsResourceSet(BINDING_PASS, this._passResourceSet);
                     currentPipeline = batch.Pipeline;
@@ -52,24 +54,29 @@ namespace LifeSim.Rendering
                     currentInstanceRS = null;
                     currentSkeletonRS = null;
                 }
-                if (currentTransformRS != batch.TransformResourceSet) {
+                if (currentTransformRS != batch.TransformResourceSet)
+                {
                     currentTransformRS = batch.TransformResourceSet;
                     commandList.SetGraphicsResourceSet(BINDING_TRANSFORM, batch.TransformResourceSet);
                 }
-                if (currentMaterialRS != batch.MaterialResourceSet) {
+                if (currentMaterialRS != batch.MaterialResourceSet)
+                {
                     currentMaterialRS = batch.MaterialResourceSet;
                     commandList.SetGraphicsResourceSet(BINDING_MATERIAL, batch.MaterialResourceSet);
                 }
-                if (currentInstanceRS != batch.InstanceResourceSet) {
+                if (currentInstanceRS != batch.InstanceResourceSet)
+                {
                     currentInstanceRS = batch.InstanceResourceSet;
                     commandList.SetGraphicsResourceSet(BINDING_INSTANCE, batch.InstanceResourceSet);
                 }
-                if (batch.SkeletonResourceSet != null && currentSkeletonRS != batch.SkeletonResourceSet) {
+                if (batch.SkeletonResourceSet != null && currentSkeletonRS != batch.SkeletonResourceSet)
+                {
                     currentSkeletonRS = batch.SkeletonResourceSet;
                     commandList.SetGraphicsResourceSet(BINDING_SKELETON, batch.SkeletonResourceSet);
                 }
 
-                if (currentMesh != batch.Mesh) {
+                if (currentMesh != batch.Mesh)
+                {
                     commandList.SetVertexBuffer(1, batch.Mesh.VertexBuffer, 0);
                     commandList.SetIndexBuffer(batch.Mesh.IndexBuffer, Veldrid.IndexFormat.UInt16);
                     currentMesh = batch.Mesh;

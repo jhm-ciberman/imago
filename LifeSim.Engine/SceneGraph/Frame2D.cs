@@ -10,9 +10,9 @@ namespace LifeSim.Engine.SceneGraph
         public Vector2 Size { get; set; }
 
         private Vector2 _pivot = Vector2.Zero;
-        public Vector2 Pivot 
-        { 
-            get => this._pivot; 
+        public Vector2 Pivot
+        {
+            get => this._pivot;
             set { this._pivot = value; this._OnTransformDirty(); }
         }
 
@@ -27,7 +27,8 @@ namespace LifeSim.Engine.SceneGraph
 
         public override void Render(SpriteBatcher spriteBatcher)
         {
-            if (this.Texture != null) {
+            if (this.Texture != null)
+            {
                 spriteBatcher.Draw(this.Texture, -this.Pivot, this.Size, Vector2.Zero, Vector2.One, in this.WorldMatrix, Color.White, 0f);
             }
         }

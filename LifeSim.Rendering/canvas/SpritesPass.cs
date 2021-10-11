@@ -54,7 +54,8 @@ namespace LifeSim.Rendering
             this._passResourceLayout.Dispose();
             this._passResourceSet.Dispose();
 
-            foreach (var set in this._resourceSets.Values) {
+            foreach (var set in this._resourceSets.Values)
+            {
                 set.Dispose();
             }
         }
@@ -70,12 +71,14 @@ namespace LifeSim.Rendering
 
         public void SubmitBatches(CommandList commandList, DeviceBuffer sharedIndexBuffer, IReadOnlyList<SpriteBatch> batches)
         {
-            for (int i = 0; i < batches.Count; i++) {
+            for (int i = 0; i < batches.Count; i++)
+            {
                 var batch = batches[i];
 
                 commandList.UpdateBuffer(batch.VertexBuffer, 0, batch.Items);
 
-                if (this._currentShader != batch.Shader) {
+                if (this._currentShader != batch.Shader)
+                {
                     this._currentShader = batch.Shader;
                     var pipeline = batch.Shader.GetPipeline(this._vertexFormat);
 
@@ -88,7 +91,7 @@ namespace LifeSim.Rendering
 
                 commandList.SetGraphicsResourceSet(1, batch.ResourceSet);
                 commandList.DrawIndexed(
-                    indexCount: (uint) batch.Count * 6,
+                    indexCount: (uint)batch.Count * 6,
                     instanceCount: 1,
                     indexStart: 0,
                     vertexOffset: 0,
@@ -100,7 +103,7 @@ namespace LifeSim.Rendering
         Pipeline IPass.MakePipeline(ShaderVariant shaderVariant)
         {
             Debug.Assert(shaderVariant.MaterialResourceLayout != null);
-            
+
             var rasterizerState = new RasterizerStateDescription(
                 FaceCullMode.None,
                 PolygonFillMode.Solid,
@@ -114,7 +117,8 @@ namespace LifeSim.Rendering
                 shaderVariant.MaterialResourceLayout,
             };
 
-            return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription() {
+            return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
+            {
                 DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
                 PrimitiveTopology = PrimitiveTopology.TriangleList,
                 ShaderSet = shaderVariant.ShaderSetDescription,

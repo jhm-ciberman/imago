@@ -12,7 +12,7 @@ namespace LifeSim.Engine.Anim
             private readonly IReadOnlyList<Animation.IChannel> _channel;
             private int _lastTimeIndex;
 
-            public BindedChannel(Node3D target, IReadOnlyList<Animation.IChannel> channels) 
+            public BindedChannel(Node3D target, IReadOnlyList<Animation.IChannel> channels)
             {
                 this.Target = target;
                 this._channel = channels;
@@ -21,7 +21,8 @@ namespace LifeSim.Engine.Anim
 
             public void Update(float time, bool loop)
             {
-                for (int i = 0; i < this._channel.Count; i++) {
+                for (int i = 0; i < this._channel.Count; i++)
+                {
                     this._channel[i].UpdateTarget(this.Target, time, loop, ref this._lastTimeIndex);
                 }
             }
@@ -44,7 +45,8 @@ namespace LifeSim.Engine.Anim
         {
             get
             {
-                foreach (var channel in this._channels) {
+                foreach (var channel in this._channels)
+                {
                     yield return channel.Target;
                 }
             }
@@ -58,11 +60,13 @@ namespace LifeSim.Engine.Anim
         public void Update(float deltaTime)
         {
             this._time += deltaTime;
-            if (this._loop) {
+            if (this._loop)
+            {
                 this._time %= this._animation.Duration;
             }
 
-            foreach (var channel in this._channels) {
+            foreach (var channel in this._channels)
+            {
                 channel.Update(this._time, this._loop);
             }
         }

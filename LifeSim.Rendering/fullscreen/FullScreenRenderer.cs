@@ -8,7 +8,7 @@ namespace LifeSim.Rendering
     public class FullScreenRenderer : IDisposable, IPass
     {
         private ResourceSet? _resourceSet;
-        
+
         private IRenderTexture _sourceTexture;
 
         private readonly IRenderTexture _destinationTexture;
@@ -83,7 +83,8 @@ namespace LifeSim.Rendering
         {
             this._commandList.Begin();
 
-            if (this._resourceSetDirty || this._resourceSet == null) {
+            if (this._resourceSetDirty || this._resourceSet == null)
+            {
                 this._resourceSetDirty = false;
                 this._resourceSet?.Dispose();
                 this._resourceSet = this.Shader.CreateResourceSet(this._sourceTexture.ColorTexture, this._gd.LinearSampler);
@@ -101,7 +102,7 @@ namespace LifeSim.Rendering
         public void SetSourceTexture(IRenderTexture sourceRenderTexture)
         {
             if (this._sourceTexture == sourceRenderTexture) return;
-            
+
             this._sourceTexture.onResized -= this._OnSourceTextureResized;
             this._sourceTexture = sourceRenderTexture;
             this._sourceTexture.onResized += this._OnSourceTextureResized;
@@ -116,7 +117,7 @@ namespace LifeSim.Rendering
         Pipeline IPass.MakePipeline(ShaderVariant shaderVariant)
         {
             Debug.Assert(shaderVariant.MaterialResourceLayout != null);
-            
+
             var rasterizerState = new RasterizerStateDescription(
                 FaceCullMode.None,
                 PolygonFillMode.Solid,
@@ -125,7 +126,8 @@ namespace LifeSim.Rendering
                 scissorTestEnabled: true
             );
 
-            return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription() {
+            return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
+            {
                 DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
                 PrimitiveTopology = PrimitiveTopology.TriangleList,
                 ShaderSet = shaderVariant.ShaderSetDescription,

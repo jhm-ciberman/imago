@@ -19,7 +19,7 @@ namespace LifeSim.Rendering
             public Vector3 Position;
             public uint Color;
         }
-        
+
 
         private int _verticesCount = 0;
         private readonly Vertex[] _vertices = new Vertex[VERTICES_PER_BATCH];
@@ -46,7 +46,7 @@ namespace LifeSim.Rendering
             this._gd = gd;
             var factory = gd.ResourceFactory;
 
-            this._vertexBuffer = factory.CreateBuffer(new BufferDescription((uint) (VERTICES_PER_BATCH * Marshal.SizeOf<Vertex>()), BufferUsage.VertexBuffer | BufferUsage.Dynamic));
+            this._vertexBuffer = factory.CreateBuffer(new BufferDescription((uint)(VERTICES_PER_BATCH * Marshal.SizeOf<Vertex>()), BufferUsage.VertexBuffer | BufferUsage.Dynamic));
             this._viewProjectionBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
             this._passResourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
@@ -82,7 +82,7 @@ namespace LifeSim.Rendering
 
         public void Submit()
         {
-            if (! this._hasCommandsToSubmit) return;
+            if (!this._hasCommandsToSubmit) return;
             this._gd.SubmitCommands(this._commandList);
             this._hasCommandsToSubmit = false;
         }
@@ -91,10 +91,12 @@ namespace LifeSim.Rendering
         {
             this._verticesCount = 0;
 
-            for (var i = 0; i < lines.Count; i++) {
+            for (var i = 0; i < lines.Count; i++)
+            {
                 var line = lines[i];
 
-                if (this._verticesCount + 2 >= VERTICES_PER_BATCH) {
+                if (this._verticesCount + 2 >= VERTICES_PER_BATCH)
+                {
                     this._FlushVertices(this._lineShader);
                 }
 
@@ -102,7 +104,8 @@ namespace LifeSim.Rendering
                 this._vertices[this._verticesCount++] = new Vertex { Position = line.End, Color = line.Color.ToPackedUInt() };
             }
 
-            if (this._verticesCount > 0) {
+            if (this._verticesCount > 0)
+            {
                 this._FlushVertices(this._lineShader);
             }
         }
@@ -111,7 +114,8 @@ namespace LifeSim.Rendering
         {
             this._commandList.UpdateBuffer(this._vertexBuffer, 0, this._vertices);
 
-            if (this._currentShader != shader) {
+            if (this._currentShader != shader)
+            {
                 this._currentShader = shader;
                 var pipeline = shader.GetPipeline(this._vertexFormat);
                 this._commandList.SetPipeline(pipeline);
@@ -119,7 +123,7 @@ namespace LifeSim.Rendering
 
             this._commandList.SetVertexBuffer(0, this._vertexBuffer);
             this._commandList.SetGraphicsResourceSet(0, this._passResourceSet);
-            this._commandList.Draw((uint) this._verticesCount);
+            this._commandList.Draw((uint)this._verticesCount);
             this._verticesCount = 0;
         }
 
@@ -133,7 +137,8 @@ namespace LifeSim.Rendering
                 scissorTestEnabled: true
             );
 
-            return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription() {
+            return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
+            {
                 DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
                 PrimitiveTopology = PrimitiveTopology.LineList,
                 ShaderSet = shaderVariant.ShaderSetDescription,

@@ -27,7 +27,7 @@ namespace LifeSim.Rendering
             this.VertFilename = vertFilename;
             this.FragFilename = fragFilename;
             this.VertCode = this._Load(vertFilename);
-            this.FragCode = this._Load(fragFilename);;
+            this.FragCode = this._Load(fragFilename); ;
         }
 
         private static readonly Regex _includeRegex = new Regex("^#include\\s+\"([^\"]+)\"");
@@ -43,16 +43,20 @@ namespace LifeSim.Rendering
             // Substitute include files
             using StreamReader reader = new StreamReader(path);
             var sb = new StringBuilder();
-            while (! reader.EndOfStream) {
+            while (!reader.EndOfStream)
+            {
                 var line = reader.ReadLine();
                 if (line == null) break;
                 var match = ShaderSource._includeRegex.Match(line);
-                if (match.Success) {
+                if (match.Success)
+                {
                     var filename = match.Groups[1].Value;
                     var fullFilePath = this._ResolvePath(filename);
                     var includedContent = this._GetGlsl(fullFilePath);
                     sb.AppendLine(includedContent);
-                } else {
+                }
+                else
+                {
                     sb.AppendLine(line);
                 }
             }
@@ -63,7 +67,8 @@ namespace LifeSim.Rendering
         private string _ResolvePath(string filename)
         {
             var fullFilePath = Path.Combine(this._shadersBasePath, filename);
-            if (! File.Exists(fullFilePath)) {
+            if (!File.Exists(fullFilePath))
+            {
                 throw new Exception($"The shader file \"{fullFilePath}\" was not found");
             }
             return fullFilePath;

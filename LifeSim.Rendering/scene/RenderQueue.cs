@@ -26,11 +26,13 @@ namespace LifeSim.Rendering
         {
             this._indices.Clear();
             this._items.Clear();
-            for (int i = 0; i < renderables.Count; i++) {
+            for (int i = 0; i < renderables.Count; i++)
+            {
                 Renderable renderable = renderables[i];
                 if (renderable.Visible == false || renderable.Material == null || renderable.Mesh == null) continue;
-                
-                if (renderable.Cull(ref frustum)) {
+
+                if (renderable.Cull(ref frustum))
+                {
                     ulong key = renderable.GetSortKey(cameraPosition);
                     renderable.Update(); // TODO: Remove this from here!
                     this._indices.Add(new RenderIndex(key, this._items.Count));
@@ -73,10 +75,13 @@ namespace LifeSim.Rendering
 
             public bool MoveNext()
             {
-                if (this._nextItemIndex >= this._indices.Count) {
+                if (this._nextItemIndex >= this._indices.Count)
+                {
                     this._current = default(Renderable);
                     return false;
-                } else {
+                }
+                else
+                {
                     var currentIndex = this._indices[this._nextItemIndex].Index;
                     this._current = this._items[currentIndex];
                     this._nextItemIndex += 1;

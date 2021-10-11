@@ -7,10 +7,10 @@ namespace LifeSim.Engine.SceneGraph
     public class NinePatchFrame2D : Frame2D, ICanvasItem
     {
         public bool DrawCenter { get; set; } = true;
-        public int PatchMarginTop { get; set; } 
-        public int PatchMarginBottom { get; set; } 
-        public int PatchMarginLeft { get; set; } 
-        public int PatchMarginRight { get; set; } 
+        public int PatchMarginTop { get; set; }
+        public int PatchMarginBottom { get; set; }
+        public int PatchMarginLeft { get; set; }
+        public int PatchMarginRight { get; set; }
 
         public Color Color { get; set; } = Color.White;
 
@@ -42,8 +42,10 @@ namespace LifeSim.Engine.SceneGraph
 
             // Scale if the size is smaller (after calculating UVs)
             var minimumRequiredSize = (sizeTL + sizeBR) * scale;
-            if (minimumRequiredSize.X > 0 && minimumRequiredSize.Y > 0) {
-                if (this.Size.X < minimumRequiredSize.X || this.Size.Y < minimumRequiredSize.Y) {
+            if (minimumRequiredSize.X > 0 && minimumRequiredSize.Y > 0)
+            {
+                if (this.Size.X < minimumRequiredSize.X || this.Size.Y < minimumRequiredSize.Y)
+                {
                     scale *= MathF.Min(this.Size.X, this.Size.Y) / MathF.Min(minimumRequiredSize.X, minimumRequiredSize.Y);
                 }
             }
@@ -55,11 +57,13 @@ namespace LifeSim.Engine.SceneGraph
             var sizeSegmentCenter = this.Size - sizeTL - sizeBR;
 
             ref Matrix3x2 worldMatrix = ref this.WorldMatrix;
-            float depth = 0f; 
+            float depth = 0f;
 
-            if (this.DrawCenter) {
+            if (this.DrawCenter)
+            {
 
-                if (sizeSegmentCenter.X > 0 && sizeSegmentCenter.Y > 0) {
+                if (sizeSegmentCenter.X > 0 && sizeSegmentCenter.Y > 0)
+                {
                     spriteBatcher.Draw(this.Texture, -this.Pivot + sizeTL, sizeSegmentCenter, uvTL, uvBR, in worldMatrix, this.Color, depth);
                 }
             }

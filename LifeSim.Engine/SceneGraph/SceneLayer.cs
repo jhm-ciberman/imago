@@ -9,7 +9,7 @@ namespace LifeSim.Engine.SceneGraph
     public class SceneLayer
     {
         public DirectionalLight MainLight { get; set; } = new DirectionalLight();
-        
+
         public ColorF AmbientColor { get; set; } = new ColorF(.2f, .2f, .2f);
 
         public ColorF ClearColor { get; set; } = new ColorF(0.84f, 0.84f, 0.86f, 1.0f);
@@ -70,7 +70,7 @@ namespace LifeSim.Engine.SceneGraph
         public void RemoveNode(Node3D node)
         {
             this._root.Remove(node);
-            if (node.TransformIsDirty) 
+            if (node.TransformIsDirty)
             {
                 this._transformDirtyList.Remove(node);
             }
@@ -83,9 +83,9 @@ namespace LifeSim.Engine.SceneGraph
             node.OnNodeAdded += this._OnNodeAddedEvent;
             node.OnNodeRemoved += this._OnNodeRemovedEvent;
 
-            if (node is RenderNode3D renderNode) 
+            if (node is RenderNode3D renderNode)
             {
-                if (renderNode.Renderable != null) 
+                if (renderNode.Renderable != null)
                 {
                     this.AddRenderable(renderNode.Renderable);
                 }
@@ -93,7 +93,7 @@ namespace LifeSim.Engine.SceneGraph
                 renderNode.OnRenderableRemoved += this._OnRenderableRemovedEvent;
             }
 
-            for (int i = 0; i < node.Children.Count; i++) 
+            for (int i = 0; i < node.Children.Count; i++)
             {
                 this._SubscribeRecursively(node.Children[i]);
             }
@@ -105,15 +105,18 @@ namespace LifeSim.Engine.SceneGraph
             node.OnNodeAdded -= this._OnNodeAddedEvent;
             node.OnNodeRemoved -= this._OnNodeRemovedEvent;
 
-            if (node is RenderNode3D renderNode) {
-                if (renderNode.Renderable != null) {
+            if (node is RenderNode3D renderNode)
+            {
+                if (renderNode.Renderable != null)
+                {
                     this.RemoveRenderable(renderNode.Renderable);
                 }
                 renderNode.OnRenderableAdded -= this._OnRenderableAddedEvent;
                 renderNode.OnRenderableRemoved -= this._OnRenderableRemovedEvent;
             }
 
-            for (int i = 0; i < node.Children.Count; i++) {
+            for (int i = 0; i < node.Children.Count; i++)
+            {
                 this._UnsubscribeRecursively(node.Children[i]);
             }
         }
@@ -140,7 +143,8 @@ namespace LifeSim.Engine.SceneGraph
 
         internal void _OnTransformDirtyEvent(Node3D node)
         {
-            if (node.Scene == this) {
+            if (node.Scene == this)
+            {
                 this._transformDirtyList.Add(node);
             }
         }
@@ -161,12 +165,14 @@ namespace LifeSim.Engine.SceneGraph
 
         public void Update()
         {
-            if (this._transformDirtyList.Count > 0) {
+            if (this._transformDirtyList.Count > 0)
+            {
                 Matrix4x4 identity = Matrix4x4.Identity;
 
-                for (int i = 0; i < this._transformDirtyList.Count; i++) {
+                for (int i = 0; i < this._transformDirtyList.Count; i++)
+                {
                     var dirtyNode = this._transformDirtyList[i];
-                    if (! dirtyNode.TransformIsDirty) continue;
+                    if (!dirtyNode.TransformIsDirty) continue;
                     this._SearchTopDirty(dirtyNode).UpdateWorldMatrix(ref identity);
                 }
                 this._transformDirtyList.Clear();
@@ -176,7 +182,8 @@ namespace LifeSim.Engine.SceneGraph
         private Node3D _SearchTopDirty(Node3D node)
         {
             Node3D topDirty = node;
-            while (true) {
+            while (true)
+            {
                 if (node.TransformIsDirty) topDirty = node;
                 if (node.Parent == null) return topDirty;
                 node = node.Parent;

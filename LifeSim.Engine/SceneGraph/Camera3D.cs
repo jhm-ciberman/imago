@@ -13,8 +13,8 @@ namespace LifeSim.Engine.SceneGraph
 
 
         private Vector3 _position = Vector3.Zero;
-        public Vector3 Position 
-        { 
+        public Vector3 Position
+        {
             get => this._position;
             set
             {
@@ -122,7 +122,7 @@ namespace LifeSim.Engine.SceneGraph
         public ICamera FrustumCullingCamera { get; private set; }
 
         public BoundingFrustum FrustumForCulling => new BoundingFrustum(this.ViewProjectionMatrix);
- 
+
         public Camera3D(Viewport viewport)
         {
             this.Viewport = viewport;
@@ -149,7 +149,7 @@ namespace LifeSim.Engine.SceneGraph
         {
             get
             {
-                if (this._viewMatrixIsDirty) 
+                if (this._viewMatrixIsDirty)
                 {
                     Vector3 forward = Vector3.Transform(Vector3.UnitZ, this._rotation);
                     Vector3 up = Vector3.Transform(Vector3.UnitY, this._rotation);

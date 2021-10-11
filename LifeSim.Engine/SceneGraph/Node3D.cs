@@ -4,7 +4,7 @@ using System.Numerics;
 using LifeSim.Core;
 using LifeSim.Rendering;
 
-namespace LifeSim.Engine.SceneGraph 
+namespace LifeSim.Engine.SceneGraph
 {
     public class Node3D
     {
@@ -24,22 +24,22 @@ namespace LifeSim.Engine.SceneGraph
         private Quaternion _rotation = Quaternion.Identity;
         private Vector3    _scale = Vector3.One;
 
-        public Vector3 Position 
-        { 
+        public Vector3 Position
+        {
             get => this._position;
-            set { var old = this._position; this._position = value; if (old != value) this._NotifyTransformDirty(); } 
+            set { var old = this._position; this._position = value; if (old != value) this._NotifyTransformDirty(); }
         }
 
-        public Quaternion Rotation 
-        { 
+        public Quaternion Rotation
+        {
             get => this._rotation;
-            set { var old = this._rotation; this._rotation = value; if (old != value) this._NotifyTransformDirty(); } 
+            set { var old = this._rotation; this._rotation = value; if (old != value) this._NotifyTransformDirty(); }
         }
-        
-        public Vector3 Scale    
-        { 
+
+        public Vector3 Scale
+        {
             get => this._scale;
-            set { var old = this._scale; this._scale = value; if (old != value) this._NotifyTransformDirty(); } 
+            set { var old = this._scale; this._scale = value; if (old != value) this._NotifyTransformDirty(); }
         }
 
         private Matrix4x4 _localMatrix = Matrix4x4.Identity;
@@ -52,7 +52,7 @@ namespace LifeSim.Engine.SceneGraph
 
         public Vector3 WorldPosition => Vector3.Transform(Vector3.Zero, this._worldMatrix);
         public Vector3 WorldScale => Vector3.Transform(this._scale, this._worldMatrix);
-        
+
         public Node3D()
         {
             //
@@ -60,8 +60,10 @@ namespace LifeSim.Engine.SceneGraph
 
         public void Add(Node3D node)
         {
-            if (node.Parent != this && node != this) {
-                if (node.Parent != null) {
+            if (node.Parent != this && node != this)
+            {
+                if (node.Parent != null)
+                {
                     node.Parent.Remove(node);
                 }
                 this._children.Add(node);
@@ -80,7 +82,7 @@ namespace LifeSim.Engine.SceneGraph
             node.Scene = null;
             this.OnNodeRemoved?.Invoke(this, node);
         }
-        
+
         protected void _NotifyTransformDirty()
         {
             if (this._transformIsDirty) return;
@@ -91,7 +93,8 @@ namespace LifeSim.Engine.SceneGraph
 
         public ref Matrix4x4 GetLocalMatrix()
         {
-            if (this._transformIsDirty) {
+            if (this._transformIsDirty)
+            {
                 this._localMatrix = Matrix4x4.CreateScale(this._scale)
                     * Matrix4x4.CreateFromQuaternion(this._rotation)
                     * Matrix4x4.CreateTranslation(this._position);
@@ -104,19 +107,23 @@ namespace LifeSim.Engine.SceneGraph
         {
             this._worldMatrix = this.GetLocalMatrix() * parentMatrix;
 
-            for(int i = 0; i < this.Children.Count; i++) {
+            for (int i = 0; i < this.Children.Count; i++)
+            {
                 this.Children[i].UpdateWorldMatrix(ref this._worldMatrix);
             }
         }
 
         public T? Find<T>() where T : Node3D
         {
-            if (this is T childT) {
+            if (this is T childT)
+            {
                 return childT;
             }
-            foreach (var child in this.Children) {
+            foreach (var child in this.Children)
+            {
                 var result = child.Find<T>();
-                if (result != null) {
+                if (result != null)
+                {
                     return result;
                 }
             }
@@ -125,9 +132,11 @@ namespace LifeSim.Engine.SceneGraph
 
         public virtual Renderable? FirstRenderable()
         {
-            foreach (var child in this.Children) {
+            foreach (var child in this.Children)
+            {
                 var result = child.FirstRenderable();
-                if (result != null) {
+                if (result != null)
+                {
                     return result;
                 }
             }
@@ -136,12 +145,15 @@ namespace LifeSim.Engine.SceneGraph
 
         public Node3D? Find(string name)
         {
-            if (this.Name == name) {
+            if (this.Name == name)
+            {
                 return this;
             }
-            foreach (var child in this.Children) {
+            foreach (var child in this.Children)
+            {
                 var result = child.Find(name);
-                if (result != null) {
+                if (result != null)
+                {
                     return result;
                 }
             }
@@ -152,7 +164,8 @@ namespace LifeSim.Engine.SceneGraph
         {
             Console.WriteLine(indent + "- " + this.GetType().Name + ": " + this.Name + "(scale: " + this.Scale + ")");
             indent += "  ";
-            foreach (var child in this.Children) {
+            foreach (var child in this.Children)
+            {
                 child.PrintHierarchyToConsole(indent);
             }
         }
@@ -160,7 +173,8 @@ namespace LifeSim.Engine.SceneGraph
         public void ForEachRecursive(System.Action<Node3D> action)
         {
             action(this);
-            foreach (var child in this.Children) {
+            foreach (var child in this.Children)
+            {
                 child.ForEachRecursive(action);
             }
         }
@@ -171,10 +185,13 @@ namespace LifeSim.Engine.SceneGraph
             int currentIndex = 0;
             Node3D currentNode = this;
             bool found = true;
-            while (found && currentIndex < arrayPaths.Length) {
+            while (found && currentIndex < arrayPaths.Length)
+            {
                 var currentNameToFind = arrayPaths[currentIndex];
-                foreach (var child in currentNode.Children) {
-                    if (child.Name == currentNameToFind) {
+                foreach (var child in currentNode.Children)
+                {
+                    if (child.Name == currentNameToFind)
+                    {
                         currentNode = child;
                         currentIndex++;
                         found = true;
@@ -182,9 +199,12 @@ namespace LifeSim.Engine.SceneGraph
                     }
                 }
             }
-            if (currentIndex < arrayPaths.Length) {
+            if (currentIndex < arrayPaths.Length)
+            {
                 return null;
-            } else {
+            }
+            else
+            {
                 return currentNode;
             }
         }

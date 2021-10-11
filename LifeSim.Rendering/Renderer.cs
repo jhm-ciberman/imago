@@ -52,7 +52,7 @@ namespace LifeSim.Rendering
             this._factory = this._gd.ResourceFactory;
 
             this.FullScreenRenderTexture = new SwapchainRenderTexture(this._gd.MainSwapchain);
-            this.MainRenderTexture = new RenderTexture(this._gd.ResourceFactory, (uint) window.Width, (uint) window.Height);
+            this.MainRenderTexture = new RenderTexture(this._gd.ResourceFactory, (uint)window.Width, (uint)window.Height);
 
             this.CanvasRenderer = new CanvasRenderer(this._gd, this.MainRenderTexture);
             this.SceneRenderer = new SceneRenderer(this._gd, this.MainRenderTexture);
@@ -69,7 +69,7 @@ namespace LifeSim.Rendering
         {
             this.ImguiRenderer.Render();
             this._fullScreenRenderer.Render();
-            
+
 
             this.WaitForGPU();
 
@@ -85,7 +85,8 @@ namespace LifeSim.Rendering
 
         public void WaitForGPU()
         {
-            if (! this._fence.Signaled) { // If we are GPU bound, then maybe it's a good moment to do a GC :)
+            if (!this._fence.Signaled)
+            { // If we are GPU bound, then maybe it's a good moment to do a GC :)
                 this._fence.Reset();
                 GC.Collect(0, GCCollectionMode.Optimized);
             }

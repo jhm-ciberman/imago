@@ -31,12 +31,12 @@ namespace LifeSim.Rendering
 
         private uint _pickingID = 0;
         public uint PickingID
-        { 
-            get => this._pickingID; 
+        {
+            get => this._pickingID;
             set { this._pickingID = value; this._RecomputeOffsetVertexData(); }
         }
- 
-        public ISkeleton? Skeleton  { get; private set; }
+
+        public ISkeleton? Skeleton { get; private set; }
         public Material? Material { get; private set; }
         private DataBlock _instanceDataBlock;
         private readonly SceneStorage _storage;
@@ -44,7 +44,7 @@ namespace LifeSim.Rendering
         public Renderable(SceneStorage storage)
         {
             this._storage = storage;
-            
+
             this._transformDataBlock = storage.RequestTransformDataBlock();
             this.TransformResourceSet = this._transformDataBlock.Buffer.ResourceSet;
         }
@@ -63,7 +63,8 @@ namespace LifeSim.Rendering
         public void SetMaterial(Material material)
         {
             this.Material = material;
-            if (this._instanceDataBlock.BlockSize != material.Definition.InstanceDataBlockSize) {
+            if (this._instanceDataBlock.BlockSize != material.Definition.InstanceDataBlockSize)
+            {
                 this._instanceDataBlock.FreeBlock();
                 this._instanceDataBlock = this._storage.RequestInstanceDataBlock(material.Definition);
             }
@@ -78,7 +79,8 @@ namespace LifeSim.Rendering
         public void SetSkeleton(ISkeleton skeleton)
         {
             if (this.Skeleton == skeleton) return;
-            if (! this._skeletonDataBlock.IsValid) {
+            if (!this._skeletonDataBlock.IsValid)
+            {
                 this._skeletonDataBlock = this._storage.RequestSkeletonDataBlock();
                 this.SkeletonResourceSet = this._skeletonDataBlock.Buffer.ResourceSet;
                 this._RecomputeOffsetVertexData();
@@ -89,7 +91,8 @@ namespace LifeSim.Rendering
 
         public void Update()
         {
-            if (this.Skeleton != null) {
+            if (this.Skeleton != null)
+            {
                 Matrix4x4.Invert(this._transform, out Matrix4x4 inverseMeshWorldMatrix);
                 this.Skeleton.UpdateMatrices(ref inverseMeshWorldMatrix);
                 this._skeletonDataBlock.WriteSpan<Matrix4x4>(this.Skeleton.BonesMatrices);
@@ -106,7 +109,8 @@ namespace LifeSim.Rendering
         {
             this._transform = transform;
             this._transformDataBlock.Write(ref transform);
-            if (this.Mesh != null) {
+            if (this.Mesh != null)
+            {
                 this._RecomputeBoundingBox();
             }
         }
@@ -146,8 +150,9 @@ namespace LifeSim.Rendering
             ulong transformBufferHash = (ulong) (this._transformDataBlock.Buffer.Id & 0xFF);
             //ulong instanceBufferHash  = (ulong) (this._instanceDataBlock.Buffer.Id & 0xFF);
             ulong skekeletonBufferHash = 0;
-            if (this._skeletonDataBlock.Buffer != null) {
-                skekeletonBufferHash = (ulong) (this._skeletonDataBlock.Buffer.Id & 0xF);
+            if (this._skeletonDataBlock.Buffer != null)
+            {
+                skekeletonBufferHash = (ulong)(this._skeletonDataBlock.Buffer.Id & 0xF);
             }
 
             ulong key = (materialHash   << 56) // 8 bits
@@ -160,9 +165,9 @@ namespace LifeSim.Rendering
 
             // This key is used to fast check if two instances can be batched together. (They must have the same hash)
             this.BatchingHashKey = HashCode.Combine(
-                this.Mesh.Id, 
+                this.Mesh.Id,
                 this.Material.Id,
-                this._instanceDataBlock.Buffer.Id, 
+                this._instanceDataBlock.Buffer.Id,
                 this._skeletonDataBlock.Buffer != null ? this._skeletonDataBlock.Buffer.Id : 0,
                 this._transformDataBlock.Buffer.Id
             );
@@ -170,12 +175,12 @@ namespace LifeSim.Rendering
 
         private void _RecomputeOffsetVertexData()
         {
-            if (! this._instanceDataBlock.IsValid) return;
+            if (!this._instanceDataBlock.IsValid) return;
 
             this.OffsetVertexData = new OffsetVertexData(
-                this._transformDataBlock.BlockIndex, 
-                this._instanceDataBlock.BlockIndex, 
-                this._skeletonDataBlock.IsValid ? this._skeletonDataBlock.BlockIndex * MAX_NUMBER_OF_BONES : 0, 
+                this._transformDataBlock.BlockIndex,
+                this._instanceDataBlock.BlockIndex,
+                this._skeletonDataBlock.IsValid ? this._skeletonDataBlock.BlockIndex * MAX_NUMBER_OF_BONES : 0,
                 this.PickingID
             );
         }

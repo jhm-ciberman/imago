@@ -12,7 +12,7 @@ namespace LifeSim.Engine.SceneGraph
         public IReadOnlyList<ICanvasItem> Items => this._items;
 
         private readonly Node2D _root = new Node2D();
-        
+
         public CanvasLayer(Viewport viewport)
         {
             this.Viewport = viewport;
@@ -22,13 +22,13 @@ namespace LifeSim.Engine.SceneGraph
         {
             this._root.Add(node);
             this._AddNodeToRecursive(node);
-        } 
+        }
 
         public void Remove(Node2D node)
         {
             this._root.Remove(node);
             this._RemoveNodeRecursive(node);
-        } 
+        }
 
         public void AddCanvasItem(ICanvasItem canvasItem)
         {
@@ -42,27 +42,32 @@ namespace LifeSim.Engine.SceneGraph
 
         internal void _AddNodeToRecursive(Node2D node)
         {
-            if (node is ICanvasItem canvasItem) {
+            if (node is ICanvasItem canvasItem)
+            {
                 this.AddCanvasItem(canvasItem);
             }
-            for (int i = 0; i < node.Children.Count; i++) {
+            for (int i = 0; i < node.Children.Count; i++)
+            {
                 this._AddNodeToRecursive(node.Children[i]);
             }
         }
 
         internal void _RemoveNodeRecursive(Node2D node)
         {
-            if (node is ICanvasItem canvasItem) {
+            if (node is ICanvasItem canvasItem)
+            {
                 this.RemoveCanvasItem(canvasItem);
             }
-            for (int i = 0; i < node.Children.Count; i++) {
+            for (int i = 0; i < node.Children.Count; i++)
+            {
                 this._RemoveNodeRecursive(node.Children[i]);
             }
         }
 
         public void UpdateWorldMatrices()
         {
-            foreach (var child in this._root.Children) {
+            foreach (var child in this._root.Children)
+            {
                 child.UpdateWorldMatrix();
             }
         }

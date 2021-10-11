@@ -10,7 +10,7 @@ namespace LifeSim.Rendering
         public Vector2 ShadowMapSize { get; set; } = new Vector2(20f, 20f);
         public float ShadowZNear { get; set; } = 2f;
         public float ShadowZFar { get; set; } = 100f;
-        
+
         public Matrix4x4 GetShadowMapMatrix(Vector3 cameraPosition)
         {
             return Matrix4x4.CreateLookAt(cameraPosition + this.Direction, cameraPosition, Vector3.UnitY)

@@ -23,7 +23,8 @@ namespace LifeSim.Engine.SceneGraph
 
         public void UpdateMatrices(ref Matrix4x4 inverseMeshWorldMatrix)
         {
-            for (int i = 0; i < this.Joints.Count; i++) {
+            for (int i = 0; i < this.Joints.Count; i++)
+            {
                 this._bonesMatrices[i] = this.InverseBindMatrices[i] * this.Joints[i].WorldMatrix * inverseMeshWorldMatrix;
             }
         }

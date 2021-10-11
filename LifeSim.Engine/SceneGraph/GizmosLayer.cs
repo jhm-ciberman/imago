@@ -25,11 +25,13 @@ namespace LifeSim.Engine.SceneGraph
         /// <param name="deltaTime">The delta time.</param>
         public void Update(float deltaTime)
         {
-            for (int i = 0; i < this._lines.Count; i++) {
+            for (int i = 0; i < this._lines.Count; i++)
+            {
                 var line = this._lines[i];
                 line.LifeTime -= deltaTime;
                 this._lines[i] = line;
-                if (line.LifeTime <= 0) {
+                if (line.LifeTime <= 0)
+                {
                     this._lines.RemoveAt(i);
                     i--;
                 }
@@ -46,7 +48,8 @@ namespace LifeSim.Engine.SceneGraph
         /// <param name="drawInFront">Whether the line should be drawn in front other objects or using depth.</param>
         public void DrawLine(Vector3 start, Vector3 end, Color color, float lifeTime = 0, bool drawInFront = false)
         {
-            this._lines.Add(new DebugLine {
+            this._lines.Add(new DebugLine
+            {
                 Start = start,
                 End = end,
                 Color = color,
@@ -66,9 +69,11 @@ namespace LifeSim.Engine.SceneGraph
         public void DrawWireSphere(Vector3 position, float radius, Color color, float lifeTime = 0, bool drawInFront = false)
         {
             float deltaStep = MathF.PI * 2 / 12;
-            for (float theta = 0; theta < MathF.PI * 2; theta += deltaStep) {
+            for (float theta = 0; theta < MathF.PI * 2; theta += deltaStep)
+            {
 
-                for (float phi = 0; phi < MathF.PI * 2; phi += deltaStep) {
+                for (float phi = 0; phi < MathF.PI * 2; phi += deltaStep)
+                {
                     Vector3 start = position + radius * new Vector3(
                         MathF.Cos(theta) * MathF.Cos(phi),
                         MathF.Sin(phi),
@@ -82,7 +87,8 @@ namespace LifeSim.Engine.SceneGraph
                     this.DrawLine(start, end, color, lifeTime, drawInFront);
                 }
 
-                for (float phi = 0; phi < MathF.PI * 2; phi += deltaStep) {
+                for (float phi = 0; phi < MathF.PI * 2; phi += deltaStep)
+                {
                     Vector3 start = position + radius * new Vector3(
                         MathF.Cos(theta) * MathF.Cos(phi),
                         MathF.Sin(phi),
@@ -128,7 +134,8 @@ namespace LifeSim.Engine.SceneGraph
             };
 
             // Draw a wired cube
-            for (int i = 0; i < 4; i++) {
+            for (int i = 0; i < 4; i++)
+            {
                 this.DrawLine(bottom[i], bottom[(i + 1) % 4], color, lifeTime, drawInFront);
                 this.DrawLine(top[i], top[(i + 1) % 4], color, lifeTime, drawInFront);
                 this.DrawLine(bottom[i], top[i], color, lifeTime, drawInFront);
@@ -137,10 +144,13 @@ namespace LifeSim.Engine.SceneGraph
 
         private void _VecOrthogonalBasis(Vector3 v, out Vector3 u, out Vector3 w)
         {
-            if (MathF.Abs(v.X) > MathF.Abs(v.Y)) {
+            if (MathF.Abs(v.X) > MathF.Abs(v.Y))
+            {
                 float invLen = 1.0f / MathF.Sqrt(v.X * v.X + v.Z * v.Z);
                 u = new Vector3(-v.Z * invLen, 0.0f, v.X * invLen);
-            } else {
+            }
+            else
+            {
                 float invLen = 1.0f / MathF.Sqrt(v.Y * v.Y + v.Z * v.Z);
                 u = new Vector3(0.0f, v.Z * invLen, -v.Y * invLen);
             }
@@ -165,7 +175,8 @@ namespace LifeSim.Engine.SceneGraph
             this._VecOrthogonalBasis(planeNormal, out Vector3 u, out Vector3 w);
 
 
-            for (float theta = 0; theta < MathF.PI * 2; theta += deltaStep) {
+            for (float theta = 0; theta < MathF.PI * 2; theta += deltaStep)
+            {
                 Vector3 start = center + radius * new Vector3(
                     MathF.Cos(theta) * u.X + MathF.Sin(theta) * w.X,
                     MathF.Cos(theta) * u.Y + MathF.Sin(theta) * w.Y,
@@ -188,7 +199,8 @@ namespace LifeSim.Engine.SceneGraph
             this._VecOrthogonalBasis(Vector3.Normalize(direction), out Vector3 u, out Vector3 w);
 
 
-            for (float theta = 0; theta < MathF.PI * 2; theta += deltaStep) {
+            for (float theta = 0; theta < MathF.PI * 2; theta += deltaStep)
+            {
                 Vector3 start = basePosition + baseRadius * new Vector3(
                     MathF.Cos(theta) * u.X + MathF.Sin(theta) * w.X,
                     MathF.Cos(theta) * u.Y + MathF.Sin(theta) * w.Y,
@@ -270,7 +282,8 @@ namespace LifeSim.Engine.SceneGraph
             var vertices = mesh.GetVertexPositions();
             var indices = mesh.GetIndices();
 
-            for (int i = 0; i < indices.Length; i += 3) {
+            for (int i = 0; i < indices.Length; i += 3)
+            {
                 var i1 = indices[i];
                 var i2 = indices[i + 1];
                 var i3 = indices[i + 2];

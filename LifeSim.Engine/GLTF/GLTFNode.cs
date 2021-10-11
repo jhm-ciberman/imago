@@ -19,7 +19,7 @@ namespace LifeSim.Engine.GLTF
 
         private readonly List<GLTFNode> _children = new List<GLTFNode>();
         public IReadOnlyList<GLTFNode> Children => this._children;
-        
+
         public GLTFNode(string name)
         {
             this.Name = name;
@@ -29,13 +29,14 @@ namespace LifeSim.Engine.GLTF
         {
             node.Parent = this;
             this._children.Add(node);
-        } 
-    
+        }
+
         public string GetFullPathName()
         {
-            if (this.Parent != null) {
+            if (this.Parent != null)
+            {
                 return this.Parent.GetFullPathName() + "/" + this.Name;
-            } 
+            }
             return "/" + this.Name;
         }
     }

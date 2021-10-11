@@ -22,7 +22,8 @@ namespace LifeSim.Engine.GLTF
         {
             this._nodesCache.Clear();
             Node3D n = new Node3D();
-            foreach (GLTFNode? node in scene.Children) {
+            foreach (GLTFNode? node in scene.Children)
+            {
                 n.Add(this._InstantiateNodeRecursive(scene, node));
             }
             return n;
@@ -32,10 +33,12 @@ namespace LifeSim.Engine.GLTF
         {
             Renderable renderable = new Renderable(this._storage);
             renderable.SetMesh(mesh);
-            if (material != null) {
+            if (material != null)
+            {
                 renderable.SetMaterial(material);
             }
-            if (skin != null) {
+            if (skin != null)
+            {
                 var skeleton = this._CreateSkeleton(scene, skin);
                 renderable.SetSkeleton(skeleton);
             }
@@ -45,7 +48,8 @@ namespace LifeSim.Engine.GLTF
         private Node3D _InstantiateNodeRecursive(ISceneTemplate scene, GLTFNode gltfNode)
         {
             Node3D? node3d = this._nodesCache.GetValueOrDefault(gltfNode);
-            if (node3d != null) {
+            if (node3d != null)
+            {
                 return node3d;
             }
 
@@ -59,7 +63,8 @@ namespace LifeSim.Engine.GLTF
             node.Rotation = gltfNode.Rotation;
             node.Scale = gltfNode.Scale;
 
-            foreach (GLTFNode? child in gltfNode.Children) {
+            foreach (GLTFNode? child in gltfNode.Children)
+            {
                 node.Add(this._InstantiateNodeRecursive(scene, child));
             }
 
@@ -70,7 +75,8 @@ namespace LifeSim.Engine.GLTF
         {
             Node3D[] joints = new Node3D[skin.JointNames.Count];
             IList<string> names = skin.JointNames;
-            for (var i = 0; i < names.Count; i++) {
+            for (var i = 0; i < names.Count; i++)
+            {
                 GLTFNode? gltfNode = scene.FindNodeByName(names[i]);
                 joints[i] = gltfNode != null
                     ? this._InstantiateNodeRecursive(scene, gltfNode)

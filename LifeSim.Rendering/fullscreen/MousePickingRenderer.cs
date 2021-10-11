@@ -11,14 +11,14 @@ namespace LifeSim.Rendering
         private readonly CommandList _commandList;
         private bool _hasCommandsToSubmit = false;
 
-        public RenderTexture RenderTexture { get; set;}
+        public RenderTexture RenderTexture { get; set; }
 
         public MousePickingRenderer(GraphicsDevice graphicsDevice, RenderTexture renderTexture)
         {
             this._gd = graphicsDevice;
             var factory = graphicsDevice.ResourceFactory;
             this._pixelTexture = factory.CreateTexture(new TextureDescription(
-                width: 1, height: 1, depth: 1, mipLevels: 1, arrayLayers: 1, 
+                width: 1, height: 1, depth: 1, mipLevels: 1, arrayLayers: 1,
                 PixelFormat.R32_UInt, TextureUsage.Staging, TextureType.Texture2D
             ));
 
@@ -39,15 +39,16 @@ namespace LifeSim.Rendering
 
         public void Update(Vector2 mousePos)
         {
-            if (this._MouseIsInside(mousePos)) {
+            if (this._MouseIsInside(mousePos))
+            {
                 uint x = (uint) mousePos.X;
                 uint y = this._gd.IsUvOriginTopLeft ? (uint) mousePos.Y : (uint) (this.RenderTexture.PickingTexture.Height - 1 - mousePos.Y);
                 this._commandList.Begin();
                 this._commandList.CopyTexture(
-                    source: this.RenderTexture.PickingTexture, 
+                    source: this.RenderTexture.PickingTexture,
                     srcX: x, srcY: y, srcZ: 0, srcMipLevel: 0, srcBaseArrayLayer: 0,
-                    destination: this._pixelTexture, 
-                    dstX: 0, dstY: 0, dstZ: 0, dstMipLevel: 0, dstBaseArrayLayer: 0, 
+                    destination: this._pixelTexture,
+                    dstX: 0, dstY: 0, dstZ: 0, dstMipLevel: 0, dstBaseArrayLayer: 0,
                     width: 1, height: 1, depth: 1, layerCount: 1
                 );
                 this._commandList.End();
@@ -61,8 +62,8 @@ namespace LifeSim.Rendering
 
         public void Submit()
         {
-            if (! this._hasCommandsToSubmit) return;
-            
+            if (!this._hasCommandsToSubmit) return;
+
             this._gd.SubmitCommands(this._commandList);
             this._hasCommandsToSubmit = false;
         }

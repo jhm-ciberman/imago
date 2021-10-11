@@ -21,7 +21,7 @@ namespace LifeSim.Engine.Anim
         public void Play(Animation animation)
         {
             var binder = new SimpleAnimationBinder();
-            this._animation = binder.Bind(this._root, animation);;
+            this._animation = binder.Bind(this._root, animation); ;
         }
 
         public void Update(float deltaTime)

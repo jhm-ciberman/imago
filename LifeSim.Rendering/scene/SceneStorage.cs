@@ -23,12 +23,14 @@ namespace LifeSim.Rendering
             this._instanceResourceLayout = instanceResourceLayout;
             this._skeletonResourceLayout = sleletonResourceLayout;
         }
-        
+
         internal DataBlock RequestTransformDataBlock()
         {
-            for (int i = 0; i < this._transformDataBuffers.Count; i++) {
+            for (int i = 0; i < this._transformDataBuffers.Count; i++)
+            {
                 var buffer = this._transformDataBuffers[i];
-                if (!buffer.IsFull) {
+                if (!buffer.IsFull)
+                {
                     return buffer.RequestBlock();
                 }
             }
@@ -42,9 +44,11 @@ namespace LifeSim.Rendering
         internal DataBlock RequestInstanceDataBlock(MaterialDefinition material)
         {
             var blockSize = material.InstanceDataBlockSize;
-            for (int i = 0; i < this._instanceDataBuffers.Count; i++) {
+            for (int i = 0; i < this._instanceDataBuffers.Count; i++)
+            {
                 var buffer = this._instanceDataBuffers[i];
-                if (buffer.BlockSize == blockSize && ! buffer.IsFull) {
+                if (buffer.BlockSize == blockSize && !buffer.IsFull)
+                {
                     return buffer.RequestBlock();
                 }
             }
@@ -57,9 +61,11 @@ namespace LifeSim.Rendering
 
         internal DataBlock RequestSkeletonDataBlock()
         {
-            for (int i = 0; i < this._skeletonDataBuffers.Count; i++) {
+            for (int i = 0; i < this._skeletonDataBuffers.Count; i++)
+            {
                 var buffer = this._skeletonDataBuffers[i];
-                if (! buffer.IsFull) {
+                if (!buffer.IsFull)
+                {
                     return buffer.RequestBlock();
                 }
             }
@@ -72,26 +78,32 @@ namespace LifeSim.Rendering
 
         internal void UpdateBuffers(Veldrid.CommandList commandList)
         {
-            for (int i = 0; i < this._instanceDataBuffers.Count; i++) {
+            for (int i = 0; i < this._instanceDataBuffers.Count; i++)
+            {
                 this._instanceDataBuffers[i].UploadToGPU(commandList);
             }
-            for (int i = 0; i < this._transformDataBuffers.Count; i++) {
+            for (int i = 0; i < this._transformDataBuffers.Count; i++)
+            {
                 this._transformDataBuffers[i].UploadToGPU(commandList);
             }
-            for (int i = 0; i < this._skeletonDataBuffers.Count; i++) {
+            for (int i = 0; i < this._skeletonDataBuffers.Count; i++)
+            {
                 this._skeletonDataBuffers[i].UploadToGPU(commandList);
             }
         }
 
         public void Dispose()
         {
-            for (int i = 0; i < this._instanceDataBuffers.Count; i++) {
+            for (int i = 0; i < this._instanceDataBuffers.Count; i++)
+            {
                 this._instanceDataBuffers[i].Dispose();
             }
-            for (int i = 0; i < this._transformDataBuffers.Count; i++) {
+            for (int i = 0; i < this._transformDataBuffers.Count; i++)
+            {
                 this._transformDataBuffers[i].Dispose();
             }
-            for (int i = 0; i < this._skeletonDataBuffers.Count; i++) {
+            for (int i = 0; i < this._skeletonDataBuffers.Count; i++)
+            {
                 this._skeletonDataBuffers[i].Dispose();
             }
         }

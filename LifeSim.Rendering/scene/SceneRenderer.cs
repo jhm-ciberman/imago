@@ -81,7 +81,8 @@ namespace LifeSim.Rendering
                 this._instanceResourceLayout
             };
 
-            if (shaderVariant.VertexFormat.IsSkinned) {
+            if (shaderVariant.VertexFormat.IsSkinned)
+            {
                 resources.Add(this._bonesResourceLayout);
             }
 
@@ -90,7 +91,7 @@ namespace LifeSim.Rendering
 
         public void Submit()
         {
-            if (! this._hasCommandsToSubmit) return;
+            if (!this._hasCommandsToSubmit) return;
             this._gd.SubmitCommands(this._commandList);
             this._hasCommandsToSubmit = false;
         }

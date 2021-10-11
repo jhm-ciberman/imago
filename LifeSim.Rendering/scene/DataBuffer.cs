@@ -36,13 +36,13 @@ namespace LifeSim.Rendering
             this.BlockSize = blockSize;
             this.BlocksCount = blocksCount;
             this.SizeInBytes = this.BlocksCount * this.BlockSize;
-            this._data = Marshal.AllocHGlobal((int) this.SizeInBytes);
-            Unsafe.InitBlockUnaligned((byte*)this._data, 0, (uint) this.SizeInBytes);
+            this._data = Marshal.AllocHGlobal((int)this.SizeInBytes);
+            Unsafe.InitBlockUnaligned((byte*)this._data, 0, (uint)this.SizeInBytes);
             this._dirty = true;
             this._resourceLayout = resourceLayout;
 
             this.DeviceBuffer = this._gd.ResourceFactory.CreateBuffer(new BufferDescription(
-                (uint) this.SizeInBytes, BufferUsage.UniformBuffer | BufferUsage.Dynamic
+                (uint)this.SizeInBytes, BufferUsage.UniformBuffer | BufferUsage.Dynamic
             ));
 
             this.ResourceSet = this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(
@@ -50,7 +50,8 @@ namespace LifeSim.Rendering
             ));
 
             this._freeList = new int[blocksCount];
-            for (int i = 0; i < blocksCount; i++) {
+            for (int i = 0; i < blocksCount; i++)
+            {
                 this._freeList[i] = (this.BlocksCount - i - 1) * this.BlockSize;
             }
             this._freeListCount = this.BlocksCount;
@@ -58,8 +59,8 @@ namespace LifeSim.Rendering
 
         public void UploadToGPU(CommandList commandList)
         {
-            if (! this._dirty) return;
-            commandList.UpdateBuffer(this.DeviceBuffer, 0, this._data, (uint) this.SizeInBytes);
+            if (!this._dirty) return;
+            commandList.UpdateBuffer(this.DeviceBuffer, 0, this._data, (uint)this.SizeInBytes);
             this._dirty = false;
         }
 
@@ -91,7 +92,8 @@ namespace LifeSim.Rendering
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void WriteSpan<T>(int offset, ReadOnlySpan<T> data) where T : unmanaged
         {
-            fixed(T* ptr = data) {
+            fixed (T* ptr = data)
+            {
                 var byteLen = (long)(data.Length * sizeof(T));
                 Buffer.MemoryCopy(ptr, (void*)(this._data + offset), byteLen, byteLen);
             }

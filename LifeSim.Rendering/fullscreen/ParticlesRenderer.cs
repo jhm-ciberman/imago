@@ -34,7 +34,7 @@ namespace LifeSim.Rendering
             private readonly float _padding;
             public Vector3 CameraUp;
             private readonly float _padding2;
-        }        
+        }
 
         private readonly Shader _particlesShader;
         private Shader? _currentShader = null;
@@ -54,7 +54,7 @@ namespace LifeSim.Rendering
 
         private readonly VertexFormat _vertexFormat;
 
-        private ParticleRenderData[] _particlesForRender = new ParticleRenderData[PARTICLES_PER_BATCH];
+        private readonly ParticleRenderData[] _particlesForRender = new ParticleRenderData[PARTICLES_PER_BATCH];
 
         private bool _hasCommandsToSubmit = false;
 
@@ -67,10 +67,10 @@ namespace LifeSim.Rendering
             this._gd = gd;
             var factory = gd.ResourceFactory;
 
-            this._vertexBuffer = factory.CreateBuffer(new BufferDescription((uint) (4 * Marshal.SizeOf<Vertex>()), BufferUsage.VertexBuffer));
-            this._particlesBuffer = factory.CreateBuffer(new BufferDescription((uint) (PARTICLES_PER_BATCH * Marshal.SizeOf<ParticleRenderData>()), BufferUsage.VertexBuffer | BufferUsage.Dynamic));
+            this._vertexBuffer = factory.CreateBuffer(new BufferDescription((uint)(4 * Marshal.SizeOf<Vertex>()), BufferUsage.VertexBuffer));
+            this._particlesBuffer = factory.CreateBuffer(new BufferDescription((uint)(PARTICLES_PER_BATCH * Marshal.SizeOf<ParticleRenderData>()), BufferUsage.VertexBuffer | BufferUsage.Dynamic));
 
-            this._viewProjectionBuffer = factory.CreateBuffer(new BufferDescription((uint) Marshal.SizeOf<CameraDataBuffer>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+            this._viewProjectionBuffer = factory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<CameraDataBuffer>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
             var quad = new Vertex[] {
                 new Vertex(new Vector2(-0.5f, -0.5f), new Vector2(0f, 1f)),
@@ -119,7 +119,8 @@ namespace LifeSim.Rendering
             this._commandList.Begin();
             this._commandList.SetFramebuffer(this._renderTexture.Framebuffer);
 
-            this._commandList.UpdateBuffer(this._viewProjectionBuffer, 0, new CameraDataBuffer {
+            this._commandList.UpdateBuffer(this._viewProjectionBuffer, 0, new CameraDataBuffer
+            {
                 ViewProjection = camera.ViewProjectionMatrix,
                 CameraRight = camera.Right,
                 CameraUp = camera.Up
@@ -133,7 +134,7 @@ namespace LifeSim.Rendering
 
         public void Submit()
         {
-            if (! this._hasCommandsToSubmit) return;
+            if (!this._hasCommandsToSubmit) return;
             this._gd.SubmitCommands(this._commandList);
             this._hasCommandsToSubmit = false;
         }
@@ -161,14 +162,16 @@ namespace LifeSim.Rendering
         private void _FlushParticles(IReadOnlyList<Particle> particles, int startIndex, int endIndex, Shader shader, Texture texture)
         {
             int particlesCount = 0;
-            for (int i = startIndex; i < endIndex; i++) {
+            for (int i = startIndex; i < endIndex; i++)
+            {
                 var particle = particles[i];
                 this._particlesForRender[particlesCount++] = new ParticleRenderData(particle.Position, particle.Size, particle.Color);
             }
 
             this._commandList.UpdateBuffer(this._particlesBuffer, 0, this._particlesForRender);
 
-            if (this._currentShader != shader) {
+            if (this._currentShader != shader)
+            {
                 this._currentShader = shader;
                 var pipeline = shader.GetPipeline(this._vertexFormat);
                 this._commandList.SetPipeline(pipeline);
@@ -176,7 +179,8 @@ namespace LifeSim.Rendering
                 this._commandList.SetGraphicsResourceSet(0, this._passResourceSet);
             }
 
-            if (this._currentTexture != texture) {
+            if (this._currentTexture != texture)
+            {
                 this._currentTexture = texture;
                 var resourceSet = this._GetTextureResourceSet(texture);
                 this._commandList.SetGraphicsResourceSet(1, resourceSet);
@@ -184,12 +188,13 @@ namespace LifeSim.Rendering
 
             this._commandList.SetVertexBuffer(0, this._vertexBuffer);
             this._commandList.SetVertexBuffer(1, this._particlesBuffer);
-            this._commandList.Draw(4, (uint) particlesCount, 0, 0);
+            this._commandList.Draw(4, (uint)particlesCount, 0, 0);
         }
 
         private ResourceSet _GetTextureResourceSet(Texture texture)
         {
-            if (this._textures.TryGetValue(texture, out var resourceSet)) {
+            if (this._textures.TryGetValue(texture, out var resourceSet))
+            {
                 return resourceSet;
             }
 
@@ -210,7 +215,8 @@ namespace LifeSim.Rendering
 
             Debug.Assert(shaderVariant.MaterialResourceLayout != null);
 
-            return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription() {
+            return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
+            {
                 DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
                 PrimitiveTopology = PrimitiveTopology.TriangleStrip,
                 ShaderSet = shaderVariant.ShaderSetDescription,

@@ -12,7 +12,7 @@ namespace LifeSim.Rendering
 
         public int BlockSize => this.Buffer == null ? 0 : this.Buffer.BlockSize;
 
-        public uint BlockIndex => (uint) (this.Offset / this.Buffer.BlockSize);
+        public uint BlockIndex => (uint)(this.Offset / this.Buffer.BlockSize);
 
         internal DataBlock(DataBuffer buffer, int offset)
         {

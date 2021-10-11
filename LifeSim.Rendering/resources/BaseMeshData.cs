@@ -14,7 +14,7 @@ namespace LifeSim.Rendering
 
         public TVertex[] Vertices { get; private set; }
 
-        public BaseMeshData(ushort[] indices, TVertex[] vertices) 
+        public BaseMeshData(ushort[] indices, TVertex[] vertices)
         {
             this.Indices = indices;
             this.Vertices = vertices;
@@ -25,7 +25,8 @@ namespace LifeSim.Rendering
 
         public void FlipIndices()
         {
-            for (var i = 0; i < this.Indices.Length; i += 3) {
+            for (var i = 0; i < this.Indices.Length; i += 3)
+            {
                 var a = this.Indices[i + 0];
                 var b = this.Indices[i + 1];
                 var c = this.Indices[i + 2];
@@ -38,7 +39,7 @@ namespace LifeSim.Rendering
 
         public VertexFormat GetVertexFormat()
         {
-            if (_cachedVertexFormat == null) 
+            if (_cachedVertexFormat == null)
             {
                 _cachedVertexFormat = this.MakeVertexFormat();
             }
@@ -64,13 +65,16 @@ namespace LifeSim.Rendering
         {
             distance = float.MaxValue;
             bool result = false;
-            for (int i = 0; i < this.Indices.Length - 2; i += 3) {
+            for (int i = 0; i < this.Indices.Length - 2; i += 3)
+            {
                 Vector3 v0 = this.GetPosition(this.Indices[i + 0]);
                 Vector3 v1 = this.GetPosition(this.Indices[i + 1]);
                 Vector3 v2 = this.GetPosition(this.Indices[i + 2]);
 
-                if (ray.Intersects(ref v0, ref v1, ref v2, out float newDistance)) {
-                    if (newDistance < distance) {
+                if (ray.Intersects(ref v0, ref v1, ref v2, out float newDistance))
+                {
+                    if (newDistance < distance)
+                    {
                         distance = newDistance;
                     }
 
@@ -84,12 +88,14 @@ namespace LifeSim.Rendering
         public int RayCast(Ray ray, List<float> distances)
         {
             int hits = 0;
-            for (int i = 0; i < this.Indices.Length - 2; i += 3) {
+            for (int i = 0; i < this.Indices.Length - 2; i += 3)
+            {
                 Vector3 v0 = this.GetPosition(this.Indices[i + 0]);
                 Vector3 v1 = this.GetPosition(this.Indices[i + 1]);
                 Vector3 v2 = this.GetPosition(this.Indices[i + 2]);
 
-                if (ray.Intersects(ref v0, ref v1, ref v2, out float newDistance)) {
+                if (ray.Intersects(ref v0, ref v1, ref v2, out float newDistance))
+                {
                     hits++;
                     distances.Add(newDistance);
                 }
@@ -101,7 +107,8 @@ namespace LifeSim.Rendering
         public Vector3[] GetVertexPositions()
         {
             var positions = new Vector3[this.Vertices.Length];
-            for (int i = 0; i < 0; i++) {
+            for (int i = 0; i < 0; i++)
+            {
                 positions[i] = this.GetPosition(i);
             }
             return positions;

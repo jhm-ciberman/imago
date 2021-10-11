@@ -16,8 +16,9 @@ namespace LifeSim.Rendering
             this._gd = graphicsDevice;
             this._commandList = graphicsDevice.ResourceFactory.CreateCommandList();
             this._renderTexture = renderTexture;
-            this._imguiRenderer = new ImGuiRenderer(this._gd, renderTexture.OutputDescription, (int) renderTexture.Width, (int) renderTexture.Height);
-            unsafe {
+            this._imguiRenderer = new ImGuiRenderer(this._gd, renderTexture.OutputDescription, (int)renderTexture.Width, (int)renderTexture.Height);
+            unsafe
+            {
                 ImGui.GetIO().NativePtr->IniFilename = null;
             }
         }
@@ -35,7 +36,7 @@ namespace LifeSim.Rendering
 
         public void Resize(uint width, uint height)
         {
-            this._imguiRenderer.WindowResized((int) width, (int) height);
+            this._imguiRenderer.WindowResized((int)width, (int)height);
         }
 
         public IntPtr Texture(Texture texture)

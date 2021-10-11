@@ -22,10 +22,10 @@ namespace LifeSim.Engine
         public App()
         {
             GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
-            
+
             WindowCreateInfo windowCI = new WindowCreateInfo(100, 100, 1024, 600, Veldrid.WindowState.Normal, "Medieval Life");
             this._window = VeldridStartup.CreateWindow(ref windowCI);
-            this.Viewport = new Rendering.Viewport((uint) this._window.Width, (uint) this._window.Height);
+            this.Viewport = new Rendering.Viewport((uint)this._window.Width, (uint)this._window.Height);
 
             var graphicsBackend = App.ParseGraphicsBackend(Environment.GetCommandLineArgs());
             this._renderer = new Renderer(this._window, graphicsBackend);
@@ -51,14 +51,17 @@ namespace LifeSim.Engine
         private static GraphicsBackend ParseGraphicsBackend(string[] args)
         {
             GraphicsBackend? backend = null;
-            if (args.Length > 0) {
-                foreach (var arg in args) {
+            if (args.Length > 0)
+            {
+                foreach (var arg in args)
+                {
                     backend = GetBackend(arg);
                     if (backend != null) break;
                 }
             }
 
-            if (backend == null && File.Exists("./backend.txt")) {
+            if (backend == null && File.Exists("./backend.txt"))
+            {
                 var backendName = File.ReadAllText("./backend.txt");
                 backend = GetBackend(backendName);
             }
@@ -68,7 +71,8 @@ namespace LifeSim.Engine
 
         public static GraphicsBackend? GetBackend(string name)
         {
-            switch (name.ToLower()) {
+            switch (name.ToLower())
+            {
                 case "vulkan":
                 case "vk":
                     return GraphicsBackend.Vulkan;
@@ -89,7 +93,7 @@ namespace LifeSim.Engine
             return null;
         }
 
-        private void OnResize() 
+        private void OnResize()
         {
             uint width = (uint) this._window.Width;
             uint height = (uint) this._window.Height;
@@ -120,19 +124,21 @@ namespace LifeSim.Engine
                 previousElapsed = newElapsed;
 
                 this._renderer.MousePicker.Update(Input.MousePosition);
-                
+
                 var fps = (1f / deltaTime).ToString("0.00");
                 var dt = (deltaTime * 1000).ToString("0.00");
 
                 var mouse = "(" + Input.MousePosition.X + ", " +Input.MousePosition.Y + ")";
                 this._window.Title = "Medieval Life" + " (" + this._renderer.BackendType.ToString() + ") frame = " + dt + "ms FPS = " + fps + " Mouse: " + mouse;
 
-                if (Input.GetKeyDown(Veldrid.Key.Escape) && ! Input.MouseIsLocked) {
+                if (Input.GetKeyDown(Veldrid.Key.Escape) && !Input.MouseIsLocked)
+                {
                     this._window.Close();
                     return;
                 }
-              
-                if (Input.GetKeyDown(Veldrid.Key.F4)) {
+
+                if (Input.GetKeyDown(Veldrid.Key.F4))
+                {
                     this._window.WindowState = this._window.WindowState == Veldrid.WindowState.BorderlessFullScreen
                         ? Veldrid.WindowState.Normal
                         : Veldrid.WindowState.BorderlessFullScreen;
@@ -140,7 +146,8 @@ namespace LifeSim.Engine
 
                 this._renderer.ImguiRenderer.Update(deltaTime, this._input.InputSnapshot);
 
-                if (this._stage != null) {
+                if (this._stage != null)
+                {
                     this._stage.Update(deltaTime);
                     this._stage.RenderFrame(this._renderer);
                     this._renderer.Render();

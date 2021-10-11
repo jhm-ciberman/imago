@@ -30,19 +30,24 @@ namespace LifeSim.Rendering
 
             uint instanceCount = 0;
 
-            if (this._offsetVertexData.Length < renderables.Count) {
-                Array.Resize(ref this._offsetVertexData, (int) (renderables.Count * 1.2f));
+            if (this._offsetVertexData.Length < renderables.Count)
+            {
+                Array.Resize(ref this._offsetVertexData, (int)(renderables.Count * 1.2f));
             }
             Renderable prevRenderable = renderables[0];
             int prevBatchingHashKey = prevRenderable.BatchingHashKey;
-            for (int i = 0; i < renderables.Count; i++) {
+            for (int i = 0; i < renderables.Count; i++)
+            {
                 Renderable renderable = renderables[i];
                 this._offsetVertexData[i] = renderable.OffsetVertexData;
 
                 // If it's batcheable, add to current batch. If not, finish batch
-                if (renderable.BatchingHashKey == prevBatchingHashKey) {
+                if (renderable.BatchingHashKey == prevBatchingHashKey)
+                {
                     instanceCount++;
-                } else {
+                }
+                else
+                {
                     this._batches.Add(new RenderBatch(instanceCount, prevRenderable, this._shadowMapPass));
                     prevRenderable = renderable;
                     instanceCount = 1;
@@ -56,8 +61,10 @@ namespace LifeSim.Rendering
         public DeviceBuffer GetVertexOffsetBuffer(CommandList commandList)
         {
             uint requiredSizeInBytes = (uint) (this._offsetVertexData.Length * 16);
-            if (this._offsetsVertexBuffer == null || this._offsetsVertexBuffer.SizeInBytes < requiredSizeInBytes) {
-                if (this._offsetsVertexBuffer != null) {
+            if (this._offsetsVertexBuffer == null || this._offsetsVertexBuffer.SizeInBytes < requiredSizeInBytes)
+            {
+                if (this._offsetsVertexBuffer != null)
+                {
                     this._gd.DisposeWhenIdle(this._offsetsVertexBuffer);
                 }
                 this._offsetsVertexBuffer = this._gd.ResourceFactory.CreateBuffer(new BufferDescription(

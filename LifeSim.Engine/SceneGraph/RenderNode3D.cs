@@ -16,15 +16,18 @@ namespace LifeSim.Engine.SceneGraph
             set
             {
                 if (this._renderable == value) return;
-                
-                if (this._renderable != null) {
+
+                if (this._renderable != null)
+                {
                     this.OnRenderableRemoved?.Invoke(this, this._renderable);
                 }
 
                 this._renderable = value;
 
-                if (this._renderable != null) {
-                    if (! this.TransformIsDirty) {
+                if (this._renderable != null)
+                {
+                    if (!this.TransformIsDirty)
+                    {
                         this._renderable.SetTransform(ref this._worldMatrix);
                     }
                     this.OnRenderableAdded?.Invoke(this, this._renderable);

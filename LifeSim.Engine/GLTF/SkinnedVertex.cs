@@ -30,7 +30,7 @@ namespace LifeSim.Engine.GLTF
             get
             {
                 if (_vertexFormat != null) return _vertexFormat;
-                
+
                 _vertexFormat = new VertexFormat(new VertexLayoutDescription(
                     new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
                     new VertexElementDescription("Normal", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),

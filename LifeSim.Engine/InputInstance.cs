@@ -33,19 +33,27 @@ namespace LifeSim.Engine
             this._newMouseButtonsThisFrame.Clear();
 
 
-            for (int i = 0; i < this.InputSnapshot.KeyEvents.Count; i++) {
+            for (int i = 0; i < this.InputSnapshot.KeyEvents.Count; i++)
+            {
                 KeyEvent ke = this.InputSnapshot.KeyEvents[i];
-                if (ke.Down) {
+                if (ke.Down)
+                {
                     this._KeyDown(ke.Key);
-                } else {
+                }
+                else
+                {
                     this._KeyUp(ke.Key);
                 }
             }
-            for (int i = 0; i < this.InputSnapshot.MouseEvents.Count; i++) {
+            for (int i = 0; i < this.InputSnapshot.MouseEvents.Count; i++)
+            {
                 MouseEvent me = this.InputSnapshot.MouseEvents[i];
-                if (me.Down) {
+                if (me.Down)
+                {
                     this._MouseDown(me.MouseButton);
-                } else {
+                }
+                else
+                {
                     this._MouseUp(me.MouseButton);
                 }
             }
@@ -54,7 +62,8 @@ namespace LifeSim.Engine
             var center = new Vector2(this._window.Width / 2, this._window.Height / 2);
             this._mouseDelta = newPos - center;
             this._mousePosition = newPos;
-            if (this.MouseIsLocked) {
+            if (this.MouseIsLocked)
+            {
                 this._window.SetMousePosition(center);
             }
         }
@@ -79,9 +88,9 @@ namespace LifeSim.Engine
         public Vector2 MouseDelta => this._mouseDelta;
         public bool MouseIsLocked { get; private set; } = false;
 
-        public bool GetKey(Key key)                        => this._currentlyPressedKeys.Contains(key);
-        public bool GetKeyDown(Key key)                    => this._newKeysThisFrame.Contains(key);
-        public bool GetMouseButton(MouseButton button)     => this._currentlyPressedMouseButtons.Contains(button);
+        public bool GetKey(Key key) => this._currentlyPressedKeys.Contains(key);
+        public bool GetKeyDown(Key key) => this._newKeysThisFrame.Contains(key);
+        public bool GetMouseButton(MouseButton button) => this._currentlyPressedMouseButtons.Contains(button);
         public bool GetMouseButtonDown(MouseButton button) => this._newMouseButtonsThisFrame.Contains(button);
 
         private void _MouseUp(MouseButton mouseButton)
@@ -92,7 +101,8 @@ namespace LifeSim.Engine
 
         private void _MouseDown(MouseButton mouseButton)
         {
-            if (this._currentlyPressedMouseButtons.Add(mouseButton)) {
+            if (this._currentlyPressedMouseButtons.Add(mouseButton))
+            {
                 this._newMouseButtonsThisFrame.Add(mouseButton);
             }
         }
@@ -105,7 +115,8 @@ namespace LifeSim.Engine
 
         private void _KeyDown(Key key)
         {
-            if (this._currentlyPressedKeys.Add(key)) {
+            if (this._currentlyPressedKeys.Add(key))
+            {
                 this._newKeysThisFrame.Add(key);
             }
         }

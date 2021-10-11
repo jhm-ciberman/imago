@@ -18,9 +18,9 @@ namespace LifeSim.Engine.SceneGraph
         private float      _rotation = 0f;
         private Vector2    _scale = Vector2.One;
 
-        public Vector2    Position { get => this._position; set { this._position = value; this._OnTransformDirty(); } }
-        public float      Rotation { get => this._rotation; set { this._rotation = value; this._OnTransformDirty(); } }
-        public Vector2    Scale    { get => this._scale;    set { this._scale = value;    this._OnTransformDirty(); } }
+        public Vector2 Position { get => this._position; set { this._position = value; this._OnTransformDirty(); } }
+        public float Rotation { get => this._rotation; set { this._rotation = value; this._OnTransformDirty(); } }
+        public Vector2 Scale { get => this._scale; set { this._scale = value; this._OnTransformDirty(); } }
 
         private Matrix3x2 _localMatrix = Matrix3x2.Identity;
         private bool _localMatrixDirty = false;
@@ -40,8 +40,9 @@ namespace LifeSim.Engine.SceneGraph
         {
             if (node.Parent == this) return;
             if (node == this) return;
-            
-            if (node.Parent != null) {
+
+            if (node.Parent != null)
+            {
                 node.Parent.Remove(node);
             }
 
@@ -70,7 +71,8 @@ namespace LifeSim.Engine.SceneGraph
         public void UpdateWorldMatrix()
         {
             this._worldMatrix = this.GetLocalMatrix();
-            for(int i = 0; i < this.Children.Count; i++) {
+            for (int i = 0; i < this.Children.Count; i++)
+            {
                 this.Children[i]._UpdateWorldMatrix(ref this._worldMatrix);
             }
         }
@@ -78,14 +80,16 @@ namespace LifeSim.Engine.SceneGraph
         private void _UpdateWorldMatrix(ref Matrix3x2 parentMatrix)
         {
             this._worldMatrix = this.GetLocalMatrix() * parentMatrix;
-            for(int i = 0; i < this.Children.Count; i++) {
+            for (int i = 0; i < this.Children.Count; i++)
+            {
                 this.Children[i]._UpdateWorldMatrix(ref this._worldMatrix);
             }
         }
 
         public ref Matrix3x2 GetLocalMatrix()
         {
-            if (this._localMatrixDirty) {
+            if (this._localMatrixDirty)
+            {
                 this._localMatrix = Matrix3x2.CreateScale(this._scale)
                     * Matrix3x2.CreateRotation(this._rotation)
                     * Matrix3x2.CreateTranslation(this._position);

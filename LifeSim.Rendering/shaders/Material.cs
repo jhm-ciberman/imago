@@ -32,13 +32,14 @@ namespace LifeSim.Rendering
         {
             lock (this.Shader)
             {
-                if (this._resourceSetDirty || this._resourceSet == null) {
+                if (this._resourceSetDirty || this._resourceSet == null)
+                {
                     this._resourceSetDirty = false;
                     this._resourceSet?.Dispose();
                     this._resourceSet = this.Shader.CreateResourceSet(this._resources);
                 }
 
-                return this._resourceSet; 
+                return this._resourceSet;
             }
         }
 

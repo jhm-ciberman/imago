@@ -36,16 +36,21 @@ namespace LifeSim.Rendering
 
         public Pipeline GetPipeline(VertexFormat vertexFormat)
         {
-            for (int i = 0; i < this._pipelines.Count; i++) {
-                if (this._pipelines[i].VertexFormat == vertexFormat) {
+            for (int i = 0; i < this._pipelines.Count; i++)
+            {
+                if (this._pipelines[i].VertexFormat == vertexFormat)
+                {
                     return this._pipelines[i].Pipeline;
                 }
             }
 
-            lock (this._pipelines) {
+            lock (this._pipelines)
+            {
                 // Search again, but this time with locking
-                for (int i = 0; i < this._pipelines.Count; i++) {
-                    if (this._pipelines[i].VertexFormat == vertexFormat) {
+                for (int i = 0; i < this._pipelines.Count; i++)
+                {
+                    if (this._pipelines[i].VertexFormat == vertexFormat)
+                    {
                         return this._pipelines[i].Pipeline;
                     }
                 }
@@ -59,8 +64,10 @@ namespace LifeSim.Rendering
 
         private ShaderVariant _GetShaderVariant(VertexFormat vertexFormat)
         {
-            for (int i = 0; i < this._variants.Count; i++) {
-                if (this._variants[i].VertexFormat == vertexFormat) {
+            for (int i = 0; i < this._variants.Count; i++)
+            {
+                if (this._variants[i].VertexFormat == vertexFormat)
+                {
                     return this._variants[i];
                 }
             }
@@ -72,7 +79,8 @@ namespace LifeSim.Rendering
 
         public void Dispose()
         {
-            for (int i = 0; i < this._variants.Count; i++) {
+            for (int i = 0; i < this._variants.Count; i++)
+            {
                 this._variants[i].Dispose();
             }
             this._materialResourceLayout?.Dispose();

@@ -67,7 +67,7 @@ namespace LifeSim.Rendering
             this.Items = new Item[batchCapacity * 4];
 
             var vertexBufferSize = (uint) (Marshal.SizeOf<SpriteBatch.Item>() * 4 * batchCapacity);
-            this.VertexBuffer = factory.CreateBuffer(new BufferDescription((uint) vertexBufferSize, BufferUsage.VertexBuffer | BufferUsage.Dynamic));
+            this.VertexBuffer = factory.CreateBuffer(new BufferDescription((uint)vertexBufferSize, BufferUsage.VertexBuffer | BufferUsage.Dynamic));
         }
 
         public bool IsFull => this.Count >= this._capacity;
@@ -77,10 +77,11 @@ namespace LifeSim.Rendering
             float w = size.X;
             float h = size.Y;
 
-            this.Items[this.Count++] = new Item {
-                TopLeft = new Vertex(position.X    , position.Y    , depth, uvTopLeft.X    , uvTopLeft.Y    , color),
-                TopRight = new Vertex(position.X + w, position.Y    , depth, uvBottomRight.X, uvTopLeft.Y    , color),
-                BottomLeft = new Vertex(position.X    , position.Y + h, depth, uvTopLeft.X    , uvBottomRight.Y, color),
+            this.Items[this.Count++] = new Item
+            {
+                TopLeft = new Vertex(position.X, position.Y, depth, uvTopLeft.X, uvTopLeft.Y, color),
+                TopRight = new Vertex(position.X + w, position.Y, depth, uvBottomRight.X, uvTopLeft.Y, color),
+                BottomLeft = new Vertex(position.X, position.Y + h, depth, uvTopLeft.X, uvBottomRight.Y, color),
                 BottomRight = new Vertex(position.X + w, position.Y + h, depth, uvBottomRight.X, uvBottomRight.Y, color),
             };
         }
@@ -107,7 +108,8 @@ namespace LifeSim.Rendering
             var blUVs = new Vector2(uvTopLeft.X, uvBottomRight.Y);
             var brUVs = uvBottomRight;
 
-            this.Items[this.Count++] = new Item {
+            this.Items[this.Count++] = new Item
+            {
                 TopLeft = new Vertex(tlPos, tlUVs, color),
                 TopRight = new Vertex(trPos, trUVs, color),
                 BottomLeft = new Vertex(blPos, blUVs, color),
@@ -127,7 +129,8 @@ namespace LifeSim.Rendering
             var blUVs = new Vector2(uvTopLeft.X, uvBottomRight.Y);
             var brUVs = uvBottomRight;
 
-            this.Items[this.Count++] = new Item {
+            this.Items[this.Count++] = new Item
+            {
                 TopLeft = new Vertex(Vector2.Transform(tl, transform), depth, tlUVs, color),
                 TopRight = new Vertex(Vector2.Transform(tr, transform), depth, trUVs, color),
                 BottomLeft = new Vertex(Vector2.Transform(bl, transform), depth, blUVs, color),
@@ -140,11 +143,14 @@ namespace LifeSim.Rendering
             Vector2 pos = new Vector2(position.X, position.Y);
             Vector2 textureSize = new Vector2(this.Texture.Width, this.Texture.Height);
             Vector2 size, uvTopLeft, uvBottomRight;
-            if (source == null) {
+            if (source == null)
+            {
                 size = textureSize;
                 uvTopLeft = Vector2.Zero;
                 uvBottomRight = Vector2.One;
-            } else {
+            }
+            else
+            {
                 var r = source.Value;
                 size = new Vector2(r.Width, r.Height);
                 uvTopLeft = new Vector2(r.X, r.Y) / textureSize;
