@@ -38,7 +38,8 @@ namespace LifeSim.Rendering
 
         public VertexFormat GetVertexFormat()
         {
-            if (_cachedVertexFormat == null) {
+            if (_cachedVertexFormat == null) 
+            {
                 _cachedVertexFormat = this.MakeVertexFormat();
             }
             return _cachedVertexFormat;
