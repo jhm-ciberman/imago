@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using LifeSim.Core;
@@ -25,14 +26,6 @@ namespace LifeSim.Engine.SceneGraph
 
         private readonly Node3D _root;
 
-        protected class RootNode : Node3D
-        {
-            public RootNode(SceneLayer scene) : base()
-            {
-                this.Scene = scene;
-            }
-        }
-
         public void Render(Renderer renderer, Camera3D camera3D)
         {
             if (this.Renderables.Count > 0)
@@ -53,7 +46,7 @@ namespace LifeSim.Engine.SceneGraph
 
         public SceneLayer()
         {
-            this._root = new RootNode(this);
+            this._root = new Node3D();
         }
 
         public void AddParticleSystem(ParticleSystem particleSystem)
@@ -149,10 +142,7 @@ namespace LifeSim.Engine.SceneGraph
 
         internal void _OnTransformDirtyEvent(Node3D node)
         {
-            if (node.Scene == this)
-            {
-                this._transformDirtyList.Add(node);
-            }
+            this._transformDirtyList.Add(node);
         }
 
         public void AddRenderable(Renderable renderable)
@@ -171,15 +161,23 @@ namespace LifeSim.Engine.SceneGraph
 
         public void Update()
         {
+            Matrix4x4 identity = Matrix4x4.Identity;
+
             if (this._transformDirtyList.Count > 0)
             {
-                Matrix4x4 identity = Matrix4x4.Identity;
-
                 for (int i = 0; i < this._transformDirtyList.Count; i++)
                 {
                     var dirtyNode = this._transformDirtyList[i];
                     if (!dirtyNode.TransformIsDirty) continue;
-                    this._SearchTopDirty(dirtyNode).UpdateWorldMatrix(ref identity);
+                    Node3D topDirty = this._SearchTopDirty(dirtyNode);
+                    if (topDirty.Parent != null)
+                    {
+                        topDirty.UpdateWorldMatrix(ref topDirty.Parent.WorldMatrix);
+                    }
+                    else
+                    {
+                        topDirty.UpdateWorldMatrix(ref identity);
+                    }
                 }
                 this._transformDirtyList.Clear();
             }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using LifeSim.Engine.SceneGraph;
 
@@ -7,32 +8,28 @@ namespace LifeSim.Engine.Anim
     {
         private struct BindedChannel
         {
-            public Node3D Target { get; }
+            public Node3D Target;
 
-            private readonly IReadOnlyList<Animation.IChannel> _channel;
-            private int _lastTimeIndex;
+            public readonly IReadOnlyList<Animation.IChannel> Channels;
+            public int LastTimeIndex;
 
             public BindedChannel(Node3D target, IReadOnlyList<Animation.IChannel> channels)
             {
                 this.Target = target;
-                this._channel = channels;
-                this._lastTimeIndex = 0;
-            }
-
-            public void Update(float time, bool loop)
-            {
-                for (int i = 0; i < this._channel.Count; i++)
-                {
-                    this._channel[i].UpdateTarget(this.Target, time, loop, ref this._lastTimeIndex);
-                }
+                this.Channels = channels;
+                this.LastTimeIndex = 0;
             }
         }
 
-        private readonly IList<BindedChannel> _channels = new List<BindedChannel>();
+        private readonly IList<BindedChannel> _bindedChannels = new List<BindedChannel>();
 
         private float _currentTime = 0f;
 
-        public float CurrentTime { get => this._currentTime; set => this._currentTime = value % this._animation.Duration; }
+        public float CurrentTime
+        {
+            get => this._currentTime;
+            set => this._currentTime = value % this._animation.Duration;
+        }
 
         private readonly bool _loop = true;
 
@@ -47,7 +44,7 @@ namespace LifeSim.Engine.Anim
         {
             get
             {
-                foreach (var channel in this._channels)
+                foreach (var channel in this._bindedChannels)
                 {
                     yield return channel.Target;
                 }
@@ -56,20 +53,25 @@ namespace LifeSim.Engine.Anim
 
         public void AddChannel(Node3D target, IReadOnlyList<Animation.IChannel> channels)
         {
-            this._channels.Add(new BindedChannel(target, channels));
+            this._bindedChannels.Add(new BindedChannel(target, channels));
         }
 
         public void Update(float deltaTime)
         {
             this._currentTime += deltaTime;
+
             if (this._loop)
             {
                 this._currentTime %= this._animation.Duration;
             }
 
-            foreach (var channel in this._channels)
+            for (int i = 0; i < this._bindedChannels.Count; i++)
             {
-                channel.Update(this._currentTime, this._loop);
+                var bindedChannel = this._bindedChannels[i];
+                for (int j = 0; j < bindedChannel.Channels.Count; j++)
+                {
+                    bindedChannel.Channels[j].UpdateTarget(bindedChannel.Target, this._currentTime, this._loop, ref bindedChannel.LastTimeIndex);
+                }
             }
         }
     }

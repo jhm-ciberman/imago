@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using LifeSim.Core;
 using LifeSim.Rendering;
 
@@ -14,8 +15,6 @@ namespace LifeSim.Engine.SceneGraph
 
         public string Name { get; set; } = string.Empty;
         public Node3D? Parent { get; private set; } = null;
-        public SceneLayer? Scene { get; protected set; }
-
 
         private readonly SwapPopList<Node3D> _children = new SwapPopList<Node3D>();
         public IReadOnlyList<Node3D> Children => this._children;
@@ -27,19 +26,40 @@ namespace LifeSim.Engine.SceneGraph
         public Vector3 Position
         {
             get => this._position;
-            set { var old = this._position; this._position = value; if (old != value) this._NotifyTransformDirty(); }
+            set
+            {
+                if (this._position != value)
+                {
+                    this._position = value;
+                    this._NotifyTransformDirty();
+                }
+            }
         }
 
         public Quaternion Rotation
         {
             get => this._rotation;
-            set { var old = this._rotation; this._rotation = value; if (old != value) this._NotifyTransformDirty(); }
+            set
+            {
+                if (this._rotation != value)
+                {
+                    this._rotation = value;
+                    this._NotifyTransformDirty();
+                }
+            }
         }
 
         public Vector3 Scale
         {
             get => this._scale;
-            set { var old = this._scale; this._scale = value; if (old != value) this._NotifyTransformDirty(); }
+            set
+            {
+                if (this._scale != value)
+                {
+                    this._scale = value;
+                    this._NotifyTransformDirty();
+                }
+            }
         }
 
         private Matrix4x4 _localMatrix = Matrix4x4.Identity;
@@ -68,7 +88,6 @@ namespace LifeSim.Engine.SceneGraph
                 }
                 this._children.Add(node);
                 node.Parent = this;
-                node.Scene = this.Scene;
                 this.OnNodeAdded?.Invoke(this, node);
             }
         }
@@ -79,10 +98,10 @@ namespace LifeSim.Engine.SceneGraph
 
             this._children.Remove(node);
             node.Parent = null;
-            node.Scene = null;
             this.OnNodeRemoved?.Invoke(this, node);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected void _NotifyTransformDirty()
         {
             if (this._transformIsDirty) return;
@@ -199,14 +218,7 @@ namespace LifeSim.Engine.SceneGraph
                     }
                 }
             }
-            if (currentIndex < arrayPaths.Length)
-            {
-                return null;
-            }
-            else
-            {
-                return currentNode;
-            }
+            return currentIndex < arrayPaths.Length ? null : currentNode;
         }
     }
 }

@@ -38,19 +38,28 @@ namespace LifeSim.Engine.Anim
         public class PositionChannel : BaseChannel<Vector3>
         {
             public PositionChannel(string targetName, ISampler<Vector3> sampler) : base(targetName, sampler) { }
-            protected override void SetTargetValue(Node3D node, ref Vector3 value) => node.Position = value;
+            protected override void SetTargetValue(Node3D node, ref Vector3 value)
+            {
+                node.Position = value;
+            }
         }
 
         public class ScaleChannel : BaseChannel<Vector3>
         {
             public ScaleChannel(string targetName, ISampler<Vector3> sampler) : base(targetName, sampler) { }
-            protected override void SetTargetValue(Node3D node, ref Vector3 value) => node.Scale = value;
+            protected override void SetTargetValue(Node3D node, ref Vector3 value)
+            {
+                node.Scale = value;
+            }
         }
 
         public class RotationChannel : BaseChannel<Quaternion>
         {
             public RotationChannel(string targetName, ISampler<Quaternion> sampler) : base(targetName, sampler) { }
-            protected override void SetTargetValue(Node3D node, ref Quaternion value) => node.Rotation = value;
+            protected override void SetTargetValue(Node3D node, ref Quaternion value)
+            {
+                node.Rotation = value;
+            }
         }
 
         public interface ISampler<T> where T : struct
