@@ -1,14 +1,13 @@
 using Veldrid;
-using System.Runtime.InteropServices;
 using System.Collections.Generic;
-using Veldrid.Utilities;
+using System.Diagnostics;
 
 namespace LifeSim.Rendering
 {
     public class SceneRenderer
     {
-        public static IPass forwardPass = null!;
-        public static IPass shadowMapPass = null!;
+        public static IPass ForwardPass = null!;
+        public static IPass ShadowMapPass = null!;
 
         private readonly GraphicsDevice _gd;
         private readonly Veldrid.ResourceFactory _factory;
@@ -19,12 +18,10 @@ namespace LifeSim.Rendering
 
         private readonly ForwardPass _forwardPass;
         private readonly ShadowmapPass _shadowmapPass;
-
-        private readonly SceneStorage _storage;
         private readonly ResourceLayout _instanceResourceLayout;
         private readonly ResourceLayout _transformResourceLayout;
         private readonly ResourceLayout _bonesResourceLayout;
-        internal SceneStorage storage => this._storage;
+        internal SceneStorage Storage { get; }
 
         public SceneRenderer(GraphicsDevice gd, RenderTexture mainRenderTexture)
         {
@@ -49,12 +46,12 @@ namespace LifeSim.Rendering
             ));
             this._bonesResourceLayout.Name = "BonesData Resource Layout";
 
-            this._storage = new SceneStorage(gd, this._transformResourceLayout, this._instanceResourceLayout, this._bonesResourceLayout);
+            this.Storage = new SceneStorage(gd, this._transformResourceLayout, this._instanceResourceLayout, this._bonesResourceLayout);
             this._shadowmapPass = new ShadowmapPass(gd, this);
-            this._forwardPass = new ForwardPass(gd, this, this._mainRenderTexture, this._shadowmapPass.shadowmapTexture);
+            this._forwardPass = new ForwardPass(gd, this, this._mainRenderTexture, this._shadowmapPass.ShadowmapTexture);
 
-            SceneRenderer.shadowMapPass = this._shadowmapPass;
-            SceneRenderer.forwardPass = this._forwardPass;
+            SceneRenderer.ShadowMapPass = this._shadowmapPass;
+            SceneRenderer.ForwardPass = this._forwardPass;
         }
 
         public void Dispose()
@@ -62,16 +59,10 @@ namespace LifeSim.Rendering
             this._commandList.Dispose();
         }
 
-        public void Render(
-            IReadOnlyList<Renderable> renderables, 
-            DirectionalLight mainLight,
-            ColorF ambientColor,
-            ColorF clearColor,
-            ICamera camera
-        ) {
-            
+        public void Render(IReadOnlyList<Renderable> renderables, DirectionalLight mainLight, ColorF ambientColor, ColorF clearColor, ICamera camera)
+        {
             this._commandList.Begin();
-            this._storage.UpdateBuffers(this._commandList);
+            this.Storage.UpdateBuffers(this._commandList);
             this._shadowmapPass.Render(this._commandList, renderables, camera, mainLight);
             this._forwardPass.Render(this._commandList, renderables, mainLight, ambientColor, clearColor, camera);
             this._commandList.End();
@@ -79,15 +70,19 @@ namespace LifeSim.Rendering
             this._hasCommandsToSubmit = true;
         }
 
-        internal Veldrid.ResourceLayout[] GetShaderVariantResourceLayouts(Veldrid.ResourceLayout passResourceLayout, ShaderVariant shaderVariant)
+        internal ResourceLayout[] GetShaderVariantResourceLayouts(ResourceLayout passResourceLayout, ShaderVariant shaderVariant)
         {
-            var resources = new List<ResourceLayout>();
-            resources.Add(passResourceLayout);
-            resources.Add(this._transformResourceLayout);
-            resources.Add(shaderVariant.materialResourceLayout);
-            resources.Add(this._instanceResourceLayout);
+            Debug.Assert(shaderVariant.MaterialResourceLayout != null);
 
-            if (shaderVariant.vertexFormat.isSkinned) {
+            var resources = new List<ResourceLayout> {
+                passResourceLayout,
+                this._transformResourceLayout,
+                shaderVariant.MaterialResourceLayout,
+                this._instanceResourceLayout
+            };
+
+            if (shaderVariant.VertexFormat.IsSkinned)
+            {
                 resources.Add(this._bonesResourceLayout);
             }
 
@@ -96,7 +91,7 @@ namespace LifeSim.Rendering
 
         public void Submit()
         {
-            if (! this._hasCommandsToSubmit) return;
+            if (!this._hasCommandsToSubmit) return;
             this._gd.SubmitCommands(this._commandList);
             this._hasCommandsToSubmit = false;
         }

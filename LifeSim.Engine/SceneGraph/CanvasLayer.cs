@@ -4,32 +4,31 @@ using LifeSim.Rendering;
 
 namespace LifeSim.Engine.SceneGraph
 {
-    public class Canvas2D
+    public class CanvasLayer
     {
-        public Viewport viewport;
+        public Viewport Viewport;
+        private readonly SwapPopList<ICanvasItem> _items = new SwapPopList<ICanvasItem>();
 
-        private SwapPopList<ICanvasItem> _items = new SwapPopList<ICanvasItem>();
-        public IReadOnlyList<ICanvasItem> items => this._items;
-        
-        private Node2D _root = new Node2D();
-        public Node2D root => this._root;
-        
-        public Canvas2D(Viewport viewport)
+        public IReadOnlyList<ICanvasItem> Items => this._items;
+
+        private readonly Node2D _root = new Node2D();
+
+        public CanvasLayer(Viewport viewport)
         {
-            this.viewport = viewport;
+            this.Viewport = viewport;
         }
 
         public void Add(Node2D node)
         {
             this._root.Add(node);
             this._AddNodeToRecursive(node);
-        } 
+        }
 
         public void Remove(Node2D node)
         {
             this._root.Remove(node);
             this._RemoveNodeRecursive(node);
-        } 
+        }
 
         public void AddCanvasItem(ICanvasItem canvasItem)
         {
@@ -43,27 +42,32 @@ namespace LifeSim.Engine.SceneGraph
 
         internal void _AddNodeToRecursive(Node2D node)
         {
-            if (node is ICanvasItem canvasItem) {
+            if (node is ICanvasItem canvasItem)
+            {
                 this.AddCanvasItem(canvasItem);
             }
-            for (int i = 0; i < node.children.Count; i++) {
-                this._AddNodeToRecursive(node.children[i]);
+            for (int i = 0; i < node.Children.Count; i++)
+            {
+                this._AddNodeToRecursive(node.Children[i]);
             }
         }
 
         internal void _RemoveNodeRecursive(Node2D node)
         {
-            if (node is ICanvasItem canvasItem) {
+            if (node is ICanvasItem canvasItem)
+            {
                 this.RemoveCanvasItem(canvasItem);
             }
-            for (int i = 0; i < node.children.Count; i++) {
-                this._RemoveNodeRecursive(node.children[i]);
+            for (int i = 0; i < node.Children.Count; i++)
+            {
+                this._RemoveNodeRecursive(node.Children[i]);
             }
         }
 
         public void UpdateWorldMatrices()
         {
-            foreach (var child in this._root.children) {
+            foreach (var child in this._root.Children)
+            {
                 child.UpdateWorldMatrix();
             }
         }

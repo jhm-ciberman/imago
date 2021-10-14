@@ -25,10 +25,10 @@ namespace LifeSim.Engine.GLTF
         public Vector4UShort ReadUShort4(int offset)
         {
             Vector4UShort vector;
-            vector.x = BitConverter.ToUInt16(this._bytes, offset + 0);
-            vector.y = BitConverter.ToUInt16(this._bytes, offset + 2);
-            vector.z = BitConverter.ToUInt16(this._bytes, offset + 4);
-            vector.w = BitConverter.ToUInt16(this._bytes, offset + 6);
+            vector.X = BitConverter.ToUInt16(this._bytes, offset + 0);
+            vector.Y = BitConverter.ToUInt16(this._bytes, offset + 2);
+            vector.Z = BitConverter.ToUInt16(this._bytes, offset + 4);
+            vector.W = BitConverter.ToUInt16(this._bytes, offset + 6);
             return vector;
         }
 
@@ -72,7 +72,7 @@ namespace LifeSim.Engine.GLTF
         public Matrix4x4 ReadMatrix4x4(int offset)
         {
             Matrix4x4 mat = new Matrix4x4();
-    
+
             mat.M11 = BitConverter.ToSingle(this._bytes, offset + 0);
             mat.M12 = BitConverter.ToSingle(this._bytes, offset + 4);
             mat.M13 = BitConverter.ToSingle(this._bytes, offset + 8);
@@ -107,7 +107,7 @@ namespace LifeSim.Engine.GLTF
 
         internal sbyte ReadSByte(int offset)
         {
-            return unchecked((sbyte) this._bytes[offset]);
+            return unchecked((sbyte)this._bytes[offset]);
         }
 
         internal short ReadShort(int offset)

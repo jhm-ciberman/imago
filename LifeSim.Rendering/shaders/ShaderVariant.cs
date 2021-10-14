@@ -7,57 +7,63 @@ namespace LifeSim.Rendering
 {
     public class ShaderVariant : IDisposable
     {
-        public VertexFormat vertexFormat;
+        public VertexFormat VertexFormat;
 
-        public ShaderSetDescription shaderSetDescription;
+        public ShaderSetDescription ShaderSetDescription;
 
-        public ResourceLayout materialResourceLayout;
+        public ResourceLayout? MaterialResourceLayout;
 
-        public ShaderVariant(Veldrid.ResourceFactory factory, VertexFormat vertexFormat, ResourceLayout materialResourceLayout, ShaderSource source)
+        public ShaderVariant(ResourceFactory factory, VertexFormat vertexFormat, ResourceLayout? materialResourceLayout, ShaderSource source)
         {
             var macros = this.GetMacroDefinitions(vertexFormat);
             var options = new GlslCompileOptions(debug: true, macros);
-            var vertGlslShader = this._CompileGlslToSpirv(source.vertCode, source.vertFilename, ShaderStages.Vertex, options);
-            var fragGlslShader = this._CompileGlslToSpirv(source.fragCode, source.fragFilename, ShaderStages.Fragment, options);
+            var vertGlslShader = this._CompileGlslToSpirv(source.VertCode, source.VertFilename, ShaderStages.Vertex, options);
+            var fragGlslShader = this._CompileGlslToSpirv(source.FragCode, source.FragFilename, ShaderStages.Fragment, options);
 
-            this.vertexFormat = vertexFormat;
+            this.VertexFormat = vertexFormat;
 
-            this.materialResourceLayout = materialResourceLayout;
+            this.MaterialResourceLayout = materialResourceLayout;
             var layout = this.GetVertexLayout(vertexFormat);
-            this.shaderSetDescription = new ShaderSetDescription(layout, factory.CreateFromSpirv(vertGlslShader, fragGlslShader));
+            this.ShaderSetDescription = new ShaderSetDescription(layout, factory.CreateFromSpirv(vertGlslShader, fragGlslShader));
         }
 
         private MacroDefinition[] GetMacroDefinitions(VertexFormat vertexFormat)
         {
             var macros = new List<MacroDefinition>();
-            //if (vertexFormat.isSkinned)
-            //    macros.Add(new MacroDefinition("USE_SKINNED_MESH"));
 
-            foreach (var element in vertexFormat.layout.Elements)
-                macros.Add(new MacroDefinition("USE_" + element.Name.ToUpperInvariant()));
+            foreach (var lqayot in vertexFormat.Layouts)
+            {
+                foreach (var element in lqayot.Elements)
+                {
+                    macros.Add(new MacroDefinition("USE_" + element.Name.ToUpperInvariant()));
+                }
+            }
 
             return macros.ToArray();
         }
 
         private VertexLayoutDescription[] GetVertexLayout(VertexFormat vertexFormat)
         {
-            if (! vertexFormat.isSurface) 
-                return new VertexLayoutDescription[] { vertexFormat.layout };
+            if (!vertexFormat.IsSurface)
+                return vertexFormat.Layouts;
 
-            var layouts = new List<VertexLayoutDescription>();
-            layouts.Add(new VertexLayoutDescription(stride: 16, instanceStepRate: 1,
+            var arr = new VertexLayoutDescription[vertexFormat.Layouts.Length + 1];
+            arr[0] = new VertexLayoutDescription(stride: 16, instanceStepRate: 1,
                 new VertexElementDescription("Offsets", VertexElementSemantic.TextureCoordinate, VertexElementFormat.UInt4)
-            ));
-            layouts.Add(vertexFormat.layout);
-            return layouts.ToArray();
+            );
+            Array.Copy(vertexFormat.Layouts, 0, arr, 1, vertexFormat.Layouts.Length);
+            return arr;
         }
 
-        private Veldrid.ShaderDescription _CompileGlslToSpirv(string sourceText, string fileName, ShaderStages stage, GlslCompileOptions options)
+        private ShaderDescription _CompileGlslToSpirv(string sourceText, string fileName, ShaderStages stage, GlslCompileOptions options)
         {
-            try {
+            try
+            {
                 var result = SpirvCompilation.CompileGlslToSpirv(sourceText, fileName, stage, options);
-                return new Veldrid.ShaderDescription(stage, result.SpirvBytes, "main");
-            } catch (SpirvCompilationException e) {
+                return new ShaderDescription(stage, result.SpirvBytes, "main");
+            }
+            catch (SpirvCompilationException e)
+            {
                 Console.WriteLine(sourceText);
                 throw e;
             }
@@ -65,8 +71,9 @@ namespace LifeSim.Rendering
 
         public void Dispose()
         {
-            var nativeShaders = this.shaderSetDescription.Shaders;
-            for (int i = 0; i < nativeShaders.Length; i++) {
+            var nativeShaders = this.ShaderSetDescription.Shaders;
+            for (int i = 0; i < nativeShaders.Length; i++)
+            {
                 nativeShaders[i].Dispose();
             }
         }

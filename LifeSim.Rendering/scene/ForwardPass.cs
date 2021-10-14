@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Veldrid;
-using Veldrid.Utilities;
 
 namespace LifeSim.Rendering
 {
@@ -12,16 +11,16 @@ namespace LifeSim.Rendering
         [StructLayout(LayoutKind.Sequential)]
         private struct CameraInfo
         {
-            public Matrix4x4 viewProjectionMatrix;
-            public Matrix4x4 shadowMapMatrix;
+            public Matrix4x4 ViewProjectionMatrix { get; set; }
+            public Matrix4x4 ShadowMapMatrix { get; set; }
         }
 
         [StructLayout(LayoutKind.Sequential)]
         private struct LightInfo
         {
-            public ColorF ambientColor;
-            public ColorF mainLightColor;
-            public Vector3 mainLightDirection;
+            public ColorF AmbientColor { get; set; }
+            public ColorF MainLightColor { get; set; }
+            public Vector3 MainLightDirection { get; set; }
             private readonly float _padding0;
         }
 
@@ -48,8 +47,8 @@ namespace LifeSim.Rendering
                 new ResourceLayoutElementDescription("ShadowMapSampler", ResourceKind.Sampler, ShaderStages.Fragment)
             ));
 
-            this._camera3DInfoBuffer = factory.CreateBuffer(new BufferDescription((uint) Marshal.SizeOf<CameraInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
-            this._lightInfoBuffer = factory.CreateBuffer(new BufferDescription((uint) Marshal.SizeOf<LightInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+            this._camera3DInfoBuffer = factory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<CameraInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+            this._lightInfoBuffer = factory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<LightInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
             var shadowMapSampler = factory.CreateSampler(new SamplerDescription (
                 SamplerAddressMode.Border, SamplerAddressMode.Border, SamplerAddressMode.Border,
@@ -68,31 +67,32 @@ namespace LifeSim.Rendering
         }
 
         public void Render(
-            CommandList commandList, 
-            IReadOnlyList<Renderable> renderables, 
+            CommandList commandList,
+            IReadOnlyList<Renderable> renderables,
             DirectionalLight mainLight,
             ColorF ambientColor,
             ColorF clearColor,
             ICamera camera
-        ) {
-            var cameraFrustum = new BoundingFrustum(camera.frustumCullingCamera.viewProjectionMatrix);
-            this._renderQueue.AddToRenderQueue(renderables, ref cameraFrustum, camera.position);
+        )
+        {
+            var cameraFrustum = camera.FrustumForCulling;
+            this._renderQueue.AddToRenderQueue(renderables, ref cameraFrustum, camera.Position);
             this._renderQueue.Sort();
 
-            commandList.SetFramebuffer(this._renderTexture.framebuffer);
-            commandList.ClearColorTarget(0, new RgbaFloat(clearColor.r, clearColor.g, clearColor.b, clearColor.a));
+            commandList.SetFramebuffer(this._renderTexture.Framebuffer);
+            commandList.ClearColorTarget(0, new RgbaFloat(clearColor.R, clearColor.G, clearColor.B, clearColor.A));
             commandList.ClearColorTarget(1, RgbaFloat.Black);
             commandList.ClearDepthStencil(1f);
 
             CameraInfo cameraInfo = new CameraInfo();
-            cameraInfo.viewProjectionMatrix = camera.viewProjectionMatrix;
-            cameraInfo.shadowMapMatrix = mainLight.GetShadowMapMatrix(camera.position) * this._shadowMapScaling;
+            cameraInfo.ViewProjectionMatrix = camera.ViewProjectionMatrix;
+            cameraInfo.ShadowMapMatrix = mainLight.GetShadowMapMatrix(camera.Position) * this._shadowMapScaling;
 
             LightInfo lightInfo = new LightInfo();
-            lightInfo.ambientColor = ambientColor;
-            lightInfo.mainLightColor = mainLight.color;
-            lightInfo.mainLightDirection = Vector3.Normalize(mainLight.direction);
-            
+            lightInfo.AmbientColor = ambientColor;
+            lightInfo.MainLightColor = mainLight.Color;
+            lightInfo.MainLightDirection = Vector3.Normalize(mainLight.Direction);
+
             commandList.UpdateBuffer(this._camera3DInfoBuffer, 0, ref cameraInfo);
             commandList.UpdateBuffer(this._lightInfoBuffer, 0, ref lightInfo);
 
@@ -117,17 +117,18 @@ namespace LifeSim.Rendering
                 scissorTestEnabled: true
             );
 
-            return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription() {
+            return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
+            {
                 DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
                 PrimitiveTopology = PrimitiveTopology.TriangleList,
-                ShaderSet = shaderVariant.shaderSetDescription,
+                ShaderSet = shaderVariant.ShaderSetDescription,
                 BlendState = new BlendStateDescription(
-                    RgbaFloat.Black, 
-                    BlendAttachmentDescription.OverrideBlend, 
+                    RgbaFloat.Black,
+                    BlendAttachmentDescription.OverrideBlend,
                     BlendAttachmentDescription.Disabled
                 ),
                 RasterizerState = rasterizerState,
-                Outputs = this._renderTexture.outputDescription,
+                Outputs = this._renderTexture.OutputDescription,
                 ResourceLayouts = this._renderer.GetShaderVariantResourceLayouts(this._resourceLayout, shaderVariant),
             });
         }

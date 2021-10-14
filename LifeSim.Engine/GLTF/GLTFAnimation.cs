@@ -30,9 +30,11 @@ namespace LifeSim.Engine.GLTF
         {
             List<Animation.IChannel> list = new List<Animation.IChannel>();
 
-            foreach (var channel in this._channels) {
+            foreach (var channel in this._channels)
+            {
                 var c = this._CreateChannel(channel);
-                if (c != null) {
+                if (c != null)
+                {
                     list.Add(c);
                 }
             }
@@ -43,12 +45,12 @@ namespace LifeSim.Engine.GLTF
         private Animation.IChannel? _CreateChannel(glTFLoader.Schema.AnimationChannel channel)
         {
             var targetIndex = channel.Target.Node;
-            if (! targetIndex.HasValue) return null;
+            if (!targetIndex.HasValue) return null;
 
             var factory = this._GetChannelFactory(channel.Target.Path);
             if (factory == null) return null;
 
-            var targetName = this._model.GetNode(targetIndex.Value).name;
+            var targetName = this._model.GetNode(targetIndex.Value).Name;
             var sampler = this._samplers[channel.Sampler];
             var input = this._GetSamplerInput(sampler.Input);
             var output = this._model.GetAccessor(sampler.Output);
@@ -57,23 +59,25 @@ namespace LifeSim.Engine.GLTF
 
         private IChannelFactory? _GetChannelFactory(PathEnum path)
         {
-            return path switch {
+            return path switch
+            {
                 PathEnum.translation => new PositionChannelFactory(),
-                PathEnum.rotation    => new RotationChannelFactory(),
-                PathEnum.scale       => new ScaleChannelFactory(),
-                _                    => null, // Not supported
+                PathEnum.rotation => new RotationChannelFactory(),
+                PathEnum.scale => new ScaleChannelFactory(),
+                _ => null, // Not supported
             };
         }
 
-        
+
         private float[] _GetSamplerInput(int index)
         {
-            if (! this._inputsCache.ContainsKey(index)) {
+            if (!this._inputsCache.ContainsKey(index))
+            {
                 float[] inputArr = this._model.GetAccessor(index).AsFloatArray();
                 this._inputsCache.Add(index, inputArr);
                 return inputArr;
             }
-            
+
             return this._inputsCache[index];
         }
 
@@ -90,11 +94,12 @@ namespace LifeSim.Engine.GLTF
             protected Animation.BaseSampler<T> _MakeSampler(float[] input, T[] values, InterpolationEnum type)
             {
                 var interpolator = this._MakeInterpolator();
-                return type switch {
-                    InterpolationEnum.STEP        => new Animation.SamplerStep<T>(input, values),
-                    InterpolationEnum.LINEAR      => new Animation.SamplerLinear<T>(input, values, interpolator),
+                return type switch
+                {
+                    InterpolationEnum.STEP => new Animation.SamplerStep<T>(input, values),
+                    InterpolationEnum.LINEAR => new Animation.SamplerLinear<T>(input, values, interpolator),
                     InterpolationEnum.CUBICSPLINE => new Animation.SamplerCubicSpline<T>(input, values, interpolator),
-                    _                             => new Animation.SamplerStep<T>(input, values),
+                    _ => new Animation.SamplerStep<T>(input, values),
                 };
             }
         }

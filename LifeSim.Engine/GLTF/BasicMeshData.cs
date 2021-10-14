@@ -14,17 +14,22 @@ namespace LifeSim.Engine.GLTF
         public static BasicMeshData CreateMesh(ushort[] indices, Vector3[] positions, Vector3[]? normals, Vector2[]? uvs)
         {
             BasicVertex[] vertices = ArrayPool<BasicVertex>.Shared.Rent(positions.Length);
-            for(var i = 0; i < positions.Length; i++) {
-                vertices[i].position = positions[i];
+            for (var i = 0; i < positions.Length; i++)
+            {
+                vertices[i].Position = positions[i];
             }
-            if (normals != null) {
-                for(var i = 0; i < normals.Length; i++) {
-                    vertices[i].normal = normals[i];
+            if (normals != null)
+            {
+                for (var i = 0; i < normals.Length; i++)
+                {
+                    vertices[i].Normal = normals[i];
                 }
             }
-            if (uvs != null) {
-                for(var i = 0; i < uvs.Length; i++) {
-                    vertices[i].uv = uvs[i];
+            if (uvs != null)
+            {
+                for (var i = 0; i < uvs.Length; i++)
+                {
+                    vertices[i].Uv = uvs[i];
                 }
             }
             var mesh = new BasicMeshData(indices, vertices);
@@ -35,43 +40,46 @@ namespace LifeSim.Engine.GLTF
 
         public void Translate(Vector3 translation)
         {
-            for (var i = 0; i < this.vertices.Length; i++) {
-                this.vertices[i].position += translation;
+            for (var i = 0; i < this.Vertices.Length; i++)
+            {
+                this.Vertices[i].Position += translation;
             }
         }
 
         public BasicMeshData Clone()
         {
-            ushort[] indices = (ushort[]) this.indices.Clone();
-            BasicVertex[] vertices = (BasicVertex[]) this.vertices.Clone();
+            ushort[] indices = (ushort[]) this.Indices.Clone();
+            BasicVertex[] vertices = (BasicVertex[]) this.Vertices.Clone();
 
             return new BasicMeshData(indices, vertices);
         }
 
         public void RecomputeNormals()
         {
-            for (var i = 0; i < this.indices.Length; i += 3) {
-                ushort index1 = this.indices[i + 0];
-                ushort index2 = this.indices[i + 1];
-                ushort index3 = this.indices[i + 2];
+            for (var i = 0; i < this.Indices.Length; i += 3)
+            {
+                ushort index1 = this.Indices[i + 0];
+                ushort index2 = this.Indices[i + 1];
+                ushort index3 = this.Indices[i + 2];
 
-                Vector3 p1 = this.vertices[index1].position;
-                Vector3 p2 = this.vertices[index2].position;
-                Vector3 p3 = this.vertices[index3].position;
+                Vector3 p1 = this.Vertices[index1].Position;
+                Vector3 p2 = this.Vertices[index2].Position;
+                Vector3 p3 = this.Vertices[index3].Position;
 
                 Vector3 normal = Vector3.Cross((p3 - p2), (p1 - p2));
 
-                this.vertices[index1].normal = normal;
-                this.vertices[index2].normal = normal;
-                this.vertices[index3].normal = normal;
+                this.Vertices[index1].Normal = normal;
+                this.Vertices[index2].Normal = normal;
+                this.Vertices[index3].Normal = normal;
             }
         }
 
-        
+
         public void FlipNormals()
         {
-            for (int i = 0; i < this.vertices.Length; i++) {
-                this.vertices[i].normal = -this.vertices[i].normal;
+            for (int i = 0; i < this.Vertices.Length; i++)
+            {
+                this.Vertices[i].Normal = -this.Vertices[i].Normal;
             }
         }
 
@@ -83,38 +91,42 @@ namespace LifeSim.Engine.GLTF
 
         public BasicMeshData Merge(BasicMeshData mesh)
         {
-            BasicVertex[] vertices = new BasicVertex[mesh.vertices.Length + this.vertices.Length];
-            ushort[] indices = new ushort[mesh.indices.Length + this.indices.Length];
-            
-            for (int i = 0; i < this.vertices.Length; i++) {
-                vertices[i] = this.vertices[i];
+            BasicVertex[] vertices = new BasicVertex[mesh.Vertices.Length + this.Vertices.Length];
+            ushort[] indices = new ushort[mesh.Indices.Length + this.Indices.Length];
+
+            for (int i = 0; i < this.Vertices.Length; i++)
+            {
+                vertices[i] = this.Vertices[i];
             }
 
-            for (int i = 0; i < mesh.vertices.Length; i++) {
-                int j = i + this.vertices.Length;
-                vertices[j] = mesh.vertices[i];
+            for (int i = 0; i < mesh.Vertices.Length; i++)
+            {
+                int j = i + this.Vertices.Length;
+                vertices[j] = mesh.Vertices[i];
             }
 
-            for (int i = 0; i < this.indices.Length; i++) {
-                indices[i] = this.indices[i];
+            for (int i = 0; i < this.Indices.Length; i++)
+            {
+                indices[i] = this.Indices[i];
             }
 
-            for (int i = 0; i < mesh.indices.Length; i++) {
-                int j = i + this.indices.Length;
-                indices[j] = (ushort) ((int)mesh.indices[i] + this.vertices.Length);
+            for (int i = 0; i < mesh.Indices.Length; i++)
+            {
+                int j = i + this.Indices.Length;
+                indices[j] = (ushort)((int)mesh.Indices[i] + this.Vertices.Length);
             }
-            
+
             return new BasicMeshData(indices, vertices);
         }
 
         protected override Vector3 GetPosition(int index)
         {
-            return this.vertices[index].position;
+            return this.Vertices[index].Position;
         }
 
         protected override VertexFormat MakeVertexFormat()
         {
-            return BasicVertex.vertexFormat;
+            return BasicVertex.VertexFormat;
         }
     }
 }

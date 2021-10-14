@@ -9,19 +9,16 @@ namespace LifeSim.Rendering
 {
     public class ShadowmapPass : IDisposable, IPass
     {
-        public Veldrid.Texture shadowmapTexture { get; private set; }
+        public Veldrid.Texture ShadowmapTexture { get; private set; }
 
-        public ResourceLayout _resourceLayout;
-        public ResourceSet _resourceSet;
-
-        private GraphicsDevice _gd;
-
+        private readonly ResourceLayout _resourceLayout;
+        private readonly ResourceSet _resourceSet;
+        private readonly GraphicsDevice _gd;
         private readonly Framebuffer _shadowmapFramebuffer;
-        public readonly DeviceBuffer _shadowmapInfoBuffer;
-
-        private RenderQueue _renderQueue;
-        private RenderJob _renderJob;
-        private SceneRenderer _renderer;
+        private readonly DeviceBuffer _shadowmapInfoBuffer;
+        private readonly RenderQueue _renderQueue;
+        private readonly RenderJob _renderJob;
+        private readonly SceneRenderer _renderer;
 
         public ShadowmapPass(GraphicsDevice gd, SceneRenderer renderer)
         {
@@ -34,12 +31,12 @@ namespace LifeSim.Rendering
             ));
 
             uint shadowMapSize = 4096;
-            this.shadowmapTexture = factory.CreateTexture(TextureDescription.Texture2D(shadowMapSize, shadowMapSize, 1, 1, PixelFormat.R32_Float, TextureUsage.DepthStencil | TextureUsage.Sampled));
+            this.ShadowmapTexture = factory.CreateTexture(TextureDescription.Texture2D(shadowMapSize, shadowMapSize, 1, 1, PixelFormat.R32_Float, TextureUsage.DepthStencil | TextureUsage.Sampled));
             this._shadowmapFramebuffer = factory.CreateFramebuffer(new FramebufferDescription(
-                this.shadowmapTexture, System.Array.Empty<Veldrid.Texture>()
+                this.ShadowmapTexture, System.Array.Empty<Veldrid.Texture>()
             ));
 
-            this._shadowmapInfoBuffer = factory.CreateBuffer(new BufferDescription((uint) Marshal.SizeOf<Matrix4x4>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+            this._shadowmapInfoBuffer = factory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<Matrix4x4>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
 
             this._resourceSet = factory.CreateResourceSet(new ResourceSetDescription(this._resourceLayout, this._shadowmapInfoBuffer));
@@ -47,15 +44,15 @@ namespace LifeSim.Rendering
             this._renderQueue = new RenderQueue();
             this._renderJob = new RenderJob(this._gd, this._resourceSet, true);
         }
-        
+
         public void Render(CommandList commandList, IReadOnlyList<Renderable> renderables, ICamera camera, DirectionalLight mainLight)
         {
-            var matrix = mainLight.GetShadowMapMatrix(camera.position);
+            var matrix = mainLight.GetShadowMapMatrix(camera.Position);
             var frustum = new BoundingFrustum(matrix);
-            this._renderQueue.AddToRenderQueue(renderables, ref frustum, camera.position);
+            this._renderQueue.AddToRenderQueue(renderables, ref frustum, camera.Position);
             this._renderQueue.Sort();
 
-            var shadowmapMatrix = mainLight.GetShadowMapMatrix(camera.position);
+            var shadowmapMatrix = mainLight.GetShadowMapMatrix(camera.Position);
             commandList.SetFramebuffer(this._shadowmapFramebuffer);
             commandList.ClearDepthStencil(1f);
             commandList.UpdateBuffer(this._shadowmapInfoBuffer, 0, ref shadowmapMatrix);
@@ -81,10 +78,11 @@ namespace LifeSim.Rendering
                 scissorTestEnabled: true
             );
 
-            return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription() {
+            return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
+            {
                 DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
                 PrimitiveTopology = PrimitiveTopology.TriangleList,
-                ShaderSet = shaderVariant.shaderSetDescription,
+                ShaderSet = shaderVariant.ShaderSetDescription,
                 BlendState = BlendStateDescription.Empty,
                 RasterizerState = rasterizerState,
                 Outputs = this._shadowmapFramebuffer.OutputDescription,

@@ -5,29 +5,29 @@ namespace LifeSim.Rendering
 {
     public readonly struct RenderBatch
     {
-        public readonly uint instanceCount;
-        public readonly Mesh mesh;
-        public readonly Veldrid.Pipeline pipeline;
-        public readonly Veldrid.ResourceSet transformResourceSet;
-        public readonly Veldrid.ResourceSet materialResourceSet;
-        public readonly Veldrid.ResourceSet instanceResourceSet;
-        public readonly Veldrid.ResourceSet? skeletonResourceSet;
+        public readonly uint InstanceCount { get; }
+        public readonly Mesh Mesh { get; }
+        public readonly Veldrid.Pipeline Pipeline { get; }
+        public readonly Veldrid.ResourceSet TransformResourceSet { get; }
+        public readonly Veldrid.ResourceSet MaterialResourceSet { get; }
+        public readonly Veldrid.ResourceSet InstanceResourceSet { get; }
+        public readonly Veldrid.ResourceSet? SkeletonResourceSet { get; }
 
         public RenderBatch(uint instanceCount, Renderable renderable, bool shadowmapPass)
         {
-            Contract.Assume(renderable.mesh != null);
-            Contract.Assume(renderable.material != null);
-            Contract.Assume(renderable.materialResourceSet != null);
-            Contract.Assume(renderable.instanceResourceSet != null);
+            Contract.Assume(renderable.Mesh != null);
+            Contract.Assume(renderable.Material != null);
+            Contract.Assume(renderable.MaterialResourceSet != null);
+            Contract.Assume(renderable.InstanceResourceSet != null);
 
-            this.instanceCount = instanceCount;
-            this.mesh = renderable.mesh;
-            var shader = shadowmapPass ? renderable.material.shadowmapShader : renderable.material.shader;
-            this.pipeline = shader.GetPipeline(renderable.mesh.vertexFormat);
-            this.transformResourceSet = renderable.transformResourceSet;
-            this.materialResourceSet = renderable.materialResourceSet;
-            this.instanceResourceSet = renderable.instanceResourceSet;
-            this.skeletonResourceSet = renderable.skeletonResourceSet;
+            this.InstanceCount = instanceCount;
+            this.Mesh = renderable.Mesh;
+            var shader = shadowmapPass ? renderable.Material.ShadowmapShader : renderable.Material.Shader;
+            this.Pipeline = shader.GetPipeline(renderable.Mesh.VertexFormat);
+            this.TransformResourceSet = renderable.TransformResourceSet;
+            this.MaterialResourceSet = renderable.MaterialResourceSet;
+            this.InstanceResourceSet = renderable.InstanceResourceSet;
+            this.SkeletonResourceSet = renderable.SkeletonResourceSet;
         }
     }
 }

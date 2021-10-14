@@ -6,13 +6,13 @@ namespace LifeSim.Rendering
 {
     public class VertexFormat
     {
-        public VertexLayoutDescription layout;
-        public bool isSkinned = false;
-        public bool isSurface = false;
+        public VertexLayoutDescription[] Layouts;
+        public bool IsSkinned = false;
+        public bool IsSurface = false;
 
-        public VertexFormat(VertexLayoutDescription layout)
+        public VertexFormat(params VertexLayoutDescription[] layouts)
         {
-            this.layout = layout;
+            this.Layouts = layouts;
         }
     }
 }

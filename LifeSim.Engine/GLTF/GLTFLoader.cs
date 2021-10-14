@@ -39,32 +39,39 @@ namespace LifeSim.Engine.GLTF
             var name = this.GetNodeName(index);
             node = new GLTFNode(name);
 
-            if (data.Mesh.HasValue) {
-                node.material = this._defaultMaterial;
-                node.mesh = this._GetMesh(data.Mesh.Value);
-                if (data.Skin.HasValue) {
-                    node.skin = this._GetSkin(data.Skin.Value);
+            if (data.Mesh.HasValue)
+            {
+                node.Material = this._defaultMaterial;
+                node.Mesh = this._GetMesh(data.Mesh.Value);
+                if (data.Skin.HasValue)
+                {
+                    node.Skin = this._GetSkin(data.Skin.Value);
                 }
             }
 
-            if (data.Matrix.Length == 0) {
+            if (data.Matrix.Length == 0)
+            {
                 Matrix4x4.Decompose(this._ToMatrix(data.Matrix), out Vector3 scale, out Quaternion rotation, out Vector3 position);
-                node.scale = scale;
-                node.rotation = rotation;
-                node.position = position;
-            } else {
+                node.Scale = scale;
+                node.Rotation = rotation;
+                node.Position = position;
+            }
+            else
+            {
                 var rot = data.Rotation;
                 var scale = data.Scale;
                 var trans = data.Translation;
-                node.scale = new Vector3(scale[0], scale[1], scale[2]);
-                node.rotation = new Quaternion(rot[0], rot[1], rot[2], rot[3]);
-                node.position = new Vector3(trans[0], trans[1], trans[2]);
+                node.Scale = new Vector3(scale[0], scale[1], scale[2]);
+                node.Rotation = new Quaternion(rot[0], rot[1], rot[2], rot[3]);
+                node.Position = new Vector3(trans[0], trans[1], trans[2]);
             }
 
             this._nodesCache[index] = node;
 
-            if (data.Children != null) {
-                foreach (var i in data.Children) {
+            if (data.Children != null)
+            {
+                foreach (var i in data.Children)
+                {
                     node.Add(this.GetNode(i));
                 }
             }
@@ -93,7 +100,8 @@ namespace LifeSim.Engine.GLTF
         public Animation[] LoadAnimations()
         {
             Animation[] animations = new Animation[this._model.Animations.Length];
-            for (int i = 0; i < this._model.Animations.Length; i++) {
+            for (int i = 0; i < this._model.Animations.Length; i++)
+            {
                 animations[i] = this.LoadAnimation(i);
             }
             return animations;
@@ -110,22 +118,26 @@ namespace LifeSim.Engine.GLTF
         private Skin _GetSkin(int index)
         {
             var data = this._model.Skins[index];
-            
+
             int? matricesIndex = data.InverseBindMatrices;
             Matrix4x4[] matrices;
-            if (matricesIndex == null) {
+            if (matricesIndex == null)
+            {
                 matrices = new GLTFBufferViewZeroed().ReadMatrix4x4Array(0, data.Joints.Length);
-            } else {
+            }
+            else
+            {
                 matrices = this.GetAccessor(matricesIndex.Value).AsMatrix4x4();
             }
 
             string[] joints = new string[data.Joints.Length];
-            for (int i = 0; i < joints.Length; i++) {
+            for (int i = 0; i < joints.Length; i++)
+            {
                 joints[i] = this.GetNodeName(data.Joints[i]);
             }
-            
+
             string? root = data.Skeleton.HasValue ? this.GetNodeName(data.Skeleton.Value) : null;
-            
+
             return new Skin(matrices, joints, root);
         }
 
@@ -134,7 +146,8 @@ namespace LifeSim.Engine.GLTF
             var data = this._model.Scenes[index];
             var name = data.Name ?? "Scene_" + index;
             var scene = new GLTFScene(name);
-            foreach (var node in data.Nodes) {
+            foreach (var node in data.Nodes)
+            {
                 scene.Add(this.GetNode(node));
             }
             return scene;
@@ -157,7 +170,7 @@ namespace LifeSim.Engine.GLTF
         {
             GLTFBuffer? buffer = this._buffersCache[index];
             if (buffer != null) return buffer;
-            
+
             var bytes = this._model.LoadBinaryBuffer(index, this._path);
             buffer = new GLTFBuffer(bytes);
             this._buffersCache[index] = buffer;
@@ -166,11 +179,11 @@ namespace LifeSim.Engine.GLTF
 
         private IGLTFBufferView _GetBufferView(int? index)
         {
-            if (! index.HasValue) return new GLTFBufferViewZeroed();
+            if (!index.HasValue) return new GLTFBufferViewZeroed();
 
             var data = this._model.BufferViews[index.Value];
             var buffer = this._GetBuffer(data.Buffer);
-            
+
             return new GLTFBufferView(buffer, data.ByteOffset, data.ByteStride);
         }
     }

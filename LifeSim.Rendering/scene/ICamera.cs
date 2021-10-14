@@ -1,11 +1,18 @@
 using System.Numerics;
+using Veldrid.Utilities;
 
 namespace LifeSim.Rendering
 {
     public interface ICamera
     {
-        Vector3 position { get; }
-        Matrix4x4 viewProjectionMatrix { get; }
-        ICamera frustumCullingCamera { get; }
+        Vector3 Position { get; }
+
+        Vector3 Forward { get; }
+        Vector3 Up { get; }
+        Vector3 Right { get; }
+        Matrix4x4 ViewMatrix { get; }
+        Matrix4x4 ProjectionMatrix { get; }
+        Matrix4x4 ViewProjectionMatrix { get; }
+        BoundingFrustum FrustumForCulling { get; }
     }
 }

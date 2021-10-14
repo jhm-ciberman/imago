@@ -8,65 +8,66 @@ namespace LifeSim.Rendering
     internal partial class DataBuffer : IDisposable
     {
         private static int _count = 0;
-        private IntPtr _data;
+        private readonly IntPtr _data;
 
-        public int blocksCount { get; private set; }
-        public int blockSize { get; private set; }
-        public int sizeInBytes { get; private set; }
+        public int BlocksCount { get; private set; }
+        public int BlockSize { get; private set; }
+        public int SizeInBytes { get; private set; }
 
-        private int[] _freeList;
+        private readonly int[] _freeList;
         private int _freeListCount = 0;
+        private readonly GraphicsDevice _gd;
+        private readonly ResourceLayout _resourceLayout;
 
-        private GraphicsDevice _gd;
-        private ResourceLayout _resourceLayout;
-        public ResourceSet resourceSet { get; private set; }
-        public DeviceBuffer deviceBuffer { get; private set; }
+        public ResourceSet ResourceSet { get; private set; }
+        public DeviceBuffer DeviceBuffer { get; private set; }
         private bool _dirty = true;
 
-        public string name { get => this.deviceBuffer.Name; set { this.deviceBuffer.Name = value; } }
+        public string Name { get => this.DeviceBuffer.Name; set => this.DeviceBuffer.Name = value; }
 
-        public bool isFull => (this._freeListCount == 0);
+        public bool IsFull => (this._freeListCount == 0);
 
-        public int id { get; private set; }
+        public int Id { get; private set; }
 
         public unsafe DataBuffer(GraphicsDevice gd, int blocksCount, int blockSize, ResourceLayout resourceLayout)
         {
-            this.id = ++DataBuffer._count;
+            this.Id = ++DataBuffer._count;
             this._gd = gd;
-            this.blockSize = blockSize;
-            this.blocksCount = blocksCount;
-            this.sizeInBytes = this.blocksCount * this.blockSize;
-            this._data = Marshal.AllocHGlobal((int) this.sizeInBytes);
-            Unsafe.InitBlockUnaligned((byte*)this._data, 0, (uint) this.sizeInBytes);
+            this.BlockSize = blockSize;
+            this.BlocksCount = blocksCount;
+            this.SizeInBytes = this.BlocksCount * this.BlockSize;
+            this._data = Marshal.AllocHGlobal((int)this.SizeInBytes);
+            Unsafe.InitBlockUnaligned((byte*)this._data, 0, (uint)this.SizeInBytes);
             this._dirty = true;
             this._resourceLayout = resourceLayout;
 
-            this.deviceBuffer = this._gd.ResourceFactory.CreateBuffer(new BufferDescription(
-                (uint) this.sizeInBytes, BufferUsage.UniformBuffer | BufferUsage.Dynamic
+            this.DeviceBuffer = this._gd.ResourceFactory.CreateBuffer(new BufferDescription(
+                (uint)this.SizeInBytes, BufferUsage.UniformBuffer | BufferUsage.Dynamic
             ));
 
-            this.resourceSet = this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(
-                this._resourceLayout, this.deviceBuffer
+            this.ResourceSet = this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(
+                this._resourceLayout, this.DeviceBuffer
             ));
 
             this._freeList = new int[blocksCount];
-            for (int i = 0; i < blocksCount; i++) {
-                this._freeList[i] = (this.blocksCount - i - 1) * this.blockSize;
+            for (int i = 0; i < blocksCount; i++)
+            {
+                this._freeList[i] = (this.BlocksCount - i - 1) * this.BlockSize;
             }
-            this._freeListCount = this.blocksCount;
+            this._freeListCount = this.BlocksCount;
         }
 
         public void UploadToGPU(CommandList commandList)
         {
-            if (! this._dirty) return;
-            commandList.UpdateBuffer(this.deviceBuffer, 0, this._data, (uint) this.sizeInBytes);
+            if (!this._dirty) return;
+            commandList.UpdateBuffer(this.DeviceBuffer, 0, this._data, (uint)this.SizeInBytes);
             this._dirty = false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public DataBlock RequestBlock()
         {
-            if (this._freeListCount == 0) throw new Exception($"Buffer {this.name} is full. This should not happen.");
+            if (this._freeListCount == 0) throw new Exception($"Buffer {this.Name} is full. This should not happen.");
 
             this._freeListCount--;
             return new DataBlock(this, this._freeList[this._freeListCount]);
@@ -86,12 +87,13 @@ namespace LifeSim.Rendering
             this._dirty = true;
         }
 
-        private System.Numerics.Matrix4x4[] _mats = new System.Numerics.Matrix4x4[1];
+        private readonly System.Numerics.Matrix4x4[] _mats = new System.Numerics.Matrix4x4[1];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void WriteSpan<T>(int offset, ReadOnlySpan<T> data) where T : unmanaged
         {
-            fixed(T* ptr = data) {
+            fixed (T* ptr = data)
+            {
                 var byteLen = (long)(data.Length * sizeof(T));
                 Buffer.MemoryCopy(ptr, (void*)(this._data + offset), byteLen, byteLen);
             }

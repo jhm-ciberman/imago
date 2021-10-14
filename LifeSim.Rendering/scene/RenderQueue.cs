@@ -8,14 +8,14 @@ namespace LifeSim.Rendering
 {
     public class RenderQueue : IEnumerable<Renderable>, IReadOnlyList<Renderable>, IReadOnlyCollection<Renderable>
     {
-        private const int defaultCapacity = 250;
+        private const int DEFAULT_CAPACITY = 250;
 
-        private readonly List<RenderIndex> _indices = new List<RenderIndex>(defaultCapacity);
-        private readonly List<Renderable> _items = new List<Renderable>(defaultCapacity);
+        private readonly List<RenderIndex> _indices = new List<RenderIndex>(DEFAULT_CAPACITY);
+        private readonly List<Renderable> _items = new List<Renderable>(DEFAULT_CAPACITY);
 
         public int Count => this._indices.Count;
 
-        public Renderable this[int index] => this._items[this._indices[index].index];
+        public Renderable this[int index] => this._items[this._indices[index].Index];
 
         public void Sort()
         {
@@ -26,14 +26,15 @@ namespace LifeSim.Rendering
         {
             this._indices.Clear();
             this._items.Clear();
-            for (int i = 0; i < renderables.Count; i++) {
+            for (int i = 0; i < renderables.Count; i++)
+            {
                 Renderable renderable = renderables[i];
-                if (renderable.material == null || renderable.mesh == null) continue;
-                
-                if (renderable.Cull(ref frustum)) {
+                if (renderable.Visible == false || renderable.Material == null || renderable.Mesh == null) continue;
+
+                if (renderable.Cull(ref frustum))
+                {
                     ulong key = renderable.GetSortKey(cameraPosition);
                     renderable.Update(); // TODO: Remove this from here!
-                    var material = renderable.material;
                     this._indices.Add(new RenderIndex(key, this._items.Count));
                     this._items.Add(renderable);
                 }
@@ -74,11 +75,14 @@ namespace LifeSim.Rendering
 
             public bool MoveNext()
             {
-                if (this._nextItemIndex >= this._indices.Count) {
+                if (this._nextItemIndex >= this._indices.Count)
+                {
                     this._current = default(Renderable);
                     return false;
-                } else {
-                    var currentIndex = this._indices[this._nextItemIndex].index;
+                }
+                else
+                {
+                    var currentIndex = this._indices[this._nextItemIndex].Index;
                     this._current = this._items[currentIndex];
                     this._nextItemIndex += 1;
                     return true;
@@ -93,23 +97,23 @@ namespace LifeSim.Rendering
 
         public readonly struct RenderIndex : IComparable<RenderIndex>
         {
-            public readonly ulong key;
-            public readonly int index;
+            public readonly ulong Key;
+            public readonly int Index;
 
             public RenderIndex(ulong key, int index)
             {
-                this.key = key;
-                this.index = index;
+                this.Key = key;
+                this.Index = index;
             }
 
             public override string ToString()
             {
-                return Convert.ToString((long) key, 16).PadLeft(16, '0');
+                return Convert.ToString((long)this.Key, 16).PadLeft(16, '0');
             }
 
             int IComparable<RenderIndex>.CompareTo(RenderIndex other)
             {
-                return (this.key < other.key) ? - 1 : (this.key == other.key) ? 0 : 1;
+                return (this.Key < other.Key) ? -1 : (this.Key == other.Key) ? 0 : 1;
             }
         }
     }

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime;
 using LifeSim.Rendering;
+using Veldrid;
 using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
 
@@ -11,23 +13,21 @@ namespace LifeSim.Engine
     {
         private readonly Sdl2Window _window;
 
-
-
         private readonly InputInstance _input;
 
         private readonly Renderer _renderer;
 
         private IStage? _stage = null;
 
-        public App(string[] args)
+        public App()
         {
             GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
-            
+
             WindowCreateInfo windowCI = new WindowCreateInfo(100, 100, 1024, 600, Veldrid.WindowState.Normal, "Medieval Life");
             this._window = VeldridStartup.CreateWindow(ref windowCI);
-            this.viewport = new Viewport((uint) this._window.Width, (uint) this._window.Height);
+            this.Viewport = new Rendering.Viewport((uint)this._window.Width, (uint)this._window.Height);
 
-            var graphicsBackend = App.ParseGraphicsBackend(args);
+            var graphicsBackend = App.ParseGraphicsBackend(Environment.GetCommandLineArgs());
             this._renderer = new Renderer(this._window, graphicsBackend);
 
             this._window.Resized += this.OnResize;
@@ -38,11 +38,9 @@ namespace LifeSim.Engine
             Input.SetInstance(this._input);
         }
 
-        public Viewport viewport { get; }
+        public Rendering.Viewport Viewport { get; }
 
-        public uint selectedObjectID => this._renderer.selectedObjectID;
-
-        public SceneStorage storage => this._renderer.sceneStorage;
+        public SceneStorage Storage => this._renderer.SceneStorage;
 
         public void Run(IStage stage)
         {
@@ -50,44 +48,68 @@ namespace LifeSim.Engine
             this._MainLoop();
         }
 
-        private static Veldrid.GraphicsBackend ParseGraphicsBackend(string[] args)
+        private static GraphicsBackend ParseGraphicsBackend(string[] args)
         {
-            Veldrid.GraphicsBackend backend = Veldrid.GraphicsBackend.Vulkan;
-            if (args.Length > 0) {
-                switch (args[0]) {
-                    case "vulkan": 
-                        backend = Veldrid.GraphicsBackend.Vulkan; 
-                        break;
-                    case "metal": 
-                        backend = Veldrid.GraphicsBackend.Metal; 
-                        break;
-                    case "directx":
-                    case "dx11":
-                    case "dx":
-                    case "directx11": 
-                        backend = Veldrid.GraphicsBackend.Direct3D11; 
-                        break;
-                    case "gl":
-                    case "opengl": backend = Veldrid.GraphicsBackend.OpenGL; 
-                        break;
-                    case "opengles": backend = Veldrid.GraphicsBackend.OpenGLES; 
-                        break;
+            GraphicsBackend? backend = null;
+            if (args.Length > 0)
+            {
+                foreach (var arg in args)
+                {
+                    backend = GetBackend(arg);
+                    if (backend != null) break;
                 }
             }
-            return backend;
+
+            if (backend == null && File.Exists("./backend.txt"))
+            {
+                var backendName = File.ReadAllText("./backend.txt");
+                backend = GetBackend(backendName);
+            }
+
+            return backend ?? VeldridStartup.GetPlatformDefaultBackend();
         }
 
-        private void OnResize() 
+        public static GraphicsBackend? GetBackend(string name)
+        {
+            switch (name.ToLower())
+            {
+                case "vulkan":
+                case "vk":
+                    return GraphicsBackend.Vulkan;
+                case "metal":
+                    return GraphicsBackend.Metal;
+                case "directx":
+                case "dx11":
+                case "dx":
+                case "directx11":
+                    return GraphicsBackend.Direct3D11;
+                case "gl":
+                case "opengl":
+                    return GraphicsBackend.OpenGL;
+                case "gles":
+                case "opengles":
+                    return GraphicsBackend.OpenGLES;
+            }
+            return null;
+        }
+
+        private void OnResize()
         {
             uint width = (uint) this._window.Width;
             uint height = (uint) this._window.Height;
-            this.viewport.Resize(width, height);
-            this._renderer.Resize(width, height, this.viewport.width, this.viewport.height);
+            this.Viewport.Resize(width, height);
+            this._renderer.Resize(width, height, this.Viewport.Width, this.Viewport.Height);
         }
 
         public void SetStage(IStage stage)
         {
             this._stage = stage;
+        }
+
+        public void Quit()
+        {
+            this._renderer.WaitForGPU();
+            this._window.Close();
         }
 
         private void _MainLoop()
@@ -101,27 +123,31 @@ namespace LifeSim.Engine
                 float deltaTime = (float)(newElapsed - previousElapsed);
                 previousElapsed = newElapsed;
 
-                this._renderer.UpdateMousePicking(Input.mousePosition);
-                
+                this._renderer.MousePicker.Update(Input.MousePosition);
+
                 var fps = (1f / deltaTime).ToString("0.00");
                 var dt = (deltaTime * 1000).ToString("0.00");
 
-                var mouse = "(" + Input.mousePosition.X + ", " +Input.mousePosition.Y + ")";
-                this._window.Title = "Medieval Life" + " (" + this._renderer.backendType.ToString() + ") frame = " + dt + "ms FPS = " + fps + " Mouse: " + mouse;
+                var mouse = "(" + Input.MousePosition.X + ", " +Input.MousePosition.Y + ")";
+                this._window.Title = "Medieval Life" + " (" + this._renderer.BackendType.ToString() + ") frame = " + dt + "ms FPS = " + fps + " Mouse: " + mouse;
 
-                if (Input.GetKeyDown(Veldrid.Key.Escape) && ! Input.mouseIsLocked) {
+                if (Input.GetKeyDown(Veldrid.Key.Escape) && !Input.MouseIsLocked)
+                {
                     this._window.Close();
                     return;
                 }
-                
-                if (Input.GetKeyDown(Veldrid.Key.F4)) {
+
+                if (Input.GetKeyDown(Veldrid.Key.F4))
+                {
                     this._window.WindowState = this._window.WindowState == Veldrid.WindowState.BorderlessFullScreen
                         ? Veldrid.WindowState.Normal
                         : Veldrid.WindowState.BorderlessFullScreen;
                 }
 
-                this._renderer.Update(deltaTime, this._input.inputSnapshot);
-                if (this._stage != null) {
+                this._renderer.ImguiRenderer.Update(deltaTime, this._input.InputSnapshot);
+
+                if (this._stage != null)
+                {
                     this._stage.Update(deltaTime);
                     this._stage.RenderFrame(this._renderer);
                     this._renderer.Render();

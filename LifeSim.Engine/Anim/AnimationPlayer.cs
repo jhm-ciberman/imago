@@ -13,6 +13,8 @@ namespace LifeSim.Engine.Anim
             this._root = root;
         }
 
+        public float CurrentTime => this._animation?.CurrentTime ?? 0;
+
         public void Play(BindedAnimation animation)
         {
             this._animation = animation;
@@ -21,7 +23,7 @@ namespace LifeSim.Engine.Anim
         public void Play(Animation animation)
         {
             var binder = new SimpleAnimationBinder();
-            this._animation = binder.Bind(this._root, animation);;
+            this._animation = binder.Bind(this._root, animation);
         }
 
         public void Update(float deltaTime)
