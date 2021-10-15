@@ -5,7 +5,7 @@ using Veldrid;
 
 namespace LifeSim.Rendering
 {
-    public class FullScreenRenderer : IDisposable, IPass
+    public class FullScreenRenderer : IDisposable, IPipelineProvider
     {
         private ResourceSet? _resourceSet;
 
@@ -114,7 +114,7 @@ namespace LifeSim.Rendering
             this._resourceSetDirty = true;
         }
 
-        Pipeline IPass.MakePipeline(ShaderVariant shaderVariant)
+        Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant)
         {
             Debug.Assert(shaderVariant.MaterialResourceLayout != null);
 

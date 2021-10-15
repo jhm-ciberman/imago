@@ -131,7 +131,7 @@ namespace LifeSim.Rendering
         public void SetInstanceData<T>(string name, T data) where T : unmanaged
         {
             if (this.Material == null) throw new Exception("No material set");
-            var offset = this.Material.Definition.InstanceUniformData[name];
+            var offset = this.Material.Definition.GetInstanceUniformDataOffset(name);
             this._instanceDataBlock.Write(offset, ref data);
         }
 

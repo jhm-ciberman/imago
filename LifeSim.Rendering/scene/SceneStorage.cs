@@ -76,16 +76,18 @@ namespace LifeSim.Rendering
             return newBuffer.RequestBlock();
         }
 
-        internal void UpdateBuffers(Veldrid.CommandList commandList)
+        internal void UpdateBuffers(CommandList commandList)
         {
             for (int i = 0; i < this._instanceDataBuffers.Count; i++)
             {
                 this._instanceDataBuffers[i].UploadToGPU(commandList);
             }
+
             for (int i = 0; i < this._transformDataBuffers.Count; i++)
             {
                 this._transformDataBuffers[i].UploadToGPU(commandList);
             }
+
             for (int i = 0; i < this._skeletonDataBuffers.Count; i++)
             {
                 this._skeletonDataBuffers[i].UploadToGPU(commandList);
@@ -98,10 +100,12 @@ namespace LifeSim.Rendering
             {
                 this._instanceDataBuffers[i].Dispose();
             }
+
             for (int i = 0; i < this._transformDataBuffers.Count; i++)
             {
                 this._transformDataBuffers[i].Dispose();
             }
+
             for (int i = 0; i < this._skeletonDataBuffers.Count; i++)
             {
                 this._skeletonDataBuffers[i].Dispose();

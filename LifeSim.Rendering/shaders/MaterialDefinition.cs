@@ -17,7 +17,6 @@ namespace LifeSim.Rendering
         private readonly Dictionary<string, int> _textures = new Dictionary<string, int>();
 
         public int ResourceCount { get; }
-        public IReadOnlyDictionary<string, int> InstanceUniformData => this._instanceUniformData;
         public IReadOnlyDictionary<string, int> Textures => this._textures;
 
         public readonly int InstanceDataBlockSize;
@@ -51,7 +50,16 @@ namespace LifeSim.Rendering
 
         }
 
-        public MaterialDefinition AddPass(IPass pass, ShaderSource source)
+        public int GetInstanceUniformDataOffset(string name)
+        {
+            if (this._instanceUniformData.TryGetValue(name, out int offset))
+            {
+                return offset;
+            }
+            throw new ArgumentException($"Uniform {name} not found");
+        }
+
+        public MaterialDefinition AddPass(IPipelineProvider pass, ShaderSource source)
         {
             this._shaders.Add(new Shader(pass, source, this._resourceLayout));
             return this;
@@ -62,7 +70,7 @@ namespace LifeSim.Rendering
             return this._instanceDefaultData.Span;
         }
 
-        public Shader GetShader(IPass pass)
+        public Shader GetShader(IPipelineProvider pass)
         {
             for (int i = 0; i < this._shaders.Count; i++)
             {

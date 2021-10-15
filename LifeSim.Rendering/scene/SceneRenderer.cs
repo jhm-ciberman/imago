@@ -6,8 +6,8 @@ namespace LifeSim.Rendering
 {
     public class SceneRenderer
     {
-        public static IPass ForwardPass = null!;
-        public static IPass ShadowMapPass = null!;
+        public static IPipelineProvider ForwardPass = null!;
+        public static IPipelineProvider ShadowMapPass = null!;
 
         private readonly GraphicsDevice _gd;
         private readonly Veldrid.ResourceFactory _factory;

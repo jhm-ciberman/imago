@@ -14,9 +14,9 @@ namespace LifeSim.Rendering
         private readonly ResourceFactory _factory;
         private readonly ShaderSource _source;
 
-        public IPass Pass { get; private set; }
+        public IPipelineProvider Pass { get; private set; }
 
-        internal Shader(IPass pass, ShaderSource source, ResourceLayout? materialResourceLayout = null)
+        internal Shader(IPipelineProvider pass, ShaderSource source, ResourceLayout? materialResourceLayout = null)
         {
             this.Id = ++Shader._count;
 
@@ -39,9 +39,7 @@ namespace LifeSim.Rendering
             for (int i = 0; i < this._pipelines.Count; i++)
             {
                 if (this._pipelines[i].VertexFormat == vertexFormat)
-                {
                     return this._pipelines[i].Pipeline;
-                }
             }
 
             lock (this._pipelines)
@@ -50,9 +48,7 @@ namespace LifeSim.Rendering
                 for (int i = 0; i < this._pipelines.Count; i++)
                 {
                     if (this._pipelines[i].VertexFormat == vertexFormat)
-                    {
                         return this._pipelines[i].Pipeline;
-                    }
                 }
 
                 ShaderVariant shaderVariant = this._GetShaderVariant(vertexFormat);

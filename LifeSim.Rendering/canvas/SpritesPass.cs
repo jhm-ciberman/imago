@@ -6,7 +6,7 @@ using Veldrid;
 
 namespace LifeSim.Rendering
 {
-    public class SpritesPass : IDisposable, IPass
+    public class SpritesPass : IDisposable, IPipelineProvider
     {
         private readonly DeviceBuffer _camera2DInfoBuffer;
         private readonly ResourceSet _passResourceSet;
@@ -100,7 +100,7 @@ namespace LifeSim.Rendering
             }
         }
 
-        Pipeline IPass.MakePipeline(ShaderVariant shaderVariant)
+        Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant)
         {
             Debug.Assert(shaderVariant.MaterialResourceLayout != null);
 

@@ -7,7 +7,7 @@ using Veldrid.Utilities;
 
 namespace LifeSim.Rendering
 {
-    public class ShadowmapPass : IDisposable, IPass
+    public class ShadowmapPass : IDisposable, IPipelineProvider
     {
         public Veldrid.Texture ShadowmapTexture { get; private set; }
 
@@ -68,7 +68,7 @@ namespace LifeSim.Rendering
             this._shadowmapInfoBuffer.Dispose();
         }
 
-        Pipeline IPass.MakePipeline(ShaderVariant shaderVariant)
+        Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant)
         {
             var rasterizerState = new RasterizerStateDescription(
                 FaceCullMode.Front,

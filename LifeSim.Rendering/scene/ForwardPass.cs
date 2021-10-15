@@ -6,7 +6,7 @@ using Veldrid;
 
 namespace LifeSim.Rendering
 {
-    public class ForwardPass : IDisposable, IPass
+    public class ForwardPass : IDisposable, IPipelineProvider
     {
         [StructLayout(LayoutKind.Sequential)]
         private struct CameraInfo
@@ -107,7 +107,7 @@ namespace LifeSim.Rendering
             this._lightInfoBuffer.Dispose();
         }
 
-        Pipeline IPass.MakePipeline(ShaderVariant shaderVariant)
+        Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant)
         {
             var rasterizerState = new RasterizerStateDescription(
                 FaceCullMode.Front,

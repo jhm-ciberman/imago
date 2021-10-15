@@ -7,7 +7,7 @@ using Veldrid;
 
 namespace LifeSim.Rendering
 {
-    public class GizmosRenderer : IPass, IDisposable
+    public class GizmosRenderer : IPipelineProvider, IDisposable
     {
         private const int VERTICES_PER_BATCH = 1000;
 
@@ -127,7 +127,7 @@ namespace LifeSim.Rendering
             this._verticesCount = 0;
         }
 
-        Pipeline IPass.MakePipeline(ShaderVariant shaderVariant)
+        Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant)
         {
             var rasterizerState = new RasterizerStateDescription(
                 FaceCullMode.None,

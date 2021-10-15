@@ -1,6 +1,4 @@
-using System;
 using Veldrid;
-using Veldrid.SPIRV;
 
 namespace LifeSim.Rendering
 {

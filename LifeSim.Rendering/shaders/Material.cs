@@ -50,6 +50,11 @@ namespace LifeSim.Rendering
 
         public void SetTexture(string name, Texture texture)
         {
+            if (this._textures.TryGetValue(name, out var oldTexture))
+            {
+                if (oldTexture == texture) return;
+            }
+
             this._textures[name] = texture;
             int index = this.Definition.Textures[name];
             this._resources[index * 2 + 0] = texture.Resource;

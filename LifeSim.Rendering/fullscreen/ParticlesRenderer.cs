@@ -7,7 +7,7 @@ using Veldrid;
 
 namespace LifeSim.Rendering
 {
-    public class ParticlesRenderer : IPass, IDisposable
+    public class ParticlesRenderer : IPipelineProvider, IDisposable
     {
         private const int PARTICLES_PER_BATCH = 1000;
 
@@ -203,7 +203,7 @@ namespace LifeSim.Rendering
             return resourceSet;
         }
 
-        Pipeline IPass.MakePipeline(ShaderVariant shaderVariant)
+        Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant)
         {
             var rasterizerState = new RasterizerStateDescription(
                 FaceCullMode.None,

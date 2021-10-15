@@ -1,6 +1,6 @@
 namespace LifeSim.Rendering
 {
-    public interface IPass
+    public interface IPipelineProvider
     {
         Veldrid.Pipeline MakePipeline(ShaderVariant shaderVariant);
     }

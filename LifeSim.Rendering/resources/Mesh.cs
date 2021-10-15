@@ -32,8 +32,8 @@ namespace LifeSim.Rendering
             var gd = Renderer.GraphicsDevice;
             var factory = gd.ResourceFactory;
 
-            var boundingBox = meshData.GetBoundingBox();
-            var vertexFormat = meshData.GetVertexFormat();
+            BoundingBox boundingBox = meshData.GetBoundingBox();
+            VertexFormat vertexFormat = meshData.GetVertexFormat();
 
             var cl = factory.CreateCommandList();
             cl.Begin();
