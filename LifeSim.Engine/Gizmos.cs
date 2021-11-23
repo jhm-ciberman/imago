@@ -1,6 +1,6 @@
 using LifeSim.Engine.SceneGraph;
 
-namespace LifeSim.Rendering
+namespace LifeSim.Engine.Rendering
 {
     public static class Gizmos
     {

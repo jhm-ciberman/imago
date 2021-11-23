@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using LifeSim.Core;
-using LifeSim.Rendering;
+using LifeSim.Engine.Rendering;
 
 namespace LifeSim.Engine.SceneGraph
 {

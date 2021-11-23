@@ -1,6 +1,6 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
-using LifeSim.Rendering;
+using LifeSim.Engine.Rendering;
 using Veldrid;
 
 namespace LifeSim.Engine.GLTF

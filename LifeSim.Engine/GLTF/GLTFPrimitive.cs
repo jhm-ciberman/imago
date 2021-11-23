@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
-using LifeSim.Rendering;
+using LifeSim.Engine.Rendering;
 
 namespace LifeSim.Engine.GLTF
 {
