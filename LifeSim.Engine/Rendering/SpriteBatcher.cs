@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using FontStashSharp.Interfaces;
-using LifeSim.Core;
 using Veldrid;
 
 namespace LifeSim.Engine.Rendering
