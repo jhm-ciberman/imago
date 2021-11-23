@@ -16,7 +16,6 @@ namespace LifeSim.Rendering
         public int BatchingHashKey { get; private set; }
 
         internal Veldrid.ResourceSet TransformResourceSet { get; private set; }
-        internal Veldrid.ResourceSet? MaterialResourceSet { get; private set; } = null;
         internal Veldrid.ResourceSet? InstanceResourceSet { get; private set; } = null;
         internal Veldrid.ResourceSet? SkeletonResourceSet { get; private set; }
 
@@ -69,7 +68,6 @@ namespace LifeSim.Rendering
                 this._instanceDataBlock.FreeBlock();
                 this._instanceDataBlock = this._storage.RequestInstanceDataBlock(material.Definition);
             }
-            this.MaterialResourceSet = material.GetMaterialResourceSet();
             this.InstanceResourceSet = this._instanceDataBlock.Buffer.ResourceSet;
             var span = material.Definition.GetDefaultInstanceData();
             this._instanceDataBlock.WriteSpan(span);

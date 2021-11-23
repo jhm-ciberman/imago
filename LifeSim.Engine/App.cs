@@ -149,6 +149,7 @@ namespace LifeSim.Engine
                 if (this._stage != null)
                 {
                     this._stage.Update(deltaTime);
+                    this._renderer.BeginRender();
                     this._stage.RenderFrame(this._renderer);
                     this._renderer.Render();
                 }

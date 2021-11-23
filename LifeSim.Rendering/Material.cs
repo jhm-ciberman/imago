@@ -11,10 +11,9 @@ namespace LifeSim.Rendering
         public int Id { get; private set; }
         public Shader Shader { get; private set; }
         public Shader ShadowmapShader { get; private set; }
+        public ResourceSet? ResourceSet { get; internal set; }
 
-        private ResourceSet? _resourceSet = null;
-
-        private bool _resourceSetDirty = true;
+        private bool _isDirty = true;
         private readonly BindableResource[] _resources;
         public readonly MaterialDefinition Definition;
         private readonly Dictionary<string, Texture> _textures = new Dictionary<string, Texture>();
@@ -26,21 +25,15 @@ namespace LifeSim.Rendering
             this.Shader = definition.GetShader(SceneRenderer.ForwardPass);
             this.ShadowmapShader = definition.GetShader(SceneRenderer.ShadowMapPass);
             this._resources = new BindableResource[definition.ResourceCount];
+            Renderer.Instance.OnMaterialDirty(this);
         }
 
-        internal Veldrid.ResourceSet GetMaterialResourceSet()
+        public void Update()
         {
-            lock (this.Shader)
-            {
-                if (this._resourceSetDirty || this._resourceSet == null)
-                {
-                    this._resourceSetDirty = false;
-                    this._resourceSet?.Dispose();
-                    this._resourceSet = this.Shader.CreateResourceSet(this._resources);
-                }
+            this.ResourceSet?.Dispose();
 
-                return this._resourceSet;
-            }
+            this.ResourceSet = this.Shader.CreateResourceSet(this._resources);
+            this._isDirty = false;
         }
 
         public Texture GetTexture(string name)
@@ -59,12 +52,22 @@ namespace LifeSim.Rendering
             int index = this.Definition.Textures[name];
             this._resources[index * 2 + 0] = texture.DeviceTexture;
             this._resources[index * 2 + 1] = texture.Sampler;
-            this._resourceSetDirty = true;
+            this.OnDirty();
+        }
+
+        protected void OnDirty()
+        {
+            if (!this._isDirty)
+            {
+                System.Diagnostics.Debug.WriteLine("Material {0} is dirty", this.Id);
+                this._isDirty = true;
+                Renderer.Instance.OnMaterialDirty(this);
+            }
         }
 
         public void Dispose()
         {
-            this._resourceSet?.Dispose();
+            this.ResourceSet?.Dispose();
         }
     }
 }

@@ -17,7 +17,7 @@ namespace LifeSim.Rendering
         {
             Contract.Assume(renderable.Mesh != null);
             Contract.Assume(renderable.Material != null);
-            Contract.Assume(renderable.MaterialResourceSet != null);
+            Contract.Assume(renderable.Material.ResourceSet != null);
             Contract.Assume(renderable.InstanceResourceSet != null);
 
             this.InstanceCount = instanceCount;
@@ -25,7 +25,7 @@ namespace LifeSim.Rendering
             var shader = shadowmapPass ? renderable.Material.ShadowmapShader : renderable.Material.Shader;
             this.Pipeline = shader.GetPipeline(renderable.Mesh.VertexFormat);
             this.TransformResourceSet = renderable.TransformResourceSet;
-            this.MaterialResourceSet = renderable.MaterialResourceSet;
+            this.MaterialResourceSet = renderable.Material.ResourceSet;
             this.InstanceResourceSet = renderable.InstanceResourceSet;
             this.SkeletonResourceSet = renderable.SkeletonResourceSet;
         }

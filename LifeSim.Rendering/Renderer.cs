@@ -52,6 +52,8 @@ namespace LifeSim.Rendering
 
         private readonly List<Texture> _dirtyTextures = new List<Texture>();
 
+        private readonly List<Material> _dirtyMaterials = new List<Material>();
+
         private readonly CommandList _resourceUpdateCommandList;
 
         private bool _updatedResources;
@@ -94,12 +96,15 @@ namespace LifeSim.Rendering
             this._resourceUpdateCommandList = this._factory.CreateCommandList();
         }
 
-        public void Render()
+        public void BeginRender()
         {
             this.UpdateDirtyResources();
+        }
+
+        public void Render()
+        {
             this.ImguiRenderer.Render();
             this._fullScreenRenderer.Render();
-
 
             this.WaitForGPU();
 
@@ -124,13 +129,26 @@ namespace LifeSim.Rendering
             this._dirtyTextures.Add(texture);
         }
 
-
+        internal void OnMaterialDirty(Material material)
+        {
+            this._dirtyMaterials.Add(material);
+        }
 
         protected void UpdateDirtyResources()
         {
+            if (this._dirtyTextures.Count == 0 && this._dirtyMaterials.Count == 0)
+            {
+                return;
+            }
+
+            foreach (var material in this._dirtyMaterials)
+            {
+                material.Update();
+            }
+            this._dirtyMaterials.Clear();
+
             if (this._dirtyTextures.Count > 0)
             {
-                System.Diagnostics.Debug.WriteLine($"Updating {this._dirtyTextures.Count} dirty textures");
                 this._resourceUpdateCommandList.Begin();
                 foreach (var resource in this._dirtyTextures)
                 {
