@@ -59,9 +59,9 @@ namespace LifeSim.Rendering
             throw new ArgumentException($"Uniform {name} not found");
         }
 
-        public MaterialDefinition AddPass(IPipelineProvider pass, ShaderSource source)
+        public MaterialDefinition AddPass(IPipelineProvider pass, string vertexCode, string fragmentCode)
         {
-            this._shaders.Add(new Shader(pass, source, this._resourceLayout));
+            this._shaders.Add(new Shader(pass, vertexCode, fragmentCode, this._resourceLayout));
             return this;
         }
 

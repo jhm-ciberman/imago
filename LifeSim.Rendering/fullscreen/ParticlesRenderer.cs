@@ -104,7 +104,9 @@ namespace LifeSim.Rendering
                 )
             );
 
-            this._particlesShader = new Shader(this, new ShaderSource("particles.vert.glsl", "particles.frag.glsl"), this._materialResourceLayout);
+            var vertex = ShaderSource.Load("particles.vert.glsl");
+            var fragment = ShaderSource.Load("particles.frag.glsl");
+            this._particlesShader = new Shader(this, vertex, fragment, this._materialResourceLayout);
             this._commandList = factory.CreateCommandList();
             this._commandList.Name = "Particles Renderer";
         }

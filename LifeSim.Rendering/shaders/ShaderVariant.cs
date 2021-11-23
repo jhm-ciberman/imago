@@ -13,12 +13,12 @@ namespace LifeSim.Rendering
 
         public ResourceLayout? MaterialResourceLayout;
 
-        public ShaderVariant(ResourceFactory factory, VertexFormat vertexFormat, ResourceLayout? materialResourceLayout, ShaderSource source)
+        public ShaderVariant(ResourceFactory factory, VertexFormat vertexFormat, ResourceLayout? materialResourceLayout, string vertexCode, string fragmentCode)
         {
             var macros = this.GetMacroDefinitions(vertexFormat);
             var options = new GlslCompileOptions(debug: true, macros);
-            var vertGlslShader = this._CompileGlslToSpirv(source.VertCode, source.VertFilename, ShaderStages.Vertex, options);
-            var fragGlslShader = this._CompileGlslToSpirv(source.FragCode, source.FragFilename, ShaderStages.Fragment, options);
+            var vertGlslShader = this._CompileGlslToSpirv(vertexCode, ShaderStages.Vertex, options);
+            var fragGlslShader = this._CompileGlslToSpirv(fragmentCode, ShaderStages.Fragment, options);
 
             this.VertexFormat = vertexFormat;
 
@@ -55,11 +55,11 @@ namespace LifeSim.Rendering
             return arr;
         }
 
-        private ShaderDescription _CompileGlslToSpirv(string sourceText, string fileName, ShaderStages stage, GlslCompileOptions options)
+        private ShaderDescription _CompileGlslToSpirv(string sourceText, ShaderStages stage, GlslCompileOptions options)
         {
             try
             {
-                var result = SpirvCompilation.CompileGlslToSpirv(sourceText, fileName, stage, options);
+                var result = SpirvCompilation.CompileGlslToSpirv(sourceText, stage.ToString(), stage, options);
                 return new ShaderDescription(stage, result.SpirvBytes, "main");
             }
             catch (SpirvCompilationException e)

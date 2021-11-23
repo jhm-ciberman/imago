@@ -39,7 +39,9 @@ namespace LifeSim.Rendering
                 new ResourceLayoutElementDescription("MainSampler", ResourceKind.Sampler, ShaderStages.Fragment)
             ));
 
-            this.Shader = new Shader(this, new ShaderSource("sprites.vert.glsl", "sprites.frag.glsl"), materialResourceLayout);
+            var vertex = ShaderSource.Load("sprites.vert.glsl");
+            var fragment = ShaderSource.Load("sprites.frag.glsl");
+            this.Shader = new Shader(this, vertex, fragment, materialResourceLayout);
 
             this._camera2DInfoBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 

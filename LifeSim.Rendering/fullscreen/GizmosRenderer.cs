@@ -60,7 +60,9 @@ namespace LifeSim.Rendering
                 new VertexElementDescription("Color", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Byte4_Norm)
             ));
 
-            this._lineShader = new Shader(this, new ShaderSource("lines.vert.glsl", "lines.frag.glsl"));
+            var vertex = ShaderSource.Load("lines.vert.glsl");
+            var fragment = ShaderSource.Load("lines.frag.glsl");
+            this._lineShader = new Shader(this, vertex, fragment);
             this._commandList = factory.CreateCommandList();
         }
 

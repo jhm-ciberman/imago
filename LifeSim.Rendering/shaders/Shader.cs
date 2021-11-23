@@ -12,17 +12,19 @@ namespace LifeSim.Rendering
         private readonly ResourceLayout? _materialResourceLayout;
         private readonly List<ShaderVariant> _variants = new List<ShaderVariant>();
         private readonly ResourceFactory _factory;
-        private readonly ShaderSource _source;
+        private readonly string _vertexCode;
+        private readonly string _fragmentCode;
 
         public IPipelineProvider Pass { get; private set; }
 
-        internal Shader(IPipelineProvider pass, ShaderSource source, ResourceLayout? materialResourceLayout = null)
+        internal Shader(IPipelineProvider pass, string vertexCode, string fragmentCode, ResourceLayout? materialResourceLayout = null)
         {
             this.Id = ++Shader._count;
 
             this.Pass = pass;
 
-            this._source = source;
+            this._vertexCode = vertexCode;
+            this._fragmentCode = fragmentCode;
 
             this._factory = Renderer.GraphicsDevice.ResourceFactory;
 
@@ -68,7 +70,7 @@ namespace LifeSim.Rendering
                 }
             }
 
-            var variant = new ShaderVariant(this._factory, vertexFormat, this._materialResourceLayout, this._source);
+            var variant = new ShaderVariant(this._factory, vertexFormat, this._materialResourceLayout, this._vertexCode, this._fragmentCode);
             this._variants.Add(variant);
             return variant;
         }

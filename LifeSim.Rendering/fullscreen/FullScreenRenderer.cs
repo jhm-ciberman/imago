@@ -41,7 +41,7 @@ namespace LifeSim.Rendering
                 new ResourceLayoutElementDescription("MainSampler", ResourceKind.Sampler, ShaderStages.Fragment)
             ));
 
-            this.Shader = new Shader(this, this._GetShaderSource(), resourceLayout);
+            this.Shader = new Shader(this, _vertexCode, _fragmentCode, resourceLayout);
 
 
             this._commandList = factory.CreateCommandList();
@@ -138,9 +138,7 @@ namespace LifeSim.Rendering
             });
         }
 
-        private ShaderSource _GetShaderSource()
-        {
-            var vertexSource = @"#version 450
+        private string _vertexCode => @"#version 450
             layout(location = 0) in vec4 Position; // xy = position, zw = uv
 
             layout(location = 0) out vec2 fsin_TexCoords;
@@ -151,7 +149,7 @@ namespace LifeSim.Rendering
                 fsin_TexCoords = Position.zw;
             }";
 
-            var fragmentSource = @"#version 450
+        private string _fragmentCode => @"#version 450
             layout(location = 0) in vec2 fsin_TexCoords;
 
             layout(set = 0, binding = 0) uniform texture2D MainTexture;
@@ -163,8 +161,5 @@ namespace LifeSim.Rendering
             {
                 fsout_color = texture(sampler2D(MainTexture, MainSampler), fsin_TexCoords);
             }";
-
-            return new ShaderSource("fullscreen-vertex", "fullscreen-fragment", vertexSource, fragmentSource);
-        }
     }
 }
