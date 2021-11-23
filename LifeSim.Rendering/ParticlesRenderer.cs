@@ -200,7 +200,7 @@ namespace LifeSim.Rendering
                 return resourceSet;
             }
 
-            resourceSet = this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(this._materialResourceLayout, texture.Resource, texture.Sampler));
+            resourceSet = this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(this._materialResourceLayout, texture.DeviceTexture, texture.Sampler));
             this._textures.Add(texture, resourceSet);
             return resourceSet;
         }

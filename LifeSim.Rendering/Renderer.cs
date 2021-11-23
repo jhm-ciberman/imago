@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Veldrid;
 using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
@@ -10,6 +11,19 @@ namespace LifeSim.Rendering
         // This is the only global variable! I swear!! 
         // Please don't point your finger at me with that face (?)
         public static GraphicsDevice GraphicsDevice = null!;
+
+        private static Renderer? _instance = null;
+        public static Renderer Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    throw new InvalidOperationException("Renderer has not been initialized!");
+                }
+                return _instance;
+            }
+        }
 
         public readonly IRenderTexture FullScreenRenderTexture;
         public readonly RenderTexture MainRenderTexture;
@@ -32,10 +46,24 @@ namespace LifeSim.Rendering
         public SceneStorage SceneStorage => this.SceneRenderer.Storage;
         public GraphicsBackend BackendType => this._gd.BackendType;
 
+        public static SceneStorage? Storage { get; internal set; }
+
         private readonly Fence _fence;
+
+        private readonly List<Texture> _dirtyTextures = new List<Texture>();
+
+        private readonly CommandList _resourceUpdateCommandList;
+
+        private bool _updatedResources;
 
         public Renderer(Sdl2Window window, GraphicsBackend graphicsBackend)
         {
+            if (_instance != null)
+            {
+                throw new InvalidOperationException("Renderer has already been initialized!");
+            }
+            _instance = this;
+
             GraphicsDeviceOptions options = new GraphicsDeviceOptions(
                 debug: false,
                 swapchainDepthFormat: PixelFormat.R16_UNorm,
@@ -63,15 +91,23 @@ namespace LifeSim.Rendering
             this._fullScreenRenderer = new FullScreenRenderer(this._gd, this.MainRenderTexture, this.FullScreenRenderTexture);
 
             this._fence = this._factory.CreateFence(false);
+            this._resourceUpdateCommandList = this._factory.CreateCommandList();
         }
 
         public void Render()
         {
+            this.UpdateDirtyResources();
             this.ImguiRenderer.Render();
             this._fullScreenRenderer.Render();
 
 
             this.WaitForGPU();
+
+            if (this._updatedResources)
+            {
+                this._updatedResources = false;
+                this._gd.SubmitCommands(this._resourceUpdateCommandList);
+            }
 
             this.SceneRenderer.Submit();
             this.ParticlesRenderer.Submit();
@@ -81,6 +117,29 @@ namespace LifeSim.Rendering
             this.ImguiRenderer.Submit();
             this._fullScreenRenderer.Submit(this._fence);
             this._gd.SwapBuffers();
+        }
+
+        internal void OnTextureDirty(Texture texture)
+        {
+            this._dirtyTextures.Add(texture);
+        }
+
+
+
+        protected void UpdateDirtyResources()
+        {
+            if (this._dirtyTextures.Count > 0)
+            {
+                System.Diagnostics.Debug.WriteLine($"Updating {this._dirtyTextures.Count} dirty textures");
+                this._resourceUpdateCommandList.Begin();
+                foreach (var resource in this._dirtyTextures)
+                {
+                    resource.Update(this._gd, this._resourceUpdateCommandList);
+                }
+                this._resourceUpdateCommandList.End();
+                this._dirtyTextures.Clear();
+                this._updatedResources = true;
+            }
         }
 
         public void WaitForGPU()

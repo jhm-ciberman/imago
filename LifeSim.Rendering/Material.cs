@@ -57,7 +57,7 @@ namespace LifeSim.Rendering
 
             this._textures[name] = texture;
             int index = this.Definition.Textures[name];
-            this._resources[index * 2 + 0] = texture.Resource;
+            this._resources[index * 2 + 0] = texture.DeviceTexture;
             this._resources[index * 2 + 1] = texture.Sampler;
             this._resourceSetDirty = true;
         }

@@ -26,13 +26,13 @@ namespace LifeSim.Engine
 
         object ITexture2DManager.CreateTexture(int width, int height)
         {
-            return new Rendering.Texture((uint)width, (uint)height);
+            return new Rendering.Texture(width, height);
         }
 
         void ITexture2DManager.SetTextureData(object texture, System.Drawing.Rectangle bounds, byte[] data)
         {
             var t = (Rendering.Texture) texture;
-            t.Update((uint)bounds.X, (uint)bounds.Y, (uint)bounds.Width, (uint)bounds.Height, data, false);
+            t.SetData(bounds.X, bounds.Y, bounds.Width, bounds.Height, data);
         }
     }
 }

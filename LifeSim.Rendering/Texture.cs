@@ -1,104 +1,142 @@
 using System;
 using System.Numerics;
-using System.Runtime.InteropServices;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
+using Veldrid;
+using System.Runtime.InteropServices;
+using System.Diagnostics;
 
 namespace LifeSim.Rendering
 {
-    public class Texture : IDisposable
+    public class Texture
     {
-        protected Veldrid.Texture _deviceTexture;
-        protected Veldrid.Sampler _sampler;
-        protected Veldrid.GraphicsDevice _gd;
+        public Veldrid.Texture DeviceTexture { get; protected set; }
+        public Sampler Sampler { get; private set; }
+        private bool _isDirty = true;
+        public int Width { get; protected set; }
+        public int Height { get; protected set; }
+        public int MipLevels { get; protected set; }
 
-        public Texture(string path, uint mipLevels = 0)
+        private static Texture? _whiteTexture = null;
+        private static Texture? _blackTexture = null;
+        private static Texture? _pinkTexture = null;
+        public static Texture White => _whiteTexture ??= new Texture(new Image<Rgba32>(4, 4, new Rgba32(255, 255, 255, 255)));
+        public static Texture Black => _blackTexture ??= new Texture(new Image<Rgba32>(4, 4, new Rgba32(0, 0, 0, 255)));
+        public static Texture Pink => _pinkTexture ??= new Texture(new Image<Rgba32>(4, 4, new Rgba32(255, 0, 255, 255)));
+
+        private readonly Image<Rgba32> _image;
+
+
+        public Texture(string path, int mipLevels = 0)
             : this(Image.Load<Rgba32>(path), mipLevels)
         {
             //
         }
 
-        public Texture(Image<Rgba32> image, uint mipLevels = 0)
-            : this((uint)image.Width, (uint)image.Height, mipLevels)
+        public Texture(Image<Rgba32> image, int mipLevels = 0)
+            : this(image, image.Width, image.Height, mipLevels)
         {
-            this.Update(image, true);
+            //
         }
 
-        public Texture(uint width, uint height, uint mipLevels = 0)
+        public Texture(int width, int height, int mipLevels = 0)
+            : this(new Image<Rgba32>(width, height), mipLevels)
         {
-            this._gd = Renderer.GraphicsDevice;
-            var factory = this._gd.ResourceFactory;
-            if (mipLevels == 0)
-            {
-                mipLevels = (uint)BitOperations.Log2(Math.Min(width, height));
-            }
+            //
+        }
 
-            this._deviceTexture = factory.CreateTexture(new Veldrid.TextureDescription(
-                (uint)width, (uint)height, depth: 1,
-                mipLevels: mipLevels, arrayLayers: 1,
-                Veldrid.PixelFormat.R8_G8_B8_A8_UNorm,
-                Veldrid.TextureUsage.Sampled | Veldrid.TextureUsage.GenerateMipmaps,
-                Veldrid.TextureType.Texture2D
+        public Texture(Image<Rgba32> image, int width, int height, int mipLevels = 0)
+        {
+            this._image = image;
+            this.Width = width;
+            this.Height = height;
+
+            this.MipLevels = (mipLevels == 0)
+                ? BitOperations.Log2((uint)Math.Min(width, height))
+                : mipLevels;
+
+            var gd = Renderer.GraphicsDevice;
+            this.DeviceTexture = this.CreateDeviceTexture(gd);
+            this.Sampler = gd.PointSampler;
+            this._isDirty = true;
+            Renderer.Instance.OnTextureDirty(this);
+        }
+
+        private Veldrid.Texture CreateDeviceTexture(GraphicsDevice gd)
+        {
+            return gd.ResourceFactory.CreateTexture(new TextureDescription(
+                (uint)this.Width, (uint)this.Height, 1,
+                (uint)this.MipLevels, 1,
+                PixelFormat.R8_G8_B8_A8_UNorm,
+                TextureUsage.Sampled | TextureUsage.GenerateMipmaps,
+                TextureType.Texture2D
             ));
-
-            this._sampler = this._gd.PointSampler;
         }
 
-        public uint Width => this._deviceTexture.Width;
-        public uint Height => this._deviceTexture.Height;
-
-        public Veldrid.Texture Resource => this._deviceTexture;
-        public Veldrid.Sampler Sampler => this._sampler;
-
-        public void Update(uint x, uint y, uint width, uint height, byte[] data, bool generateMipmaps = true)
+        private void _OnTextureChanged()
         {
-            this._gd.UpdateTexture(
-                this._deviceTexture, data,
-                x: x, y: y, z: 0,
-                width: width, height: height, depth: 1,
-                mipLevel: 0, arrayLayer: 0
-            );
-
-            if (generateMipmaps) this.RegenerateMipmaps();
-        }
-
-        public unsafe void Update(Image<Rgba32> image, bool generateMipmaps = true)
-        {
-            if (!image.TryGetSinglePixelSpan(out Span<Rgba32> pixelSpan))
+            if (!this._isDirty)
             {
-                throw new System.Exception("Unable to get image pixelspan.");
+                this._isDirty = true;
+                Renderer.Instance.OnTextureDirty(this);
             }
-
-            fixed (void* pin = &MemoryMarshal.GetReference(pixelSpan))
-            { // TODO: check matching width/height, etc
-                this._gd.UpdateTexture(
-                    this._deviceTexture,
-                    (IntPtr)pin,
-                    (uint)(sizeof(byte) * 4 * image.Width * image.Height),
-                    x: 0, y: 0, z: 0,
-                    width: (uint)image.Width,
-                    height: (uint)image.Height,
-                    depth: 1, mipLevel: (uint)0, arrayLayer: 0
-                );
-            }
-
-            if (generateMipmaps) this.RegenerateMipmaps();
         }
 
-        public void RegenerateMipmaps()
+        public void Apply()
         {
-            var cl = this._gd.ResourceFactory.CreateCommandList();
-            cl.Begin();
-            cl.GenerateMipmaps(this._deviceTexture);
-            cl.End();
-
-            this._gd.SubmitCommands(cl);
+            this._OnTextureChanged();
         }
 
         public void Dispose()
         {
-            this._deviceTexture.Dispose();
+            this.DeviceTexture.Dispose();
         }
 
+        public void SetData(int x, int y, int width, int height, byte[] data)
+        {
+            Debug.Assert(x >= 0 && y >= 0 && x + width <= this.Width && y + height <= this.Height);
+
+            // Copy the data bytes to the image
+            int index = 0;
+            for (int yi = y; yi < y + height; yi++)
+            {
+                Span<Rgba32> row = this._image.GetPixelRowSpan(yi);
+                for (int xi = 0; xi < width; xi++)
+                {
+                    row[x + xi] = new Rgba32(data[index + 0], data[index + 1], data[index + 2], data[index + 3]);
+                    index += 4;
+                }
+            }
+
+            this._OnTextureChanged();
+        }
+
+
+        public unsafe void Update(GraphicsDevice gd, CommandList cl)
+        {
+            if (!this._image.TryGetSinglePixelSpan(out Span<Rgba32> pixelSpan))
+            {
+                throw new Exception("Unable to get image pixelspan.");
+            }
+
+            fixed (void* pin = &MemoryMarshal.GetReference(pixelSpan))
+            {
+                gd.UpdateTexture(
+                    this.DeviceTexture,
+                    (IntPtr)pin,
+                    (uint)(sizeof(byte) * 4 * this.Width * this.Height),
+                    x: 0, y: 0, z: 0,
+                    width: (uint)this.Width, height: (uint)this.Height, depth: 1,
+                    mipLevel: 0, arrayLayer: 0
+                );
+            }
+
+            if (this.MipLevels > 0)
+            {
+                cl.GenerateMipmaps(this.DeviceTexture);
+            }
+
+            this._isDirty = false;
+        }
     }
 }
