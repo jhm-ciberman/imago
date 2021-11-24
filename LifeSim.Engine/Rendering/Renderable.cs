@@ -1,6 +1,5 @@
 using System;
 using System.Numerics;
-using System.Runtime.CompilerServices;
 using Veldrid.Utilities;
 
 namespace LifeSim.Engine.Rendering
@@ -11,14 +10,14 @@ namespace LifeSim.Engine.Rendering
 
         public int RenderListIndex { get; set; }
         private Matrix4x4 _transform = Matrix4x4.Identity;
-        private Vector3 _centerPosition;
-        public BoundingBox BoundingBox;
+        public Vector3 CenterPosition { get; private set; }
+        public BoundingBox BoundingBox { get; private set; }
         private ulong _cachedSortKey;
         public int BatchingHashKey { get; private set; }
 
         internal Veldrid.ResourceSet TransformResourceSet { get; private set; }
         internal Veldrid.ResourceSet? InstanceResourceSet { get; private set; } = null;
-        internal Veldrid.ResourceSet? SkeletonResourceSet { get; private set; }
+        internal Veldrid.ResourceSet? SkeletonResourceSet { get; private set; } = null;
 
         public OffsetVertexData OffsetVertexData { get; set; }
 
@@ -71,7 +70,6 @@ namespace LifeSim.Engine.Rendering
 
         public void SetSkeleton(Skeleton skeleton)
         {
-            if (this.Skeleton == skeleton) return;
             this.Skeleton = skeleton;
             this.SkeletonResourceSet = skeleton.ResourceSet;
             this._RecomputeOffsetVertexData();
@@ -114,25 +112,27 @@ namespace LifeSim.Engine.Rendering
             ulong materialHash        = (ulong) (this.Material.Id & 0xFFF);
             ulong meshHash            = (ulong) (this.Mesh.Id & 0xFFF);
             ulong transformBufferHash = (ulong) (this._transformDataBlock.Buffer.Id & 0xFF);
-            //ulong instanceBufferHash  = (ulong) (this._instanceDataBlock.Buffer.Id & 0xFF);
+            ulong instanceBufferHash  = (ulong) (this._instanceDataBlock.Buffer.Id & 0xFF);
             ulong skekeletonBufferHash = (this.Skeleton != null) ? (ulong)(this.Skeleton.BufferId & 0xF) : 0;
 
             // The sort key is a 64-bit number that is used to sort renderables.
-            ulong key = (materialHash   << 56) // 8 bits
-                | (transformBufferHash  << 48) // 8 bits
-                | (transformBufferHash  << 40) // 8 bits
-                | (skekeletonBufferHash << 36) // 4 bits
-                | (meshHash             << 24); // 12 bits
+            ulong key = (materialHash   << 56) // 8 bits (max: 255)
+                | (transformBufferHash  << 48) // 8 bits (max: 255)
+                | (instanceBufferHash   << 40) // 8 bits (max: 255)
+                | (skekeletonBufferHash << 36) // 4 bits (max: 15)
+                | (meshHash             << 24); // 12 bits (max: 4095)
 
             this._cachedSortKey = key;
 
             // This key is used to fast check if two instances can be batched together. (They must have the same hash)
+            // It could happen that the hash is not unique, but it is extremely unlikely that two instances that are 
+            // contiguous after sorting the render queue by the sort key, end up having the same hash.
             this.BatchingHashKey = HashCode.Combine(
-                this.Mesh.Id,
+                meshHash,
                 this.Material.Id,
-                this._instanceDataBlock.Buffer.Id,
+                instanceBufferHash,
                 skekeletonBufferHash,
-                this._transformDataBlock.Buffer.Id
+                transformBufferHash
             );
         }
 
@@ -151,12 +151,12 @@ namespace LifeSim.Engine.Rendering
         private void _RecomputeBoundingBox()
         {
             this.BoundingBox = BoundingBox.Transform(this.Mesh!.AABB, this._transform);
-            this._centerPosition = this.BoundingBox.GetCenter();
+            this.CenterPosition = this.BoundingBox.GetCenter();
         }
 
         internal ulong GetSortKey(Vector3 cameraPosition)
         {
-            float dist = Vector3.DistanceSquared(this._centerPosition, cameraPosition);
+            float dist = Vector3.DistanceSquared(this.CenterPosition, cameraPosition);
             uint cameraDistance = Math.Min(uint.MaxValue, (uint) (dist * 1000f));
             return this._cachedSortKey | (cameraDistance & 0xFFFFFF); // 24 bits
         }
