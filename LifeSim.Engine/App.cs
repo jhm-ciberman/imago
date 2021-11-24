@@ -83,8 +83,7 @@ namespace LifeSim.Engine
                 var fps = (1f / deltaTime).ToString("0.00");
                 var dt = (deltaTime * 1000).ToString("0.00");
 
-                var mouse = "(" + Input.MousePosition.X + ", " +Input.MousePosition.Y + ")";
-                this._window.Title = "Medieval Life" + " (" + this._renderer.BackendType.ToString() + ") frame = " + dt + "ms FPS = " + fps + " Mouse: " + mouse;
+                this._window.Title = "Medieval Life" + " (" + this._renderer.BackendType.ToString() + ") frame = " + dt + "ms FPS = " + fps;
 
                 if (Input.GetKeyDown(Veldrid.Key.Escape) && !Input.MouseIsLocked)
                 {

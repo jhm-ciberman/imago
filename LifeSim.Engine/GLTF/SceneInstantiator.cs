@@ -18,7 +18,7 @@ namespace LifeSim.Engine.GLTF
             this._storage = storage;
         }
 
-        public Node3D Instantiate(ISceneTemplate scene)
+        public Node3D Instantiate(GLTFScene scene)
         {
             this._nodesCache.Clear();
             Node3D n = new Node3D();
@@ -29,7 +29,7 @@ namespace LifeSim.Engine.GLTF
             return n;
         }
 
-        private Node3D _CreateRenderNode(ISceneTemplate scene, Mesh mesh, Material? material, Skin? skin)
+        private Node3D _CreateRenderNode(GLTFScene scene, Mesh mesh, Material? material, Skin? skin)
         {
             Renderable renderable = new Renderable(this._storage);
             renderable.SetMesh(mesh);
@@ -45,7 +45,7 @@ namespace LifeSim.Engine.GLTF
             return new RenderNode3D(renderable);
         }
 
-        private Node3D _InstantiateNodeRecursive(ISceneTemplate scene, GLTFNode gltfNode)
+        private Node3D _InstantiateNodeRecursive(GLTFScene scene, GLTFNode gltfNode)
         {
             Node3D? node3d = this._nodesCache.GetValueOrDefault(gltfNode);
             if (node3d != null)
@@ -71,7 +71,7 @@ namespace LifeSim.Engine.GLTF
             return node;
         }
 
-        private Skeleton _CreateSkeleton(ISceneTemplate scene, Skin skin)
+        private Skeleton _CreateSkeleton(GLTFScene scene, Skin skin)
         {
             Node3D[] joints = new Node3D[skin.JointNames.Count];
             IList<string> names = skin.JointNames;
@@ -82,7 +82,7 @@ namespace LifeSim.Engine.GLTF
                     ? this._InstantiateNodeRecursive(scene, gltfNode)
                     : throw new System.Exception("Could not bind joint: " + names[i]);
             }
-            return new Skeleton(joints, skin.InverseBindMatrices);
+            return new Skeleton(this._storage, joints, skin.InverseBindMatrices);
         }
     }
 }

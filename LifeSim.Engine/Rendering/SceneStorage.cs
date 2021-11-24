@@ -15,6 +15,8 @@ namespace LifeSim.Engine.Rendering
         private readonly ResourceLayout _instanceResourceLayout;
         private readonly ResourceLayout _skeletonResourceLayout;
 
+        private readonly List<Skeleton> _skeletons = new List<Skeleton>();
+
         public SceneStorage(GraphicsDevice gd, ResourceLayout transformResourceLayout, ResourceLayout instanceResourceLayout, ResourceLayout sleletonResourceLayout)
         {
             this._gd = gd;
@@ -41,6 +43,11 @@ namespace LifeSim.Engine.Rendering
             return newBuffer.RequestBlock();
         }
 
+        internal void RegisterSkeleton(Skeleton skeleton)
+        {
+            this._skeletons.Add(skeleton);
+        }
+
         internal DataBlock RequestInstanceDataBlock(MaterialDefinition material)
         {
             var blockSize = material.InstanceDataBlockSize;
@@ -59,6 +66,11 @@ namespace LifeSim.Engine.Rendering
             return newBuffer.RequestBlock();
         }
 
+        internal void UnregisterSkeleton(Skeleton skeleton)
+        {
+            this._skeletons.Remove(skeleton);
+        }
+
         internal DataBlock RequestSkeletonDataBlock()
         {
             for (int i = 0; i < this._skeletonDataBuffers.Count; i++)
@@ -70,7 +82,7 @@ namespace LifeSim.Engine.Rendering
                 }
             }
 
-            var newBuffer = new DataBuffer(this._gd, MIN_BUFFER_BLOCKS / Renderable.MAX_NUMBER_OF_BONES, Renderable.MAX_NUMBER_OF_BONES * 64, this._skeletonResourceLayout);
+            var newBuffer = new DataBuffer(this._gd, MIN_BUFFER_BLOCKS / Skeleton.MAX_NUMBER_OF_BONES, Skeleton.MAX_NUMBER_OF_BONES * 64, this._skeletonResourceLayout);
             newBuffer.Name = "SkeletonDataBuffer " + this._skeletonDataBuffers.Count;
             this._skeletonDataBuffers.Add(newBuffer);
             return newBuffer.RequestBlock();
@@ -86,6 +98,11 @@ namespace LifeSim.Engine.Rendering
             for (int i = 0; i < this._transformDataBuffers.Count; i++)
             {
                 this._transformDataBuffers[i].UploadToGPU(commandList);
+            }
+
+            foreach (var skeleton in this._skeletons)
+            {
+                skeleton.Update();
             }
 
             for (int i = 0; i < this._skeletonDataBuffers.Count; i++)
@@ -109,6 +126,11 @@ namespace LifeSim.Engine.Rendering
             for (int i = 0; i < this._skeletonDataBuffers.Count; i++)
             {
                 this._skeletonDataBuffers[i].Dispose();
+            }
+
+            foreach (var skeleton in this._skeletons)
+            {
+                skeleton.Dispose();
             }
         }
     }

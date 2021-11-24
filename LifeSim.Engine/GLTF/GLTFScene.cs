@@ -4,7 +4,7 @@ using LifeSim.Engine.SceneGraph;
 
 namespace LifeSim.Engine.GLTF
 {
-    public partial class GLTFScene : ISceneTemplate
+    public partial class GLTFScene
     {
         private readonly List<GLTFNode> _children = new List<GLTFNode>();
         private readonly Dictionary<string, GLTFNode> _nodesByName = new Dictionary<string, GLTFNode>();

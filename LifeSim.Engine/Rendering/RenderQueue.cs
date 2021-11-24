@@ -31,10 +31,9 @@ namespace LifeSim.Engine.Rendering
                 Renderable renderable = renderables[i];
                 if (renderable.Visible == false || renderable.Material == null || renderable.Mesh == null) continue;
 
-                if (renderable.Cull(ref frustum))
+                if (frustum.Contains(ref renderable.BoundingBox) != ContainmentType.Disjoint)
                 {
                     ulong key = renderable.GetSortKey(cameraPosition);
-                    renderable.Update(); // TODO: Remove this from here!
                     this._indices.Add(new RenderIndex(key, this._items.Count));
                     this._items.Add(renderable);
                 }
