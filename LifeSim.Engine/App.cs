@@ -19,16 +19,16 @@ namespace LifeSim.Engine
 
         private IStage? _stage = null;
 
-        public App()
+        public App(string windowTitle, GraphicsBackend? backend = null)
         {
             GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
 
-            WindowCreateInfo windowCI = new WindowCreateInfo(100, 100, 1024, 600, Veldrid.WindowState.Normal, "Medieval Life");
+            WindowCreateInfo windowCI = new WindowCreateInfo(100, 100, 1024, 600, Veldrid.WindowState.Normal, windowTitle);
             this._window = VeldridStartup.CreateWindow(ref windowCI);
             this.Viewport = new Rendering.Viewport((uint)this._window.Width, (uint)this._window.Height);
 
-            var graphicsBackend = App.ParseGraphicsBackend(Environment.GetCommandLineArgs());
-            this._renderer = new Renderer(this._window, graphicsBackend);
+
+            this._renderer = new Renderer(this._window, backend);
 
             this._window.Resized += this.OnResize;
 
@@ -46,51 +46,6 @@ namespace LifeSim.Engine
         {
             this.SetStage(stage);
             this._MainLoop();
-        }
-
-        private static GraphicsBackend ParseGraphicsBackend(string[] args)
-        {
-            GraphicsBackend? backend = null;
-            if (args.Length > 0)
-            {
-                foreach (var arg in args)
-                {
-                    backend = GetBackend(arg);
-                    if (backend != null) break;
-                }
-            }
-
-            if (backend == null && File.Exists("./backend.txt"))
-            {
-                var backendName = File.ReadAllText("./backend.txt");
-                backend = GetBackend(backendName);
-            }
-
-            return backend ?? VeldridStartup.GetPlatformDefaultBackend();
-        }
-
-        public static GraphicsBackend? GetBackend(string name)
-        {
-            switch (name.ToLower())
-            {
-                case "vulkan":
-                case "vk":
-                    return GraphicsBackend.Vulkan;
-                case "metal":
-                    return GraphicsBackend.Metal;
-                case "directx":
-                case "dx11":
-                case "dx":
-                case "directx11":
-                    return GraphicsBackend.Direct3D11;
-                case "gl":
-                case "opengl":
-                    return GraphicsBackend.OpenGL;
-                case "gles":
-                case "opengles":
-                    return GraphicsBackend.OpenGLES;
-            }
-            return null;
         }
 
         private void OnResize()

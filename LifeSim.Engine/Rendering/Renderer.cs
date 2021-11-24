@@ -58,7 +58,7 @@ namespace LifeSim.Engine.Rendering
 
         private bool _updatedResources;
 
-        public Renderer(Sdl2Window window, GraphicsBackend graphicsBackend)
+        public Renderer(Sdl2Window window, GraphicsBackend? graphicsBackend = null)
         {
             if (_instance != null)
             {
@@ -76,7 +76,7 @@ namespace LifeSim.Engine.Rendering
                 swapchainSrgbFormat: false
             );
 
-            this._gd = VeldridStartup.CreateGraphicsDevice(window, options, graphicsBackend);
+            this._gd = VeldridStartup.CreateGraphicsDevice(window, options, graphicsBackend ?? VeldridStartup.GetPlatformDefaultBackend());
             Renderer.GraphicsDevice = this._gd;
 
             this._factory = this._gd.ResourceFactory;
