@@ -7,6 +7,8 @@ namespace LifeSim.Engine.Rendering
 {
     public class Renderable
     {
+        private static uint _count;
+
         public int RenderListIndex { get; set; }
         private Matrix4x4 _transform = Matrix4x4.Identity;
         private Vector3 _centerPosition;
@@ -25,9 +27,7 @@ namespace LifeSim.Engine.Rendering
         public Mesh? Mesh { get; private set; } = null;
 
         public bool Visible { get; set; } = true;
-
-        private uint _pickingID = 0;
-        public uint PickingID { get => this._pickingID; set { this._pickingID = value; this._RecomputeOffsetVertexData(); } }
+        public uint Id { get; }
 
         public Skeleton? Skeleton { get; private set; }
         public Material? Material { get; private set; }
@@ -37,7 +37,7 @@ namespace LifeSim.Engine.Rendering
         public Renderable(SceneStorage storage)
         {
             this._storage = storage;
-
+            this.Id = ++_count;
             this._transformDataBlock = storage.RequestTransformDataBlock();
             this.TransformResourceSet = this._transformDataBlock.Buffer.ResourceSet;
         }
@@ -72,11 +72,10 @@ namespace LifeSim.Engine.Rendering
         public void SetSkeleton(Skeleton skeleton)
         {
             if (this.Skeleton == skeleton) return;
-
+            this.Skeleton = skeleton;
             this.SkeletonResourceSet = skeleton.ResourceSet;
             this._RecomputeOffsetVertexData();
             this._RecomputeSortKey();
-            this.Skeleton = skeleton;
         }
 
         public void SetTransform(ref Matrix4x4 transform)
@@ -145,7 +144,7 @@ namespace LifeSim.Engine.Rendering
                 this._transformDataBlock.BlockIndex,
                 this._instanceDataBlock.BlockIndex,
                 this.Skeleton?.BoneDataOffset ?? 0,
-                this.PickingID
+                this.Id // this id is used for picking
             );
         }
 
