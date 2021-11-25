@@ -37,7 +37,7 @@ namespace LifeSim.Engine.Rendering
                 elements[j++] = new ResourceLayoutElementDescription(name + "Sampler", ResourceKind.Sampler, ShaderStages.Fragment);
             }
 
-            this._resourceLayout = Renderer.GraphicsDevice.ResourceFactory.CreateResourceLayout(new ResourceLayoutDescription(elements));
+            this._resourceLayout = Renderer.Instance.GraphicsDevice.ResourceFactory.CreateResourceLayout(new ResourceLayoutDescription(elements));
 
             this.InstanceDataBlockSize = uniforms.Length * 16;
             this._instanceDefaultData = new Memory<byte>(new byte[this.InstanceDataBlockSize]);

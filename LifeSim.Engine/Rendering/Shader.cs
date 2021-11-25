@@ -26,7 +26,7 @@ namespace LifeSim.Engine.Rendering
             this._vertexCode = vertexCode;
             this._fragmentCode = fragmentCode;
 
-            this._factory = Renderer.GraphicsDevice.ResourceFactory;
+            this._factory = Renderer.Instance.GraphicsDevice.ResourceFactory;
 
             this._materialResourceLayout = materialResourceLayout;
         }

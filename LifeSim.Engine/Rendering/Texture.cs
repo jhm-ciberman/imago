@@ -55,7 +55,7 @@ namespace LifeSim.Engine.Rendering
                 ? BitOperations.Log2((uint)Math.Min(width, height))
                 : mipLevels;
 
-            var gd = Renderer.GraphicsDevice;
+            var gd = Renderer.Instance.GraphicsDevice;
             this.DeviceTexture = this.CreateDeviceTexture(gd);
             this.Sampler = gd.PointSampler;
             this._isDirty = true;

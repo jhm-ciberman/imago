@@ -29,7 +29,7 @@ namespace LifeSim.Engine.Rendering
 
         public static Mesh CreateFromData(IMeshData meshData)
         {
-            var gd = Renderer.GraphicsDevice;
+            var gd = Renderer.Instance.GraphicsDevice;
             var factory = gd.ResourceFactory;
 
             BoundingBox boundingBox = meshData.GetBoundingBox();
