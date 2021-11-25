@@ -11,19 +11,30 @@ namespace LifeSim.Engine.Rendering
         private readonly List<DataBuffer> _instanceDataBuffers = new List<DataBuffer>();
         private readonly List<DataBuffer> _transformDataBuffers = new List<DataBuffer>();
         private readonly List<DataBuffer> _skeletonDataBuffers = new List<DataBuffer>();
-        private readonly ResourceLayout _transformResourceLayout;
-        private readonly ResourceLayout _instanceResourceLayout;
-        private readonly ResourceLayout _skeletonResourceLayout;
+        public readonly ResourceLayout TransformResourceLayout;
+        public readonly ResourceLayout InstanceResourceLayout;
+        public readonly ResourceLayout SkeletonResourceLayout;
 
         private readonly List<Skeleton> _skeletons = new List<Skeleton>();
 
-        public SceneStorage(GraphicsDevice gd, ResourceLayout transformResourceLayout, ResourceLayout instanceResourceLayout, ResourceLayout sleletonResourceLayout)
+        public SceneStorage(GraphicsDevice gd)
         {
             this._gd = gd;
+            var factory = gd.ResourceFactory;
+            this.InstanceResourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
+                new ResourceLayoutElementDescription("InstanceDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex | ShaderStages.Fragment)
+            ));
+            this.InstanceResourceLayout.Name = "InstanceData Resource Layout";
 
-            this._transformResourceLayout = transformResourceLayout;
-            this._instanceResourceLayout = instanceResourceLayout;
-            this._skeletonResourceLayout = sleletonResourceLayout;
+            this.TransformResourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
+                new ResourceLayoutElementDescription("TransformDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
+            ));
+            this.TransformResourceLayout.Name = "TransformData Resource Layout";
+
+            this.SkeletonResourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
+                new ResourceLayoutElementDescription("BonesDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
+            ));
+            this.SkeletonResourceLayout.Name = "BonesData Resource Layout";
         }
 
         internal DataBlock RequestTransformDataBlock()
@@ -37,7 +48,7 @@ namespace LifeSim.Engine.Rendering
                 }
             }
 
-            var newBuffer = new DataBuffer(this._gd, MIN_BUFFER_BLOCKS, 64, this._transformResourceLayout);
+            var newBuffer = new DataBuffer(this._gd, MIN_BUFFER_BLOCKS, 64, this.TransformResourceLayout);
             newBuffer.Name = "TransformDataBuffer " + this._transformDataBuffers.Count;
             this._transformDataBuffers.Add(newBuffer);
             return newBuffer.RequestBlock();
@@ -60,7 +71,7 @@ namespace LifeSim.Engine.Rendering
                 }
             }
 
-            var newBuffer = new DataBuffer(this._gd, MIN_BUFFER_BLOCKS, blockSize, this._instanceResourceLayout);
+            var newBuffer = new DataBuffer(this._gd, MIN_BUFFER_BLOCKS, blockSize, this.InstanceResourceLayout);
             newBuffer.Name = "InstanceDataBuffer " + this._instanceDataBuffers.Count;
             this._instanceDataBuffers.Add(newBuffer);
             return newBuffer.RequestBlock();
@@ -82,7 +93,7 @@ namespace LifeSim.Engine.Rendering
                 }
             }
 
-            var newBuffer = new DataBuffer(this._gd, MIN_BUFFER_BLOCKS / Skeleton.MAX_NUMBER_OF_BONES, Skeleton.MAX_NUMBER_OF_BONES * 64, this._skeletonResourceLayout);
+            var newBuffer = new DataBuffer(this._gd, MIN_BUFFER_BLOCKS / Skeleton.MAX_NUMBER_OF_BONES, Skeleton.MAX_NUMBER_OF_BONES * 64, this.SkeletonResourceLayout);
             newBuffer.Name = "SkeletonDataBuffer " + this._skeletonDataBuffers.Count;
             this._skeletonDataBuffers.Add(newBuffer);
             return newBuffer.RequestBlock();

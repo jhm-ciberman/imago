@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Veldrid;
@@ -18,13 +19,13 @@ namespace LifeSim.Engine.Rendering
         private readonly DeviceBuffer _shadowmapInfoBuffer;
         private readonly RenderQueue _renderQueue;
         private readonly RenderJob _renderJob;
-        private readonly SceneRenderer _renderer;
+        private readonly SceneStorage _storage;
 
-        public ShadowmapPass(GraphicsDevice gd, SceneRenderer renderer)
+        public ShadowmapPass(GraphicsDevice gd, SceneStorage storage)
         {
             this._gd = gd;
             var factory = gd.ResourceFactory;
-            this._renderer = renderer;
+            this._storage = storage;
 
             this._resourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
                 new ResourceLayoutElementDescription("ShadowMapDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
@@ -86,8 +87,27 @@ namespace LifeSim.Engine.Rendering
                 BlendState = BlendStateDescription.Empty,
                 RasterizerState = rasterizerState,
                 Outputs = this._shadowmapFramebuffer.OutputDescription,
-                ResourceLayouts = this._renderer.GetShaderVariantResourceLayouts(this._resourceLayout, shaderVariant),
+                ResourceLayouts = this._GetResourceLayouts(shaderVariant),
             });
+        }
+
+        private ResourceLayout[] _GetResourceLayouts(ShaderVariant shaderVariant)
+        {
+            Debug.Assert(shaderVariant.MaterialResourceLayout != null);
+
+            var resources = new List<ResourceLayout> {
+                this._resourceLayout,
+                this._storage.TransformResourceLayout,
+                shaderVariant.MaterialResourceLayout,
+                this._storage.InstanceResourceLayout
+            };
+
+            if (shaderVariant.VertexFormat.IsSkinned)
+            {
+                resources.Add(this._storage.SkeletonResourceLayout);
+            }
+
+            return resources.ToArray();
         }
     }
 }

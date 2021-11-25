@@ -22,8 +22,8 @@ namespace LifeSim.Engine.Rendering
         {
             this.Id = ++Material._count;
             this.Definition = definition;
-            this.Shader = definition.GetShader(SceneRenderer.ForwardPass);
-            this.ShadowmapShader = definition.GetShader(SceneRenderer.ShadowMapPass);
+            this.Shader = definition.GetShader(Renderer.ForwardPass);
+            this.ShadowmapShader = definition.GetShader(Renderer.ShadowMapPass);
             this._resources = new BindableResource[definition.ResourceCount];
             Renderer.Instance.OnMaterialDirty(this);
         }

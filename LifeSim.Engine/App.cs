@@ -40,7 +40,7 @@ namespace LifeSim.Engine
 
         public Rendering.Viewport Viewport { get; }
 
-        public SceneStorage Storage => this._renderer.SceneStorage;
+        public SceneStorage Storage => this._renderer.Storage;
 
         public void Run(IStage stage)
         {

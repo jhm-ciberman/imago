@@ -11,7 +11,8 @@ namespace LifeSim.Engine.Rendering
         // This is the only global variable! I swear!! 
         // Please don't point your finger at me with that face (?)
         public static GraphicsDevice GraphicsDevice = null!;
-
+        public static IPipelineProvider ForwardPass = null!;
+        public static IPipelineProvider ShadowMapPass = null!;
         private static Renderer? _instance = null;
         public static Renderer Instance
         {
@@ -35,18 +36,12 @@ namespace LifeSim.Engine.Rendering
 
         public ParticlesRenderer ParticlesRenderer { get; }
 
-        public SceneRenderer SceneRenderer { get; }
-
         public ImguiRenderer ImguiRenderer { get; }
 
         public CanvasRenderer CanvasRenderer { get; }
 
         public MousePickingRenderer MousePicker { get; }
-
-        public SceneStorage SceneStorage => this.SceneRenderer.Storage;
         public GraphicsBackend BackendType => this._gd.BackendType;
-
-        public static SceneStorage? Storage { get; internal set; }
 
         private readonly Fence _fence;
 
@@ -55,6 +50,15 @@ namespace LifeSim.Engine.Rendering
         private readonly List<Material> _dirtyMaterials = new List<Material>();
 
         private readonly CommandList _resourceUpdateCommandList;
+
+        private readonly ForwardPass _forwardPass;
+        private readonly ShadowmapPass _shadowmapPass;
+
+        internal SceneStorage Storage { get; }
+
+        private readonly CommandList _commandList;
+
+        private bool _hasCommandsToSubmit;
 
         private bool _updatedResources;
 
@@ -76,21 +80,30 @@ namespace LifeSim.Engine.Rendering
                 swapchainSrgbFormat: false
             );
 
-            this._gd = VeldridStartup.CreateGraphicsDevice(window, options, graphicsBackend ?? VeldridStartup.GetPlatformDefaultBackend());
+            var gd = VeldridStartup.CreateGraphicsDevice(window, options, graphicsBackend ?? VeldridStartup.GetPlatformDefaultBackend());
+            this._gd = gd;
             Renderer.GraphicsDevice = this._gd;
 
             this._factory = this._gd.ResourceFactory;
 
             this.FullScreenRenderTexture = new SwapchainRenderTexture(this._gd.MainSwapchain);
-            this.MainRenderTexture = new RenderTexture(this._gd.ResourceFactory, (uint)window.Width, (uint)window.Height);
+            this.MainRenderTexture = new RenderTexture(gd.ResourceFactory, (uint)window.Width, (uint)window.Height);
 
-            this.CanvasRenderer = new CanvasRenderer(this._gd, this.MainRenderTexture);
-            this.SceneRenderer = new SceneRenderer(this._gd, this.MainRenderTexture);
-            this.ImguiRenderer = new ImguiRenderer(this._gd, this.MainRenderTexture);
-            this.MousePicker = new MousePickingRenderer(this._gd, this.MainRenderTexture);
-            this.GizmosRenderer = new GizmosRenderer(this._gd, this.MainRenderTexture);
-            this.ParticlesRenderer = new ParticlesRenderer(this._gd, this.MainRenderTexture);
-            this._fullScreenRenderer = new FullScreenRenderer(this._gd, this.MainRenderTexture, this.FullScreenRenderTexture);
+            this.Storage = new SceneStorage(gd);
+
+            this.CanvasRenderer = new CanvasRenderer(gd, this.MainRenderTexture);
+            this.ImguiRenderer = new ImguiRenderer(gd, this.MainRenderTexture);
+            this.MousePicker = new MousePickingRenderer(gd, this.MainRenderTexture);
+            this.GizmosRenderer = new GizmosRenderer(gd, this.MainRenderTexture);
+            this.ParticlesRenderer = new ParticlesRenderer(gd, this.MainRenderTexture);
+            this._fullScreenRenderer = new FullScreenRenderer(gd, this.MainRenderTexture, this.FullScreenRenderTexture);
+
+            this._commandList = this._factory.CreateCommandList();
+            this._shadowmapPass = new ShadowmapPass(gd, this.Storage);
+            this._forwardPass = new ForwardPass(gd, this.Storage, this.MainRenderTexture, this._shadowmapPass.ShadowmapTexture);
+
+            Renderer.ShadowMapPass = this._shadowmapPass;
+            Renderer.ForwardPass = this._forwardPass;
 
             this._fence = this._factory.CreateFence(false);
             this._resourceUpdateCommandList = this._factory.CreateCommandList();
@@ -99,6 +112,17 @@ namespace LifeSim.Engine.Rendering
         public void BeginRender()
         {
             this.UpdateDirtyResources();
+        }
+
+        public void Render(IReadOnlyList<Renderable> renderables, DirectionalLight mainLight, ColorF ambientColor, ColorF clearColor, ICamera camera)
+        {
+            this._commandList.Begin();
+            this.Storage.UpdateBuffers(this._commandList);
+            this._shadowmapPass.Render(this._commandList, renderables, camera, mainLight);
+            this._forwardPass.Render(this._commandList, renderables, mainLight, ambientColor, clearColor, camera);
+            this._commandList.End();
+
+            this._hasCommandsToSubmit = true;
         }
 
         public void Render()
@@ -114,7 +138,12 @@ namespace LifeSim.Engine.Rendering
                 this._gd.SubmitCommands(this._resourceUpdateCommandList);
             }
 
-            this.SceneRenderer.Submit();
+            if (this._hasCommandsToSubmit)
+            {
+                this._gd.SubmitCommands(this._commandList);
+                this._hasCommandsToSubmit = false;
+            }
+
             this.ParticlesRenderer.Submit();
             this.GizmosRenderer.Submit();
             this.CanvasRenderer.Submit();
@@ -184,11 +213,11 @@ namespace LifeSim.Engine.Rendering
             this.FullScreenRenderTexture.Dispose();
             this.MainRenderTexture.Dispose();
             this.CanvasRenderer.Dispose();
-            this.SceneRenderer.Dispose();
             this.ImguiRenderer.Dispose();
             this.MousePicker.Dispose();
             this.GizmosRenderer.Dispose();
             this._fullScreenRenderer.Dispose();
+            this._commandList.Dispose();
             this._fence.Dispose();
             this._gd.Dispose();
         }
