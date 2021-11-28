@@ -48,15 +48,11 @@ namespace LifeSim.Engine.Rendering
 
         private readonly GraphicsDevice _gd;
 
-        private readonly CommandList _commandList;
-
         private readonly DeviceBuffer _viewProjectionBuffer;
 
         private readonly VertexFormat _vertexFormat;
 
         private readonly ParticleRenderData[] _particlesForRender = new ParticleRenderData[PARTICLES_PER_BATCH];
-
-        private bool _hasCommandsToSubmit = false;
 
         private readonly Dictionary<Texture, ResourceSet> _textures = new Dictionary<Texture, ResourceSet>();
 
@@ -107,46 +103,33 @@ namespace LifeSim.Engine.Rendering
             var vertex = ShaderSource.Load("particles.vert.glsl");
             var fragment = ShaderSource.Load("particles.frag.glsl");
             this._particlesShader = new Shader(this, vertex, fragment, this._materialResourceLayout);
-            this._commandList = factory.CreateCommandList();
-            this._commandList.Name = "Particles Renderer";
         }
 
 
 
-        public void Render(IReadOnlyList<Particle> particles, Texture texture, ICamera camera)
+        public void Render(CommandList cl, IReadOnlyList<Particle> particles, Texture texture, ICamera camera)
         {
             this._currentShader = null;
             this._currentTexture = null;
 
-            this._commandList.Begin();
-            this._commandList.SetFramebuffer(this._renderTexture.Framebuffer);
+            cl.SetFramebuffer(this._renderTexture.Framebuffer);
 
-            this._commandList.UpdateBuffer(this._viewProjectionBuffer, 0, new CameraDataBuffer
+            cl.UpdateBuffer(this._viewProjectionBuffer, 0, new CameraDataBuffer
             {
                 ViewProjection = camera.ViewProjectionMatrix,
                 CameraRight = camera.Right,
                 CameraUp = camera.Up
             });
 
-            this._RenderParticles(particles, this._particlesShader, texture);
-
-            this._commandList.End();
-            this._hasCommandsToSubmit = true;
+            this._RenderParticles(cl, particles, this._particlesShader, texture);
         }
 
-        public void Submit()
-        {
-            if (!this._hasCommandsToSubmit) return;
-            this._gd.SubmitCommands(this._commandList);
-            this._hasCommandsToSubmit = false;
-        }
-
-        private void _RenderParticles(IReadOnlyList<Particle> particles, Shader shader, Texture texture)
+        private void _RenderParticles(CommandList cl, IReadOnlyList<Particle> particles, Shader shader, Texture texture)
         {
             if (particles.Count == 0) return;
             if (particles.Count <= PARTICLES_PER_BATCH)
             {
-                this._FlushParticles(particles, 0, particles.Count, shader, texture);
+                this._FlushParticles(cl, particles, 0, particles.Count, shader, texture);
             }
 
             int batchStartIndex = 0;
@@ -156,12 +139,12 @@ namespace LifeSim.Engine.Rendering
             for (int i = 0; i < numberOfbatches; i++)
             {
                 batchEndIndex = Math.Min(particles.Count, batchStartIndex + PARTICLES_PER_BATCH);
-                this._FlushParticles(particles, batchStartIndex, batchEndIndex, shader, texture);
+                this._FlushParticles(cl, particles, batchStartIndex, batchEndIndex, shader, texture);
                 batchStartIndex = batchEndIndex;
             }
         }
 
-        private void _FlushParticles(IReadOnlyList<Particle> particles, int startIndex, int endIndex, Shader shader, Texture texture)
+        private void _FlushParticles(CommandList cl, IReadOnlyList<Particle> particles, int startIndex, int endIndex, Shader shader, Texture texture)
         {
             int particlesCount = 0;
             for (int i = startIndex; i < endIndex; i++)
@@ -170,27 +153,27 @@ namespace LifeSim.Engine.Rendering
                 this._particlesForRender[particlesCount++] = new ParticleRenderData(particle.Position, particle.Size, particle.Color);
             }
 
-            this._commandList.UpdateBuffer(this._particlesBuffer, 0, this._particlesForRender);
+            cl.UpdateBuffer(this._particlesBuffer, 0, this._particlesForRender);
 
             if (this._currentShader != shader)
             {
                 this._currentShader = shader;
                 var pipeline = shader.GetPipeline(this._vertexFormat);
-                this._commandList.SetPipeline(pipeline);
+                cl.SetPipeline(pipeline);
 
-                this._commandList.SetGraphicsResourceSet(0, this._passResourceSet);
+                cl.SetGraphicsResourceSet(0, this._passResourceSet);
             }
 
             if (this._currentTexture != texture)
             {
                 this._currentTexture = texture;
                 var resourceSet = this._GetTextureResourceSet(texture);
-                this._commandList.SetGraphicsResourceSet(1, resourceSet);
+                cl.SetGraphicsResourceSet(1, resourceSet);
             }
 
-            this._commandList.SetVertexBuffer(0, this._vertexBuffer);
-            this._commandList.SetVertexBuffer(1, this._particlesBuffer);
-            this._commandList.Draw(4, (uint)particlesCount, 0, 0);
+            cl.SetVertexBuffer(0, this._vertexBuffer);
+            cl.SetVertexBuffer(1, this._particlesBuffer);
+            cl.Draw(4, (uint)particlesCount, 0, 0);
         }
 
         private ResourceSet _GetTextureResourceSet(Texture texture)
@@ -234,7 +217,6 @@ namespace LifeSim.Engine.Rendering
 
         public void Dispose()
         {
-            this._commandList.Dispose();
             this._vertexBuffer.Dispose();
             this._viewProjectionBuffer.Dispose();
             this._passResourceLayout.Dispose();

@@ -34,7 +34,6 @@ namespace LifeSim.Engine.Rendering
         private readonly FullScreenPass _fullScreenPass;
         private readonly GizmosPass _gizmosPass;
 
-        public ParticlesPass ParticlesPass { get; }
 
 
         public GraphicsBackend BackendType => this.GraphicsDevice.BackendType;
@@ -47,13 +46,12 @@ namespace LifeSim.Engine.Rendering
 
         private readonly List<Material> _dirtyMaterials = new List<Material>();
 
-        private readonly CommandList _resourceUpdateCommandList;
-
         private readonly ForwardPass _forwardPass;
         private readonly ShadowmapPass _shadowmapPass;
         private readonly SpritesPass _spritesPass;
         private readonly ImGuiPass _imGuiPass;
         private readonly MousePickingPass _mousePickerPass;
+        private readonly ParticlesPass _particlesPass;
 
         private readonly SpriteBatcher _spriteBatcher;
 
@@ -64,8 +62,6 @@ namespace LifeSim.Engine.Rendering
         public uint MousePickerObjectID => this._mousePickerPass.ObjectID;
 
         private readonly CommandList _commandList;
-
-        private bool _updatedResources;
 
         public Renderer(Sdl2Window window, GraphicsBackend? graphicsBackend = null)
         {
@@ -98,7 +94,7 @@ namespace LifeSim.Engine.Rendering
             this._imGuiPass = new ImGuiPass(gd, this.MainRenderTexture);
             this._mousePickerPass = new MousePickingPass(gd, this.MainRenderTexture);
             this._gizmosPass = new GizmosPass(gd, this.MainRenderTexture);
-            this.ParticlesPass = new ParticlesPass(gd, this.MainRenderTexture);
+            this._particlesPass = new ParticlesPass(gd, this.MainRenderTexture);
             this._fullScreenPass = new FullScreenPass(gd, this.MainRenderTexture, this.FullScreenRenderTexture);
 
             this._commandList = this._factory.CreateCommandList();
@@ -109,7 +105,6 @@ namespace LifeSim.Engine.Rendering
             this._spriteBatcher = new SpriteBatcher(gd, this._spritesPass.Shader);
 
             this._fence = this._factory.CreateFence(false);
-            this._resourceUpdateCommandList = this._factory.CreateCommandList();
         }
 
         public void Update(float deltaTime, InputSnapshot inputSnapshot)
@@ -142,14 +137,11 @@ namespace LifeSim.Engine.Rendering
         {
             if (this._dirtyTextures.Count > 0)
             {
-                this._resourceUpdateCommandList.Begin();
                 foreach (var resource in this._dirtyTextures)
                 {
-                    resource.Update(this.GraphicsDevice, this._resourceUpdateCommandList);
+                    resource.Update(this.GraphicsDevice, this._commandList);
                 }
-                this._resourceUpdateCommandList.End();
                 this._dirtyTextures.Clear();
-                this._updatedResources = true;
             }
         }
 
@@ -175,9 +167,14 @@ namespace LifeSim.Engine.Rendering
             this._forwardPass.Render(this._commandList, renderables, mainLight, ambientColor, clearColor, camera);
         }
 
-        internal void RenderGizmos(IReadOnlyList<DebugLine> lines, Camera3D camera3D)
+        public void RenderGizmos(IReadOnlyList<DebugLine> lines, Camera3D camera3D)
         {
             this._gizmosPass.Render(this._commandList, lines, camera3D);
+        }
+
+        public void RenderParticles(SwapPopList<Particle> particles, Texture texture, ICamera camera)
+        {
+            this._particlesPass.Render(this._commandList, particles, texture, camera);
         }
 
         public void EndRender()
@@ -194,13 +191,6 @@ namespace LifeSim.Engine.Rendering
             }
             this.GraphicsDevice.WaitForIdle();
 
-            if (this._updatedResources)
-            {
-                this._updatedResources = false;
-                this.GraphicsDevice.SubmitCommands(this._resourceUpdateCommandList);
-            }
-
-            this.ParticlesPass.Submit();
             this.GraphicsDevice.SubmitCommands(this._commandList, this._fence);
             this.GraphicsDevice.SwapBuffers();
         }
@@ -237,7 +227,7 @@ namespace LifeSim.Engine.Rendering
             this._imGuiPass.Dispose();
             this._mousePickerPass.Dispose();
             this._gizmosPass.Dispose();
-            this.ParticlesPass.Dispose();
+            this._particlesPass.Dispose();
             this._spritesPass.Dispose();
             this._fullScreenPass.Dispose();
             this._commandList.Dispose();

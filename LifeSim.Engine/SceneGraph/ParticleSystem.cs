@@ -24,7 +24,7 @@ namespace LifeSim.Engine.SceneGraph
         public void Render(Renderer renderer, ICamera camera)
         {
             this._SortParticles(camera.Position);
-            renderer.ParticlesPass.Render(this._particles, this.Texture, camera);
+            renderer.RenderParticles(this._particles, this.Texture, camera);
         }
 
         private void _SortParticles(Vector3 cameraPosition)
