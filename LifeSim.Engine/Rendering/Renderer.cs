@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using FontStashSharp.Interfaces;
+using LifeSim.Engine.SceneGraph;
 using Veldrid;
 using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
@@ -31,13 +32,14 @@ namespace LifeSim.Engine.Rendering
         public GraphicsDevice GraphicsDevice { get; }
         private readonly ResourceFactory _factory;
         private readonly FullScreenPass _fullScreenPass;
-
-        public GizmosPass GizmosPass { get; }
+        private readonly GizmosPass _gizmosPass;
 
         public ParticlesPass ParticlesPass { get; }
 
 
         public GraphicsBackend BackendType => this.GraphicsDevice.BackendType;
+
+
 
         private readonly Fence _fence;
 
@@ -95,7 +97,7 @@ namespace LifeSim.Engine.Rendering
 
             this._imGuiPass = new ImGuiPass(gd, this.MainRenderTexture);
             this._mousePickerPass = new MousePickingPass(gd, this.MainRenderTexture);
-            this.GizmosPass = new GizmosPass(gd, this.MainRenderTexture);
+            this._gizmosPass = new GizmosPass(gd, this.MainRenderTexture);
             this.ParticlesPass = new ParticlesPass(gd, this.MainRenderTexture);
             this._fullScreenPass = new FullScreenPass(gd, this.MainRenderTexture, this.FullScreenRenderTexture);
 
@@ -173,6 +175,11 @@ namespace LifeSim.Engine.Rendering
             this._forwardPass.Render(this._commandList, renderables, mainLight, ambientColor, clearColor, camera);
         }
 
+        internal void RenderGizmos(IReadOnlyList<DebugLine> lines, Camera3D camera3D)
+        {
+            this._gizmosPass.Render(this._commandList, lines, camera3D);
+        }
+
         public void EndRender()
         {
             this._mousePickerPass.Render(this._commandList);
@@ -194,7 +201,6 @@ namespace LifeSim.Engine.Rendering
             }
 
             this.ParticlesPass.Submit();
-            this.GizmosPass.Submit();
             this.GraphicsDevice.SubmitCommands(this._commandList, this._fence);
             this.GraphicsDevice.SwapBuffers();
         }
@@ -230,7 +236,7 @@ namespace LifeSim.Engine.Rendering
             this.MainRenderTexture.Dispose();
             this._imGuiPass.Dispose();
             this._mousePickerPass.Dispose();
-            this.GizmosPass.Dispose();
+            this._gizmosPass.Dispose();
             this.ParticlesPass.Dispose();
             this._spritesPass.Dispose();
             this._fullScreenPass.Dispose();

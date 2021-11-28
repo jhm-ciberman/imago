@@ -31,13 +31,9 @@ namespace LifeSim.Engine.Rendering
 
         private readonly GraphicsDevice _gd;
 
-        private readonly CommandList _commandList;
-
         private readonly DeviceBuffer _viewProjectionBuffer;
 
         private readonly VertexFormat _vertexFormat;
-
-        private bool _hasCommandsToSubmit = false;
 
         public GizmosPass(GraphicsDevice gd, IRenderTexture renderTexture)
         {
@@ -62,33 +58,21 @@ namespace LifeSim.Engine.Rendering
             var vertex = ShaderSource.Load("lines.vert.glsl");
             var fragment = ShaderSource.Load("lines.frag.glsl");
             this._lineShader = new Shader(this, vertex, fragment);
-            this._commandList = factory.CreateCommandList();
         }
 
-        public void Render(IReadOnlyList<DebugLine> lines, ICamera camera)
+        public void Render(CommandList cl, IReadOnlyList<DebugLine> lines, ICamera camera)
         {
             this._currentShader = null;
 
-            this._commandList.Begin();
-            this._commandList.SetFramebuffer(this._renderTexture.Framebuffer);
+            cl.SetFramebuffer(this._renderTexture.Framebuffer);
 
             var viewProjectionMatrix = camera.ViewProjectionMatrix;
-            this._commandList.UpdateBuffer(this._viewProjectionBuffer, 0, ref viewProjectionMatrix);
+            cl.UpdateBuffer(this._viewProjectionBuffer, 0, ref viewProjectionMatrix);
 
-            this._RenderLinesVertices(lines);
-
-            this._commandList.End();
-            this._hasCommandsToSubmit = true;
+            this._RenderLinesVertices(cl, lines);
         }
 
-        public void Submit()
-        {
-            if (!this._hasCommandsToSubmit) return;
-            this._gd.SubmitCommands(this._commandList);
-            this._hasCommandsToSubmit = false;
-        }
-
-        private void _RenderLinesVertices(IReadOnlyList<DebugLine> lines)
+        private void _RenderLinesVertices(CommandList cl, IReadOnlyList<DebugLine> lines)
         {
             this._verticesCount = 0;
 
@@ -98,7 +82,7 @@ namespace LifeSim.Engine.Rendering
 
                 if (this._verticesCount + 2 >= VERTICES_PER_BATCH)
                 {
-                    this._FlushVertices(this._lineShader);
+                    this._FlushVertices(cl, this._lineShader);
                 }
 
                 this._vertices[this._verticesCount++] = new Vertex { Position = line.Start, Color = line.Color.ToPackedUInt() };
@@ -107,24 +91,24 @@ namespace LifeSim.Engine.Rendering
 
             if (this._verticesCount > 0)
             {
-                this._FlushVertices(this._lineShader);
+                this._FlushVertices(cl, this._lineShader);
             }
         }
 
-        private void _FlushVertices(Shader shader)
+        private void _FlushVertices(CommandList cl, Shader shader)
         {
-            this._commandList.UpdateBuffer(this._vertexBuffer, 0, this._vertices);
+            cl.UpdateBuffer(this._vertexBuffer, 0, this._vertices);
 
             if (this._currentShader != shader)
             {
                 this._currentShader = shader;
                 var pipeline = shader.GetPipeline(this._vertexFormat);
-                this._commandList.SetPipeline(pipeline);
+                cl.SetPipeline(pipeline);
             }
 
-            this._commandList.SetVertexBuffer(0, this._vertexBuffer);
-            this._commandList.SetGraphicsResourceSet(0, this._passResourceSet);
-            this._commandList.Draw((uint)this._verticesCount);
+            cl.SetVertexBuffer(0, this._vertexBuffer);
+            cl.SetGraphicsResourceSet(0, this._passResourceSet);
+            cl.Draw((uint)this._verticesCount);
             this._verticesCount = 0;
         }
 
@@ -154,7 +138,6 @@ namespace LifeSim.Engine.Rendering
 
         public void Dispose()
         {
-            this._commandList.Dispose();
             this._vertexBuffer.Dispose();
             this._viewProjectionBuffer.Dispose();
             this._passResourceLayout.Dispose();
