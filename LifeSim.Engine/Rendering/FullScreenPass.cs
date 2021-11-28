@@ -20,7 +20,6 @@ namespace LifeSim.Engine.Rendering
         private readonly GraphicsDevice _gd;
         private readonly Pipeline _pipeline;
         private readonly DeviceBuffer _vertexBuffer;
-        private readonly CommandList _commandList;
 
         public FullScreenPass(GraphicsDevice gd, IRenderTexture sourceRenderTexture, IRenderTexture destinationRenderTexture)
         {
@@ -44,8 +43,6 @@ namespace LifeSim.Engine.Rendering
             this.Shader = new Shader(this, _vertexCode, _fragmentCode, resourceLayout);
 
 
-            this._commandList = factory.CreateCommandList();
-
             this._pipeline = this.Shader.GetPipeline(vertexFormat);
 
             this._vertexBuffer = factory.CreateBuffer(new BufferDescription(16 * 6, BufferUsage.VertexBuffer));
@@ -66,23 +63,10 @@ namespace LifeSim.Engine.Rendering
         {
             this._resourceSet?.Dispose();
             this._vertexBuffer.Dispose();
-            this._commandList.Dispose();
         }
 
-        public void Submit()
+        public void Render(CommandList cl)
         {
-            this._gd.SubmitCommands(this._commandList);
-        }
-
-        public void Submit(Fence fence)
-        {
-            this._gd.SubmitCommands(this._commandList, fence);
-        }
-
-        public void Render()
-        {
-            this._commandList.Begin();
-
             if (this._resourceSetDirty || this._resourceSet == null)
             {
                 this._resourceSetDirty = false;
@@ -90,13 +74,11 @@ namespace LifeSim.Engine.Rendering
                 this._resourceSet = this.Shader.CreateResourceSet(this._sourceTexture.DeviceTexture, this._gd.LinearSampler);
             }
 
-            this._commandList.SetFramebuffer(this._destinationTexture.Framebuffer);
-            this._commandList.SetPipeline(this._pipeline);
-            this._commandList.SetVertexBuffer(0, this._vertexBuffer);
-            this._commandList.SetGraphicsResourceSet(0, this._resourceSet);
-            this._commandList.Draw(6);
-
-            this._commandList.End();
+            cl.SetFramebuffer(this._destinationTexture.Framebuffer);
+            cl.SetPipeline(this._pipeline);
+            cl.SetVertexBuffer(0, this._vertexBuffer);
+            cl.SetGraphicsResourceSet(0, this._resourceSet);
+            cl.Draw(6);
         }
 
         public void SetSourceTexture(IRenderTexture sourceRenderTexture)

@@ -177,8 +177,8 @@ namespace LifeSim.Engine.Rendering
         {
             this._mousePickerPass.Render(this._commandList);
             this._imGuiPass.Render(this._commandList);
+            this._fullScreenPass.Render(this._commandList);
             this._commandList.End();
-            this._fullScreenPass.Render();
 
             if (!this._fence.Signaled)
             { // If we are GPU bound, then maybe it's a good moment to do a GC :)
@@ -195,8 +195,7 @@ namespace LifeSim.Engine.Rendering
 
             this.ParticlesPass.Submit();
             this.GizmosPass.Submit();
-            this.GraphicsDevice.SubmitCommands(this._commandList);
-            this._fullScreenPass.Submit(this._fence);
+            this.GraphicsDevice.SubmitCommands(this._commandList, this._fence);
             this.GraphicsDevice.SwapBuffers();
         }
 
