@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using FontStashSharp.Interfaces;
 using Veldrid;
 using Veldrid.Sdl2;
@@ -37,8 +38,6 @@ namespace LifeSim.Engine.Rendering
 
         public ImGuiPass ImGuiPass { get; }
 
-        public CanvasRenderer CanvasRenderer { get; }
-
         public MousePickingPass MousePicker { get; }
         public GraphicsBackend BackendType => this.GraphicsDevice.BackendType;
 
@@ -52,6 +51,9 @@ namespace LifeSim.Engine.Rendering
 
         private readonly ForwardPass _forwardPass;
         private readonly ShadowmapPass _shadowmapPass;
+        private readonly SpritesPass _spritesPass;
+
+        private readonly SpriteBatcher _spriteBatcher;
 
         public IPipelineProvider ForwardPass => this._forwardPass;
         public IPipelineProvider ShadowMapPass => this._shadowmapPass;
@@ -59,8 +61,6 @@ namespace LifeSim.Engine.Rendering
         internal SceneStorage Storage { get; }
 
         private readonly CommandList _commandList;
-
-        private bool _hasCommandsToSubmit;
 
         private bool _updatedResources;
 
@@ -92,7 +92,6 @@ namespace LifeSim.Engine.Rendering
 
             this.Storage = new SceneStorage(gd);
 
-            this.CanvasRenderer = new CanvasRenderer(gd, this.MainRenderTexture);
             this.ImGuiPass = new ImGuiPass(gd, this.MainRenderTexture);
             this.MousePicker = new MousePickingPass(gd, this.MainRenderTexture);
             this.GizmosPass = new GizmosPass(gd, this.MainRenderTexture);
@@ -102,6 +101,9 @@ namespace LifeSim.Engine.Rendering
             this._commandList = this._factory.CreateCommandList();
             this._shadowmapPass = new ShadowmapPass(gd, this.Storage);
             this._forwardPass = new ForwardPass(gd, this.Storage, this.MainRenderTexture, this._shadowmapPass.ShadowmapTexture);
+            this._spritesPass = new SpritesPass(gd, this.MainRenderTexture);
+
+            this._spriteBatcher = new SpriteBatcher(gd, this._spritesPass.Shader);
 
             this._fence = this._factory.CreateFence(false);
             this._resourceUpdateCommandList = this._factory.CreateCommandList();
@@ -109,17 +111,26 @@ namespace LifeSim.Engine.Rendering
 
         public void BeginRender()
         {
-            if (this._dirtyTextures.Count == 0 && this._dirtyMaterials.Count == 0)
-            {
-                return;
-            }
+            this._commandList.Begin();
 
-            foreach (var material in this._dirtyMaterials)
-            {
-                material.Update();
-            }
-            this._dirtyMaterials.Clear();
+            this.UpdateDirtyMaterials();
+            this.UpdateDirtyTextures();
+        }
 
+        protected void UpdateDirtyMaterials()
+        {
+            if (this._dirtyTextures.Count > 0)
+            {
+                foreach (var material in this._dirtyMaterials)
+                {
+                    material.Update();
+                }
+                this._dirtyMaterials.Clear();
+            }
+        }
+
+        protected void UpdateDirtyTextures()
+        {
             if (this._dirtyTextures.Count > 0)
             {
                 this._resourceUpdateCommandList.Begin();
@@ -133,19 +144,31 @@ namespace LifeSim.Engine.Rendering
             }
         }
 
-        public void Render(IReadOnlyList<Renderable> renderables, DirectionalLight mainLight, ColorF ambientColor, ColorF clearColor, ICamera camera)
+        public void RenderCanvas(Viewport viewport, IReadOnlyList<ICanvasItem> items)
         {
-            this._commandList.Begin();
+            Matrix4x4 projection = Matrix4x4.CreateOrthographicOffCenter(0, viewport.Width, viewport.Height, 0, -10f, 100f);
+
+            this._spriteBatcher.BeginBatch();
+            for (int i = 0; i < items.Count; i++)
+            {
+                items[i].Render(this._spriteBatcher);
+            }
+
+
+            this._spritesPass.BeginPass(this._commandList, ref projection);
+            this._spritesPass.SubmitBatches(this._commandList, this._spriteBatcher.IndexBuffer, this._spriteBatcher.Batches);
+        }
+
+        public void RenderScene(IReadOnlyList<Renderable> renderables, DirectionalLight mainLight, ColorF ambientColor, ColorF clearColor, ICamera camera)
+        {
             this.Storage.UpdateBuffers(this._commandList);
             this._shadowmapPass.Render(this._commandList, renderables, camera, mainLight);
             this._forwardPass.Render(this._commandList, renderables, mainLight, ambientColor, clearColor, camera);
-            this._commandList.End();
-
-            this._hasCommandsToSubmit = true;
         }
 
-        public void Render()
+        public void EndRender()
         {
+            this._commandList.End();
             this.ImGuiPass.Render();
             this._fullScreenPass.Render();
 
@@ -162,15 +185,9 @@ namespace LifeSim.Engine.Rendering
                 this.GraphicsDevice.SubmitCommands(this._resourceUpdateCommandList);
             }
 
-            if (this._hasCommandsToSubmit)
-            {
-                this.GraphicsDevice.SubmitCommands(this._commandList);
-                this._hasCommandsToSubmit = false;
-            }
-
             this.ParticlesPass.Submit();
             this.GizmosPass.Submit();
-            this.CanvasRenderer.Submit();
+            this.GraphicsDevice.SubmitCommands(this._commandList);
             this.MousePicker.Submit();
             this.ImGuiPass.Submit();
             this._fullScreenPass.Submit(this._fence);
@@ -201,10 +218,11 @@ namespace LifeSim.Engine.Rendering
             this.GraphicsDevice.WaitForIdle();
             this.FullScreenRenderTexture.Dispose();
             this.MainRenderTexture.Dispose();
-            this.CanvasRenderer.Dispose();
             this.ImGuiPass.Dispose();
             this.MousePicker.Dispose();
             this.GizmosPass.Dispose();
+            this.ParticlesPass.Dispose();
+            this._spritesPass.Dispose();
             this._fullScreenPass.Dispose();
             this._commandList.Dispose();
             this._fence.Dispose();

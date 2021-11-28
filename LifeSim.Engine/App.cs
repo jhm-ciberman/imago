@@ -132,7 +132,7 @@ namespace LifeSim.Engine
 
                             this._renderer.BeginRender();
                             this._stage.RenderFrame(this._renderer);
-                            this._renderer.Render();
+                            this._renderer.EndRender();
 
                             swRendering.Stop();
                             this._renderingTime = swRendering.Elapsed.TotalMilliseconds;
@@ -151,7 +151,7 @@ namespace LifeSim.Engine
                         Stopwatch swRendering = Stopwatch.StartNew();
                         this._renderer.BeginRender();
                         this._stage.RenderFrame(this._renderer);
-                        this._renderer.Render();
+                        this._renderer.EndRender();
                         swRendering.Stop();
                         this._renderingTime = swRendering.Elapsed.TotalMilliseconds;
                         System.Console.WriteLine("Rendering time: " + this._renderingTime);

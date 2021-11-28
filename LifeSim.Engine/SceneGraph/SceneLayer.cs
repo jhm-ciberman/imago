@@ -29,7 +29,7 @@ namespace LifeSim.Engine.SceneGraph
         {
             if (this.Renderables.Count > 0)
             {
-                renderer.Render(this.Renderables, this.MainLight, this.AmbientColor, this.ClearColor, camera3D);
+                renderer.RenderScene(this.Renderables, this.MainLight, this.AmbientColor, this.ClearColor, camera3D);
             }
 
             if (this.Gizmos.Lines.Count > 0)
