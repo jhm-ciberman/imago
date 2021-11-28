@@ -84,8 +84,6 @@ namespace LifeSim.Engine
                 float deltaTime = (float)(newElapsed - previousElapsed);
                 previousElapsed = newElapsed;
 
-                this._renderer.MousePicker.Update(Input.MousePosition);
-
                 var fps = (1f / deltaTime).ToString("0.00");
                 var dt = (deltaTime * 1000).ToString("0.00");
 
@@ -104,11 +102,7 @@ namespace LifeSim.Engine
                         : Veldrid.WindowState.BorderlessFullScreen;
                 }
 
-
-
-                this._renderer.ImGuiPass.Update(deltaTime, this._input.InputSnapshot);
-
-
+                this._renderer.Update(deltaTime, this._input.InputSnapshot);
 
                 if (this._stage != null)
                 {

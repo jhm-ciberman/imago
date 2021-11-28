@@ -36,9 +36,7 @@ namespace LifeSim.Engine.Rendering
 
         public ParticlesPass ParticlesPass { get; }
 
-        public ImGuiPass ImGuiPass { get; }
 
-        public MousePickingPass MousePicker { get; }
         public GraphicsBackend BackendType => this.GraphicsDevice.BackendType;
 
         private readonly Fence _fence;
@@ -52,6 +50,8 @@ namespace LifeSim.Engine.Rendering
         private readonly ForwardPass _forwardPass;
         private readonly ShadowmapPass _shadowmapPass;
         private readonly SpritesPass _spritesPass;
+        private readonly ImGuiPass _imGuiPass;
+        private readonly MousePickingPass _mousePickerPass;
 
         private readonly SpriteBatcher _spriteBatcher;
 
@@ -59,6 +59,7 @@ namespace LifeSim.Engine.Rendering
         public IPipelineProvider ShadowMapPass => this._shadowmapPass;
 
         internal SceneStorage Storage { get; }
+        public uint MousePickerObjectID => this._mousePickerPass.ObjectID;
 
         private readonly CommandList _commandList;
 
@@ -92,8 +93,8 @@ namespace LifeSim.Engine.Rendering
 
             this.Storage = new SceneStorage(gd);
 
-            this.ImGuiPass = new ImGuiPass(gd, this.MainRenderTexture);
-            this.MousePicker = new MousePickingPass(gd, this.MainRenderTexture);
+            this._imGuiPass = new ImGuiPass(gd, this.MainRenderTexture);
+            this._mousePickerPass = new MousePickingPass(gd, this.MainRenderTexture);
             this.GizmosPass = new GizmosPass(gd, this.MainRenderTexture);
             this.ParticlesPass = new ParticlesPass(gd, this.MainRenderTexture);
             this._fullScreenPass = new FullScreenPass(gd, this.MainRenderTexture, this.FullScreenRenderTexture);
@@ -107,6 +108,12 @@ namespace LifeSim.Engine.Rendering
 
             this._fence = this._factory.CreateFence(false);
             this._resourceUpdateCommandList = this._factory.CreateCommandList();
+        }
+
+        public void Update(float deltaTime, InputSnapshot inputSnapshot)
+        {
+            this._mousePickerPass.Update(inputSnapshot.MousePosition);
+            this._imGuiPass.Update(deltaTime, inputSnapshot);
         }
 
         public void BeginRender()
@@ -168,8 +175,9 @@ namespace LifeSim.Engine.Rendering
 
         public void EndRender()
         {
+            this._mousePickerPass.Render(this._commandList);
+            this._imGuiPass.Render(this._commandList);
             this._commandList.End();
-            this.ImGuiPass.Render();
             this._fullScreenPass.Render();
 
             if (!this._fence.Signaled)
@@ -188,10 +196,13 @@ namespace LifeSim.Engine.Rendering
             this.ParticlesPass.Submit();
             this.GizmosPass.Submit();
             this.GraphicsDevice.SubmitCommands(this._commandList);
-            this.MousePicker.Submit();
-            this.ImGuiPass.Submit();
             this._fullScreenPass.Submit(this._fence);
             this.GraphicsDevice.SwapBuffers();
+        }
+
+        public IntPtr GetOrCreateImGuiBinding(Texture texture)
+        {
+            return this._imGuiPass.GetOrCreateBinding(texture);
         }
 
         internal void OnTextureDirty(Texture texture)
@@ -210,7 +221,7 @@ namespace LifeSim.Engine.Rendering
             this.GraphicsDevice.WaitForIdle();
             this.FullScreenRenderTexture.Resize(width, height);
             this.MainRenderTexture.Resize(viewportWidth, viewportHeight);
-            this.ImGuiPass.Resize(viewportWidth, viewportHeight);
+            this._imGuiPass.Resize(viewportWidth, viewportHeight);
         }
 
         public void Dispose()
@@ -218,8 +229,8 @@ namespace LifeSim.Engine.Rendering
             this.GraphicsDevice.WaitForIdle();
             this.FullScreenRenderTexture.Dispose();
             this.MainRenderTexture.Dispose();
-            this.ImGuiPass.Dispose();
-            this.MousePicker.Dispose();
+            this._imGuiPass.Dispose();
+            this._mousePickerPass.Dispose();
             this.GizmosPass.Dispose();
             this.ParticlesPass.Dispose();
             this._spritesPass.Dispose();
