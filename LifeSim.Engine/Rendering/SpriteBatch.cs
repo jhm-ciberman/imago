@@ -43,7 +43,7 @@ namespace LifeSim.Engine.Rendering
             public Vertex BottomLeft;
         }
 
-        public Texture Texture { get; private set; }
+        public ITexture Texture { get; private set; }
         public Shader Shader { get; private set; }
 
         public DeviceBuffer VertexBuffer { get; private set; }
@@ -56,7 +56,7 @@ namespace LifeSim.Engine.Rendering
         public ResourceSet ResourceSet;
         private readonly GraphicsDevice _gd;
 
-        public SpriteBatch(GraphicsDevice gd, Shader shader, Texture texture, int batchCapacity)
+        public SpriteBatch(GraphicsDevice gd, Shader shader, ITexture texture, int batchCapacity)
         {
             this._gd = gd;
             this.Shader = shader;
@@ -160,7 +160,7 @@ namespace LifeSim.Engine.Rendering
             this.Draw(pos, size, uvTopLeft, uvBottomRight, color, scale, rotation, origin, depth);
         }
 
-        public void SetMaterial(Shader shader, Texture texture)
+        public void SetMaterial(Shader shader, ITexture texture)
         {
             this.ResourceSet.Dispose();
             this.Shader = shader;

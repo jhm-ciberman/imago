@@ -7,7 +7,7 @@ using Veldrid;
 
 namespace LifeSim.Engine.Rendering
 {
-    public class ParticlesRenderer : IPipelineProvider, IDisposable
+    public class ParticlesPass : IPipelineProvider, IDisposable
     {
         private const int PARTICLES_PER_BATCH = 1000;
 
@@ -60,7 +60,7 @@ namespace LifeSim.Engine.Rendering
 
         private readonly Dictionary<Texture, ResourceSet> _textures = new Dictionary<Texture, ResourceSet>();
 
-        public ParticlesRenderer(GraphicsDevice gd, IRenderTexture renderTexture)
+        public ParticlesPass(GraphicsDevice gd, IRenderTexture renderTexture)
         {
             this._renderTexture = renderTexture;
             this._particlesForRender = new ParticleRenderData[PARTICLES_PER_BATCH];

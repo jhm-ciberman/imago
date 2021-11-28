@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Runtime;
+using System.Threading.Tasks;
 using LifeSim.Engine.Rendering;
 using Veldrid;
 using Veldrid.Sdl2;
@@ -63,9 +64,14 @@ namespace LifeSim.Engine
 
         public void Quit()
         {
-            this._renderer.WaitForGPU();
+            this._renderer.Dispose();
             this._window.Close();
         }
+
+        private double _simulationTime = 0;
+        private double _renderingTime = 0;
+
+        private double _frameTime = 0;
 
         private void _MainLoop()
         {
@@ -98,15 +104,71 @@ namespace LifeSim.Engine
                         : Veldrid.WindowState.BorderlessFullScreen;
                 }
 
-                this._renderer.ImguiRenderer.Update(deltaTime, this._input.InputSnapshot);
+
+
+                this._renderer.ImGuiPass.Update(deltaTime, this._input.InputSnapshot);
+
+
 
                 if (this._stage != null)
                 {
-                    this._stage.Update(deltaTime);
-                    this._renderer.BeginRender();
-                    this._stage.RenderFrame(this._renderer);
-                    this._renderer.Render();
+                    bool useMultiThreading = true;
+
+                    var swFrame = Stopwatch.StartNew();
+
+                    if (useMultiThreading)
+                    {
+                        var simulation = Task.Run(() =>
+                        {
+                            Stopwatch swSimulation = Stopwatch.StartNew();
+                            this._stage.Update(deltaTime);
+                            swSimulation.Stop();
+                            this._simulationTime = swSimulation.Elapsed.TotalMilliseconds;
+                            System.Console.WriteLine("Simulation time: " + this._simulationTime);
+                        });
+                        var rendering = Task.Run(() =>
+                        {
+                            Stopwatch swRendering = Stopwatch.StartNew();
+
+                            this._renderer.BeginRender();
+                            this._stage.RenderFrame(this._renderer);
+                            this._renderer.Render();
+
+                            swRendering.Stop();
+                            this._renderingTime = swRendering.Elapsed.TotalMilliseconds;
+                            System.Console.WriteLine("Rendering time: " + this._renderingTime);
+                        });
+                        Task.WaitAll(simulation, rendering);
+                    }
+                    else
+                    {
+                        Stopwatch swSimulation = Stopwatch.StartNew();
+                        this._stage.Update(deltaTime);
+                        swSimulation.Stop();
+                        this._simulationTime = swSimulation.Elapsed.TotalMilliseconds;
+                        System.Console.WriteLine("Simulation time: " + this._simulationTime);
+
+                        Stopwatch swRendering = Stopwatch.StartNew();
+                        this._renderer.BeginRender();
+                        this._stage.RenderFrame(this._renderer);
+                        this._renderer.Render();
+                        swRendering.Stop();
+                        this._renderingTime = swRendering.Elapsed.TotalMilliseconds;
+                        System.Console.WriteLine("Rendering time: " + this._renderingTime);
+                    }
+
+                    swFrame.Stop();
+                    this._frameTime = swFrame.Elapsed.TotalMilliseconds;
+                    var totalTime = this._simulationTime + this._renderingTime;
+                    System.Console.WriteLine("Frame time: " + this._frameTime + " - Saved: " + (this._frameTime - totalTime).ToString("0.00"));
+
+
                 }
+
+                ImGuiNET.ImGui.Begin("Debug");
+                ImGuiNET.ImGui.Text("Simulation time: " + this._simulationTime.ToString("0.00") + "ms");
+                ImGuiNET.ImGui.Text("Rendering time: " + this._simulationTime.ToString("0.00") + "ms");
+                ImGuiNET.ImGui.End();
 
                 this._input.UpdateFrameInput(); // For next frame
             }

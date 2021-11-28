@@ -4,7 +4,7 @@ using Veldrid;
 
 namespace LifeSim.Engine.Rendering
 {
-    public class MousePickingRenderer : IDisposable
+    public class MousePickingPass : IDisposable
     {
         private readonly GraphicsDevice _gd;
         private readonly Veldrid.Texture _pixelTexture;
@@ -13,7 +13,7 @@ namespace LifeSim.Engine.Rendering
 
         public RenderTexture RenderTexture { get; set; }
 
-        public MousePickingRenderer(GraphicsDevice graphicsDevice, RenderTexture renderTexture)
+        public MousePickingPass(GraphicsDevice graphicsDevice, RenderTexture renderTexture)
         {
             this._gd = graphicsDevice;
             var factory = graphicsDevice.ResourceFactory;

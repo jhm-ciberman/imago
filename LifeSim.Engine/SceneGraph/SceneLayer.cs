@@ -34,7 +34,7 @@ namespace LifeSim.Engine.SceneGraph
 
             if (this.Gizmos.Lines.Count > 0)
             {
-                renderer.GizmosRenderer.Render(this.Gizmos.Lines, camera3D);
+                renderer.GizmosPass.Render(this.Gizmos.Lines, camera3D);
             }
 
             for (int i = 0; i < this._particleSystems.Count; i++)

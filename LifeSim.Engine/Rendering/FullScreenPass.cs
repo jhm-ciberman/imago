@@ -5,7 +5,7 @@ using Veldrid;
 
 namespace LifeSim.Engine.Rendering
 {
-    public class FullScreenRenderer : IDisposable, IPipelineProvider
+    public class FullScreenPass : IDisposable, IPipelineProvider
     {
         private ResourceSet? _resourceSet;
 
@@ -22,13 +22,13 @@ namespace LifeSim.Engine.Rendering
         private readonly DeviceBuffer _vertexBuffer;
         private readonly CommandList _commandList;
 
-        public FullScreenRenderer(GraphicsDevice gd, IRenderTexture sourceRenderTexture, IRenderTexture destinationRenderTexture)
+        public FullScreenPass(GraphicsDevice gd, IRenderTexture sourceRenderTexture, IRenderTexture destinationRenderTexture)
         {
             this._gd = gd;
             var factory = gd.ResourceFactory;
 
             this._sourceTexture = sourceRenderTexture;
-            this._sourceTexture.onResized += this._OnSourceTextureResized;
+            this._sourceTexture.OnResized += this._OnSourceTextureResized;
 
             this._destinationTexture = destinationRenderTexture;
 
@@ -87,7 +87,7 @@ namespace LifeSim.Engine.Rendering
             {
                 this._resourceSetDirty = false;
                 this._resourceSet?.Dispose();
-                this._resourceSet = this.Shader.CreateResourceSet(this._sourceTexture.ColorTexture, this._gd.LinearSampler);
+                this._resourceSet = this.Shader.CreateResourceSet(this._sourceTexture.DeviceTexture, this._gd.LinearSampler);
             }
 
             this._commandList.SetFramebuffer(this._destinationTexture.Framebuffer);
@@ -103,9 +103,9 @@ namespace LifeSim.Engine.Rendering
         {
             if (this._sourceTexture == sourceRenderTexture) return;
 
-            this._sourceTexture.onResized -= this._OnSourceTextureResized;
+            this._sourceTexture.OnResized -= this._OnSourceTextureResized;
             this._sourceTexture = sourceRenderTexture;
-            this._sourceTexture.onResized += this._OnSourceTextureResized;
+            this._sourceTexture.OnResized += this._OnSourceTextureResized;
             this._resourceSetDirty = true;
         }
 

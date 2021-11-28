@@ -4,14 +4,14 @@ using Veldrid;
 
 namespace LifeSim.Engine.Rendering
 {
-    public class ImguiRenderer : IDisposable
+    public class ImGuiPass : IDisposable
     {
         private readonly CommandList _commandList;
         private readonly GraphicsDevice _gd;
         private readonly Veldrid.ImGuiRenderer _imguiRenderer;
         private readonly RenderTexture _renderTexture;
 
-        public ImguiRenderer(GraphicsDevice graphicsDevice, RenderTexture renderTexture)
+        public ImGuiPass(GraphicsDevice graphicsDevice, RenderTexture renderTexture)
         {
             this._gd = graphicsDevice;
             this._commandList = graphicsDevice.ResourceFactory.CreateCommandList();

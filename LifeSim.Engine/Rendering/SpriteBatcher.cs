@@ -46,7 +46,7 @@ namespace LifeSim.Engine.Rendering
 
         }
 
-        private SpriteBatch _FindBatch(Shader shader, Texture texture)
+        private SpriteBatch _FindBatch(Shader shader, ITexture texture)
         {
             for (int i = 0; i < this._batches.Count; i++)
             {
@@ -132,7 +132,7 @@ namespace LifeSim.Engine.Rendering
             float depth
         )
         {
-            this._FindBatch(this._defaultShader, (Texture)texture)
+            this._FindBatch(this._defaultShader, (ITexture)texture)
                 .Draw(position, sourceRectangle, color, rotation, origin, scale, depth);
 
             this.TotalSpritesToDraw++;

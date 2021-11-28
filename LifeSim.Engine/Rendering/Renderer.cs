@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
+using FontStashSharp.Interfaces;
 using Veldrid;
 using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
 
 namespace LifeSim.Engine.Rendering
 {
-    public class Renderer : IDisposable
+    public class Renderer : ITexture2DManager, IDisposable
     {
         // This is the only global variable! I swear!! 
         // Please don't point your finger at me with that face (?)
@@ -28,17 +29,17 @@ namespace LifeSim.Engine.Rendering
 
         public GraphicsDevice GraphicsDevice { get; }
         private readonly ResourceFactory _factory;
-        private readonly FullScreenRenderer _fullScreenRenderer;
+        private readonly FullScreenPass _fullScreenPass;
 
-        public GizmosRenderer GizmosRenderer { get; }
+        public GizmosPass GizmosPass { get; }
 
-        public ParticlesRenderer ParticlesRenderer { get; }
+        public ParticlesPass ParticlesPass { get; }
 
-        public ImguiRenderer ImguiRenderer { get; }
+        public ImGuiPass ImGuiPass { get; }
 
         public CanvasRenderer CanvasRenderer { get; }
 
-        public MousePickingRenderer MousePicker { get; }
+        public MousePickingPass MousePicker { get; }
         public GraphicsBackend BackendType => this.GraphicsDevice.BackendType;
 
         private readonly Fence _fence;
@@ -87,16 +88,16 @@ namespace LifeSim.Engine.Rendering
             this._factory = this.GraphicsDevice.ResourceFactory;
 
             this.FullScreenRenderTexture = new SwapchainRenderTexture(this.GraphicsDevice.MainSwapchain);
-            this.MainRenderTexture = new RenderTexture(gd.ResourceFactory, (uint)window.Width, (uint)window.Height);
+            this.MainRenderTexture = new RenderTexture(gd, (uint)window.Width, (uint)window.Height);
 
             this.Storage = new SceneStorage(gd);
 
             this.CanvasRenderer = new CanvasRenderer(gd, this.MainRenderTexture);
-            this.ImguiRenderer = new ImguiRenderer(gd, this.MainRenderTexture);
-            this.MousePicker = new MousePickingRenderer(gd, this.MainRenderTexture);
-            this.GizmosRenderer = new GizmosRenderer(gd, this.MainRenderTexture);
-            this.ParticlesRenderer = new ParticlesRenderer(gd, this.MainRenderTexture);
-            this._fullScreenRenderer = new FullScreenRenderer(gd, this.MainRenderTexture, this.FullScreenRenderTexture);
+            this.ImGuiPass = new ImGuiPass(gd, this.MainRenderTexture);
+            this.MousePicker = new MousePickingPass(gd, this.MainRenderTexture);
+            this.GizmosPass = new GizmosPass(gd, this.MainRenderTexture);
+            this.ParticlesPass = new ParticlesPass(gd, this.MainRenderTexture);
+            this._fullScreenPass = new FullScreenPass(gd, this.MainRenderTexture, this.FullScreenRenderTexture);
 
             this._commandList = this._factory.CreateCommandList();
             this._shadowmapPass = new ShadowmapPass(gd, this.Storage);
@@ -107,60 +108,6 @@ namespace LifeSim.Engine.Rendering
         }
 
         public void BeginRender()
-        {
-            this.UpdateDirtyResources();
-        }
-
-        public void Render(IReadOnlyList<Renderable> renderables, DirectionalLight mainLight, ColorF ambientColor, ColorF clearColor, ICamera camera)
-        {
-            this._commandList.Begin();
-            this.Storage.UpdateBuffers(this._commandList);
-            this._shadowmapPass.Render(this._commandList, renderables, camera, mainLight);
-            this._forwardPass.Render(this._commandList, renderables, mainLight, ambientColor, clearColor, camera);
-            this._commandList.End();
-
-            this._hasCommandsToSubmit = true;
-        }
-
-        public void Render()
-        {
-            this.ImguiRenderer.Render();
-            this._fullScreenRenderer.Render();
-
-            this.WaitForGPU();
-
-            if (this._updatedResources)
-            {
-                this._updatedResources = false;
-                this.GraphicsDevice.SubmitCommands(this._resourceUpdateCommandList);
-            }
-
-            if (this._hasCommandsToSubmit)
-            {
-                this.GraphicsDevice.SubmitCommands(this._commandList);
-                this._hasCommandsToSubmit = false;
-            }
-
-            this.ParticlesRenderer.Submit();
-            this.GizmosRenderer.Submit();
-            this.CanvasRenderer.Submit();
-            this.MousePicker.Submit();
-            this.ImguiRenderer.Submit();
-            this._fullScreenRenderer.Submit(this._fence);
-            this.GraphicsDevice.SwapBuffers();
-        }
-
-        internal void OnTextureDirty(Texture texture)
-        {
-            this._dirtyTextures.Add(texture);
-        }
-
-        internal void OnMaterialDirty(Material material)
-        {
-            this._dirtyMaterials.Add(material);
-        }
-
-        protected void UpdateDirtyResources()
         {
             if (this._dirtyTextures.Count == 0 && this._dirtyMaterials.Count == 0)
             {
@@ -186,14 +133,58 @@ namespace LifeSim.Engine.Rendering
             }
         }
 
-        public void WaitForGPU()
+        public void Render(IReadOnlyList<Renderable> renderables, DirectionalLight mainLight, ColorF ambientColor, ColorF clearColor, ICamera camera)
         {
+            this._commandList.Begin();
+            this.Storage.UpdateBuffers(this._commandList);
+            this._shadowmapPass.Render(this._commandList, renderables, camera, mainLight);
+            this._forwardPass.Render(this._commandList, renderables, mainLight, ambientColor, clearColor, camera);
+            this._commandList.End();
+
+            this._hasCommandsToSubmit = true;
+        }
+
+        public void Render()
+        {
+            this.ImGuiPass.Render();
+            this._fullScreenPass.Render();
+
             if (!this._fence.Signaled)
             { // If we are GPU bound, then maybe it's a good moment to do a GC :)
                 this._fence.Reset();
                 GC.Collect(0, GCCollectionMode.Optimized);
             }
             this.GraphicsDevice.WaitForIdle();
+
+            if (this._updatedResources)
+            {
+                this._updatedResources = false;
+                this.GraphicsDevice.SubmitCommands(this._resourceUpdateCommandList);
+            }
+
+            if (this._hasCommandsToSubmit)
+            {
+                this.GraphicsDevice.SubmitCommands(this._commandList);
+                this._hasCommandsToSubmit = false;
+            }
+
+            this.ParticlesPass.Submit();
+            this.GizmosPass.Submit();
+            this.CanvasRenderer.Submit();
+            this.MousePicker.Submit();
+            this.ImGuiPass.Submit();
+            this._fullScreenPass.Submit(this._fence);
+            this.GraphicsDevice.SwapBuffers();
+        }
+
+        internal void OnTextureDirty(Texture texture)
+        {
+            this._dirtyTextures.Add(texture);
+        }
+
+        internal void OnMaterialDirty(Material material)
+        {
+            this._dirtyMaterials.Add(material);
         }
 
         public void Resize(uint width, uint height, uint viewportWidth, uint viewportHeight)
@@ -202,21 +193,33 @@ namespace LifeSim.Engine.Rendering
             this.GraphicsDevice.WaitForIdle();
             this.FullScreenRenderTexture.Resize(width, height);
             this.MainRenderTexture.Resize(viewportWidth, viewportHeight);
-            this.ImguiRenderer.Resize(viewportWidth, viewportHeight);
+            this.ImGuiPass.Resize(viewportWidth, viewportHeight);
         }
 
         public void Dispose()
         {
+            this.GraphicsDevice.WaitForIdle();
             this.FullScreenRenderTexture.Dispose();
             this.MainRenderTexture.Dispose();
             this.CanvasRenderer.Dispose();
-            this.ImguiRenderer.Dispose();
+            this.ImGuiPass.Dispose();
             this.MousePicker.Dispose();
-            this.GizmosRenderer.Dispose();
-            this._fullScreenRenderer.Dispose();
+            this.GizmosPass.Dispose();
+            this._fullScreenPass.Dispose();
             this._commandList.Dispose();
             this._fence.Dispose();
             this.GraphicsDevice.Dispose();
+        }
+
+        object ITexture2DManager.CreateTexture(int width, int height)
+        {
+            return new Texture(width, height);
+        }
+
+        void ITexture2DManager.SetTextureData(object texture, System.Drawing.Rectangle bounds, byte[] data)
+        {
+            var t = (Texture) texture;
+            t.SetDataFromBytes(bounds.X, bounds.Y, bounds.Width, bounds.Height, data);
         }
     }
 }

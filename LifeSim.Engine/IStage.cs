@@ -7,6 +7,8 @@ namespace LifeSim.Engine
     public interface IStage
     {
         void RenderFrame(Renderer renderer);
+
+        void RenderImGui();
         void Update(float deltaTime);
     }
 }

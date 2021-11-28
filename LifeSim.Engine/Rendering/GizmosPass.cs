@@ -6,7 +6,7 @@ using Veldrid;
 
 namespace LifeSim.Engine.Rendering
 {
-    public class GizmosRenderer : IPipelineProvider, IDisposable
+    public class GizmosPass : IPipelineProvider, IDisposable
     {
         private const int VERTICES_PER_BATCH = 1000;
 
@@ -39,7 +39,7 @@ namespace LifeSim.Engine.Rendering
 
         private bool _hasCommandsToSubmit = false;
 
-        public GizmosRenderer(GraphicsDevice gd, IRenderTexture renderTexture)
+        public GizmosPass(GraphicsDevice gd, IRenderTexture renderTexture)
         {
             this._renderTexture = renderTexture;
             this._gd = gd;
