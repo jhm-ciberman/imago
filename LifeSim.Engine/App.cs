@@ -4,6 +4,7 @@ using System.IO;
 using System.Runtime;
 using System.Threading.Tasks;
 using LifeSim.Engine.Rendering;
+using LifeSim.Engine.SceneGraph;
 using Veldrid;
 using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
@@ -22,12 +23,17 @@ namespace LifeSim.Engine
 
         private readonly Renderer _renderer;
 
-        private IScene? _scene = null;
-
         private double _simulationTime = 0;
         private double _renderingTime = 0;
 
         private double _frameTime = 0;
+
+        public bool UseMultiThreadRendering { get; set; } = true;
+
+        public Scene? CurrentScene { get; set; } = null;
+
+        private bool _running = false;
+        public uint MousePickerObjectID => this._renderer.MousePickerObjectID;
 
         public App(string windowTitle, GraphicsBackend? backend = null)
         {
@@ -36,7 +42,6 @@ namespace LifeSim.Engine
             WindowCreateInfo windowCI = new WindowCreateInfo(100, 100, 1024, 600, Veldrid.WindowState.Normal, windowTitle);
             this._window = VeldridStartup.CreateWindow(ref windowCI);
             this.Viewport = new Rendering.Viewport((uint)this._window.Width, (uint)this._window.Height);
-
 
             this._renderer = new Renderer(this._window, backend);
 
@@ -48,10 +53,9 @@ namespace LifeSim.Engine
             Input.SetInstance(this._input);
         }
 
-        public void Run(IScene scene)
+        public void SetScene(Scene scene)
         {
-            this.SetScene(scene);
-            this._MainLoop();
+            this.CurrentScene = scene;
         }
 
         private void OnResize()
@@ -62,19 +66,18 @@ namespace LifeSim.Engine
             this._renderer.Resize(width, height, this.Viewport.Width, this.Viewport.Height);
         }
 
-        public void SetScene(IScene stage)
-        {
-            this._scene = stage;
-        }
-
         public void Quit()
         {
             this._renderer.Dispose();
             this._window.Close();
         }
 
-        private void _MainLoop()
+        public void Run()
         {
+            if (this._running) return;
+
+            this._running = true;
+
             Stopwatch sw = Stopwatch.StartNew();
             double previousElapsed = sw.Elapsed.TotalSeconds;
 
@@ -102,22 +105,21 @@ namespace LifeSim.Engine
                         : WindowState.BorderlessFullScreen;
                 }
 
-                if (this._scene != null)
+                var scene = this.CurrentScene;
+                if (scene != null)
                 {
-                    bool useMultiThreading = true;
-
                     var swFrame = Stopwatch.StartNew();
 
-                    if (useMultiThreading)
+                    if (this.UseMultiThreadRendering)
                     {
-                        var simulation = Task.Run(() => this._Update(deltaTime));
-                        var rendering = Task.Run(() => this._Render(deltaTime));
+                        var simulation = Task.Run(() => this._Update(scene, deltaTime));
+                        var rendering = Task.Run(() => this._Render(scene, deltaTime));
                         Task.WaitAll(simulation, rendering);
                     }
                     else
                     {
-                        this._Update(deltaTime);
-                        this._Render(deltaTime);
+                        this._Update(scene, deltaTime);
+                        this._Render(scene, deltaTime);
                     }
 
                     swFrame.Stop();
@@ -135,32 +137,25 @@ namespace LifeSim.Engine
             }
         }
 
-        private void _Render(float deltaTime)
+        private void _Update(Scene scene, float deltaTime)
         {
-            if (this._scene == null) return;
-
-            Stopwatch swRendering = Stopwatch.StartNew();
-            this._renderer.BeginRender();
-            this._renderer.SetMousePickingPosition(this._input.MousePosition);
-            this._renderer.UpdateImGui(deltaTime, this._input.InputSnapshot);
-            this._scene.RenderFrame(this._renderer);
-            this._renderer.EndRender();
-            swRendering.Stop();
-            this._renderingTime = swRendering.Elapsed.TotalMilliseconds;
-            System.Console.WriteLine("Rendering time: " + this._renderingTime);
-        }
-
-        private void _Update(float deltaTime)
-        {
-            if (this._scene == null) return;
-
             Stopwatch swSimulation = Stopwatch.StartNew();
-            this._scene.Update(deltaTime);
+            scene.Update(deltaTime);
+            scene.UpdateTransforms();
             swSimulation.Stop();
             this._simulationTime = swSimulation.Elapsed.TotalMilliseconds;
             System.Console.WriteLine("Simulation time: " + this._simulationTime);
         }
 
-    }
+        private void _Render(Scene scene, float deltaTime)
+        {
+            Stopwatch swRendering = Stopwatch.StartNew();
 
+            this._renderer.Render(scene, deltaTime, this._input.InputSnapshot);
+
+            swRendering.Stop();
+            this._renderingTime = swRendering.Elapsed.TotalMilliseconds;
+            System.Console.WriteLine("Rendering time: " + this._renderingTime);
+        }
+    }
 }

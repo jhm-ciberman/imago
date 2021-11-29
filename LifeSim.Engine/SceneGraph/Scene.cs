@@ -2,50 +2,58 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using LifeSim.Engine.Rendering;
+using LifeSim.Engine.SceneGraph;
 
 namespace LifeSim.Engine.SceneGraph
 {
-    public class Stage
+    public abstract class Scene
     {
+        public App App { get; }
+
         public DirectionalLight MainLight { get; set; } = new DirectionalLight();
 
         public ColorF AmbientColor { get; set; } = new ColorF(.2f, .2f, .2f);
 
         public ColorF ClearColor { get; set; } = new ColorF(0.84f, 0.84f, 0.86f, 1.0f);
 
+
+        public GizmosLayer Gizmos { get; } = new GizmosLayer();
+
+        public ICamera? Camera { get; set; } = null;
+
+        private readonly List<ParticleSystem> _particleSystems = new List<ParticleSystem>();
+
+        public IReadOnlyList<ParticleSystem> ParticleSystems => this._particleSystems;
+
+
         private readonly SwapPopList<Renderable> _renderables = new SwapPopList<Renderable>();
+
+        private readonly List<CanvasLayer> _canvasLayers = new List<CanvasLayer>();
+
+        public IReadOnlyList<CanvasLayer> CanvasLayers => this._canvasLayers;
 
         public IReadOnlyList<Renderable> Renderables => this._renderables;
 
         private readonly List<Node3D> _transformDirtyList = new List<Node3D>();
 
-        public GizmosLayer Gizmos { get; } = new GizmosLayer();
 
-        private readonly List<ParticleSystem> _particleSystems = new List<ParticleSystem>();
+        private readonly Node3D _root = new Node3D();
 
-        private readonly Node3D _root;
-
-        public void Render(Renderer renderer, Camera3D camera3D)
+        public Scene(App app)
         {
-            if (this.Renderables.Count > 0)
-            {
-                renderer.RenderScene(this.Renderables, this.MainLight, this.AmbientColor, this.ClearColor, camera3D);
-            }
-
-            if (this.Gizmos.Lines.Count > 0)
-            {
-                renderer.RenderGizmos(this.Gizmos.Lines, camera3D);
-            }
-
-            for (int i = 0; i < this._particleSystems.Count; i++)
-            {
-                this._particleSystems[i].Render(renderer, camera3D);
-            }
+            this.App = app;
+            this._root.OnNodeAdded += this._OnNodeAddedEvent;
+            this._root.OnNodeRemoved += this._OnNodeRemovedEvent;
         }
 
-        public Stage()
+        public void Add(Node3D node)
         {
-            this._root = new Node3D();
+            this._root.Add(node);
+        }
+
+        public void Remove(Node3D node)
+        {
+            this._root.Remove(node);
         }
 
         public void AddParticleSystem(ParticleSystem particleSystem)
@@ -58,22 +66,29 @@ namespace LifeSim.Engine.SceneGraph
             this._particleSystems.Remove(particleSystem);
         }
 
-        public void AddNode(Node3D node)
+        public void AddCanvasLayer(CanvasLayer canvasLayer)
         {
-            this._root.Add(node);
-            this._transformDirtyList.Add(node);
-            this._SubscribeRecursively(node);
+            this._canvasLayers.Add(canvasLayer);
         }
 
-        public void RemoveNode(Node3D node)
+        public void RemoveCanvasLayer(CanvasLayer canvasLayer)
         {
-            this._root.Remove(node);
-            if (node.TransformIsDirty)
-            {
-                this._transformDirtyList.Remove(node);
-            }
-            this._UnsubscribeRecursively(node);
+            this._canvasLayers.Remove(canvasLayer);
         }
+
+
+        public virtual void RenderFrame(Renderer renderer)
+        {
+            // 
+        }
+
+        public virtual void RenderImGui()
+        {
+            // 
+        }
+
+        public abstract void Update(float deltaTime);
+
 
         private void _SubscribeRecursively(Node3D node)
         {
@@ -119,13 +134,15 @@ namespace LifeSim.Engine.SceneGraph
             }
         }
 
-        private void _OnNodeRemovedEvent(Node3D sender, Node3D node)
+        private void _OnNodeRemovedEvent(Node3D node)
         {
+            this._transformDirtyList.Remove(node);
             this._UnsubscribeRecursively(node);
         }
 
-        private void _OnNodeAddedEvent(Node3D sender, Node3D node)
+        private void _OnNodeAddedEvent(Node3D node)
         {
+            this._transformDirtyList.Add(node);
             this._SubscribeRecursively(node);
         }
 
@@ -157,29 +174,32 @@ namespace LifeSim.Engine.SceneGraph
             renderable.Free();
         }
 
-
-        public void Update()
+        public void UpdateTransforms()
         {
+            for (int i = 0; i < this._canvasLayers.Count; i++)
+            {
+                this._canvasLayers[i].UpdateTransforms();
+            }
+
+            if (this._transformDirtyList.Count == 0) return;
+
             Matrix4x4 identity = Matrix4x4.Identity;
 
-            if (this._transformDirtyList.Count > 0)
+            for (int i = 0; i < this._transformDirtyList.Count; i++)
             {
-                for (int i = 0; i < this._transformDirtyList.Count; i++)
+                var dirtyNode = this._transformDirtyList[i];
+                if (!dirtyNode.TransformIsDirty) continue;
+                Node3D topDirty = this._SearchTopDirty(dirtyNode);
+                if (topDirty.Parent != null)
                 {
-                    var dirtyNode = this._transformDirtyList[i];
-                    if (!dirtyNode.TransformIsDirty) continue;
-                    Node3D topDirty = this._SearchTopDirty(dirtyNode);
-                    if (topDirty.Parent != null)
-                    {
-                        topDirty.UpdateWorldMatrix(ref topDirty.Parent.WorldMatrix);
-                    }
-                    else
-                    {
-                        topDirty.UpdateWorldMatrix(ref identity);
-                    }
+                    topDirty.UpdateWorldMatrix(ref topDirty.Parent.WorldMatrix);
                 }
-                this._transformDirtyList.Clear();
+                else
+                {
+                    topDirty.UpdateWorldMatrix(ref identity);
+                }
             }
+            this._transformDirtyList.Clear();
         }
 
         private Node3D _SearchTopDirty(Node3D node)
@@ -192,5 +212,6 @@ namespace LifeSim.Engine.SceneGraph
                 node = node.Parent;
             }
         }
+
     }
 }

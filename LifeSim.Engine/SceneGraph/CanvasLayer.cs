@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using LifeSim.Engine.Rendering;
 
@@ -63,7 +64,7 @@ namespace LifeSim.Engine.SceneGraph
             }
         }
 
-        public void UpdateWorldMatrices()
+        public void UpdateTransforms()
         {
             foreach (var child in this._root.Children)
             {

@@ -9,8 +9,8 @@ namespace LifeSim.Engine.SceneGraph
     public class Node3D
     {
         public event Action<Node3D>? OnTransformDirty;
-        public event Action<Node3D, Node3D>? OnNodeAdded;
-        public event Action<Node3D, Node3D>? OnNodeRemoved;
+        public event Action<Node3D>? OnNodeAdded;
+        public event Action<Node3D>? OnNodeRemoved;
 
         public string Name { get; set; } = string.Empty;
         public Node3D? Parent { get; private set; } = null;
@@ -87,7 +87,7 @@ namespace LifeSim.Engine.SceneGraph
                 }
                 this._children.Add(node);
                 node.Parent = this;
-                this.OnNodeAdded?.Invoke(this, node);
+                this.OnNodeAdded?.Invoke(node);
             }
         }
 
@@ -97,7 +97,7 @@ namespace LifeSim.Engine.SceneGraph
 
             this._children.Remove(node);
             node.Parent = null;
-            this.OnNodeRemoved?.Invoke(this, node);
+            this.OnNodeRemoved?.Invoke(node);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

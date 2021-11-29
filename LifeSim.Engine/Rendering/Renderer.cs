@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Numerics;
 using FontStashSharp.Interfaces;
 using LifeSim.Engine.SceneGraph;
@@ -34,11 +35,7 @@ namespace LifeSim.Engine.Rendering
         private readonly FullScreenPass _fullScreenPass;
         private readonly GizmosPass _gizmosPass;
 
-
-
         public GraphicsBackend BackendType => this.GraphicsDevice.BackendType;
-
-
 
         private readonly Fence _fence;
 
@@ -107,24 +104,6 @@ namespace LifeSim.Engine.Rendering
             this._fence = this._factory.CreateFence(false);
         }
 
-        public void SetMousePickingPosition(Vector2 position)
-        {
-            this._mousePickerPass.SetMousePosition(position);
-        }
-
-        public void UpdateImGui(float deltaTime, InputSnapshot inputSnapshot)
-        {
-            this._imGuiPass.Update(deltaTime, inputSnapshot);
-        }
-
-        public void BeginRender()
-        {
-            this._commandList.Begin();
-
-            this.UpdateDirtyMaterials();
-            this.UpdateDirtyTextures();
-        }
-
         protected void UpdateDirtyMaterials()
         {
             if (this._dirtyTextures.Count > 0)
@@ -149,40 +128,56 @@ namespace LifeSim.Engine.Rendering
             }
         }
 
-        public void RenderCanvas(Viewport viewport, IReadOnlyList<ICanvasItem> items)
+        public void Render(Scene scene, float deltaTime, InputSnapshot inputSnapshot)
         {
-            Matrix4x4 projection = Matrix4x4.CreateOrthographicOffCenter(0, viewport.Width, viewport.Height, 0, -10f, 100f);
+            this._mousePickerPass.SetMousePosition(inputSnapshot.MousePosition);
+            this._imGuiPass.Update(deltaTime, inputSnapshot);
 
-            this._spriteBatcher.BeginBatch();
-            for (int i = 0; i < items.Count; i++)
+            this._commandList.Begin();
+
+            this.UpdateDirtyMaterials();
+            this.UpdateDirtyTextures();
+            this.Storage.UpdateBuffers(this._commandList);
+
+            if (scene.Camera != null)
             {
-                items[i].Render(this._spriteBatcher);
+                if (scene.Renderables.Count > 0)
+                {
+                    this._shadowmapPass.Render(this._commandList, scene.Renderables, scene.Camera, scene.MainLight);
+                    this._forwardPass.Render(this._commandList, scene.Renderables, scene.MainLight, scene.AmbientColor, scene.ClearColor, scene.Camera);
+                }
+
+                if (scene.Gizmos.Lines.Count > 0)
+                {
+                    this._gizmosPass.Render(this._commandList, scene.Gizmos.Lines, scene.Camera);
+                }
+
+                for (int i = 0; i < scene.ParticleSystems.Count; i++)
+                {
+                    var system = scene.ParticleSystems[i];
+                    system.SortParticles(scene.Camera.Position);
+                    this._particlesPass.Render(this._commandList, system.Particles, system.Texture, scene.Camera);
+                }
             }
 
+            for (int i = 0; i < scene.CanvasLayers.Count; i++)
+            {
+                var canvasLayer = scene.CanvasLayers[i];
+                Viewport viewport = canvasLayer.Viewport;
+                Matrix4x4 projection = Matrix4x4.CreateOrthographicOffCenter(0, viewport.Width, viewport.Height, 0, -10f, 100f);
 
-            this._spritesPass.BeginPass(this._commandList, ref projection);
-            this._spritesPass.SubmitBatches(this._commandList, this._spriteBatcher.IndexBuffer, this._spriteBatcher.Batches);
-        }
+                this._spriteBatcher.BeginBatch();
+                for (int j = 0; j < canvasLayer.Items.Count; j++)
+                {
+                    canvasLayer.Items[j].Render(this._spriteBatcher);
+                }
 
-        public void RenderScene(IReadOnlyList<Renderable> renderables, DirectionalLight mainLight, ColorF ambientColor, ColorF clearColor, ICamera camera)
-        {
-            this.Storage.UpdateBuffers(this._commandList);
-            this._shadowmapPass.Render(this._commandList, renderables, camera, mainLight);
-            this._forwardPass.Render(this._commandList, renderables, mainLight, ambientColor, clearColor, camera);
-        }
+                this._spritesPass.BeginPass(this._commandList, ref projection);
+                this._spritesPass.SubmitBatches(this._commandList, this._spriteBatcher.IndexBuffer, this._spriteBatcher.Batches);
+            }
 
-        public void RenderGizmos(IReadOnlyList<DebugLine> lines, ICamera camera3D)
-        {
-            this._gizmosPass.Render(this._commandList, lines, camera3D);
-        }
+            scene.RenderFrame(this);
 
-        public void RenderParticles(SwapPopList<Particle> particles, Texture texture, ICamera camera)
-        {
-            this._particlesPass.Render(this._commandList, particles, texture, camera);
-        }
-
-        public void EndRender()
-        {
             this._mousePickerPass.Render(this._commandList);
             this._imGuiPass.Render(this._commandList);
             this._fullScreenPass.Render(this._commandList);
