@@ -4,7 +4,7 @@ using LifeSim.Engine.SceneGraph;
 
 namespace LifeSim.Engine
 {
-    public interface IStage
+    public interface IScene
     {
         void RenderFrame(Renderer renderer);
 

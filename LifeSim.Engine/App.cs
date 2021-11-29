@@ -12,13 +12,22 @@ namespace LifeSim.Engine
 {
     public class App
     {
+        public Rendering.Viewport Viewport { get; }
+
+        public SceneStorage Storage => this._renderer.Storage;
+
         private readonly Sdl2Window _window;
 
         private readonly InputInstance _input;
 
         private readonly Renderer _renderer;
 
-        private IStage? _stage = null;
+        private IScene? _scene = null;
+
+        private double _simulationTime = 0;
+        private double _renderingTime = 0;
+
+        private double _frameTime = 0;
 
         public App(string windowTitle, GraphicsBackend? backend = null)
         {
@@ -39,13 +48,9 @@ namespace LifeSim.Engine
             Input.SetInstance(this._input);
         }
 
-        public Rendering.Viewport Viewport { get; }
-
-        public SceneStorage Storage => this._renderer.Storage;
-
-        public void Run(IStage stage)
+        public void Run(IScene scene)
         {
-            this.SetStage(stage);
+            this.SetScene(scene);
             this._MainLoop();
         }
 
@@ -57,9 +62,9 @@ namespace LifeSim.Engine
             this._renderer.Resize(width, height, this.Viewport.Width, this.Viewport.Height);
         }
 
-        public void SetStage(IStage stage)
+        public void SetScene(IScene stage)
         {
-            this._stage = stage;
+            this._scene = stage;
         }
 
         public void Quit()
@@ -67,11 +72,6 @@ namespace LifeSim.Engine
             this._renderer.Dispose();
             this._window.Close();
         }
-
-        private double _simulationTime = 0;
-        private double _renderingTime = 0;
-
-        private double _frameTime = 0;
 
         private void _MainLoop()
         {
@@ -89,22 +89,20 @@ namespace LifeSim.Engine
 
                 this._window.Title = "Medieval Life" + " (" + this._renderer.BackendType.ToString() + ") frame = " + dt + "ms FPS = " + fps;
 
-                if (Input.GetKeyDown(Veldrid.Key.Escape) && !Input.MouseIsLocked)
+                if (Input.GetKeyDown(Key.Escape) && !Input.MouseIsLocked)
                 {
                     this._window.Close();
                     return;
                 }
 
-                if (Input.GetKeyDown(Veldrid.Key.F4))
+                if (Input.GetKeyDown(Key.F4))
                 {
                     this._window.WindowState = this._window.WindowState == Veldrid.WindowState.BorderlessFullScreen
-                        ? Veldrid.WindowState.Normal
-                        : Veldrid.WindowState.BorderlessFullScreen;
+                        ? WindowState.Normal
+                        : WindowState.BorderlessFullScreen;
                 }
 
-                this._renderer.Update(deltaTime, this._input.InputSnapshot);
-
-                if (this._stage != null)
+                if (this._scene != null)
                 {
                     bool useMultiThreading = true;
 
@@ -112,61 +110,57 @@ namespace LifeSim.Engine
 
                     if (useMultiThreading)
                     {
-                        var simulation = Task.Run(() =>
-                        {
-                            Stopwatch swSimulation = Stopwatch.StartNew();
-                            this._stage.Update(deltaTime);
-                            swSimulation.Stop();
-                            this._simulationTime = swSimulation.Elapsed.TotalMilliseconds;
-                            System.Console.WriteLine("Simulation time: " + this._simulationTime);
-                        });
-                        var rendering = Task.Run(() =>
-                        {
-                            Stopwatch swRendering = Stopwatch.StartNew();
-
-                            this._renderer.BeginRender();
-                            this._stage.RenderFrame(this._renderer);
-                            this._renderer.EndRender();
-
-                            swRendering.Stop();
-                            this._renderingTime = swRendering.Elapsed.TotalMilliseconds;
-                            System.Console.WriteLine("Rendering time: " + this._renderingTime);
-                        });
+                        var simulation = Task.Run(() => this._Update(deltaTime));
+                        var rendering = Task.Run(() => this._Render(deltaTime));
                         Task.WaitAll(simulation, rendering);
                     }
                     else
                     {
-                        Stopwatch swSimulation = Stopwatch.StartNew();
-                        this._stage.Update(deltaTime);
-                        swSimulation.Stop();
-                        this._simulationTime = swSimulation.Elapsed.TotalMilliseconds;
-                        System.Console.WriteLine("Simulation time: " + this._simulationTime);
-
-                        Stopwatch swRendering = Stopwatch.StartNew();
-                        this._renderer.BeginRender();
-                        this._stage.RenderFrame(this._renderer);
-                        this._renderer.EndRender();
-                        swRendering.Stop();
-                        this._renderingTime = swRendering.Elapsed.TotalMilliseconds;
-                        System.Console.WriteLine("Rendering time: " + this._renderingTime);
+                        this._Update(deltaTime);
+                        this._Render(deltaTime);
                     }
 
                     swFrame.Stop();
                     this._frameTime = swFrame.Elapsed.TotalMilliseconds;
                     var totalTime = this._simulationTime + this._renderingTime;
                     System.Console.WriteLine("Frame time: " + this._frameTime + " - Saved: " + (this._frameTime - totalTime).ToString("0.00"));
-
-
                 }
 
                 ImGuiNET.ImGui.Begin("Debug");
                 ImGuiNET.ImGui.Text("Simulation time: " + this._simulationTime.ToString("0.00") + "ms");
-                ImGuiNET.ImGui.Text("Rendering time: " + this._simulationTime.ToString("0.00") + "ms");
+                ImGuiNET.ImGui.Text("Rendering time: " + this._renderingTime.ToString("0.00") + "ms");
                 ImGuiNET.ImGui.End();
 
                 this._input.UpdateFrameInput(); // For next frame
             }
         }
+
+        private void _Render(float deltaTime)
+        {
+            if (this._scene == null) return;
+
+            Stopwatch swRendering = Stopwatch.StartNew();
+            this._renderer.BeginRender();
+            this._renderer.SetMousePickingPosition(this._input.MousePosition);
+            this._renderer.UpdateImGui(deltaTime, this._input.InputSnapshot);
+            this._scene.RenderFrame(this._renderer);
+            this._renderer.EndRender();
+            swRendering.Stop();
+            this._renderingTime = swRendering.Elapsed.TotalMilliseconds;
+            System.Console.WriteLine("Rendering time: " + this._renderingTime);
+        }
+
+        private void _Update(float deltaTime)
+        {
+            if (this._scene == null) return;
+
+            Stopwatch swSimulation = Stopwatch.StartNew();
+            this._scene.Update(deltaTime);
+            swSimulation.Stop();
+            this._simulationTime = swSimulation.Elapsed.TotalMilliseconds;
+            System.Console.WriteLine("Simulation time: " + this._simulationTime);
+        }
+
     }
 
 }

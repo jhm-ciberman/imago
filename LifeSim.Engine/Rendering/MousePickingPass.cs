@@ -34,7 +34,7 @@ namespace LifeSim.Engine.Rendering
             return true;
         }
 
-        public void Update(Vector2 mousePos)
+        public void SetMousePosition(Vector2 mousePos)
         {
             this._mousePosition = mousePos;
         }

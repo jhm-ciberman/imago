@@ -107,9 +107,13 @@ namespace LifeSim.Engine.Rendering
             this._fence = this._factory.CreateFence(false);
         }
 
-        public void Update(float deltaTime, InputSnapshot inputSnapshot)
+        public void SetMousePickingPosition(Vector2 position)
         {
-            this._mousePickerPass.Update(inputSnapshot.MousePosition);
+            this._mousePickerPass.SetMousePosition(position);
+        }
+
+        public void UpdateImGui(float deltaTime, InputSnapshot inputSnapshot)
+        {
             this._imGuiPass.Update(deltaTime, inputSnapshot);
         }
 
@@ -167,7 +171,7 @@ namespace LifeSim.Engine.Rendering
             this._forwardPass.Render(this._commandList, renderables, mainLight, ambientColor, clearColor, camera);
         }
 
-        public void RenderGizmos(IReadOnlyList<DebugLine> lines, Camera3D camera3D)
+        public void RenderGizmos(IReadOnlyList<DebugLine> lines, ICamera camera3D)
         {
             this._gizmosPass.Render(this._commandList, lines, camera3D);
         }

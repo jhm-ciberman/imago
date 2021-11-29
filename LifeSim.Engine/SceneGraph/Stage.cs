@@ -5,7 +5,7 @@ using LifeSim.Engine.Rendering;
 
 namespace LifeSim.Engine.SceneGraph
 {
-    public class SceneLayer
+    public class Stage
     {
         public DirectionalLight MainLight { get; set; } = new DirectionalLight();
 
@@ -43,7 +43,7 @@ namespace LifeSim.Engine.SceneGraph
             }
         }
 
-        public SceneLayer()
+        public Stage()
         {
             this._root = new Node3D();
         }
