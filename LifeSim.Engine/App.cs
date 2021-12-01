@@ -125,7 +125,7 @@ namespace LifeSim.Engine
                     swFrame.Stop();
                     this._frameTime = swFrame.Elapsed.TotalMilliseconds;
                     var totalTime = this._simulationTime + this._renderingTime;
-                    System.Console.WriteLine("Frame time: " + this._frameTime + " - Saved: " + (this._frameTime - totalTime).ToString("0.00"));
+                    //System.Console.WriteLine("Frame time: " + this._frameTime + " - Saved: " + (this._frameTime - totalTime).ToString("0.00"));
                 }
 
                 ImGuiNET.ImGui.Begin("Debug");
@@ -144,7 +144,7 @@ namespace LifeSim.Engine
             scene.UpdateTransforms();
             swSimulation.Stop();
             this._simulationTime = swSimulation.Elapsed.TotalMilliseconds;
-            System.Console.WriteLine("Simulation time: " + this._simulationTime);
+            //System.Console.WriteLine("Simulation time: " + this._simulationTime);
         }
 
         private void _Render(Scene scene, float deltaTime)
@@ -155,7 +155,7 @@ namespace LifeSim.Engine
 
             swRendering.Stop();
             this._renderingTime = swRendering.Elapsed.TotalMilliseconds;
-            System.Console.WriteLine("Rendering time: " + this._renderingTime);
+            //System.Console.WriteLine("Rendering time: " + this._renderingTime);
         }
     }
 }

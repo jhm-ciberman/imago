@@ -106,25 +106,31 @@ namespace LifeSim.Engine.Rendering
 
         protected void UpdateDirtyMaterials()
         {
-            if (this._dirtyTextures.Count > 0)
+            lock (this._dirtyMaterials)
             {
-                foreach (var material in this._dirtyMaterials)
+                if (this._dirtyMaterials.Count > 0)
                 {
-                    material.Update();
+                    foreach (var material in this._dirtyMaterials)
+                    {
+                        material.Update();
+                    }
+                    this._dirtyMaterials.Clear();
                 }
-                this._dirtyMaterials.Clear();
             }
         }
 
         protected void UpdateDirtyTextures()
         {
-            if (this._dirtyTextures.Count > 0)
+            lock (this._dirtyTextures)
             {
-                foreach (var resource in this._dirtyTextures)
+                if (this._dirtyTextures.Count > 0)
                 {
-                    resource.Update(this.GraphicsDevice, this._commandList);
+                    foreach (var resource in this._dirtyTextures)
+                    {
+                        resource.Update(this.GraphicsDevice, this._commandList);
+                    }
+                    this._dirtyTextures.Clear();
                 }
-                this._dirtyTextures.Clear();
             }
         }
 
@@ -201,12 +207,18 @@ namespace LifeSim.Engine.Rendering
 
         internal void OnTextureDirty(Texture texture)
         {
-            this._dirtyTextures.Add(texture);
+            lock (this._dirtyTextures)
+            {
+                this._dirtyTextures.Add(texture);
+            }
         }
 
         internal void OnMaterialDirty(Material material)
         {
-            this._dirtyMaterials.Add(material);
+            lock (this._dirtyMaterials)
+            {
+                this._dirtyMaterials.Add(material);
+            }
         }
 
         public void Resize(uint width, uint height, uint viewportWidth, uint viewportHeight)
