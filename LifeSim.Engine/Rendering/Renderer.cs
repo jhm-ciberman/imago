@@ -153,13 +153,18 @@ namespace LifeSim.Engine.Rendering
             this.UpdateDirtyTextures();
             this.Storage.UpdateBuffers(this._commandList);
 
+            this._commandList.SetFramebuffer(this.MainRenderTexture.Framebuffer);
+            this._commandList.ClearColorTarget(0, new RgbaFloat(scene.ClearColor.R, scene.ClearColor.G, scene.ClearColor.B, scene.ClearColor.A));
+            this._commandList.ClearColorTarget(1, RgbaFloat.Black);
+            this._commandList.ClearDepthStencil(1f);
+
             if (scene.Camera != null)
             {
                 var camera = scene.Camera;
                 if (scene.ForwardQueue.Count > 0)
                 {
                     this._shadowmapPass.Render(this._commandList, scene.ShadowmapQueue, camera, scene.MainLight);
-                    this._forwardPass.Render(this._commandList, scene.ForwardQueue, camera, scene.MainLight, scene.AmbientColor, scene.ClearColor);
+                    this._forwardPass.Render(this._commandList, scene.ForwardQueue, camera, scene.MainLight, scene.AmbientColor);
                 }
 
                 if (scene.Gizmos.Lines.Count > 0)

@@ -70,14 +70,10 @@ namespace LifeSim.Engine.Rendering
             IReadOnlyList<Renderable> renderQueue,
             ICamera camera,
             DirectionalLight mainLight,
-            ColorF ambientColor,
-            ColorF clearColor
+            ColorF ambientColor
         )
         {
             commandList.SetFramebuffer(this._renderTexture.Framebuffer);
-            commandList.ClearColorTarget(0, new RgbaFloat(clearColor.R, clearColor.G, clearColor.B, clearColor.A));
-            commandList.ClearColorTarget(1, RgbaFloat.Black);
-            commandList.ClearDepthStencil(1f);
 
             CameraInfo cameraInfo = new CameraInfo();
             cameraInfo.ViewProjectionMatrix = camera.ViewProjectionMatrix;
