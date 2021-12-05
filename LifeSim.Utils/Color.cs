@@ -6,10 +6,10 @@ namespace LifeSim
     [StructLayout(LayoutKind.Sequential)]
     public readonly struct Color
     {
-        public readonly byte A;
-        public readonly byte B;
-        public readonly byte G;
         public readonly byte R;
+        public readonly byte G;
+        public readonly byte B;
+        public readonly byte A;
 
         public Color(uint packed) : this()
         {
