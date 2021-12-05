@@ -108,7 +108,7 @@ namespace LifeSim.Engine.Rendering
             }
         }
 
-        public readonly struct RenderIndex : IComparable<RenderIndex>
+        private readonly struct RenderIndex : IComparable<RenderIndex>
         {
             public readonly ulong Key;
             public readonly int Index;
