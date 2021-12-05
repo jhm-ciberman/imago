@@ -91,7 +91,7 @@ namespace LifeSim.Engine.Rendering
 
             this._vertexFormat = new VertexFormat(
                 new VertexLayoutDescription(
-                    new VertexElementDescription("VertexPosition", VertexElementSemantic.Position, VertexElementFormat.Float2),
+                    new VertexElementDescription("VertexPosition", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
                     new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2)
                 ),
                 new VertexLayoutDescription(stride: (uint)Marshal.SizeOf<ParticleRenderData>(), instanceStepRate: 1,

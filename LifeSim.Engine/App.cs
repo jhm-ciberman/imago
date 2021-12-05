@@ -28,8 +28,6 @@ namespace LifeSim.Engine
 
         private double _frameTime = 0;
 
-        public bool UseMultiThreadRendering { get; set; } = true;
-
         public Scene? CurrentScene { get; set; } = null;
 
         private bool _running = false;
@@ -111,17 +109,8 @@ namespace LifeSim.Engine
                     var swFrame = Stopwatch.StartNew();
                     scene.BeginUpdate(); // Swap internal render queues
 
-                    if (this.UseMultiThreadRendering)
-                    {
-                        var simulation = Task.Run(() => this._Update(scene, deltaTime));
-                        var rendering = Task.Run(() => this._Render(scene, deltaTime));
-                        Task.WaitAll(simulation, rendering);
-                    }
-                    else
-                    {
-                        this._Update(scene, deltaTime);
-                        this._Render(scene, deltaTime);
-                    }
+                    this._Update(scene, deltaTime);
+                    this._Render(scene, deltaTime);
 
                     swFrame.Stop();
                     this._frameTime = swFrame.Elapsed.TotalMilliseconds;

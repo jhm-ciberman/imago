@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Veldrid;
 
 namespace LifeSim.Engine.Rendering
@@ -56,6 +57,7 @@ namespace LifeSim.Engine.Rendering
                 ShaderVariant shaderVariant = this._GetShaderVariant(vertexFormat);
                 var pipeline = this.Pass.MakePipeline(shaderVariant);
                 this._pipelines.Add(new CachedPipeline(vertexFormat, pipeline));
+
                 return pipeline;
             }
         }
@@ -69,8 +71,9 @@ namespace LifeSim.Engine.Rendering
                     return this._variants[i];
                 }
             }
-
+            var sw = Stopwatch.StartNew();
             var variant = new ShaderVariant(this._factory, vertexFormat, this._materialResourceLayout, this._vertexCode, this._fragmentCode);
+            Console.WriteLine($"Compiled shader variant for shader id = {this.Id} ({this.Pass.GetType().Name}) in {sw.ElapsedMilliseconds}ms");
             this._variants.Add(variant);
             return variant;
         }

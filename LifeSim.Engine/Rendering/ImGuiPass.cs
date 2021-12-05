@@ -43,7 +43,6 @@ namespace LifeSim.Engine.Rendering
 
         public void Render(CommandList cl)
         {
-            cl.SetFramebuffer(this._renderTexture.Framebuffer);
             this._imguiRenderer.Render(this._gd, cl);
         }
     }

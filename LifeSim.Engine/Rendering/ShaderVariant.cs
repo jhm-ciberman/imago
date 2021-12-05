@@ -15,8 +15,13 @@ namespace LifeSim.Engine.Rendering
 
         public ShaderVariant(ResourceFactory factory, VertexFormat vertexFormat, ResourceLayout? materialResourceLayout, string vertexCode, string fragmentCode)
         {
+            bool debug = false;
+#if DEBUG
+            debug = true;
+#endif
+
             var macros = this.GetMacroDefinitions(vertexFormat);
-            var options = new GlslCompileOptions(debug: true, macros);
+            var options = new GlslCompileOptions(debug: debug, macros);
             var vertGlslShader = this._CompileGlslToSpirv(vertexCode, ShaderStages.Vertex, options);
             var fragGlslShader = this._CompileGlslToSpirv(fragmentCode, ShaderStages.Fragment, options);
 

@@ -69,8 +69,13 @@ namespace LifeSim.Engine.Rendering
             }
             _instance = this;
 
+            bool debug = false;
+#if DEBUG
+            debug = true;
+#endif
+
             GraphicsDeviceOptions options = new GraphicsDeviceOptions(
-                debug: false,
+                debug: debug,
                 swapchainDepthFormat: PixelFormat.R16_UNorm,
                 syncToVerticalBlank: false,
                 resourceBindingModel: ResourceBindingModel.Default,
@@ -187,9 +192,10 @@ namespace LifeSim.Engine.Rendering
             }
 
             scene.RenderFrame(this);
+            scene.RenderImGui();
 
-            this._mousePickerPass.Render(this._commandList);
             this._imGuiPass.Render(this._commandList);
+            this._mousePickerPass.Render(this._commandList);
             this._fullScreenPass.Render(this._commandList);
             this._commandList.End();
 
