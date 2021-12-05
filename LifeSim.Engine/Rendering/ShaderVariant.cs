@@ -13,14 +13,14 @@ namespace LifeSim.Engine.Rendering
 
         public ResourceLayout? MaterialResourceLayout;
 
-        public ShaderVariant(ResourceFactory factory, VertexFormat vertexFormat, ResourceLayout? materialResourceLayout, string vertexCode, string fragmentCode)
+        public ShaderVariant(GraphicsDevice gd, VertexFormat vertexFormat, ResourceLayout? materialResourceLayout, string vertexCode, string fragmentCode)
         {
             bool debug = false;
 #if DEBUG
             debug = true;
 #endif
 
-            var macros = this.GetMacroDefinitions(vertexFormat);
+            var macros = this.GetMacroDefinitions(vertexFormat, gd.BackendType);
             var options = new GlslCompileOptions(debug: debug, macros);
             var vertGlslShader = this._CompileGlslToSpirv(vertexCode, ShaderStages.Vertex, options);
             var fragGlslShader = this._CompileGlslToSpirv(fragmentCode, ShaderStages.Fragment, options);
@@ -29,12 +29,31 @@ namespace LifeSim.Engine.Rendering
 
             this.MaterialResourceLayout = materialResourceLayout;
             var layout = this.GetVertexLayout(vertexFormat);
-            this.ShaderSetDescription = new ShaderSetDescription(layout, factory.CreateFromSpirv(vertGlslShader, fragGlslShader));
+            this.ShaderSetDescription = new ShaderSetDescription(layout, gd.ResourceFactory.CreateFromSpirv(vertGlslShader, fragGlslShader));
         }
 
-        private MacroDefinition[] GetMacroDefinitions(VertexFormat vertexFormat)
+        private MacroDefinition[] GetMacroDefinitions(VertexFormat vertexFormat, GraphicsBackend backend)
         {
             var macros = new List<MacroDefinition>();
+
+            switch (backend)
+            {
+                case GraphicsBackend.Direct3D11:
+                    macros.Add(new MacroDefinition("D3D11"));
+                    break;
+                case GraphicsBackend.Vulkan:
+                    macros.Add(new MacroDefinition("VULKAN"));
+                    break;
+                case GraphicsBackend.OpenGL:
+                    macros.Add(new MacroDefinition("OPENGL"));
+                    break;
+                case GraphicsBackend.Metal:
+                    macros.Add(new MacroDefinition("METAL"));
+                    break;
+                case GraphicsBackend.OpenGLES:
+                    macros.Add(new MacroDefinition("OPENGLES"));
+                    break;
+            }
 
             foreach (var lqayot in vertexFormat.Layouts)
             {

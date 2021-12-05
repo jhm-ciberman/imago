@@ -12,7 +12,7 @@ namespace LifeSim.Engine.Rendering
         private readonly List<CachedPipeline> _pipelines = new List<CachedPipeline>();
         private readonly ResourceLayout? _materialResourceLayout;
         private readonly List<ShaderVariant> _variants = new List<ShaderVariant>();
-        private readonly ResourceFactory _factory;
+        private readonly GraphicsDevice _gd;
         private readonly string _vertexCode;
         private readonly string _fragmentCode;
 
@@ -27,14 +27,14 @@ namespace LifeSim.Engine.Rendering
             this._vertexCode = vertexCode;
             this._fragmentCode = fragmentCode;
 
-            this._factory = Renderer.Instance.GraphicsDevice.ResourceFactory;
+            this._gd = Renderer.Instance.GraphicsDevice;
 
             this._materialResourceLayout = materialResourceLayout;
         }
 
         public ResourceSet CreateResourceSet(params BindableResource[] resources)
         {
-            return this._factory.CreateResourceSet(new ResourceSetDescription(this._materialResourceLayout, resources));
+            return this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(this._materialResourceLayout, resources));
         }
 
         public Pipeline GetPipeline(VertexFormat vertexFormat)
@@ -72,7 +72,7 @@ namespace LifeSim.Engine.Rendering
                 }
             }
             var sw = Stopwatch.StartNew();
-            var variant = new ShaderVariant(this._factory, vertexFormat, this._materialResourceLayout, this._vertexCode, this._fragmentCode);
+            var variant = new ShaderVariant(this._gd, vertexFormat, this._materialResourceLayout, this._vertexCode, this._fragmentCode);
             Console.WriteLine($"Compiled shader variant for shader id = {this.Id} ({this.Pass.GetType().Name}) in {sw.ElapsedMilliseconds}ms");
             this._variants.Add(variant);
             return variant;
