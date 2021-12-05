@@ -141,7 +141,7 @@ namespace LifeSim.Engine
         {
             Stopwatch swSimulation = Stopwatch.StartNew();
             scene.Update(deltaTime);
-            scene.UpdateTransforms();
+            scene.EndUpdate();
             swSimulation.Stop();
             this._simulationTime = swSimulation.Elapsed.TotalMilliseconds;
             //System.Console.WriteLine("Simulation time: " + this._simulationTime);

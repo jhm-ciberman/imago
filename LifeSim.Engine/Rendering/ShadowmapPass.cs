@@ -17,7 +17,6 @@ namespace LifeSim.Engine.Rendering
         private readonly GraphicsDevice _gd;
         private readonly Framebuffer _shadowmapFramebuffer;
         private readonly DeviceBuffer _shadowmapInfoBuffer;
-        private readonly RenderQueue _renderQueue;
         private readonly RenderJob _renderJob;
         private readonly SceneStorage _storage;
 
@@ -42,23 +41,17 @@ namespace LifeSim.Engine.Rendering
 
             this._resourceSet = factory.CreateResourceSet(new ResourceSetDescription(this._resourceLayout, this._shadowmapInfoBuffer));
 
-            this._renderQueue = new RenderQueue();
             this._renderJob = new RenderJob(this._gd, this._resourceSet, true);
         }
 
-        public void Render(CommandList commandList, IReadOnlyList<Renderable> renderables, ICamera camera, DirectionalLight mainLight)
+        public void Render(CommandList commandList, IReadOnlyList<Renderable> renderQueue, ICamera camera, DirectionalLight mainLight)
         {
-            var matrix = mainLight.GetShadowMapMatrix(camera.Position);
-            var frustum = new BoundingFrustum(matrix);
-            this._renderQueue.AddToRenderQueue(renderables, ref frustum, camera.Position);
-            this._renderQueue.Sort();
-
             var shadowmapMatrix = mainLight.GetShadowMapMatrix(camera.Position);
             commandList.SetFramebuffer(this._shadowmapFramebuffer);
             commandList.ClearDepthStencil(1f);
             commandList.UpdateBuffer(this._shadowmapInfoBuffer, 0, ref shadowmapMatrix);
 
-            this._renderJob.DrawRenderList(commandList, this._renderQueue);
+            this._renderJob.DrawRenderList(commandList, renderQueue);
         }
 
         public void Dispose()

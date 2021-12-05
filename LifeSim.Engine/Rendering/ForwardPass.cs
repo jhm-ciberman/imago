@@ -33,7 +33,6 @@ namespace LifeSim.Engine.Rendering
         private readonly Matrix4x4 _shadowMapScaling;
         private readonly IRenderTexture _renderTexture;
         private readonly SceneStorage _storage;
-        private readonly RenderQueue _renderQueue;
         private readonly RenderJob _renderJob;
         public ForwardPass(GraphicsDevice gd, SceneStorage storage, IRenderTexture mainRenderTexture, Veldrid.Texture shadowmapTexture)
         {
@@ -64,22 +63,17 @@ namespace LifeSim.Engine.Rendering
             this._renderTexture = mainRenderTexture;
 
             this._renderJob = new RenderJob(this._gd, this._resourceSet, false);
-            this._renderQueue = new RenderQueue();
         }
 
         public void Render(
             CommandList commandList,
-            IReadOnlyList<Renderable> renderables,
+            IReadOnlyList<Renderable> renderQueue,
+            ICamera camera,
             DirectionalLight mainLight,
             ColorF ambientColor,
-            ColorF clearColor,
-            ICamera camera
+            ColorF clearColor
         )
         {
-            var cameraFrustum = camera.FrustumForCulling;
-            this._renderQueue.AddToRenderQueue(renderables, ref cameraFrustum, camera.Position);
-            this._renderQueue.Sort();
-
             commandList.SetFramebuffer(this._renderTexture.Framebuffer);
             commandList.ClearColorTarget(0, new RgbaFloat(clearColor.R, clearColor.G, clearColor.B, clearColor.A));
             commandList.ClearColorTarget(1, RgbaFloat.Black);
@@ -97,7 +91,7 @@ namespace LifeSim.Engine.Rendering
             commandList.UpdateBuffer(this._camera3DInfoBuffer, 0, ref cameraInfo);
             commandList.UpdateBuffer(this._lightInfoBuffer, 0, ref lightInfo);
 
-            this._renderJob.DrawRenderList(commandList, this._renderQueue);
+            this._renderJob.DrawRenderList(commandList, renderQueue);
         }
 
         public void Dispose()

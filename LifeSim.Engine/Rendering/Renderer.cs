@@ -7,6 +7,7 @@ using LifeSim.Engine.SceneGraph;
 using Veldrid;
 using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
+using Veldrid.Utilities;
 
 namespace LifeSim.Engine.Rendering
 {
@@ -102,6 +103,8 @@ namespace LifeSim.Engine.Rendering
             this._spriteBatcher = new SpriteBatcher(gd, this._spritesPass.Shader);
 
             this._fence = this._factory.CreateFence(false);
+
+
         }
 
         protected void UpdateDirtyMaterials()
@@ -147,10 +150,11 @@ namespace LifeSim.Engine.Rendering
 
             if (scene.Camera != null)
             {
-                if (scene.Renderables.Count > 0)
+                var camera = scene.Camera;
+                if (scene.ForwardQueue.Count > 0)
                 {
-                    this._shadowmapPass.Render(this._commandList, scene.Renderables, scene.Camera, scene.MainLight);
-                    this._forwardPass.Render(this._commandList, scene.Renderables, scene.MainLight, scene.AmbientColor, scene.ClearColor, scene.Camera);
+                    this._shadowmapPass.Render(this._commandList, scene.ShadowmapQueue, camera, scene.MainLight);
+                    this._forwardPass.Render(this._commandList, scene.ForwardQueue, camera, scene.MainLight, scene.AmbientColor, scene.ClearColor);
                 }
 
                 if (scene.Gizmos.Lines.Count > 0)

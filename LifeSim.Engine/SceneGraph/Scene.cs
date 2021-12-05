@@ -36,6 +36,13 @@ namespace LifeSim.Engine.SceneGraph
 
         private readonly List<Node3D> _transformDirtyList = new List<Node3D>();
 
+        private readonly RenderQueue _shadowmapQueue = new RenderQueue();
+
+        private readonly RenderQueue _forwardQueue = new RenderQueue();
+
+        public IReadOnlyList<Renderable> ForwardQueue => this._forwardQueue;
+
+        public IReadOnlyList<Renderable> ShadowmapQueue => this._shadowmapQueue;
 
         private readonly Node3D _root = new Node3D();
 
@@ -174,7 +181,13 @@ namespace LifeSim.Engine.SceneGraph
             renderable.Free();
         }
 
-        public void UpdateTransforms()
+        public void EndUpdate()
+        {
+            this._UpdateTransforms();
+            this._UpdateRenderQueues();
+        }
+
+        private void _UpdateTransforms()
         {
             for (int i = 0; i < this._canvasLayers.Count; i++)
             {
@@ -200,6 +213,22 @@ namespace LifeSim.Engine.SceneGraph
                 }
             }
             this._transformDirtyList.Clear();
+        }
+
+
+        private void _UpdateRenderQueues()
+        {
+            var camera = this.Camera;
+            if (camera == null) return;
+
+            var matrix = this.MainLight.GetShadowMapMatrix(camera.Position);
+            var frustum = new Veldrid.Utilities.BoundingFrustum(matrix);
+            this._shadowmapQueue.AddToRenderQueue(this.Renderables, ref frustum, camera.Position);
+            this._shadowmapQueue.Sort();
+
+            var cameraFrustum = camera.FrustumForCulling;
+            this._forwardQueue.AddToRenderQueue(this.Renderables, ref cameraFrustum, camera.Position);
+            this._forwardQueue.Sort();
         }
 
         private Node3D _SearchTopDirty(Node3D node)
