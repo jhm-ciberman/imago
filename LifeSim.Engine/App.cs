@@ -109,6 +109,7 @@ namespace LifeSim.Engine
                 if (scene != null)
                 {
                     var swFrame = Stopwatch.StartNew();
+                    scene.BeginUpdate(); // Swap internal render queues
 
                     if (this.UseMultiThreadRendering)
                     {

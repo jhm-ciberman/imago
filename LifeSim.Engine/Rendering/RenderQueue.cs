@@ -10,36 +10,26 @@ namespace LifeSim.Engine.Rendering
     {
         private const int DEFAULT_CAPACITY = 250;
 
-        private List<RenderIndex> _indicesCurrent = new List<RenderIndex>(DEFAULT_CAPACITY);
-        private List<Renderable> _itemsCurrent = new List<Renderable>(DEFAULT_CAPACITY);
+        private readonly List<RenderIndex> _indices = new List<RenderIndex>(DEFAULT_CAPACITY);
+        private readonly List<Renderable> _items = new List<Renderable>(DEFAULT_CAPACITY);
 
-        private List<RenderIndex> _indicesSecondary = new List<RenderIndex>(DEFAULT_CAPACITY); // Used for double buffering (safe multi-threading)
+        public Vector3 CameraPosition { get; set; }
 
-        private List<Renderable> _itemsSecondary = new List<Renderable>(DEFAULT_CAPACITY);
+        public Matrix4x4 ViewProjectionMatrix { get; set; }
 
-        private readonly object _lock = new object();
+        public int Count => this._indices.Count;
 
-        public int Count => this._indicesCurrent.Count;
-
-        public Renderable this[int index] => this._itemsCurrent[this._indicesCurrent[index].Index];
+        public Renderable this[int index] => this._items[this._indices[index].Index];
 
         public void Sort()
         {
-            lock (this._lock) // Thread safe, swap lists
-            {
-                (this._indicesCurrent, this._indicesSecondary) = (this._indicesSecondary, this._indicesCurrent);
-                (this._itemsCurrent, this._itemsSecondary) = (this._itemsSecondary, this._itemsCurrent);
-            }
-
-            this._indicesCurrent.Sort();
+            this._indices.Sort();
         }
 
-
-
-        public void AddToRenderQueue(IReadOnlyList<Renderable> renderables, ref BoundingFrustum frustum, Vector3 cameraPosition)
+        public void AddToRenderQueue(IReadOnlyList<Renderable> renderables, ref BoundingFrustum frustum)
         {
-            this._indicesCurrent.Clear();
-            this._itemsCurrent.Clear();
+            this._indices.Clear();
+            this._items.Clear();
             for (int i = 0; i < renderables.Count; i++)
             {
                 Renderable renderable = renderables[i];
@@ -47,21 +37,21 @@ namespace LifeSim.Engine.Rendering
 
                 if (frustum.Contains(renderable.BoundingBox) != ContainmentType.Disjoint)
                 {
-                    ulong key = renderable.GetSortKey(cameraPosition);
-                    this._indicesCurrent.Add(new RenderIndex(key, this._itemsCurrent.Count));
-                    this._itemsCurrent.Add(renderable);
+                    ulong key = renderable.GetSortKey(this.CameraPosition);
+                    this._indices.Add(new RenderIndex(key, this._items.Count));
+                    this._items.Add(renderable);
                 }
             }
         }
 
         public IEnumerator<Renderable> GetEnumerator()
         {
-            return new Enumerator(this._indicesCurrent, this._itemsCurrent);
+            return new Enumerator(this._indices, this._items);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return new Enumerator(this._indicesCurrent, this._itemsCurrent);
+            return new Enumerator(this._indices, this._items);
         }
 
         private struct Enumerator : IEnumerator<Renderable>
