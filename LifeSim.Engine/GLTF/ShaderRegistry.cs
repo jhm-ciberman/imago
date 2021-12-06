@@ -1,4 +1,4 @@
-namespace LifeSim.Rendering
+namespace LifeSim.Engine.Rendering
 {
     public static class ShaderRegistry
     {

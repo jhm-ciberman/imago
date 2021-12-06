@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using LifeSim.Core;
-using LifeSim.Rendering;
+using LifeSim.Engine.Rendering;
 
 namespace LifeSim.Engine.SceneGraph
 {
@@ -22,13 +21,7 @@ namespace LifeSim.Engine.SceneGraph
 
         public abstract void Spawn(Vector3 position);
 
-        public void Render(Renderer renderer, ICamera camera)
-        {
-            this._SortParticles(camera.Position);
-            renderer.ParticlesRenderer.Render(this._particles, this.Texture, camera);
-        }
-
-        private void _SortParticles(Vector3 cameraPosition)
+        public void SortParticles(Vector3 cameraPosition)
         {
             for (int i = 0; i < this._particles.Count; i++)
             {

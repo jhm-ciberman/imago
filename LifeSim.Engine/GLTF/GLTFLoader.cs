@@ -1,7 +1,7 @@
 using System.Numerics;
 using glTFLoader;
 using LifeSim.Engine.Anim;
-using LifeSim.Rendering;
+using LifeSim.Engine.Rendering;
 
 namespace LifeSim.Engine.GLTF
 {
