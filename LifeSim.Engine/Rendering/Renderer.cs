@@ -69,13 +69,8 @@ namespace LifeSim.Engine.Rendering
             }
             _instance = this;
 
-            bool debug = false;
-#if DEBUG
-            debug = true;
-#endif
-
             GraphicsDeviceOptions options = new GraphicsDeviceOptions(
-                debug: debug,
+                debug: false,
                 swapchainDepthFormat: PixelFormat.R16_UNorm,
                 syncToVerticalBlank: false,
                 resourceBindingModel: ResourceBindingModel.Default,
