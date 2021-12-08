@@ -26,8 +26,6 @@ namespace LifeSim.Engine
         private double _simulationTime = 0;
         private double _renderingTime = 0;
 
-        private double _frameTime = 0;
-
         public Scene? CurrentScene { get; set; } = null;
 
         private bool _running = false;
@@ -113,8 +111,8 @@ namespace LifeSim.Engine
                     this._Render(scene, deltaTime);
 
                     swFrame.Stop();
-                    this._frameTime = swFrame.Elapsed.TotalMilliseconds;
-                    var totalTime = this._simulationTime + this._renderingTime;
+                    //this._frameTime = swFrame.Elapsed.TotalMilliseconds;
+                    //var totalTime = this._simulationTime + this._renderingTime;
                     //System.Console.WriteLine("Frame time: " + this._frameTime + " - Saved: " + (this._frameTime - totalTime).ToString("0.00"));
                 }
 
