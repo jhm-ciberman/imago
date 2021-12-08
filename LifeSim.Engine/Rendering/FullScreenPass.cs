@@ -40,7 +40,7 @@ namespace LifeSim.Engine.Rendering
                 new ResourceLayoutElementDescription("MainSampler", ResourceKind.Sampler, ShaderStages.Fragment)
             ));
 
-            this.Shader = new Shader(this, _vertexCode, _fragmentCode, resourceLayout);
+            this.Shader = new Shader(this, this._vertexCode, this._fragmentCode, resourceLayout);
 
 
             this._pipeline = this.Shader.GetPipeline(vertexFormat);

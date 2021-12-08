@@ -55,9 +55,7 @@ namespace LifeSim.Engine.Rendering
                 new VertexElementDescription("Color", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Byte4_Norm)
             ));
 
-            var vertex = ShaderSource.Load("lines.vert.glsl");
-            var fragment = ShaderSource.Load("lines.frag.glsl");
-            this._lineShader = new Shader(this, vertex, fragment);
+            this._lineShader = new Shader(this, this._vertex, this._fragment);
         }
 
         public void Render(CommandList cl, IReadOnlyList<DebugLine> lines, ICamera camera)
@@ -144,5 +142,34 @@ namespace LifeSim.Engine.Rendering
             this._passResourceSet.Dispose();
             this._lineShader.Dispose();
         }
+
+        private readonly string _fragment = @"
+            #version 450
+            layout(location = 0) in vec4 fsin_Color;
+            layout(location = 0) out vec4 fsout_color;
+
+            void main()
+            {
+                fsout_color = fsin_Color;
+            }
+            ";
+
+        private readonly string _vertex = @"
+            #version 450
+            layout(set = 0, binding = 0, std140) uniform CameraDataBuffer {
+                mat4 ViewProjection;
+            };
+
+            layout(location = 0) in vec3 Position;
+            layout(location = 1) in vec4 Color;
+
+            layout(location = 0) out vec4 fsin_Color;
+
+            void main()
+            {
+                gl_Position = ViewProjection * vec4(Position, 1);
+                fsin_Color = Color;
+            }
+            ";
     }
 }
