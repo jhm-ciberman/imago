@@ -5,7 +5,9 @@ namespace LifeSim.Engine.SceneGraph
 {
     public class Frame2D : RenderNode2D, ICanvasItem
     {
-        public Texture? Texture { get; set; }
+        public ITexture? Texture { get; set; }
+
+        public Shader? Shader { get; set; }
 
         public Vector2 Size { get; set; }
 
@@ -17,9 +19,9 @@ namespace LifeSim.Engine.SceneGraph
         }
 
         public Frame2D() { }
-        public Frame2D(Texture texture) : this(texture, new Vector2(texture.Width, texture.Height)) { }
+        public Frame2D(ITexture texture) : this(texture, new Vector2(texture.Width, texture.Height)) { }
 
-        public Frame2D(Texture texture, Vector2 size)
+        public Frame2D(ITexture texture, Vector2 size)
         {
             this.Texture = texture;
             this.Size = size;
@@ -29,7 +31,7 @@ namespace LifeSim.Engine.SceneGraph
         {
             if (this.Texture != null)
             {
-                spriteBatcher.Draw(this.Texture, -this.Pivot, this.Size, Vector2.Zero, Vector2.One, in this.WorldMatrix, Color.White, 0f);
+                spriteBatcher.Draw(this.Shader, this.Texture, -this.Pivot, this.Size, Vector2.Zero, Vector2.One, in this.WorldMatrix, Color.White, 0f);
             }
         }
     }

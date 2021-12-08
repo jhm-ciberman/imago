@@ -100,22 +100,22 @@ namespace LifeSim.Engine.Rendering
 
         public IReadOnlyList<SpriteBatch> Batches => this._batches;
 
-        public void Draw(Texture texture, Vector2 position, Vector2 size)
+        public void Draw(Shader? shader, ITexture texture, Vector2 position, Vector2 size)
         {
-            this.Draw(texture, position, size, Vector2.Zero, Vector2.One, Color.White, 0f);
+            this.Draw(shader, texture, position, size, Vector2.Zero, Vector2.One, Color.White, 0f);
         }
 
-        public void Draw(Texture texture, Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, in Matrix3x2 transform, Color color, float depth = 0f)
+        public void Draw(Shader? shader, ITexture texture, Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, in Matrix3x2 transform, Color color, float depth = 0f)
         {
-            this._FindBatch(this._defaultShader, texture)
+            this._FindBatch(shader ?? this._defaultShader, texture)
                 .Draw(position, size, uvTopLeft, uvBottomRight, in transform, color, depth);
 
             this.TotalSpritesToDraw++;
         }
 
-        public void Draw(Texture texture, Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, Color color, float depth = 0f)
+        public void Draw(Shader? shader, ITexture texture, Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, Color color, float depth = 0f)
         {
-            this._FindBatch(this._defaultShader, texture)
+            this._FindBatch(shader ?? this._defaultShader, texture)
                 .Draw(position, size, uvTopLeft, uvBottomRight, color, depth);
 
             this.TotalSpritesToDraw++;

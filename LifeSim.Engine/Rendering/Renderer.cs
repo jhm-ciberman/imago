@@ -100,7 +100,7 @@ namespace LifeSim.Engine.Rendering
             this._forwardPass = new ForwardPass(gd, this.Storage, this.MainRenderTexture, this._shadowPass.ShadowmapTexture.DeviceTexture);
             this._spritesPass = new SpritesPass(gd, this.MainRenderTexture);
 
-            this._spriteBatcher = new SpriteBatcher(gd, this._spritesPass.Shader);
+            this._spriteBatcher = new SpriteBatcher(gd, this._spritesPass.DefaultShader);
 
             this._fence = this._factory.CreateFence(false);
 

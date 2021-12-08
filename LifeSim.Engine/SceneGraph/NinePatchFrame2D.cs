@@ -64,7 +64,7 @@ namespace LifeSim.Engine.SceneGraph
 
                 if (sizeSegmentCenter.X > 0 && sizeSegmentCenter.Y > 0)
                 {
-                    spriteBatcher.Draw(this.Texture, -this.Pivot + sizeTL, sizeSegmentCenter, uvTL, uvBR, in worldMatrix, this.Color, depth);
+                    spriteBatcher.Draw(this.Shader, this.Texture, -this.Pivot + sizeTL, sizeSegmentCenter, uvTL, uvBR, in worldMatrix, this.Color, depth);
                 }
             }
 
@@ -74,13 +74,13 @@ namespace LifeSim.Engine.SceneGraph
             var posBL = new Vector2(0f                , this.Size.Y - sizeTL.Y);
 
             // Corner Top Left
-            spriteBatcher.Draw(this.Texture, -this.Pivot + posTL, sizeTL, Vector2.Zero, uvTL, in worldMatrix, this.Color, depth);
+            spriteBatcher.Draw(this.Shader, this.Texture, -this.Pivot + posTL, sizeTL, Vector2.Zero, uvTL, in worldMatrix, this.Color, depth);
             // Corner Top Right
-            spriteBatcher.Draw(this.Texture, -this.Pivot + posTR, sizeTR, new Vector2(uvBR.X, 0f), new Vector2(1f, uvTL.Y), in worldMatrix, this.Color, depth);
+            spriteBatcher.Draw(this.Shader, this.Texture, -this.Pivot + posTR, sizeTR, new Vector2(uvBR.X, 0f), new Vector2(1f, uvTL.Y), in worldMatrix, this.Color, depth);
             // Corner Bottom Left
-            spriteBatcher.Draw(this.Texture, -this.Pivot + posBL, sizeBL, new Vector2(0f, uvBR.Y), new Vector2(uvTL.X, 1f), in worldMatrix, this.Color, depth);
+            spriteBatcher.Draw(this.Shader, this.Texture, -this.Pivot + posBL, sizeBL, new Vector2(0f, uvBR.Y), new Vector2(uvTL.X, 1f), in worldMatrix, this.Color, depth);
             // Corner Bottom Right
-            spriteBatcher.Draw(this.Texture, -this.Pivot + posBR, sizeBR, uvBR, Vector2.One, in worldMatrix, this.Color, depth);
+            spriteBatcher.Draw(this.Shader, this.Texture, -this.Pivot + posBR, sizeBR, uvBR, Vector2.One, in worldMatrix, this.Color, depth);
 
 
             var sizeTop = new Vector2(this.Size.X - sizeTL.X - sizeTR.X, sizeTL.Y);
@@ -89,13 +89,13 @@ namespace LifeSim.Engine.SceneGraph
             var sizeRight = new Vector2(sizeTR.X, this.Size.Y - sizeTR.Y - sizeBR.Y);
 
             // Lateral Top
-            spriteBatcher.Draw(this.Texture, -this.Pivot + new Vector2(sizeTL.X, 0f), sizeTop, new Vector2(uvTL.X, 0f), new Vector2(uvBR.X, uvTL.Y), in worldMatrix, this.Color, depth);
+            spriteBatcher.Draw(this.Shader, this.Texture, -this.Pivot + new Vector2(sizeTL.X, 0f), sizeTop, new Vector2(uvTL.X, 0f), new Vector2(uvBR.X, uvTL.Y), in worldMatrix, this.Color, depth);
             // Lateral Bottom
-            spriteBatcher.Draw(this.Texture, -this.Pivot + new Vector2(sizeBL.X, this.Size.Y - sizeBL.Y), sizeBottom, new Vector2(uvTL.X, uvBR.Y), new Vector2(uvBR.X, 1f), in worldMatrix, this.Color, depth);
+            spriteBatcher.Draw(this.Shader, this.Texture, -this.Pivot + new Vector2(sizeBL.X, this.Size.Y - sizeBL.Y), sizeBottom, new Vector2(uvTL.X, uvBR.Y), new Vector2(uvBR.X, 1f), in worldMatrix, this.Color, depth);
             // Lateral Left
-            spriteBatcher.Draw(this.Texture, -this.Pivot + new Vector2(0f, sizeTL.Y), sizeLeft, new Vector2(0f, uvTL.Y), new Vector2(uvTL.X, uvBR.Y), in worldMatrix, this.Color, depth);
+            spriteBatcher.Draw(this.Shader, this.Texture, -this.Pivot + new Vector2(0f, sizeTL.Y), sizeLeft, new Vector2(0f, uvTL.Y), new Vector2(uvTL.X, uvBR.Y), in worldMatrix, this.Color, depth);
             // Lateral Right
-            spriteBatcher.Draw(this.Texture, -this.Pivot + new Vector2(this.Size.X - sizeTR.X, sizeTR.Y), sizeRight, new Vector2(uvBR.X, uvTL.Y), new Vector2(1f, uvBR.Y), in worldMatrix, this.Color, depth);
+            spriteBatcher.Draw(this.Shader, this.Texture, -this.Pivot + new Vector2(this.Size.X - sizeTR.X, sizeTR.Y), sizeRight, new Vector2(uvBR.X, uvTL.Y), new Vector2(1f, uvBR.Y), in worldMatrix, this.Color, depth);
         }
     }
 }

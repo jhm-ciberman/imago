@@ -18,7 +18,7 @@ namespace LifeSim.Engine.Rendering
 
         public IPipelineProvider Pass { get; private set; }
 
-        internal Shader(IPipelineProvider pass, string vertexCode, string fragmentCode, ResourceLayout? materialResourceLayout = null)
+        public Shader(IPipelineProvider pass, string vertexCode, string fragmentCode, ResourceLayout? materialResourceLayout = null)
         {
             this.Id = ++Shader._count;
 

@@ -8,6 +8,8 @@ namespace LifeSim.Engine.Rendering
 {
     public class SpritesPass : IDisposable, IPipelineProvider
     {
+        public static SpritesPass Instance { get; protected set; } = null!;
+
         private readonly DeviceBuffer _camera2DInfoBuffer;
         private readonly ResourceSet _passResourceSet;
         private readonly IRenderTexture _renderTexture;
@@ -17,10 +19,13 @@ namespace LifeSim.Engine.Rendering
         private Shader? _currentShader;
         private readonly VertexFormat _vertexFormat;
         private readonly Dictionary<(Shader, Texture), ResourceSet> _resourceSets = new Dictionary<(Shader, Texture), ResourceSet>();
-        public readonly Shader Shader;
+        public readonly Shader DefaultShader;
+
+        private readonly ResourceLayout _resourceLayout;
 
         public SpritesPass(GraphicsDevice gd, IRenderTexture renderTexture)
         {
+            Instance = this;
             this._gd = gd;
             var factory = gd.ResourceFactory;
 
@@ -34,20 +39,27 @@ namespace LifeSim.Engine.Rendering
                 new VertexElementDescription("Color", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Byte4_Norm)
             ));
 
-            var materialResourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
+            this._resourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
                 new ResourceLayoutElementDescription("MainTexture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
                 new ResourceLayoutElementDescription("MainSampler", ResourceKind.Sampler, ShaderStages.Fragment)
             ));
 
             var vertex = ShaderSource.Load("sprites.vert.glsl");
             var fragment = ShaderSource.Load("sprites.frag.glsl");
-            this.Shader = new Shader(this, vertex, fragment, materialResourceLayout);
+            this.DefaultShader = new Shader(this, vertex, fragment, this._resourceLayout);
 
             this._camera2DInfoBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
             this._passResourceSet = factory.CreateResourceSet(new ResourceSetDescription(this._passResourceLayout, this._camera2DInfoBuffer));
 
             this._renderTexture = renderTexture;
+        }
+
+        public Shader MakeShader(string vertexFile, string fragmentFile)
+        {
+            var vertex = ShaderSource.Load(vertexFile);
+            var fragment = ShaderSource.Load(fragmentFile);
+            return new Shader(this, vertex, fragment, this._resourceLayout);
         }
 
         public void Dispose()
