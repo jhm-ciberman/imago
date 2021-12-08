@@ -6,12 +6,8 @@ using LifeSim.Engine.Rendering;
 
 namespace LifeSim.Engine.SceneGraph
 {
-    public class Node3D
+    public class Node3D : IDisposable
     {
-        public event Action<Node3D>? OnTransformDirty;
-        public event Action<Node3D>? OnNodeAdded;
-        public event Action<Node3D>? OnNodeRemoved;
-
         public string Name { get; set; } = string.Empty;
         public Node3D? Parent { get; private set; } = null;
 
@@ -61,6 +57,8 @@ namespace LifeSim.Engine.SceneGraph
             }
         }
 
+        public Scene? Scene { get; protected set; } = null;
+
         private Matrix4x4 _localMatrix = Matrix4x4.Identity;
 
         protected Matrix4x4 _worldMatrix = Matrix4x4.Identity;
@@ -87,7 +85,8 @@ namespace LifeSim.Engine.SceneGraph
                 }
                 this._children.Add(node);
                 node.Parent = this;
-                this.OnNodeAdded?.Invoke(node);
+                node.Scene = this.Scene;
+                this.Scene?.NotifyNodeAdded(node);
             }
         }
 
@@ -97,7 +96,8 @@ namespace LifeSim.Engine.SceneGraph
 
             this._children.Remove(node);
             node.Parent = null;
-            this.OnNodeRemoved?.Invoke(node);
+            node.Scene = null;
+            this.Scene?.NotifyNodeRemoved(node);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -106,7 +106,7 @@ namespace LifeSim.Engine.SceneGraph
             if (this._transformIsDirty) return;
             this._transformIsDirty = true;
 
-            this.OnTransformDirty?.Invoke(this);
+            this.Scene?.NotifyTransformDirty(this);
         }
 
         public ref Matrix4x4 GetLocalMatrix()
@@ -218,6 +218,14 @@ namespace LifeSim.Engine.SceneGraph
                 }
             }
             return currentIndex < arrayPaths.Length ? null : currentNode;
+        }
+
+        public virtual void Dispose()
+        {
+            foreach (var child in this.Children)
+            {
+                child.Dispose();
+            }
         }
     }
 }

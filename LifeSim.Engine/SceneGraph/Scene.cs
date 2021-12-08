@@ -6,7 +6,7 @@ using LifeSim.Engine.SceneGraph;
 
 namespace LifeSim.Engine.SceneGraph
 {
-    public abstract class Scene
+    public abstract class Scene : Node3D
     {
         public App App { get; }
 
@@ -48,23 +48,12 @@ namespace LifeSim.Engine.SceneGraph
 
         public IReadOnlyList<Renderable> ShadowmapQueue => this._shadowmapReadWriteQueue;
 
-        private readonly Node3D _root = new Node3D();
+
 
         public Scene(App app)
         {
             this.App = app;
-            this._root.OnNodeAdded += this._OnNodeAddedEvent;
-            this._root.OnNodeRemoved += this._OnNodeRemovedEvent;
-        }
-
-        public void Add(Node3D node)
-        {
-            this._root.Add(node);
-        }
-
-        public void Remove(Node3D node)
-        {
-            this._root.Remove(node);
+            this.Scene = this;
         }
 
         public void AddParticleSystem(ParticleSystem particleSystem)
@@ -103,10 +92,6 @@ namespace LifeSim.Engine.SceneGraph
 
         private void _SubscribeRecursively(Node3D node)
         {
-            node.OnTransformDirty += this._OnTransformDirtyEvent;
-            node.OnNodeAdded += this._OnNodeAddedEvent;
-            node.OnNodeRemoved += this._OnNodeRemovedEvent;
-
             if (node is RenderNode3D renderNode)
             {
                 if (renderNode.Renderable != null)
@@ -125,10 +110,6 @@ namespace LifeSim.Engine.SceneGraph
 
         private void _UnsubscribeRecursively(Node3D node)
         {
-            node.OnTransformDirty -= this._OnTransformDirtyEvent;
-            node.OnNodeAdded -= this._OnNodeAddedEvent;
-            node.OnNodeRemoved -= this._OnNodeRemovedEvent;
-
             if (node is RenderNode3D renderNode)
             {
                 if (renderNode.Renderable != null)
@@ -145,18 +126,6 @@ namespace LifeSim.Engine.SceneGraph
             }
         }
 
-        private void _OnNodeRemovedEvent(Node3D node)
-        {
-            this._transformDirtyList.Remove(node);
-            this._UnsubscribeRecursively(node);
-        }
-
-        private void _OnNodeAddedEvent(Node3D node)
-        {
-            this._transformDirtyList.Add(node);
-            this._SubscribeRecursively(node);
-        }
-
         private void _OnRenderableRemovedEvent(Node3D sender, Renderable renderable)
         {
             this.RemoveRenderable(renderable);
@@ -165,11 +134,6 @@ namespace LifeSim.Engine.SceneGraph
         private void _OnRenderableAddedEvent(Node3D sender, Renderable renderable)
         {
             this.AddRenderable(renderable);
-        }
-
-        internal void _OnTransformDirtyEvent(Node3D node)
-        {
-            this._transformDirtyList.Add(node);
         }
 
         public void AddRenderable(Renderable renderable)
@@ -254,6 +218,23 @@ namespace LifeSim.Engine.SceneGraph
                 if (node.Parent == null) return topDirty;
                 node = node.Parent;
             }
+        }
+
+        internal void NotifyNodeAdded(Node3D node)
+        {
+            this._transformDirtyList.Add(node);
+            this._SubscribeRecursively(node);
+        }
+
+        internal void NotifyNodeRemoved(Node3D node)
+        {
+            this._transformDirtyList.Remove(node);
+            this._UnsubscribeRecursively(node);
+        }
+
+        internal void NotifyTransformDirty(Node3D node)
+        {
+            this._transformDirtyList.Add(node);
         }
 
     }
