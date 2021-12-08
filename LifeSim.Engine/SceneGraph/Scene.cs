@@ -89,60 +89,13 @@ namespace LifeSim.Engine.SceneGraph
 
         public abstract void Update(float deltaTime);
 
-
-        private void _SubscribeRecursively(Node3D node)
-        {
-            if (node is RenderNode3D renderNode)
-            {
-                if (renderNode.Renderable != null)
-                {
-                    this.AddRenderable(renderNode.Renderable);
-                }
-                renderNode.OnRenderableAdded += this._OnRenderableAddedEvent;
-                renderNode.OnRenderableRemoved += this._OnRenderableRemovedEvent;
-            }
-
-            for (int i = 0; i < node.Children.Count; i++)
-            {
-                this._SubscribeRecursively(node.Children[i]);
-            }
-        }
-
-        private void _UnsubscribeRecursively(Node3D node)
-        {
-            if (node is RenderNode3D renderNode)
-            {
-                if (renderNode.Renderable != null)
-                {
-                    this.RemoveRenderable(renderNode.Renderable);
-                }
-                renderNode.OnRenderableAdded -= this._OnRenderableAddedEvent;
-                renderNode.OnRenderableRemoved -= this._OnRenderableRemovedEvent;
-            }
-
-            for (int i = 0; i < node.Children.Count; i++)
-            {
-                this._UnsubscribeRecursively(node.Children[i]);
-            }
-        }
-
-        private void _OnRenderableRemovedEvent(Node3D sender, Renderable renderable)
-        {
-            this.RemoveRenderable(renderable);
-        }
-
-        private void _OnRenderableAddedEvent(Node3D sender, Renderable renderable)
-        {
-            this.AddRenderable(renderable);
-        }
-
-        public void AddRenderable(Renderable renderable)
+        public void NotifyRenderableAdded(Renderable renderable)
         {
             renderable.RenderListIndex = this._renderables.Count;
             this._renderables.Add(renderable);
         }
 
-        public void RemoveRenderable(Renderable renderable)
+        public void NotifyRenderableRemoved(Renderable renderable)
         {
             this._renderables[this._renderables.Count - 1].RenderListIndex = renderable.RenderListIndex;
             this._renderables.RemoveAt(renderable.RenderListIndex);
@@ -223,13 +176,11 @@ namespace LifeSim.Engine.SceneGraph
         internal void NotifyNodeAdded(Node3D node)
         {
             this._transformDirtyList.Add(node);
-            this._SubscribeRecursively(node);
         }
 
         internal void NotifyNodeRemoved(Node3D node)
         {
             this._transformDirtyList.Remove(node);
-            this._UnsubscribeRecursively(node);
         }
 
         internal void NotifyTransformDirty(Node3D node)

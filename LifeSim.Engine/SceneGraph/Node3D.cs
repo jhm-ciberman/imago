@@ -23,11 +23,9 @@ namespace LifeSim.Engine.SceneGraph
             get => this._position;
             set
             {
-                if (this._position != value)
-                {
-                    this._position = value;
-                    this._NotifyTransformDirty();
-                }
+                if (this._position == value) return;
+                this._position = value;
+                this._NotifyTransformDirty();
             }
         }
 
@@ -36,11 +34,9 @@ namespace LifeSim.Engine.SceneGraph
             get => this._rotation;
             set
             {
-                if (this._rotation != value)
-                {
-                    this._rotation = value;
-                    this._NotifyTransformDirty();
-                }
+                if (this._rotation == value) return;
+                this._rotation = value;
+                this._NotifyTransformDirty();
             }
         }
 
@@ -49,11 +45,9 @@ namespace LifeSim.Engine.SceneGraph
             get => this._scale;
             set
             {
-                if (this._scale != value)
-                {
-                    this._scale = value;
-                    this._NotifyTransformDirty();
-                }
+                if (this._scale == value) return;
+                this._scale = value;
+                this._NotifyTransformDirty();
             }
         }
 
@@ -77,16 +71,23 @@ namespace LifeSim.Engine.SceneGraph
 
         public void Add(Node3D node)
         {
-            if (node.Parent != this && node != this)
+            // Prevent adding self as child
+            if (node.Parent == this || node == this) return;
+
+            // If node already has a parent, remove it from that parent
+            if (node.Parent != null)
             {
-                if (node.Parent != null)
-                {
-                    node.Parent.Remove(node);
-                }
-                this._children.Add(node);
-                node.Parent = this;
-                node.Scene = this.Scene;
-                this.Scene?.NotifyNodeAdded(node);
+                node.Parent.Remove(node);
+            }
+
+            // Set node's parent to this
+            this._children.Add(node);
+            node.Parent = this;
+
+            // If the current node has a scene, add the node to the scene
+            if (this.Scene != null)
+            {
+                node._AttachToSceneRecursive(this.Scene);
             }
         }
 
@@ -96,16 +97,41 @@ namespace LifeSim.Engine.SceneGraph
 
             this._children.Remove(node);
             node.Parent = null;
-            node.Scene = null;
-            this.Scene?.NotifyNodeRemoved(node);
+            if (node.Scene != null)
+            {
+                node._DetachFromSceneRecursive();
+            }
+        }
+
+        protected virtual void _AttachToSceneRecursive(Scene scene)
+        {
+            if (this.Scene != null) return;
+
+            this.Scene = scene;
+            this.Scene.NotifyNodeAdded(this);
+            foreach (var child in this._children)
+            {
+                child._AttachToSceneRecursive(scene);
+            }
+        }
+
+        protected virtual void _DetachFromSceneRecursive()
+        {
+            if (this.Scene == null) return;
+
+            this.Scene.NotifyNodeRemoved(this);
+            foreach (var child in this._children)
+            {
+                child._DetachFromSceneRecursive();
+            }
+            this.Scene = null;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected void _NotifyTransformDirty()
+        private void _NotifyTransformDirty()
         {
             if (this._transformIsDirty) return;
             this._transformIsDirty = true;
-
             this.Scene?.NotifyTransformDirty(this);
         }
 

@@ -6,9 +6,6 @@ namespace LifeSim.Engine.SceneGraph
 {
     public class RenderNode3D : Node3D
     {
-        public event Action<Node3D, Renderable>? OnRenderableAdded;
-        public event Action<Node3D, Renderable>? OnRenderableRemoved;
-
         private Renderable? _renderable = null;
         public Renderable? Renderable
         {
@@ -19,7 +16,7 @@ namespace LifeSim.Engine.SceneGraph
 
                 if (this._renderable != null)
                 {
-                    this.OnRenderableRemoved?.Invoke(this, this._renderable);
+                    this.Scene?.NotifyRenderableRemoved(this._renderable);
                 }
 
                 this._renderable = value;
@@ -30,7 +27,8 @@ namespace LifeSim.Engine.SceneGraph
                     {
                         this._renderable.SetTransform(ref this._worldMatrix);
                     }
-                    this.OnRenderableAdded?.Invoke(this, this._renderable);
+
+                    this.Scene?.NotifyRenderableAdded(this._renderable);
                 }
             }
         }
@@ -50,6 +48,26 @@ namespace LifeSim.Engine.SceneGraph
         public override Renderable? FirstRenderable()
         {
             return this.Renderable ?? base.FirstRenderable();
+        }
+
+        protected override void _AttachToSceneRecursive(Scene scene)
+        {
+            base._AttachToSceneRecursive(scene);
+
+            if (this.Renderable != null)
+            {
+                scene.NotifyRenderableAdded(this.Renderable);
+            }
+        }
+
+        protected override void _DetachFromSceneRecursive()
+        {
+            if (this.Renderable != null)
+            {
+                this.Scene?.NotifyRenderableRemoved(this.Renderable);
+            }
+
+            base._DetachFromSceneRecursive();
         }
     }
 }
