@@ -5,12 +5,7 @@ namespace LifeSim.Engine.Rendering
 {
     internal class SwapchainRenderTexture : IRenderTexture, ITexture
     {
-        private readonly Swapchain _swapchain;
-
-        public SwapchainRenderTexture(Swapchain swapchain)
-        {
-            this._swapchain = swapchain;
-        }
+        public event Action<IRenderTexture>? OnResized;
 
         public Framebuffer Framebuffer => this._swapchain.Framebuffer;
 
@@ -18,23 +13,28 @@ namespace LifeSim.Engine.Rendering
 
         public OutputDescription OutputDescription => this.Framebuffer.OutputDescription;
 
-        public int Width => (int)this.Framebuffer.Width;
+        public uint Width => this.Framebuffer.Width;
 
-        public int Height => (int)this.Framebuffer.Height;
+        public uint Height => this.Framebuffer.Height;
 
         public Sampler Sampler => Renderer.Instance.GraphicsDevice.LinearSampler;
 
-        public event Action<IRenderTexture>? OnResized;
+        private readonly Swapchain _swapchain;
 
-        public void Dispose()
+        public SwapchainRenderTexture(Swapchain swapchain)
         {
-            // 
+            this._swapchain = swapchain;
         }
 
         public void Resize(uint width, uint height)
         {
             this._swapchain.Resize(width, height);
             this.OnResized?.Invoke(this);
+        }
+
+        public void Dispose()
+        {
+            // Nothing because the swapchain is disposed when the window is closed.
         }
     }
 }

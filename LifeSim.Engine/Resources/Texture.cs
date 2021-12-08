@@ -27,16 +27,16 @@ namespace LifeSim.Engine.Rendering
 
         public static Texture FromImage(Image<Rgba32> image)
         {
-            var texture = new Texture(image.Width, image.Height);
+            var texture = new Texture((uint)image.Width, (uint)image.Height);
             texture.SetDataFromImage(image);
             return texture;
         }
 
         public Veldrid.Texture DeviceTexture { get; protected set; }
         public Sampler Sampler { get; private set; }
-        public int Width { get; protected set; }
-        public int Height { get; protected set; }
-        public int MipLevels { get; protected set; }
+        public uint Width { get; protected set; }
+        public uint Height { get; protected set; }
+        public uint MipLevels { get; protected set; }
 
         private readonly byte[] _data;
 
@@ -44,27 +44,27 @@ namespace LifeSim.Engine.Rendering
 
         protected readonly GraphicsDevice _gd;
 
-        public Texture(int width, int height, int mipLevels = 0)
+        public Texture(uint width, uint height, uint mipLevels = 0)
         {
             this._gd = Renderer.Instance.GraphicsDevice;
             this.Width = width;
             this.Height = height;
 
             this.MipLevels = (mipLevels == 0)
-                ? BitOperations.Log2((uint)Math.Min(width, height))
+                ? (uint)BitOperations.Log2(Math.Min(width, height))
                 : mipLevels;
 
             this._data = new byte[width * height * 4];
 
             this.DeviceTexture = this._gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(
-                (uint)this.Width, (uint)this.Height, (uint)this.MipLevels, 1,
+                this.Width, this.Height, this.MipLevels, 1,
                 PixelFormat.R8_G8_B8_A8_UNorm, TextureUsage.Sampled | TextureUsage.GenerateMipmaps
             ));
             this.Sampler = this._gd.PointSampler;
             Renderer.Instance.OnTextureDirty(this);
         }
 
-        protected Texture(int width, int height, Color fillColor)
+        protected Texture(uint width, uint height, Color fillColor)
             : this(width, height)
         {
             this.Fill(fillColor);
@@ -128,7 +128,7 @@ namespace LifeSim.Engine.Rendering
                 for (int row = 0; row < height; row++)
                 {
                     var src = new Span<byte>(data, row * width * 4, width * 4);
-                    var dest = new Span<byte>(this._data, (y + row) * this.Width * 4 + x * 4, width * 4);
+                    var dest = new Span<byte>(this._data, (int)((y + row) * this.Width * 4 + x * 4), width * 4);
                     src.CopyTo(dest);
                 }
             }

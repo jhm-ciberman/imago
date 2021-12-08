@@ -45,7 +45,7 @@ namespace LifeSim.Engine.Rendering
         private readonly List<Material> _dirtyMaterials = new List<Material>();
 
         private readonly ForwardPass _forwardPass;
-        private readonly ShadowmapPass _shadowmapPass;
+        private readonly ShadowPass _shadowPass;
         private readonly SpritesPass _spritesPass;
         private readonly ImGuiPass _imGuiPass;
         private readonly MousePickingPass _mousePickerPass;
@@ -54,7 +54,7 @@ namespace LifeSim.Engine.Rendering
         private readonly SpriteBatcher _spriteBatcher;
 
         public IPipelineProvider ForwardPass => this._forwardPass;
-        public IPipelineProvider ShadowMapPass => this._shadowmapPass;
+        public IPipelineProvider ShadowMapPass => this._shadowPass;
 
         internal SceneStorage Storage { get; }
         public uint MousePickerObjectID => this._mousePickerPass.ObjectID;
@@ -96,8 +96,8 @@ namespace LifeSim.Engine.Rendering
             this._fullScreenPass = new FullScreenPass(gd, this.MainRenderTexture, this.FullScreenRenderTexture);
 
             this._commandList = this._factory.CreateCommandList();
-            this._shadowmapPass = new ShadowmapPass(gd, this.Storage);
-            this._forwardPass = new ForwardPass(gd, this.Storage, this.MainRenderTexture, this._shadowmapPass.ShadowmapTexture);
+            this._shadowPass = new ShadowPass(gd, this.Storage);
+            this._forwardPass = new ForwardPass(gd, this.Storage, this.MainRenderTexture, this._shadowPass.ShadowmapTexture.DeviceTexture);
             this._spritesPass = new SpritesPass(gd, this.MainRenderTexture);
 
             this._spriteBatcher = new SpriteBatcher(gd, this._spritesPass.Shader);
@@ -137,6 +137,8 @@ namespace LifeSim.Engine.Rendering
             }
         }
 
+        public ITexture ShadowMapTexture => this._shadowPass.ShadowmapTexture;
+
         public void Render(Scene scene, float deltaTime, InputSnapshot inputSnapshot)
         {
             this._mousePickerPass.SetMousePosition(inputSnapshot.MousePosition);
@@ -158,7 +160,7 @@ namespace LifeSim.Engine.Rendering
                 var camera = scene.Camera;
                 if (scene.ForwardQueue.Count > 0)
                 {
-                    this._shadowmapPass.Render(this._commandList, scene.ShadowmapQueue, camera, scene.MainLight);
+                    this._shadowPass.Render(this._commandList, scene.ShadowmapQueue, camera, scene.MainLight);
                     this._forwardPass.Render(this._commandList, scene.ForwardQueue, camera, scene.MainLight, scene.AmbientColor);
                 }
 
@@ -258,7 +260,7 @@ namespace LifeSim.Engine.Rendering
 
         object ITexture2DManager.CreateTexture(int width, int height)
         {
-            return new Texture(width, height);
+            return new Texture((uint)width, (uint)height);
         }
 
         void ITexture2DManager.SetTextureData(object texture, System.Drawing.Rectangle bounds, byte[] data)

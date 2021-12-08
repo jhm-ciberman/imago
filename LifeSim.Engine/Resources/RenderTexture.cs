@@ -5,25 +5,38 @@ namespace LifeSim.Engine.Rendering
 {
     public class RenderTexture : IRenderTexture
     {
-        private readonly Veldrid.ResourceFactory _factory;
-        private Framebuffer _framebuffer;
-        private Veldrid.Texture _colorTexture;
-
         public event Action<IRenderTexture>? OnResized;
 
-        public RenderTexture(GraphicsDevice graphicsDevice, uint width, uint height)
+        public Framebuffer Framebuffer { get; private set; }
+
+        public Veldrid.Texture DeviceTexture { get; private set; }
+
+        public Veldrid.Texture DepthTexture { get; private set; }
+
+        public Veldrid.Texture PickingTexture { get; private set; }
+
+        public OutputDescription OutputDescription => this.Framebuffer.OutputDescription;
+
+        public uint Width => this.Framebuffer.Width;
+        public uint Height => this.Framebuffer.Height;
+
+        public Sampler Sampler { get; private set; }
+
+        private readonly GraphicsDevice _gd;
+
+        public RenderTexture(GraphicsDevice gd, uint width, uint height)
         {
-            this._factory = graphicsDevice.ResourceFactory;
+            this._gd = gd;
             this.DepthTexture = this._CreateDepthTexture(width, height);
-            this._colorTexture = this._CreateColorTexture(width, height);
+            this.DeviceTexture = this._CreateColorTexture(width, height);
             this.PickingTexture = this._CreatePickingIDTexture(width, height);
-            this._framebuffer = this._CreateFramebuffer();
-            this.Sampler = graphicsDevice.LinearSampler;
+            this.Framebuffer = this._CreateFramebuffer();
+            this.Sampler = gd.LinearSampler;
         }
 
         private Veldrid.Texture _CreateDepthTexture(uint width, uint height)
         {
-            return this._factory.CreateTexture(new TextureDescription(
+            return this._gd.ResourceFactory.CreateTexture(new TextureDescription(
                 width, height, depth: 1, mipLevels: 1, arrayLayers: 1,
                 PixelFormat.D32_Float_S8_UInt,
                 TextureUsage.DepthStencil | TextureUsage.Sampled,
@@ -33,7 +46,7 @@ namespace LifeSim.Engine.Rendering
 
         private Veldrid.Texture _CreateColorTexture(uint width, uint height)
         {
-            return this._factory.CreateTexture(new TextureDescription(
+            return this._gd.ResourceFactory.CreateTexture(new TextureDescription(
                 width, height, depth: 1, mipLevels: 1, arrayLayers: 1,
                 PixelFormat.R8_G8_B8_A8_UNorm,
                 TextureUsage.RenderTarget | TextureUsage.Sampled,
@@ -43,7 +56,7 @@ namespace LifeSim.Engine.Rendering
 
         private Veldrid.Texture _CreatePickingIDTexture(uint width, uint height)
         {
-            return this._factory.CreateTexture(new TextureDescription(
+            return this._gd.ResourceFactory.CreateTexture(new TextureDescription(
                 width, height, depth: 1, mipLevels: 1, arrayLayers: 1,
                 PixelFormat.R32_UInt,
                 TextureUsage.RenderTarget | TextureUsage.Sampled,
@@ -53,42 +66,30 @@ namespace LifeSim.Engine.Rendering
 
         private Framebuffer _CreateFramebuffer()
         {
-            return this._factory.CreateFramebuffer(new FramebufferDescription(
-                this.DepthTexture, this._colorTexture, this.PickingTexture
+            return this._gd.ResourceFactory.CreateFramebuffer(new FramebufferDescription(
+                this.DepthTexture, this.DeviceTexture, this.PickingTexture
             ));
-        }
-
-        public Framebuffer Framebuffer => this._framebuffer;
-
-        public Veldrid.Texture DeviceTexture => this._colorTexture;
-
-        public Veldrid.Texture DepthTexture { get; private set; }
-
-        public Veldrid.Texture PickingTexture { get; private set; }
-
-        public OutputDescription OutputDescription => this._framebuffer.OutputDescription;
-
-        public int Width => (int)this.Framebuffer.Width;
-        public int Height => (int)this.Framebuffer.Height;
-
-        public Sampler Sampler { get; private set; }
-
-        public void Dispose()
-        {
-            this.DepthTexture?.Dispose();
-            this._colorTexture?.Dispose();
-            this.PickingTexture?.Dispose();
-            this._framebuffer?.Dispose();
         }
 
         public void Resize(uint width, uint height)
         {
-            this.Dispose();
+            this._gd.DisposeWhenIdle(this.DepthTexture);
+            this._gd.DisposeWhenIdle(this.DeviceTexture);
+            this._gd.DisposeWhenIdle(this.PickingTexture);
+            this._gd.DisposeWhenIdle(this.Framebuffer);
             this.DepthTexture = this._CreateDepthTexture(width, height);
-            this._colorTexture = this._CreateColorTexture(width, height);
+            this.DeviceTexture = this._CreateColorTexture(width, height);
             this.PickingTexture = this._CreatePickingIDTexture(width, height);
-            this._framebuffer = this._CreateFramebuffer();
+            this.Framebuffer = this._CreateFramebuffer();
             this.OnResized?.Invoke(this);
+        }
+
+        public void Dispose()
+        {
+            this.DepthTexture?.Dispose();
+            this.DeviceTexture?.Dispose();
+            this.PickingTexture?.Dispose();
+            this.Framebuffer?.Dispose();
         }
     }
 }
