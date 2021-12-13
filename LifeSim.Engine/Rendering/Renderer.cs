@@ -72,7 +72,7 @@ namespace LifeSim.Engine.Rendering
             GraphicsDeviceOptions options = new GraphicsDeviceOptions(
                 debug: false,
                 swapchainDepthFormat: PixelFormat.R16_UNorm,
-                syncToVerticalBlank: false,
+                syncToVerticalBlank: true,
                 resourceBindingModel: ResourceBindingModel.Default,
                 preferDepthRangeZeroToOne: true,
                 preferStandardClipSpaceYDirection: true,
@@ -144,7 +144,11 @@ namespace LifeSim.Engine.Rendering
             this._mousePickerPass.SetMousePosition(inputSnapshot.MousePosition);
             this._imGuiPass.Update(deltaTime, inputSnapshot);
 
+            scene.OnBeforeRender(this);
+
             this._commandList.Begin();
+
+
 
             this.UpdateDirtyMaterials();
             this.UpdateDirtyTextures();
@@ -154,6 +158,8 @@ namespace LifeSim.Engine.Rendering
             this._commandList.ClearColorTarget(0, new RgbaFloat(scene.ClearColor.R, scene.ClearColor.G, scene.ClearColor.B, scene.ClearColor.A));
             this._commandList.ClearColorTarget(1, RgbaFloat.Black);
             this._commandList.ClearDepthStencil(1f);
+
+
 
             if (scene.Camera != null)
             {
@@ -193,7 +199,7 @@ namespace LifeSim.Engine.Rendering
                 this._spritesPass.SubmitBatches(this._commandList, this._spriteBatcher.IndexBuffer, this._spriteBatcher.Batches);
             }
 
-            scene.RenderFrame(this);
+
             scene.RenderImGui();
 
             this._imGuiPass.Render(this._commandList);

@@ -77,7 +77,7 @@ namespace LifeSim.Engine.Rendering
 
             CameraInfo cameraInfo = new CameraInfo();
             cameraInfo.ViewProjectionMatrix = camera.ViewProjectionMatrix;
-            cameraInfo.ShadowMapMatrix = mainLight.GetShadowMapMatrix(camera.Position) * this._shadowMapScaling;
+            cameraInfo.ShadowMapMatrix = mainLight.GetShadowMapMatrix(camera) * this._shadowMapScaling;
 
             LightInfo lightInfo = new LightInfo();
             lightInfo.AmbientColor = ambientColor;

@@ -84,7 +84,7 @@ namespace LifeSim.Engine.SceneGraph
             }
         }
 
-        private float _farPlane = 1000f;
+        private float _farPlane = 200f;
         public float FarPlane
         {
             get => this._farPlane;
@@ -153,6 +153,7 @@ namespace LifeSim.Engine.SceneGraph
             {
                 if (this._viewMatrixIsDirty)
                 {
+                    var light = DirectionalLight.Singleton;
                     Vector3 forward = Vector3.Transform(Vector3.UnitZ, this._rotation);
                     Vector3 up = Vector3.Transform(Vector3.UnitY, this._rotation);
                     this._viewMatrix = Matrix4x4.CreateLookAt(this.Position, this.Position + forward, up);

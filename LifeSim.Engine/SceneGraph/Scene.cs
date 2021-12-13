@@ -77,7 +77,7 @@ namespace LifeSim.Engine.SceneGraph
         }
 
 
-        public virtual void RenderFrame(Renderer renderer)
+        public virtual void OnBeforeRender(Renderer renderer)
         {
             // 
         }
@@ -148,7 +148,7 @@ namespace LifeSim.Engine.SceneGraph
             var camera = this.Camera;
             if (camera == null) return;
 
-            var matrix = this.MainLight.GetShadowMapMatrix(camera.Position);
+            var matrix = this.MainLight.GetShadowMapMatrix(camera);
             var frustum = new Veldrid.Utilities.BoundingFrustum(matrix);
             this._shadowmapReadWriteQueue.CameraPosition = camera.Position;
             this._shadowmapReadWriteQueue.AddToRenderQueue(this.Renderables, ref frustum);

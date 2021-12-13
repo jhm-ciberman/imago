@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using LifeSim.Engine.Rendering;
+using Veldrid.Utilities;
 
 namespace LifeSim.Engine.SceneGraph
 {
@@ -55,6 +56,32 @@ namespace LifeSim.Engine.SceneGraph
                 LifeTime = lifeTime,
                 DrawInFront = drawInFront
             });
+        }
+
+        /// <summary>
+        /// Draws a frustum with the given color.
+        /// </summary>
+        /// <param name="frustum">The frustum to draw.</param>
+        /// <param name="color">The color of the frustum.</param>
+        /// <param name="lifeTime">The amount of time the frustum will be drawn. A value of 0 means that the frustum will be drawn until the next frame.</param>
+        /// <param name="drawInFront">Whether the frustum should be drawn in front other objects or using depth.</param>
+        public void DrawFrustum(ref BoundingFrustum frustum, Color color, float lifeTime = 0, bool drawInFront = false)
+        {
+            var corners = frustum.GetCorners();
+            this.DrawLine(corners.FarBottomLeft, corners.FarBottomRight, color, lifeTime, drawInFront);
+            this.DrawLine(corners.FarBottomRight, corners.FarTopRight, color, lifeTime, drawInFront);
+            this.DrawLine(corners.FarTopRight, corners.FarTopLeft, color, lifeTime, drawInFront);
+            this.DrawLine(corners.FarTopLeft, corners.FarBottomLeft, color, lifeTime, drawInFront);
+
+            this.DrawLine(corners.NearBottomLeft, corners.NearBottomRight, color, lifeTime, drawInFront);
+            this.DrawLine(corners.NearBottomRight, corners.NearTopRight, color, lifeTime, drawInFront);
+            this.DrawLine(corners.NearTopRight, corners.NearTopLeft, color, lifeTime, drawInFront);
+            this.DrawLine(corners.NearTopLeft, corners.NearBottomLeft, color, lifeTime, drawInFront);
+
+            this.DrawLine(corners.NearBottomLeft, corners.FarBottomLeft, color, lifeTime, drawInFront);
+            this.DrawLine(corners.NearBottomRight, corners.FarBottomRight, color, lifeTime, drawInFront);
+            this.DrawLine(corners.NearTopRight, corners.FarTopRight, color, lifeTime, drawInFront);
+            this.DrawLine(corners.NearTopLeft, corners.FarTopLeft, color, lifeTime, drawInFront);
         }
 
         /// <summary>

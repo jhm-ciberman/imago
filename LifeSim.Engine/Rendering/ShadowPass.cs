@@ -42,7 +42,7 @@ namespace LifeSim.Engine.Rendering
 
         public void Render(CommandList commandList, IReadOnlyList<Renderable> renderQueue, ICamera camera, DirectionalLight mainLight)
         {
-            var shadowmapMatrix = mainLight.GetShadowMapMatrix(camera.Position);
+            var shadowmapMatrix = mainLight.GetShadowMapMatrix(camera);
             commandList.SetFramebuffer(this.ShadowmapTexture.Framebuffer);
             commandList.ClearDepthStencil(1f);
             commandList.UpdateBuffer(this._shadowmapInfoBuffer, 0, ref shadowmapMatrix);
