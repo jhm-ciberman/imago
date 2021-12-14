@@ -42,7 +42,7 @@ namespace LifeSim.Engine.Rendering
                     macros.Add(new MacroDefinition("D3D11"));
                     break;
                 case GraphicsBackend.Vulkan:
-                    macros.Add(new MacroDefinition("VULKAN"));
+                    //macros.Add(new MacroDefinition("VULKAN"));
                     break;
                 case GraphicsBackend.OpenGL:
                     macros.Add(new MacroDefinition("OPENGL"));

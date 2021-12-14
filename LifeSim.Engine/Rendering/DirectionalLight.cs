@@ -44,25 +44,24 @@ namespace LifeSim.Engine.Rendering
             frustumCornersLS[6] = Vector3.Transform(corners.NearTopLeft, lightViewMatrix);
             frustumCornersLS[7] = Vector3.Transform(corners.NearTopRight, lightViewMatrix);
 
+            Vector3 mainCameraCenter = (corners.FarBottomLeft + corners.FarBottomRight + corners.FarTopLeft + corners.FarTopRight
+                + corners.NearBottomLeft + corners.NearBottomRight + corners.NearTopLeft + corners.NearTopRight) / 8;
+
+            float shadowCameraDistance = mainCamera.FarPlane - mainCamera.NearPlane;
+
             Vector3 min = frustumCornersLS[0], max = frustumCornersLS[0];
             for (int i = 1; i < 8; i++)
             {
                 min = Vector3.Min(min, frustumCornersLS[i]);
                 max = Vector3.Max(max, frustumCornersLS[i]);
             }
-            Vector3 center = (min + max) / 2;
-            Vector3 shadowCameraPos = Vector3.Transform(center, lightViewMatrixInverse);
-            float size = Vector3.Distance(min, max);
-            float shadowCameraDistance = mainCamera.FarPlane - mainCamera.NearPlane;
 
-            GizmosLayer.Default.DrawLine(Vector3.Zero, shadowCameraPos, LifeSim.Color.Red);
+            Vector3 shadowCameraPos = new Vector3((max.X + min.X) / 2f, (max.Y + min.Y) / 2f, max.Z);
+            shadowCameraPos = Vector3.Transform(shadowCameraPos, lightViewMatrixInverse);
 
-            float nearPadding = 10f;
-            return Matrix4x4.CreateLookAt(shadowCameraPos + Vector3.Normalize(this.Direction) * shadowCameraDistance, shadowCameraPos, Vector3.UnitY)
-                * Matrix4x4.CreateOrthographic(size, size, nearPadding, shadowCameraDistance + shadowCameraDistance * 0.5f);
+            return Matrix4x4.CreateLookAt(shadowCameraPos, shadowCameraPos - Vector3.Normalize(this.Direction), Vector3.UnitY)
+                 * Matrix4x4.CreateOrthographic(max.X - min.X, max.Y - min.Y, 0, max.Z - min.Z);
         }
     }
 
-    //        var frustum = new BoundingFrustum(lightViewMatrix);
-    //        GizmosLayer.Default.DrawFrustum(ref frustum, LifeSim.Color.Magenta);
 }
