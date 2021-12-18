@@ -1,33 +1,40 @@
 using System;
 using System.Numerics;
-using LifeSim.Engine.SceneGraph;
 using Veldrid.Utilities;
 
 namespace LifeSim.Engine.Rendering
 {
     public class DirectionalLight
     {
-        public static DirectionalLight? Singleton { get; set; }
-
         public DirectionalLight()
         {
-            //Singleton = this;
+
         }
 
 
-
+        private bool _newMode = false;
         public Vector3 Direction { get; set; } = new Vector3(100, 200, 100);
         public ColorF Color { get; set; } = ColorF.White;
-        public float ShadowsDistance { get; set; } = 30f;
+        public float ShadowsDistance { get; set; } = 200f;
 
-        //public Matrix4x4 GetShadowMapMatrix(ICamera mainCamera)
-        //{
-        //    return Matrix4x4.CreateLookAt(mainCamera.Position + this.Direction, mainCamera.Position, Vector3.UnitY)
-        //        * Matrix4x4.CreateOrthographic(20, 20, 0.1f, this.ShadowsDistance);
-        //}
+        public Matrix4x4 GetShadowMapMatrixOldMode(ICamera mainCamera)
+        {
+            return Matrix4x4.CreateLookAt(mainCamera.Position + this.Direction, mainCamera.Position, Vector3.UnitY)
+                * Matrix4x4.CreateOrthographic(30, 30, 0.1f, 200f);
+        }
 
         public Matrix4x4 GetShadowMapMatrix(ICamera mainCamera)
         {
+            if (Input.GetKeyDown(Veldrid.Key.F))
+            {
+                this._newMode = !this._newMode;
+            }
+
+            if (!this._newMode)
+            {
+                return this.GetShadowMapMatrixOldMode(mainCamera);
+            }
+
             Matrix4x4 lightViewMatrix = Matrix4x4.CreateLookAt(Vector3.Normalize(this.Direction), Vector3.Zero, Vector3.UnitY);
             Matrix4x4.Invert(lightViewMatrix, out Matrix4x4 lightViewMatrixInverse);
 

@@ -72,7 +72,7 @@ namespace LifeSim.Engine.Rendering
             GraphicsDeviceOptions options = new GraphicsDeviceOptions(
                 debug: false,
                 swapchainDepthFormat: PixelFormat.R16_UNorm,
-                syncToVerticalBlank: true,
+                syncToVerticalBlank: false,
                 resourceBindingModel: ResourceBindingModel.Default,
                 preferDepthRangeZeroToOne: true,
                 preferStandardClipSpaceYDirection: true,
