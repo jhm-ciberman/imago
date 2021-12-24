@@ -52,7 +52,7 @@ namespace LifeSim.Engine.Rendering
 
             var shadowMapSampler = factory.CreateSampler(new SamplerDescription (
                 SamplerAddressMode.Border, SamplerAddressMode.Border, SamplerAddressMode.Border,
-                SamplerFilter.MinLinear_MagLinear_MipPoint, null, 0, 0, 0, 0, SamplerBorderColor.OpaqueWhite
+                SamplerFilter.MinPoint_MagPoint_MipPoint, null, 0, 0, 0, 0, SamplerBorderColor.OpaqueWhite
             ));
 
             this._resourceSet = factory.CreateResourceSet(new ResourceSetDescription(this._resourceLayout, this._camera3DInfoBuffer, this._lightInfoBuffer, shadowmapTexture, shadowMapSampler));

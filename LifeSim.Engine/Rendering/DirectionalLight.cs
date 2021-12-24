@@ -12,13 +12,11 @@ namespace LifeSim.Engine.Rendering
 
         }
 
-
-        private bool _newMode = false;
         public Vector3 Direction { get; set; } = new Vector3(100, 200, 100);
-        public ColorF Color { get; set; } = ColorF.White;
-        public float ShadowsDistance { get; set; } = 200f;
 
-        private bool _stabilizeCascades = false;
+        public ColorF Color { get; set; } = ColorF.White;
+
+        public float ShadowsDistance { get; set; } = 200f;
 
         public Matrix4x4 GetShadowMapMatrixOldMode(ICamera mainCamera)
         {
@@ -26,26 +24,25 @@ namespace LifeSim.Engine.Rendering
                 * Matrix4x4.CreateOrthographic(30, 30, 0.1f, 200f);
         }
 
-        public unsafe Matrix4x4 GetShadowMapMatrix(ICamera mainCamera)
+        public Matrix4x4 GetShadowMapMatrix(ICamera mainCamera)
         {
             if (Input.GetKeyDown(Veldrid.Key.F))
             {
-                this._newMode = !this._newMode;
+                //this._snap = !this._snap;
             }
-            if (!this._newMode)
-            {
-                return this.GetShadowMapMatrixOldMode(mainCamera);
-            }
-
-            if (Input.GetKeyDown(Veldrid.Key.G))
-            {
-                this._stabilizeCascades = !this._stabilizeCascades;
-            }
-
-
 
             BoundingFrustum mainCameraFrustum = new BoundingFrustum(mainCamera.ViewProjectionMatrix);
             FrustumCorners corners = mainCameraFrustum.GetCorners();
+
+            float sphereDiameter = MathF.Max(
+                Vector3.Distance(corners.FarBottomLeft, corners.FarTopRight),
+                Vector3.Distance(corners.NearBottomLeft, corners.FarTopRight)
+            );
+
+            sphereDiameter = MathF.Round(sphereDiameter * 16) / 16;
+
+            Matrix4x4 lightViewMatrix = Matrix4x4.CreateLookAt(Vector3.Normalize(this.Direction), Vector3.Zero, Vector3.UnitY);
+            Matrix4x4.Invert(lightViewMatrix, out Matrix4x4 lightViewMatrixInverse);
 
             Span<Vector3> frustumCornersWS = stackalloc Vector3[8];
             frustumCornersWS[0] = corners.FarBottomLeft;
@@ -57,54 +54,27 @@ namespace LifeSim.Engine.Rendering
             frustumCornersWS[6] = corners.NearTopLeft;
             frustumCornersWS[7] = corners.NearTopRight;
 
-            Vector3 frustumCenter = (corners.FarBottomLeft + corners.FarBottomRight + corners.FarTopLeft + corners.FarTopRight
-                + corners.NearBottomLeft + corners.NearBottomRight + corners.NearTopLeft + corners.NearTopRight) / 8;
-
-            float shadowCameraDistance = mainCamera.FarPlane - mainCamera.NearPlane;
-
-            Vector3 min, max;
-            if (this._stabilizeCascades)
+            Vector3 minLS = new Vector3(float.MaxValue);
+            Vector3 maxLS = new Vector3(float.MinValue);
+            for (int i = 1; i < 8; i++)
             {
-                float sphereRadius = 0;
-                for (int i = 0; i < 8; ++i)
-                {
-                    float dist = Vector3.Distance(frustumCornersWS[i], frustumCenter);
-                    sphereRadius = Math.Max(sphereRadius, dist);
-                }
-
-                sphereRadius = (float)Math.Ceiling(sphereRadius * 16) / 16;
-
-                max = new Vector3(sphereRadius, sphereRadius, sphereRadius);
-                min = -max;
-            }
-            else
-            {
-                Matrix4x4 lightViewMatrix = Matrix4x4.CreateLookAt(frustumCenter, frustumCenter - Vector3.Normalize(this.Direction), Vector3.UnitY);
-                Matrix4x4.Invert(lightViewMatrix, out Matrix4x4 lightViewMatrixInverse);
-
-                // Calculate the AABB of the frustum in light space
-                min = new Vector3(float.MaxValue);
-                max = new Vector3(float.MinValue);
-                for (int i = 0; i < 8; i++)
-                {
-                    Vector3 cornerLS = Vector3.Transform(frustumCornersWS[i], lightViewMatrix);
-                    min = Vector3.Min(min, cornerLS);
-                    max = Vector3.Max(max, cornerLS);
-                }
+                Vector3 frustumCornerLS = Vector3.Transform(frustumCornersWS[i], lightViewMatrix);
+                minLS = Vector3.Min(minLS, frustumCornerLS);
+                maxLS = Vector3.Max(maxLS, frustumCornerLS);
             }
 
-            Vector3 shadowCameraPos = frustumCenter - Vector3.Normalize(this.Direction) * min.Z;
+            float shadowMapSize = 2048f;
+            float f = sphereDiameter / shadowMapSize;
 
-            GizmosLayer.Default.DrawLine(frustumCenter, shadowCameraPos, LifeSim.Color.Red);
+            Vector3 centerLS = (minLS + maxLS) / 2f;
+            centerLS.X = MathF.Round(centerLS.X / f) * f;
+            centerLS.Y = MathF.Round(centerLS.Y / f) * f;
+            Vector3 centerWS = Vector3.Transform(centerLS, lightViewMatrixInverse);
 
-            var matrix = Matrix4x4.CreateLookAt(shadowCameraPos, frustumCenter, Vector3.UnitY)
-                 * Matrix4x4.CreateOrthographic(max.X - min.X, max.Y - min.Y, 0f, max.Z - min.Z);
+            lightViewMatrix = Matrix4x4.CreateLookAt(centerWS, centerWS - Vector3.Normalize(this.Direction), Vector3.UnitY);
 
-            var frustum = new BoundingFrustum(matrix);
-            GizmosLayer.Default.DrawFrustum(ref frustum, LifeSim.Color.Red);
-
-            return matrix;
+            Matrix4x4 lightProjectionMatrix = Matrix4x4.CreateOrthographic(sphereDiameter, sphereDiameter, minLS.Z, maxLS.Z);
+            return lightViewMatrix * lightProjectionMatrix;
         }
     }
-
 }

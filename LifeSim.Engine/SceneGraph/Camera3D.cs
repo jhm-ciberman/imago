@@ -84,7 +84,7 @@ namespace LifeSim.Engine.SceneGraph
             }
         }
 
-        private float _farPlane = 200f;
+        private float _farPlane = 300f;
         public float FarPlane
         {
             get => this._farPlane;
