@@ -97,7 +97,7 @@ namespace LifeSim.Engine.Rendering
 
             this._commandList = this._factory.CreateCommandList();
             this._shadowPass = new ShadowPass(gd, this.Storage);
-            this._forwardPass = new ForwardPass(gd, this.Storage, this.MainRenderTexture, this._shadowPass.ShadowmapTexture.DeviceTexture);
+            this._forwardPass = new ForwardPass(gd, this.Storage, this.MainRenderTexture, this._shadowPass);
             this._spritesPass = new SpritesPass(gd, this.MainRenderTexture);
 
             this._spriteBatcher = new SpriteBatcher(gd, this._spritesPass.DefaultShader);

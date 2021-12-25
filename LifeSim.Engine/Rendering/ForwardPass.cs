@@ -34,7 +34,7 @@ namespace LifeSim.Engine.Rendering
         private readonly IRenderTexture _renderTexture;
         private readonly SceneStorage _storage;
         private readonly RenderJob _renderJob;
-        public ForwardPass(GraphicsDevice gd, SceneStorage storage, IRenderTexture mainRenderTexture, Veldrid.Texture shadowmapTexture)
+        public ForwardPass(GraphicsDevice gd, SceneStorage storage, IRenderTexture mainRenderTexture, ShadowPass shadowPass)
         {
             this._gd = gd;
             var factory = gd.ResourceFactory;
@@ -55,7 +55,13 @@ namespace LifeSim.Engine.Rendering
                 SamplerFilter.MinPoint_MagPoint_MipPoint, null, 0, 0, 0, 0, SamplerBorderColor.OpaqueWhite
             ));
 
-            this._resourceSet = factory.CreateResourceSet(new ResourceSetDescription(this._resourceLayout, this._camera3DInfoBuffer, this._lightInfoBuffer, shadowmapTexture, shadowMapSampler));
+            this._resourceSet = factory.CreateResourceSet(new ResourceSetDescription(this._resourceLayout,
+                this._camera3DInfoBuffer,
+                this._lightInfoBuffer,
+                shadowPass.ShadowmapTexture.DeviceTexture,
+                shadowMapSampler
+            ));
+
             this._shadowMapScaling = (this._gd.IsUvOriginTopLeft)
                 ? Matrix4x4.CreateScale(.5f, -.5f, 1f) * Matrix4x4.CreateTranslation(0.5f, 0.5f, 0f)
                 : Matrix4x4.CreateScale(.5f, .5f, 1f) * Matrix4x4.CreateTranslation(0.5f, 0.5f, 0f);

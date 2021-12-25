@@ -15,7 +15,7 @@ namespace LifeSim.Engine.Rendering
 
         public ShaderVariant(GraphicsDevice gd, VertexFormat vertexFormat, ResourceLayout? materialResourceLayout, string vertexCode, string fragmentCode)
         {
-            bool debug = false;
+            bool debug = gd.BackendType == GraphicsBackend.OpenGL || gd.BackendType == GraphicsBackend.OpenGLES;
 #if DEBUG
             debug = true;
 #endif
