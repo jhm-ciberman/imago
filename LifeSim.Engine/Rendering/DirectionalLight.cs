@@ -26,10 +26,7 @@ namespace LifeSim.Engine.Rendering
 
         public Matrix4x4 GetShadowMapMatrix(ICamera mainCamera)
         {
-            if (Input.GetKeyDown(Veldrid.Key.F))
-            {
-                //this._snap = !this._snap;
-            }
+            return this.GetShadowMapMatrixOldMode(mainCamera);
 
             BoundingFrustum mainCameraFrustum = new BoundingFrustum(mainCamera.ViewProjectionMatrix);
             FrustumCorners corners = mainCameraFrustum.GetCorners();
