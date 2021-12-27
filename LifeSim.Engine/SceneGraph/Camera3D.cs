@@ -162,19 +162,7 @@ namespace LifeSim.Engine.SceneGraph
         }
 
 
-        private Matrix4x4 _viewProjectionMatrix;
-        public Matrix4x4 ViewProjectionMatrix
-        {
-            get
-            {
-                if (this._viewMatrixIsDirty || this._projectionMatrixIsDirty)
-                {
-                    this._viewProjectionMatrix = this.ViewMatrix * this.ProjectionMatrix;
-                }
-
-                return this._viewProjectionMatrix;
-            }
-        }
+        public Matrix4x4 ViewProjectionMatrix => this.ViewMatrix * this.ProjectionMatrix;
 
         public Vector3 Up => new Vector3(this.ViewMatrix.M12, this.ViewMatrix.M22, this.ViewMatrix.M32);
         public Vector3 Right => new Vector3(this.ViewMatrix.M11, this.ViewMatrix.M21, this.ViewMatrix.M31);
