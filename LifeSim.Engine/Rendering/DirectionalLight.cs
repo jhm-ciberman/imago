@@ -12,9 +12,11 @@ namespace LifeSim.Engine.Rendering
 
         }
 
-        public Vector3 Direction { get; set; } = new Vector3(100, 200, 100);
+        public Vector3 Direction { get; set; } = new Vector3(30, 30, 30);
 
         public ColorF Color { get; set; } = ColorF.White;
+
+        private bool _snap = false;
 
         public float ShadowsDistance { get; set; } = 200f;
 
@@ -26,7 +28,12 @@ namespace LifeSim.Engine.Rendering
 
         public Matrix4x4 GetShadowMapMatrix(ICamera mainCamera)
         {
-            return this.GetShadowMapMatrixOldMode(mainCamera);
+            //return this.GetShadowMapMatrixOldMode(mainCamera);
+
+            if (Input.GetKeyDown(Veldrid.Key.F))
+            {
+                this._snap = !this._snap;
+            }
 
             BoundingFrustum mainCameraFrustum = new BoundingFrustum(mainCamera.ViewProjectionMatrix);
             FrustumCorners corners = mainCameraFrustum.GetCorners();
@@ -53,24 +60,27 @@ namespace LifeSim.Engine.Rendering
 
             Vector3 minLS = new Vector3(float.MaxValue);
             Vector3 maxLS = new Vector3(float.MinValue);
-            for (int i = 1; i < 8; i++)
+            for (int i = 0; i < 8; i++)
             {
                 Vector3 frustumCornerLS = Vector3.Transform(frustumCornersWS[i], lightViewMatrix);
                 minLS = Vector3.Min(minLS, frustumCornerLS);
                 maxLS = Vector3.Max(maxLS, frustumCornerLS);
             }
 
-            float shadowMapSize = 2048f;
+            float shadowMapSize = 512f;
             float f = sphereDiameter / shadowMapSize;
 
-            Vector3 centerLS = (minLS + maxLS) / 2f;
-            centerLS.X = MathF.Round(centerLS.X / f) * f;
-            centerLS.Y = MathF.Round(centerLS.Y / f) * f;
+            Vector3 centerLS = new Vector3((maxLS.X + minLS.X) / 2f, (maxLS.Y + minLS.Y) / 2f, maxLS.Z);
+            if (this._snap)
+            {
+                centerLS.X = MathF.Round(centerLS.X / f) * f;
+                centerLS.Y = MathF.Round(centerLS.Y / f) * f;
+            }
             Vector3 centerWS = Vector3.Transform(centerLS, lightViewMatrixInverse);
 
             lightViewMatrix = Matrix4x4.CreateLookAt(centerWS, centerWS - Vector3.Normalize(this.Direction), Vector3.UnitY);
 
-            Matrix4x4 lightProjectionMatrix = Matrix4x4.CreateOrthographic(sphereDiameter, sphereDiameter, minLS.Z, maxLS.Z);
+            Matrix4x4 lightProjectionMatrix = Matrix4x4.CreateOrthographic(sphereDiameter, sphereDiameter, 0, maxLS.Z - minLS.Z);
             return lightViewMatrix * lightProjectionMatrix;
         }
     }
