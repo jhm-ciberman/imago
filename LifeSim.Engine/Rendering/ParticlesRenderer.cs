@@ -195,7 +195,7 @@ namespace LifeSim.Engine.Rendering
                 PolygonFillMode.Solid,
                 FrontFace.Clockwise,
                 depthClipEnabled: true,
-                scissorTestEnabled: true
+                scissorTestEnabled: false
             );
 
             Debug.Assert(shaderVariant.MaterialResourceLayout != null);

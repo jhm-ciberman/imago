@@ -123,7 +123,7 @@ namespace LifeSim.Engine.Rendering
                 PolygonFillMode.Solid,
                 FrontFace.Clockwise,
                 depthClipEnabled: true,
-                scissorTestEnabled: true
+                scissorTestEnabled: false
             );
 
             var resources = new ResourceLayout[] {

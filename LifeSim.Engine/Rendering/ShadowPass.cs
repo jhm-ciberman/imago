@@ -61,11 +61,11 @@ namespace LifeSim.Engine.Rendering
         Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant)
         {
             var rasterizerState = new RasterizerStateDescription(
-                FaceCullMode.Front,
+                FaceCullMode.None,
                 PolygonFillMode.Solid,
                 FrontFace.Clockwise,
                 depthClipEnabled: true,
-                scissorTestEnabled: true
+                scissorTestEnabled: false
             );
 
             return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()

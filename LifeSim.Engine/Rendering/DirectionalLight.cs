@@ -16,9 +16,11 @@ namespace LifeSim.Engine.Rendering
 
         public ColorF Color { get; set; } = ColorF.White;
 
-        private bool _snap = false;
+        private float _zOffset = 0f;
 
-        public float ShadowsDistance { get; set; } = 200f;
+        private bool _snap = true;
+
+        public float ShadowsDistance { get; set; } = 10f;
 
         public Matrix4x4 GetShadowMapMatrixOldMode(ICamera mainCamera)
         {
@@ -26,16 +28,38 @@ namespace LifeSim.Engine.Rendering
                 * Matrix4x4.CreateOrthographic(30, 30, 0.1f, 200f);
         }
 
+
+
+
         public Matrix4x4 GetShadowMapMatrix(ICamera mainCamera)
         {
             //return this.GetShadowMapMatrixOldMode(mainCamera);
 
             if (Input.GetKeyDown(Veldrid.Key.F))
             {
-                this._snap = !this._snap;
+                this._zOffset += 0.1f;
             }
 
-            BoundingFrustum mainCameraFrustum = new BoundingFrustum(mainCamera.ViewProjectionMatrix);
+            if (Input.GetKeyDown(Veldrid.Key.G))
+            {
+                this._zOffset -= 0.1f;
+            }
+
+            Matrix4x4 cameraViewProjectionMatrix;
+            if (mainCamera is Camera3D camera3D)
+            {
+                Matrix4x4 cameraViewMatrix = camera3D.ViewMatrix;
+                float near = this._zOffset + camera3D.NearPlane;
+                float far = this._zOffset + MathF.Min(camera3D.FarPlane, this.ShadowsDistance);
+                Matrix4x4 cameraProjectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(camera3D.FieldOfView, camera3D.AspectRatio, near, far);
+                cameraViewProjectionMatrix = cameraViewMatrix * cameraProjectionMatrix;
+            }
+            else
+            {
+                cameraViewProjectionMatrix = mainCamera.ViewProjectionMatrix;
+            }
+            BoundingFrustum mainCameraFrustum = new BoundingFrustum(cameraViewProjectionMatrix);
+
             FrustumCorners corners = mainCameraFrustum.GetCorners();
 
             float sphereDiameter = MathF.Max(
@@ -70,7 +94,12 @@ namespace LifeSim.Engine.Rendering
             float shadowMapSize = 512f;
             float f = sphereDiameter / shadowMapSize;
 
-            Vector3 centerLS = new Vector3((maxLS.X + minLS.X) / 2f, (maxLS.Y + minLS.Y) / 2f, maxLS.Z);
+            Vector3 frustumCenterWS = (corners.FarBottomLeft + corners.FarTopRight + corners.FarBottomRight + corners.FarTopLeft 
+            + corners.NearBottomLeft + corners.NearTopRight + corners.NearBottomRight + corners.NearTopLeft) / 8f;
+
+            Vector3 centerLS = Vector3.Transform(frustumCenterWS, lightViewMatrix);
+            centerLS.Z = maxLS.Z;
+
             if (this._snap)
             {
                 centerLS.X = MathF.Round(centerLS.X / f) * f;
@@ -78,10 +107,77 @@ namespace LifeSim.Engine.Rendering
             }
             Vector3 centerWS = Vector3.Transform(centerLS, lightViewMatrixInverse);
 
+            GizmosLayer.Default.DrawWireSphere(frustumCenterWS, sphereDiameter / 2f, LifeSim.Color.Red);
+            GizmosLayer.Default.DrawWireSphere(frustumCenterWS, sphereDiameter / 10f, LifeSim.Color.Cyan);
+
             lightViewMatrix = Matrix4x4.CreateLookAt(centerWS, centerWS - Vector3.Normalize(this.Direction), Vector3.UnitY);
 
             Matrix4x4 lightProjectionMatrix = Matrix4x4.CreateOrthographic(sphereDiameter, sphereDiameter, 0, maxLS.Z - minLS.Z);
             return lightViewMatrix * lightProjectionMatrix;
+        }
+
+        private enum SplitMode
+        {
+            Uniform,
+            Logarithmic,
+            Practical,
+        }
+
+        private SplitMode _splitMode = SplitMode.Uniform;
+
+        private readonly float[] _cascadesSplits = new float[4]; // The number of cascades is customizable.
+
+        private void _GetSplits(Camera3D camera)
+        {
+            float near = camera.NearPlane;
+            float far = MathF.Min(camera.FarPlane, this.ShadowsDistance);
+
+            switch (this._splitMode)
+            {
+
+                case SplitMode.Uniform:
+                    this._UniformSplit(this._cascadesSplits, near, far);
+                    break;
+                case SplitMode.Logarithmic:
+                    this._LogarithmicSplit(this._cascadesSplits, near, far);
+                    break;
+                case SplitMode.Practical:
+                    this._PracticalSplit(this._cascadesSplits, near, far, 0.5f);
+                    break;
+            }
+        }
+
+        private void _UniformSplit(float[] splits, float near, float far)
+        {
+            int count = splits.Length;
+            float range = far - near;
+            float step = range / (count - 1);
+            for (int i = 0; i < count; i++)
+            {
+                splits[i] = near + step * i;
+            }
+        }
+
+        private void _LogarithmicSplit(float[] splits, float near, float far)
+        {
+            int count = splits.Length;
+            for (int i = 0; i < count; i++)
+            {
+                splits[i] = MathF.Pow(near * (far / near), i / count);
+            }
+        }
+
+        private void _PracticalSplit(float[] splits, float near, float far, float lamda)
+        {
+            int count = splits.Length;
+            float range = far - near;
+            float step = range / (count - 1);
+            for (int i = 0; i < count; i++)
+            {
+                var a = near + step * i;
+                var b = MathF.Pow(near * (far / near), i / count);
+                splits[i] = lamda * a + (1 - lamda) * b; // Interpolate the two
+            }
         }
     }
 }

@@ -111,7 +111,7 @@ namespace LifeSim.Engine.Rendering
                 PolygonFillMode.Solid,
                 FrontFace.Clockwise,
                 depthClipEnabled: true,
-                scissorTestEnabled: true
+                scissorTestEnabled: false
             );
 
             return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
