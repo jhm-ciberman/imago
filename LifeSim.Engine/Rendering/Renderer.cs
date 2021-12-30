@@ -61,6 +61,10 @@ namespace LifeSim.Engine.Rendering
 
         private readonly CommandList _commandList;
 
+        private readonly RenderQueue _forwardQueue;
+
+        private readonly RenderQueue _shadowQueue;
+
         public Renderer(Sdl2Window window, GraphicsBackend? graphicsBackend = null)
         {
             if (_instance != null)
@@ -104,7 +108,8 @@ namespace LifeSim.Engine.Rendering
 
             this._fence = this._factory.CreateFence(false);
 
-
+            this._forwardQueue = new RenderQueue();
+            this._shadowQueue = new RenderQueue();
         }
 
         protected void UpdateDirtyMaterials()
@@ -148,38 +153,39 @@ namespace LifeSim.Engine.Rendering
 
             this._commandList.Begin();
 
-
-
             this.UpdateDirtyMaterials();
             this.UpdateDirtyTextures();
             this.Storage.UpdateBuffers(this._commandList);
 
             this._commandList.SetFramebuffer(this.MainRenderTexture.Framebuffer);
-            this._commandList.ClearColorTarget(0, new RgbaFloat(scene.ClearColor.R, scene.ClearColor.G, scene.ClearColor.B, scene.ClearColor.A));
-            this._commandList.ClearColorTarget(1, RgbaFloat.Black);
-            this._commandList.ClearDepthStencil(1f);
 
+            ICamera? camera = scene.Camera;
 
-
-            if (scene.Camera != null)
+            if (camera != null)
             {
-                var camera = scene.Camera;
-                if (scene.ForwardQueue.Count > 0)
+                ShadowCascadeInfo shadowCascadeInfo = ShadowCascadesHelper.GetShadowMapMatrix(camera, scene.MainLight);
+                BoundingFrustum shadowFrustum = new BoundingFrustum(shadowCascadeInfo.ShadowMapMatrix);
+                this._forwardQueue.AddToRenderQueue(scene.Renderables, camera.FrustumForCulling, camera.Position);
+                this._shadowQueue.AddToRenderQueue(scene.Renderables, shadowFrustum, camera.Position);
+
+                this._forwardQueue.Sort();
+                this._shadowQueue.Sort();
+                if (this._forwardQueue.Count > 0)
                 {
-                    this._shadowPass.Render(this._commandList, scene.ShadowmapQueue, camera, scene.MainLight);
-                    this._forwardPass.Render(this._commandList, scene.ForwardQueue, camera, scene.MainLight, scene.AmbientColor);
+                    this._shadowPass.Render(this._commandList, this._shadowQueue, ref shadowCascadeInfo);
+                    this._forwardPass.Render(this._commandList, this._forwardQueue, camera, scene.MainLight.Direction, scene.MainLight.Color, scene.AmbientColor, ref shadowCascadeInfo);
                 }
 
                 if (scene.Gizmos.Lines.Count > 0)
                 {
-                    this._gizmosPass.Render(this._commandList, scene.Gizmos.Lines, scene.Camera);
+                    this._gizmosPass.Render(this._commandList, scene.Gizmos.Lines, camera);
                 }
 
                 for (int i = 0; i < scene.ParticleSystems.Count; i++)
                 {
                     var system = scene.ParticleSystems[i];
-                    system.SortParticles(scene.Camera.Position);
-                    this._particlesPass.Render(this._commandList, system.Particles, system.Texture, scene.Camera);
+                    system.SortParticles(camera.Position);
+                    this._particlesPass.Render(this._commandList, system.Particles, system.Texture, camera);
                 }
             }
 

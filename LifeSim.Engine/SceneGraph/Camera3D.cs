@@ -6,6 +6,7 @@ namespace LifeSim.Engine.SceneGraph
 {
     public class Camera3D : ICamera
     {
+        public ColorF? ClearColor { get; set; } = new ColorF(0.84f, 0.84f, 0.86f, 1.0f);
         private bool _viewMatrixIsDirty = true;
         private bool _projectionMatrixIsDirty = true;
         private Matrix4x4 _viewMatrix;

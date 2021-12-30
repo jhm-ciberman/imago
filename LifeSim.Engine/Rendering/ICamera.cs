@@ -17,5 +17,6 @@ namespace LifeSim.Engine.Rendering
         Matrix4x4 ProjectionMatrix { get; }
         Matrix4x4 ViewProjectionMatrix { get; }
         BoundingFrustum FrustumForCulling { get; }
+        ColorF? ClearColor { get; }
     }
 }

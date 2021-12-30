@@ -34,6 +34,7 @@ namespace LifeSim.Engine.Rendering
         private readonly IRenderTexture _renderTexture;
         private readonly SceneStorage _storage;
         private readonly RenderJob _renderJob;
+
         public ForwardPass(GraphicsDevice gd, SceneStorage storage, IRenderTexture mainRenderTexture, ShadowPass shadowPass)
         {
             this._gd = gd;
@@ -75,20 +76,30 @@ namespace LifeSim.Engine.Rendering
             CommandList commandList,
             IReadOnlyList<Renderable> renderQueue,
             ICamera camera,
-            DirectionalLight mainLight,
-            ColorF ambientColor
+            Vector3 mainLightDirection,
+            ColorF mainLightColor,
+            ColorF ambientColor,
+            ref ShadowCascadeInfo shadowCascadeInfo
         )
         {
             commandList.SetFramebuffer(this._renderTexture.Framebuffer);
 
+            if (camera.ClearColor != null)
+            {
+                ColorF clearColor = camera.ClearColor.Value;
+                commandList.ClearColorTarget(0, new RgbaFloat(clearColor.R, clearColor.G, clearColor.B, clearColor.A));
+                commandList.ClearColorTarget(1, RgbaFloat.Black);
+                commandList.ClearDepthStencil(1f);
+            }
+
             CameraInfo cameraInfo = new CameraInfo();
             cameraInfo.ViewProjectionMatrix = camera.ViewProjectionMatrix;
-            cameraInfo.ShadowMapMatrix = mainLight.GetShadowMapMatrix(camera) * this._shadowMapScaling;
+            cameraInfo.ShadowMapMatrix = shadowCascadeInfo.ShadowMapMatrix * this._shadowMapScaling;
 
             LightInfo lightInfo = new LightInfo();
             lightInfo.AmbientColor = ambientColor;
-            lightInfo.MainLightColor = mainLight.Color;
-            lightInfo.MainLightDirection = Vector3.Normalize(mainLight.Direction);
+            lightInfo.MainLightColor = mainLightColor;
+            lightInfo.MainLightDirection = Vector3.Normalize(mainLightDirection);
 
             commandList.UpdateBuffer(this._camera3DInfoBuffer, 0, ref cameraInfo);
             commandList.UpdateBuffer(this._lightInfoBuffer, 0, ref lightInfo);

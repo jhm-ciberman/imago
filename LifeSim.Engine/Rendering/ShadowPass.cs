@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using LifeSim.Engine.SceneGraph;
 using Veldrid;
 using Veldrid.Utilities;
 
@@ -40,12 +41,11 @@ namespace LifeSim.Engine.Rendering
             this._renderJob = new RenderJob(this._gd, this._resourceSet, true);
         }
 
-        public void Render(CommandList commandList, IReadOnlyList<Renderable> renderQueue, ICamera camera, DirectionalLight mainLight)
+        public void Render(CommandList commandList, IReadOnlyList<Renderable> renderQueue, ref ShadowCascadeInfo shadowCascadeInfo)
         {
-            var shadowmapMatrix = mainLight.GetShadowMapMatrix(camera);
             commandList.SetFramebuffer(this.ShadowmapTexture.Framebuffer);
             commandList.ClearDepthStencil(1f);
-            commandList.UpdateBuffer(this._shadowmapInfoBuffer, 0, ref shadowmapMatrix);
+            commandList.UpdateBuffer(this._shadowmapInfoBuffer, 0, ref shadowCascadeInfo.ShadowMapMatrix);
 
             this._renderJob.DrawRenderList(commandList, renderQueue);
         }
@@ -98,5 +98,6 @@ namespace LifeSim.Engine.Rendering
 
             return resources.ToArray();
         }
+
     }
 }

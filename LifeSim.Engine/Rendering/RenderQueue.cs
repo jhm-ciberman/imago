@@ -13,10 +13,6 @@ namespace LifeSim.Engine.Rendering
         private readonly List<RenderIndex> _indices = new List<RenderIndex>(DEFAULT_CAPACITY);
         private readonly List<Renderable> _items = new List<Renderable>(DEFAULT_CAPACITY);
 
-        public Vector3 CameraPosition { get; set; }
-
-        public Matrix4x4 ViewProjectionMatrix { get; set; }
-
         public int Count => this._indices.Count;
 
         public Renderable this[int index] => this._items[this._indices[index].Index];
@@ -26,7 +22,7 @@ namespace LifeSim.Engine.Rendering
             this._indices.Sort();
         }
 
-        public void AddToRenderQueue(IReadOnlyList<Renderable> renderables, ref BoundingFrustum frustum)
+        public void AddToRenderQueue(IReadOnlyList<Renderable> renderables, BoundingFrustum cameraFrustum, Vector3 cameraPosition)
         {
             this._indices.Clear();
             this._items.Clear();
@@ -35,9 +31,9 @@ namespace LifeSim.Engine.Rendering
                 Renderable renderable = renderables[i];
                 if (renderable.Visible == false || renderable.Material == null || renderable.Mesh == null) continue;
 
-                if (frustum.Contains(renderable.BoundingBox) != ContainmentType.Disjoint)
+                if (cameraFrustum.Contains(renderable.BoundingBox) != ContainmentType.Disjoint)
                 {
-                    ulong key = renderable.GetSortKey(this.CameraPosition);
+                    ulong key = renderable.GetSortKey(cameraPosition);
                     this._indices.Add(new RenderIndex(key, this._items.Count));
                     this._items.Add(renderable);
                 }

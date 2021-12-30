@@ -14,12 +14,10 @@ namespace LifeSim.Engine.SceneGraph
 
         public ColorF AmbientColor { get; set; } = new ColorF(.2f, .2f, .2f);
 
-        public ColorF ClearColor { get; set; } = new ColorF(0.84f, 0.84f, 0.86f, 1.0f);
-
 
         public GizmosLayer Gizmos { get; } = new GizmosLayer();
 
-        public ICamera? Camera { get; set; } = null;
+        public Camera3D? Camera { get; set; } = null;
 
         private readonly List<ParticleSystem> _particleSystems = new List<ParticleSystem>();
 
@@ -43,11 +41,6 @@ namespace LifeSim.Engine.SceneGraph
         private RenderQueue _shadowmapReadWriteQueue = new RenderQueue();
 
         private RenderQueue _forwardReadWriteQueue = new RenderQueue();
-
-        public IReadOnlyList<Renderable> ForwardQueue => this._forwardReadWriteQueue;
-
-        public IReadOnlyList<Renderable> ShadowmapQueue => this._shadowmapReadWriteQueue;
-
 
 
         public Scene(App app)
@@ -76,6 +69,10 @@ namespace LifeSim.Engine.SceneGraph
             this._canvasLayers.Remove(canvasLayer);
         }
 
+        internal IEnumerable<Renderable> GetCulledRenderables(Camera3D camera)
+        {
+            throw new NotImplementedException();
+        }
 
         public virtual void OnBeforeRender(Renderer renderer)
         {
@@ -104,26 +101,34 @@ namespace LifeSim.Engine.SceneGraph
 
         public void EndUpdate()
         {
-            this._UpdateTransforms();
-            this._UpdateRenderQueues();
-        }
-
-        private void _UpdateTransforms()
-        {
             for (int i = 0; i < this._canvasLayers.Count; i++)
             {
                 this._canvasLayers[i].UpdateTransforms();
             }
 
+            this._UpdateDirtyTransforms();
+        }
+
+        private void _UpdateDirtyTransforms()
+        {
             if (this._transformDirtyList.Count == 0) return;
 
             Matrix4x4 identity = Matrix4x4.Identity;
 
             for (int i = 0; i < this._transformDirtyList.Count; i++)
             {
-                var dirtyNode = this._transformDirtyList[i];
-                if (!dirtyNode.TransformIsDirty) continue;
-                Node3D topDirty = this._SearchTopDirty(dirtyNode);
+                Node3D node = this._transformDirtyList[i];
+                if (!node.TransformIsDirty) continue;
+
+                // Search for the top dirty node
+                Node3D topDirty = node;
+                while (true)
+                {
+                    if (node.TransformIsDirty) topDirty = node;
+                    if (node.Parent == null) break;
+                    node = node.Parent;
+                }
+
                 if (topDirty.Parent != null)
                 {
                     topDirty.UpdateWorldMatrix(ref topDirty.Parent.WorldMatrix);
@@ -133,6 +138,7 @@ namespace LifeSim.Engine.SceneGraph
                     topDirty.UpdateWorldMatrix(ref identity);
                 }
             }
+
             this._transformDirtyList.Clear();
         }
 
@@ -141,36 +147,6 @@ namespace LifeSim.Engine.SceneGraph
             // Swap queues for next frame
             (this._shadowmapReadOnlyQueue, this._shadowmapReadWriteQueue) = (this._shadowmapReadWriteQueue, this._shadowmapReadOnlyQueue);
             (this._forwardReadOnlyQueue, this._forwardReadWriteQueue) = (this._forwardReadWriteQueue, this._forwardReadOnlyQueue);
-        }
-
-        private void _UpdateRenderQueues()
-        {
-            var camera = this.Camera;
-            if (camera == null) return;
-
-            var matrix = this.MainLight.GetShadowMapMatrix(camera);
-            var frustum = new Veldrid.Utilities.BoundingFrustum(matrix);
-            this._shadowmapReadWriteQueue.CameraPosition = camera.Position;
-            this._shadowmapReadWriteQueue.AddToRenderQueue(this.Renderables, ref frustum);
-
-            var cameraFrustum = camera.FrustumForCulling;
-            this._forwardReadWriteQueue.CameraPosition = camera.Position;
-            this._forwardReadWriteQueue.ViewProjectionMatrix = camera.ViewProjectionMatrix;
-            this._forwardReadWriteQueue.AddToRenderQueue(this.Renderables, ref cameraFrustum);
-
-            this._shadowmapReadWriteQueue.Sort();
-            this._forwardReadWriteQueue.Sort();
-        }
-
-        private Node3D _SearchTopDirty(Node3D node)
-        {
-            Node3D topDirty = node;
-            while (true)
-            {
-                if (node.TransformIsDirty) topDirty = node;
-                if (node.Parent == null) return topDirty;
-                node = node.Parent;
-            }
         }
 
         internal void NotifyNodeAdded(Node3D node)
