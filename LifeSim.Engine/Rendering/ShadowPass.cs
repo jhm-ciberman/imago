@@ -41,11 +41,11 @@ namespace LifeSim.Engine.Rendering
             this._renderJob = new RenderJob(this._gd, this._resourceSet, true);
         }
 
-        public void Render(CommandList commandList, IReadOnlyList<Renderable> renderQueue, ref ShadowCascadeInfo shadowCascadeInfo)
+        public void Render(CommandList commandList, IReadOnlyList<Renderable> renderQueue, ShadowCascadeInfo shadowCascadeInfo)
         {
             commandList.SetFramebuffer(this.ShadowmapTexture.Framebuffer);
             commandList.ClearDepthStencil(1f);
-            commandList.UpdateBuffer(this._shadowmapInfoBuffer, 0, ref shadowCascadeInfo.ShadowMapMatrix);
+            commandList.UpdateBuffer(this._shadowmapInfoBuffer, 0, shadowCascadeInfo.ShadowMapMatrix);
 
             this._renderJob.DrawRenderList(commandList, renderQueue);
         }

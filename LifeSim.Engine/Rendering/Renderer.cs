@@ -159,11 +159,12 @@ namespace LifeSim.Engine.Rendering
 
             this._commandList.SetFramebuffer(this.MainRenderTexture.Framebuffer);
 
-            ICamera? camera = scene.Camera;
+            Camera3D? camera = scene.Camera;
 
             if (camera != null)
             {
-                ShadowCascadeInfo shadowCascadeInfo = ShadowCascadesHelper.GetShadowMapMatrix(camera, scene.MainLight);
+                scene.MainLight.UpdateShadowMapCascades(camera);
+                ShadowCascadeInfo shadowCascadeInfo = scene.MainLight.Cascades[0];
                 BoundingFrustum shadowFrustum = new BoundingFrustum(shadowCascadeInfo.ShadowMapMatrix);
                 this._forwardQueue.AddToRenderQueue(scene.Renderables, camera.FrustumForCulling, camera.Position);
                 this._shadowQueue.AddToRenderQueue(scene.Renderables, shadowFrustum, camera.Position);
@@ -172,7 +173,7 @@ namespace LifeSim.Engine.Rendering
                 this._shadowQueue.Sort();
                 if (this._forwardQueue.Count > 0)
                 {
-                    this._shadowPass.Render(this._commandList, this._shadowQueue, ref shadowCascadeInfo);
+                    this._shadowPass.Render(this._commandList, this._shadowQueue, shadowCascadeInfo);
                     this._forwardPass.Render(this._commandList, this._forwardQueue, camera, scene.MainLight.Direction, scene.MainLight.Color, scene.AmbientColor, ref shadowCascadeInfo);
                 }
 

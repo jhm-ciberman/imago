@@ -12,9 +12,9 @@ namespace LifeSim.Engine.Anim
 
         public BindedAnimation Bind(Node3D root, Animation animation)
         {
-            BindedAnimation binded = new BindedAnimation(animation);
+            var binded = new BindedAnimation(animation);
 
-            Dictionary<string, Node3D> dictionary = new Dictionary<string, Node3D>();
+            var dictionary = new Dictionary<string, Node3D>();
             this._AddToDictionaryRecursive(dictionary, root);
 
             foreach (var channelName in animation.ChannelNames)
