@@ -61,10 +61,6 @@ namespace LifeSim.Engine.Rendering
 
         private readonly CommandList _commandList;
 
-        private readonly RenderQueue _forwardQueue;
-
-        private readonly RenderQueue _shadowQueue;
-
         public Renderer(Sdl2Window window, GraphicsBackend? graphicsBackend = null)
         {
             if (_instance != null)
@@ -107,9 +103,6 @@ namespace LifeSim.Engine.Rendering
             this._spriteBatcher = new SpriteBatcher(gd, this._spritesPass.DefaultShader);
 
             this._fence = this._factory.CreateFence(false);
-
-            this._forwardQueue = new RenderQueue();
-            this._shadowQueue = new RenderQueue();
         }
 
         protected void UpdateDirtyMaterials()
@@ -163,19 +156,8 @@ namespace LifeSim.Engine.Rendering
 
             if (camera != null)
             {
-                scene.MainLight.UpdateShadowMapCascades(camera);
-                ShadowCascadeInfo shadowCascadeInfo = scene.MainLight.Cascades[0];
-                BoundingFrustum shadowFrustum = new BoundingFrustum(shadowCascadeInfo.ShadowMapMatrix);
-                this._forwardQueue.AddToRenderQueue(scene.Renderables, camera.FrustumForCulling, camera.Position);
-                this._shadowQueue.AddToRenderQueue(scene.Renderables, shadowFrustum, camera.Position);
-
-                this._forwardQueue.Sort();
-                this._shadowQueue.Sort();
-                if (this._forwardQueue.Count > 0)
-                {
-                    this._shadowPass.Render(this._commandList, this._shadowQueue, shadowCascadeInfo);
-                    this._forwardPass.Render(this._commandList, this._forwardQueue, camera, scene.MainLight.Direction, scene.MainLight.Color, scene.AmbientColor, ref shadowCascadeInfo);
-                }
+                this._shadowPass.Render(this._commandList, scene.Renderables, camera, scene.MainLight.Direction);
+                this._forwardPass.Render(this._commandList, scene.Renderables, camera, scene.MainLight.Direction, scene.MainLight.Color, scene.AmbientColor);
 
                 if (scene.Gizmos.Lines.Count > 0)
                 {

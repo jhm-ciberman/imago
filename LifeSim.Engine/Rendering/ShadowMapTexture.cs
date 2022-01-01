@@ -1,5 +1,9 @@
 using System;
+using System.Numerics;
+using System.Threading.Tasks;
+using LifeSim.Engine.SceneGraph;
 using Veldrid;
+using Veldrid.Utilities;
 
 namespace LifeSim.Engine.Rendering
 {
@@ -25,7 +29,7 @@ namespace LifeSim.Engine.Rendering
             this._gd = gd;
             this.Width = width;
             this.Height = height;
-            this.DeviceTexture = gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(width, height, 1, 1, PixelFormat.R32_Float, TextureUsage.DepthStencil | TextureUsage.Sampled));
+            this.DeviceTexture = gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(this.Width, this.Height, 1, 1, PixelFormat.R32_Float, TextureUsage.DepthStencil | TextureUsage.Sampled));
             this.Sampler = gd.LinearSampler;
             this.Framebuffer = gd.ResourceFactory.CreateFramebuffer(new FramebufferDescription(
                 this.DeviceTexture, Array.Empty<Veldrid.Texture>()
@@ -52,5 +56,6 @@ namespace LifeSim.Engine.Rendering
             this.DeviceTexture.Dispose();
             this.Framebuffer.Dispose();
         }
+
     }
 }

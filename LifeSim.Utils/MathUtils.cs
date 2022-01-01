@@ -9,6 +9,18 @@ namespace LifeSim
         private const float K_EPSILON = 0.00001f;
         private const float K_EPSILON_NORMAL_SQRT = 1e-15f;
 
+        /// <summary>
+        /// Linearly interpolates between two values.
+        /// </summary>
+        /// <param name="a">The first value.</param>
+        /// <param name="b">The second value.</param>
+        /// <param name="t">The interpolation factor.</param>
+        /// <returns>The interpolated value.</returns>
+        public static float Lerp(float a, float b, float t)
+        {
+            return a + (b - a) * t;
+        }
+
         public static float MoveTowardsAngle(float current, float target, float maxDelta)
         {
             float deltaAngle = DeltaAngle(current, target);

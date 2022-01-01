@@ -30,16 +30,19 @@ namespace LifeSim.Engine.Rendering
         private readonly DeviceBuffer _camera3DInfoBuffer;
         private readonly ResourceLayout _resourceLayout;
         private readonly ResourceSet _resourceSet;
-        private readonly Matrix4x4 _shadowMapScaling;
         private readonly IRenderTexture _renderTexture;
         private readonly SceneStorage _storage;
         private readonly RenderJob _renderJob;
+        private readonly RenderQueue _renderQueue;
+
+        private readonly ShadowPass _shadowPass;
 
         public ForwardPass(GraphicsDevice gd, SceneStorage storage, IRenderTexture mainRenderTexture, ShadowPass shadowPass)
         {
             this._gd = gd;
             var factory = gd.ResourceFactory;
             this._storage = storage;
+            this._shadowPass = shadowPass;
 
             this._resourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
                 new ResourceLayoutElementDescription("CameraDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex),
@@ -63,25 +66,25 @@ namespace LifeSim.Engine.Rendering
                 shadowMapSampler
             ));
 
-            this._shadowMapScaling = (this._gd.IsUvOriginTopLeft)
-                ? Matrix4x4.CreateScale(.5f, -.5f, 1f) * Matrix4x4.CreateTranslation(0.5f, 0.5f, 0f)
-                : Matrix4x4.CreateScale(.5f, .5f, 1f) * Matrix4x4.CreateTranslation(0.5f, 0.5f, 0f);
-
             this._renderTexture = mainRenderTexture;
 
             this._renderJob = new RenderJob(this._gd, this._resourceSet, false);
+
+            this._renderQueue = new RenderQueue();
         }
 
         public void Render(
             CommandList commandList,
-            IReadOnlyList<Renderable> renderQueue,
+            IReadOnlyList<Renderable> renderList,
             ICamera camera,
             Vector3 mainLightDirection,
             ColorF mainLightColor,
-            ColorF ambientColor,
-            ref ShadowCascadeInfo shadowCascadeInfo
+            ColorF ambientColor
         )
         {
+            this._renderQueue.AddToRenderQueue(renderList, camera.FrustumForCulling, camera.Position);
+            this._renderQueue.Sort();
+
             commandList.SetFramebuffer(this._renderTexture.Framebuffer);
 
             if (camera.ClearColor != null)
@@ -94,7 +97,7 @@ namespace LifeSim.Engine.Rendering
 
             CameraInfo cameraInfo = new CameraInfo();
             cameraInfo.ViewProjectionMatrix = camera.ViewProjectionMatrix;
-            cameraInfo.ShadowMapMatrix = shadowCascadeInfo.ShadowMapMatrix * this._shadowMapScaling;
+            cameraInfo.ShadowMapMatrix = this._shadowPass.GetShadowCascadeViewProjectionMatrix(0);
 
             LightInfo lightInfo = new LightInfo();
             lightInfo.AmbientColor = ambientColor;
@@ -104,7 +107,7 @@ namespace LifeSim.Engine.Rendering
             commandList.UpdateBuffer(this._camera3DInfoBuffer, 0, ref cameraInfo);
             commandList.UpdateBuffer(this._lightInfoBuffer, 0, ref lightInfo);
 
-            this._renderJob.DrawRenderList(commandList, renderQueue);
+            this._renderJob.DrawRenderList(commandList, this._renderQueue);
         }
 
         public void Dispose()
