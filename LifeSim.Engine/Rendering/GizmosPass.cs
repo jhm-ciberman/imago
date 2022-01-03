@@ -60,6 +60,8 @@ namespace LifeSim.Engine.Rendering
 
         public void Render(CommandList cl, IReadOnlyList<DebugLine> lines, ICamera camera)
         {
+            if (lines.Count == 0) return;
+
             this._currentShader = null;
 
             cl.SetFramebuffer(this._renderTexture.Framebuffer);

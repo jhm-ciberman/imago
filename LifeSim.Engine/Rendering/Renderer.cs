@@ -158,11 +158,7 @@ namespace LifeSim.Engine.Rendering
             {
                 this._shadowPass.Render(this._commandList, scene.Renderables, camera, scene.MainLight.Direction);
                 this._forwardPass.Render(this._commandList, scene.Renderables, camera, scene.MainLight.Direction, scene.MainLight.Color, scene.AmbientColor);
-
-                if (scene.Gizmos.Lines.Count > 0)
-                {
-                    this._gizmosPass.Render(this._commandList, scene.Gizmos.Lines, camera);
-                }
+                this._gizmosPass.Render(this._commandList, scene.Gizmos.Lines, camera);
 
                 for (int i = 0; i < scene.ParticleSystems.Count; i++)
                 {

@@ -22,7 +22,7 @@ namespace LifeSim.Engine.Rendering
         private readonly SceneStorage _storage;
 
         private Matrix4x4[] _viewProjectionMatrices { get; } = new Matrix4x4[4];
-        private Matrix4x4[] _scalingMatrices { get; } = new Matrix4x4[4];
+        private Matrix4x4 _scalingMatrix;
 
         public ShadowMapConfig Config { get; }
 
@@ -49,9 +49,9 @@ namespace LifeSim.Engine.Rendering
                 new ResourceLayoutElementDescription("ShadowMapDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
             ));
 
-            uint width = this.Config.ShadowMapSize * this.Config.CascadesCount;
-            uint height = this.Config.ShadowMapSize;
-            this.ShadowmapTexture = new ShadowMapTexture(gd, width, height);
+            uint size = this.Config.ShadowMapSize;
+            uint count = this.Config.CascadesCount;
+            this.ShadowmapTexture = new ShadowMapTexture(gd, size, size, count);
 
             this._shadowmapInfoBuffer = factory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<Matrix4x4>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
@@ -63,14 +63,7 @@ namespace LifeSim.Engine.Rendering
             this.Config.OnShadowMapSizeChanged += this.OnShadowMapSizeChanged;
 
             float verticalFlip = this._gd.IsUvOriginTopLeft ? -1.0f : 1.0f;
-            uint cascadeCount = this.Config.CascadesCount == 3 ? 4 : this.Config.CascadesCount;
-            float horizontalScale = 1f / cascadeCount;
-            for (int i = 0; i < this._viewProjectionMatrices.Length; i++)
-            {
-                this._viewProjectionMatrices[i] = Matrix4x4.Identity;
-                this._scalingMatrices[i] = Matrix4x4.CreateScale(.5f, .5f * verticalFlip, 1f)
-                                        * Matrix4x4.CreateTranslation(0.5f, 0.5f, 0f);
-            }
+            this._scalingMatrix = Matrix4x4.CreateScale(.5f, .5f * verticalFlip, 1f) * Matrix4x4.CreateTranslation(0.5f, 0.5f, 0f);
         }
 
         private void OnShadowMapSizeChanged(uint size)
@@ -85,15 +78,23 @@ namespace LifeSim.Engine.Rendering
 
         public void Render(CommandList commandList, IReadOnlyList<Renderable> renderables, Camera3D camera, Vector3 mainLightDirection)
         {
+            if (Input.GetKeyDown(Veldrid.Key.Number4)) this.Config.CascadesCount = 4;
+            if (Input.GetKeyDown(Veldrid.Key.Number3)) this.Config.CascadesCount = 3;
+            if (Input.GetKeyDown(Veldrid.Key.Number2)) this.Config.CascadesCount = 2;
+            if (Input.GetKeyDown(Veldrid.Key.Number1)) this.Config.CascadesCount = 1;
+
+            if (Input.GetKeyDown(Veldrid.Key.Number0)) this.Config.MaximumShadowsDistance += 10;
+            if (Input.GetKeyDown(Veldrid.Key.Number9)) this.Config.MaximumShadowsDistance -= 10;
+
             this.UpdateSplitDistances(camera);
 
             this.UpdateShadowMapTextureSize();
 
-            commandList.SetFramebuffer(this.ShadowmapTexture.Framebuffer);
-            commandList.ClearDepthStencil(1f);
 
             for (int i = 0; i < this.Config.CascadesCount; i++)
             {
+                commandList.SetFramebuffer(this.ShadowmapTexture.Framebuffers[i]);
+                commandList.ClearDepthStencil(1f);
                 this.UpdateCascadeMatrix(camera, mainLightDirection, i);
 
                 BoundingFrustum shadowFrustum = new BoundingFrustum(this._viewProjectionMatrices[i]);
@@ -106,17 +107,22 @@ namespace LifeSim.Engine.Rendering
 
         public Matrix4x4 GetShadowCascadeViewProjectionMatrix(int cascadeIndex)
         {
-            return this._viewProjectionMatrices[cascadeIndex] * this._scalingMatrices[cascadeIndex];
+            if (cascadeIndex < 0 || cascadeIndex >= this.Config.CascadesCount)
+            {
+                return Matrix4x4.Identity;
+            }
+
+            return this._viewProjectionMatrices[cascadeIndex] * this._scalingMatrix;
         }
 
         private void UpdateShadowMapTextureSize()
         {
             if (!this._shadowMapTextureSizeDirty) return;
 
-            uint count = this.Config.CascadesCount == 3 ? 4 : this.Config.CascadesCount;
-            uint width = this.Config.ShadowMapSize * count;
-            uint height = this.Config.ShadowMapSize;
-            this.ShadowmapTexture.Resize(width, height);
+            uint count = this.Config.CascadesCount;
+            uint size = this.Config.ShadowMapSize;
+            this._gd.DisposeWhenIdle(this.ShadowmapTexture);
+            this.ShadowmapTexture = new ShadowMapTexture(this._gd, size, size, count);
             this._shadowMapTextureSizeDirty = false;
         }
 
@@ -126,6 +132,11 @@ namespace LifeSim.Engine.Rendering
             this._resourceLayout.Dispose();
             this.ShadowmapTexture.Dispose();
             this._shadowmapInfoBuffer.Dispose();
+        }
+
+        internal Vector4 GetShadowCascadesFarDistances()
+        {
+            return new Vector4(this._splitDistances[1], this._splitDistances[2], this._splitDistances[3], this._splitDistances[4]);
         }
 
         Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant)
@@ -145,7 +156,7 @@ namespace LifeSim.Engine.Rendering
                 ShaderSet = shaderVariant.ShaderSetDescription,
                 BlendState = BlendStateDescription.Empty,
                 RasterizerState = rasterizerState,
-                Outputs = this.ShadowmapTexture.OutputDescription,
+                Outputs = this.ShadowmapTexture.Framebuffers[0].OutputDescription,
                 ResourceLayouts = this._GetResourceLayouts(shaderVariant),
             });
         }
@@ -184,9 +195,10 @@ namespace LifeSim.Engine.Rendering
 
             for (int i = 1; i < count; i++)
             {
-                float uniformDistance = near + ((far - near) * i / count);
-                float logarithmicDistance = MathF.Pow(near * (far / near), i / count);
-                this._splitDistances[i] = MathUtils.Lerp(uniformDistance, logarithmicDistance, this.Config.SplitLambda);
+                float t = (float)i / count;
+                float uniformDistance = near + (far - near) * t;
+                float logarithmicDistance = near * MathF.Pow(far / near, t);
+                this._splitDistances[i] = MathUtils.Lerp(logarithmicDistance, uniformDistance, this.Config.SplitLambda);
             }
         }
 

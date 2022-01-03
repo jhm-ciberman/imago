@@ -13,16 +13,20 @@ namespace LifeSim.Engine.Rendering
         private struct CameraInfo
         {
             public Matrix4x4 ViewProjectionMatrix { get; set; }
-            public Matrix4x4 ShadowMapMatrix { get; set; }
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        private struct LightInfo
+        private unsafe struct LightInfo
         {
             public ColorF AmbientColor { get; set; }
             public ColorF MainLightColor { get; set; }
             public Vector3 MainLightDirection { get; set; }
             private readonly float _padding0;
+            public Vector4 ShadowMapCascadeSplits { get; set; }
+            public Matrix4x4 ShadowMapMatrix0 { get; set; }
+            public Matrix4x4 ShadowMapMatrix1 { get; set; }
+            public Matrix4x4 ShadowMapMatrix2 { get; set; }
+            public Matrix4x4 ShadowMapMatrix3 { get; set; }
         }
 
         private readonly GraphicsDevice _gd;
@@ -97,12 +101,16 @@ namespace LifeSim.Engine.Rendering
 
             CameraInfo cameraInfo = new CameraInfo();
             cameraInfo.ViewProjectionMatrix = camera.ViewProjectionMatrix;
-            cameraInfo.ShadowMapMatrix = this._shadowPass.GetShadowCascadeViewProjectionMatrix(0);
 
             LightInfo lightInfo = new LightInfo();
             lightInfo.AmbientColor = ambientColor;
             lightInfo.MainLightColor = mainLightColor;
             lightInfo.MainLightDirection = Vector3.Normalize(mainLightDirection);
+            lightInfo.ShadowMapCascadeSplits = this._shadowPass.GetShadowCascadesFarDistances();
+            lightInfo.ShadowMapMatrix0 = this._shadowPass.GetShadowCascadeViewProjectionMatrix(0);
+            lightInfo.ShadowMapMatrix1 = this._shadowPass.GetShadowCascadeViewProjectionMatrix(1);
+            lightInfo.ShadowMapMatrix2 = this._shadowPass.GetShadowCascadeViewProjectionMatrix(2);
+            lightInfo.ShadowMapMatrix3 = this._shadowPass.GetShadowCascadeViewProjectionMatrix(3);
 
             commandList.UpdateBuffer(this._camera3DInfoBuffer, 0, ref cameraInfo);
             commandList.UpdateBuffer(this._lightInfoBuffer, 0, ref lightInfo);

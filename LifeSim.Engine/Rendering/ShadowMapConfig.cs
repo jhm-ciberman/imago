@@ -9,7 +9,7 @@ namespace LifeSim.Engine.Rendering
 
         public event Action<uint>? OnCascadeCountChanged;
 
-        private float _maximumShadowDistance = 10f;
+        private float _maximumShadowDistance = 100f;
 
         /// <summary>
         /// Gets or sets the maximum distance that the light will cast shadows. 
@@ -58,7 +58,7 @@ namespace LifeSim.Engine.Rendering
             }
         }
 
-        private uint _cascadesCount = 1;
+        private uint _cascadesCount = 4;
 
         /// <summary>
         /// Gets or sets the number of cascades used by the light. The number must be between 1 and 4.
