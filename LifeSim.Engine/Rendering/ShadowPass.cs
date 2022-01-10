@@ -95,7 +95,10 @@ namespace LifeSim.Engine.Rendering
             {
                 commandList.SetFramebuffer(this.ShadowmapTexture.Framebuffers[i]);
                 commandList.ClearDepthStencil(1f);
-                this.UpdateCascadeMatrix(camera, mainLightDirection, i);
+
+                float near = this._splitDistances[i];
+                float far = this._splitDistances[i + 1];
+                this._viewProjectionMatrices[i] = this.GetCascadeMatrix(camera, mainLightDirection, near, far);
 
                 BoundingFrustum shadowFrustum = new BoundingFrustum(this._viewProjectionMatrices[i]);
                 this._renderQueues[i].AddToRenderQueue(renderables, shadowFrustum, camera.Position);
@@ -202,10 +205,8 @@ namespace LifeSim.Engine.Rendering
             }
         }
 
-        public void UpdateCascadeMatrix(Camera3D camera, Vector3 lightDirection, int index)
+        private Matrix4x4 GetCascadeMatrix(Camera3D camera, Vector3 lightDirection, float near, float far)
         {
-            float near = this._splitDistances[index];
-            float far = this._splitDistances[index + 1];
             Matrix4x4 cameraProjectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(camera.FieldOfView, camera.AspectRatio, near, far);
             Matrix4x4 cameraViewProjectionMatrix = camera.ViewMatrix * cameraProjectionMatrix;
 
@@ -247,20 +248,23 @@ namespace LifeSim.Engine.Rendering
             Vector3 frustumCenterWS = (corners.FarBottomLeft + corners.FarTopRight + corners.FarBottomRight + corners.FarTopLeft
             + corners.NearBottomLeft + corners.NearTopRight + corners.NearBottomRight + corners.NearTopLeft) / 8f;
 
+            float zPadding = 2f;
+
             Vector3 centerLS = Vector3.Transform(frustumCenterWS, lightViewMatrix);
             centerLS.X = MathF.Round(centerLS.X / f) * f;
             centerLS.Y = MathF.Round(centerLS.Y / f) * f;
-            centerLS.Z = maxLS.Z;
+            centerLS.Z = maxLS.Z + zPadding;
             Vector3 centerWS = Vector3.Transform(centerLS, lightViewMatrixInverse);
+
 
             //GizmosLayer.Default.DrawWireSphere(frustumCenterWS, sphereDiameter / 2f, LifeSim.Color.Red);
             //GizmosLayer.Default.DrawWireSphere(frustumCenterWS, sphereDiameter / 10f, LifeSim.Color.Cyan);
 
             lightViewMatrix = Matrix4x4.CreateLookAt(centerWS, centerWS - lightDirection, Vector3.UnitY);
 
-            Matrix4x4 lightProjectionMatrix = Matrix4x4.CreateOrthographic(sphereDiameter, sphereDiameter, 0, maxLS.Z - minLS.Z);
+            Matrix4x4 lightProjectionMatrix = Matrix4x4.CreateOrthographic(sphereDiameter, sphereDiameter, 0, maxLS.Z - minLS.Z + zPadding);
 
-            this._viewProjectionMatrices[index] = lightViewMatrix * lightProjectionMatrix;
+            return lightViewMatrix * lightProjectionMatrix;
         }
     }
 }

@@ -32,7 +32,7 @@ namespace LifeSim.Engine.Rendering
             }
         }
 
-        private float _splitLambda = 0.5f;
+        private float _splitLambda = 0.15f;
 
         /// <summary>
         /// Gets or sets the split lamda used to calculate the cascade splits.
