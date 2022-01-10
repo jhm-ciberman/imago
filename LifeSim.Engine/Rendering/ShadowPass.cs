@@ -148,7 +148,7 @@ namespace LifeSim.Engine.Rendering
                 FaceCullMode.None,
                 PolygonFillMode.Solid,
                 FrontFace.Clockwise,
-                depthClipEnabled: true,
+                depthClipEnabled: false, // Shadow pancaking! Love pancakes!
                 scissorTestEnabled: false
             );
 
