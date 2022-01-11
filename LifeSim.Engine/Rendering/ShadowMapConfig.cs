@@ -9,7 +9,7 @@ namespace LifeSim.Engine.Rendering
 
         public event Action<uint>? OnCascadeCountChanged;
 
-        private float _maximumShadowDistance = 100f;
+        private float _maximumShadowDistance = 50f;
 
         /// <summary>
         /// Gets or sets the maximum distance that the light will cast shadows. 
@@ -85,7 +85,7 @@ namespace LifeSim.Engine.Rendering
             }
         }
 
-        private uint _shadowMapSize = 1024;
+        private uint _shadowMapSize = 2048;
 
         /// <summary>
         /// Gets or sets the size of the shadow map texture.
@@ -120,7 +120,7 @@ namespace LifeSim.Engine.Rendering
             }
         }
 
-        private float _cullingZPadding = 0f;
+        private float _cullingZPadding = 5f;
 
         /// <summary>
         /// Gets or sets the padding added to the back of the shadow map 
@@ -144,7 +144,7 @@ namespace LifeSim.Engine.Rendering
             }
         }
 
-        private float _depthBias = 0.9f;
+        private float _depthBias = 0.25f;
 
         /// <summary>
         /// Gets or sets the depth bias used when rendering the shadow map.
