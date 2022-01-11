@@ -13,6 +13,10 @@ namespace LifeSim.Engine.Rendering
         private struct CameraInfo
         {
             public Matrix4x4 ViewProjectionMatrix { get; set; }
+            public Matrix4x4 ShadowMapMatrix0 { get; set; }
+            public Matrix4x4 ShadowMapMatrix1 { get; set; }
+            public Matrix4x4 ShadowMapMatrix2 { get; set; }
+            public Matrix4x4 ShadowMapMatrix3 { get; set; }
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -22,11 +26,12 @@ namespace LifeSim.Engine.Rendering
             public ColorF MainLightColor { get; set; }
             public Vector3 MainLightDirection { get; set; }
             private readonly float _padding0;
-            public Vector4 ShadowMapCascadeSplits { get; set; }
-            public Matrix4x4 ShadowMapMatrix0 { get; set; }
-            public Matrix4x4 ShadowMapMatrix1 { get; set; }
-            public Matrix4x4 ShadowMapMatrix2 { get; set; }
-            public Matrix4x4 ShadowMapMatrix3 { get; set; }
+
+            // x = cascade far plane, y = depth bias, z = normal bias, w = unused (x4 cascades)
+            public Vector4 ShadoData0 { get; set; }
+            public Vector4 ShadoData1 { get; set; }
+            public Vector4 ShadoData2 { get; set; }
+            public Vector4 ShadoData3 { get; set; }
         }
 
         private readonly GraphicsDevice _gd;
@@ -101,16 +106,19 @@ namespace LifeSim.Engine.Rendering
 
             CameraInfo cameraInfo = new CameraInfo();
             cameraInfo.ViewProjectionMatrix = camera.ViewProjectionMatrix;
+            cameraInfo.ShadowMapMatrix0 = this._shadowPass.GetShadowCascadeViewProjectionMatrix(0);
+            cameraInfo.ShadowMapMatrix1 = this._shadowPass.GetShadowCascadeViewProjectionMatrix(1);
+            cameraInfo.ShadowMapMatrix2 = this._shadowPass.GetShadowCascadeViewProjectionMatrix(2);
+            cameraInfo.ShadowMapMatrix3 = this._shadowPass.GetShadowCascadeViewProjectionMatrix(3);
 
             LightInfo lightInfo = new LightInfo();
             lightInfo.AmbientColor = ambientColor;
             lightInfo.MainLightColor = mainLightColor;
             lightInfo.MainLightDirection = Vector3.Normalize(mainLightDirection);
-            lightInfo.ShadowMapCascadeSplits = this._shadowPass.GetShadowCascadesFarDistances();
-            lightInfo.ShadowMapMatrix0 = this._shadowPass.GetShadowCascadeViewProjectionMatrix(0);
-            lightInfo.ShadowMapMatrix1 = this._shadowPass.GetShadowCascadeViewProjectionMatrix(1);
-            lightInfo.ShadowMapMatrix2 = this._shadowPass.GetShadowCascadeViewProjectionMatrix(2);
-            lightInfo.ShadowMapMatrix3 = this._shadowPass.GetShadowCascadeViewProjectionMatrix(3);
+            lightInfo.ShadoData0 = this._shadowPass.GetShadowCascadesData(0);
+            lightInfo.ShadoData1 = this._shadowPass.GetShadowCascadesData(1);
+            lightInfo.ShadoData2 = this._shadowPass.GetShadowCascadesData(2);
+            lightInfo.ShadoData3 = this._shadowPass.GetShadowCascadesData(3);
 
             commandList.UpdateBuffer(this._camera3DInfoBuffer, 0, ref cameraInfo);
             commandList.UpdateBuffer(this._lightInfoBuffer, 0, ref lightInfo);

@@ -61,6 +61,8 @@ namespace LifeSim.Engine.Rendering
 
         private readonly CommandList _commandList;
 
+        public ShadowMapConfig ShadowMapConfig => this._shadowPass.Config;
+
         public Renderer(Sdl2Window window, GraphicsBackend? graphicsBackend = null)
         {
             if (_instance != null)

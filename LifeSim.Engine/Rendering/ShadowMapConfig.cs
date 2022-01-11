@@ -77,8 +77,11 @@ namespace LifeSim.Engine.Rendering
                     throw new ArgumentOutOfRangeException(nameof(value), "The number of cascades must be between 1 and 4.");
                 }
 
-                this._cascadesCount = value;
-                this.OnCascadeCountChanged?.Invoke(value);
+                if (this._cascadesCount != value)
+                {
+                    this._cascadesCount = value;
+                    this.OnCascadeCountChanged?.Invoke(value);
+                }
             }
         }
 
@@ -94,7 +97,7 @@ namespace LifeSim.Engine.Rendering
         /// <exception cref="ArgumentOutOfRangeException">
         /// The shadow map size must be greater than zero.
         /// </exception>
-        public uint ShadowMapSize
+        public uint ShadowMapResolution
         {
             get => this._shadowMapSize;
             set
@@ -109,9 +112,81 @@ namespace LifeSim.Engine.Rendering
                     throw new ArgumentOutOfRangeException(nameof(value), "The shadow map size cannot be zero.");
                 }
 
-                this._shadowMapSize = value;
-                this.OnShadowMapSizeChanged?.Invoke(value);
+                if (value != this._shadowMapSize)
+                {
+                    this._shadowMapSize = value;
+                    this.OnShadowMapSizeChanged?.Invoke(value);
+                }
             }
         }
+
+        private float _cullingZPadding = 0f;
+
+        /// <summary>
+        /// Gets or sets the padding added to the back of the shadow map 
+        /// when culling the geometry so the geometry that is behind the camera
+        /// is rendered.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// The padding must be greater or equal to zero.
+        /// </exception>
+        public float CullingZPadding
+        {
+            get => this._cullingZPadding;
+            set
+            {
+                if (value < 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value), "The padding must be greater or equal to zero.");
+                }
+
+                this._cullingZPadding = value;
+            }
+        }
+
+        private float _depthBias = 0.9f;
+
+        /// <summary>
+        /// Gets or sets the depth bias used when rendering the shadow map.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// The depth bias must be greater or equal to zero.
+        /// </exception>
+        public float DepthBias
+        {
+            get => this._depthBias;
+            set
+            {
+                if (value < 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value), "The depth bias must be greater or equal to zero.");
+                }
+
+                this._depthBias = value;
+            }
+        }
+
+        private float _normalBias = 0.1f;
+
+        /// <summary>
+        /// Gets or sets the normal bias used when rendering the shadow map.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// The normal bias must be greater or equal to zero.
+        /// </exception>
+        public float NormalBias
+        {
+            get => this._normalBias;
+            set
+            {
+                if (value < 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value), "The normal bias must be greater or equal to zero.");
+                }
+
+                this._normalBias = value;
+            }
+        }
+
     }
 }

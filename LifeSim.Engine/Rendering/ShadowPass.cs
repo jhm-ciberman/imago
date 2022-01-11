@@ -21,7 +21,7 @@ namespace LifeSim.Engine.Rendering
         private readonly RenderJob _renderJob;
         private readonly SceneStorage _storage;
 
-        private Matrix4x4[] _viewProjectionMatrices { get; } = new Matrix4x4[4];
+        private ShadowCascade[] _cascades { get; } = new ShadowCascade[4];
         private Matrix4x4 _scalingMatrix;
 
         public ShadowMapConfig Config { get; }
@@ -49,7 +49,7 @@ namespace LifeSim.Engine.Rendering
                 new ResourceLayoutElementDescription("ShadowMapDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
             ));
 
-            uint size = this.Config.ShadowMapSize;
+            uint size = this.Config.ShadowMapResolution;
             uint count = this.Config.CascadesCount;
             this.ShadowmapTexture = new ShadowMapTexture(gd, size, size, count);
 
@@ -64,6 +64,11 @@ namespace LifeSim.Engine.Rendering
 
             float verticalFlip = this._gd.IsUvOriginTopLeft ? -1.0f : 1.0f;
             this._scalingMatrix = Matrix4x4.CreateScale(.5f, .5f * verticalFlip, 1f) * Matrix4x4.CreateTranslation(0.5f, 0.5f, 0f);
+
+            for (int i = 0; i < this._cascades.Length; i++)
+            {
+                this._cascades[i] = new ShadowCascade();
+            }
         }
 
         private void OnShadowMapSizeChanged(uint size)
@@ -78,18 +83,9 @@ namespace LifeSim.Engine.Rendering
 
         public void Render(CommandList commandList, IReadOnlyList<Renderable> renderables, Camera3D camera, Vector3 mainLightDirection)
         {
-            if (Input.GetKeyDown(Veldrid.Key.Number4)) this.Config.CascadesCount = 4;
-            if (Input.GetKeyDown(Veldrid.Key.Number3)) this.Config.CascadesCount = 3;
-            if (Input.GetKeyDown(Veldrid.Key.Number2)) this.Config.CascadesCount = 2;
-            if (Input.GetKeyDown(Veldrid.Key.Number1)) this.Config.CascadesCount = 1;
-
-            if (Input.GetKeyDown(Veldrid.Key.Number0)) this.Config.MaximumShadowsDistance += 10;
-            if (Input.GetKeyDown(Veldrid.Key.Number9)) this.Config.MaximumShadowsDistance -= 10;
-
             this.UpdateSplitDistances(camera);
 
             this.UpdateShadowMapTextureSize();
-
 
             for (int i = 0; i < this.Config.CascadesCount; i++)
             {
@@ -98,12 +94,13 @@ namespace LifeSim.Engine.Rendering
 
                 float near = this._splitDistances[i];
                 float far = this._splitDistances[i + 1];
-                this._viewProjectionMatrices[i] = this.GetCascadeMatrix(camera, mainLightDirection, near, far);
 
-                BoundingFrustum shadowFrustum = new BoundingFrustum(this._viewProjectionMatrices[i]);
+                this._cascades[i].UpdateCascadeMatrix(camera, mainLightDirection, near, far, this.Config);
+
+                BoundingFrustum shadowFrustum = new BoundingFrustum(this._cascades[i].ViewProjectionMatrix);
                 this._renderQueues[i].AddToRenderQueue(renderables, shadowFrustum, camera.Position);
 
-                commandList.UpdateBuffer(this._shadowmapInfoBuffer, 0, this._viewProjectionMatrices[i]);
+                commandList.UpdateBuffer(this._shadowmapInfoBuffer, 0, this._cascades[i].ViewProjectionMatrix);
                 this._renderJob.DrawRenderList(commandList, this._renderQueues[i]);
             }
         }
@@ -115,7 +112,7 @@ namespace LifeSim.Engine.Rendering
                 return Matrix4x4.Identity;
             }
 
-            return this._viewProjectionMatrices[cascadeIndex] * this._scalingMatrix;
+            return this._cascades[cascadeIndex].ViewProjectionMatrix * this._scalingMatrix;
         }
 
         private void UpdateShadowMapTextureSize()
@@ -123,7 +120,7 @@ namespace LifeSim.Engine.Rendering
             if (!this._shadowMapTextureSizeDirty) return;
 
             uint count = this.Config.CascadesCount;
-            uint size = this.Config.ShadowMapSize;
+            uint size = this.Config.ShadowMapResolution;
             this._gd.DisposeWhenIdle(this.ShadowmapTexture);
             this.ShadowmapTexture = new ShadowMapTexture(this._gd, size, size, count);
             this._shadowMapTextureSizeDirty = false;
@@ -137,9 +134,10 @@ namespace LifeSim.Engine.Rendering
             this._shadowmapInfoBuffer.Dispose();
         }
 
-        internal Vector4 GetShadowCascadesFarDistances()
+        internal Vector4 GetShadowCascadesData(int index)
         {
-            return new Vector4(this._splitDistances[1], this._splitDistances[2], this._splitDistances[3], this._splitDistances[4]);
+            var cascade = this._cascades[index];
+            return new Vector4(cascade.SplitFar, cascade.DepthBias, cascade.NormalBias, 0.0f);
         }
 
         Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant)
@@ -189,7 +187,8 @@ namespace LifeSim.Engine.Rendering
             // https://developer.nvidia.com/gpugems/gpugems3/part-ii-light-and-shadows/chapter-10-parallel-split-shadow-maps-programmable-gpus
 
             float near = camera.NearPlane;
-            float far = MathF.Min(camera.FarPlane, this.Config.MaximumShadowsDistance);
+            float far = MathF.Min(camera.FarPlane, camera.NearPlane + this.Config.MaximumShadowsDistance);
+            far = MathF.Max(far, near + 0.01f);
 
             uint count = this.Config.CascadesCount;
 
@@ -203,68 +202,6 @@ namespace LifeSim.Engine.Rendering
                 float logarithmicDistance = near * MathF.Pow(far / near, t);
                 this._splitDistances[i] = MathUtils.Lerp(logarithmicDistance, uniformDistance, this.Config.SplitLambda);
             }
-        }
-
-        private Matrix4x4 GetCascadeMatrix(Camera3D camera, Vector3 lightDirection, float near, float far)
-        {
-            Matrix4x4 cameraProjectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(camera.FieldOfView, camera.AspectRatio, near, far);
-            Matrix4x4 cameraViewProjectionMatrix = camera.ViewMatrix * cameraProjectionMatrix;
-
-            BoundingFrustum mainCameraFrustum = new BoundingFrustum(cameraViewProjectionMatrix);
-
-            FrustumCorners corners = mainCameraFrustum.GetCorners();
-
-            float sphereDiameter = MathF.Max(
-                Vector3.Distance(corners.FarBottomLeft, corners.FarTopRight),
-                Vector3.Distance(corners.NearBottomLeft, corners.FarTopRight)
-            );
-
-            sphereDiameter = MathF.Round(sphereDiameter * 16) / 16;
-
-            Matrix4x4 lightViewMatrix = Matrix4x4.CreateLookAt(lightDirection, Vector3.Zero, Vector3.UnitY);
-            Matrix4x4.Invert(lightViewMatrix, out Matrix4x4 lightViewMatrixInverse);
-
-            Span<Vector3> frustumCornersWS = stackalloc Vector3[8];
-            frustumCornersWS[0] = corners.FarBottomLeft;
-            frustumCornersWS[1] = corners.FarBottomRight;
-            frustumCornersWS[2] = corners.FarTopLeft;
-            frustumCornersWS[3] = corners.FarTopRight;
-            frustumCornersWS[4] = corners.NearBottomLeft;
-            frustumCornersWS[5] = corners.NearBottomRight;
-            frustumCornersWS[6] = corners.NearTopLeft;
-            frustumCornersWS[7] = corners.NearTopRight;
-
-            Vector3 minLS = new Vector3(float.MaxValue);
-            Vector3 maxLS = new Vector3(float.MinValue);
-            for (int i = 0; i < 8; i++)
-            {
-                Vector3 frustumCornerLS = Vector3.Transform(frustumCornersWS[i], lightViewMatrix);
-                minLS = Vector3.Min(minLS, frustumCornerLS);
-                maxLS = Vector3.Max(maxLS, frustumCornerLS);
-            }
-
-            float f = sphereDiameter / this.Config.ShadowMapSize;
-
-            Vector3 frustumCenterWS = (corners.FarBottomLeft + corners.FarTopRight + corners.FarBottomRight + corners.FarTopLeft
-            + corners.NearBottomLeft + corners.NearTopRight + corners.NearBottomRight + corners.NearTopLeft) / 8f;
-
-            float zPadding = 2f;
-
-            Vector3 centerLS = Vector3.Transform(frustumCenterWS, lightViewMatrix);
-            centerLS.X = MathF.Round(centerLS.X / f) * f;
-            centerLS.Y = MathF.Round(centerLS.Y / f) * f;
-            centerLS.Z = maxLS.Z + zPadding;
-            Vector3 centerWS = Vector3.Transform(centerLS, lightViewMatrixInverse);
-
-
-            //GizmosLayer.Default.DrawWireSphere(frustumCenterWS, sphereDiameter / 2f, LifeSim.Color.Red);
-            //GizmosLayer.Default.DrawWireSphere(frustumCenterWS, sphereDiameter / 10f, LifeSim.Color.Cyan);
-
-            lightViewMatrix = Matrix4x4.CreateLookAt(centerWS, centerWS - lightDirection, Vector3.UnitY);
-
-            Matrix4x4 lightProjectionMatrix = Matrix4x4.CreateOrthographic(sphereDiameter, sphereDiameter, 0, maxLS.Z - minLS.Z + zPadding);
-
-            return lightViewMatrix * lightProjectionMatrix;
         }
     }
 }

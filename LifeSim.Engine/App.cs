@@ -31,6 +31,8 @@ namespace LifeSim.Engine
         private bool _running = false;
         public uint MousePickerObjectID => this._renderer.MousePickerObjectID;
 
+        public Renderer Renderer => this._renderer;
+
         public App(string windowTitle, GraphicsBackend? backend = null)
         {
             GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
