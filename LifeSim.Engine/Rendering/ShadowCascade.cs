@@ -11,7 +11,7 @@ namespace LifeSim.Engine.Rendering
         public float SplitFar { get; set; }
 
         public float DepthBias { get; set; }
-        public float NormalBias { get; set; }
+        public float NormalOffset { get; set; }
         public Matrix4x4 ViewProjectionMatrix { get; set; }
 
         public void UpdateCascadeMatrix(Camera3D camera, Vector3 lightDirection, float near, float far, ShadowMapConfig config)
@@ -63,9 +63,6 @@ namespace LifeSim.Engine.Rendering
             centerLS.Z = maxLS.Z + config.CullingZPadding;
             Vector3 centerWS = Vector3.Transform(centerLS, lightViewMatrixInverse);
 
-
-            //GizmosLayer.Default.DrawWireSphere(frustumCenterWS, sphereDiameter / 2f, LifeSim.Color.Red);
-            //GizmosLayer.Default.DrawWireSphere(frustumCenterWS, sphereDiameter / 10f, LifeSim.Color.Cyan);
             float orthoDepth = maxLS.Z - minLS.Z + config.CullingZPadding;
             lightViewMatrix = Matrix4x4.CreateLookAt(centerWS, centerWS - lightDirection, Vector3.UnitY);
 
@@ -74,8 +71,8 @@ namespace LifeSim.Engine.Rendering
             this.ViewProjectionMatrix = lightViewMatrix * lightProjectionMatrix;
             this.SplitNear = near;
             this.SplitFar = far;
-            this.DepthBias = config.DepthBias / 10;
-            this.NormalBias = config.NormalBias / 10;
+            this.DepthBias = config.DepthBias * unitsPerTexel / orthoDepth;
+            this.NormalOffset = config.NormalOffset * unitsPerTexel;
         }
     }
 }

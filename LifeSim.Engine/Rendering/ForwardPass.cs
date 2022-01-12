@@ -17,6 +17,12 @@ namespace LifeSim.Engine.Rendering
             public Matrix4x4 ShadowMapMatrix1 { get; set; }
             public Matrix4x4 ShadowMapMatrix2 { get; set; }
             public Matrix4x4 ShadowMapMatrix3 { get; set; }
+
+            // x = depth bias, y = normal bias, z = unused, w = unused (x4 cascades)
+            public Vector4 ShadowBiasData0 { get; set; }
+            public Vector4 ShadowBiasData1 { get; set; }
+            public Vector4 ShadowBiasData2 { get; set; }
+            public Vector4 ShadowBiasData3 { get; set; }
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -26,12 +32,7 @@ namespace LifeSim.Engine.Rendering
             public ColorF MainLightColor { get; set; }
             public Vector3 MainLightDirection { get; set; }
             private readonly float _padding0;
-
-            // x = cascade far plane, y = depth bias, z = normal bias, w = unused (x4 cascades)
-            public Vector4 ShadoData0 { get; set; }
-            public Vector4 ShadoData1 { get; set; }
-            public Vector4 ShadoData2 { get; set; }
-            public Vector4 ShadoData3 { get; set; }
+            public Vector4 ShadowMapDistances { get; set; } // Each component is the far plane of a cascade
         }
 
         private readonly GraphicsDevice _gd;
@@ -63,16 +64,11 @@ namespace LifeSim.Engine.Rendering
             this._camera3DInfoBuffer = factory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<CameraInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
             this._lightInfoBuffer = factory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<LightInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
-            var shadowMapSampler = factory.CreateSampler(new SamplerDescription (
-                SamplerAddressMode.Border, SamplerAddressMode.Border, SamplerAddressMode.Border,
-                SamplerFilter.MinPoint_MagPoint_MipPoint, null, 0, 0, 0, 0, SamplerBorderColor.OpaqueWhite
-            ));
-
             this._resourceSet = factory.CreateResourceSet(new ResourceSetDescription(this._resourceLayout,
                 this._camera3DInfoBuffer,
                 this._lightInfoBuffer,
                 shadowPass.ShadowmapTexture.DeviceTexture,
-                shadowMapSampler
+                shadowPass.ShadowmapTexture.ShadowSampler
             ));
 
             this._renderTexture = mainRenderTexture;
@@ -110,15 +106,16 @@ namespace LifeSim.Engine.Rendering
             cameraInfo.ShadowMapMatrix1 = this._shadowPass.GetShadowCascadeViewProjectionMatrix(1);
             cameraInfo.ShadowMapMatrix2 = this._shadowPass.GetShadowCascadeViewProjectionMatrix(2);
             cameraInfo.ShadowMapMatrix3 = this._shadowPass.GetShadowCascadeViewProjectionMatrix(3);
+            cameraInfo.ShadowBiasData0 = this._shadowPass.GetShadowBiasData(0);
+            cameraInfo.ShadowBiasData1 = this._shadowPass.GetShadowBiasData(1);
+            cameraInfo.ShadowBiasData2 = this._shadowPass.GetShadowBiasData(2);
+            cameraInfo.ShadowBiasData3 = this._shadowPass.GetShadowBiasData(3);
 
             LightInfo lightInfo = new LightInfo();
             lightInfo.AmbientColor = ambientColor;
             lightInfo.MainLightColor = mainLightColor;
             lightInfo.MainLightDirection = Vector3.Normalize(mainLightDirection);
-            lightInfo.ShadoData0 = this._shadowPass.GetShadowCascadesData(0);
-            lightInfo.ShadoData1 = this._shadowPass.GetShadowCascadesData(1);
-            lightInfo.ShadoData2 = this._shadowPass.GetShadowCascadesData(2);
-            lightInfo.ShadoData3 = this._shadowPass.GetShadowCascadesData(3);
+            lightInfo.ShadowMapDistances = this._shadowPass.GetShadowCascadeDistances();
 
             commandList.UpdateBuffer(this._camera3DInfoBuffer, 0, ref cameraInfo);
             commandList.UpdateBuffer(this._lightInfoBuffer, 0, ref lightInfo);

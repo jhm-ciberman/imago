@@ -85,11 +85,13 @@ namespace LifeSim.Engine.Rendering
             }
         }
 
-        private uint _shadowMapSize = 2048;
+        private uint _shadowMapSize = 1024;
 
         /// <summary>
         /// Gets or sets the size of the shadow map texture.
-        /// It must be a power of two.
+        /// It must be a power of two. This size will be used for each cascade.
+        /// So if the value is 1024, the first cascade will be 1024x1024, the second 1024x1024, etc.
+        /// The cascades are stored as an array texture.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">
         /// The shadow map size must be a power of two.
@@ -147,7 +149,9 @@ namespace LifeSim.Engine.Rendering
         private float _depthBias = 0.25f;
 
         /// <summary>
-        /// Gets or sets the depth bias used when rendering the shadow map.
+        /// Gets or sets the depth bias used when rendering the shadow map. 
+        /// The units are in texels so a value of 0.1f will bias the depth by 0.1 texels.
+        /// This way the same value works independent of the shadow map resolution.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">
         /// The depth bias must be greater or equal to zero.
@@ -166,25 +170,28 @@ namespace LifeSim.Engine.Rendering
             }
         }
 
-        private float _normalBias = 0.1f;
+        private float _normalOffset = 5.6f;
 
         /// <summary>
-        /// Gets or sets the normal bias used when rendering the shadow map.
+        /// Gets or sets the normal offset used when rendering the shadow map. 
+        /// The units are in texels so a value of 0.1f will offset the shadowmap coordinates 
+        /// in the direction of the normal by 0.1 texels.
+        /// This way the same value works independent of the shadow map resolution.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">
-        /// The normal bias must be greater or equal to zero.
+        /// The normal offset must be greater or equal to zero.
         /// </exception>
-        public float NormalBias
+        public float NormalOffset
         {
-            get => this._normalBias;
+            get => this._normalOffset;
             set
             {
                 if (value < 0)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(value), "The normal bias must be greater or equal to zero.");
+                    throw new ArgumentOutOfRangeException(nameof(value), "The normal offset must be greater or equal to zero.");
                 }
 
-                this._normalBias = value;
+                this._normalOffset = value;
             }
         }
 

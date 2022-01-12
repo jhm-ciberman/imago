@@ -134,10 +134,10 @@ namespace LifeSim.Engine.Rendering
             this._shadowmapInfoBuffer.Dispose();
         }
 
-        internal Vector4 GetShadowCascadesData(int index)
+        internal Vector4 GetShadowBiasData(int index)
         {
             var cascade = this._cascades[index];
-            return new Vector4(cascade.SplitFar, cascade.DepthBias, cascade.NormalBias, 0.0f);
+            return new Vector4(cascade.DepthBias, cascade.NormalOffset, 0.0f, 0.0f);
         }
 
         Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant)
@@ -160,6 +160,11 @@ namespace LifeSim.Engine.Rendering
                 Outputs = this.ShadowmapTexture.Framebuffers[0].OutputDescription,
                 ResourceLayouts = this._GetResourceLayouts(shaderVariant),
             });
+        }
+
+        internal Vector4 GetShadowCascadeDistances()
+        {
+            return new Vector4(this._splitDistances[1], this._splitDistances[2], this._splitDistances[3], this._splitDistances[4]);
         }
 
         private ResourceLayout[] _GetResourceLayouts(ShaderVariant shaderVariant)

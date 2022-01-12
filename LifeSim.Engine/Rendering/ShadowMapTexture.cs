@@ -1,9 +1,5 @@
 using System;
-using System.Numerics;
-using System.Threading.Tasks;
-using LifeSim.Engine.SceneGraph;
 using Veldrid;
-using Veldrid.Utilities;
 
 namespace LifeSim.Engine.Rendering
 {
@@ -19,6 +15,8 @@ namespace LifeSim.Engine.Rendering
 
         public Sampler Sampler { get; private set; }
 
+        public Sampler ShadowSampler { get; private set; }
+
         public Framebuffer[] Framebuffers { get; private set; }
 
         public ShadowMapTexture(GraphicsDevice gd, uint width, uint height, uint arrayLayers)
@@ -27,7 +25,16 @@ namespace LifeSim.Engine.Rendering
             this.Height = height;
             this.ArrayLayers = arrayLayers;
             this.DeviceTexture = gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(this.Width, this.Height, 1, this.ArrayLayers, PixelFormat.R32_Float, TextureUsage.DepthStencil | TextureUsage.Sampled));
+
             this.Sampler = gd.LinearSampler;
+
+            this.ShadowSampler = gd.ResourceFactory.CreateSampler(new SamplerDescription(
+                SamplerAddressMode.Border, SamplerAddressMode.Border, SamplerAddressMode.Border,
+                SamplerFilter.MinLinear_MagLinear_MipPoint,
+                //null, 
+                ComparisonKind.Greater,
+                0, 0, 0, 0, SamplerBorderColor.OpaqueWhite
+            ));
 
             this.Framebuffers = new Framebuffer[this.ArrayLayers];
 
@@ -43,6 +50,7 @@ namespace LifeSim.Engine.Rendering
         public void Dispose()
         {
             this.DeviceTexture.Dispose();
+            this.Sampler.Dispose();
 
             foreach (Framebuffer fb in this.Framebuffers)
             {
