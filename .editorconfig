@@ -18,6 +18,7 @@ csharp_new_line_before_open_brace = all
 csharp_space_around_declaration_statements = ignore
 csharp_prefer_braces = when_multiline
 csharp_prefer_simple_default_expression = false
+csharp_style_implicit_object_creation_when_type_is_apparent = false
 
 dotnet_diagnostic.IDE0040.severity = warning # access modifier required
 dotnet_diagnostic.IDE0008.severity = none # Use explicit type instead of 'var'

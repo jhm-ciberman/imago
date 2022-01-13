@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
@@ -91,11 +92,9 @@ namespace LifeSim
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override bool Equals(object? other)
+        public override bool Equals([AllowNull] object obj)
         {
-            if (!(other is Vector2Int)) return false;
-
-            return this.Equals((Vector2Int)other);
+            return obj is Vector2Int vector && this.Equals(vector);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
