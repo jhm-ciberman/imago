@@ -21,13 +21,13 @@ public class CanvasLayer
     public void Add(Node2D node)
     {
         this._root.Add(node);
-        this._AddNodeToRecursive(node);
+        this.AddNodeToRecursive(node);
     }
 
     public void Remove(Node2D node)
     {
         this._root.Remove(node);
-        this._RemoveNodeRecursive(node);
+        this.RemoveNodeRecursive(node);
     }
 
     public void AddCanvasItem(ICanvasItem canvasItem)
@@ -40,7 +40,7 @@ public class CanvasLayer
         this._items.Remove(canvasItem);
     }
 
-    internal void _AddNodeToRecursive(Node2D node)
+    internal void AddNodeToRecursive(Node2D node)
     {
         if (node is ICanvasItem canvasItem)
         {
@@ -48,11 +48,11 @@ public class CanvasLayer
         }
         for (int i = 0; i < node.Children.Count; i++)
         {
-            this._AddNodeToRecursive(node.Children[i]);
+            this.AddNodeToRecursive(node.Children[i]);
         }
     }
 
-    internal void _RemoveNodeRecursive(Node2D node)
+    internal void RemoveNodeRecursive(Node2D node)
     {
         if (node is ICanvasItem canvasItem)
         {
@@ -60,7 +60,7 @@ public class CanvasLayer
         }
         for (int i = 0; i < node.Children.Count; i++)
         {
-            this._RemoveNodeRecursive(node.Children[i]);
+            this.RemoveNodeRecursive(node.Children[i]);
         }
     }
 

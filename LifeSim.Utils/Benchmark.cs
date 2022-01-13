@@ -52,7 +52,7 @@ public static class Benchmark
         Benchmark._loggerFunction("\"" + taskName + "\" took " + sw.ElapsedTicks + " ticks");
     }
 
-    private static Stopwatch _GetStopWatch(string taskName)
+    private static Stopwatch GetStopWatch(string taskName)
     {
         if (!Benchmark._parts.TryGetValue(taskName, out Stopwatch? sw))
         {
@@ -64,7 +64,7 @@ public static class Benchmark
 
     public static void RunPart(string taskName, Action callback)
     {
-        var sw = Benchmark._GetStopWatch(taskName);
+        var sw = Benchmark.GetStopWatch(taskName);
         sw.Start();
         callback();
         sw.Stop();
@@ -74,7 +74,7 @@ public static class Benchmark
 
     public static void Report(string taskName)
     {
-        var sw = Benchmark._GetStopWatch(taskName);
+        var sw = Benchmark.GetStopWatch(taskName);
         Benchmark._loggerFunction("\"" + taskName + "\" took " + sw.ElapsedMilliseconds + " milliseconds");
         Benchmark._parts.Remove(taskName);
     }

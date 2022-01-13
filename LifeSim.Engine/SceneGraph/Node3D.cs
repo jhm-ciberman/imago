@@ -25,7 +25,7 @@ public class Node3D : IDisposable
         {
             if (this._position == value) return;
             this._position = value;
-            this._NotifyTransformDirty();
+            this.NotifyTransformDirty();
         }
     }
 
@@ -36,7 +36,7 @@ public class Node3D : IDisposable
         {
             if (this._rotation == value) return;
             this._rotation = value;
-            this._NotifyTransformDirty();
+            this.NotifyTransformDirty();
         }
     }
 
@@ -47,7 +47,7 @@ public class Node3D : IDisposable
         {
             if (this._scale == value) return;
             this._scale = value;
-            this._NotifyTransformDirty();
+            this.NotifyTransformDirty();
         }
     }
 
@@ -87,7 +87,7 @@ public class Node3D : IDisposable
         // If the current node has a scene, add the node to the scene
         if (this.Scene != null)
         {
-            node._AttachToSceneRecursive(this.Scene);
+            node.AttachToSceneRecursive(this.Scene);
         }
     }
 
@@ -99,11 +99,11 @@ public class Node3D : IDisposable
         node.Parent = null;
         if (node.Scene != null)
         {
-            node._DetachFromSceneRecursive();
+            node.DetachFromSceneRecursive();
         }
     }
 
-    protected virtual void _AttachToSceneRecursive(Scene scene)
+    protected virtual void AttachToSceneRecursive(Scene scene)
     {
         if (this.Scene != null) return;
 
@@ -111,24 +111,24 @@ public class Node3D : IDisposable
         this.Scene.NotifyNodeAdded(this);
         foreach (var child in this._children)
         {
-            child._AttachToSceneRecursive(scene);
+            child.AttachToSceneRecursive(scene);
         }
     }
 
-    protected virtual void _DetachFromSceneRecursive()
+    protected virtual void DetachFromSceneRecursive()
     {
         if (this.Scene == null) return;
 
         this.Scene.NotifyNodeRemoved(this);
         foreach (var child in this._children)
         {
-            child._DetachFromSceneRecursive();
+            child.DetachFromSceneRecursive();
         }
         this.Scene = null;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void _NotifyTransformDirty()
+    private void NotifyTransformDirty()
     {
         if (this._transformIsDirty) return;
         this._transformIsDirty = true;

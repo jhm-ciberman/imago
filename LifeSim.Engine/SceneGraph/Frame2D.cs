@@ -15,7 +15,7 @@ public class Frame2D : RenderNode2D, ICanvasItem
     public Vector2 Pivot
     {
         get => this._pivot;
-        set { this._pivot = value; this._OnTransformDirty(); }
+        set { this._pivot = value; this.OnTransformDirty(); }
     }
 
     public Frame2D() { }

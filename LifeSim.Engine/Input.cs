@@ -10,7 +10,7 @@ public static class Input
     private static InputInstance? _instance = null;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static InputInstance _GetInstance()
+    private static InputInstance GetInstance()
     {
         if (Input._instance == null)
         {
@@ -19,14 +19,14 @@ public static class Input
         return Input._instance;
     }
 
-    public static bool GetKey(Key key) => Input._GetInstance().GetKey(key);
-    public static bool GetKeyDown(Key key) => Input._GetInstance().GetKeyDown(key);
-    public static bool GetMouseButton(MouseButton button) => Input._GetInstance().GetMouseButton(button);
-    public static bool GetMouseButtonDown(MouseButton button) => Input._GetInstance().GetMouseButtonDown(button);
+    public static bool GetKey(Key key) => Input.GetInstance().GetKey(key);
+    public static bool GetKeyDown(Key key) => Input.GetInstance().GetKeyDown(key);
+    public static bool GetMouseButton(MouseButton button) => Input.GetInstance().GetMouseButton(button);
+    public static bool GetMouseButtonDown(MouseButton button) => Input.GetInstance().GetMouseButtonDown(button);
 
-    public static Vector2 MouseDelta => Input._GetInstance().MouseDelta;
-    public static Vector2 MousePosition => Input._GetInstance().MousePosition;
-    public static bool MouseIsLocked => Input._GetInstance().MouseIsLocked;
-    public static void LockMouse() => Input._GetInstance().LockMouse();
-    public static void UnlockMouse() => Input._GetInstance().UnlockMouse();
+    public static Vector2 MouseDelta => Input.GetInstance().MouseDelta;
+    public static Vector2 MousePosition => Input.GetInstance().MousePosition;
+    public static bool MouseIsLocked => Input.GetInstance().MouseIsLocked;
+    public static void LockMouse() => Input.GetInstance().LockMouse();
+    public static void UnlockMouse() => Input.GetInstance().UnlockMouse();
 }

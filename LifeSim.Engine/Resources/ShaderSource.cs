@@ -15,11 +15,11 @@ public static class ShaderSource
 
     public static string Load(string filename)
     {
-        var fullPath = _ResolvePath(filename);
-        return _GetGlsl(fullPath);
+        var fullPath = ResolvePath(filename);
+        return GetGlsl(fullPath);
     }
 
-    private static string _GetGlsl(string path)
+    private static string GetGlsl(string path)
     {
         // Substitute include files
         using StreamReader reader = new StreamReader(path);
@@ -32,8 +32,8 @@ public static class ShaderSource
             if (match.Success)
             {
                 var filename = match.Groups[1].Value;
-                var fullFilePath = _ResolvePath(filename);
-                var includedContent = _GetGlsl(fullFilePath);
+                var fullFilePath = ResolvePath(filename);
+                var includedContent = GetGlsl(fullFilePath);
                 sb.AppendLine(includedContent);
             }
             else
@@ -45,7 +45,7 @@ public static class ShaderSource
         return sb.ToString();
     }
 
-    private static string _ResolvePath(string filename)
+    private static string ResolvePath(string filename)
     {
         var fullFilePath = Path.Combine(_shadersBasePath, filename);
         if (!File.Exists(fullFilePath))

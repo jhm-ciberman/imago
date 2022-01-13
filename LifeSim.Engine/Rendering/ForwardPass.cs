@@ -153,11 +153,11 @@ public class ForwardPass : IDisposable, IPipelineProvider
             ),
             RasterizerState = rasterizerState,
             Outputs = this._renderTexture.OutputDescription,
-            ResourceLayouts = this._GetResourceLayouts(shaderVariant),
+            ResourceLayouts = this.GetResourceLayouts(shaderVariant),
         });
     }
 
-    private ResourceLayout[] _GetResourceLayouts(ShaderVariant shaderVariant)
+    private ResourceLayout[] GetResourceLayouts(ShaderVariant shaderVariant)
     {
         Debug.Assert(shaderVariant.MaterialResourceLayout != null);
 

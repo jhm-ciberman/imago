@@ -27,7 +27,7 @@ public class FullScreenPass : IDisposable, IPipelineProvider
         var factory = gd.ResourceFactory;
 
         this._sourceTexture = sourceRenderTexture;
-        this._sourceTexture.OnResized += this._OnSourceTextureResized;
+        this._sourceTexture.OnResized += this.OnSourceTextureResized;
 
         this._destinationTexture = destinationRenderTexture;
 
@@ -85,13 +85,13 @@ public class FullScreenPass : IDisposable, IPipelineProvider
     {
         if (this._sourceTexture == sourceRenderTexture) return;
 
-        this._sourceTexture.OnResized -= this._OnSourceTextureResized;
+        this._sourceTexture.OnResized -= this.OnSourceTextureResized;
         this._sourceTexture = sourceRenderTexture;
-        this._sourceTexture.OnResized += this._OnSourceTextureResized;
+        this._sourceTexture.OnResized += this.OnSourceTextureResized;
         this._resourceSetDirty = true;
     }
 
-    private void _OnSourceTextureResized(IRenderTexture renderTexture)
+    private void OnSourceTextureResized(IRenderTexture renderTexture)
     {
         this._resourceSetDirty = true;
     }

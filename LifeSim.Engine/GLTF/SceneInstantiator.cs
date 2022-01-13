@@ -24,12 +24,12 @@ public class SceneInstantiator
         Node3D n = new Node3D();
         foreach (GLTFNode? node in scene.Children)
         {
-            n.Add(this._InstantiateNodeRecursive(scene, node));
+            n.Add(this.InstantiateNodeRecursive(scene, node));
         }
         return n;
     }
 
-    private Node3D _CreateRenderNode(GLTFScene scene, Mesh mesh, Material? material, Skin? skin)
+    private Node3D CreateRenderNode(GLTFScene scene, Mesh mesh, Material? material, Skin? skin)
     {
         Renderable renderable = new Renderable(this._storage);
         renderable.SetMesh(mesh);
@@ -39,13 +39,13 @@ public class SceneInstantiator
         }
         if (skin != null)
         {
-            var skeleton = this._CreateSkeleton(scene, skin);
+            var skeleton = this.CreateSkeleton(scene, skin);
             renderable.SetSkeleton(skeleton);
         }
         return new RenderNode3D(renderable);
     }
 
-    private Node3D _InstantiateNodeRecursive(GLTFScene scene, GLTFNode gltfNode)
+    private Node3D InstantiateNodeRecursive(GLTFScene scene, GLTFNode gltfNode)
     {
         Node3D? node3d = this._nodesCache.GetValueOrDefault(gltfNode);
         if (node3d != null)
@@ -54,7 +54,7 @@ public class SceneInstantiator
         }
 
         Node3D node = (gltfNode.Mesh != null)
-                    ? this._CreateRenderNode(scene, gltfNode.Mesh, gltfNode.Material, gltfNode.Skin)
+                    ? this.CreateRenderNode(scene, gltfNode.Mesh, gltfNode.Material, gltfNode.Skin)
                     : new Node3D();
 
         this._nodesCache[gltfNode] = node;
@@ -65,13 +65,13 @@ public class SceneInstantiator
 
         foreach (GLTFNode? child in gltfNode.Children)
         {
-            node.Add(this._InstantiateNodeRecursive(scene, child));
+            node.Add(this.InstantiateNodeRecursive(scene, child));
         }
 
         return node;
     }
 
-    private Skeleton _CreateSkeleton(GLTFScene scene, Skin skin)
+    private Skeleton CreateSkeleton(GLTFScene scene, Skin skin)
     {
         Node3D[] joints = new Node3D[skin.JointNames.Count];
         IList<string> names = skin.JointNames;
@@ -79,7 +79,7 @@ public class SceneInstantiator
         {
             GLTFNode? gltfNode = scene.FindNodeByName(names[i]);
             joints[i] = gltfNode != null
-                ? this._InstantiateNodeRecursive(scene, gltfNode)
+                ? this.InstantiateNodeRecursive(scene, gltfNode)
                 : throw new System.Exception("Could not bind joint: " + names[i]);
         }
         return new Skeleton(this._storage, joints, skin.InverseBindMatrices);

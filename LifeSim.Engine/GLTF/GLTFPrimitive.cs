@@ -21,21 +21,21 @@ internal class GLTFPrimitive
 
     public IMeshData MakeMeshData()
     {
-        var positionAccessor = this._GetAttributeAccessor("POSITION");
+        var positionAccessor = this.GetAttributeAccessor("POSITION");
         Debug.Assert(positionAccessor != null);
         var positions = positionAccessor.AsVector3Array();
 
-        var texCoordAccessor = this._GetAttributeAccessor("TEXCOORD_0");
+        var texCoordAccessor = this.GetAttributeAccessor("TEXCOORD_0");
         var texCoords = texCoordAccessor?.AsVector2Array();
 
-        var normalAccessor   = this._GetAttributeAccessor("NORMAL");
+        var normalAccessor   = this.GetAttributeAccessor("NORMAL");
         var normals = normalAccessor?.AsVector3Array();
 
-        var jointsAccessor   = this._GetAttributeAccessor("JOINTS_0");
-        var weightsAccessor  = this._GetAttributeAccessor("WEIGHTS_0");
+        var jointsAccessor   = this.GetAttributeAccessor("JOINTS_0");
+        var weightsAccessor  = this.GetAttributeAccessor("WEIGHTS_0");
 
 
-        var indices = this._indicesAccessor == null ? _MakeFakeIndices(positions.Length) : this._indicesAccessor.AsIndicesArray();
+        var indices = this._indicesAccessor == null ? MakeFakeIndices(positions.Length) : this._indicesAccessor.AsIndicesArray();
 
         if (this._loadSkinned && weightsAccessor != null && jointsAccessor != null)
         {
@@ -50,7 +50,7 @@ internal class GLTFPrimitive
     }
 
 
-    private GLTFAccessor? _GetAttributeAccessor(string name)
+    private GLTFAccessor? GetAttributeAccessor(string name)
     {
         if (this._attributes.TryGetValue(name, out int attributeId))
         {
@@ -59,7 +59,7 @@ internal class GLTFPrimitive
         return null;
     }
 
-    private static ushort[] _MakeFakeIndices(int count)
+    private static ushort[] MakeFakeIndices(int count)
     {
         var arr = new ushort[count];
         for (int i = 0; i < count; i++)

@@ -58,7 +58,7 @@ internal class GLTFBufferView : IGLTFBufferView
         this._byteStride = byteStride ?? 0;
     }
 
-    public T[] _Read<T>(int offset, int count, System.Func<int, T> reader) where T : struct
+    private T[] Read<T>(int offset, int count, System.Func<int, T> reader) where T : struct
     {
         var arr = new T[count];
         var stride = this._byteStride == 0 ? Marshal.SizeOf(typeof(T)) : this._byteStride;
@@ -70,19 +70,19 @@ internal class GLTFBufferView : IGLTFBufferView
         return arr;
     }
 
-    public Vector2[] ReadVector2Array(int offset, int count) => this._Read<Vector2>(offset, count, this._buffer.ReadVector2);
-    public Vector3[] ReadVector3Array(int offset, int count) => this._Read<Vector3>(offset, count, this._buffer.ReadVector3);
-    public Vector4[] ReadVector4Array(int offset, int count) => this._Read<Vector4>(offset, count, this._buffer.ReadVector4);
+    public Vector2[] ReadVector2Array(int offset, int count) => this.Read<Vector2>(offset, count, this._buffer.ReadVector2);
+    public Vector3[] ReadVector3Array(int offset, int count) => this.Read<Vector3>(offset, count, this._buffer.ReadVector3);
+    public Vector4[] ReadVector4Array(int offset, int count) => this.Read<Vector4>(offset, count, this._buffer.ReadVector4);
 
-    public Vector4UShort[] ReadUShort4Array(int offset, int count) => this._Read<Vector4UShort>(offset, count, this._buffer.ReadUShort4);
-    public ushort[] ReadUShortArray(int offset, int count) => this._Read<ushort>(offset, count, this._buffer.ReadUShort);
-    public uint[] ReadUIntArray(int offset, int count) => this._Read<uint>(offset, count, this._buffer.ReadUInt);
-    public byte[] ReadByteArray(int offset, int count) => this._Read<byte>(offset, count, this._buffer.ReadByte);
-    public float[] ReadFloatArray(int offset, int count) => this._Read<float>(offset, count, this._buffer.ReadFloat);
-    public sbyte[] ReadSByteArray(int offset, int count) => this._Read<sbyte>(offset, count, this._buffer.ReadSByte);
-    public short[] ReadShortArray(int offset, int count) => this._Read<short>(offset, count, this._buffer.ReadShort);
+    public Vector4UShort[] ReadUShort4Array(int offset, int count) => this.Read<Vector4UShort>(offset, count, this._buffer.ReadUShort4);
+    public ushort[] ReadUShortArray(int offset, int count) => this.Read<ushort>(offset, count, this._buffer.ReadUShort);
+    public uint[] ReadUIntArray(int offset, int count) => this.Read<uint>(offset, count, this._buffer.ReadUInt);
+    public byte[] ReadByteArray(int offset, int count) => this.Read<byte>(offset, count, this._buffer.ReadByte);
+    public float[] ReadFloatArray(int offset, int count) => this.Read<float>(offset, count, this._buffer.ReadFloat);
+    public sbyte[] ReadSByteArray(int offset, int count) => this.Read<sbyte>(offset, count, this._buffer.ReadSByte);
+    public short[] ReadShortArray(int offset, int count) => this.Read<short>(offset, count, this._buffer.ReadShort);
 
-    public Quaternion[] ReadQuaternionArray(int offset, int count) => this._Read<Quaternion>(offset, count, this._buffer.ReadQuaternion);
+    public Quaternion[] ReadQuaternionArray(int offset, int count) => this.Read<Quaternion>(offset, count, this._buffer.ReadQuaternion);
 
-    public Matrix4x4[] ReadMatrix4x4Array(int offset, int count) => this._Read<Matrix4x4>(offset, count, this._buffer.ReadMatrix4x4);
+    public Matrix4x4[] ReadMatrix4x4Array(int offset, int count) => this.Read<Matrix4x4>(offset, count, this._buffer.ReadMatrix4x4);
 }

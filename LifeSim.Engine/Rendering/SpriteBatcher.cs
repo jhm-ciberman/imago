@@ -46,7 +46,7 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
 
     }
 
-    private SpriteBatch _FindBatch(Shader shader, ITexture texture)
+    private SpriteBatch FindBatch(Shader shader, ITexture texture)
     {
         for (int i = 0; i < this._batches.Count; i++)
         {
@@ -107,7 +107,7 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
 
     public void Draw(Shader? shader, ITexture texture, Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, in Matrix3x2 transform, Color color, float depth = 0f)
     {
-        this._FindBatch(shader ?? this._defaultShader, texture)
+        this.FindBatch(shader ?? this._defaultShader, texture)
             .Draw(position, size, uvTopLeft, uvBottomRight, in transform, color, depth);
 
         this.TotalSpritesToDraw++;
@@ -115,7 +115,7 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
 
     public void Draw(Shader? shader, ITexture texture, Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, Color color, float depth = 0f)
     {
-        this._FindBatch(shader ?? this._defaultShader, texture)
+        this.FindBatch(shader ?? this._defaultShader, texture)
             .Draw(position, size, uvTopLeft, uvBottomRight, color, depth);
 
         this.TotalSpritesToDraw++;
@@ -132,7 +132,7 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
         float depth
     )
     {
-        this._FindBatch(this._defaultShader, (ITexture)texture)
+        this.FindBatch(this._defaultShader, (ITexture)texture)
             .Draw(position, sourceRectangle, color, rotation, origin, scale, depth);
 
         this.TotalSpritesToDraw++;

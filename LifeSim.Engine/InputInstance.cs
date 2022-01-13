@@ -38,11 +38,11 @@ public class InputInstance
             KeyEvent ke = this.InputSnapshot.KeyEvents[i];
             if (ke.Down)
             {
-                this._KeyDown(ke.Key);
+                this.KeyDown(ke.Key);
             }
             else
             {
-                this._KeyUp(ke.Key);
+                this.KeyUp(ke.Key);
             }
         }
         for (int i = 0; i < this.InputSnapshot.MouseEvents.Count; i++)
@@ -50,11 +50,11 @@ public class InputInstance
             MouseEvent me = this.InputSnapshot.MouseEvents[i];
             if (me.Down)
             {
-                this._MouseDown(me.MouseButton);
+                this.MouseDown(me.MouseButton);
             }
             else
             {
-                this._MouseUp(me.MouseButton);
+                this.MouseUp(me.MouseButton);
             }
         }
 
@@ -88,18 +88,33 @@ public class InputInstance
     public Vector2 MouseDelta => this._mouseDelta;
     public bool MouseIsLocked { get; private set; } = false;
 
-    public bool GetKey(Key key) => this._currentlyPressedKeys.Contains(key);
-    public bool GetKeyDown(Key key) => this._newKeysThisFrame.Contains(key);
-    public bool GetMouseButton(MouseButton button) => this._currentlyPressedMouseButtons.Contains(button);
-    public bool GetMouseButtonDown(MouseButton button) => this._newMouseButtonsThisFrame.Contains(button);
+    public bool GetKey(Key key)
+    {
+        return this._currentlyPressedKeys.Contains(key);
+    }
 
-    private void _MouseUp(MouseButton mouseButton)
+    public bool GetKeyDown(Key key)
+    {
+        return this._newKeysThisFrame.Contains(key);
+    }
+
+    public bool GetMouseButton(MouseButton button)
+    {
+        return this._currentlyPressedMouseButtons.Contains(button);
+    }
+
+    public bool GetMouseButtonDown(MouseButton button)
+    {
+        return this._newMouseButtonsThisFrame.Contains(button);
+    }
+
+    private void MouseUp(MouseButton mouseButton)
     {
         this._currentlyPressedMouseButtons.Remove(mouseButton);
         this._newMouseButtonsThisFrame.Remove(mouseButton);
     }
 
-    private void _MouseDown(MouseButton mouseButton)
+    private void MouseDown(MouseButton mouseButton)
     {
         if (this._currentlyPressedMouseButtons.Add(mouseButton))
         {
@@ -107,13 +122,13 @@ public class InputInstance
         }
     }
 
-    private void _KeyUp(Key key)
+    private void KeyUp(Key key)
     {
         this._currentlyPressedKeys.Remove(key);
         this._newKeysThisFrame.Remove(key);
     }
 
-    private void _KeyDown(Key key)
+    private void KeyDown(Key key)
     {
         if (this._currentlyPressedKeys.Add(key))
         {

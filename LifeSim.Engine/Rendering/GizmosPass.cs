@@ -69,10 +69,10 @@ public class GizmosPass : IPipelineProvider, IDisposable
         var viewProjectionMatrix = camera.ViewProjectionMatrix;
         cl.UpdateBuffer(this._viewProjectionBuffer, 0, ref viewProjectionMatrix);
 
-        this._RenderLinesVertices(cl, lines);
+        this.RenderLinesVertices(cl, lines);
     }
 
-    private void _RenderLinesVertices(CommandList cl, IReadOnlyList<DebugLine> lines)
+    private void RenderLinesVertices(CommandList cl, IReadOnlyList<DebugLine> lines)
     {
         this._verticesCount = 0;
 
@@ -82,7 +82,7 @@ public class GizmosPass : IPipelineProvider, IDisposable
 
             if (this._verticesCount + 2 >= VERTICES_PER_BATCH)
             {
-                this._FlushVertices(cl, this._lineShader);
+                this.FlushVertices(cl, this._lineShader);
             }
 
             this._vertices[this._verticesCount++] = new Vertex { Position = line.Start, Color = line.Color.ToPackedUInt() };
@@ -91,11 +91,11 @@ public class GizmosPass : IPipelineProvider, IDisposable
 
         if (this._verticesCount > 0)
         {
-            this._FlushVertices(cl, this._lineShader);
+            this.FlushVertices(cl, this._lineShader);
         }
     }
 
-    private void _FlushVertices(CommandList cl, Shader shader)
+    private void FlushVertices(CommandList cl, Shader shader)
     {
         cl.UpdateBuffer(this._vertexBuffer, 0, this._vertices);
 

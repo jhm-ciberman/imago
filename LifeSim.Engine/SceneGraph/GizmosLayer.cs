@@ -168,7 +168,7 @@ public class GizmosLayer
         }
     }
 
-    private static void _VecOrthogonalBasis(Vector3 v, out Vector3 u, out Vector3 w)
+    private static void VecOrthogonalBasis(Vector3 v, out Vector3 u, out Vector3 w)
     {
         if (MathF.Abs(v.X) > MathF.Abs(v.Y))
         {
@@ -198,7 +198,7 @@ public class GizmosLayer
     {
         float deltaStep = MathF.PI * 2 / segments;
 
-        _VecOrthogonalBasis(planeNormal, out Vector3 u, out Vector3 w);
+        VecOrthogonalBasis(planeNormal, out Vector3 u, out Vector3 w);
 
 
         for (float theta = 0; theta < MathF.PI * 2; theta += deltaStep)
@@ -222,7 +222,7 @@ public class GizmosLayer
         float deltaStep = MathF.PI * 2 / segments;
         Vector3 direction = apexPosition - basePosition;
 
-        _VecOrthogonalBasis(Vector3.Normalize(direction), out Vector3 u, out Vector3 w);
+        VecOrthogonalBasis(Vector3.Normalize(direction), out Vector3 u, out Vector3 w);
 
 
         for (float theta = 0; theta < MathF.PI * 2; theta += deltaStep)
@@ -288,7 +288,7 @@ public class GizmosLayer
     /// <param name="drawInFront">Whether the plane should be drawn in front other objects or using depth.</param>
     public void DrawPlane(Vector3 position, Vector3 planeNormal, Color planeColor, Color normalColor, float lifeTime = 0, bool drawInFront = false)
     {
-        _VecOrthogonalBasis(planeNormal, out Vector3 u, out Vector3 w);
+        VecOrthogonalBasis(planeNormal, out Vector3 u, out Vector3 w);
 
         var p1 = position + u * -0.5f + w * -0.5f;
         var p2 = position + u * 0.5f + w * -0.5f;

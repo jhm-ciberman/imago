@@ -18,9 +18,9 @@ public class Node2D
     private float      _rotation = 0f;
     private Vector2    _scale = Vector2.One;
 
-    public Vector2 Position { get => this._position; set { this._position = value; this._OnTransformDirty(); } }
-    public float Rotation { get => this._rotation; set { this._rotation = value; this._OnTransformDirty(); } }
-    public Vector2 Scale { get => this._scale; set { this._scale = value; this._OnTransformDirty(); } }
+    public Vector2 Position { get => this._position; set { this._position = value; this.OnTransformDirty(); } }
+    public float Rotation { get => this._rotation; set { this._rotation = value; this.OnTransformDirty(); } }
+    public Vector2 Scale { get => this._scale; set { this._scale = value; this.OnTransformDirty(); } }
 
     private Matrix3x2 _localMatrix = Matrix3x2.Identity;
     private bool _localMatrixDirty = false;
@@ -49,7 +49,7 @@ public class Node2D
         node._canvas = this._canvas;
         node.Parent = this;
         this._children.Add(node);
-        this._canvas?._AddNodeToRecursive(node);
+        this._canvas?.AddNodeToRecursive(node);
     }
 
     public void Remove(Node2D node)
@@ -59,10 +59,10 @@ public class Node2D
         this._children.Remove(node);
         node._canvas = null;
         node.Parent = null;
-        this._canvas?._RemoveNodeRecursive(node);
+        this._canvas?.RemoveNodeRecursive(node);
     }
 
-    protected void _OnTransformDirty()
+    protected void OnTransformDirty()
     {
         if (this._localMatrixDirty) return;
         this._localMatrixDirty = true;
@@ -73,16 +73,16 @@ public class Node2D
         this._worldMatrix = this.GetLocalMatrix();
         for (int i = 0; i < this.Children.Count; i++)
         {
-            this.Children[i]._UpdateWorldMatrix(ref this._worldMatrix);
+            this.Children[i].UpdateWorldMatrix(ref this._worldMatrix);
         }
     }
 
-    private void _UpdateWorldMatrix(ref Matrix3x2 parentMatrix)
+    private void UpdateWorldMatrix(ref Matrix3x2 parentMatrix)
     {
         this._worldMatrix = this.GetLocalMatrix() * parentMatrix;
         for (int i = 0; i < this.Children.Count; i++)
         {
-            this.Children[i]._UpdateWorldMatrix(ref this._worldMatrix);
+            this.Children[i].UpdateWorldMatrix(ref this._worldMatrix);
         }
     }
 

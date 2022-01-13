@@ -42,16 +42,16 @@ public class GLTFLoader
         if (data.Mesh.HasValue)
         {
             node.Material = this._defaultMaterial;
-            node.Mesh = this._GetMesh(data.Mesh.Value);
+            node.Mesh = this.GetMesh(data.Mesh.Value);
             if (data.Skin.HasValue)
             {
-                node.Skin = this._GetSkin(data.Skin.Value);
+                node.Skin = this.GetSkin(data.Skin.Value);
             }
         }
 
         if (data.Matrix.Length == 0)
         {
-            Matrix4x4.Decompose(_ToMatrix(data.Matrix), out Vector3 scale, out Quaternion rotation, out Vector3 position);
+            Matrix4x4.Decompose(ToMatrix(data.Matrix), out Vector3 scale, out Quaternion rotation, out Vector3 position);
             node.Scale = scale;
             node.Rotation = rotation;
             node.Position = position;
@@ -80,7 +80,7 @@ public class GLTFLoader
 
 
 
-    private static Matrix4x4 _ToMatrix(float[] m)
+    private static Matrix4x4 ToMatrix(float[] m)
     {
         return new Matrix4x4(
             m[0], m[1], m[2], m[3],
@@ -91,7 +91,7 @@ public class GLTFLoader
     }
 
 
-    private Mesh _GetMesh(int index)
+    private Mesh GetMesh(int index)
     {
         var meshData = this.GetPrimitive(index).MakeMeshData();
         return Mesh.CreateFromData(meshData);
@@ -115,7 +115,7 @@ public class GLTFLoader
         return anim.LoadAnimation();
     }
 
-    private Skin _GetSkin(int index)
+    private Skin GetSkin(int index)
     {
         var data = this._model.Skins[index];
 
@@ -162,11 +162,11 @@ public class GLTFLoader
     internal GLTFAccessor GetAccessor(int index)
     {
         var data = this._model.Accessors[index];
-        var bufferView = this._GetBufferView(data.BufferView);
+        var bufferView = this.GetBufferView(data.BufferView);
         return new GLTFAccessor(bufferView, data.ByteOffset, data.Count, data.ComponentType, data.Type, data.Normalized);
     }
 
-    private GLTFBuffer _GetBuffer(int index)
+    private GLTFBuffer GetBuffer(int index)
     {
         GLTFBuffer? buffer = this._buffersCache[index];
         if (buffer != null) return buffer;
@@ -177,12 +177,12 @@ public class GLTFLoader
         return buffer;
     }
 
-    private IGLTFBufferView _GetBufferView(int? index)
+    private IGLTFBufferView GetBufferView(int? index)
     {
         if (!index.HasValue) return new GLTFBufferViewZeroed();
 
         var data = this._model.BufferViews[index.Value];
-        var buffer = this._GetBuffer(data.Buffer);
+        var buffer = this.GetBuffer(data.Buffer);
 
         return new GLTFBufferView(buffer, data.ByteOffset, data.ByteStride);
     }

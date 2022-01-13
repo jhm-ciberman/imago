@@ -81,11 +81,11 @@ public class Animation
             this._values = values;
         }
 
-        protected abstract T _Interpolate(int indexPrev, int indexNext, float time);
+        protected abstract T Interpolate(int indexPrev, int indexNext, float time);
 
 #pragma warning disable IDE0060 //TODO: optimize with lastTimeIndex
 
-        private int _FindNextIndex(float time, int lastTimeIndex)
+        private int FindNextIndex(float time, int lastTimeIndex)
         {
             for (int i = 0; i < this._times.Length; i++)
             {
@@ -101,7 +101,7 @@ public class Animation
 
         public T Sample(float time, bool loop, ref int lastTimeIndex)
         {
-            var nextIndex = this._FindNextIndex(time, lastTimeIndex);
+            var nextIndex = this.FindNextIndex(time, lastTimeIndex);
             lastTimeIndex = nextIndex;
 
             //var prevIndex = loop 
@@ -109,7 +109,7 @@ public class Animation
             //    : nextIndex - 1;
 
             var prevIndex = System.Math.Clamp(nextIndex - 1, 0, this._times.Length);
-            return this._Interpolate(prevIndex, nextIndex, time);
+            return this.Interpolate(prevIndex, nextIndex, time);
         }
     }
 
@@ -122,7 +122,7 @@ public class Animation
             this._interpolator = interpolator;
         }
 
-        protected override T _Interpolate(int indexPrev, int indexNext, float time)
+        protected override T Interpolate(int indexPrev, int indexNext, float time)
         {
             var prev = this._values[indexPrev];
             var next = this._values[indexNext];
@@ -144,7 +144,7 @@ public class Animation
         {
         }
 
-        protected override T _Interpolate(int indexPrev, int indexNext, float time)
+        protected override T Interpolate(int indexPrev, int indexNext, float time)
         {
             return this._values[indexPrev];
         }
@@ -159,7 +159,7 @@ public class Animation
             this._interpolator = interpolator;
         }
 
-        protected override T _Interpolate(int indexPrev, int indexNext, float time)
+        protected override T Interpolate(int indexPrev, int indexNext, float time)
         {
             return this._values[indexPrev]; //TODO: Implement cubic spline
         }

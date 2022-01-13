@@ -106,10 +106,10 @@ public abstract class Scene : Node3D
             this._canvasLayers[i].UpdateTransforms();
         }
 
-        this._UpdateDirtyTransforms();
+        this.UpdateDirtyTransforms();
     }
 
-    private void _UpdateDirtyTransforms()
+    private void UpdateDirtyTransforms()
     {
         if (this._transformDirtyList.Count == 0) return;
 

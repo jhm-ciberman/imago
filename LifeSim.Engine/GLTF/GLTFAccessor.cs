@@ -28,14 +28,14 @@ internal class GLTFAccessor
     {
         return this._componentType switch
         {
-            ComponentTypeEnum.UNSIGNED_BYTE => _Byte2UShort(this._bufferView.ReadByteArray(this._byteOffset, this._count)),
+            ComponentTypeEnum.UNSIGNED_BYTE => Byte2UShort(this._bufferView.ReadByteArray(this._byteOffset, this._count)),
             ComponentTypeEnum.UNSIGNED_SHORT => this._bufferView.ReadUShortArray(this._byteOffset, this._count),
-            ComponentTypeEnum.UNSIGNED_INT => _Int2UShort(this._bufferView.ReadUIntArray(this._byteOffset, this._count)),
+            ComponentTypeEnum.UNSIGNED_INT => Int2UShort(this._bufferView.ReadUIntArray(this._byteOffset, this._count)),
             _ => throw new NotSupportedException(),
         };
     }
 
-    private static ushort[] _Int2UShort(uint[] sourceArr)
+    private static ushort[] Int2UShort(uint[] sourceArr)
     {
         var arr = new ushort[sourceArr.Length];
         for (int i = 0; i < sourceArr.Length; i++)
@@ -45,7 +45,7 @@ internal class GLTFAccessor
         return arr;
     }
 
-    private static ushort[] _Byte2UShort(byte[] sourceArr)
+    private static ushort[] Byte2UShort(byte[] sourceArr)
     {
         var arr = new ushort[sourceArr.Length];
         for (int i = 0; i < sourceArr.Length; i++)
@@ -96,10 +96,10 @@ internal class GLTFAccessor
         return this._componentType switch
         {
             ComponentTypeEnum.FLOAT => this._bufferView.ReadQuaternionArray(this._byteOffset, this._count),
-            ComponentTypeEnum.BYTE => this._normalizeToQuaternion(this._bufferView.ReadSByteArray(this._byteOffset, this._count)),
-            ComponentTypeEnum.UNSIGNED_BYTE => this._normalizeToQuaternion(this._bufferView.ReadByteArray(this._byteOffset, this._count)),
-            ComponentTypeEnum.SHORT => this._normalizeToQuaternion(this._bufferView.ReadShortArray(this._byteOffset, this._count)),
-            ComponentTypeEnum.UNSIGNED_SHORT => this._normalizeToQuaternion(this._bufferView.ReadUShortArray(this._byteOffset, this._count)),
+            ComponentTypeEnum.BYTE => this.NormalizeToQuaternion(this._bufferView.ReadSByteArray(this._byteOffset, this._count)),
+            ComponentTypeEnum.UNSIGNED_BYTE => this.NormalizeToQuaternion(this._bufferView.ReadByteArray(this._byteOffset, this._count)),
+            ComponentTypeEnum.SHORT => this.NormalizeToQuaternion(this._bufferView.ReadShortArray(this._byteOffset, this._count)),
+            ComponentTypeEnum.UNSIGNED_SHORT => this.NormalizeToQuaternion(this._bufferView.ReadUShortArray(this._byteOffset, this._count)),
             _ => throw new System.NotSupportedException(),
         };
     }
@@ -115,7 +115,7 @@ internal class GLTFAccessor
     }
 
 
-    private Quaternion[] _normalizeToQuaternion(byte[] sourceArr)
+    private Quaternion[] NormalizeToQuaternion(byte[] sourceArr)
     {
         if (!this._normalized) throw new System.NotSupportedException();
 
@@ -131,7 +131,7 @@ internal class GLTFAccessor
         return arr;
     }
 
-    private Quaternion[] _normalizeToQuaternion(ushort[] sourceArr)
+    private Quaternion[] NormalizeToQuaternion(ushort[] sourceArr)
     {
         if (!this._normalized) throw new System.NotSupportedException();
 
@@ -147,7 +147,7 @@ internal class GLTFAccessor
         return arr;
     }
 
-    private Quaternion[] _normalizeToQuaternion(sbyte[] sourceArr)
+    private Quaternion[] NormalizeToQuaternion(sbyte[] sourceArr)
     {
         if (!this._normalized) throw new System.NotSupportedException();
 
@@ -163,7 +163,7 @@ internal class GLTFAccessor
         return arr;
     }
 
-    private Quaternion[] _normalizeToQuaternion(short[] sourceArr)
+    private Quaternion[] NormalizeToQuaternion(short[] sourceArr)
     {
         if (!this._normalized) throw new System.NotSupportedException();
 

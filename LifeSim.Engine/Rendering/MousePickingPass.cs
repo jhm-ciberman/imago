@@ -26,7 +26,7 @@ public class MousePickingPass : IDisposable
 
     private Vector2 _mousePosition;
 
-    private bool _MouseIsInside(Vector2 mousePos)
+    private bool MouseIsInside(Vector2 mousePos)
     {
         if (mousePos.X < 0 || mousePos.Y < 0) return false;
         var texture = this.RenderTexture.PickingTexture;
@@ -42,7 +42,7 @@ public class MousePickingPass : IDisposable
     public void Render(CommandList cl)
     {
         var mousePos = this._mousePosition;
-        if (this._MouseIsInside(mousePos))
+        if (this.MouseIsInside(mousePos))
         {
             uint x = (uint) mousePos.X;
             uint y = this._gd.IsUvOriginTopLeft

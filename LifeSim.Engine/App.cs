@@ -109,8 +109,8 @@ public class App
                 var swFrame = Stopwatch.StartNew();
                 scene.BeginUpdate(); // Swap internal render queues
 
-                this._Update(scene, deltaTime);
-                this._Render(scene, deltaTime);
+                this.Update(scene, deltaTime);
+                this.Render(scene, deltaTime);
 
                 swFrame.Stop();
                 //this._frameTime = swFrame.Elapsed.TotalMilliseconds;
@@ -127,7 +127,7 @@ public class App
         }
     }
 
-    private void _Update(Scene scene, float deltaTime)
+    private void Update(Scene scene, float deltaTime)
     {
         Stopwatch swSimulation = Stopwatch.StartNew();
         scene.Update(deltaTime);
@@ -137,7 +137,7 @@ public class App
         //System.Console.WriteLine("Simulation time: " + this._simulationTime);
     }
 
-    private void _Render(Scene scene, float deltaTime)
+    private void Render(Scene scene, float deltaTime)
     {
         Stopwatch swRendering = Stopwatch.StartNew();
 

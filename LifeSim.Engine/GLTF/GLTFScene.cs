@@ -25,15 +25,15 @@ public partial class GLTFScene
     public void Add(GLTFNode node)
     {
         this._children.Add(node);
-        this._AddToDictionaryRecursive(node);
+        this.AddToDictionaryRecursive(node);
     }
 
-    private void _AddToDictionaryRecursive(GLTFNode node)
+    private void AddToDictionaryRecursive(GLTFNode node)
     {
         this._nodesByName[node.Name] = node;
         foreach (GLTFNode? child in node.Children)
         {
-            this._AddToDictionaryRecursive(child);
+            this.AddToDictionaryRecursive(child);
         }
     }
 

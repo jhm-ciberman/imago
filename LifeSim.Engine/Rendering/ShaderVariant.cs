@@ -22,8 +22,8 @@ public class ShaderVariant : IDisposable
 
         var macros = GetMacroDefinitions(vertexFormat, gd.BackendType);
         var options = new GlslCompileOptions(debug: debug, macros);
-        var vertGlslShader = _CompileGlslToSpirv(vertexCode, ShaderStages.Vertex, options);
-        var fragGlslShader = _CompileGlslToSpirv(fragmentCode, ShaderStages.Fragment, options);
+        var vertGlslShader = CompileGlslToSpirv(vertexCode, ShaderStages.Vertex, options);
+        var fragGlslShader = CompileGlslToSpirv(fragmentCode, ShaderStages.Fragment, options);
 
         this.VertexFormat = vertexFormat;
 
@@ -79,7 +79,7 @@ public class ShaderVariant : IDisposable
         return arr;
     }
 
-    private static ShaderDescription _CompileGlslToSpirv(string sourceText, ShaderStages stage, GlslCompileOptions options)
+    private static ShaderDescription CompileGlslToSpirv(string sourceText, ShaderStages stage, GlslCompileOptions options)
     {
         try
         {

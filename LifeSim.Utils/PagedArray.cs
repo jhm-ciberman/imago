@@ -22,10 +22,10 @@ public class PagedArray<T> : ICollection<T> where T : class
         this._freeList = new Queue<int>(this._pageCapacity);
         this._pages = Array.Empty<PagedArray<T>.Page>();
 
-        this._AllocateNewPage();
+        this.AllocateNewPage();
     }
 
-    private void _AllocateNewPage()
+    private void AllocateNewPage()
     {
         int oldPagesCount = this._pages.Length;
         int newPagesCount = oldPagesCount + 1;
@@ -60,7 +60,7 @@ public class PagedArray<T> : ICollection<T> where T : class
     {
         if (!this._freeList.TryDequeue(out int index))
         {
-            this._AllocateNewPage();
+            this.AllocateNewPage();
             index = this._freeList.Dequeue();
         }
 

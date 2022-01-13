@@ -121,15 +121,15 @@ public class ParticlesPass : IPipelineProvider, IDisposable
             CameraUp = camera.Up
         });
 
-        this._RenderParticles(cl, particles, this._particlesShader, texture);
+        this.RenderParticles(cl, particles, this._particlesShader, texture);
     }
 
-    private void _RenderParticles(CommandList cl, IReadOnlyList<Particle> particles, Shader shader, Texture texture)
+    private void RenderParticles(CommandList cl, IReadOnlyList<Particle> particles, Shader shader, Texture texture)
     {
         if (particles.Count == 0) return;
         if (particles.Count <= PARTICLES_PER_BATCH)
         {
-            this._FlushParticles(cl, particles, 0, particles.Count, shader, texture);
+            this.FlushParticles(cl, particles, 0, particles.Count, shader, texture);
         }
 
         int batchStartIndex = 0;
@@ -139,12 +139,12 @@ public class ParticlesPass : IPipelineProvider, IDisposable
         for (int i = 0; i < numberOfbatches; i++)
         {
             batchEndIndex = Math.Min(particles.Count, batchStartIndex + PARTICLES_PER_BATCH);
-            this._FlushParticles(cl, particles, batchStartIndex, batchEndIndex, shader, texture);
+            this.FlushParticles(cl, particles, batchStartIndex, batchEndIndex, shader, texture);
             batchStartIndex = batchEndIndex;
         }
     }
 
-    private void _FlushParticles(CommandList cl, IReadOnlyList<Particle> particles, int startIndex, int endIndex, Shader shader, Texture texture)
+    private void FlushParticles(CommandList cl, IReadOnlyList<Particle> particles, int startIndex, int endIndex, Shader shader, Texture texture)
     {
         int particlesCount = 0;
         for (int i = startIndex; i < endIndex; i++)
@@ -167,7 +167,7 @@ public class ParticlesPass : IPipelineProvider, IDisposable
         if (this._currentTexture != texture)
         {
             this._currentTexture = texture;
-            var resourceSet = this._GetTextureResourceSet(texture);
+            var resourceSet = this.GetTextureResourceSet(texture);
             cl.SetGraphicsResourceSet(1, resourceSet);
         }
 
@@ -176,7 +176,7 @@ public class ParticlesPass : IPipelineProvider, IDisposable
         cl.Draw(4, (uint)particlesCount, 0, 0);
     }
 
-    private ResourceSet _GetTextureResourceSet(Texture texture)
+    private ResourceSet GetTextureResourceSet(Texture texture)
     {
         if (this._textures.TryGetValue(texture, out var resourceSet))
         {

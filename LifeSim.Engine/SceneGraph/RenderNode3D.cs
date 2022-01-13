@@ -50,9 +50,9 @@ public class RenderNode3D : Node3D
         return this.Renderable ?? base.FirstRenderable();
     }
 
-    protected override void _AttachToSceneRecursive(Scene scene)
+    protected override void AttachToSceneRecursive(Scene scene)
     {
-        base._AttachToSceneRecursive(scene);
+        base.AttachToSceneRecursive(scene);
 
         if (this.Renderable != null)
         {
@@ -60,13 +60,13 @@ public class RenderNode3D : Node3D
         }
     }
 
-    protected override void _DetachFromSceneRecursive()
+    protected override void DetachFromSceneRecursive()
     {
         if (this.Renderable != null)
         {
             this.Scene?.NotifyRenderableRemoved(this.Renderable);
         }
 
-        base._DetachFromSceneRecursive();
+        base.DetachFromSceneRecursive();
     }
 }

@@ -32,7 +32,7 @@ public class GLTFAnimation
 
         foreach (var channel in this._channels)
         {
-            var c = this._CreateChannel(channel);
+            var c = this.CreateChannel(channel);
             if (c != null)
             {
                 list.Add(c);
@@ -42,22 +42,22 @@ public class GLTFAnimation
         return new Animation(this._name, list);
     }
 
-    private Animation.IChannel? _CreateChannel(glTFLoader.Schema.AnimationChannel channel)
+    private Animation.IChannel? CreateChannel(glTFLoader.Schema.AnimationChannel channel)
     {
         var targetIndex = channel.Target.Node;
         if (!targetIndex.HasValue) return null;
 
-        var factory = _GetChannelFactory(channel.Target.Path);
+        var factory = GetChannelFactory(channel.Target.Path);
         if (factory == null) return null;
 
         var targetName = this._model.GetNode(targetIndex.Value).Name;
         var sampler = this._samplers[channel.Sampler];
-        var input = this._GetSamplerInput(sampler.Input);
+        var input = this.GetSamplerInput(sampler.Input);
         var output = this._model.GetAccessor(sampler.Output);
         return factory.MakeChannel(targetName, input, output, sampler.Interpolation);
     }
 
-    private static IChannelFactory? _GetChannelFactory(PathEnum path)
+    private static IChannelFactory? GetChannelFactory(PathEnum path)
     {
         return path switch
         {
@@ -69,7 +69,7 @@ public class GLTFAnimation
     }
 
 
-    private float[] _GetSamplerInput(int index)
+    private float[] GetSamplerInput(int index)
     {
         if (!this._inputsCache.ContainsKey(index))
         {
@@ -89,11 +89,11 @@ public class GLTFAnimation
     private abstract class ChannelFactory<T> : IChannelFactory where T : struct
     {
         public abstract Animation.IChannel MakeChannel(string targetName, float[] input, GLTFAccessor output, InterpolationEnum type);
-        protected abstract Animation.IInterpolator<T> _MakeInterpolator();
+        protected abstract Animation.IInterpolator<T> MakeInterpolator();
 
-        protected Animation.BaseSampler<T> _MakeSampler(float[] input, T[] values, InterpolationEnum type)
+        protected Animation.BaseSampler<T> MakeSampler(float[] input, T[] values, InterpolationEnum type)
         {
-            var interpolator = this._MakeInterpolator();
+            var interpolator = this.MakeInterpolator();
             return type switch
             {
                 InterpolationEnum.STEP => new Animation.SamplerStep<T>(input, values),
@@ -108,32 +108,32 @@ public class GLTFAnimation
     {
         public override Animation.IChannel MakeChannel(string targetName, float[] input, GLTFAccessor output, InterpolationEnum type)
         {
-            var sampler = this._MakeSampler(input, output.AsVector3Array(), type);
+            var sampler = this.MakeSampler(input, output.AsVector3Array(), type);
             return new Animation.PositionChannel(targetName, sampler);
         }
 
-        protected override Animation.IInterpolator<Vector3> _MakeInterpolator() => new Animation.Vector3Interpolator();
+        protected override Animation.IInterpolator<Vector3> MakeInterpolator() => new Animation.Vector3Interpolator();
     }
 
     private class RotationChannelFactory : ChannelFactory<Quaternion>
     {
         public override Animation.IChannel MakeChannel(string targetName, float[] input, GLTFAccessor output, InterpolationEnum type)
         {
-            var sampler = this._MakeSampler(input, output.AsQuaternionArray(), type);
+            var sampler = this.MakeSampler(input, output.AsQuaternionArray(), type);
             return new Animation.RotationChannel(targetName, sampler);
         }
 
-        protected override Animation.IInterpolator<Quaternion> _MakeInterpolator() => new Animation.QuaternionInterpolator();
+        protected override Animation.IInterpolator<Quaternion> MakeInterpolator() => new Animation.QuaternionInterpolator();
     }
 
     private class ScaleChannelFactory : ChannelFactory<Vector3>
     {
         public override Animation.IChannel MakeChannel(string targetName, float[] input, GLTFAccessor output, InterpolationEnum type)
         {
-            var sampler = this._MakeSampler(input, output.AsVector3Array(), type);
+            var sampler = this.MakeSampler(input, output.AsVector3Array(), type);
             return new Animation.ScaleChannel(targetName, sampler);
         }
 
-        protected override Animation.IInterpolator<Vector3> _MakeInterpolator() => new Animation.Vector3Interpolator();
+        protected override Animation.IInterpolator<Vector3> MakeInterpolator() => new Animation.Vector3Interpolator();
     }
 }

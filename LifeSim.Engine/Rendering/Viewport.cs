@@ -2,7 +2,7 @@ namespace LifeSim.Engine.Rendering;
 
 public class Viewport
 {
-    public event System.Action<Viewport>? onResized;
+    public event System.Action<Viewport>? OnResized;
 
     public Viewport(uint width, uint height) : this(0, 0, width, height) { }
 
@@ -18,7 +18,7 @@ public class Viewport
     {
         this.Width = width;
         this.Height = height;
-        this.onResized?.Invoke(this);
+        this.OnResized?.Invoke(this);
     }
 
     public void Move(uint x, uint y)

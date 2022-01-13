@@ -54,7 +54,7 @@ public class Shader : IDisposable
                     return this._pipelines[i].Pipeline;
             }
 
-            ShaderVariant shaderVariant = this._GetShaderVariant(vertexFormat);
+            ShaderVariant shaderVariant = this.GetShaderVariant(vertexFormat);
             var pipeline = this.Pass.MakePipeline(shaderVariant);
             this._pipelines.Add(new CachedPipeline(vertexFormat, pipeline));
 
@@ -62,7 +62,7 @@ public class Shader : IDisposable
         }
     }
 
-    private ShaderVariant _GetShaderVariant(VertexFormat vertexFormat)
+    private ShaderVariant GetShaderVariant(VertexFormat vertexFormat)
     {
         for (int i = 0; i < this._variants.Count; i++)
         {

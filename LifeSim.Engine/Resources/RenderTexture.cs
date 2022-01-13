@@ -27,14 +27,14 @@ public class RenderTexture : IRenderTexture
     public RenderTexture(GraphicsDevice gd, uint width, uint height)
     {
         this._gd = gd;
-        this.DepthTexture = this._CreateDepthTexture(width, height);
-        this.DeviceTexture = this._CreateColorTexture(width, height);
-        this.PickingTexture = this._CreatePickingIDTexture(width, height);
-        this.Framebuffer = this._CreateFramebuffer();
+        this.DepthTexture = this.CreateDepthTexture(width, height);
+        this.DeviceTexture = this.CreateColorTexture(width, height);
+        this.PickingTexture = this.CreatePickingIDTexture(width, height);
+        this.Framebuffer = this.CreateFramebuffer();
         this.Sampler = gd.LinearSampler;
     }
 
-    private Veldrid.Texture _CreateDepthTexture(uint width, uint height)
+    private Veldrid.Texture CreateDepthTexture(uint width, uint height)
     {
         return this._gd.ResourceFactory.CreateTexture(new TextureDescription(
             width, height, depth: 1, mipLevels: 1, arrayLayers: 1,
@@ -44,7 +44,7 @@ public class RenderTexture : IRenderTexture
         ));
     }
 
-    private Veldrid.Texture _CreateColorTexture(uint width, uint height)
+    private Veldrid.Texture CreateColorTexture(uint width, uint height)
     {
         return this._gd.ResourceFactory.CreateTexture(new TextureDescription(
             width, height, depth: 1, mipLevels: 1, arrayLayers: 1,
@@ -54,7 +54,7 @@ public class RenderTexture : IRenderTexture
         ));
     }
 
-    private Veldrid.Texture _CreatePickingIDTexture(uint width, uint height)
+    private Veldrid.Texture CreatePickingIDTexture(uint width, uint height)
     {
         return this._gd.ResourceFactory.CreateTexture(new TextureDescription(
             width, height, depth: 1, mipLevels: 1, arrayLayers: 1,
@@ -64,7 +64,7 @@ public class RenderTexture : IRenderTexture
         ));
     }
 
-    private Framebuffer _CreateFramebuffer()
+    private Framebuffer CreateFramebuffer()
     {
         return this._gd.ResourceFactory.CreateFramebuffer(new FramebufferDescription(
             this.DepthTexture, this.DeviceTexture, this.PickingTexture
@@ -77,10 +77,10 @@ public class RenderTexture : IRenderTexture
         this._gd.DisposeWhenIdle(this.DeviceTexture);
         this._gd.DisposeWhenIdle(this.PickingTexture);
         this._gd.DisposeWhenIdle(this.Framebuffer);
-        this.DepthTexture = this._CreateDepthTexture(width, height);
-        this.DeviceTexture = this._CreateColorTexture(width, height);
-        this.PickingTexture = this._CreatePickingIDTexture(width, height);
-        this.Framebuffer = this._CreateFramebuffer();
+        this.DepthTexture = this.CreateDepthTexture(width, height);
+        this.DeviceTexture = this.CreateColorTexture(width, height);
+        this.PickingTexture = this.CreatePickingIDTexture(width, height);
+        this.Framebuffer = this.CreateFramebuffer();
         this.OnResized?.Invoke(this);
     }
 

@@ -158,7 +158,7 @@ public partial class ShadowPass : IDisposable, IPipelineProvider
             BlendState = BlendStateDescription.Empty,
             RasterizerState = rasterizerState,
             Outputs = this.ShadowmapTexture.Framebuffers[0].OutputDescription,
-            ResourceLayouts = this._GetResourceLayouts(shaderVariant),
+            ResourceLayouts = this.GetResourceLayouts(shaderVariant),
         });
     }
 
@@ -167,7 +167,7 @@ public partial class ShadowPass : IDisposable, IPipelineProvider
         return new Vector4(this._splitDistances[1], this._splitDistances[2], this._splitDistances[3], this._splitDistances[4]);
     }
 
-    private ResourceLayout[] _GetResourceLayouts(ShaderVariant shaderVariant)
+    private ResourceLayout[] GetResourceLayouts(ShaderVariant shaderVariant)
     {
         Debug.Assert(shaderVariant.MaterialResourceLayout != null);
 

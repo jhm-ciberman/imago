@@ -15,7 +15,7 @@ public class SimpleAnimationBinder
         var binded = new BindedAnimation(animation);
 
         var dictionary = new Dictionary<string, Node3D>();
-        this._AddToDictionaryRecursive(dictionary, root);
+        this.AddToDictionaryRecursive(dictionary, root);
 
         foreach (var channelName in animation.ChannelNames)
         {
@@ -37,14 +37,14 @@ public class SimpleAnimationBinder
         return binded;
     }
 
-    private void _AddToDictionaryRecursive(Dictionary<string, Node3D> dictionary, Node3D node)
+    private void AddToDictionaryRecursive(Dictionary<string, Node3D> dictionary, Node3D node)
     {
         if (node is Node3D spatialNode)
             dictionary[node.Name] = spatialNode;
 
         foreach (var child in node.Children)
         {
-            this._AddToDictionaryRecursive(dictionary, child);
+            this.AddToDictionaryRecursive(dictionary, child);
         }
     }
 }

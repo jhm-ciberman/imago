@@ -49,8 +49,8 @@ public class Renderable
     public void SetMesh(Mesh mesh)
     {
         this.Mesh = mesh;
-        this._RecomputeSortKey();
-        this._RecomputeBoundingBox();
+        this.RecomputeSortKey();
+        this.RecomputeBoundingBox();
     }
 
     public void SetMaterial(Material material)
@@ -64,16 +64,16 @@ public class Renderable
         this.InstanceResourceSet = this._instanceDataBlock.Buffer.ResourceSet;
         var span = material.Definition.GetDefaultInstanceData();
         this._instanceDataBlock.WriteSpan(span);
-        this._RecomputeOffsetVertexData();
-        this._RecomputeSortKey();
+        this.RecomputeOffsetVertexData();
+        this.RecomputeSortKey();
     }
 
     public void SetSkeleton(Skeleton skeleton)
     {
         this.Skeleton = skeleton;
         this.SkeletonResourceSet = skeleton.ResourceSet;
-        this._RecomputeOffsetVertexData();
-        this._RecomputeSortKey();
+        this.RecomputeOffsetVertexData();
+        this.RecomputeSortKey();
     }
 
     public void SetTransform(ref Matrix4x4 transform)
@@ -83,7 +83,7 @@ public class Renderable
 
         if (this.Mesh != null)
         {
-            this._RecomputeBoundingBox();
+            this.RecomputeBoundingBox();
         }
 
         if (this.Skeleton != null)
@@ -105,7 +105,7 @@ public class Renderable
         this._transformDataBlock.FreeBlock();
     }
 
-    protected void _RecomputeSortKey()
+    protected void RecomputeSortKey()
     {
         if (this.Material == null || this.Mesh == null) return;
 
@@ -136,7 +136,7 @@ public class Renderable
         );
     }
 
-    private void _RecomputeOffsetVertexData()
+    private void RecomputeOffsetVertexData()
     {
         if (!this._instanceDataBlock.IsValid) return;
 
@@ -148,7 +148,7 @@ public class Renderable
         );
     }
 
-    private void _RecomputeBoundingBox()
+    private void RecomputeBoundingBox()
     {
         this.BoundingBox = BoundingBox.Transform(this.Mesh!.AABB, this._transform);
         this.CenterPosition = this.BoundingBox.GetCenter();
