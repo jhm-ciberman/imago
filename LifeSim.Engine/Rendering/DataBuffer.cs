@@ -87,8 +87,6 @@ internal partial class DataBuffer : IDisposable
         this._dirty = true;
     }
 
-    private readonly System.Numerics.Matrix4x4[] _mats = new System.Numerics.Matrix4x4[1];
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public unsafe void WriteSpan<T>(int offset, ReadOnlySpan<T> data) where T : unmanaged
     {
