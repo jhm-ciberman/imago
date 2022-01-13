@@ -92,7 +92,7 @@ namespace LifeSim.Engine.Rendering
                 string prefix = "Compilation failed: " + stage.ToString() + ":";
                 if (e.Message.Contains(prefix))
                 {
-                    this.ParseError(e.Message, out int lineNumber, out string fileName, out string message);
+                    this.ParseError(e.Message, out int lineNumber, out string _, out string message);
 
                     string[] sourceCodeLines = sourceText.Split('\n');
                     int linesRange = 3; // Show 3 lines before and after the error
