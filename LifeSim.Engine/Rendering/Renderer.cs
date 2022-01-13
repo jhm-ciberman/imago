@@ -1,13 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Numerics;
 using FontStashSharp.Interfaces;
 using LifeSim.Engine.SceneGraph;
 using Veldrid;
 using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
-using Veldrid.Utilities;
 
 namespace LifeSim.Engine.Rendering;
 
@@ -182,9 +180,11 @@ public class Renderer : ITexture2DManager, IDisposable
                 canvasLayer.Items[j].Render(this._spriteBatcher);
             }
 
+            this.UpdateDirtyTextures();
             this._spritesPass.BeginPass(this._commandList, ref projection);
             this._spritesPass.SubmitBatches(this._commandList, this._spriteBatcher.IndexBuffer, this._spriteBatcher.Batches);
         }
+
 
 
         scene.RenderImGui();
@@ -195,7 +195,8 @@ public class Renderer : ITexture2DManager, IDisposable
         this._commandList.End();
 
         if (!this._fence.Signaled)
-        { // If we are GPU bound, then maybe it's a good moment to do a GC :)
+        {
+            // If we are GPU bound, then maybe it's a good moment to do a GC :)
             this._fence.Reset();
             GC.Collect(0, GCCollectionMode.Optimized);
         }
