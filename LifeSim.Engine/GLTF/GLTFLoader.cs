@@ -51,7 +51,7 @@ namespace LifeSim.Engine.GLTF
 
             if (data.Matrix.Length == 0)
             {
-                Matrix4x4.Decompose(this._ToMatrix(data.Matrix), out Vector3 scale, out Quaternion rotation, out Vector3 position);
+                Matrix4x4.Decompose(_ToMatrix(data.Matrix), out Vector3 scale, out Quaternion rotation, out Vector3 position);
                 node.Scale = scale;
                 node.Rotation = rotation;
                 node.Position = position;
@@ -80,7 +80,7 @@ namespace LifeSim.Engine.GLTF
 
 
 
-        private Matrix4x4 _ToMatrix(float[] m)
+        private static Matrix4x4 _ToMatrix(float[] m)
         {
             return new Matrix4x4(
                 m[0], m[1], m[2], m[3],

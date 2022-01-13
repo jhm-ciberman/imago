@@ -35,7 +35,7 @@ namespace LifeSim.Engine.GLTF
             var weightsAccessor  = this._GetAttributeAccessor("WEIGHTS_0");
 
 
-            var indices = this._indicesAccessor == null ? this._MakeFakeIndices(positions.Length) : this._indicesAccessor.AsIndicesArray();
+            var indices = this._indicesAccessor == null ? _MakeFakeIndices(positions.Length) : this._indicesAccessor.AsIndicesArray();
 
             if (this._loadSkinned && weightsAccessor != null && jointsAccessor != null)
             {
@@ -59,7 +59,7 @@ namespace LifeSim.Engine.GLTF
             return null;
         }
 
-        private ushort[] _MakeFakeIndices(int count)
+        private static ushort[] _MakeFakeIndices(int count)
         {
             var arr = new ushort[count];
             for (int i = 0; i < count; i++)

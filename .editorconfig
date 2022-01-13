@@ -26,6 +26,7 @@ dotnet_diagnostic.IDE0055.severity = suggestion # Fix Formating
 dotnet_diagnostic.IDE0130.severity = none # "Namespace 'Foo' does not match folder structure (https://github.com/dotnet/roslyn/issues/55014)
 dotnet_diagnostic.IDE0036.severity = suggestion # "Modifiers are not ordered" (static public instead of public static)
 dotnet_diagnostic.IDE0048.severity = none # Parenthesis must be added for clarity (I know math, I'm an engineer, I don't need extra parenthesis)
+dotnet_diagnostic.CA1816.severity = silent # Call GC.SuppressFinalize correctly (TODO: implement this correctly)
 
 dotnet_style_require_accessibility_modifiers = always
 dotnet_style_object_initializer = false

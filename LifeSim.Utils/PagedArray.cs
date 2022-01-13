@@ -20,7 +20,7 @@ namespace LifeSim
             this._pageCapacity = capacity;
             this._count = 0;
             this._freeList = new Queue<int>(this._pageCapacity);
-            this._pages = new Page[0];
+            this._pages = Array.Empty<PagedArray<T>.Page>();
 
             this._AllocateNewPage();
         }

@@ -20,19 +20,19 @@ namespace LifeSim.Engine.Rendering
             debug = true;
 #endif
 
-            var macros = this.GetMacroDefinitions(vertexFormat, gd.BackendType);
+            var macros = GetMacroDefinitions(vertexFormat, gd.BackendType);
             var options = new GlslCompileOptions(debug: debug, macros);
-            var vertGlslShader = this._CompileGlslToSpirv(vertexCode, ShaderStages.Vertex, options);
-            var fragGlslShader = this._CompileGlslToSpirv(fragmentCode, ShaderStages.Fragment, options);
+            var vertGlslShader = _CompileGlslToSpirv(vertexCode, ShaderStages.Vertex, options);
+            var fragGlslShader = _CompileGlslToSpirv(fragmentCode, ShaderStages.Fragment, options);
 
             this.VertexFormat = vertexFormat;
 
             this.MaterialResourceLayout = materialResourceLayout;
-            var layout = this.GetVertexLayout(vertexFormat);
+            var layout = GetVertexLayout(vertexFormat);
             this.ShaderSetDescription = new ShaderSetDescription(layout, gd.ResourceFactory.CreateFromSpirv(vertGlslShader, fragGlslShader));
         }
 
-        private MacroDefinition[] GetMacroDefinitions(VertexFormat vertexFormat, GraphicsBackend backend)
+        private static MacroDefinition[] GetMacroDefinitions(VertexFormat vertexFormat, GraphicsBackend backend)
         {
             var macros = new List<MacroDefinition>();
 
@@ -66,7 +66,7 @@ namespace LifeSim.Engine.Rendering
             return macros.ToArray();
         }
 
-        private VertexLayoutDescription[] GetVertexLayout(VertexFormat vertexFormat)
+        private static VertexLayoutDescription[] GetVertexLayout(VertexFormat vertexFormat)
         {
             if (!vertexFormat.IsSurface)
                 return vertexFormat.Layouts;
@@ -79,7 +79,7 @@ namespace LifeSim.Engine.Rendering
             return arr;
         }
 
-        private ShaderDescription _CompileGlslToSpirv(string sourceText, ShaderStages stage, GlslCompileOptions options)
+        private static ShaderDescription _CompileGlslToSpirv(string sourceText, ShaderStages stage, GlslCompileOptions options)
         {
             try
             {
@@ -92,7 +92,7 @@ namespace LifeSim.Engine.Rendering
                 string prefix = "Compilation failed: " + stage.ToString() + ":";
                 if (e.Message.Contains(prefix))
                 {
-                    this.ParseError(e.Message, out int lineNumber, out string _, out string message);
+                    ParseError(e.Message, out int lineNumber, out string _, out string message);
 
                     string[] sourceCodeLines = sourceText.Split('\n');
                     int linesRange = 3; // Show 3 lines before and after the error
@@ -122,7 +122,7 @@ namespace LifeSim.Engine.Rendering
             }
         }
 
-        private void ParseError(string originalExceptionMessage, out int lineNumber, out string filename, out string errorMessage)
+        private static void ParseError(string originalExceptionMessage, out int lineNumber, out string filename, out string errorMessage)
         {
             // The format is "Compilation failed: FileName:LineNumber:ErrorMessage".
             // The ErrorMessage can contain colons.

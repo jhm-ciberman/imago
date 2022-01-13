@@ -40,7 +40,7 @@ namespace LifeSim.Engine.Rendering
                 new ResourceLayoutElementDescription("MainSampler", ResourceKind.Sampler, ShaderStages.Fragment)
             ));
 
-            this.Shader = new Shader(this, this._vertexCode, this._fragmentCode, resourceLayout);
+            this.Shader = new Shader(this, _vertexCode, _fragmentCode, resourceLayout);
 
 
             this._pipeline = this.Shader.GetPipeline(vertexFormat);
@@ -120,7 +120,7 @@ namespace LifeSim.Engine.Rendering
             });
         }
 
-        private string _vertexCode => @"#version 450
+        private static readonly string _vertexCode = @"#version 450
             layout(location = 0) in vec4 Position; // xy = position, zw = uv
 
             layout(location = 0) out vec2 fsin_TexCoords;
@@ -131,7 +131,7 @@ namespace LifeSim.Engine.Rendering
                 fsin_TexCoords = Position.zw;
             }";
 
-        private string _fragmentCode => @"#version 450
+        private static readonly string _fragmentCode = @"#version 450
             layout(location = 0) in vec2 fsin_TexCoords;
 
             layout(set = 0, binding = 0) uniform texture2D MainTexture;

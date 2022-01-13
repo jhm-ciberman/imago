@@ -43,5 +43,15 @@ namespace LifeSim.Engine.GLTF
         {
             return new Vector4(v.X, v.Y, v.Z, v.W);
         }
+
+        public static bool operator ==(Vector4UShort left, Vector4UShort right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(Vector4UShort left, Vector4UShort right)
+        {
+            return !(left == right);
+        }
     }
 }

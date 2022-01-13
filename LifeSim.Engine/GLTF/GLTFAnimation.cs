@@ -47,7 +47,7 @@ namespace LifeSim.Engine.GLTF
             var targetIndex = channel.Target.Node;
             if (!targetIndex.HasValue) return null;
 
-            var factory = this._GetChannelFactory(channel.Target.Path);
+            var factory = _GetChannelFactory(channel.Target.Path);
             if (factory == null) return null;
 
             var targetName = this._model.GetNode(targetIndex.Value).Name;
@@ -57,7 +57,7 @@ namespace LifeSim.Engine.GLTF
             return factory.MakeChannel(targetName, input, output, sampler.Interpolation);
         }
 
-        private IChannelFactory? _GetChannelFactory(PathEnum path)
+        private static IChannelFactory? _GetChannelFactory(PathEnum path)
         {
             return path switch
             {

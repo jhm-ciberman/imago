@@ -28,14 +28,14 @@ namespace LifeSim.Engine.GLTF
         {
             return this._componentType switch
             {
-                ComponentTypeEnum.UNSIGNED_BYTE => this._Byte2UShort(this._bufferView.ReadByteArray(this._byteOffset, this._count)),
+                ComponentTypeEnum.UNSIGNED_BYTE => _Byte2UShort(this._bufferView.ReadByteArray(this._byteOffset, this._count)),
                 ComponentTypeEnum.UNSIGNED_SHORT => this._bufferView.ReadUShortArray(this._byteOffset, this._count),
-                ComponentTypeEnum.UNSIGNED_INT => this._Int2UShort(this._bufferView.ReadUIntArray(this._byteOffset, this._count)),
+                ComponentTypeEnum.UNSIGNED_INT => _Int2UShort(this._bufferView.ReadUIntArray(this._byteOffset, this._count)),
                 _ => throw new NotSupportedException(),
             };
         }
 
-        private ushort[] _Int2UShort(uint[] sourceArr)
+        private static ushort[] _Int2UShort(uint[] sourceArr)
         {
             var arr = new ushort[sourceArr.Length];
             for (int i = 0; i < sourceArr.Length; i++)
@@ -45,7 +45,7 @@ namespace LifeSim.Engine.GLTF
             return arr;
         }
 
-        private ushort[] _Byte2UShort(byte[] sourceArr)
+        private static ushort[] _Byte2UShort(byte[] sourceArr)
         {
             var arr = new ushort[sourceArr.Length];
             for (int i = 0; i < sourceArr.Length; i++)
