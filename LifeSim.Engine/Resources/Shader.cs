@@ -3,100 +3,99 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Veldrid;
 
-namespace LifeSim.Engine.Rendering
+namespace LifeSim.Engine.Rendering;
+
+public class Shader : IDisposable
 {
-    public class Shader : IDisposable
+    private static int _count = 0;
+    public int Id;
+    private readonly List<CachedPipeline> _pipelines = new List<CachedPipeline>();
+    private readonly ResourceLayout? _materialResourceLayout;
+    private readonly List<ShaderVariant> _variants = new List<ShaderVariant>();
+    private readonly GraphicsDevice _gd;
+    private readonly string _vertexCode;
+    private readonly string _fragmentCode;
+
+    public IPipelineProvider Pass { get; private set; }
+
+    public Shader(IPipelineProvider pass, string vertexCode, string fragmentCode, ResourceLayout? materialResourceLayout = null)
     {
-        private static int _count = 0;
-        public int Id;
-        private readonly List<CachedPipeline> _pipelines = new List<CachedPipeline>();
-        private readonly ResourceLayout? _materialResourceLayout;
-        private readonly List<ShaderVariant> _variants = new List<ShaderVariant>();
-        private readonly GraphicsDevice _gd;
-        private readonly string _vertexCode;
-        private readonly string _fragmentCode;
+        this.Id = ++Shader._count;
 
-        public IPipelineProvider Pass { get; private set; }
+        this.Pass = pass;
 
-        public Shader(IPipelineProvider pass, string vertexCode, string fragmentCode, ResourceLayout? materialResourceLayout = null)
+        this._vertexCode = vertexCode;
+        this._fragmentCode = fragmentCode;
+
+        this._gd = Renderer.Instance.GraphicsDevice;
+
+        this._materialResourceLayout = materialResourceLayout;
+    }
+
+    public ResourceSet CreateResourceSet(params BindableResource[] resources)
+    {
+        return this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(this._materialResourceLayout, resources));
+    }
+
+    public Pipeline GetPipeline(VertexFormat vertexFormat)
+    {
+        for (int i = 0; i < this._pipelines.Count; i++)
         {
-            this.Id = ++Shader._count;
-
-            this.Pass = pass;
-
-            this._vertexCode = vertexCode;
-            this._fragmentCode = fragmentCode;
-
-            this._gd = Renderer.Instance.GraphicsDevice;
-
-            this._materialResourceLayout = materialResourceLayout;
+            if (this._pipelines[i].VertexFormat == vertexFormat)
+                return this._pipelines[i].Pipeline;
         }
 
-        public ResourceSet CreateResourceSet(params BindableResource[] resources)
+        lock (this._pipelines)
         {
-            return this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(this._materialResourceLayout, resources));
-        }
-
-        public Pipeline GetPipeline(VertexFormat vertexFormat)
-        {
+            // Search again, but this time with locking
             for (int i = 0; i < this._pipelines.Count; i++)
             {
                 if (this._pipelines[i].VertexFormat == vertexFormat)
                     return this._pipelines[i].Pipeline;
             }
 
-            lock (this._pipelines)
+            ShaderVariant shaderVariant = this._GetShaderVariant(vertexFormat);
+            var pipeline = this.Pass.MakePipeline(shaderVariant);
+            this._pipelines.Add(new CachedPipeline(vertexFormat, pipeline));
+
+            return pipeline;
+        }
+    }
+
+    private ShaderVariant _GetShaderVariant(VertexFormat vertexFormat)
+    {
+        for (int i = 0; i < this._variants.Count; i++)
+        {
+            if (this._variants[i].VertexFormat == vertexFormat)
             {
-                // Search again, but this time with locking
-                for (int i = 0; i < this._pipelines.Count; i++)
-                {
-                    if (this._pipelines[i].VertexFormat == vertexFormat)
-                        return this._pipelines[i].Pipeline;
-                }
-
-                ShaderVariant shaderVariant = this._GetShaderVariant(vertexFormat);
-                var pipeline = this.Pass.MakePipeline(shaderVariant);
-                this._pipelines.Add(new CachedPipeline(vertexFormat, pipeline));
-
-                return pipeline;
+                return this._variants[i];
             }
         }
+        var sw = Stopwatch.StartNew();
+        var variant = new ShaderVariant(this._gd, vertexFormat, this._materialResourceLayout, this._vertexCode, this._fragmentCode);
+        Console.WriteLine($"Compiled shader variant for shader id = {this.Id} ({this.Pass.GetType().Name}) in {sw.ElapsedMilliseconds}ms");
+        this._variants.Add(variant);
+        return variant;
+    }
 
-        private ShaderVariant _GetShaderVariant(VertexFormat vertexFormat)
+    public void Dispose()
+    {
+        for (int i = 0; i < this._variants.Count; i++)
         {
-            for (int i = 0; i < this._variants.Count; i++)
-            {
-                if (this._variants[i].VertexFormat == vertexFormat)
-                {
-                    return this._variants[i];
-                }
-            }
-            var sw = Stopwatch.StartNew();
-            var variant = new ShaderVariant(this._gd, vertexFormat, this._materialResourceLayout, this._vertexCode, this._fragmentCode);
-            Console.WriteLine($"Compiled shader variant for shader id = {this.Id} ({this.Pass.GetType().Name}) in {sw.ElapsedMilliseconds}ms");
-            this._variants.Add(variant);
-            return variant;
+            this._variants[i].Dispose();
         }
+        this._materialResourceLayout?.Dispose();
+    }
 
-        public void Dispose()
+    private struct CachedPipeline
+    {
+        public VertexFormat VertexFormat;
+        public Pipeline Pipeline;
+
+        public CachedPipeline(VertexFormat vertexFormat, Pipeline pipeline)
         {
-            for (int i = 0; i < this._variants.Count; i++)
-            {
-                this._variants[i].Dispose();
-            }
-            this._materialResourceLayout?.Dispose();
-        }
-
-        private struct CachedPipeline
-        {
-            public VertexFormat VertexFormat;
-            public Pipeline Pipeline;
-
-            public CachedPipeline(VertexFormat vertexFormat, Pipeline pipeline)
-            {
-                this.VertexFormat = vertexFormat;
-                this.Pipeline = pipeline;
-            }
+            this.VertexFormat = vertexFormat;
+            this.Pipeline = pipeline;
         }
     }
 }

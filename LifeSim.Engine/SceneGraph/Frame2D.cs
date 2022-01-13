@@ -1,38 +1,37 @@
 using System.Numerics;
 using LifeSim.Engine.Rendering;
 
-namespace LifeSim.Engine.SceneGraph
+namespace LifeSim.Engine.SceneGraph;
+
+public class Frame2D : RenderNode2D, ICanvasItem
 {
-    public class Frame2D : RenderNode2D, ICanvasItem
+    public ITexture? Texture { get; set; }
+
+    public Shader? Shader { get; set; }
+
+    public Vector2 Size { get; set; }
+
+    private Vector2 _pivot = Vector2.Zero;
+    public Vector2 Pivot
     {
-        public ITexture? Texture { get; set; }
+        get => this._pivot;
+        set { this._pivot = value; this._OnTransformDirty(); }
+    }
 
-        public Shader? Shader { get; set; }
+    public Frame2D() { }
+    public Frame2D(ITexture texture) : this(texture, new Vector2(texture.Width, texture.Height)) { }
 
-        public Vector2 Size { get; set; }
+    public Frame2D(ITexture texture, Vector2 size)
+    {
+        this.Texture = texture;
+        this.Size = size;
+    }
 
-        private Vector2 _pivot = Vector2.Zero;
-        public Vector2 Pivot
+    public override void Render(SpriteBatcher spriteBatcher)
+    {
+        if (this.Texture != null)
         {
-            get => this._pivot;
-            set { this._pivot = value; this._OnTransformDirty(); }
-        }
-
-        public Frame2D() { }
-        public Frame2D(ITexture texture) : this(texture, new Vector2(texture.Width, texture.Height)) { }
-
-        public Frame2D(ITexture texture, Vector2 size)
-        {
-            this.Texture = texture;
-            this.Size = size;
-        }
-
-        public override void Render(SpriteBatcher spriteBatcher)
-        {
-            if (this.Texture != null)
-            {
-                spriteBatcher.Draw(this.Shader, this.Texture, -this.Pivot, this.Size, Vector2.Zero, Vector2.One, in this.WorldMatrix, Color.White, 0f);
-            }
+            spriteBatcher.Draw(this.Shader, this.Texture, -this.Pivot, this.Size, Vector2.Zero, Vector2.One, in this.WorldMatrix, Color.White, 0f);
         }
     }
 }

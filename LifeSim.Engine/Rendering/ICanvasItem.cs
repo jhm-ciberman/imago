@@ -1,7 +1,6 @@
-namespace LifeSim.Engine.Rendering
+namespace LifeSim.Engine.Rendering;
+
+public interface ICanvasItem
 {
-    public interface ICanvasItem
-    {
-        void Render(SpriteBatcher spriteBatcher);
-    }
+    void Render(SpriteBatcher spriteBatcher);
 }

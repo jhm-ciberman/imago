@@ -4,254 +4,253 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using LifeSim.Engine.Rendering;
 
-namespace LifeSim.Engine.SceneGraph
+namespace LifeSim.Engine.SceneGraph;
+
+public class Node3D : IDisposable
 {
-    public class Node3D : IDisposable
+    public string Name { get; set; } = string.Empty;
+    public Node3D? Parent { get; private set; } = null;
+
+    private readonly SwapPopList<Node3D> _children = new SwapPopList<Node3D>();
+    public IReadOnlyList<Node3D> Children => this._children;
+
+    private Vector3    _position = Vector3.Zero;
+    private Quaternion _rotation = Quaternion.Identity;
+    private Vector3    _scale = Vector3.One;
+
+    public Vector3 Position
     {
-        public string Name { get; set; } = string.Empty;
-        public Node3D? Parent { get; private set; } = null;
-
-        private readonly SwapPopList<Node3D> _children = new SwapPopList<Node3D>();
-        public IReadOnlyList<Node3D> Children => this._children;
-
-        private Vector3    _position = Vector3.Zero;
-        private Quaternion _rotation = Quaternion.Identity;
-        private Vector3    _scale = Vector3.One;
-
-        public Vector3 Position
+        get => this._position;
+        set
         {
-            get => this._position;
-            set
-            {
-                if (this._position == value) return;
-                this._position = value;
-                this._NotifyTransformDirty();
-            }
+            if (this._position == value) return;
+            this._position = value;
+            this._NotifyTransformDirty();
+        }
+    }
+
+    public Quaternion Rotation
+    {
+        get => this._rotation;
+        set
+        {
+            if (this._rotation == value) return;
+            this._rotation = value;
+            this._NotifyTransformDirty();
+        }
+    }
+
+    public Vector3 Scale
+    {
+        get => this._scale;
+        set
+        {
+            if (this._scale == value) return;
+            this._scale = value;
+            this._NotifyTransformDirty();
+        }
+    }
+
+    public Scene? Scene { get; protected set; } = null;
+
+    private Matrix4x4 _localMatrix = Matrix4x4.Identity;
+
+    protected Matrix4x4 _worldMatrix = Matrix4x4.Identity;
+    public ref Matrix4x4 WorldMatrix => ref this._worldMatrix;
+
+    protected bool _transformIsDirty = true;
+    public bool TransformIsDirty => this._transformIsDirty;
+
+    public Vector3 WorldPosition => Vector3.Transform(Vector3.Zero, this._worldMatrix);
+    public Vector3 WorldScale => Vector3.Transform(this._scale, this._worldMatrix);
+
+    public Node3D()
+    {
+        //
+    }
+
+    public void Add(Node3D node)
+    {
+        // Prevent adding self as child
+        if (node.Parent == this || node == this) return;
+
+        // If node already has a parent, remove it from that parent
+        if (node.Parent != null)
+        {
+            node.Parent.Remove(node);
         }
 
-        public Quaternion Rotation
+        // Set node's parent to this
+        this._children.Add(node);
+        node.Parent = this;
+
+        // If the current node has a scene, add the node to the scene
+        if (this.Scene != null)
         {
-            get => this._rotation;
-            set
+            node._AttachToSceneRecursive(this.Scene);
+        }
+    }
+
+    public void Remove(Node3D node)
+    {
+        if (node.Parent != this) return;
+
+        this._children.Remove(node);
+        node.Parent = null;
+        if (node.Scene != null)
+        {
+            node._DetachFromSceneRecursive();
+        }
+    }
+
+    protected virtual void _AttachToSceneRecursive(Scene scene)
+    {
+        if (this.Scene != null) return;
+
+        this.Scene = scene;
+        this.Scene.NotifyNodeAdded(this);
+        foreach (var child in this._children)
+        {
+            child._AttachToSceneRecursive(scene);
+        }
+    }
+
+    protected virtual void _DetachFromSceneRecursive()
+    {
+        if (this.Scene == null) return;
+
+        this.Scene.NotifyNodeRemoved(this);
+        foreach (var child in this._children)
+        {
+            child._DetachFromSceneRecursive();
+        }
+        this.Scene = null;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void _NotifyTransformDirty()
+    {
+        if (this._transformIsDirty) return;
+        this._transformIsDirty = true;
+        this.Scene?.NotifyTransformDirty(this);
+    }
+
+    public ref Matrix4x4 GetLocalMatrix()
+    {
+        if (this._transformIsDirty)
+        {
+            this._localMatrix = Matrix4x4.CreateScale(this._scale)
+                * Matrix4x4.CreateFromQuaternion(this._rotation)
+                * Matrix4x4.CreateTranslation(this._position);
+            this._transformIsDirty = false;
+        }
+        return ref this._localMatrix;
+    }
+
+    public virtual void UpdateWorldMatrix(ref Matrix4x4 parentMatrix)
+    {
+        this._worldMatrix = this.GetLocalMatrix() * parentMatrix;
+
+        for (int i = 0; i < this.Children.Count; i++)
+        {
+            this.Children[i].UpdateWorldMatrix(ref this._worldMatrix);
+        }
+    }
+
+    public T? Find<T>() where T : Node3D
+    {
+        if (this is T childT)
+        {
+            return childT;
+        }
+        foreach (var child in this.Children)
+        {
+            var result = child.Find<T>();
+            if (result != null)
             {
-                if (this._rotation == value) return;
-                this._rotation = value;
-                this._NotifyTransformDirty();
+                return result;
             }
         }
+        return null;
+    }
 
-        public Vector3 Scale
+    public virtual Renderable? FirstRenderable()
+    {
+        foreach (var child in this.Children)
         {
-            get => this._scale;
-            set
+            var result = child.FirstRenderable();
+            if (result != null)
             {
-                if (this._scale == value) return;
-                this._scale = value;
-                this._NotifyTransformDirty();
+                return result;
             }
         }
+        return null;
+    }
 
-        public Scene? Scene { get; protected set; } = null;
-
-        private Matrix4x4 _localMatrix = Matrix4x4.Identity;
-
-        protected Matrix4x4 _worldMatrix = Matrix4x4.Identity;
-        public ref Matrix4x4 WorldMatrix => ref this._worldMatrix;
-
-        protected bool _transformIsDirty = true;
-        public bool TransformIsDirty => this._transformIsDirty;
-
-        public Vector3 WorldPosition => Vector3.Transform(Vector3.Zero, this._worldMatrix);
-        public Vector3 WorldScale => Vector3.Transform(this._scale, this._worldMatrix);
-
-        public Node3D()
+    public Node3D? Find(string name)
+    {
+        if (this.Name == name)
         {
-            //
+            return this;
         }
-
-        public void Add(Node3D node)
+        foreach (var child in this.Children)
         {
-            // Prevent adding self as child
-            if (node.Parent == this || node == this) return;
-
-            // If node already has a parent, remove it from that parent
-            if (node.Parent != null)
+            var result = child.Find(name);
+            if (result != null)
             {
-                node.Parent.Remove(node);
-            }
-
-            // Set node's parent to this
-            this._children.Add(node);
-            node.Parent = this;
-
-            // If the current node has a scene, add the node to the scene
-            if (this.Scene != null)
-            {
-                node._AttachToSceneRecursive(this.Scene);
+                return result;
             }
         }
+        return null;
+    }
 
-        public void Remove(Node3D node)
+    public virtual void PrintHierarchyToConsole(string indent = "")
+    {
+        Console.WriteLine(indent + "- " + this.GetType().Name + ": " + this.Name + "(scale: " + this.Scale + ")");
+        indent += "  ";
+        foreach (var child in this.Children)
         {
-            if (node.Parent != this) return;
-
-            this._children.Remove(node);
-            node.Parent = null;
-            if (node.Scene != null)
-            {
-                node._DetachFromSceneRecursive();
-            }
+            child.PrintHierarchyToConsole(indent);
         }
+    }
 
-        protected virtual void _AttachToSceneRecursive(Scene scene)
+    public void ForEachRecursive(System.Action<Node3D> action)
+    {
+        action(this);
+        foreach (var child in this.Children)
         {
-            if (this.Scene != null) return;
-
-            this.Scene = scene;
-            this.Scene.NotifyNodeAdded(this);
-            foreach (var child in this._children)
-            {
-                child._AttachToSceneRecursive(scene);
-            }
+            child.ForEachRecursive(action);
         }
+    }
 
-        protected virtual void _DetachFromSceneRecursive()
+    public Node3D? FindPath(string name)
+    {
+        var arrayPaths = name.Split('/');
+        int currentIndex = 0;
+        Node3D currentNode = this;
+        bool found = true;
+        while (found && currentIndex < arrayPaths.Length)
         {
-            if (this.Scene == null) return;
-
-            this.Scene.NotifyNodeRemoved(this);
-            foreach (var child in this._children)
+            var currentNameToFind = arrayPaths[currentIndex];
+            foreach (var child in currentNode.Children)
             {
-                child._DetachFromSceneRecursive();
-            }
-            this.Scene = null;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void _NotifyTransformDirty()
-        {
-            if (this._transformIsDirty) return;
-            this._transformIsDirty = true;
-            this.Scene?.NotifyTransformDirty(this);
-        }
-
-        public ref Matrix4x4 GetLocalMatrix()
-        {
-            if (this._transformIsDirty)
-            {
-                this._localMatrix = Matrix4x4.CreateScale(this._scale)
-                    * Matrix4x4.CreateFromQuaternion(this._rotation)
-                    * Matrix4x4.CreateTranslation(this._position);
-                this._transformIsDirty = false;
-            }
-            return ref this._localMatrix;
-        }
-
-        public virtual void UpdateWorldMatrix(ref Matrix4x4 parentMatrix)
-        {
-            this._worldMatrix = this.GetLocalMatrix() * parentMatrix;
-
-            for (int i = 0; i < this.Children.Count; i++)
-            {
-                this.Children[i].UpdateWorldMatrix(ref this._worldMatrix);
-            }
-        }
-
-        public T? Find<T>() where T : Node3D
-        {
-            if (this is T childT)
-            {
-                return childT;
-            }
-            foreach (var child in this.Children)
-            {
-                var result = child.Find<T>();
-                if (result != null)
+                if (child.Name == currentNameToFind)
                 {
-                    return result;
+                    currentNode = child;
+                    currentIndex++;
+                    found = true;
+                    break;
                 }
             }
-            return null;
         }
+        return currentIndex < arrayPaths.Length ? null : currentNode;
+    }
 
-        public virtual Renderable? FirstRenderable()
+    public virtual void Dispose()
+    {
+        foreach (var child in this.Children)
         {
-            foreach (var child in this.Children)
-            {
-                var result = child.FirstRenderable();
-                if (result != null)
-                {
-                    return result;
-                }
-            }
-            return null;
-        }
-
-        public Node3D? Find(string name)
-        {
-            if (this.Name == name)
-            {
-                return this;
-            }
-            foreach (var child in this.Children)
-            {
-                var result = child.Find(name);
-                if (result != null)
-                {
-                    return result;
-                }
-            }
-            return null;
-        }
-
-        public virtual void PrintHierarchyToConsole(string indent = "")
-        {
-            Console.WriteLine(indent + "- " + this.GetType().Name + ": " + this.Name + "(scale: " + this.Scale + ")");
-            indent += "  ";
-            foreach (var child in this.Children)
-            {
-                child.PrintHierarchyToConsole(indent);
-            }
-        }
-
-        public void ForEachRecursive(System.Action<Node3D> action)
-        {
-            action(this);
-            foreach (var child in this.Children)
-            {
-                child.ForEachRecursive(action);
-            }
-        }
-
-        public Node3D? FindPath(string name)
-        {
-            var arrayPaths = name.Split('/');
-            int currentIndex = 0;
-            Node3D currentNode = this;
-            bool found = true;
-            while (found && currentIndex < arrayPaths.Length)
-            {
-                var currentNameToFind = arrayPaths[currentIndex];
-                foreach (var child in currentNode.Children)
-                {
-                    if (child.Name == currentNameToFind)
-                    {
-                        currentNode = child;
-                        currentIndex++;
-                        found = true;
-                        break;
-                    }
-                }
-            }
-            return currentIndex < arrayPaths.Length ? null : currentNode;
-        }
-
-        public virtual void Dispose()
-        {
-            foreach (var child in this.Children)
-            {
-                child.Dispose();
-            }
+            child.Dispose();
         }
     }
 }

@@ -3,41 +3,40 @@ using System.Numerics;
 using LifeSim.Engine.Anim;
 using LifeSim.Engine.Rendering;
 
-namespace LifeSim.Engine.GLTF
+namespace LifeSim.Engine.GLTF;
+
+public class GLTFNode
 {
-    public class GLTFNode
+    public string Name;
+    public Vector3 Position;
+    public Quaternion Rotation;
+    public Vector3 Scale;
+
+    public Mesh? Mesh = null;
+    public Skin? Skin = null;
+    public Material? Material = null;
+    public GLTFNode? Parent = null;
+
+    private readonly List<GLTFNode> _children = new List<GLTFNode>();
+    public IReadOnlyList<GLTFNode> Children => this._children;
+
+    public GLTFNode(string name)
     {
-        public string Name;
-        public Vector3 Position;
-        public Quaternion Rotation;
-        public Vector3 Scale;
+        this.Name = name;
+    }
 
-        public Mesh? Mesh = null;
-        public Skin? Skin = null;
-        public Material? Material = null;
-        public GLTFNode? Parent = null;
+    public void Add(GLTFNode node)
+    {
+        node.Parent = this;
+        this._children.Add(node);
+    }
 
-        private readonly List<GLTFNode> _children = new List<GLTFNode>();
-        public IReadOnlyList<GLTFNode> Children => this._children;
-
-        public GLTFNode(string name)
+    public string GetFullPathName()
+    {
+        if (this.Parent != null)
         {
-            this.Name = name;
+            return this.Parent.GetFullPathName() + "/" + this.Name;
         }
-
-        public void Add(GLTFNode node)
-        {
-            node.Parent = this;
-            this._children.Add(node);
-        }
-
-        public string GetFullPathName()
-        {
-            if (this.Parent != null)
-            {
-                return this.Parent.GetFullPathName() + "/" + this.Name;
-            }
-            return "/" + this.Name;
-        }
+        return "/" + this.Name;
     }
 }

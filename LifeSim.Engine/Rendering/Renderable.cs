@@ -2,163 +2,162 @@ using System;
 using System.Numerics;
 using Veldrid.Utilities;
 
-namespace LifeSim.Engine.Rendering
+namespace LifeSim.Engine.Rendering;
+
+public class Renderable
 {
-    public class Renderable
+    private static uint _count;
+
+    public int RenderListIndex { get; set; }
+    private Matrix4x4 _transform = Matrix4x4.Identity;
+    public Vector3 CenterPosition { get; private set; }
+    public BoundingBox BoundingBox { get; private set; }
+    private ulong _cachedSortKey;
+    public int BatchingHashKey { get; private set; }
+
+    internal Veldrid.ResourceSet TransformResourceSet { get; private set; }
+    internal Veldrid.ResourceSet? InstanceResourceSet { get; private set; } = null;
+    internal Veldrid.ResourceSet? SkeletonResourceSet { get; private set; } = null;
+
+    public OffsetVertexData OffsetVertexData { get; set; }
+
+    private DataBlock _transformDataBlock;
+
+    public Mesh? Mesh { get; private set; } = null;
+
+    public bool Visible { get; set; } = true;
+    public uint Id { get; }
+
+    public Skeleton? Skeleton { get; private set; }
+    public Material? Material { get; private set; }
+    private DataBlock _instanceDataBlock;
+    private readonly SceneStorage _storage;
+
+    public Renderable(SceneStorage storage)
     {
-        private static uint _count;
+        this._storage = storage;
+        this.Id = ++_count;
+        this._transformDataBlock = storage.RequestTransformDataBlock();
+        this.TransformResourceSet = this._transformDataBlock.Buffer.ResourceSet;
+    }
 
-        public int RenderListIndex { get; set; }
-        private Matrix4x4 _transform = Matrix4x4.Identity;
-        public Vector3 CenterPosition { get; private set; }
-        public BoundingBox BoundingBox { get; private set; }
-        private ulong _cachedSortKey;
-        public int BatchingHashKey { get; private set; }
+    public Renderable(SceneStorage storage, Mesh mesh) : this(storage)
+    {
+        this.SetMesh(mesh);
+    }
 
-        internal Veldrid.ResourceSet TransformResourceSet { get; private set; }
-        internal Veldrid.ResourceSet? InstanceResourceSet { get; private set; } = null;
-        internal Veldrid.ResourceSet? SkeletonResourceSet { get; private set; } = null;
+    public void SetMesh(Mesh mesh)
+    {
+        this.Mesh = mesh;
+        this._RecomputeSortKey();
+        this._RecomputeBoundingBox();
+    }
 
-        public OffsetVertexData OffsetVertexData { get; set; }
-
-        private DataBlock _transformDataBlock;
-
-        public Mesh? Mesh { get; private set; } = null;
-
-        public bool Visible { get; set; } = true;
-        public uint Id { get; }
-
-        public Skeleton? Skeleton { get; private set; }
-        public Material? Material { get; private set; }
-        private DataBlock _instanceDataBlock;
-        private readonly SceneStorage _storage;
-
-        public Renderable(SceneStorage storage)
+    public void SetMaterial(Material material)
+    {
+        this.Material = material;
+        if (this._instanceDataBlock.BlockSize != material.Definition.InstanceDataBlockSize)
         {
-            this._storage = storage;
-            this.Id = ++_count;
-            this._transformDataBlock = storage.RequestTransformDataBlock();
-            this.TransformResourceSet = this._transformDataBlock.Buffer.ResourceSet;
+            this._instanceDataBlock.FreeBlock();
+            this._instanceDataBlock = this._storage.RequestInstanceDataBlock(material.Definition);
         }
+        this.InstanceResourceSet = this._instanceDataBlock.Buffer.ResourceSet;
+        var span = material.Definition.GetDefaultInstanceData();
+        this._instanceDataBlock.WriteSpan(span);
+        this._RecomputeOffsetVertexData();
+        this._RecomputeSortKey();
+    }
 
-        public Renderable(SceneStorage storage, Mesh mesh) : this(storage)
-        {
-            this.SetMesh(mesh);
-        }
+    public void SetSkeleton(Skeleton skeleton)
+    {
+        this.Skeleton = skeleton;
+        this.SkeletonResourceSet = skeleton.ResourceSet;
+        this._RecomputeOffsetVertexData();
+        this._RecomputeSortKey();
+    }
 
-        public void SetMesh(Mesh mesh)
+    public void SetTransform(ref Matrix4x4 transform)
+    {
+        this._transform = transform;
+        this._transformDataBlock.Write(ref transform);
+
+        if (this.Mesh != null)
         {
-            this.Mesh = mesh;
-            this._RecomputeSortKey();
             this._RecomputeBoundingBox();
         }
 
-        public void SetMaterial(Material material)
+        if (this.Skeleton != null)
         {
-            this.Material = material;
-            if (this._instanceDataBlock.BlockSize != material.Definition.InstanceDataBlockSize)
-            {
-                this._instanceDataBlock.FreeBlock();
-                this._instanceDataBlock = this._storage.RequestInstanceDataBlock(material.Definition);
-            }
-            this.InstanceResourceSet = this._instanceDataBlock.Buffer.ResourceSet;
-            var span = material.Definition.GetDefaultInstanceData();
-            this._instanceDataBlock.WriteSpan(span);
-            this._RecomputeOffsetVertexData();
-            this._RecomputeSortKey();
+            this.Skeleton.RootTransform = transform;
         }
+    }
 
-        public void SetSkeleton(Skeleton skeleton)
-        {
-            this.Skeleton = skeleton;
-            this.SkeletonResourceSet = skeleton.ResourceSet;
-            this._RecomputeOffsetVertexData();
-            this._RecomputeSortKey();
-        }
+    public void SetInstanceData<T>(string name, T data) where T : unmanaged
+    {
+        if (this.Material == null) throw new Exception("No material set");
+        var offset = this.Material.Definition.GetInstanceUniformDataOffset(name);
+        this._instanceDataBlock.Write(offset, ref data);
+    }
 
-        public void SetTransform(ref Matrix4x4 transform)
-        {
-            this._transform = transform;
-            this._transformDataBlock.Write(ref transform);
+    public void Free()
+    {
+        this._instanceDataBlock.FreeBlock();
+        this._transformDataBlock.FreeBlock();
+    }
 
-            if (this.Mesh != null)
-            {
-                this._RecomputeBoundingBox();
-            }
+    protected void _RecomputeSortKey()
+    {
+        if (this.Material == null || this.Mesh == null) return;
 
-            if (this.Skeleton != null)
-            {
-                this.Skeleton.RootTransform = transform;
-            }
-        }
+        ulong materialHash        = (ulong) (this.Material.Id & 0xFFF);
+        ulong meshHash            = (ulong) (this.Mesh.Id & 0xFFF);
+        ulong transformBufferHash = (ulong) (this._transformDataBlock.Buffer.Id & 0xFF);
+        ulong instanceBufferHash  = (ulong) (this._instanceDataBlock.Buffer.Id & 0xFF);
+        ulong skekeletonBufferHash = (this.Skeleton != null) ? (ulong)(this.Skeleton.BufferId & 0xF) : 0;
 
-        public void SetInstanceData<T>(string name, T data) where T : unmanaged
-        {
-            if (this.Material == null) throw new Exception("No material set");
-            var offset = this.Material.Definition.GetInstanceUniformDataOffset(name);
-            this._instanceDataBlock.Write(offset, ref data);
-        }
-
-        public void Free()
-        {
-            this._instanceDataBlock.FreeBlock();
-            this._transformDataBlock.FreeBlock();
-        }
-
-        protected void _RecomputeSortKey()
-        {
-            if (this.Material == null || this.Mesh == null) return;
-
-            ulong materialHash        = (ulong) (this.Material.Id & 0xFFF);
-            ulong meshHash            = (ulong) (this.Mesh.Id & 0xFFF);
-            ulong transformBufferHash = (ulong) (this._transformDataBlock.Buffer.Id & 0xFF);
-            ulong instanceBufferHash  = (ulong) (this._instanceDataBlock.Buffer.Id & 0xFF);
-            ulong skekeletonBufferHash = (this.Skeleton != null) ? (ulong)(this.Skeleton.BufferId & 0xF) : 0;
-
-            // The sort key is a 64-bit number that is used to sort renderables.
-            ulong key = (materialHash   << 56) // 8 bits (max: 255)
+        // The sort key is a 64-bit number that is used to sort renderables.
+        ulong key = (materialHash   << 56) // 8 bits (max: 255)
                 | (transformBufferHash  << 48) // 8 bits (max: 255)
                 | (instanceBufferHash   << 40) // 8 bits (max: 255)
                 | (skekeletonBufferHash << 36) // 4 bits (max: 15)
                 | (meshHash             << 24); // 12 bits (max: 4095)
 
-            this._cachedSortKey = key;
+        this._cachedSortKey = key;
 
-            // This key is used to fast check if two instances can be batched together. (They must have the same hash)
-            // It could happen that the hash is not unique, but it is extremely unlikely that two instances that are 
-            // contiguous after sorting the render queue by the sort key, end up having the same hash.
-            this.BatchingHashKey = HashCode.Combine(
-                meshHash,
-                this.Material.Id,
-                instanceBufferHash,
-                skekeletonBufferHash,
-                transformBufferHash
-            );
-        }
+        // This key is used to fast check if two instances can be batched together. (They must have the same hash)
+        // It could happen that the hash is not unique, but it is extremely unlikely that two instances that are 
+        // contiguous after sorting the render queue by the sort key, end up having the same hash.
+        this.BatchingHashKey = HashCode.Combine(
+            meshHash,
+            this.Material.Id,
+            instanceBufferHash,
+            skekeletonBufferHash,
+            transformBufferHash
+        );
+    }
 
-        private void _RecomputeOffsetVertexData()
-        {
-            if (!this._instanceDataBlock.IsValid) return;
+    private void _RecomputeOffsetVertexData()
+    {
+        if (!this._instanceDataBlock.IsValid) return;
 
-            this.OffsetVertexData = new OffsetVertexData(
-                this._transformDataBlock.BlockIndex,
-                this._instanceDataBlock.BlockIndex,
-                this.Skeleton?.BoneDataOffset ?? 0,
-                this.Id // this id is used for picking
-            );
-        }
+        this.OffsetVertexData = new OffsetVertexData(
+            this._transformDataBlock.BlockIndex,
+            this._instanceDataBlock.BlockIndex,
+            this.Skeleton?.BoneDataOffset ?? 0,
+            this.Id // this id is used for picking
+        );
+    }
 
-        private void _RecomputeBoundingBox()
-        {
-            this.BoundingBox = BoundingBox.Transform(this.Mesh!.AABB, this._transform);
-            this.CenterPosition = this.BoundingBox.GetCenter();
-        }
+    private void _RecomputeBoundingBox()
+    {
+        this.BoundingBox = BoundingBox.Transform(this.Mesh!.AABB, this._transform);
+        this.CenterPosition = this.BoundingBox.GetCenter();
+    }
 
-        internal ulong GetSortKey(Vector3 cameraPosition)
-        {
-            float dist = Vector3.DistanceSquared(this.CenterPosition, cameraPosition);
-            uint cameraDistance = Math.Min(uint.MaxValue, (uint) (dist * 1000f));
-            return this._cachedSortKey | (cameraDistance & 0xFFFFFF); // 24 bits
-        }
+    internal ulong GetSortKey(Vector3 cameraPosition)
+    {
+        float dist = Vector3.DistanceSquared(this.CenterPosition, cameraPosition);
+        uint cameraDistance = Math.Min(uint.MaxValue, (uint) (dist * 1000f));
+        return this._cachedSortKey | (cameraDistance & 0xFFFFFF); // 24 bits
     }
 }

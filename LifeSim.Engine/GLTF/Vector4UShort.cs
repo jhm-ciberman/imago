@@ -2,56 +2,55 @@ using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
 
-namespace LifeSim.Engine.GLTF
+namespace LifeSim.Engine.GLTF;
+
+[StructLayout(LayoutKind.Sequential)]
+public struct Vector4UShort
 {
-    [StructLayout(LayoutKind.Sequential)]
-    public struct Vector4UShort
+    public ushort X;
+    public ushort Y;
+    public ushort Z;
+    public ushort W;
+
+    public Vector4UShort(ushort x, ushort y, ushort z, ushort w)
     {
-        public ushort X;
-        public ushort Y;
-        public ushort Z;
-        public ushort W;
+        this.X = x;
+        this.Y = y;
+        this.Z = z;
+        this.W = w;
+    }
 
-        public Vector4UShort(ushort x, ushort y, ushort z, ushort w)
-        {
-            this.X = x;
-            this.Y = y;
-            this.Z = z;
-            this.W = w;
-        }
+    public override bool Equals(object? obj)
+    {
+        return obj is Vector4UShort other &&
+               this.X == other.X &&
+               this.Y == other.Y &&
+               this.Z == other.Z &&
+               this.W == other.W;
+    }
 
-        public override bool Equals(object? obj)
-        {
-            return obj is Vector4UShort other &&
-                   this.X == other.X &&
-                   this.Y == other.Y &&
-                   this.Z == other.Z &&
-                   this.W == other.W;
-        }
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(this.X, this.Y, this.Z, this.W);
+    }
 
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(this.X, this.Y, this.Z, this.W);
-        }
+    public override string? ToString()
+    {
+        return "<" + this.X + ", " + this.Y + ", " + this.Z + ", " + this.W + ">";
+    }
 
-        public override string? ToString()
-        {
-            return "<" + this.X + ", " + this.Y + ", " + this.Z + ", " + this.W + ">";
-        }
+    public static implicit operator Vector4(Vector4UShort v)
+    {
+        return new Vector4(v.X, v.Y, v.Z, v.W);
+    }
 
-        public static implicit operator Vector4(Vector4UShort v)
-        {
-            return new Vector4(v.X, v.Y, v.Z, v.W);
-        }
+    public static bool operator ==(Vector4UShort left, Vector4UShort right)
+    {
+        return left.Equals(right);
+    }
 
-        public static bool operator ==(Vector4UShort left, Vector4UShort right)
-        {
-            return left.Equals(right);
-        }
-
-        public static bool operator !=(Vector4UShort left, Vector4UShort right)
-        {
-            return !(left == right);
-        }
+    public static bool operator !=(Vector4UShort left, Vector4UShort right)
+    {
+        return !(left == right);
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime;
@@ -9,143 +9,142 @@ using Veldrid;
 using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
 
-namespace LifeSim.Engine
+namespace LifeSim.Engine;
+
+public class App
 {
-    public class App
+    public Rendering.Viewport Viewport { get; }
+
+    public SceneStorage Storage => this._renderer.Storage;
+
+    private readonly Sdl2Window _window;
+
+    private readonly InputInstance _input;
+
+    private readonly Renderer _renderer;
+
+    private double _simulationTime = 0;
+    private double _renderingTime = 0;
+
+    public Scene? CurrentScene { get; set; } = null;
+
+    private bool _running = false;
+    public uint MousePickerObjectID => this._renderer.MousePickerObjectID;
+
+    public Renderer Renderer => this._renderer;
+
+    public App(string windowTitle, GraphicsBackend? backend = null)
     {
-        public Rendering.Viewport Viewport { get; }
+        GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
 
-        public SceneStorage Storage => this._renderer.Storage;
+        WindowCreateInfo windowCI = new WindowCreateInfo(100, 100, 1024, 600, Veldrid.WindowState.Normal, windowTitle);
+        this._window = VeldridStartup.CreateWindow(ref windowCI);
+        this.Viewport = new Rendering.Viewport((uint)this._window.Width, (uint)this._window.Height);
 
-        private readonly Sdl2Window _window;
+        this._renderer = new Renderer(this._window, backend);
 
-        private readonly InputInstance _input;
+        this._window.Resized += this.OnResize;
 
-        private readonly Renderer _renderer;
+        this.OnResize();
 
-        private double _simulationTime = 0;
-        private double _renderingTime = 0;
+        this._input = new InputInstance(this._window);
+        Input.SetInstance(this._input);
+    }
 
-        public Scene? CurrentScene { get; set; } = null;
+    public void SetScene(Scene scene)
+    {
+        this.CurrentScene = scene;
+    }
 
-        private bool _running = false;
-        public uint MousePickerObjectID => this._renderer.MousePickerObjectID;
+    private void OnResize()
+    {
+        uint width = (uint) this._window.Width;
+        uint height = (uint) this._window.Height;
+        this.Viewport.Resize(width, height);
+        this._renderer.Resize(width, height, this.Viewport.Width, this.Viewport.Height);
+    }
 
-        public Renderer Renderer => this._renderer;
+    public void Quit()
+    {
+        this._renderer.Dispose();
+        this._window.Close();
+    }
 
-        public App(string windowTitle, GraphicsBackend? backend = null)
+    public void Run()
+    {
+        if (this._running) return;
+
+        this._running = true;
+
+        Stopwatch sw = Stopwatch.StartNew();
+        double previousElapsed = sw.Elapsed.TotalSeconds;
+
+        while (this._window.Exists)
         {
-            GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
+            double newElapsed = sw.Elapsed.TotalSeconds;
+            float deltaTime = (float)(newElapsed - previousElapsed);
+            previousElapsed = newElapsed;
 
-            WindowCreateInfo windowCI = new WindowCreateInfo(100, 100, 1024, 600, Veldrid.WindowState.Normal, windowTitle);
-            this._window = VeldridStartup.CreateWindow(ref windowCI);
-            this.Viewport = new Rendering.Viewport((uint)this._window.Width, (uint)this._window.Height);
+            var fps = (1f / deltaTime).ToString("0.00");
+            var dt = (deltaTime * 1000).ToString("0.00");
 
-            this._renderer = new Renderer(this._window, backend);
+            this._window.Title = "Medieval Life" + " (" + this._renderer.BackendType.ToString() + ") frame = " + dt + "ms FPS = " + fps;
 
-            this._window.Resized += this.OnResize;
-
-            this.OnResize();
-
-            this._input = new InputInstance(this._window);
-            Input.SetInstance(this._input);
-        }
-
-        public void SetScene(Scene scene)
-        {
-            this.CurrentScene = scene;
-        }
-
-        private void OnResize()
-        {
-            uint width = (uint) this._window.Width;
-            uint height = (uint) this._window.Height;
-            this.Viewport.Resize(width, height);
-            this._renderer.Resize(width, height, this.Viewport.Width, this.Viewport.Height);
-        }
-
-        public void Quit()
-        {
-            this._renderer.Dispose();
-            this._window.Close();
-        }
-
-        public void Run()
-        {
-            if (this._running) return;
-
-            this._running = true;
-
-            Stopwatch sw = Stopwatch.StartNew();
-            double previousElapsed = sw.Elapsed.TotalSeconds;
-
-            while (this._window.Exists)
+            if (Input.GetKeyDown(Key.Escape) && !Input.MouseIsLocked)
             {
-                double newElapsed = sw.Elapsed.TotalSeconds;
-                float deltaTime = (float)(newElapsed - previousElapsed);
-                previousElapsed = newElapsed;
-
-                var fps = (1f / deltaTime).ToString("0.00");
-                var dt = (deltaTime * 1000).ToString("0.00");
-
-                this._window.Title = "Medieval Life" + " (" + this._renderer.BackendType.ToString() + ") frame = " + dt + "ms FPS = " + fps;
-
-                if (Input.GetKeyDown(Key.Escape) && !Input.MouseIsLocked)
-                {
-                    this._window.Close();
-                    return;
-                }
-
-                if (Input.GetKeyDown(Key.F4))
-                {
-                    this._window.WindowState = this._window.WindowState == Veldrid.WindowState.BorderlessFullScreen
-                        ? WindowState.Normal
-                        : WindowState.BorderlessFullScreen;
-                }
-
-                var scene = this.CurrentScene;
-                if (scene != null)
-                {
-                    var swFrame = Stopwatch.StartNew();
-                    scene.BeginUpdate(); // Swap internal render queues
-
-                    this._Update(scene, deltaTime);
-                    this._Render(scene, deltaTime);
-
-                    swFrame.Stop();
-                    //this._frameTime = swFrame.Elapsed.TotalMilliseconds;
-                    //var totalTime = this._simulationTime + this._renderingTime;
-                    //System.Console.WriteLine("Frame time: " + this._frameTime + " - Saved: " + (this._frameTime - totalTime).ToString("0.00"));
-                }
-
-                ImGuiNET.ImGui.Begin("Debug");
-                ImGuiNET.ImGui.Text("Simulation time: " + this._simulationTime.ToString("0.00") + "ms");
-                ImGuiNET.ImGui.Text("Rendering time: " + this._renderingTime.ToString("0.00") + "ms");
-                ImGuiNET.ImGui.End();
-
-                this._input.UpdateFrameInput(); // For next frame
+                this._window.Close();
+                return;
             }
+
+            if (Input.GetKeyDown(Key.F4))
+            {
+                this._window.WindowState = this._window.WindowState == Veldrid.WindowState.BorderlessFullScreen
+                    ? WindowState.Normal
+                    : WindowState.BorderlessFullScreen;
+            }
+
+            var scene = this.CurrentScene;
+            if (scene != null)
+            {
+                var swFrame = Stopwatch.StartNew();
+                scene.BeginUpdate(); // Swap internal render queues
+
+                this._Update(scene, deltaTime);
+                this._Render(scene, deltaTime);
+
+                swFrame.Stop();
+                //this._frameTime = swFrame.Elapsed.TotalMilliseconds;
+                //var totalTime = this._simulationTime + this._renderingTime;
+                //System.Console.WriteLine("Frame time: " + this._frameTime + " - Saved: " + (this._frameTime - totalTime).ToString("0.00"));
+            }
+
+            ImGuiNET.ImGui.Begin("Debug");
+            ImGuiNET.ImGui.Text("Simulation time: " + this._simulationTime.ToString("0.00") + "ms");
+            ImGuiNET.ImGui.Text("Rendering time: " + this._renderingTime.ToString("0.00") + "ms");
+            ImGuiNET.ImGui.End();
+
+            this._input.UpdateFrameInput(); // For next frame
         }
+    }
 
-        private void _Update(Scene scene, float deltaTime)
-        {
-            Stopwatch swSimulation = Stopwatch.StartNew();
-            scene.Update(deltaTime);
-            scene.EndUpdate();
-            swSimulation.Stop();
-            this._simulationTime = swSimulation.Elapsed.TotalMilliseconds;
-            //System.Console.WriteLine("Simulation time: " + this._simulationTime);
-        }
+    private void _Update(Scene scene, float deltaTime)
+    {
+        Stopwatch swSimulation = Stopwatch.StartNew();
+        scene.Update(deltaTime);
+        scene.EndUpdate();
+        swSimulation.Stop();
+        this._simulationTime = swSimulation.Elapsed.TotalMilliseconds;
+        //System.Console.WriteLine("Simulation time: " + this._simulationTime);
+    }
 
-        private void _Render(Scene scene, float deltaTime)
-        {
-            Stopwatch swRendering = Stopwatch.StartNew();
+    private void _Render(Scene scene, float deltaTime)
+    {
+        Stopwatch swRendering = Stopwatch.StartNew();
 
-            this._renderer.Render(scene, deltaTime, this._input.InputSnapshot);
+        this._renderer.Render(scene, deltaTime, this._input.InputSnapshot);
 
-            swRendering.Stop();
-            this._renderingTime = swRendering.Elapsed.TotalMilliseconds;
-            //System.Console.WriteLine("Rendering time: " + this._renderingTime);
-        }
+        swRendering.Stop();
+        this._renderingTime = swRendering.Elapsed.TotalMilliseconds;
+        //System.Console.WriteLine("Rendering time: " + this._renderingTime);
     }
 }

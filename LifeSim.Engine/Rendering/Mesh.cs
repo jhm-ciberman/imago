@@ -1,55 +1,54 @@
 using Veldrid;
 using Veldrid.Utilities;
 
-namespace LifeSim.Engine.Rendering
+namespace LifeSim.Engine.Rendering;
+
+public class Mesh : System.IDisposable
 {
-    public class Mesh : System.IDisposable
+    private static int _count = 0;
+
+    public int Id { get; private set; }
+    public uint IndexCount { get; private set; }
+    public VertexFormat VertexFormat { get; private set; }
+    public DeviceBuffer VertexBuffer { get; private set; }
+    public DeviceBuffer IndexBuffer { get; private set; }
+    public BoundingBox AABB { get; private set; }
+
+    public IMeshData MeshData { get; private set; }
+
+    protected Mesh(VertexFormat vertexFormat, uint indexCount, Veldrid.DeviceBuffer vertexBuffer, Veldrid.DeviceBuffer indexBuffer, ref BoundingBox boundingBox, IMeshData meshData)
     {
-        private static int _count = 0;
+        this.Id = ++Mesh._count;
+        this.VertexFormat = vertexFormat;
+        this.IndexCount = indexCount;
+        this.AABB = boundingBox;
+        this.IndexBuffer = indexBuffer;
+        this.VertexBuffer = vertexBuffer;
+        this.MeshData = meshData;
+    }
 
-        public int Id { get; private set; }
-        public uint IndexCount { get; private set; }
-        public VertexFormat VertexFormat { get; private set; }
-        public DeviceBuffer VertexBuffer { get; private set; }
-        public DeviceBuffer IndexBuffer { get; private set; }
-        public BoundingBox AABB { get; private set; }
+    public static Mesh CreateFromData(IMeshData meshData)
+    {
+        var gd = Renderer.Instance.GraphicsDevice;
+        var factory = gd.ResourceFactory;
 
-        public IMeshData MeshData { get; private set; }
+        BoundingBox boundingBox = meshData.GetBoundingBox();
+        VertexFormat vertexFormat = meshData.GetVertexFormat();
 
-        protected Mesh(VertexFormat vertexFormat, uint indexCount, Veldrid.DeviceBuffer vertexBuffer, Veldrid.DeviceBuffer indexBuffer, ref BoundingBox boundingBox, IMeshData meshData)
-        {
-            this.Id = ++Mesh._count;
-            this.VertexFormat = vertexFormat;
-            this.IndexCount = indexCount;
-            this.AABB = boundingBox;
-            this.IndexBuffer = indexBuffer;
-            this.VertexBuffer = vertexBuffer;
-            this.MeshData = meshData;
-        }
+        var cl = factory.CreateCommandList();
+        cl.Begin();
+        var indexBuffer = meshData.CreateIndexBuffer(factory, cl, out int indexCount);
+        var vertexBuffer = meshData.CreateVertexBuffer(factory, cl);
+        cl.End();
+        gd.SubmitCommands(cl);
+        cl.Dispose();
 
-        public static Mesh CreateFromData(IMeshData meshData)
-        {
-            var gd = Renderer.Instance.GraphicsDevice;
-            var factory = gd.ResourceFactory;
+        return new Mesh(vertexFormat, (uint)indexCount, vertexBuffer, indexBuffer, ref boundingBox, meshData);
+    }
 
-            BoundingBox boundingBox = meshData.GetBoundingBox();
-            VertexFormat vertexFormat = meshData.GetVertexFormat();
-
-            var cl = factory.CreateCommandList();
-            cl.Begin();
-            var indexBuffer = meshData.CreateIndexBuffer(factory, cl, out int indexCount);
-            var vertexBuffer = meshData.CreateVertexBuffer(factory, cl);
-            cl.End();
-            gd.SubmitCommands(cl);
-            cl.Dispose();
-
-            return new Mesh(vertexFormat, (uint)indexCount, vertexBuffer, indexBuffer, ref boundingBox, meshData);
-        }
-
-        public virtual void Dispose()
-        {
-            this.VertexBuffer.Dispose();
-            this.IndexBuffer.Dispose();
-        }
+    public virtual void Dispose()
+    {
+        this.VertexBuffer.Dispose();
+        this.IndexBuffer.Dispose();
     }
 }

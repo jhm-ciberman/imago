@@ -2,71 +2,70 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using LifeSim.Engine.Rendering;
 
-namespace LifeSim.Engine.GLTF
+namespace LifeSim.Engine.GLTF;
+
+internal class GLTFPrimitive
 {
-    internal class GLTFPrimitive
+    private readonly Dictionary<string, int> _attributes;
+    private readonly GLTFAccessor? _indicesAccessor;
+    private readonly GLTFLoader _model;
+
+    public GLTFPrimitive(GLTFLoader model, int? indices, Dictionary<string, int> attributes)
     {
-        private readonly Dictionary<string, int> _attributes;
-        private readonly GLTFAccessor? _indicesAccessor;
-        private readonly GLTFLoader _model;
+        this._model = model;
+        this._indicesAccessor = indices.HasValue ? this._model.GetAccessor(indices.Value) : null;
+        this._attributes = attributes;
+    }
 
-        public GLTFPrimitive(GLTFLoader model, int? indices, Dictionary<string, int> attributes)
+    private readonly bool _loadSkinned = true;
+
+    public IMeshData MakeMeshData()
+    {
+        var positionAccessor = this._GetAttributeAccessor("POSITION");
+        Debug.Assert(positionAccessor != null);
+        var positions = positionAccessor.AsVector3Array();
+
+        var texCoordAccessor = this._GetAttributeAccessor("TEXCOORD_0");
+        var texCoords = texCoordAccessor?.AsVector2Array();
+
+        var normalAccessor   = this._GetAttributeAccessor("NORMAL");
+        var normals = normalAccessor?.AsVector3Array();
+
+        var jointsAccessor   = this._GetAttributeAccessor("JOINTS_0");
+        var weightsAccessor  = this._GetAttributeAccessor("WEIGHTS_0");
+
+
+        var indices = this._indicesAccessor == null ? _MakeFakeIndices(positions.Length) : this._indicesAccessor.AsIndicesArray();
+
+        if (this._loadSkinned && weightsAccessor != null && jointsAccessor != null)
         {
-            this._model = model;
-            this._indicesAccessor = indices.HasValue ? this._model.GetAccessor(indices.Value) : null;
-            this._attributes = attributes;
+            var joints = jointsAccessor.AsUShort4Array();
+            var weights = weightsAccessor.AsVector4Array();
+            return SkinnedMeshData.CreateMesh(indices, positions, normals, texCoords, joints, weights);
         }
-
-        private readonly bool _loadSkinned = true;
-
-        public IMeshData MakeMeshData()
+        else
         {
-            var positionAccessor = this._GetAttributeAccessor("POSITION");
-            Debug.Assert(positionAccessor != null);
-            var positions = positionAccessor.AsVector3Array();
-
-            var texCoordAccessor = this._GetAttributeAccessor("TEXCOORD_0");
-            var texCoords = texCoordAccessor?.AsVector2Array();
-
-            var normalAccessor   = this._GetAttributeAccessor("NORMAL");
-            var normals = normalAccessor?.AsVector3Array();
-
-            var jointsAccessor   = this._GetAttributeAccessor("JOINTS_0");
-            var weightsAccessor  = this._GetAttributeAccessor("WEIGHTS_0");
-
-
-            var indices = this._indicesAccessor == null ? _MakeFakeIndices(positions.Length) : this._indicesAccessor.AsIndicesArray();
-
-            if (this._loadSkinned && weightsAccessor != null && jointsAccessor != null)
-            {
-                var joints = jointsAccessor.AsUShort4Array();
-                var weights = weightsAccessor.AsVector4Array();
-                return SkinnedMeshData.CreateMesh(indices, positions, normals, texCoords, joints, weights);
-            }
-            else
-            {
-                return BasicMeshData.CreateMesh(indices, positions, normals, texCoords);
-            }
+            return BasicMeshData.CreateMesh(indices, positions, normals, texCoords);
         }
+    }
 
 
-        private GLTFAccessor? _GetAttributeAccessor(string name)
+    private GLTFAccessor? _GetAttributeAccessor(string name)
+    {
+        if (this._attributes.TryGetValue(name, out int attributeId))
         {
-            if (this._attributes.TryGetValue(name, out int attributeId))
-            {
-                return this._model.GetAccessor(attributeId);
-            }
-            return null;
+            return this._model.GetAccessor(attributeId);
         }
+        return null;
+    }
 
-        private static ushort[] _MakeFakeIndices(int count)
+    private static ushort[] _MakeFakeIndices(int count)
+    {
+        var arr = new ushort[count];
+        for (int i = 0; i < count; i++)
         {
-            var arr = new ushort[count];
-            for (int i = 0; i < count; i++)
-            {
-                arr[i] = (ushort)i;
-            }
-            return arr;
+            arr[i] = (ushort)i;
         }
+        return arr;
     }
 }

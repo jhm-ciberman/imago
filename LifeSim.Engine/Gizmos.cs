@@ -1,12 +1,11 @@
 using LifeSim.Engine.SceneGraph;
 
-namespace LifeSim.Engine.Rendering
+namespace LifeSim.Engine.Rendering;
+
+public static class Gizmos
 {
-    public static class Gizmos
-    {
 
 
 
 
-    }
 }
