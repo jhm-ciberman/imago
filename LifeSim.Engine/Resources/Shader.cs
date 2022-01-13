@@ -8,7 +8,7 @@ namespace LifeSim.Engine.Rendering;
 public class Shader : IDisposable
 {
     private static int _count = 0;
-    public int Id;
+    public int Id { get; set; }
     private readonly List<CachedPipeline> _pipelines = new List<CachedPipeline>();
     private readonly ResourceLayout? _materialResourceLayout;
     private readonly List<ShaderVariant> _variants = new List<ShaderVariant>();
@@ -71,9 +71,8 @@ public class Shader : IDisposable
                 return this._variants[i];
             }
         }
-        var sw = Stopwatch.StartNew();
+
         var variant = new ShaderVariant(this._gd, vertexFormat, this._materialResourceLayout, this._vertexCode, this._fragmentCode);
-        Console.WriteLine($"Compiled shader variant for shader id = {this.Id} ({this.Pass.GetType().Name}) in {sw.ElapsedMilliseconds}ms");
         this._variants.Add(variant);
         return variant;
     }
