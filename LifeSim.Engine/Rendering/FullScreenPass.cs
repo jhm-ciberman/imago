@@ -137,10 +137,10 @@ public class FullScreenPass : IDisposable, IPipelineProvider
             layout(set = 0, binding = 0) uniform texture2D MainTexture;
             layout(set = 0, binding = 1) uniform sampler MainSampler;
 
-            layout(location = 0) out vec4 fsout_color;
+            layout(location = 0) out vec4 fsout_Color;
 
             void main()
             {
-                fsout_color = texture(sampler2D(MainTexture, MainSampler), fsin_TexCoords);
+                fsout_Color = texture(sampler2D(MainTexture, MainSampler), fsin_TexCoords);
             }";
 }

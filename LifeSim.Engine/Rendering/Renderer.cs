@@ -54,6 +54,8 @@ public class Renderer : ITexture2DManager, IDisposable
     public IPipelineProvider ForwardPass => this._forwardPass;
     public IPipelineProvider ShadowMapPass => this._shadowPass;
 
+    public SkyDomePass SkyDomePass { get; }
+
     internal SceneStorage Storage { get; }
     public uint MousePickerObjectID => this._mousePickerPass.ObjectID;
 
@@ -99,6 +101,7 @@ public class Renderer : ITexture2DManager, IDisposable
         this._shadowPass = new ShadowPass(gd, this.Storage);
         this._forwardPass = new ForwardPass(gd, this.Storage, this.MainRenderTexture, this._shadowPass);
         this._spritesPass = new SpritesPass(gd, this.MainRenderTexture);
+        this.SkyDomePass = new SkyDomePass(gd, this.MainRenderTexture);
 
         this._spriteBatcher = new SpriteBatcher(gd, this._spritesPass.DefaultShader);
 
@@ -158,6 +161,9 @@ public class Renderer : ITexture2DManager, IDisposable
         {
             this._shadowPass.Render(this._commandList, scene.Renderables, camera, scene.MainLight.Direction);
             this._forwardPass.Render(this._commandList, scene.Renderables, camera, scene.MainLight.Direction, scene.MainLight.Color, scene.AmbientColor);
+
+            this.SkyDomePass.Render(this._commandList, camera);
+
             this._gizmosPass.Render(this._commandList, scene.Gizmos.Lines, camera);
 
             for (int i = 0; i < scene.ParticleSystems.Count; i++)
