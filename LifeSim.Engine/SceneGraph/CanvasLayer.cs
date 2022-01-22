@@ -1,17 +1,20 @@
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using LifeSim.Engine.Rendering;
 
 namespace LifeSim.Engine.SceneGraph;
 
 public class CanvasLayer
 {
-    public Viewport Viewport;
+    public Viewport Viewport { get; }
     private readonly SwapPopList<ICanvasItem> _items = new SwapPopList<ICanvasItem>();
 
     public IReadOnlyList<ICanvasItem> Items => this._items;
 
     private readonly Node2D _root = new Node2D();
+
+    public Matrix4x4 ViewProjectionMatrix => Matrix4x4.CreateOrthographicOffCenter(0, this.Viewport.Width, this.Viewport.Height, 0, -10f, 100f);
 
     public CanvasLayer(Viewport viewport)
     {

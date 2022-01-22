@@ -168,8 +168,6 @@ public class Renderer : ITexture2DManager, IDisposable
         for (int i = 0; i < scene.CanvasLayers.Count; i++)
         {
             var canvasLayer = scene.CanvasLayers[i];
-            Viewport viewport = canvasLayer.Viewport;
-            Matrix4x4 projection = Matrix4x4.CreateOrthographicOffCenter(0, viewport.Width, viewport.Height, 0, -10f, 100f);
 
             this._spriteBatcher.BeginBatch();
             for (int j = 0; j < canvasLayer.Items.Count; j++)
@@ -178,7 +176,7 @@ public class Renderer : ITexture2DManager, IDisposable
             }
 
             this.UpdateDirtyTextures();
-            this._spritesPass.BeginPass(this._commandList, ref projection);
+            this._spritesPass.BeginPass(this._commandList, canvasLayer.ViewProjectionMatrix);
             this._spritesPass.SubmitBatches(this._commandList, this._spriteBatcher.IndexBuffer, this._spriteBatcher.Batches);
         }
 

@@ -74,7 +74,7 @@ public class SpritesPass : IDisposable, IPipelineProvider
         }
     }
 
-    public void BeginPass(CommandList commandList, ref Matrix4x4 projectionMatrix)
+    public void BeginPass(CommandList commandList, Matrix4x4 projectionMatrix)
     {
         commandList.SetFramebuffer(this._renderTexture.Framebuffer);
         commandList.ClearDepthStencil(1f);
@@ -119,17 +119,17 @@ public class SpritesPass : IDisposable, IPipelineProvider
         Debug.Assert(shaderVariant.MaterialResourceLayout != null);
 
         var rasterizerState = new RasterizerStateDescription(
-                FaceCullMode.None,
-                PolygonFillMode.Solid,
-                FrontFace.Clockwise,
-                depthClipEnabled: true,
-                scissorTestEnabled: false
-            );
+            FaceCullMode.None,
+            PolygonFillMode.Solid,
+            FrontFace.Clockwise,
+            depthClipEnabled: true,
+            scissorTestEnabled: false
+        );
 
         var resources = new ResourceLayout[] {
-                this._passResourceLayout,
-                shaderVariant.MaterialResourceLayout,
-            };
+            this._passResourceLayout,
+            shaderVariant.MaterialResourceLayout,
+        };
 
         return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
         {
