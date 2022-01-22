@@ -48,13 +48,12 @@ public class Renderer : ITexture2DManager, IDisposable
     private readonly ImGuiPass _imGuiPass;
     private readonly MousePickingPass _mousePickerPass;
     private readonly ParticlesPass _particlesPass;
-
+    private readonly SkyDomePass _skyDomePass;
     private readonly SpriteBatcher _spriteBatcher;
 
     public IPipelineProvider ForwardPass => this._forwardPass;
     public IPipelineProvider ShadowMapPass => this._shadowPass;
 
-    public SkyDomePass SkyDomePass { get; }
 
     internal SceneStorage Storage { get; }
     public uint MousePickerObjectID => this._mousePickerPass.ObjectID;
@@ -72,14 +71,14 @@ public class Renderer : ITexture2DManager, IDisposable
         _instance = this;
 
         GraphicsDeviceOptions options = new GraphicsDeviceOptions(
-                debug: false,
-                swapchainDepthFormat: PixelFormat.R16_UNorm,
-                syncToVerticalBlank: true,
-                resourceBindingModel: ResourceBindingModel.Default,
-                preferDepthRangeZeroToOne: true,
-                preferStandardClipSpaceYDirection: true,
-                swapchainSrgbFormat: false
-            );
+            debug: false,
+            swapchainDepthFormat: null, //PixelFormat.R16_UNorm,
+            syncToVerticalBlank: true,
+            resourceBindingModel: ResourceBindingModel.Default,
+            preferDepthRangeZeroToOne: true,
+            preferStandardClipSpaceYDirection: true,
+            swapchainSrgbFormat: false
+        );
 
         var gd = VeldridStartup.CreateGraphicsDevice(window, options, graphicsBackend ?? VeldridStartup.GetPlatformDefaultBackend());
         this.GraphicsDevice = gd;
@@ -95,13 +94,13 @@ public class Renderer : ITexture2DManager, IDisposable
         this._mousePickerPass = new MousePickingPass(gd, this.MainRenderTexture);
         this._gizmosPass = new GizmosPass(gd, this.MainRenderTexture);
         this._particlesPass = new ParticlesPass(gd, this.MainRenderTexture);
-        this._fullScreenPass = new FullScreenPass(gd, this.MainRenderTexture, this.FullScreenRenderTexture);
-
-        this._commandList = this._factory.CreateCommandList();
         this._shadowPass = new ShadowPass(gd, this.Storage);
         this._forwardPass = new ForwardPass(gd, this.Storage, this.MainRenderTexture, this._shadowPass);
         this._spritesPass = new SpritesPass(gd, this.MainRenderTexture);
-        this.SkyDomePass = new SkyDomePass(gd, this.MainRenderTexture);
+        this._skyDomePass = new SkyDomePass(gd, this.MainRenderTexture);
+
+        this._fullScreenPass = new FullScreenPass(gd, this.MainRenderTexture, this.FullScreenRenderTexture);
+        this._commandList = this._factory.CreateCommandList();
 
         this._spriteBatcher = new SpriteBatcher(gd, this._spritesPass.DefaultShader);
 
@@ -161,17 +160,9 @@ public class Renderer : ITexture2DManager, IDisposable
         {
             this._shadowPass.Render(this._commandList, scene.Renderables, camera, scene.MainLight.Direction);
             this._forwardPass.Render(this._commandList, scene.Renderables, camera, scene.MainLight.Direction, scene.MainLight.Color, scene.AmbientColor);
-
-            this.SkyDomePass.Render(this._commandList, camera);
-
+            this._skyDomePass.Render(this._commandList, camera);
             this._gizmosPass.Render(this._commandList, scene.Gizmos.Lines, camera);
-
-            for (int i = 0; i < scene.ParticleSystems.Count; i++)
-            {
-                var system = scene.ParticleSystems[i];
-                system.SortParticles(camera.Position);
-                this._particlesPass.Render(this._commandList, system.Particles, system.Texture, camera);
-            }
+            this._particlesPass.Render(this._commandList, scene.ParticleSystems, camera);
         }
 
         for (int i = 0; i < scene.CanvasLayers.Count; i++)
@@ -191,8 +182,6 @@ public class Renderer : ITexture2DManager, IDisposable
             this._spritesPass.SubmitBatches(this._commandList, this._spriteBatcher.IndexBuffer, this._spriteBatcher.Batches);
         }
 
-
-
         scene.RenderImGui();
 
         this._imGuiPass.Render(this._commandList);
@@ -203,11 +192,11 @@ public class Renderer : ITexture2DManager, IDisposable
         if (!this._fence.Signaled)
         {
             // If we are GPU bound, then maybe it's a good moment to do a GC :)
-            this._fence.Reset();
+            Console.WriteLine("Performing GC");
             GC.Collect(0, GCCollectionMode.Optimized);
         }
         this.GraphicsDevice.WaitForIdle();
-
+        this._fence.Reset();
         this.GraphicsDevice.SubmitCommands(this._commandList, this._fence);
         this.GraphicsDevice.SwapBuffers();
     }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using LifeSim.Engine.SceneGraph;
 using Veldrid;
 
 namespace LifeSim.Engine.Rendering;
@@ -38,7 +39,7 @@ public class ParticlesPass : IPipelineProvider, IDisposable
 
     private readonly Shader _particlesShader;
     private Shader? _currentShader = null;
-    private Texture? _currentTexture = null;
+    private ITexture? _currentTexture = null;
     private readonly ResourceSet _passResourceSet;
     private readonly ResourceLayout _passResourceLayout;
     private readonly ResourceLayout _materialResourceLayout;
@@ -54,7 +55,7 @@ public class ParticlesPass : IPipelineProvider, IDisposable
 
     private readonly ParticleRenderData[] _particlesForRender = new ParticleRenderData[PARTICLES_PER_BATCH];
 
-    private readonly Dictionary<Texture, ResourceSet> _textures = new Dictionary<Texture, ResourceSet>();
+    private readonly Dictionary<ITexture, ResourceSet> _textures = new Dictionary<ITexture, ResourceSet>();
 
     public ParticlesPass(GraphicsDevice gd, IRenderTexture renderTexture)
     {
@@ -69,11 +70,11 @@ public class ParticlesPass : IPipelineProvider, IDisposable
         this._viewProjectionBuffer = factory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<CameraDataBuffer>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
         var quad = new Vertex[] {
-                new Vertex(new Vector2(-0.5f, -0.5f), new Vector2(0f, 1f)),
-                new Vertex(new Vector2(0.5f, -0.5f), new Vector2(1f, 1f)),
-                new Vertex(new Vector2(-0.5f, 0.5f), new Vector2(0f, 0f)),
-                new Vertex(new Vector2(0.5f, 0.5f), new Vector2(1f, 0f)),
-            };
+            new Vertex(new Vector2(-0.5f, -0.5f), new Vector2(0f, 1f)),
+            new Vertex(new Vector2(0.5f, -0.5f), new Vector2(1f, 1f)),
+            new Vertex(new Vector2(-0.5f, 0.5f), new Vector2(0f, 0f)),
+            new Vertex(new Vector2(0.5f, 0.5f), new Vector2(1f, 0f)),
+        };
 
         gd.UpdateBuffer(this._vertexBuffer, 0, quad);
 
@@ -107,24 +108,31 @@ public class ParticlesPass : IPipelineProvider, IDisposable
 
 
 
-    public void Render(CommandList cl, IReadOnlyList<Particle> particles, Texture texture, ICamera camera)
+    public void Render(CommandList cl, IReadOnlyList<IParticleSystem> particleSystems, ICamera camera)
     {
         this._currentShader = null;
         this._currentTexture = null;
 
         cl.SetFramebuffer(this._renderTexture.Framebuffer);
 
-        cl.UpdateBuffer(this._viewProjectionBuffer, 0, new CameraDataBuffer
+        for (int i = 0; i < particleSystems.Count; i++)
         {
-            ViewProjection = camera.ViewProjectionMatrix,
-            CameraRight = camera.Right,
-            CameraUp = camera.Up
-        });
+            IParticleSystem system = particleSystems[i];
 
-        this.RenderParticles(cl, particles, this._particlesShader, texture);
+            cl.UpdateBuffer(this._viewProjectionBuffer, 0, new CameraDataBuffer
+            {
+                ViewProjection = camera.ViewProjectionMatrix,
+                CameraRight = camera.Right,
+                CameraUp = camera.Up
+            });
+
+            system.SortParticles(camera.Position);
+
+            this.RenderParticles(cl, system.Particles, this._particlesShader, system.Texture);
+        }
     }
 
-    private void RenderParticles(CommandList cl, IReadOnlyList<Particle> particles, Shader shader, Texture texture)
+    private void RenderParticles(CommandList cl, IReadOnlyList<Particle> particles, Shader shader, ITexture texture)
     {
         if (particles.Count == 0) return;
         if (particles.Count <= PARTICLES_PER_BATCH)
@@ -144,7 +152,7 @@ public class ParticlesPass : IPipelineProvider, IDisposable
         }
     }
 
-    private void FlushParticles(CommandList cl, IReadOnlyList<Particle> particles, int startIndex, int endIndex, Shader shader, Texture texture)
+    private void FlushParticles(CommandList cl, IReadOnlyList<Particle> particles, int startIndex, int endIndex, Shader shader, ITexture texture)
     {
         int particlesCount = 0;
         for (int i = startIndex; i < endIndex; i++)
@@ -176,7 +184,7 @@ public class ParticlesPass : IPipelineProvider, IDisposable
         cl.Draw(4, (uint)particlesCount, 0, 0);
     }
 
-    private ResourceSet GetTextureResourceSet(Texture texture)
+    private ResourceSet GetTextureResourceSet(ITexture texture)
     {
         if (this._textures.TryGetValue(texture, out var resourceSet))
         {
@@ -191,12 +199,12 @@ public class ParticlesPass : IPipelineProvider, IDisposable
     Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant)
     {
         var rasterizerState = new RasterizerStateDescription(
-                FaceCullMode.None,
-                PolygonFillMode.Solid,
-                FrontFace.Clockwise,
-                depthClipEnabled: true,
-                scissorTestEnabled: false
-            );
+            FaceCullMode.None,
+            PolygonFillMode.Solid,
+            FrontFace.Clockwise,
+            depthClipEnabled: true,
+            scissorTestEnabled: false
+        );
 
         Debug.Assert(shaderVariant.MaterialResourceLayout != null);
 

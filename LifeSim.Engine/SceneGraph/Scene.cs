@@ -19,9 +19,9 @@ public abstract class Scene : Node3D
 
     public Camera3D? Camera { get; set; } = null;
 
-    private readonly List<ParticleSystem> _particleSystems = new List<ParticleSystem>();
+    private readonly List<IParticleSystem> _particleSystems = new List<IParticleSystem>();
 
-    public IReadOnlyList<ParticleSystem> ParticleSystems => this._particleSystems;
+    public IReadOnlyList<IParticleSystem> ParticleSystems => this._particleSystems;
 
 
     private readonly SwapPopList<Renderable> _renderables = new SwapPopList<Renderable>();
@@ -49,12 +49,12 @@ public abstract class Scene : Node3D
         this.Scene = this;
     }
 
-    public void AddParticleSystem(ParticleSystem particleSystem)
+    public void AddParticleSystem(IParticleSystem particleSystem)
     {
         this._particleSystems.Add(particleSystem);
     }
 
-    public void RemoveParticleSystem(ParticleSystem particleSystem)
+    public void RemoveParticleSystem(IParticleSystem particleSystem)
     {
         this._particleSystems.Remove(particleSystem);
     }

@@ -121,13 +121,13 @@ public class SkyDomePass : IPipelineProvider, IDisposable
 
     public void Render(CommandList cl, ICamera camera)
     {
-        //this.LutTextureOffset = (this.LutTextureOffset + 0.001f) % 1f;
+        //this.LutTextureOffset = (this.LutTextureOffset + 0.0005f) % 1f;
 
         var passData = new PassData
         {
             ViewProjectionMatrix = camera.ViewProjectionMatrix,
             ModelMatrix = Matrix4x4.CreateScale(camera.FarPlane - 0.1f) * Matrix4x4.CreateTranslation(camera.Position),
-            LutTextureOffset = new Vector2(this.LutTextureOffset, 0),
+            LutTextureOffset = new Vector2(this.LutTextureOffset, 0.75f / 24f),
         };
 
         cl.SetFramebuffer(this._renderTexture.Framebuffer);
@@ -224,7 +224,7 @@ public class SkyDomePass : IPipelineProvider, IDisposable
         {
             mat4 ViewProjectionMatrix;
             mat4 ModelMatrix;
-            vec2 LutTextureOffset;
+            vec2 LutTextureOffset; // x: offset, y: east/west delta
         } passData;
 
         layout(set = 0, binding = 1) uniform texture2D LutTexture;
@@ -236,7 +236,9 @@ public class SkyDomePass : IPipelineProvider, IDisposable
         {
             gl_Position = passData.ViewProjectionMatrix * passData.ModelMatrix * vec4(Position, 1.0);
 
-            vec2 texCoord = vec2(passData.LutTextureOffset.x, 1.0 - Position.y);
+            float eastWestDelta = Position.x * passData.LutTextureOffset.y;
+
+            vec2 texCoord = vec2(passData.LutTextureOffset.x - eastWestDelta, 1.0 - Position.y);
 
             fsin_Color = texture(sampler2D(LutTexture, LutSampler), texCoord);
         }
