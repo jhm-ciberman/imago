@@ -1,15 +1,15 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace LifeSim.Engine.GLTF;
+namespace LifeSim.Engine.Gltf;
 
 internal class GLTFPrimitive
 {
     private readonly Dictionary<string, int> _attributes;
-    private readonly GLTFAccessor? _indicesAccessor;
-    private readonly GLTFLoader _model;
+    private readonly GltfAccessor? _indicesAccessor;
+    private readonly GltfLoader _model;
 
-    public GLTFPrimitive(GLTFLoader model, int? indices, Dictionary<string, int> attributes)
+    public GLTFPrimitive(GltfLoader model, int? indices, Dictionary<string, int> attributes)
     {
         this._model = model;
         this._indicesAccessor = indices.HasValue ? this._model.GetAccessor(indices.Value) : null;
@@ -49,7 +49,7 @@ internal class GLTFPrimitive
     }
 
 
-    private GLTFAccessor? GetAttributeAccessor(string name)
+    private GltfAccessor? GetAttributeAccessor(string name)
     {
         if (this._attributes.TryGetValue(name, out int attributeId))
         {

@@ -2,18 +2,18 @@ using System;
 using System.Numerics;
 using static glTFLoader.Schema.Accessor;
 
-namespace LifeSim.Engine.GLTF;
+namespace LifeSim.Engine.Gltf;
 
-internal class GLTFAccessor
+internal class GltfAccessor
 {
-    private readonly IGLTFBufferView _bufferView;
+    private readonly IGltfBufferView _bufferView;
     private readonly int _byteOffset;
     private readonly int _count;
     private readonly ComponentTypeEnum _componentType;
     private readonly bool _normalized;
     public TypeEnum Type { get; }
 
-    public GLTFAccessor(IGLTFBufferView bufferView, int byteOffset, int count, ComponentTypeEnum componentType, TypeEnum type, bool normalized)
+    public GltfAccessor(IGltfBufferView bufferView, int byteOffset, int count, ComponentTypeEnum componentType, TypeEnum type, bool normalized)
     {
         this._bufferView = bufferView;
         this._byteOffset = byteOffset;

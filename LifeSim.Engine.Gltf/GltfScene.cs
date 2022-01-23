@@ -1,10 +1,11 @@
 using System.Collections.Generic;
 using LifeSim.Engine.Rendering;
 using LifeSim.Engine.SceneGraph;
+using LifeSim.Engine;
 
-namespace LifeSim.Engine.GLTF;
+namespace LifeSim.Engine.Gltf;
 
-public partial class GLTFScene
+internal class GLTFScene : IScenePrefab
 {
     private readonly List<GLTFNode> _children = new List<GLTFNode>();
     private readonly Dictionary<string, GLTFNode> _nodesByName = new Dictionary<string, GLTFNode>();

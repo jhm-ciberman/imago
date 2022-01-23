@@ -2,10 +2,11 @@ using System.Collections.Generic;
 using System.Numerics;
 using LifeSim.Engine.Anim;
 using LifeSim.Engine.Rendering;
+using LifeSim.Engine.Resources;
 
-namespace LifeSim.Engine.GLTF;
+namespace LifeSim.Engine.Gltf;
 
-public class GLTFNode
+internal class GLTFNode
 {
     public string Name;
     public Vector3 Position;

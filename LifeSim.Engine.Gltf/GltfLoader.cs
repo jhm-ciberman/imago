@@ -2,23 +2,25 @@ using System.Numerics;
 using glTFLoader;
 using LifeSim.Engine.Anim;
 using LifeSim.Engine.Rendering;
+using LifeSim.Engine.Resources;
+using LifeSim.Engine;
 
-namespace LifeSim.Engine.GLTF;
+namespace LifeSim.Engine.Gltf;
 
-public class GLTFLoader
+public class GltfLoader
 {
     private readonly string _path;
     private readonly glTFLoader.Schema.Gltf _model;
 
-    private readonly GLTFBuffer?[] _buffersCache;
+    private readonly GltfBuffer?[] _buffersCache;
     private readonly GLTFNode?[] _nodesCache;
     private readonly Material? _defaultMaterial;
 
-    public GLTFLoader(string path, Material? defaultMaterial = null)
+    public GltfLoader(string path, Material? defaultMaterial = null)
     {
         this._path = path;
         this._model = glTFLoader.Interface.LoadModel(path);
-        this._buffersCache = new GLTFBuffer[this._model.Buffers.Length];
+        this._buffersCache = new GltfBuffer[this._model.Buffers.Length];
         this._nodesCache = new GLTFNode[this._model.Nodes.Length];
         this._defaultMaterial = defaultMaterial;
     }
@@ -90,7 +92,6 @@ public class GLTFLoader
         );
     }
 
-
     private Mesh GetMesh(int index)
     {
         var meshData = this.GetPrimitive(index).MakeMeshData();
@@ -111,7 +112,7 @@ public class GLTFLoader
     {
         var data = this._model.Animations[index];
 
-        var anim = new GLTFAnimation(this, data);
+        var anim = new GltfAnimation(this, data);
         return anim.LoadAnimation();
     }
 
@@ -123,7 +124,7 @@ public class GLTFLoader
         Matrix4x4[] matrices;
         if (matricesIndex == null)
         {
-            matrices = new GLTFBufferViewZeroed().ReadMatrix4x4Array(0, data.Joints.Length);
+            matrices = new GltfBufferViewZeroed().ReadMatrix4x4Array(0, data.Joints.Length);
         }
         else
         {
@@ -141,7 +142,7 @@ public class GLTFLoader
         return new Skin(matrices, joints, root);
     }
 
-    public GLTFScene LoadScene(int index = 0)
+    public IScenePrefab LoadScene(int index = 0)
     {
         var data = this._model.Scenes[index];
         var name = data.Name ?? "Scene_" + index;
@@ -159,31 +160,31 @@ public class GLTFLoader
         return new GLTFPrimitive(this, data.Indices, data.Attributes);
     }
 
-    internal GLTFAccessor GetAccessor(int index)
+    internal GltfAccessor GetAccessor(int index)
     {
         var data = this._model.Accessors[index];
         var bufferView = this.GetBufferView(data.BufferView);
-        return new GLTFAccessor(bufferView, data.ByteOffset, data.Count, data.ComponentType, data.Type, data.Normalized);
+        return new GltfAccessor(bufferView, data.ByteOffset, data.Count, data.ComponentType, data.Type, data.Normalized);
     }
 
-    private GLTFBuffer GetBuffer(int index)
+    private GltfBuffer GetBuffer(int index)
     {
-        GLTFBuffer? buffer = this._buffersCache[index];
+        GltfBuffer? buffer = this._buffersCache[index];
         if (buffer != null) return buffer;
 
         var bytes = this._model.LoadBinaryBuffer(index, this._path);
-        buffer = new GLTFBuffer(bytes);
+        buffer = new GltfBuffer(bytes);
         this._buffersCache[index] = buffer;
         return buffer;
     }
 
-    private IGLTFBufferView GetBufferView(int? index)
+    private IGltfBufferView GetBufferView(int? index)
     {
-        if (!index.HasValue) return new GLTFBufferViewZeroed();
+        if (!index.HasValue) return new GltfBufferViewZeroed();
 
         var data = this._model.BufferViews[index.Value];
         var buffer = this.GetBuffer(data.Buffer);
 
-        return new GLTFBufferView(buffer, data.ByteOffset, data.ByteStride);
+        return new GltfBufferView(buffer, data.ByteOffset, data.ByteStride);
     }
 }

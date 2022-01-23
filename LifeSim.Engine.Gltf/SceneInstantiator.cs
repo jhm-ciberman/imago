@@ -1,9 +1,10 @@
 using System.Collections.Generic;
 using LifeSim.Engine.Anim;
 using LifeSim.Engine.Rendering;
+using LifeSim.Engine.Resources;
 using LifeSim.Engine.SceneGraph;
 
-namespace LifeSim.Engine.GLTF;
+namespace LifeSim.Engine.Gltf;
 
 public class SceneInstantiator
 {
@@ -18,7 +19,7 @@ public class SceneInstantiator
         this._storage = storage;
     }
 
-    public Node3D Instantiate(GLTFScene scene)
+    internal Node3D Instantiate(GLTFScene scene)
     {
         this._nodesCache.Clear();
         Node3D n = new Node3D();

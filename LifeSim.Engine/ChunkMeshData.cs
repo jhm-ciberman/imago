@@ -2,7 +2,7 @@ using System;
 using System.Buffers;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using LifeSim.Engine.GLTF;
+using LifeSim.Engine.Gltf;
 using LifeSim.Engine.Rendering;
 using Veldrid;
 

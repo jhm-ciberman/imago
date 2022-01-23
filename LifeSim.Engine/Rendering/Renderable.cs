@@ -1,5 +1,6 @@
 using System;
 using System.Numerics;
+using LifeSim.Engine.Resources;
 using Veldrid.Utilities;
 
 namespace LifeSim.Engine.Rendering;

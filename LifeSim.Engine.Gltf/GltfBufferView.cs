@@ -1,57 +1,15 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
 
-namespace LifeSim.Engine.GLTF;
+namespace LifeSim.Engine.Gltf;
 
-internal interface IGLTFBufferView
+internal class GltfBufferView : IGltfBufferView
 {
-    Vector2[] ReadVector2Array(int offset, int count);
-    Vector3[] ReadVector3Array(int offset, int count);
-    Vector4[] ReadVector4Array(int offset, int count);
-    ushort[] ReadUShortArray(int offset, int count);
-    Vector4UShort[] ReadUShort4Array(int offset, int count);
-    uint[] ReadUIntArray(int offset, int count);
-    byte[] ReadByteArray(int offset, int count);
-    float[] ReadFloatArray(int offset, int count);
-    Matrix4x4[] ReadMatrix4x4Array(int offset, int count);
-    Quaternion[] ReadQuaternionArray(int offset, int count);
-    sbyte[] ReadSByteArray(int offset, int count);
-    short[] ReadShortArray(int offset, int count);
-}
-
-internal class GLTFBufferViewZeroed : IGLTFBufferView
-{
-
-    public Vector2[] ReadVector2Array(int offset, int count) => new Vector2[count];
-    public Vector3[] ReadVector3Array(int offset, int count) => new Vector3[count];
-    public Vector4[] ReadVector4Array(int offset, int count) => new Vector4[count];
-    public ushort[] ReadUShortArray(int offset, int count) => new ushort[count];
-    public Vector4UShort[] ReadUShort4Array(int offset, int count) => new Vector4UShort[count];
-    public uint[] ReadUIntArray(int offset, int count) => new uint[count];
-    public byte[] ReadByteArray(int offset, int count) => new byte[count];
-    public float[] ReadFloatArray(int offset, int count) => new float[count];
-    public sbyte[] ReadSByteArray(int offset, int count) => new sbyte[count];
-    public short[] ReadShortArray(int offset, int count) => new short[count];
-    public Quaternion[] ReadQuaternionArray(int offset, int count) => new Quaternion[count];
-
-    public Matrix4x4[] ReadMatrix4x4Array(int offset, int count)
-    {
-        Matrix4x4[] matrices = new Matrix4x4[count];
-        for (int i = 0; i < matrices.Length; i++)
-        {
-            matrices[i] = Matrix4x4.Identity;
-        }
-        return matrices;
-    }
-}
-
-internal class GLTFBufferView : IGLTFBufferView
-{
-    private readonly GLTFBuffer _buffer;
+    private readonly GltfBuffer _buffer;
     private readonly int _byteOffset;
     private readonly int _byteStride;
 
-    public GLTFBufferView(GLTFBuffer buffer, int byteOffset, int? byteStride)
+    public GltfBufferView(GltfBuffer buffer, int byteOffset, int? byteStride)
     {
         this._buffer = buffer;
         this._byteOffset = byteOffset;

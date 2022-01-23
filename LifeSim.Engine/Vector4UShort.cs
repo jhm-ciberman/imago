@@ -2,7 +2,7 @@ using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
 
-namespace LifeSim.Engine.GLTF;
+namespace LifeSim.Engine;
 
 [StructLayout(LayoutKind.Sequential)]
 public struct Vector4UShort

@@ -1,13 +1,13 @@
 using System;
 using System.Numerics;
 
-namespace LifeSim.Engine.GLTF;
+namespace LifeSim.Engine.Gltf;
 
-public class GLTFBuffer
+internal class GltfBuffer
 {
     private readonly byte[] _bytes;
 
-    public GLTFBuffer(byte[] bytes)
+    internal GltfBuffer(byte[] bytes)
     {
         this._bytes = bytes;
     }

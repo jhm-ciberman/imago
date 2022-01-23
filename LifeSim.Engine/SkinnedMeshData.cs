@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using LifeSim.Engine.Rendering;
 using Veldrid;
 
-namespace LifeSim.Engine.GLTF;
+namespace LifeSim.Engine.Gltf;
 
 public class SkinnedMeshData : BasicMeshData
 {

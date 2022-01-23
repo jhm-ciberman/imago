@@ -4,11 +4,11 @@ using LifeSim.Engine.Anim;
 using static glTFLoader.Schema.AnimationChannelTarget;
 using static glTFLoader.Schema.AnimationSampler;
 
-namespace LifeSim.Engine.GLTF;
+namespace LifeSim.Engine.Gltf;
 
-public class GLTFAnimation
+internal class GltfAnimation
 {
-    private readonly GLTFLoader _model;
+    private readonly GltfLoader _model;
 
     private readonly glTFLoader.Schema.AnimationSampler[] _samplers;
 
@@ -18,7 +18,7 @@ public class GLTFAnimation
 
     private readonly Dictionary<int, float[]> _inputsCache = new Dictionary<int, float[]>();
 
-    internal GLTFAnimation(GLTFLoader model, glTFLoader.Schema.Animation animation)
+    internal GltfAnimation(GltfLoader model, glTFLoader.Schema.Animation animation)
     {
         this._model = model;
         this._samplers = animation.Samplers;
@@ -83,12 +83,12 @@ public class GLTFAnimation
 
     private interface IChannelFactory
     {
-        Animation.IChannel MakeChannel(string targetName, float[] input, GLTFAccessor output, InterpolationEnum type);
+        Animation.IChannel MakeChannel(string targetName, float[] input, GltfAccessor output, InterpolationEnum type);
     }
 
     private abstract class ChannelFactory<T> : IChannelFactory where T : struct
     {
-        public abstract Animation.IChannel MakeChannel(string targetName, float[] input, GLTFAccessor output, InterpolationEnum type);
+        public abstract Animation.IChannel MakeChannel(string targetName, float[] input, GltfAccessor output, InterpolationEnum type);
         protected abstract Animation.IInterpolator<T> MakeInterpolator();
 
         protected Animation.BaseSampler<T> MakeSampler(float[] input, T[] values, InterpolationEnum type)
@@ -106,7 +106,7 @@ public class GLTFAnimation
 
     private class PositionChannelFactory : ChannelFactory<Vector3>
     {
-        public override Animation.IChannel MakeChannel(string targetName, float[] input, GLTFAccessor output, InterpolationEnum type)
+        public override Animation.IChannel MakeChannel(string targetName, float[] input, GltfAccessor output, InterpolationEnum type)
         {
             var sampler = this.MakeSampler(input, output.AsVector3Array(), type);
             return new Animation.PositionChannel(targetName, sampler);
@@ -117,7 +117,7 @@ public class GLTFAnimation
 
     private class RotationChannelFactory : ChannelFactory<Quaternion>
     {
-        public override Animation.IChannel MakeChannel(string targetName, float[] input, GLTFAccessor output, InterpolationEnum type)
+        public override Animation.IChannel MakeChannel(string targetName, float[] input, GltfAccessor output, InterpolationEnum type)
         {
             var sampler = this.MakeSampler(input, output.AsQuaternionArray(), type);
             return new Animation.RotationChannel(targetName, sampler);
@@ -128,7 +128,7 @@ public class GLTFAnimation
 
     private class ScaleChannelFactory : ChannelFactory<Vector3>
     {
-        public override Animation.IChannel MakeChannel(string targetName, float[] input, GLTFAccessor output, InterpolationEnum type)
+        public override Animation.IChannel MakeChannel(string targetName, float[] input, GltfAccessor output, InterpolationEnum type)
         {
             var sampler = this.MakeSampler(input, output.AsVector3Array(), type);
             return new Animation.ScaleChannel(targetName, sampler);
