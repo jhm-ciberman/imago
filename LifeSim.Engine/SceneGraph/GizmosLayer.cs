@@ -305,18 +305,15 @@ public class GizmosLayer
 
     public void DrawWireMesh(IMeshData mesh, ref Matrix4x4 transform, Color color, float lifeTime = 0, bool drawInFront = false)
     {
-        var vertices = mesh.GetVertexPositions();
-        var indices = mesh.GetIndices();
-
-        for (int i = 0; i < indices.Length; i += 3)
+        for (int i = 0; i < mesh.Indices.Length; i += 3)
         {
-            var i1 = indices[i];
-            var i2 = indices[i + 1];
-            var i3 = indices[i + 2];
+            var i1 = mesh.Indices[i];
+            var i2 = mesh.Indices[i + 1];
+            var i3 = mesh.Indices[i + 2];
 
-            var v1 = Vector3.Transform(vertices[i1], transform);
-            var v2 = Vector3.Transform(vertices[i2], transform);
-            var v3 = Vector3.Transform(vertices[i3], transform);
+            var v1 = Vector3.Transform(mesh.Positions[i1], transform);
+            var v2 = Vector3.Transform(mesh.Positions[i2], transform);
+            var v3 = Vector3.Transform(mesh.Positions[i3], transform);
 
             this.DrawLine(v1, v2, color, lifeTime, drawInFront);
             this.DrawLine(v2, v3, color, lifeTime, drawInFront);

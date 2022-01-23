@@ -10,20 +10,20 @@ public struct BasicVertex
 {
     public Vector3 Position;
     public Vector3 Normal;
-    public Vector2 Uv;
+    public Vector2 TexCoord;
 
     public BasicVertex(Vector3 position, Vector3 normal, Vector2 uv)
     {
         this.Position = position;
         this.Normal = normal;
-        this.Uv = uv;
+        this.TexCoord = uv;
     }
 
     public BasicVertex(Vector3 position, Vector2 uv)
     {
         this.Position = position;
         this.Normal = Vector3.Zero;
-        this.Uv = uv;
+        this.TexCoord = uv;
     }
 
     private static VertexFormat? _vertexFormat;

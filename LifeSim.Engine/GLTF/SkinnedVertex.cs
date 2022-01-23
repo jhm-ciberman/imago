@@ -10,7 +10,7 @@ public struct SkinnedVertex
 {
     public Vector3 Position;
     public Vector3 Normal;
-    public Vector2 Uv;
+    public Vector2 TexCoords;
     public Vector4UShort Joints;
     public Vector4 Weights;
 
@@ -18,7 +18,7 @@ public struct SkinnedVertex
     {
         this.Position = position;
         this.Normal = normal;
-        this.Uv = uv;
+        this.TexCoords = uv;
         this.Joints = joints;
         this.Weights = weights;
     }

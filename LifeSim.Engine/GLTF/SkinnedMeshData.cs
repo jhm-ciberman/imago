@@ -1,52 +1,46 @@
+using System;
 using System.Buffers;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using LifeSim.Engine.Rendering;
 using Veldrid;
-using Veldrid.SPIRV;
 
 namespace LifeSim.Engine.GLTF;
 
-public class SkinnedMeshData : BaseMeshData<SkinnedVertex>
+public class SkinnedMeshData : BasicMeshData
 {
-    public SkinnedMeshData(ushort[] indices, SkinnedVertex[] vertices) : base(indices, vertices)
+    public Vector4UShort[] Joints { get; set; }
+
+    public Vector4[] Weights { get; set; }
+
+    public override VertexFormat VertexFormat => SkinnedVertex.VertexFormat;
+
+    public SkinnedMeshData(ushort[] indices, Vector3[] positions, Vector3[]? normals, Vector2[]? uvs, Vector4UShort[] joints, Vector4[] weights) 
+        : base(indices, positions, normals, uvs)
     {
+        this.Joints = joints;
+        this.Weights = weights;
     }
 
-    public static SkinnedMeshData CreateMesh(ushort[] indices, Vector3[] positions, Vector3[]? normals, Vector2[]? uvs, Vector4UShort[] joints, Vector4[] weights)
+    public override DeviceBuffer CreateVertexBuffer(GraphicsDevice gd)
     {
-        SkinnedVertex[] vertices = ArrayPool<SkinnedVertex>.Shared.Rent(positions.Length);
-        for (var i = 0; i < positions.Length; i++)
+        this.Validate();
+
+        SkinnedVertex[] vertices = ArrayPool<SkinnedVertex>.Shared.Rent(this.Positions.Length);
+        for (var i = 0; i < this.Positions.Length; i++)
         {
-            vertices[i].Position = positions[i];
-            vertices[i].Joints = joints[i];
-            vertices[i].Weights = weights[i];
+            vertices[i].Position = this.Positions[i];
+            vertices[i].Normal = this.Normals[i];
+            vertices[i].TexCoords = this.TexCoords[i];
+            vertices[i].Joints = this.Joints[i];
+            vertices[i].Weights = this.Weights[i];
         }
-        if (normals != null)
-        {
-            for (var i = 0; i < normals.Length; i++)
-            {
-                vertices[i].Normal = normals[i];
-            }
-        }
-        if (uvs != null)
-        {
-            for (var i = 0; i < uvs.Length; i++)
-            {
-                vertices[i].Uv = uvs[i];
-            }
-        }
-        var mesh = new SkinnedMeshData(indices, vertices);
+
+        uint sizeInBytes = (uint) (Marshal.SizeOf<SkinnedVertex>() * this.Positions.Length);
+
+        DeviceBuffer vertexBuffer = gd.ResourceFactory.CreateBuffer(new BufferDescription(sizeInBytes, BufferUsage.VertexBuffer));
+        gd.UpdateBuffer(vertexBuffer, 0, new ReadOnlySpan<SkinnedVertex>(vertices, 0, this.Positions.Length));
         ArrayPool<SkinnedVertex>.Shared.Return(vertices);
-        return mesh;
-    }
-
-    protected override VertexFormat MakeVertexFormat()
-    {
-        return SkinnedVertex.VertexFormat;
-    }
-
-    protected override Vector3 GetPosition(int index)
-    {
-        return this.Vertices[index].Position;
+        return vertexBuffer;
     }
 }

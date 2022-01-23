@@ -41,11 +41,11 @@ internal class GLTFPrimitive
         {
             var joints = jointsAccessor.AsUShort4Array();
             var weights = weightsAccessor.AsVector4Array();
-            return SkinnedMeshData.CreateMesh(indices, positions, normals, texCoords, joints, weights);
+            return new SkinnedMeshData(indices, positions, normals, texCoords, joints, weights);
         }
         else
         {
-            return BasicMeshData.CreateMesh(indices, positions, normals, texCoords);
+            return new BasicMeshData(indices, positions, normals, texCoords);
         }
     }
 

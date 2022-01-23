@@ -30,20 +30,12 @@ public class Mesh : System.IDisposable
     public static Mesh CreateFromData(IMeshData meshData)
     {
         var gd = Renderer.Instance.GraphicsDevice;
-        var factory = gd.ResourceFactory;
+        BoundingBox boundingBox = BoundingBox.CreateFromVertices(meshData.Positions);
 
-        BoundingBox boundingBox = meshData.GetBoundingBox();
-        VertexFormat vertexFormat = meshData.GetVertexFormat();
+        var indexBuffer = meshData.CreateIndexBuffer(gd);
+        var vertexBuffer = meshData.CreateVertexBuffer(gd);
 
-        var cl = factory.CreateCommandList();
-        cl.Begin();
-        var indexBuffer = meshData.CreateIndexBuffer(factory, cl, out int indexCount);
-        var vertexBuffer = meshData.CreateVertexBuffer(factory, cl);
-        cl.End();
-        gd.SubmitCommands(cl);
-        cl.Dispose();
-
-        return new Mesh(vertexFormat, (uint)indexCount, vertexBuffer, indexBuffer, ref boundingBox, meshData);
+        return new Mesh(meshData.VertexFormat, (uint)meshData.Indices.Length, vertexBuffer, indexBuffer, ref boundingBox, meshData);
     }
 
     public virtual void Dispose()

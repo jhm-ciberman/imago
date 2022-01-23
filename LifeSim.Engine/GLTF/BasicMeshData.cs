@@ -1,57 +1,73 @@
+using System;
 using System.Buffers;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using LifeSim.Engine.Rendering;
 using Veldrid;
 
 namespace LifeSim.Engine.GLTF;
 
-public class BasicMeshData : BaseMeshData<BasicVertex>
+public class BasicMeshData : BaseMeshData
 {
-    public BasicMeshData(ushort[] indices, BasicVertex[] vertices) : base(indices, vertices)
+    public Vector3[] Normals { get; set; }
+
+    public Vector2[] TexCoords { get; set; }
+
+    public override VertexFormat VertexFormat => BasicVertex.VertexFormat;
+
+    public BasicMeshData(ushort[] indices, Vector3[] positions, Vector3[]? normals, Vector2[]? texCoords) : base(indices, positions)
     {
+        this.Normals = normals ?? new Vector3[positions.Length];
+        this.TexCoords = texCoords ?? new Vector2[positions.Length];
+
+        if (normals == null)
+        {
+            this.RecomputeNormals();
+        }
     }
 
-    public static BasicMeshData CreateMesh(ushort[] indices, Vector3[] positions, Vector3[]? normals, Vector2[]? uvs)
+    protected override void Validate()
     {
-        BasicVertex[] vertices = ArrayPool<BasicVertex>.Shared.Rent(positions.Length);
-        for (var i = 0; i < positions.Length; i++)
+        base.Validate();
+
+        if (this.Normals.Length != this.Positions.Length)
         {
-            vertices[i].Position = positions[i];
+            throw new ArgumentException("The number of normals must match the number of positions.");
         }
-        if (normals != null)
+
+        if (this.TexCoords.Length != this.Positions.Length)
         {
-            for (var i = 0; i < normals.Length; i++)
-            {
-                vertices[i].Normal = normals[i];
-            }
+            throw new ArgumentException("The number of texture coordinates must match the number of positions.");
         }
-        if (uvs != null)
+    }
+
+    public override DeviceBuffer CreateVertexBuffer(GraphicsDevice gd)
+    {
+        this.Validate();
+
+        BasicVertex[] vertices = ArrayPool<BasicVertex>.Shared.Rent(this.Positions.Length);
+        for (var i = 0; i < this.Positions.Length; i++)
         {
-            for (var i = 0; i < uvs.Length; i++)
-            {
-                vertices[i].Uv = uvs[i];
-            }
+            vertices[i].Position = this.Positions[i];
+            vertices[i].Normal = this.Normals[i];
+            vertices[i].TexCoord = this.TexCoords[i];
         }
-        var mesh = new BasicMeshData(indices, vertices);
+
+        uint sizeInBytes = (uint) (Marshal.SizeOf<BasicVertex>() * this.Positions.Length);
+
+        DeviceBuffer vertexBuffer = gd.ResourceFactory.CreateBuffer(new BufferDescription(sizeInBytes, BufferUsage.VertexBuffer));
+        gd.UpdateBuffer(vertexBuffer, 0, new ReadOnlySpan<BasicVertex>(vertices, 0, this.Positions.Length));
         ArrayPool<BasicVertex>.Shared.Return(vertices);
-        return mesh;
-    }
-
-
-    public void Translate(Vector3 translation)
-    {
-        for (var i = 0; i < this.Vertices.Length; i++)
-        {
-            this.Vertices[i].Position += translation;
-        }
+        return vertexBuffer;
     }
 
     public BasicMeshData Clone()
     {
         ushort[] indices = (ushort[]) this.Indices.Clone();
-        BasicVertex[] vertices = (BasicVertex[]) this.Vertices.Clone();
-
-        return new BasicMeshData(indices, vertices);
+        Vector3[] positions = (Vector3[]) this.Positions.Clone();
+        Vector3[] normals = (Vector3[]) this.Normals.Clone();
+        Vector2[] texCoords = (Vector2[]) this.TexCoords.Clone();
+        return new BasicMeshData(indices, positions, normals, texCoords);
     }
 
     public void RecomputeNormals()
@@ -62,24 +78,24 @@ public class BasicMeshData : BaseMeshData<BasicVertex>
             ushort index2 = this.Indices[i + 1];
             ushort index3 = this.Indices[i + 2];
 
-            Vector3 p1 = this.Vertices[index1].Position;
-            Vector3 p2 = this.Vertices[index2].Position;
-            Vector3 p3 = this.Vertices[index3].Position;
+            Vector3 p1 = this.Positions[index1];
+            Vector3 p2 = this.Positions[index2];
+            Vector3 p3 = this.Positions[index3];
 
             Vector3 normal = Vector3.Cross((p3 - p2), (p1 - p2));
 
-            this.Vertices[index1].Normal = normal;
-            this.Vertices[index2].Normal = normal;
-            this.Vertices[index3].Normal = normal;
+            this.Normals[index1] = normal;
+            this.Normals[index2] = normal;
+            this.Normals[index3] = normal;
         }
     }
 
 
     public void FlipNormals()
     {
-        for (int i = 0; i < this.Vertices.Length; i++)
+        for (int i = 0; i < this.Normals.Length; i++)
         {
-            this.Vertices[i].Normal = -this.Vertices[i].Normal;
+            this.Normals[i] = -this.Normals[i];
         }
     }
 
@@ -91,41 +107,28 @@ public class BasicMeshData : BaseMeshData<BasicVertex>
 
     public BasicMeshData Merge(BasicMeshData mesh)
     {
-        BasicVertex[] vertices = new BasicVertex[mesh.Vertices.Length + this.Vertices.Length];
+        Vector3[] positions = new Vector3[mesh.Positions.Length + this.Positions.Length];
+        Vector3[] normals = new Vector3[mesh.Normals.Length + this.Normals.Length];
+        Vector2[] uvs = new Vector2[mesh.TexCoords.Length + this.TexCoords.Length];
         ushort[] indices = new ushort[mesh.Indices.Length + this.Indices.Length];
 
-        for (int i = 0; i < this.Vertices.Length; i++)
-        {
-            vertices[i] = this.Vertices[i];
-        }
+        Array.Copy(this.Positions, positions, this.Positions.Length);
+        Array.Copy(mesh.Positions, 0, positions, this.Positions.Length, mesh.Positions.Length);
 
-        for (int i = 0; i < mesh.Vertices.Length; i++)
-        {
-            int j = i + this.Vertices.Length;
-            vertices[j] = mesh.Vertices[i];
-        }
+        Array.Copy(this.Normals, normals, this.Normals.Length);
+        Array.Copy(mesh.Normals, 0, normals, this.Normals.Length, mesh.Normals.Length);
 
-        for (int i = 0; i < this.Indices.Length; i++)
-        {
-            indices[i] = this.Indices[i];
-        }
+        Array.Copy(this.TexCoords, uvs, this.TexCoords.Length);
+        Array.Copy(mesh.TexCoords, 0, uvs, this.TexCoords.Length, mesh.TexCoords.Length);
 
+        // Indices should be offset by the number of vertices in the first mesh
+        Array.Copy(this.Indices, indices, this.Indices.Length);
         for (int i = 0; i < mesh.Indices.Length; i++)
         {
-            int j = i + this.Indices.Length;
-            indices[j] = (ushort)((int)mesh.Indices[i] + this.Vertices.Length);
+            indices[i + this.Indices.Length] = (ushort)(mesh.Indices[i] + this.Positions.Length);
         }
 
-        return new BasicMeshData(indices, vertices);
+        return new BasicMeshData(indices, positions, normals, uvs);
     }
 
-    protected override Vector3 GetPosition(int index)
-    {
-        return this.Vertices[index].Position;
-    }
-
-    protected override VertexFormat MakeVertexFormat()
-    {
-        return BasicVertex.VertexFormat;
-    }
 }

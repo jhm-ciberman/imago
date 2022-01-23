@@ -21,7 +21,7 @@ public class SkyDomePass : IPipelineProvider, IDisposable
         public Matrix4x4 ViewProjectionMatrix { get; set; }
         public Matrix4x4 ModelMatrix { get; set; }
         public Vector2 LutTextureOffset { get; set; }
-        private readonly Vector2 _padding0;
+        public Vector2 Padding0 { get; set; }
     }
 
     private readonly GraphicsDevice _gd;
@@ -121,7 +121,7 @@ public class SkyDomePass : IPipelineProvider, IDisposable
 
     public void Render(CommandList cl, ICamera camera)
     {
-        //this.LutTextureOffset = (this.LutTextureOffset + 0.0005f) % 1f;
+        this.LutTextureOffset = (this.LutTextureOffset + 0.0005f) % 1f;
 
         var passData = new PassData
         {
