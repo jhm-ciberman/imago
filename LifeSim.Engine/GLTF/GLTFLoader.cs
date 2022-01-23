@@ -94,7 +94,7 @@ public class GLTFLoader
     private Mesh GetMesh(int index)
     {
         var meshData = this.GetPrimitive(index).MakeMeshData();
-        return Mesh.CreateFromData(meshData);
+        return new Mesh(meshData);
     }
 
     public Animation[] LoadAnimations()

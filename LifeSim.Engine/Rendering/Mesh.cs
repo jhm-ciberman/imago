@@ -16,26 +16,16 @@ public class Mesh : System.IDisposable
 
     public IMeshData MeshData { get; private set; }
 
-    protected Mesh(VertexFormat vertexFormat, uint indexCount, Veldrid.DeviceBuffer vertexBuffer, Veldrid.DeviceBuffer indexBuffer, ref BoundingBox boundingBox, IMeshData meshData)
-    {
-        this.Id = ++Mesh._count;
-        this.VertexFormat = vertexFormat;
-        this.IndexCount = indexCount;
-        this.AABB = boundingBox;
-        this.IndexBuffer = indexBuffer;
-        this.VertexBuffer = vertexBuffer;
-        this.MeshData = meshData;
-    }
-
-    public static Mesh CreateFromData(IMeshData meshData)
+    public Mesh(IMeshData meshData)
     {
         var gd = Renderer.Instance.GraphicsDevice;
-        BoundingBox boundingBox = BoundingBox.CreateFromVertices(meshData.Positions);
-
-        var indexBuffer = meshData.CreateIndexBuffer(gd);
-        var vertexBuffer = meshData.CreateVertexBuffer(gd);
-
-        return new Mesh(meshData.VertexFormat, (uint)meshData.Indices.Length, vertexBuffer, indexBuffer, ref boundingBox, meshData);
+        this.Id = ++Mesh._count;
+        this.VertexFormat = meshData.VertexFormat;
+        this.IndexCount = (uint)meshData.Indices.Length;
+        this.AABB = BoundingBox.CreateFromVertices(meshData.Positions);
+        this.IndexBuffer = meshData.CreateIndexBuffer(gd);
+        this.VertexBuffer = meshData.CreateVertexBuffer(gd);
+        this.MeshData = meshData;
     }
 
     public virtual void Dispose()

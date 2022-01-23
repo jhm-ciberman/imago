@@ -5,9 +5,9 @@ namespace LifeSim.Engine.Anim;
 
 public class Skin
 {
-    public readonly string? Root;
-    public readonly IList<string> JointNames;
-    public readonly IList<Matrix4x4> InverseBindMatrices;
+    public string? Root { get; }
+    public IList<string> JointNames { get; }
+    public IList<Matrix4x4> InverseBindMatrices { get; }
 
     public Skin(IList<Matrix4x4> inverseBindMatrices, IList<string> jointNames, string? root)
     {

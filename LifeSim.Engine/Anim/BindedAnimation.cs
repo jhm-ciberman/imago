@@ -6,11 +6,11 @@ namespace LifeSim.Engine.Anim;
 
 public class BindedAnimation
 {
-    private struct BindedChannel
+    private class BindedChannel
     {
-        public Node3D Target;
+        public Node3D Target { get; }
 
-        public readonly IReadOnlyList<Animation.IChannel> Channels;
+        public IReadOnlyList<Animation.IChannel> Channels { get; }
         public int LastTimeIndex;
 
         public BindedChannel(Node3D target, IReadOnlyList<Animation.IChannel> channels)

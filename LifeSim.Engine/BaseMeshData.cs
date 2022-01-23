@@ -1,11 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.Numerics;
-using System.Runtime.InteropServices;
+using LifeSim.Engine.Rendering;
 using Veldrid;
-using Veldrid.Utilities;
 
-namespace LifeSim.Engine.Rendering;
+namespace LifeSim.Engine;
 
 public abstract class BaseMeshData : IMeshData
 {

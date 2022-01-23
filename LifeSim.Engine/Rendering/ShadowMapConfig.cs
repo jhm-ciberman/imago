@@ -85,7 +85,7 @@ public class ShadowMapConfig
         }
     }
 
-    private uint _shadowMapSize = 1024;
+    private uint _shadowMapSize = 2048;
 
     /// <summary>
     /// Gets or sets the size of the shadow map texture.

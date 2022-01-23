@@ -1,13 +1,13 @@
-using System.Collections.Generic;
 using System.Numerics;
+using LifeSim.Engine.Rendering;
 using Veldrid;
 using Veldrid.Utilities;
 
-namespace LifeSim.Engine.Rendering;
+namespace LifeSim.Engine;
 
 /// <summary>
 /// An object describing generic mesh data. This can be used to construct a <see cref="VertexBuffer"/> and
-/// <see cref="IndexBuffer"/>, and also exposes functionality for bounding box and sphere computation.
+/// <see cref="IndexBuffer"/>.
 /// </summary>
 public interface IMeshData
 {
