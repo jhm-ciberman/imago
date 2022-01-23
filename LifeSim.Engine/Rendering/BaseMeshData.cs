@@ -48,7 +48,6 @@ public abstract class BaseMeshData : IMeshData
         }
     }
 
-    []
     protected virtual void Validate()
     {
         if (this.Indices.Length % 3 != 0)

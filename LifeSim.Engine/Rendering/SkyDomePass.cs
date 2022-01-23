@@ -121,7 +121,7 @@ public class SkyDomePass : IPipelineProvider, IDisposable
 
     public void Render(CommandList cl, ICamera camera)
     {
-        this.LutTextureOffset = (this.LutTextureOffset + 0.0005f) % 1f;
+        //this.LutTextureOffset = (this.LutTextureOffset + 0.0005f) % 1f;
 
         var passData = new PassData
         {

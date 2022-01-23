@@ -15,7 +15,7 @@ public class SkinnedMeshData : BasicMeshData
 
     public override VertexFormat VertexFormat => SkinnedVertex.VertexFormat;
 
-    public SkinnedMeshData(ushort[] indices, Vector3[] positions, Vector3[]? normals, Vector2[]? uvs, Vector4UShort[] joints, Vector4[] weights) 
+    public SkinnedMeshData(ushort[] indices, Vector3[] positions, Vector3[]? normals, Vector2[]? uvs, Vector4UShort[] joints, Vector4[] weights)
         : base(indices, positions, normals, uvs)
     {
         this.Joints = joints;
