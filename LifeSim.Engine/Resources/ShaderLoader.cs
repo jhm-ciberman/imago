@@ -7,7 +7,7 @@ using Veldrid;
 
 namespace LifeSim.Engine.Rendering;
 
-public static class ShaderSource
+public static class ShaderLoader
 {
     private static readonly string _shadersBasePath = "./res/shaders/";
 
@@ -50,7 +50,7 @@ public static class ShaderSource
         var fullFilePath = Path.Combine(_shadersBasePath, filename);
         if (!File.Exists(fullFilePath))
         {
-            throw new Exception($"The shader file \"{fullFilePath}\" was not found");
+            throw new FileNotFoundException($"Could not find shader file {filename}");
         }
         return fullFilePath;
     }

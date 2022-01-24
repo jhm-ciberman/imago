@@ -26,8 +26,8 @@ public class Renderer : ITexture2DManager, IDisposable
         }
     }
 
-    public readonly IRenderTexture FullScreenRenderTexture;
-    public readonly RenderTexture MainRenderTexture;
+    public IRenderTexture FullScreenRenderTexture { get; }
+    public RenderTexture MainRenderTexture { get; }
 
     public GraphicsDevice GraphicsDevice { get; }
     private readonly ResourceFactory _factory;
@@ -86,20 +86,20 @@ public class Renderer : ITexture2DManager, IDisposable
         this._factory = this.GraphicsDevice.ResourceFactory;
 
         this.FullScreenRenderTexture = new SwapchainRenderTexture(this, this.GraphicsDevice.MainSwapchain);
-        this.MainRenderTexture = new RenderTexture(gd, (uint)window.Width, (uint)window.Height);
+        this.MainRenderTexture = new RenderTexture(this, (uint)window.Width, (uint)window.Height);
 
         this.Storage = new SceneStorage(gd);
 
-        this._imGuiPass = new ImGuiPass(gd, this.MainRenderTexture);
-        this._mousePickerPass = new MousePickingPass(gd, this.MainRenderTexture);
-        this._gizmosPass = new GizmosPass(gd, this.MainRenderTexture);
-        this._particlesPass = new ParticlesPass(gd, this.MainRenderTexture);
-        this._shadowPass = new ShadowPass(gd, this.Storage);
-        this._forwardPass = new ForwardPass(gd, this.Storage, this.MainRenderTexture, this._shadowPass);
-        this._spritesPass = new SpritesPass(gd, this.MainRenderTexture);
+        this._imGuiPass = new ImGuiPass(this, this.MainRenderTexture);
+        this._mousePickerPass = new MousePickingPass(this, this.MainRenderTexture);
+        this._gizmosPass = new GizmosPass(this, this.MainRenderTexture);
+        this._particlesPass = new ParticlesPass(this, this.MainRenderTexture);
+        this._shadowPass = new ShadowPass(this, this.Storage);
+        this._forwardPass = new ForwardPass(this, this.Storage, this.MainRenderTexture, this._shadowPass);
+        this._spritesPass = new SpritesPass(this, this.MainRenderTexture);
         this._skyDomePass = new SkyDomePass(this, this.MainRenderTexture);
 
-        this._fullScreenPass = new FullScreenPass(gd, this.MainRenderTexture, this.FullScreenRenderTexture);
+        this._fullScreenPass = new FullScreenPass(this, this.MainRenderTexture, this.FullScreenRenderTexture);
         this._commandList = this._factory.CreateCommandList();
 
         this._spriteBatcher = new SpriteBatcher(gd, this._spritesPass.DefaultShader);

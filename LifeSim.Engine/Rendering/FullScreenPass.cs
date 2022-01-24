@@ -21,10 +21,10 @@ public class FullScreenPass : IDisposable, IPipelineProvider
     private readonly Pipeline _pipeline;
     private readonly DeviceBuffer _vertexBuffer;
 
-    public FullScreenPass(GraphicsDevice gd, IRenderTexture sourceRenderTexture, IRenderTexture destinationRenderTexture)
+    public FullScreenPass(Renderer renderer, IRenderTexture sourceRenderTexture, IRenderTexture destinationRenderTexture)
     {
-        this._gd = gd;
-        var factory = gd.ResourceFactory;
+        this._gd = renderer.GraphicsDevice;
+        var factory = this._gd.ResourceFactory;
 
         this._sourceTexture = sourceRenderTexture;
         this._sourceTexture.OnResized += this.OnSourceTextureResized;
@@ -32,30 +32,30 @@ public class FullScreenPass : IDisposable, IPipelineProvider
         this._destinationTexture = destinationRenderTexture;
 
         var vertexFormat = new VertexFormat(new VertexLayoutDescription(
-                new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float4)
-            ));
+            new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float4)
+        ));
 
         var resourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
-                new ResourceLayoutElementDescription("MainTexture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
-                new ResourceLayoutElementDescription("MainSampler", ResourceKind.Sampler, ShaderStages.Fragment)
-            ));
+            new ResourceLayoutElementDescription("MainTexture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
+            new ResourceLayoutElementDescription("MainSampler", ResourceKind.Sampler, ShaderStages.Fragment)
+        ));
 
-        this.Shader = new Shader(this, _vertexCode, _fragmentCode, resourceLayout);
+        this.Shader = new Shader(renderer, this, _vertexCode, _fragmentCode, resourceLayout);
 
 
         this._pipeline = this.Shader.GetPipeline(vertexFormat);
 
         this._vertexBuffer = factory.CreateBuffer(new BufferDescription(16 * 6, BufferUsage.VertexBuffer));
-        (float top, float bottom) = gd.IsUvOriginTopLeft ? (1f, 0f) : (0f, 1f);
-        gd.UpdateBuffer(this._vertexBuffer, 0, new[] {
-                new Vector4(-1f, -1f, 0f, top   ), // x, y, u, v
-                new Vector4( 1f, -1f, 1f, top   ),
-                new Vector4( 1f,  1f, 1f, bottom),
+        (float top, float bottom) = this._gd.IsUvOriginTopLeft ? (1f, 0f) : (0f, 1f);
+        this._gd.UpdateBuffer(this._vertexBuffer, 0, new[] {
+            new Vector4(-1f, -1f, 0f, top   ), // x, y, u, v
+            new Vector4( 1f, -1f, 1f, top   ),
+            new Vector4( 1f,  1f, 1f, bottom),
 
-                new Vector4(-1f, -1f, 0f, top   ),
-                new Vector4( 1f,  1f, 1f, bottom),
-                new Vector4(-1f,  1f, 0f, bottom),
-            });
+            new Vector4(-1f, -1f, 0f, top   ),
+            new Vector4( 1f,  1f, 1f, bottom),
+            new Vector4(-1f,  1f, 0f, bottom),
+        });
     }
 
 

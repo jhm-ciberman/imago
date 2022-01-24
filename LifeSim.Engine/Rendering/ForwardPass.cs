@@ -47,10 +47,10 @@ public class ForwardPass : IDisposable, IPipelineProvider
 
     private readonly ShadowPass _shadowPass;
 
-    public ForwardPass(GraphicsDevice gd, SceneStorage storage, IRenderTexture mainRenderTexture, ShadowPass shadowPass)
+    public ForwardPass(Renderer renderer, SceneStorage storage, IRenderTexture mainRenderTexture, ShadowPass shadowPass)
     {
-        this._gd = gd;
-        var factory = gd.ResourceFactory;
+        this._gd = renderer.GraphicsDevice;
+        var factory = this._gd.ResourceFactory;
         this._storage = storage;
         this._shadowPass = shadowPass;
 

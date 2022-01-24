@@ -20,7 +20,7 @@ public class Shader : IDisposable
     private readonly string _fragmentCode;
 
 
-    public Shader(IPipelineProvider pass, string vertexCode, string fragmentCode, ResourceLayout? materialResourceLayout = null)
+    public Shader(Renderer renderer, IPipelineProvider pass, string vertexCode, string fragmentCode, ResourceLayout? materialResourceLayout = null)
     {
         this.Id = ++Shader._count;
 
@@ -29,7 +29,7 @@ public class Shader : IDisposable
         this._vertexCode = vertexCode;
         this._fragmentCode = fragmentCode;
 
-        this._gd = Renderer.Instance.GraphicsDevice;
+        this._gd = renderer.GraphicsDevice;
 
         this._materialResourceLayout = materialResourceLayout;
     }

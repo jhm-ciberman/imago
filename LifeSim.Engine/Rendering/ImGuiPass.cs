@@ -10,9 +10,9 @@ public class ImGuiPass : IDisposable
     private readonly Veldrid.ImGuiRenderer _imguiRenderer;
     private readonly RenderTexture _renderTexture;
 
-    public ImGuiPass(GraphicsDevice graphicsDevice, RenderTexture renderTexture)
+    public ImGuiPass(Renderer renderer, RenderTexture renderTexture)
     {
-        this._gd = graphicsDevice;
+        this._gd = renderer.GraphicsDevice;
         this._renderTexture = renderTexture;
         this._imguiRenderer = new ImGuiRenderer(this._gd, renderTexture.OutputDescription, (int)renderTexture.Width, (int)renderTexture.Height);
         unsafe

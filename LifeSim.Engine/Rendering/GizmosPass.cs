@@ -35,11 +35,11 @@ public class GizmosPass : IPipelineProvider, IDisposable
 
     private readonly VertexFormat _vertexFormat;
 
-    public GizmosPass(GraphicsDevice gd, IRenderTexture renderTexture)
+    public GizmosPass(Renderer renderer, IRenderTexture renderTexture)
     {
         this._renderTexture = renderTexture;
-        this._gd = gd;
-        var factory = gd.ResourceFactory;
+        this._gd = renderer.GraphicsDevice;
+        var factory = this._gd.ResourceFactory;
 
         this._vertexBuffer = factory.CreateBuffer(new BufferDescription((uint)(VERTICES_PER_BATCH * Marshal.SizeOf<Vertex>()), BufferUsage.VertexBuffer | BufferUsage.Dynamic));
         this._viewProjectionBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
@@ -55,7 +55,7 @@ public class GizmosPass : IPipelineProvider, IDisposable
             new VertexElementDescription("Color", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Byte4_Norm)
         ));
 
-        this._lineShader = new Shader(this, this._vertex, this._fragment);
+        this._lineShader = new Shader(renderer, this, this._vertex, this._fragment);
     }
 
     public void Render(CommandList cl, IReadOnlyList<DebugLine> lines, ICamera camera)

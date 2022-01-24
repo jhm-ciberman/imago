@@ -10,10 +10,10 @@ public class MousePickingPass : IDisposable
     private readonly Veldrid.Texture _pixelTexture;
     public RenderTexture RenderTexture { get; set; }
 
-    public MousePickingPass(GraphicsDevice graphicsDevice, RenderTexture renderTexture)
+    public MousePickingPass(Renderer renderer, RenderTexture renderTexture)
     {
-        this._gd = graphicsDevice;
-        var factory = graphicsDevice.ResourceFactory;
+        this._gd = renderer.GraphicsDevice;
+        var factory = this._gd.ResourceFactory;
         this._pixelTexture = factory.CreateTexture(new TextureDescription(
             width: 1, height: 1, depth: 1, mipLevels: 1, arrayLayers: 1,
             PixelFormat.R32_UInt, TextureUsage.Staging, TextureType.Texture2D

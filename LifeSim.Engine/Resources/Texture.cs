@@ -34,11 +34,11 @@ public class Texture : ITexture
 
     private bool _isDirty = false;
 
-    protected readonly GraphicsDevice _gd;
+    protected readonly Renderer _renderer;
 
     public Texture(Renderer renderer, uint width, uint height, uint mipLevels = 0)
     {
-        this._gd = renderer.GraphicsDevice;
+        this._renderer = renderer;
         this.Width = width;
         this.Height = height;
 
@@ -48,12 +48,13 @@ public class Texture : ITexture
 
         this._data = new byte[width * height * 4];
 
-        this.DeviceTexture = this._gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(
+        var gd = this._renderer.GraphicsDevice;
+        this.DeviceTexture = gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(
             this.Width, this.Height, this.MipLevels, 1,
             PixelFormat.R8_G8_B8_A8_UNorm, TextureUsage.Sampled | TextureUsage.GenerateMipmaps
         ));
-        this.Sampler = this._gd.PointSampler;
-        Renderer.Instance.OnTextureDirty(this);
+        this.Sampler = gd.PointSampler;
+        renderer.OnTextureDirty(this);
     }
 
     protected Texture(Renderer renderer, uint width, uint height, Color fillColor)
@@ -67,7 +68,7 @@ public class Texture : ITexture
         if (!this._isDirty)
         {
             this._isDirty = true;
-            Renderer.Instance.OnTextureDirty(this);
+            this._renderer.OnTextureDirty(this);
         }
     }
 

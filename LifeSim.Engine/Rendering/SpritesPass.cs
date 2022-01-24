@@ -23,11 +23,14 @@ public class SpritesPass : IDisposable, IPipelineProvider
 
     private readonly ResourceLayout _resourceLayout;
 
-    public SpritesPass(GraphicsDevice gd, IRenderTexture renderTexture)
+    private readonly Renderer _renderer;
+
+    public SpritesPass(Renderer renderer, IRenderTexture renderTexture)
     {
         Instance = this;
-        this._gd = gd;
-        var factory = gd.ResourceFactory;
+        this._renderer = renderer;
+        this._gd = renderer.GraphicsDevice;
+        var factory = this._gd.ResourceFactory;
 
         this._passResourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
             new ResourceLayoutElementDescription("CameraDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
@@ -44,9 +47,9 @@ public class SpritesPass : IDisposable, IPipelineProvider
             new ResourceLayoutElementDescription("MainSampler", ResourceKind.Sampler, ShaderStages.Fragment)
         ));
 
-        var vertex = ShaderSource.Load("sprites.vert.glsl");
-        var fragment = ShaderSource.Load("sprites.frag.glsl");
-        this.DefaultShader = new Shader(this, vertex, fragment, this._resourceLayout);
+        var vertex = ShaderLoader.Load("sprites.vert.glsl");
+        var fragment = ShaderLoader.Load("sprites.frag.glsl");
+        this.DefaultShader = new Shader(renderer, this, vertex, fragment, this._resourceLayout);
 
         this._camera2DInfoBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
@@ -57,9 +60,9 @@ public class SpritesPass : IDisposable, IPipelineProvider
 
     public Shader MakeShader(string vertexFile, string fragmentFile)
     {
-        var vertex = ShaderSource.Load(vertexFile);
-        var fragment = ShaderSource.Load(fragmentFile);
-        return new Shader(this, vertex, fragment, this._resourceLayout);
+        var vertex = ShaderLoader.Load(vertexFile);
+        var fragment = ShaderLoader.Load(fragmentFile);
+        return new Shader(this._renderer, this, vertex, fragment, this._resourceLayout);
     }
 
     public void Dispose()

@@ -87,7 +87,7 @@ public class SkyDomePass : IPipelineProvider, IDisposable
         this._passDataBuffer = factory.CreateBuffer(new BufferDescription(
             (uint)Marshal.SizeOf<PassData>(), BufferUsage.UniformBuffer));
 
-        this.Shader = new Shader(this, _vertexCode, _fragmentCode, null);
+        this.Shader = new Shader(renderer, this, _vertexCode, _fragmentCode, null);
 
         this._pipeline = this.Shader.GetPipeline(vertexFormat);
 

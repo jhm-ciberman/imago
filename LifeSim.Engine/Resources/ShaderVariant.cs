@@ -7,13 +7,13 @@ namespace LifeSim.Engine.Rendering;
 
 public class ShaderVariant : IDisposable
 {
-    public VertexFormat VertexFormat;
+    public VertexFormat VertexFormat { get; }
 
-    public ShaderSetDescription ShaderSetDescription;
+    public ShaderSetDescription ShaderSetDescription { get; }
 
-    public ResourceLayout? MaterialResourceLayout;
+    public ResourceLayout? MaterialResourceLayout { get; }
 
-    public ShaderVariant(GraphicsDevice gd, VertexFormat vertexFormat, ResourceLayout? materialResourceLayout, string vertexCode, string fragmentCode)
+    internal ShaderVariant(GraphicsDevice gd, VertexFormat vertexFormat, ResourceLayout? materialResourceLayout, string vertexCode, string fragmentCode)
     {
         bool debug = gd.BackendType == GraphicsBackend.OpenGL || gd.BackendType == GraphicsBackend.OpenGLES;
 #if DEBUG

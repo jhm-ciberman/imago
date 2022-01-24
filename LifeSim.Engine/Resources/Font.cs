@@ -9,12 +9,11 @@ public class Font : IDisposable
 {
     private readonly FontSystem _fontSystem;
 
-    public Font(string[] paths)
+    public Font(Renderer renderer, string[] paths)
     {
         var fontLoader = StbTrueTypeSharpFontLoader.Instance;
-        var textureManager = Renderer.Instance;
         int atlasSize = 1024;
-        this._fontSystem = new FontSystem(fontLoader, textureManager, atlasSize, atlasSize, 0, 1, true);
+        this._fontSystem = new FontSystem(fontLoader, renderer, atlasSize, atlasSize, 0, 1, true);
         foreach (var path in paths)
         {
             this._fontSystem.AddFont(File.ReadAllBytes(path));

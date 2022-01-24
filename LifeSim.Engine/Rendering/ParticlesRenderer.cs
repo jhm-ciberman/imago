@@ -57,12 +57,12 @@ public class ParticlesPass : IPipelineProvider, IDisposable
 
     private readonly Dictionary<ITexture, ResourceSet> _textures = new Dictionary<ITexture, ResourceSet>();
 
-    public ParticlesPass(GraphicsDevice gd, IRenderTexture renderTexture)
+    public ParticlesPass(Renderer renderer, IRenderTexture renderTexture)
     {
         this._renderTexture = renderTexture;
         this._particlesForRender = new ParticleRenderData[PARTICLES_PER_BATCH];
-        this._gd = gd;
-        var factory = gd.ResourceFactory;
+        this._gd = renderer.GraphicsDevice;
+        var factory = this._gd.ResourceFactory;
 
         this._vertexBuffer = factory.CreateBuffer(new BufferDescription((uint)(4 * Marshal.SizeOf<Vertex>()), BufferUsage.VertexBuffer));
         this._particlesBuffer = factory.CreateBuffer(new BufferDescription((uint)(PARTICLES_PER_BATCH * Marshal.SizeOf<ParticleRenderData>()), BufferUsage.VertexBuffer | BufferUsage.Dynamic));
@@ -76,7 +76,7 @@ public class ParticlesPass : IPipelineProvider, IDisposable
             new Vertex(new Vector2(0.5f, 0.5f), new Vector2(1f, 0f)),
         };
 
-        gd.UpdateBuffer(this._vertexBuffer, 0, quad);
+        this._gd.UpdateBuffer(this._vertexBuffer, 0, quad);
 
         this._passResourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
             new ResourceLayoutElementDescription("CameraDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
@@ -101,9 +101,9 @@ public class ParticlesPass : IPipelineProvider, IDisposable
             )
         );
 
-        var vertex = ShaderSource.Load("particles.vert.glsl");
-        var fragment = ShaderSource.Load("particles.frag.glsl");
-        this._particlesShader = new Shader(this, vertex, fragment, this._materialResourceLayout);
+        var vertex = ShaderLoader.Load("particles.vert.glsl");
+        var fragment = ShaderLoader.Load("particles.frag.glsl");
+        this._particlesShader = new Shader(renderer, this, vertex, fragment, this._materialResourceLayout);
     }
 
 

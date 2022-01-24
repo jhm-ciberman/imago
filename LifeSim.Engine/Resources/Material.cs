@@ -10,22 +10,24 @@ public class Material
 
     public int Id { get; private set; }
     public Shader Shader { get; private set; }
-    public Shader ShadowmapShader { get; private set; }
+    public Shader ShadowmapShader { get; }
     public ResourceSet? ResourceSet { get; internal set; }
 
     private bool _isDirty = true;
     private readonly BindableResource[] _resources;
-    public readonly MaterialDefinition Definition;
+    public MaterialDefinition Definition { get; }
     private readonly Dictionary<string, Texture> _textures = new Dictionary<string, Texture>();
 
-    public Material(MaterialDefinition definition)
+    private readonly Renderer _renderer;
+    public Material(Renderer renderer, MaterialDefinition definition)
     {
         this.Id = ++Material._count;
+        this._renderer = renderer;
         this.Definition = definition;
-        this.Shader = definition.GetShader(Renderer.Instance.ForwardPass);
-        this.ShadowmapShader = definition.GetShader(Renderer.Instance.ShadowMapPass);
+        this.Shader = definition.GetShader(renderer.ForwardPass);
+        this.ShadowmapShader = definition.GetShader(renderer.ShadowMapPass);
         this._resources = new BindableResource[definition.ResourceCount];
-        Renderer.Instance.OnMaterialDirty(this);
+        renderer.OnMaterialDirty(this);
     }
 
     public void Update()
@@ -60,7 +62,7 @@ public class Material
         if (!this._isDirty)
         {
             this._isDirty = true;
-            Renderer.Instance.OnMaterialDirty(this);
+            this._renderer.OnMaterialDirty(this);
         }
     }
 

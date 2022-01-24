@@ -32,10 +32,10 @@ public partial class ShadowPass : IDisposable, IPipelineProvider
 
     private readonly RenderQueue[] _renderQueues;
 
-    public ShadowPass(GraphicsDevice gd, SceneStorage storage)
+    public ShadowPass(Renderer renderer, SceneStorage storage)
     {
-        this._gd = gd;
-        var factory = gd.ResourceFactory;
+        this._gd = renderer.GraphicsDevice;
+        var factory = this._gd.ResourceFactory;
         this.Config = new ShadowMapConfig();
         this._storage = storage;
 
@@ -51,7 +51,7 @@ public partial class ShadowPass : IDisposable, IPipelineProvider
 
         uint size = this.Config.ShadowMapResolution;
         uint count = this.Config.CascadesCount;
-        this.ShadowmapTexture = new ShadowMapTexture(gd, size, size, count);
+        this.ShadowmapTexture = new ShadowMapTexture(this._gd, size, size, count);
 
         this._shadowmapInfoBuffer = factory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<Matrix4x4>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 

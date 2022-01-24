@@ -24,8 +24,10 @@ public class MaterialDefinition
     private readonly ResourceLayout _resourceLayout;
     private readonly Memory<byte> _instanceDefaultData;
 
+    private readonly Renderer _renderer;
     public MaterialDefinition(Renderer renderer, IUniform[] uniforms, string[] textures)
     {
+        this._renderer = renderer;
         this._textures = new Dictionary<string, int>();
         this.ResourceCount = textures.Length * 2;
         var elements = new ResourceLayoutElementDescription[this.ResourceCount];
@@ -61,7 +63,7 @@ public class MaterialDefinition
 
     public MaterialDefinition AddPass(IPipelineProvider pass, string vertexCode, string fragmentCode)
     {
-        this._shaders.Add(new Shader(pass, vertexCode, fragmentCode, this._resourceLayout));
+        this._shaders.Add(new Shader(this._renderer, pass, vertexCode, fragmentCode, this._resourceLayout));
         return this;
     }
 
