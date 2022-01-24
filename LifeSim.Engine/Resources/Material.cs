@@ -59,7 +59,6 @@ public class Material
     {
         if (!this._isDirty)
         {
-            System.Diagnostics.Debug.WriteLine("Material {0} is dirty", this.Id);
             this._isDirty = true;
             Renderer.Instance.OnMaterialDirty(this);
         }

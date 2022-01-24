@@ -17,9 +17,9 @@ public class Mesh : System.IDisposable
 
     public IMeshData MeshData { get; private set; }
 
-    public Mesh(IMeshData meshData)
+    public Mesh(Renderer renderer, IMeshData meshData)
     {
-        var gd = Renderer.Instance.GraphicsDevice;
+        var gd = renderer.GraphicsDevice;
         this.Id = ++Mesh._count;
         this.VertexFormat = meshData.VertexFormat;
         this.IndexCount = (uint)meshData.Indices.Length;

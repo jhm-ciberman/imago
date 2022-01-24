@@ -24,7 +24,7 @@ public class MaterialDefinition
     private readonly ResourceLayout _resourceLayout;
     private readonly Memory<byte> _instanceDefaultData;
 
-    public MaterialDefinition(IUniform[] uniforms, string[] textures)
+    public MaterialDefinition(Renderer renderer, IUniform[] uniforms, string[] textures)
     {
         this._textures = new Dictionary<string, int>();
         this.ResourceCount = textures.Length * 2;
@@ -37,7 +37,7 @@ public class MaterialDefinition
             elements[j++] = new ResourceLayoutElementDescription(name + "Sampler", ResourceKind.Sampler, ShaderStages.Fragment);
         }
 
-        this._resourceLayout = Renderer.Instance.GraphicsDevice.ResourceFactory.CreateResourceLayout(new ResourceLayoutDescription(elements));
+        this._resourceLayout = renderer.GraphicsDevice.ResourceFactory.CreateResourceLayout(new ResourceLayoutDescription(elements));
 
         this.InstanceDataBlockSize = uniforms.Length * 16;
         this._instanceDefaultData = new Memory<byte>(new byte[this.InstanceDataBlockSize]);

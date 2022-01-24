@@ -85,7 +85,7 @@ public class Renderer : ITexture2DManager, IDisposable
 
         this._factory = this.GraphicsDevice.ResourceFactory;
 
-        this.FullScreenRenderTexture = new SwapchainRenderTexture(this.GraphicsDevice.MainSwapchain);
+        this.FullScreenRenderTexture = new SwapchainRenderTexture(this, this.GraphicsDevice.MainSwapchain);
         this.MainRenderTexture = new RenderTexture(gd, (uint)window.Width, (uint)window.Height);
 
         this.Storage = new SceneStorage(gd);
@@ -97,7 +97,7 @@ public class Renderer : ITexture2DManager, IDisposable
         this._shadowPass = new ShadowPass(gd, this.Storage);
         this._forwardPass = new ForwardPass(gd, this.Storage, this.MainRenderTexture, this._shadowPass);
         this._spritesPass = new SpritesPass(gd, this.MainRenderTexture);
-        this._skyDomePass = new SkyDomePass(gd, this.MainRenderTexture);
+        this._skyDomePass = new SkyDomePass(this, this.MainRenderTexture);
 
         this._fullScreenPass = new FullScreenPass(gd, this.MainRenderTexture, this.FullScreenRenderTexture);
         this._commandList = this._factory.CreateCommandList();
@@ -247,7 +247,7 @@ public class Renderer : ITexture2DManager, IDisposable
 
     object ITexture2DManager.CreateTexture(int width, int height)
     {
-        return new Texture((uint)width, (uint)height);
+        return new Texture(this, (uint)width, (uint)height);
     }
 
     void ITexture2DManager.SetTextureData(object texture, System.Drawing.Rectangle bounds, byte[] data)

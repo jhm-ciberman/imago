@@ -1,19 +1,24 @@
 using System.Numerics;
 using LifeSim.Engine.Rendering;
+using LifeSim.Engine.Resources;
 
 namespace LifeSim.Engine.SceneGraph;
 
 public class TextNode2D : RenderNode2D
 {
-    public string Text;
+    public string Text { get; set; } = "";
 
-    public Color Color = new Color(0xFFFF4500);
+    public Color Color { get; set; } = new Color(0xFFFF4500);
 
-    public Font? Font;
+    public Font? Font { get; set; }
 
-    public int FontSize = 30;
+    public int FontSize { get; set; } = 30;
 
-    public TextNode2D() : this("") { }
+    public TextNode2D()
+    {
+        //
+    }
+
     public TextNode2D(string text, Font? font = null)
     {
         this.Text = text;

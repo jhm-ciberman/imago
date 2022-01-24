@@ -53,7 +53,7 @@ public class SpriteBatch : IDisposable
     private readonly int _capacity = 1000;
     public readonly Item[] Items;
 
-    public ResourceSet ResourceSet;
+    public ResourceSet ResourceSet { get; private set; }
     private readonly GraphicsDevice _gd;
 
     public SpriteBatch(GraphicsDevice gd, Shader shader, ITexture texture, int batchCapacity)

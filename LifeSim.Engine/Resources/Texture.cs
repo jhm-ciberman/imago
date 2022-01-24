@@ -11,23 +11,15 @@ namespace LifeSim.Engine.Rendering;
 
 public class Texture : ITexture
 {
-    private static Texture? _whiteTexture = null;
-    private static Texture? _blackTexture = null;
-    private static Texture? _pinkTexture = null;
-    public static Texture White => _whiteTexture ??= new Texture(4, 4, new Color(255, 255, 255, 255));
-    public static Texture Black => _blackTexture ??= new Texture(4, 4, new Color(0, 0, 0, 255));
-    public static Texture Pink => _pinkTexture ??= new Texture(4, 4, new Color(255, 0, 255, 255));
-
-
-    public static Texture FromFile(string path)
+    public static Texture FromFile(Renderer renderer, string path)
     {
         using var img = Image.Load<Rgba32>(path);
-        return FromImage(img);
+        return FromImage(renderer, img);
     }
 
-    public static Texture FromImage(Image<Rgba32> image)
+    public static Texture FromImage(Renderer renderer, Image<Rgba32> image)
     {
-        var texture = new Texture((uint)image.Width, (uint)image.Height);
+        var texture = new Texture(renderer, (uint)image.Width, (uint)image.Height);
         texture.SetDataFromImage(image);
         return texture;
     }
@@ -44,9 +36,9 @@ public class Texture : ITexture
 
     protected readonly GraphicsDevice _gd;
 
-    public Texture(uint width, uint height, uint mipLevels = 0)
+    public Texture(Renderer renderer, uint width, uint height, uint mipLevels = 0)
     {
-        this._gd = Renderer.Instance.GraphicsDevice;
+        this._gd = renderer.GraphicsDevice;
         this.Width = width;
         this.Height = height;
 
@@ -64,13 +56,11 @@ public class Texture : ITexture
         Renderer.Instance.OnTextureDirty(this);
     }
 
-    protected Texture(uint width, uint height, Color fillColor)
-        : this(width, height)
+    protected Texture(Renderer renderer, uint width, uint height, Color fillColor)
+        : this(renderer, width, height)
     {
         this.Fill(fillColor);
     }
-
-
 
     protected void OnTextureDirty()
     {

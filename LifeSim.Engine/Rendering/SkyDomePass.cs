@@ -53,10 +53,10 @@ public class SkyDomePass : IPipelineProvider, IDisposable
 
     public float LutTextureOffset { get; set; } = 0.38f;
 
-    public SkyDomePass(GraphicsDevice gd, IRenderTexture renderTexture)
+    public SkyDomePass(Renderer renderer, IRenderTexture renderTexture)
     {
-        this._gd = gd;
-        var factory = gd.ResourceFactory;
+        this._gd = renderer.GraphicsDevice;
+        var factory = this._gd.ResourceFactory;
         this._renderTexture = renderTexture;
 
         int subdivisions = 40;
@@ -91,7 +91,7 @@ public class SkyDomePass : IPipelineProvider, IDisposable
 
         this._pipeline = this.Shader.GetPipeline(vertexFormat);
 
-        this._lutTexture = Texture.FromFile("./res/skydome_lut.png");
+        this._lutTexture = Texture.FromFile(renderer, "./res/skydome_lut.png");
 
         this._sampler = factory.CreateSampler(new SamplerDescription(
             SamplerAddressMode.Clamp, SamplerAddressMode.Clamp, SamplerAddressMode.Clamp,

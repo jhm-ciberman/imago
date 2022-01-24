@@ -29,6 +29,7 @@ dotnet_diagnostic.IDE0130.severity = none # "Namespace 'Foo' does not match fold
 dotnet_diagnostic.IDE0036.severity = suggestion # "Modifiers are not ordered" (static public instead of public static)
 dotnet_diagnostic.IDE0048.severity = none # Parenthesis must be added for clarity (I know math, I'm an engineer, I don't need extra parenthesis)
 dotnet_diagnostic.CA1816.severity = silent # Call GC.SuppressFinalize correctly (TODO: implement this correctly)
+dotnet_diagnostic.CA1001.severity = warning # Types that own disposable fields should be disposable
 
 dotnet_style_require_accessibility_modifiers = always
 dotnet_style_object_initializer = false

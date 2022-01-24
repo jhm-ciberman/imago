@@ -11,7 +11,7 @@ using Veldrid.StartupUtilities;
 
 namespace LifeSim.Engine;
 
-public class App
+public class App : IDisposable
 {
     public Rendering.Viewport Viewport { get; }
 
@@ -146,5 +146,10 @@ public class App
         swRendering.Stop();
         this._renderingTime = swRendering.Elapsed.TotalMilliseconds;
         //System.Console.WriteLine("Rendering time: " + this._renderingTime);
+    }
+
+    public void Dispose()
+    {
+        this._renderer.Dispose();
     }
 }

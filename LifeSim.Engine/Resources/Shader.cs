@@ -7,7 +7,11 @@ namespace LifeSim.Engine.Rendering;
 public class Shader : IDisposable
 {
     private static int _count = 0;
+
     public int Id { get; set; }
+
+    public IPipelineProvider Pass { get; private set; }
+
     private readonly List<CachedPipeline> _pipelines = new List<CachedPipeline>();
     private readonly ResourceLayout? _materialResourceLayout;
     private readonly List<ShaderVariant> _variants = new List<ShaderVariant>();
@@ -15,7 +19,6 @@ public class Shader : IDisposable
     private readonly string _vertexCode;
     private readonly string _fragmentCode;
 
-    public IPipelineProvider Pass { get; private set; }
 
     public Shader(IPipelineProvider pass, string vertexCode, string fragmentCode, ResourceLayout? materialResourceLayout = null)
     {

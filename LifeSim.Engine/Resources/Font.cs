@@ -1,11 +1,11 @@
+using System;
 using System.IO;
 using FontStashSharp;
-using FontStashSharp.Interfaces;
 using LifeSim.Engine.Rendering;
 
-namespace LifeSim.Engine;
+namespace LifeSim.Engine.Resources;
 
-public class Font
+public class Font : IDisposable
 {
     private readonly FontSystem _fontSystem;
 
@@ -19,6 +19,11 @@ public class Font
         {
             this._fontSystem.AddFont(File.ReadAllBytes(path));
         }
+    }
+
+    public void Dispose()
+    {
+        ((IDisposable)this._fontSystem).Dispose();
     }
 
     public DynamicSpriteFont GetFont(int size)
