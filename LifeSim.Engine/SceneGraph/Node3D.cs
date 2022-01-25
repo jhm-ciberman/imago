@@ -174,7 +174,7 @@ public class Node3D : IDisposable
         return null;
     }
 
-    public virtual Renderable? FirstRenderable()
+    public virtual RenderNode3D? FirstRenderable()
     {
         foreach (var child in this.Children)
         {

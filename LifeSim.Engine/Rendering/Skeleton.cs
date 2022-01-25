@@ -23,9 +23,9 @@ public class Skeleton : IDisposable
 
     public uint BoneDataOffset => this._dataBlock.BlockIndex * MAX_NUMBER_OF_BONES;
 
-    public Skeleton(SceneStorage storage, IList<Node3D> joints, IList<Matrix4x4> inverseBindMatrices)
+    public Skeleton(Renderer renderer, IList<Node3D> joints, IList<Matrix4x4> inverseBindMatrices)
     {
-        this._storage = storage;
+        this._storage = renderer.Storage;
         this.Joints = joints;
         this.InverseBindMatrices = inverseBindMatrices;
         this._bonesMatrices = new Matrix4x4[this.Joints.Count];

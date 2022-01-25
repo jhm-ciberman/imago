@@ -5,5 +5,5 @@ namespace LifeSim.Engine;
 
 public interface IScenePrefab
 {
-    Node3D Instantiate(SceneStorage storage);
+    Node3D Instantiate();
 }

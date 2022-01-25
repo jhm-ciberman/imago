@@ -27,7 +27,7 @@ public class Renderable
     public Mesh? Mesh { get; private set; } = null;
 
     public bool Visible { get; set; } = true;
-    public uint Id { get; }
+    public uint PickingId { get; }
 
     public Skeleton? Skeleton { get; private set; }
     public Material? Material { get; private set; }
@@ -37,7 +37,7 @@ public class Renderable
     public Renderable(SceneStorage storage)
     {
         this._storage = storage;
-        this.Id = ++_count;
+        this.PickingId = ++_count;
         this._transformDataBlock = storage.RequestTransformDataBlock();
         this.TransformResourceSet = this._transformDataBlock.Buffer.ResourceSet;
     }
@@ -145,7 +145,7 @@ public class Renderable
             this._transformDataBlock.BlockIndex,
             this._instanceDataBlock.BlockIndex,
             this.Skeleton?.BoneDataOffset ?? 0,
-            this.Id // this id is used for picking
+            this.PickingId // this id is used for picking
         );
     }
 

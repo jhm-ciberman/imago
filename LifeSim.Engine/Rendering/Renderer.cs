@@ -55,7 +55,7 @@ public class Renderer : ITexture2DManager, IDisposable
     public IPipelineProvider ShadowMapPass => this._shadowPass;
 
 
-    internal SceneStorage Storage { get; }
+    public SceneStorage Storage { get; }
     public uint MousePickerObjectID => this._mousePickerPass.ObjectID;
 
     private readonly CommandList _commandList;

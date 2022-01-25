@@ -3,7 +3,6 @@ using glTFLoader;
 using LifeSim.Engine.Anim;
 using LifeSim.Engine.Rendering;
 using LifeSim.Engine.Resources;
-using LifeSim.Engine;
 
 namespace LifeSim.Engine.Gltf;
 
@@ -149,7 +148,7 @@ public class GltfLoader
     {
         var data = this._model.Scenes[index];
         var name = data.Name ?? "Scene_" + index;
-        var scene = new GLTFScene(name);
+        var scene = new GltfScene(this._renderer, name);
         foreach (var node in data.Nodes)
         {
             scene.Add(this.GetNode(node));

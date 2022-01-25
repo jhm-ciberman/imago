@@ -5,14 +5,16 @@ using LifeSim.Engine;
 
 namespace LifeSim.Engine.Gltf;
 
-internal class GLTFScene : IScenePrefab
+internal class GltfScene : IScenePrefab
 {
+    public string Name { get; }
     private readonly List<GLTFNode> _children = new List<GLTFNode>();
     private readonly Dictionary<string, GLTFNode> _nodesByName = new Dictionary<string, GLTFNode>();
-    public readonly string Name;
+    private readonly Renderer _renderer;
 
-    public GLTFScene(string name)
+    public GltfScene(Renderer renderer, string name)
     {
+        this._renderer = renderer;
         this.Name = name;
     }
 
@@ -38,8 +40,8 @@ internal class GLTFScene : IScenePrefab
         }
     }
 
-    public Node3D Instantiate(SceneStorage storage)
+    public Node3D Instantiate()
     {
-        return new SceneInstantiator(storage).Instantiate(this);
+        return new SceneInstantiator(this._renderer).Instantiate(this);
     }
 }

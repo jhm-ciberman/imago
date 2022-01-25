@@ -1,41 +1,81 @@
 using System;
 using System.Numerics;
 using LifeSim.Engine.Rendering;
+using LifeSim.Engine.Resources;
 
 namespace LifeSim.Engine.SceneGraph;
 
 public class RenderNode3D : Node3D
 {
-    private Renderable? _renderable = null;
-    public Renderable? Renderable
+    private readonly Renderable _renderable;
+
+    private Mesh? _mesh;
+    public Mesh? Mesh
     {
-        get => this._renderable;
+        get => this._mesh;
         set
         {
-            if (this._renderable == value) return;
+            this._mesh = value;
 
-            if (this._renderable != null)
+            if (value is null)
             {
-                this.Scene?.NotifyRenderableRemoved(this._renderable);
+                throw new ArgumentNullException(nameof(value));
             }
 
-            this._renderable = value;
-
-            if (this._renderable != null)
-            {
-                if (!this.TransformIsDirty)
-                {
-                    this._renderable.SetTransform(ref this._worldMatrix);
-                }
-
-                this.Scene?.NotifyRenderableAdded(this._renderable);
-            }
+            this._renderable.SetMesh(value);
         }
     }
 
-    public RenderNode3D(Renderable? renderable = null)
+    private Material? _material;
+    public Material? Material
     {
-        this.Renderable = renderable;
+        get => this._material;
+        set
+        {
+            this._material = value;
+
+            if (value is null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+
+            this._renderable.SetMaterial(value);
+        }
+    }
+
+
+
+    private Skeleton? _skeleton;
+    public Skeleton? Skeleton
+    {
+        get => this._skeleton;
+        set
+        {
+            this._skeleton = value;
+
+            if (value is null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+
+            this._renderable.SetSkeleton(value);
+        }
+    }
+
+    public RenderNode3D(Renderer renderer)
+    {
+        this._renderable = new Renderable(renderer.Storage);
+    }
+
+    public RenderNode3D(Renderer renderer, Mesh mesh)
+    {
+        this._renderable = new Renderable(renderer.Storage, mesh);
+        this._mesh = mesh;
+    }
+
+    public void SetInstanceData<T>(string name, T data) where T : unmanaged
+    {
+        this._renderable.SetInstanceData(name, data);
     }
 
     public override void UpdateWorldMatrix(ref Matrix4x4 parentMatrix)
@@ -45,28 +85,21 @@ public class RenderNode3D : Node3D
         this._renderable?.SetTransform(ref this.WorldMatrix);
     }
 
-    public override Renderable? FirstRenderable()
+    public override RenderNode3D? FirstRenderable()
     {
-        return this.Renderable ?? base.FirstRenderable();
+        return this;
     }
 
     protected override void AttachToSceneRecursive(Scene scene)
     {
         base.AttachToSceneRecursive(scene);
 
-        if (this.Renderable != null)
-        {
-            scene.NotifyRenderableAdded(this.Renderable);
-        }
+        scene.NotifyRenderableAdded(this._renderable);
     }
 
     protected override void DetachFromSceneRecursive()
     {
-        if (this.Renderable != null)
-        {
-            this.Scene?.NotifyRenderableRemoved(this.Renderable);
-        }
-
+        this.Scene?.NotifyRenderableRemoved(this._renderable);
         base.DetachFromSceneRecursive();
     }
 }
