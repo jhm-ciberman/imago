@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using LifeSim.Engine.Rendering;
 using Veldrid;
 
-namespace LifeSim.Engine.Gltf;
+namespace LifeSim.Engine;
 
 [StructLayout(LayoutKind.Sequential)]
 public struct SkinnedVertex

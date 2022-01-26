@@ -12,21 +12,6 @@ namespace LifeSim.Engine.Rendering;
 
 public class Renderer : ITexture2DManager, IDisposable
 {
-    // This is the only global variable! I swear!! 
-    // Please don't point your finger at me with that face (?)
-    private static Renderer? _instance = null;
-    public static Renderer Instance
-    {
-        get
-        {
-            if (_instance == null)
-            {
-                throw new InvalidOperationException("Renderer has not been initialized!");
-            }
-            return _instance;
-        }
-    }
-
     private readonly SwapchainRenderTexture _fullScreenRenderTexture;
     private readonly RenderTexture _mainRenderTexture;
 
@@ -67,12 +52,6 @@ public class Renderer : ITexture2DManager, IDisposable
 
     public Renderer(Sdl2Window window, GraphicsBackend? graphicsBackend = null)
     {
-        if (_instance != null)
-        {
-            throw new InvalidOperationException("Renderer has already been initialized!");
-        }
-        _instance = this;
-
         GraphicsDeviceOptions options = new GraphicsDeviceOptions(
             debug: false,
             swapchainDepthFormat: null, //PixelFormat.R16_UNorm,

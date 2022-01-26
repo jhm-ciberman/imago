@@ -52,7 +52,7 @@ public class Technique
 
     }
 
-    public Material Make()
+    public Material MakeMaterial()
     {
         return new Material(this._renderer, this);
     }
