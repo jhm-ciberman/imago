@@ -8,7 +8,7 @@ using Veldrid;
 
 namespace LifeSim.Engine.Rendering;
 
-public class ParticlesPass : IPipelineProvider, IDisposable
+public class ParticlesPass : IDisposable
 {
     private const int PARTICLES_PER_BATCH = 1000;
 
@@ -37,8 +37,6 @@ public class ParticlesPass : IPipelineProvider, IDisposable
         private readonly float _padding2;
     }
 
-    private readonly Shader _particlesShader;
-    private Shader? _currentShader = null;
     private ITexture? _currentTexture = null;
     private readonly ResourceSet _passResourceSet;
     private readonly ResourceLayout _passResourceLayout;
@@ -51,7 +49,7 @@ public class ParticlesPass : IPipelineProvider, IDisposable
 
     private readonly DeviceBuffer _viewProjectionBuffer;
 
-    private readonly VertexFormat _vertexFormat;
+    private readonly Pipeline _pipeline;
 
     private readonly ParticleRenderData[] _particlesForRender = new ParticleRenderData[PARTICLES_PER_BATCH];
 
@@ -90,7 +88,7 @@ public class ParticlesPass : IPipelineProvider, IDisposable
 
         this._passResourceSet = factory.CreateResourceSet(new ResourceSetDescription(this._passResourceLayout, this._viewProjectionBuffer));
 
-        this._vertexFormat = new VertexFormat(
+        var vertexFormat = new VertexFormat(
             new VertexLayoutDescription(
                 new VertexElementDescription("VertexPosition", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
                 new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2)
@@ -103,17 +101,20 @@ public class ParticlesPass : IPipelineProvider, IDisposable
 
         var vertex = ShaderLoader.Load("particles.vert.glsl");
         var fragment = ShaderLoader.Load("particles.frag.glsl");
-        this._particlesShader = new Shader(renderer, this, vertex, fragment, this._materialResourceLayout);
+
+        var shaderVariant = new ShaderVariant(this._gd, vertexFormat, this._materialResourceLayout, vertex, fragment);
+        this._pipeline = this.MakePipeline(shaderVariant);
     }
 
 
 
     public void Render(CommandList cl, IReadOnlyList<IParticleSystem> particleSystems, ICamera camera)
     {
-        this._currentShader = null;
         this._currentTexture = null;
 
         cl.SetFramebuffer(this._renderTexture.Framebuffer);
+        cl.SetPipeline(this._pipeline);
+        cl.SetGraphicsResourceSet(0, this._passResourceSet);
 
         for (int i = 0; i < particleSystems.Count; i++)
         {
@@ -128,16 +129,16 @@ public class ParticlesPass : IPipelineProvider, IDisposable
 
             system.SortParticles(camera.Position);
 
-            this.RenderParticles(cl, system.Particles, this._particlesShader, system.Texture);
+            this.RenderParticles(cl, system.Particles, system.Texture);
         }
     }
 
-    private void RenderParticles(CommandList cl, IReadOnlyList<Particle> particles, Shader shader, ITexture texture)
+    private void RenderParticles(CommandList cl, IReadOnlyList<Particle> particles, ITexture texture)
     {
         if (particles.Count == 0) return;
         if (particles.Count <= PARTICLES_PER_BATCH)
         {
-            this.FlushParticles(cl, particles, 0, particles.Count, shader, texture);
+            this.FlushParticles(cl, particles, 0, particles.Count, texture);
         }
 
         int batchStartIndex = 0;
@@ -147,12 +148,12 @@ public class ParticlesPass : IPipelineProvider, IDisposable
         for (int i = 0; i < numberOfbatches; i++)
         {
             batchEndIndex = Math.Min(particles.Count, batchStartIndex + PARTICLES_PER_BATCH);
-            this.FlushParticles(cl, particles, batchStartIndex, batchEndIndex, shader, texture);
+            this.FlushParticles(cl, particles, batchStartIndex, batchEndIndex, texture);
             batchStartIndex = batchEndIndex;
         }
     }
 
-    private void FlushParticles(CommandList cl, IReadOnlyList<Particle> particles, int startIndex, int endIndex, Shader shader, ITexture texture)
+    private void FlushParticles(CommandList cl, IReadOnlyList<Particle> particles, int startIndex, int endIndex, ITexture texture)
     {
         int particlesCount = 0;
         for (int i = startIndex; i < endIndex; i++)
@@ -162,15 +163,6 @@ public class ParticlesPass : IPipelineProvider, IDisposable
         }
 
         cl.UpdateBuffer(this._particlesBuffer, 0, this._particlesForRender);
-
-        if (this._currentShader != shader)
-        {
-            this._currentShader = shader;
-            var pipeline = shader.GetPipeline(this._vertexFormat);
-            cl.SetPipeline(pipeline);
-
-            cl.SetGraphicsResourceSet(0, this._passResourceSet);
-        }
 
         if (this._currentTexture != texture)
         {
@@ -196,7 +188,7 @@ public class ParticlesPass : IPipelineProvider, IDisposable
         return resourceSet;
     }
 
-    Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant)
+    private Pipeline MakePipeline(ShaderVariant shaderVariant)
     {
         var rasterizerState = new RasterizerStateDescription(
             FaceCullMode.None,
@@ -229,6 +221,6 @@ public class ParticlesPass : IPipelineProvider, IDisposable
         this._viewProjectionBuffer.Dispose();
         this._passResourceLayout.Dispose();
         this._passResourceSet.Dispose();
-        this._particlesShader.Dispose();
+        this._pipeline.Dispose();
     }
 }

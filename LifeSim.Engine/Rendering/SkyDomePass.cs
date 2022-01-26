@@ -9,7 +9,7 @@ using Veldrid;
 
 namespace LifeSim.Engine.Rendering;
 
-public class SkyDomePass : IPipelineProvider, IDisposable
+public class SkyDomePass : IDisposable
 {
     private struct Vertex
     {
@@ -33,8 +33,6 @@ public class SkyDomePass : IPipelineProvider, IDisposable
     private readonly int _indexCount;
 
     private readonly IRenderTexture _renderTexture;
-
-    public Shader Shader { get; private set; }
 
     private readonly ResourceSet _resourceSet;
 
@@ -87,11 +85,10 @@ public class SkyDomePass : IPipelineProvider, IDisposable
         this._passDataBuffer = factory.CreateBuffer(new BufferDescription(
             (uint)Marshal.SizeOf<PassData>(), BufferUsage.UniformBuffer));
 
-        this.Shader = new Shader(renderer, this, _vertexCode, _fragmentCode, null);
+        var shaderVariant = new ShaderVariant(this._gd, vertexFormat, null, _vertexCode, _fragmentCode);
+        this._pipeline = this.MakePipeline(shaderVariant);
 
-        this._pipeline = this.Shader.GetPipeline(vertexFormat);
-
-        this._lutTexture = Texture.FromFile(renderer, "./res/skydome_lut.png");
+        this._lutTexture = renderer.Factory.CreateTexture("./res/skydome_lut.png");
 
         this._sampler = factory.CreateSampler(new SamplerDescription(
             SamplerAddressMode.Clamp, SamplerAddressMode.Clamp, SamplerAddressMode.Clamp,
@@ -145,7 +142,7 @@ public class SkyDomePass : IPipelineProvider, IDisposable
     }
 
 
-    public Pipeline MakePipeline(ShaderVariant shaderVariant)
+    private Pipeline MakePipeline(ShaderVariant shaderVariant)
     {
         var rasterizerState = new RasterizerStateDescription(
             FaceCullMode.Front,

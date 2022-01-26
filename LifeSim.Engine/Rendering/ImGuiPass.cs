@@ -8,9 +8,9 @@ public class ImGuiPass : IDisposable
 {
     private readonly GraphicsDevice _gd;
     private readonly Veldrid.ImGuiRenderer _imguiRenderer;
-    private readonly RenderTexture _renderTexture;
+    private readonly IRenderTexture _renderTexture;
 
-    public ImGuiPass(Renderer renderer, RenderTexture renderTexture)
+    public ImGuiPass(Renderer renderer, IRenderTexture renderTexture)
     {
         this._gd = renderer.GraphicsDevice;
         this._renderTexture = renderTexture;

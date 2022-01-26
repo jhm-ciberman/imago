@@ -23,7 +23,7 @@ internal class SwapchainRenderTexture : IRenderTexture, ITexture
 
     private readonly GraphicsDevice _gd;
 
-    public SwapchainRenderTexture(Renderer renderer, Swapchain swapchain)
+    internal SwapchainRenderTexture(Renderer renderer, Swapchain swapchain)
     {
         this._gd = renderer.GraphicsDevice;
         this._swapchain = swapchain;

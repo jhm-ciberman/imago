@@ -59,7 +59,7 @@ public class SceneStorage : IDisposable
         this._skeletons.Add(skeleton);
     }
 
-    internal DataBlock RequestInstanceDataBlock(MaterialDefinition material)
+    internal DataBlock RequestInstanceDataBlock(Technique material)
     {
         var blockSize = material.InstanceDataBlockSize;
         for (int i = 0; i < this._instanceDataBuffers.Count; i++)

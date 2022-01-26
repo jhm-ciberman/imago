@@ -8,7 +8,7 @@ public class MousePickingPass : IDisposable
 {
     private readonly GraphicsDevice _gd;
     private readonly Veldrid.Texture _pixelTexture;
-    public RenderTexture RenderTexture { get; set; }
+    internal RenderTexture RenderTexture { get; set; }
 
     public MousePickingPass(Renderer renderer, RenderTexture renderTexture)
     {

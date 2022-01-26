@@ -13,7 +13,7 @@ public class Shader : IDisposable
     public IPipelineProvider Pass { get; private set; }
 
     private readonly List<CachedPipeline> _pipelines = new List<CachedPipeline>();
-    private readonly ResourceLayout? _materialResourceLayout;
+    public ResourceLayout? MaterialResourceLayout { get; }
     private readonly List<ShaderVariant> _variants = new List<ShaderVariant>();
     private readonly GraphicsDevice _gd;
     private readonly string _vertexCode;
@@ -31,12 +31,7 @@ public class Shader : IDisposable
 
         this._gd = renderer.GraphicsDevice;
 
-        this._materialResourceLayout = materialResourceLayout;
-    }
-
-    public ResourceSet CreateResourceSet(params BindableResource[] resources)
-    {
-        return this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(this._materialResourceLayout, resources));
+        this.MaterialResourceLayout = materialResourceLayout;
     }
 
     public Pipeline GetPipeline(VertexFormat vertexFormat)
@@ -74,7 +69,7 @@ public class Shader : IDisposable
             }
         }
 
-        var variant = new ShaderVariant(this._gd, vertexFormat, this._materialResourceLayout, this._vertexCode, this._fragmentCode);
+        var variant = new ShaderVariant(this._gd, vertexFormat, this.MaterialResourceLayout, this._vertexCode, this._fragmentCode);
         this._variants.Add(variant);
         return variant;
     }
@@ -85,7 +80,7 @@ public class Shader : IDisposable
         {
             this._variants[i].Dispose();
         }
-        this._materialResourceLayout?.Dispose();
+        this.MaterialResourceLayout?.Dispose();
     }
 
     private struct CachedPipeline

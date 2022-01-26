@@ -26,7 +26,7 @@ public class RenderTexture : IRenderTexture
 
     private readonly GraphicsDevice _gd;
 
-    public RenderTexture(Renderer renderer, uint width, uint height)
+    internal RenderTexture(Renderer renderer, uint width, uint height)
     {
         this._renderer = renderer;
         this._gd = renderer.GraphicsDevice;

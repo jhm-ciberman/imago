@@ -5,21 +5,19 @@ using Veldrid;
 
 namespace LifeSim.Engine.Rendering;
 
-public class FullScreenPass : IDisposable, IPipelineProvider
+public class FullScreenPass : IDisposable
 {
     private ResourceSet? _resourceSet;
 
-    private IRenderTexture _sourceTexture;
+    private readonly IRenderTexture _sourceTexture;
 
     private readonly IRenderTexture _destinationTexture;
-
-    private bool _resourceSetDirty = true;
-
-    public Shader Shader { get; private set; }
 
     private readonly GraphicsDevice _gd;
     private readonly Pipeline _pipeline;
     private readonly DeviceBuffer _vertexBuffer;
+
+    private readonly ResourceLayout _resourceLayout;
 
     public FullScreenPass(Renderer renderer, IRenderTexture sourceRenderTexture, IRenderTexture destinationRenderTexture)
     {
@@ -35,15 +33,13 @@ public class FullScreenPass : IDisposable, IPipelineProvider
             new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float4)
         ));
 
-        var resourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
+        this._resourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
             new ResourceLayoutElementDescription("MainTexture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
             new ResourceLayoutElementDescription("MainSampler", ResourceKind.Sampler, ShaderStages.Fragment)
         ));
 
-        this.Shader = new Shader(renderer, this, _vertexCode, _fragmentCode, resourceLayout);
-
-
-        this._pipeline = this.Shader.GetPipeline(vertexFormat);
+        var shaderVariant = new ShaderVariant(this._gd, vertexFormat, this._resourceLayout, _vertexCode, _fragmentCode);
+        this._pipeline = this.MakePipeline(shaderVariant);
 
         this._vertexBuffer = factory.CreateBuffer(new BufferDescription(16 * 6, BufferUsage.VertexBuffer));
         (float top, float bottom) = this._gd.IsUvOriginTopLeft ? (1f, 0f) : (0f, 1f);
@@ -56,6 +52,8 @@ public class FullScreenPass : IDisposable, IPipelineProvider
             new Vector4( 1f,  1f, 1f, bottom),
             new Vector4(-1f,  1f, 0f, bottom),
         });
+
+        this.OnSourceTextureResized(this._sourceTexture);
     }
 
 
@@ -63,17 +61,11 @@ public class FullScreenPass : IDisposable, IPipelineProvider
     {
         this._resourceSet?.Dispose();
         this._vertexBuffer.Dispose();
+        this._resourceLayout.Dispose();
     }
 
     public void Render(CommandList cl)
     {
-        if (this._resourceSetDirty || this._resourceSet == null)
-        {
-            this._resourceSetDirty = false;
-            this._resourceSet?.Dispose();
-            this._resourceSet = this.Shader.CreateResourceSet(this._sourceTexture.DeviceTexture, this._gd.LinearSampler);
-        }
-
         cl.SetFramebuffer(this._destinationTexture.Framebuffer);
         cl.SetPipeline(this._pipeline);
         cl.SetVertexBuffer(0, this._vertexBuffer);
@@ -81,22 +73,14 @@ public class FullScreenPass : IDisposable, IPipelineProvider
         cl.Draw(6);
     }
 
-    public void SetSourceTexture(IRenderTexture sourceRenderTexture)
-    {
-        if (this._sourceTexture == sourceRenderTexture) return;
-
-        this._sourceTexture.OnResized -= this.OnSourceTextureResized;
-        this._sourceTexture = sourceRenderTexture;
-        this._sourceTexture.OnResized += this.OnSourceTextureResized;
-        this._resourceSetDirty = true;
-    }
-
     private void OnSourceTextureResized(IRenderTexture renderTexture)
     {
-        this._resourceSetDirty = true;
+        this._resourceSet?.Dispose();
+        this._resourceSet = this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(
+            this._resourceLayout, renderTexture.DeviceTexture, this._gd.LinearSampler));
     }
 
-    Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant)
+    private Pipeline MakePipeline(ShaderVariant shaderVariant)
     {
         Debug.Assert(shaderVariant.MaterialResourceLayout != null);
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
+using LifeSim.Engine.SceneGraph;
 using Veldrid;
 
 namespace LifeSim.Engine.Rendering;
@@ -19,11 +20,13 @@ public class SpritesPass : IDisposable, IPipelineProvider
     private Shader? _currentShader;
     private readonly VertexFormat _vertexFormat;
     private readonly Dictionary<(Shader, Texture), ResourceSet> _resourceSets = new Dictionary<(Shader, Texture), ResourceSet>();
-    public readonly Shader DefaultShader;
+    private readonly Shader _defaultShader;
 
     private readonly ResourceLayout _resourceLayout;
 
     private readonly Renderer _renderer;
+
+    private readonly SpriteBatcher _spriteBatcher;
 
     public SpritesPass(Renderer renderer, IRenderTexture renderTexture)
     {
@@ -49,13 +52,15 @@ public class SpritesPass : IDisposable, IPipelineProvider
 
         var vertex = ShaderLoader.Load("sprites.vert.glsl");
         var fragment = ShaderLoader.Load("sprites.frag.glsl");
-        this.DefaultShader = new Shader(renderer, this, vertex, fragment, this._resourceLayout);
+        this._defaultShader = new Shader(renderer, this, vertex, fragment, this._resourceLayout);
 
         this._camera2DInfoBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
         this._passResourceSet = factory.CreateResourceSet(new ResourceSetDescription(this._passResourceLayout, this._camera2DInfoBuffer));
 
         this._renderTexture = renderTexture;
+
+        this._spriteBatcher = new SpriteBatcher(this._gd, this._defaultShader);
     }
 
     public Shader MakeShader(string vertexFile, string fragmentFile)
@@ -144,5 +149,23 @@ public class SpritesPass : IDisposable, IPipelineProvider
             Outputs = this._renderTexture.OutputDescription,
             ResourceLayouts = resources,
         });
+    }
+
+    internal void Render(CommandList cl, IReadOnlyList<CanvasLayer> canvasLayers)
+    {
+        for (int i = 0; i < canvasLayers.Count; i++)
+        {
+            var canvasLayer = canvasLayers[i];
+            this._spriteBatcher.BeginBatch();
+
+            for (int j = 0; j < canvasLayer.Items.Count; j++)
+            {
+                canvasLayer.Items[j].Render(this._spriteBatcher);
+            }
+
+            this._renderer.UpdateDirtyTextures(); // TODO: FIX THIS, should be done in the renderer, not here at this moment
+            this.BeginPass(cl, canvasLayer.ViewProjectionMatrix);
+            this.SubmitBatches(cl, this._spriteBatcher.IndexBuffer, this._spriteBatcher.Batches);
+        }
     }
 }

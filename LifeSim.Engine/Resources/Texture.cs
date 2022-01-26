@@ -11,19 +11,6 @@ namespace LifeSim.Engine.Rendering;
 
 public class Texture : ITexture
 {
-    public static Texture FromFile(Renderer renderer, string path)
-    {
-        using var img = Image.Load<Rgba32>(path);
-        return FromImage(renderer, img);
-    }
-
-    public static Texture FromImage(Renderer renderer, Image<Rgba32> image)
-    {
-        var texture = new Texture(renderer, (uint)image.Width, (uint)image.Height);
-        texture.SetDataFromImage(image);
-        return texture;
-    }
-
     public Veldrid.Texture DeviceTexture { get; protected set; }
     public Sampler Sampler { get; private set; }
     public uint Width { get; protected set; }
@@ -55,12 +42,6 @@ public class Texture : ITexture
         ));
         this.Sampler = gd.PointSampler;
         renderer.OnTextureDirty(this);
-    }
-
-    protected Texture(Renderer renderer, uint width, uint height, Color fillColor)
-        : this(renderer, width, height)
-    {
-        this.Fill(fillColor);
     }
 
     protected void OnTextureDirty()

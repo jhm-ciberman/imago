@@ -51,7 +51,7 @@ public class SpriteBatch : IDisposable
     public int Count { get; private set; } = 0;
 
     private readonly int _capacity = 1000;
-    public readonly Item[] Items;
+    public Item[] Items { get; }
 
     public ResourceSet ResourceSet { get; private set; }
     private readonly GraphicsDevice _gd;
@@ -62,11 +62,12 @@ public class SpriteBatch : IDisposable
         this.Shader = shader;
         this.Texture = texture;
         var factory = this._gd.ResourceFactory;
-        this.ResourceSet = shader.CreateResourceSet(this.Texture.DeviceTexture, this.Texture.Sampler);
+        this.ResourceSet = this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(
+            shader.MaterialResourceLayout, this.Texture.DeviceTexture, this.Texture.Sampler));
         this._capacity = batchCapacity;
         this.Items = new Item[batchCapacity * 4];
 
-        var vertexBufferSize = (uint) (Marshal.SizeOf<SpriteBatch.Item>() * 4 * batchCapacity);
+        var vertexBufferSize = (uint) (Marshal.SizeOf<Item>() * 4 * batchCapacity);
         this.VertexBuffer = factory.CreateBuffer(new BufferDescription((uint)vertexBufferSize, BufferUsage.VertexBuffer | BufferUsage.Dynamic));
     }
 
@@ -165,7 +166,8 @@ public class SpriteBatch : IDisposable
         this.ResourceSet.Dispose();
         this.Shader = shader;
         this.Texture = texture;
-        this.ResourceSet = shader.CreateResourceSet(this.Texture.DeviceTexture, this.Texture.Sampler);
+        this.ResourceSet = this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(
+            shader.MaterialResourceLayout, this.Texture.DeviceTexture, this.Texture.Sampler));
     }
 
     public void Clear()

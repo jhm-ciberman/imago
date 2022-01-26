@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using FontStashSharp.Interfaces;
+using LifeSim.Engine.Resources;
 using LifeSim.Engine.SceneGraph;
 using Veldrid;
 using Veldrid.Sdl2;
@@ -26,8 +27,8 @@ public class Renderer : ITexture2DManager, IDisposable
         }
     }
 
-    public IRenderTexture FullScreenRenderTexture { get; }
-    public RenderTexture MainRenderTexture { get; }
+    private readonly SwapchainRenderTexture _fullScreenRenderTexture;
+    private readonly RenderTexture _mainRenderTexture;
 
     public GraphicsDevice GraphicsDevice { get; }
     private readonly ResourceFactory _factory;
@@ -49,8 +50,6 @@ public class Renderer : ITexture2DManager, IDisposable
     private readonly MousePickingPass _mousePickerPass;
     private readonly ParticlesPass _particlesPass;
     private readonly SkyDomePass _skyDomePass;
-    private readonly SpriteBatcher _spriteBatcher;
-
     public IPipelineProvider ForwardPass => this._forwardPass;
     public IPipelineProvider ShadowMapPass => this._shadowPass;
 
@@ -61,6 +60,10 @@ public class Renderer : ITexture2DManager, IDisposable
     private readonly CommandList _commandList;
 
     public ShadowMapConfig ShadowMapConfig => this._shadowPass.Config;
+
+    public ITexture ShadowMapTexture => this._shadowPass.ShadowmapTexture;
+
+    public RendererResourceFactory Factory { get; }
 
     public Renderer(Sdl2Window window, GraphicsBackend? graphicsBackend = null)
     {
@@ -80,29 +83,29 @@ public class Renderer : ITexture2DManager, IDisposable
             swapchainSrgbFormat: false
         );
 
+        this.Factory = new RendererResourceFactory(this);
+
         var gd = VeldridStartup.CreateGraphicsDevice(window, options, graphicsBackend ?? VeldridStartup.GetPlatformDefaultBackend());
         this.GraphicsDevice = gd;
 
         this._factory = this.GraphicsDevice.ResourceFactory;
 
-        this.FullScreenRenderTexture = new SwapchainRenderTexture(this, this.GraphicsDevice.MainSwapchain);
-        this.MainRenderTexture = new RenderTexture(this, (uint)window.Width, (uint)window.Height);
+        this._fullScreenRenderTexture = new SwapchainRenderTexture(this, this.GraphicsDevice.MainSwapchain);
+        this._mainRenderTexture = new RenderTexture(this, (uint)window.Width, (uint)window.Height);
 
         this.Storage = new SceneStorage(gd);
 
-        this._imGuiPass = new ImGuiPass(this, this.MainRenderTexture);
-        this._mousePickerPass = new MousePickingPass(this, this.MainRenderTexture);
-        this._gizmosPass = new GizmosPass(this, this.MainRenderTexture);
-        this._particlesPass = new ParticlesPass(this, this.MainRenderTexture);
+        this._imGuiPass = new ImGuiPass(this, this._mainRenderTexture);
+        this._mousePickerPass = new MousePickingPass(this, this._mainRenderTexture);
+        this._gizmosPass = new GizmosPass(this, this._mainRenderTexture);
+        this._particlesPass = new ParticlesPass(this, this._mainRenderTexture);
         this._shadowPass = new ShadowPass(this, this.Storage);
-        this._forwardPass = new ForwardPass(this, this.Storage, this.MainRenderTexture, this._shadowPass);
-        this._spritesPass = new SpritesPass(this, this.MainRenderTexture);
-        this._skyDomePass = new SkyDomePass(this, this.MainRenderTexture);
+        this._forwardPass = new ForwardPass(this, this.Storage, this._mainRenderTexture, this._shadowPass);
+        this._spritesPass = new SpritesPass(this, this._mainRenderTexture);
+        this._skyDomePass = new SkyDomePass(this, this._mainRenderTexture);
 
-        this._fullScreenPass = new FullScreenPass(this, this.MainRenderTexture, this.FullScreenRenderTexture);
+        this._fullScreenPass = new FullScreenPass(this, this._mainRenderTexture, this._fullScreenRenderTexture);
         this._commandList = this._factory.CreateCommandList();
-
-        this._spriteBatcher = new SpriteBatcher(gd, this._spritesPass.DefaultShader);
 
         this._fence = this._factory.CreateFence(false);
     }
@@ -122,7 +125,7 @@ public class Renderer : ITexture2DManager, IDisposable
         }
     }
 
-    protected void UpdateDirtyTextures()
+    public void UpdateDirtyTextures()
     {
         lock (this._dirtyTextures)
         {
@@ -137,8 +140,6 @@ public class Renderer : ITexture2DManager, IDisposable
         }
     }
 
-    public ITexture ShadowMapTexture => this._shadowPass.ShadowmapTexture;
-
     public void Render(Scene scene, float deltaTime, InputSnapshot inputSnapshot)
     {
         this._mousePickerPass.SetMousePosition(inputSnapshot.MousePosition);
@@ -152,7 +153,7 @@ public class Renderer : ITexture2DManager, IDisposable
         this.UpdateDirtyTextures();
         this.Storage.UpdateBuffers(this._commandList);
 
-        this._commandList.SetFramebuffer(this.MainRenderTexture.Framebuffer);
+        this._commandList.SetFramebuffer(this._mainRenderTexture.Framebuffer);
 
         Camera3D? camera = scene.Camera;
 
@@ -165,20 +166,8 @@ public class Renderer : ITexture2DManager, IDisposable
             this._particlesPass.Render(this._commandList, scene.ParticleSystems, camera);
         }
 
-        for (int i = 0; i < scene.CanvasLayers.Count; i++)
-        {
-            var canvasLayer = scene.CanvasLayers[i];
+        this._spritesPass.Render(this._commandList, scene.CanvasLayers);
 
-            this._spriteBatcher.BeginBatch();
-            for (int j = 0; j < canvasLayer.Items.Count; j++)
-            {
-                canvasLayer.Items[j].Render(this._spriteBatcher);
-            }
-
-            this.UpdateDirtyTextures();
-            this._spritesPass.BeginPass(this._commandList, canvasLayer.ViewProjectionMatrix);
-            this._spritesPass.SubmitBatches(this._commandList, this._spriteBatcher.IndexBuffer, this._spriteBatcher.Batches);
-        }
 
         scene.RenderImGui();
 
@@ -224,16 +213,16 @@ public class Renderer : ITexture2DManager, IDisposable
     {
         this.GraphicsDevice.ResizeMainWindow(width, height);
         this.GraphicsDevice.WaitForIdle();
-        this.FullScreenRenderTexture.Resize(width, height);
-        this.MainRenderTexture.Resize(viewportWidth, viewportHeight);
+        this._fullScreenRenderTexture.Resize(width, height);
+        this._mainRenderTexture.Resize(viewportWidth, viewportHeight);
         this._imGuiPass.Resize(viewportWidth, viewportHeight);
     }
 
     public void Dispose()
     {
         this.GraphicsDevice.WaitForIdle();
-        this.FullScreenRenderTexture.Dispose();
-        this.MainRenderTexture.Dispose();
+        this._fullScreenRenderTexture.Dispose();
+        this._mainRenderTexture.Dispose();
         this._imGuiPass.Dispose();
         this._mousePickerPass.Dispose();
         this._gizmosPass.Dispose();

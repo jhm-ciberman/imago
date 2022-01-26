@@ -5,7 +5,7 @@ using Veldrid;
 
 namespace LifeSim.Engine.Rendering;
 
-public class MaterialDefinition
+public class Technique
 {
     public interface IUniform
     {
@@ -19,13 +19,13 @@ public class MaterialDefinition
     public int ResourceCount { get; }
     public IReadOnlyDictionary<string, int> Textures => this._textures;
 
-    public readonly int InstanceDataBlockSize;
+    public int InstanceDataBlockSize { get; }
+    public ResourceLayout ResourceLayout { get; }
     private readonly List<Shader> _shaders = new List<Shader>();
-    private readonly ResourceLayout _resourceLayout;
     private readonly Memory<byte> _instanceDefaultData;
 
     private readonly Renderer _renderer;
-    public MaterialDefinition(Renderer renderer, IUniform[] uniforms, string[] textures)
+    public Technique(Renderer renderer, IUniform[] uniforms, string[] textures)
     {
         this._renderer = renderer;
         this._textures = new Dictionary<string, int>();
@@ -39,7 +39,7 @@ public class MaterialDefinition
             elements[j++] = new ResourceLayoutElementDescription(name + "Sampler", ResourceKind.Sampler, ShaderStages.Fragment);
         }
 
-        this._resourceLayout = renderer.GraphicsDevice.ResourceFactory.CreateResourceLayout(new ResourceLayoutDescription(elements));
+        this.ResourceLayout = renderer.GraphicsDevice.ResourceFactory.CreateResourceLayout(new ResourceLayoutDescription(elements));
 
         this.InstanceDataBlockSize = uniforms.Length * 16;
         this._instanceDefaultData = new Memory<byte>(new byte[this.InstanceDataBlockSize]);
@@ -52,6 +52,11 @@ public class MaterialDefinition
 
     }
 
+    public Material Make()
+    {
+        return new Material(this._renderer, this);
+    }
+
     public int GetInstanceUniformDataOffset(string name)
     {
         if (this._instanceUniformData.TryGetValue(name, out int offset))
@@ -61,9 +66,9 @@ public class MaterialDefinition
         throw new ArgumentException($"Uniform {name} not found");
     }
 
-    public MaterialDefinition AddPass(IPipelineProvider pass, string vertexCode, string fragmentCode)
+    public Technique AddPass(IPipelineProvider pass, string vertexCode, string fragmentCode)
     {
-        this._shaders.Add(new Shader(this._renderer, pass, vertexCode, fragmentCode, this._resourceLayout));
+        this._shaders.Add(new Shader(this._renderer, pass, vertexCode, fragmentCode, this.ResourceLayout));
         return this;
     }
 

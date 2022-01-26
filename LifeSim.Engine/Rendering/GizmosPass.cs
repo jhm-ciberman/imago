@@ -6,7 +6,7 @@ using Veldrid;
 
 namespace LifeSim.Engine.Rendering;
 
-public class GizmosPass : IPipelineProvider, IDisposable
+public class GizmosPass : IDisposable
 {
     private const int VERTICES_PER_BATCH = 1000;
 
@@ -22,8 +22,7 @@ public class GizmosPass : IPipelineProvider, IDisposable
 
     private int _verticesCount = 0;
     private readonly Vertex[] _vertices = new Vertex[VERTICES_PER_BATCH];
-    private readonly Shader _lineShader;
-    private Shader? _currentShader = null;
+    private readonly Pipeline _pipeline;
     private readonly ResourceSet _passResourceSet;
     private readonly ResourceLayout _passResourceLayout;
     private readonly IRenderTexture _renderTexture;
@@ -55,16 +54,16 @@ public class GizmosPass : IPipelineProvider, IDisposable
             new VertexElementDescription("Color", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Byte4_Norm)
         ));
 
-        this._lineShader = new Shader(renderer, this, this._vertex, this._fragment);
+        var shaderVariant = new ShaderVariant(this._gd, this._vertexFormat, null, this._vertex, this._fragment);
+        this._pipeline = this.MakePipeline(shaderVariant);
     }
 
     public void Render(CommandList cl, IReadOnlyList<DebugLine> lines, ICamera camera)
     {
         if (lines.Count == 0) return;
 
-        this._currentShader = null;
-
         cl.SetFramebuffer(this._renderTexture.Framebuffer);
+        cl.SetPipeline(this._pipeline);
 
         var viewProjectionMatrix = camera.ViewProjectionMatrix;
         cl.UpdateBuffer(this._viewProjectionBuffer, 0, ref viewProjectionMatrix);
@@ -82,7 +81,7 @@ public class GizmosPass : IPipelineProvider, IDisposable
 
             if (this._verticesCount + 2 >= VERTICES_PER_BATCH)
             {
-                this.FlushVertices(cl, this._lineShader);
+                this.FlushVertices(cl);
             }
 
             this._vertices[this._verticesCount++] = new Vertex { Position = line.Start, Color = line.Color.ToPackedUInt() };
@@ -91,28 +90,20 @@ public class GizmosPass : IPipelineProvider, IDisposable
 
         if (this._verticesCount > 0)
         {
-            this.FlushVertices(cl, this._lineShader);
+            this.FlushVertices(cl);
         }
     }
 
-    private void FlushVertices(CommandList cl, Shader shader)
+    private void FlushVertices(CommandList cl)
     {
         cl.UpdateBuffer(this._vertexBuffer, 0, this._vertices);
-
-        if (this._currentShader != shader)
-        {
-            this._currentShader = shader;
-            var pipeline = shader.GetPipeline(this._vertexFormat);
-            cl.SetPipeline(pipeline);
-        }
-
         cl.SetVertexBuffer(0, this._vertexBuffer);
         cl.SetGraphicsResourceSet(0, this._passResourceSet);
         cl.Draw((uint)this._verticesCount);
         this._verticesCount = 0;
     }
 
-    Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant)
+    private Pipeline MakePipeline(ShaderVariant shaderVariant)
     {
         var rasterizerState = new RasterizerStateDescription(
                 FaceCullMode.None,
@@ -142,7 +133,7 @@ public class GizmosPass : IPipelineProvider, IDisposable
         this._viewProjectionBuffer.Dispose();
         this._passResourceLayout.Dispose();
         this._passResourceSet.Dispose();
-        this._lineShader.Dispose();
+        this._pipeline.Dispose();
     }
 
     private readonly string _fragment = @"

@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace LifeSim.Engine.Rendering;
 
-public struct Uniform<T> : MaterialDefinition.IUniform where T : unmanaged
+public struct Uniform<T> : Technique.IUniform where T : unmanaged
 {
     public string Name { get; private set; }
     private T _data;
