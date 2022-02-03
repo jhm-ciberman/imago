@@ -8,8 +8,6 @@ namespace LifeSim.Engine.SceneGraph;
 
 public abstract class Scene : Node3D
 {
-    public App App { get; }
-
     public DirectionalLight MainLight { get; set; } = new DirectionalLight();
 
     public ColorF AmbientColor { get; set; } = new ColorF(.2f, .2f, .2f);
@@ -43,9 +41,8 @@ public abstract class Scene : Node3D
     private RenderQueue _forwardReadWriteQueue = new RenderQueue();
 
 
-    public Scene(App app)
+    public Scene()
     {
-        this.App = app;
         this.Scene = this;
     }
 

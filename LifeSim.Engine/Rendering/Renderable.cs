@@ -1,6 +1,7 @@
 using System;
 using System.Numerics;
 using LifeSim.Engine.Resources;
+using LifeSim.Engine.SceneGraph;
 using Veldrid.Utilities;
 
 namespace LifeSim.Engine.Rendering;
@@ -34,17 +35,15 @@ public class Renderable
     private DataBlock _instanceDataBlock;
     private readonly SceneStorage _storage;
 
-    public Renderable(SceneStorage storage)
+    public RenderNode3D Node { get; }
+
+    public Renderable(SceneStorage storage, RenderNode3D node)
     {
         this._storage = storage;
+        this.Node = node;
         this.PickingId = ++_count;
         this._transformDataBlock = storage.RequestTransformDataBlock();
         this.TransformResourceSet = this._transformDataBlock.Buffer.ResourceSet;
-    }
-
-    public Renderable(SceneStorage storage, Mesh mesh) : this(storage)
-    {
-        this.SetMesh(mesh);
     }
 
     public void SetMesh(Mesh mesh)

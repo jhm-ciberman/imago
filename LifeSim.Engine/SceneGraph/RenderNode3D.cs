@@ -64,13 +64,12 @@ public class RenderNode3D : Node3D
 
     public RenderNode3D(Renderer renderer)
     {
-        this._renderable = new Renderable(renderer.Storage);
+        this._renderable = new Renderable(renderer.Storage, this);
     }
 
-    public RenderNode3D(Renderer renderer, Mesh mesh)
+    public RenderNode3D(Renderer renderer, Mesh mesh) : this(renderer)
     {
-        this._renderable = new Renderable(renderer.Storage, mesh);
-        this._mesh = mesh;
+        this.Mesh = mesh;
     }
 
     public void SetInstanceData<T>(string name, T data) where T : unmanaged
