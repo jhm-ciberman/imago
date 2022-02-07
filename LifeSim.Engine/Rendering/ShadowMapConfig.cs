@@ -170,7 +170,7 @@ public class ShadowMapConfig
         }
     }
 
-    private float _normalOffset = 5.6f;
+    private float _normalOffset = 3.6f;
 
     /// <summary>
     /// Gets or sets the normal offset used when rendering the shadow map. 
@@ -194,5 +194,9 @@ public class ShadowMapConfig
             this._normalOffset = value;
         }
     }
+
+    public float NormalOffsetScale { get; set; } = 0.25f;
+
+    public bool UseNormalOffsetScale { get; set; } = true;
 
 }

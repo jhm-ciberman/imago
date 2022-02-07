@@ -14,7 +14,7 @@ public class ShadowCascade
     public float NormalOffset { get; set; }
     public Matrix4x4 ViewProjectionMatrix { get; set; }
 
-    public void UpdateCascadeMatrix(Camera3D camera, Vector3 lightDirection, float near, float far, ShadowMapConfig config)
+    public void UpdateCascadeMatrix(int cascadeIndex, Camera3D camera, Vector3 lightDirection, float near, float far, ShadowMapConfig config)
     {
         Matrix4x4 cameraProjectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(camera.FieldOfView, camera.AspectRatio, near, far);
         Matrix4x4 cameraViewProjectionMatrix = camera.ViewMatrix * cameraProjectionMatrix;
@@ -67,6 +67,11 @@ public class ShadowCascade
         lightViewMatrix = Matrix4x4.CreateLookAt(centerWS, centerWS - lightDirection, Vector3.UnitY);
 
         Matrix4x4 lightProjectionMatrix = Matrix4x4.CreateOrthographic(sphereDiameter, sphereDiameter, 0.0f, orthoDepth);
+
+        if (config.UseNormalOffsetScale)
+        {
+            unitsPerTexel *= config.NormalOffsetScale;
+        }
 
         this.ViewProjectionMatrix = lightViewMatrix * lightProjectionMatrix;
         this.SplitNear = near;

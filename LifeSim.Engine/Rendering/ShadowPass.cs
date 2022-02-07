@@ -95,7 +95,7 @@ public partial class ShadowPass : IDisposable, IPipelineProvider
             float near = this._splitDistances[i];
             float far = this._splitDistances[i + 1];
 
-            this._cascades[i].UpdateCascadeMatrix(camera, mainLightDirection, near, far, this.Config);
+            this._cascades[i].UpdateCascadeMatrix(i, camera, mainLightDirection, near, far, this.Config);
 
             BoundingFrustum shadowFrustum = new BoundingFrustum(this._cascades[i].ViewProjectionMatrix);
             this._renderQueues[i].AddToRenderQueue(renderables, shadowFrustum, camera.Position);
