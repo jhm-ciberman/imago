@@ -10,7 +10,7 @@ public abstract class Scene : Node3D
 {
     public DirectionalLight MainLight { get; set; } = new DirectionalLight();
 
-    public ColorF AmbientColor { get; set; } = new ColorF(.2f, .2f, .2f);
+    public ColorF AmbientColor { get; set; } = new ColorF(.2f, .2f, .2f, 100f / 255f);
 
 
     public GizmosLayer Gizmos { get; } = new GizmosLayer();

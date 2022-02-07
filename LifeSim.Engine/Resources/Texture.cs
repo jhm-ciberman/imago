@@ -1,7 +1,5 @@
 using System;
-using System.Diagnostics;
 using System.Numerics;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -23,7 +21,7 @@ public class Texture : ITexture
 
     protected readonly Renderer _renderer;
 
-    public Texture(Renderer renderer, uint width, uint height, uint mipLevels = 0)
+    public Texture(Renderer renderer, uint width, uint height, uint mipLevels = 0, bool srgb = true)
     {
         this._renderer = renderer;
         this.Width = width;
@@ -34,11 +32,12 @@ public class Texture : ITexture
             : mipLevels;
 
         this._data = new byte[width * height * 4];
+        PixelFormat pixelFormat = srgb ? PixelFormat.R8_G8_B8_A8_UNorm_SRgb : PixelFormat.R8_G8_B8_A8_UNorm;
 
         var gd = this._renderer.GraphicsDevice;
         this.DeviceTexture = gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(
             this.Width, this.Height, this.MipLevels, 1,
-            PixelFormat.R8_G8_B8_A8_UNorm, TextureUsage.Sampled | TextureUsage.GenerateMipmaps
+            pixelFormat, TextureUsage.Sampled | TextureUsage.GenerateMipmaps
         ));
         this.Sampler = gd.PointSampler;
         renderer.OnTextureDirty(this);

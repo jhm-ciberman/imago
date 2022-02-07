@@ -27,15 +27,15 @@ public class RendererResourceFactory
         return new Texture(this._renderer, width, height, mipLevels);
     }
 
-    public Texture CreateTexture(string path)
+    public Texture CreateTexture(string path, bool srgb = true)
     {
         using var img = Image.Load<Rgba32>(path);
-        return this.CreateTexture(img);
+        return this.CreateTexture(img, srgb);
     }
 
-    public Texture CreateTexture(Image<Rgba32> image)
+    public Texture CreateTexture(Image<Rgba32> image, bool srgb = true)
     {
-        var texture = new Texture(this._renderer, (uint)image.Width, (uint)image.Height);
+        var texture = new Texture(this._renderer, (uint)image.Width, (uint)image.Height, 0, srgb);
         texture.SetDataFromImage(image);
         return texture;
     }

@@ -85,7 +85,7 @@ public class ShadowMapConfig
         }
     }
 
-    private uint _shadowMapSize = 2048;
+    private uint _shadowMapSize = 2048 * 2;
 
     /// <summary>
     /// Gets or sets the size of the shadow map texture.
@@ -122,55 +122,19 @@ public class ShadowMapConfig
         }
     }
 
-    private float _cullingZPadding = 5f;
-
     /// <summary>
     /// Gets or sets the padding added to the back of the shadow map 
     /// when culling the geometry so the geometry that is behind the camera
     /// is rendered.
     /// </summary>
-    /// <exception cref="ArgumentOutOfRangeException">
-    /// The padding must be greater or equal to zero.
-    /// </exception>
-    public float CullingZPadding
-    {
-        get => this._cullingZPadding;
-        set
-        {
-            if (value < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(value), "The padding must be greater or equal to zero.");
-            }
-
-            this._cullingZPadding = value;
-        }
-    }
-
-    private float _depthBias = 0.25f;
+    public float CullingZPadding { get; set; } = 5f;
 
     /// <summary>
     /// Gets or sets the depth bias used when rendering the shadow map. 
     /// The units are in texels so a value of 0.1f will bias the depth by 0.1 texels.
     /// This way the same value works independent of the shadow map resolution.
     /// </summary>
-    /// <exception cref="ArgumentOutOfRangeException">
-    /// The depth bias must be greater or equal to zero.
-    /// </exception>
-    public float DepthBias
-    {
-        get => this._depthBias;
-        set
-        {
-            if (value < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(value), "The depth bias must be greater or equal to zero.");
-            }
-
-            this._depthBias = value;
-        }
-    }
-
-    private float _normalOffset = 3.6f;
+    public float DepthBias { get; set; } = 5.00f;
 
     /// <summary>
     /// Gets or sets the normal offset used when rendering the shadow map. 
@@ -178,25 +142,7 @@ public class ShadowMapConfig
     /// in the direction of the normal by 0.1 texels.
     /// This way the same value works independent of the shadow map resolution.
     /// </summary>
-    /// <exception cref="ArgumentOutOfRangeException">
-    /// The normal offset must be greater or equal to zero.
-    /// </exception>
-    public float NormalOffset
-    {
-        get => this._normalOffset;
-        set
-        {
-            if (value < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(value), "The normal offset must be greater or equal to zero.");
-            }
+    public float NormalOffset { get; set; } = 2.00f;
 
-            this._normalOffset = value;
-        }
-    }
-
-    public float NormalOffsetScale { get; set; } = 0.25f;
-
-    public bool UseNormalOffsetScale { get; set; } = true;
-
+    public ColorF ShadowColor { get; set; } = new ColorF(0.0f, 0.0f, 0.0f, .8f);
 }

@@ -143,12 +143,12 @@ public partial class ShadowPass : IDisposable, IPipelineProvider
     Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant)
     {
         var rasterizerState = new RasterizerStateDescription(
-                FaceCullMode.None,
-                PolygonFillMode.Solid,
-                FrontFace.Clockwise,
-                depthClipEnabled: false, // Shadow pancaking! Love pancakes!
-                scissorTestEnabled: false
-            );
+            FaceCullMode.Front,
+            PolygonFillMode.Solid,
+            FrontFace.Clockwise,
+            depthClipEnabled: false, // Shadow pancaking! Love pancakes!
+            scissorTestEnabled: false
+        );
 
         return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
         {

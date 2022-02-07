@@ -13,6 +13,8 @@ public class ForwardPass : IDisposable, IPipelineProvider
     private struct CameraInfo
     {
         public Matrix4x4 ViewProjectionMatrix { get; set; }
+        public Vector3 MainLightDirection { get; set; }
+        private readonly float _padding;
         public Matrix4x4 ShadowMapMatrix0 { get; set; }
         public Matrix4x4 ShadowMapMatrix1 { get; set; }
         public Matrix4x4 ShadowMapMatrix2 { get; set; }
@@ -28,8 +30,9 @@ public class ForwardPass : IDisposable, IPipelineProvider
     [StructLayout(LayoutKind.Sequential)]
     private unsafe struct LightInfo
     {
-        public ColorF AmbientColor { get; set; }
-        public ColorF MainLightColor { get; set; }
+        public ColorF AmbientColor { get; set; } // rgb = color, a = intensity
+        public ColorF MainLightColor { get; set; } // rgb = color, a = intensity
+        public ColorF ShadowColor { get; set; } // rgb = color, a = intensity
         public Vector3 MainLightDirection { get; set; }
         private readonly float _padding0;
         public Vector4 ShadowMapDistances { get; set; } // Each component is the far plane of a cascade
@@ -84,7 +87,8 @@ public class ForwardPass : IDisposable, IPipelineProvider
         ICamera camera,
         Vector3 mainLightDirection,
         ColorF mainLightColor,
-        ColorF ambientColor
+        ColorF ambientColor,
+        ColorF shadowColor
     )
     {
         this._renderQueue.AddToRenderQueue(renderList, camera.FrustumForCulling, camera.Position);
@@ -100,8 +104,11 @@ public class ForwardPass : IDisposable, IPipelineProvider
             commandList.ClearDepthStencil(1f);
         }
 
+        mainLightDirection = Vector3.Normalize(mainLightDirection);
+
         CameraInfo cameraInfo = new CameraInfo();
         cameraInfo.ViewProjectionMatrix = camera.ViewProjectionMatrix;
+        cameraInfo.MainLightDirection = mainLightDirection;
         cameraInfo.ShadowMapMatrix0 = this._shadowPass.GetShadowCascadeViewProjectionMatrix(0);
         cameraInfo.ShadowMapMatrix1 = this._shadowPass.GetShadowCascadeViewProjectionMatrix(1);
         cameraInfo.ShadowMapMatrix2 = this._shadowPass.GetShadowCascadeViewProjectionMatrix(2);
@@ -114,7 +121,8 @@ public class ForwardPass : IDisposable, IPipelineProvider
         LightInfo lightInfo = new LightInfo();
         lightInfo.AmbientColor = ambientColor;
         lightInfo.MainLightColor = mainLightColor;
-        lightInfo.MainLightDirection = Vector3.Normalize(mainLightDirection);
+        lightInfo.ShadowColor = shadowColor;
+        lightInfo.MainLightDirection = mainLightDirection;
         lightInfo.ShadowMapDistances = this._shadowPass.GetShadowCascadeDistances();
 
         commandList.UpdateBuffer(this._camera3DInfoBuffer, 0, ref cameraInfo);

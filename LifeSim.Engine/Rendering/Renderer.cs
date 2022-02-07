@@ -139,7 +139,7 @@ public class Renderer : ITexture2DManager, IDisposable
         if (camera != null)
         {
             this._shadowPass.Render(this._commandList, scene.Renderables, camera, scene.MainLight.Direction);
-            this._forwardPass.Render(this._commandList, scene.Renderables, camera, scene.MainLight.Direction, scene.MainLight.Color, scene.AmbientColor);
+            this._forwardPass.Render(this._commandList, scene.Renderables, camera, scene.MainLight.Direction, scene.MainLight.Color, scene.AmbientColor, this._shadowPass.Config.ShadowColor);
             this._skyDomePass.Render(this._commandList, camera);
             this._gizmosPass.Render(this._commandList, scene.Gizmos.Lines, camera);
             this._particlesPass.Render(this._commandList, scene.ParticleSystems, camera);

@@ -35,6 +35,12 @@ public readonly struct ColorF
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static implicit operator ColorF(Vector4 color)
+    {
+        return new ColorF(color.X, color.Y, color.Z, color.W);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator System.Drawing.Color(ColorF color)
     {
         return System.Drawing.Color.FromArgb((byte)(color.A * 255f), (byte)(color.R * 255f), (byte)(color.G * 255f), (byte)(color.B * 255f));
