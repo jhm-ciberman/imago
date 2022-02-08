@@ -84,6 +84,8 @@ public class BasicMeshData : BaseMeshData
 
             Vector3 normal = Vector3.Cross((p3 - p2), (p1 - p2));
 
+            normal = Vector3.Normalize(normal);
+
             this.Normals[index1] = normal;
             this.Normals[index2] = normal;
             this.Normals[index3] = normal;

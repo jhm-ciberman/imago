@@ -85,7 +85,7 @@ public class ShadowMapConfig
         }
     }
 
-    private uint _shadowMapSize = 2048 * 2;
+    private uint _shadowMapSize = 2048;
 
     /// <summary>
     /// Gets or sets the size of the shadow map texture.
@@ -134,7 +134,7 @@ public class ShadowMapConfig
     /// The units are in texels so a value of 0.1f will bias the depth by 0.1 texels.
     /// This way the same value works independent of the shadow map resolution.
     /// </summary>
-    public float DepthBias { get; set; } = 5.00f;
+    public float DepthBias { get; set; } = 0.95f;
 
     /// <summary>
     /// Gets or sets the normal offset used when rendering the shadow map. 
@@ -142,7 +142,7 @@ public class ShadowMapConfig
     /// in the direction of the normal by 0.1 texels.
     /// This way the same value works independent of the shadow map resolution.
     /// </summary>
-    public float NormalOffset { get; set; } = 2.00f;
+    public float NormalOffset { get; set; } = 1.9f;
 
     public ColorF ShadowColor { get; set; } = new ColorF(0.0f, 0.0f, 0.0f, .8f);
 }

@@ -12,6 +12,16 @@ namespace LifeSim.Engine.Rendering;
 
 public partial class ShadowPass : IDisposable, IPipelineProvider
 {
+    [StructLayout(LayoutKind.Sequential)]
+    private struct ShadowMapDataBuffer
+    {
+        public Matrix4x4 ShadowMapMatrix { get; set; }
+        public Vector2 ShadowBias { get; set; } // x = depth bias, y = normal bias
+        private readonly Vector2 _padding0;
+        public Vector3 LightDirection { get; set; } // xyz = light direction
+        private readonly float _padding1;
+    }
+
     public ShadowMapTexture ShadowmapTexture { get; private set; }
 
     private readonly ResourceLayout _resourceLayout;
@@ -53,7 +63,7 @@ public partial class ShadowPass : IDisposable, IPipelineProvider
         uint count = this.Config.CascadesCount;
         this.ShadowmapTexture = new ShadowMapTexture(this._gd, size, size, count);
 
-        this._shadowmapInfoBuffer = factory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<Matrix4x4>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+        this._shadowmapInfoBuffer = factory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<ShadowMapDataBuffer>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
         this._resourceSet = factory.CreateResourceSet(new ResourceSetDescription(this._resourceLayout, this._shadowmapInfoBuffer));
 
@@ -100,7 +110,12 @@ public partial class ShadowPass : IDisposable, IPipelineProvider
             BoundingFrustum shadowFrustum = new BoundingFrustum(this._cascades[i].ViewProjectionMatrix);
             this._renderQueues[i].AddToRenderQueue(renderables, shadowFrustum, camera.Position);
 
-            commandList.UpdateBuffer(this._shadowmapInfoBuffer, 0, this._cascades[i].ViewProjectionMatrix);
+            ShadowMapDataBuffer data = new ShadowMapDataBuffer();
+            data.ShadowMapMatrix = this._cascades[i].ViewProjectionMatrix;
+            data.ShadowBias = new Vector2(this._cascades[i].DepthBias, this._cascades[i].NormalOffset);
+            data.LightDirection = mainLightDirection;
+
+            commandList.UpdateBuffer(this._shadowmapInfoBuffer, 0, data);
             this._renderJob.DrawRenderList(commandList, this._renderQueues[i]);
         }
     }
@@ -172,11 +187,11 @@ public partial class ShadowPass : IDisposable, IPipelineProvider
         Debug.Assert(shaderVariant.MaterialResourceLayout != null);
 
         var resources = new List<ResourceLayout> {
-                this._resourceLayout,
-                this._storage.TransformResourceLayout,
-                shaderVariant.MaterialResourceLayout,
-                this._storage.InstanceResourceLayout
-            };
+            this._resourceLayout,
+            this._storage.TransformResourceLayout,
+            shaderVariant.MaterialResourceLayout,
+            this._storage.InstanceResourceLayout
+        };
 
         if (shaderVariant.VertexFormat.IsSkinned)
         {

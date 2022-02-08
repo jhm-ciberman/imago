@@ -68,13 +68,11 @@ public class ShadowCascade
 
         Matrix4x4 lightProjectionMatrix = Matrix4x4.CreateOrthographic(sphereDiameter, sphereDiameter, 0.0f, orthoDepth);
 
-        float depthBias = config.DepthBias;
-        float normalOffset = config.NormalOffset;
-
         this.ViewProjectionMatrix = lightViewMatrix * lightProjectionMatrix;
         this.SplitNear = near;
         this.SplitFar = far;
-        this.DepthBias = depthBias * unitsPerTexel / orthoDepth;
-        this.NormalOffset = normalOffset * unitsPerTexel;
+
+        this.DepthBias = -config.DepthBias * unitsPerTexel;
+        this.NormalOffset = -config.NormalOffset * unitsPerTexel;
     }
 }

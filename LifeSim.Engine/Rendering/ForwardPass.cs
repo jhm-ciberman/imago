@@ -10,21 +10,21 @@ namespace LifeSim.Engine.Rendering;
 public class ForwardPass : IDisposable, IPipelineProvider
 {
     [StructLayout(LayoutKind.Sequential)]
-    private struct CameraInfo
+    private struct CameraDataBuffer
     {
         public Matrix4x4 ViewProjectionMatrix { get; set; }
-        public Vector3 MainLightDirection { get; set; }
-        private readonly float _padding;
+        //public Vector3 MainLightDirection { get; set; }
+        //private readonly float _padding;
         public Matrix4x4 ShadowMapMatrix0 { get; set; }
         public Matrix4x4 ShadowMapMatrix1 { get; set; }
         public Matrix4x4 ShadowMapMatrix2 { get; set; }
         public Matrix4x4 ShadowMapMatrix3 { get; set; }
 
         // x = depth bias, y = normal bias, z = unused, w = unused (x4 cascades)
-        public Vector4 ShadowBiasData0 { get; set; }
-        public Vector4 ShadowBiasData1 { get; set; }
-        public Vector4 ShadowBiasData2 { get; set; }
-        public Vector4 ShadowBiasData3 { get; set; }
+        //public Vector4 ShadowBiasData0 { get; set; }
+        //public Vector4 ShadowBiasData1 { get; set; }
+        //public Vector4 ShadowBiasData2 { get; set; }
+        //public Vector4 ShadowBiasData3 { get; set; }
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -64,7 +64,7 @@ public class ForwardPass : IDisposable, IPipelineProvider
             new ResourceLayoutElementDescription("ShadowMapSampler", ResourceKind.Sampler, ShaderStages.Fragment)
         ));
 
-        this._camera3DInfoBuffer = factory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<CameraInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+        this._camera3DInfoBuffer = factory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<CameraDataBuffer>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
         this._lightInfoBuffer = factory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<LightInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
         this._resourceSet = factory.CreateResourceSet(new ResourceSetDescription(this._resourceLayout,
@@ -106,17 +106,17 @@ public class ForwardPass : IDisposable, IPipelineProvider
 
         mainLightDirection = Vector3.Normalize(mainLightDirection);
 
-        CameraInfo cameraInfo = new CameraInfo();
+        CameraDataBuffer cameraInfo = new CameraDataBuffer();
         cameraInfo.ViewProjectionMatrix = camera.ViewProjectionMatrix;
-        cameraInfo.MainLightDirection = mainLightDirection;
+        //cameraInfo.MainLightDirection = mainLightDirection;
         cameraInfo.ShadowMapMatrix0 = this._shadowPass.GetShadowCascadeViewProjectionMatrix(0);
         cameraInfo.ShadowMapMatrix1 = this._shadowPass.GetShadowCascadeViewProjectionMatrix(1);
         cameraInfo.ShadowMapMatrix2 = this._shadowPass.GetShadowCascadeViewProjectionMatrix(2);
         cameraInfo.ShadowMapMatrix3 = this._shadowPass.GetShadowCascadeViewProjectionMatrix(3);
-        cameraInfo.ShadowBiasData0 = this._shadowPass.GetShadowBiasData(0);
-        cameraInfo.ShadowBiasData1 = this._shadowPass.GetShadowBiasData(1);
-        cameraInfo.ShadowBiasData2 = this._shadowPass.GetShadowBiasData(2);
-        cameraInfo.ShadowBiasData3 = this._shadowPass.GetShadowBiasData(3);
+        //cameraInfo.ShadowBiasData0 = this._shadowPass.GetShadowBiasData(0);
+        //cameraInfo.ShadowBiasData1 = this._shadowPass.GetShadowBiasData(1);
+        //cameraInfo.ShadowBiasData2 = this._shadowPass.GetShadowBiasData(2);
+        //cameraInfo.ShadowBiasData3 = this._shadowPass.GetShadowBiasData(3);
 
         LightInfo lightInfo = new LightInfo();
         lightInfo.AmbientColor = ambientColor;
@@ -142,12 +142,12 @@ public class ForwardPass : IDisposable, IPipelineProvider
     Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant)
     {
         var rasterizerState = new RasterizerStateDescription(
-                FaceCullMode.Front,
-                PolygonFillMode.Solid,
-                FrontFace.Clockwise,
-                depthClipEnabled: true,
-                scissorTestEnabled: false
-            );
+            FaceCullMode.Front,
+            PolygonFillMode.Solid,
+            FrontFace.Clockwise,
+            depthClipEnabled: true,
+            scissorTestEnabled: false
+        );
 
         return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
         {
