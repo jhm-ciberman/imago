@@ -228,22 +228,18 @@ public class Node3D : IDisposable
         var arrayPaths = name.Split('/');
         int currentIndex = 0;
         Node3D currentNode = this;
-        bool found = true;
-        while (found && currentIndex < arrayPaths.Length)
+        while (currentIndex < arrayPaths.Length)
         {
-            var currentNameToFind = arrayPaths[currentIndex];
-            foreach (var child in currentNode.Children)
+            var currentPath = arrayPaths[currentIndex];
+            var nextNode = currentNode.Find(currentPath);
+            if (nextNode == null)
             {
-                if (child.Name == currentNameToFind)
-                {
-                    currentNode = child;
-                    currentIndex++;
-                    found = true;
-                    break;
-                }
+                return null;
             }
+            currentNode = nextNode;
+            currentIndex++;
         }
-        return currentIndex < arrayPaths.Length ? null : currentNode;
+        return currentNode;
     }
 
     public virtual void Dispose()

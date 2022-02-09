@@ -114,10 +114,18 @@ public class Camera3D : ICamera
         {
             if (this._viewport != value)
             {
+                this._viewport.OnResized -= this.OnViewportResized;
                 this._viewport = value;
                 this._projectionMatrixIsDirty = true;
+                this._viewport.OnResized += this.OnViewportResized;
             }
         }
+    }
+
+    private void OnViewportResized(Viewport viewport)
+    {
+        this._viewport = viewport;
+        this._projectionMatrixIsDirty = true;
     }
 
     public ICamera FrustumCullingCamera { get; private set; }

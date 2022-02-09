@@ -110,8 +110,20 @@ internal class GltfAccessor
         return this._componentType switch
         {
             ComponentTypeEnum.UNSIGNED_SHORT => this._bufferView.ReadUShort4Array(this._byteOffset, this._count),
-            _ => throw new System.NotSupportedException(),
+            ComponentTypeEnum.UNSIGNED_BYTE => this.ReadVector4UShortFromByteArray(),
+            _ => throw new NotSupportedException(),
         };
+    }
+
+    private Vector4UShort[] ReadVector4UShortFromByteArray()
+    {
+        byte[] arr = this._bufferView.ReadByteArray(this._byteOffset / 4, this._count * 4);
+        Vector4UShort[] result = new Vector4UShort[arr.Length / 4];
+        for (int i = 0; i < arr.Length; i += 4)
+        {
+            result[i / 4] = new Vector4UShort(arr[i], arr[i + 1], arr[i + 2], arr[i + 3]);
+        }
+        return result;
     }
 
 

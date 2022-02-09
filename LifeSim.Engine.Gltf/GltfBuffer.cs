@@ -95,6 +95,16 @@ internal class GltfBuffer
         return mat;
     }
 
+    internal Vector4UShort ReadByte4(int offset)
+    {
+        Vector4UShort vector;
+        vector.X = this._bytes[offset + 0];
+        vector.Y = this._bytes[offset + 1];
+        vector.Z = this._bytes[offset + 2];
+        vector.W = this._bytes[offset + 3];
+        return vector;
+    }
+
     internal Quaternion ReadQuaternion(int offset)
     {
         Quaternion quat;
