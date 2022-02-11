@@ -163,7 +163,6 @@ public class SpritesPass : IDisposable, IPipelineProvider
                 canvasLayer.Items[j].Render(this._spriteBatcher);
             }
 
-            this._renderer.UpdateDirtyTextures(); // TODO: FIX THIS, should be done in the renderer, not here at this moment
             this.BeginPass(cl, canvasLayer.ViewProjectionMatrix);
             this.SubmitBatches(cl, this._spriteBatcher.IndexBuffer, this._spriteBatcher.Batches);
         }

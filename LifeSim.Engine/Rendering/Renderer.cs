@@ -215,12 +215,11 @@ public class Renderer : ITexture2DManager, IDisposable
 
     object ITexture2DManager.CreateTexture(int width, int height)
     {
-        return new Texture(this, (uint)width, (uint)height);
+        return new DirectTexture(this, (uint)width, (uint)height);
     }
 
     void ITexture2DManager.SetTextureData(object texture, System.Drawing.Rectangle bounds, byte[] data)
     {
-        var t = (Texture) texture;
-        t.SetDataFromBytes(bounds.X, bounds.Y, bounds.Width, bounds.Height, data);
+        ((DirectTexture)texture).Update(data, bounds.X, bounds.Y, bounds.Width, bounds.Height);
     }
 }

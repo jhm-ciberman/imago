@@ -73,7 +73,7 @@ public class Texture : ITexture
 
         if (!img.TryGetSinglePixelSpan(out Span<Rgba32> pixels))
         {
-            throw new Exception("Failed to get pixel span");
+            throw new ArgumentException("Image is not in RGBA32 format.");
         }
 
         var dest = new Span<byte>(this._data);
@@ -107,7 +107,6 @@ public class Texture : ITexture
         this.OnTextureDirty();
     }
 
-
     public void Update(GraphicsDevice gd, CommandList cl)
     {
         gd.UpdateTexture(this.DeviceTexture, this._data,
@@ -126,6 +125,4 @@ public class Texture : ITexture
     {
         this.DeviceTexture.Dispose();
     }
-
-
 }
