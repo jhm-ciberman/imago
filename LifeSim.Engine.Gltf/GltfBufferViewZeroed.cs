@@ -69,9 +69,4 @@ internal class GltfBufferViewZeroed : IGltfBufferView
         }
         return matrices;
     }
-
-    public Vector4UShort[] ReadByte4Array(int offset, int count)
-    {
-        return new Vector4UShort[count];
-    }
 }
