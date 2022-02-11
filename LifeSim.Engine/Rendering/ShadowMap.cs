@@ -3,12 +3,8 @@ using System.Numerics;
 
 namespace LifeSim.Engine.Rendering;
 
-public class ShadowMapConfig
+public class ShadowMap
 {
-    public event Action<uint>? OnShadowMapSizeChanged;
-
-    public event Action<uint>? OnCascadeCountChanged;
-
     private float _maximumShadowDistance = 50f;
 
     /// <summary>
@@ -77,15 +73,11 @@ public class ShadowMapConfig
                 throw new ArgumentOutOfRangeException(nameof(value), "The number of cascades must be between 1 and 4.");
             }
 
-            if (this._cascadesCount != value)
-            {
-                this._cascadesCount = value;
-                this.OnCascadeCountChanged?.Invoke(value);
-            }
+            this._cascadesCount = value;
         }
     }
 
-    private uint _shadowMapSize = 2048;
+    private uint _size = 2048;
 
     /// <summary>
     /// Gets or sets the size of the shadow map texture.
@@ -99,9 +91,9 @@ public class ShadowMapConfig
     /// <exception cref="ArgumentOutOfRangeException">
     /// The shadow map size must be greater than zero.
     /// </exception>
-    public uint ShadowMapResolution
+    public uint Size
     {
-        get => this._shadowMapSize;
+        get => this._size;
         set
         {
             if ((value & (value - 1)) != 0)
@@ -114,11 +106,7 @@ public class ShadowMapConfig
                 throw new ArgumentOutOfRangeException(nameof(value), "The shadow map size cannot be zero.");
             }
 
-            if (value != this._shadowMapSize)
-            {
-                this._shadowMapSize = value;
-                this.OnShadowMapSizeChanged?.Invoke(value);
-            }
+            this._size = value;
         }
     }
 
@@ -144,5 +132,5 @@ public class ShadowMapConfig
     /// </summary>
     public float NormalOffset { get; set; } = 1.9f;
 
-    public ColorF ShadowColor { get; set; } = new ColorF(0.0f, 0.0f, 0.0f, .8f);
+    public ColorF Color { get; set; } = new ColorF(0.0f, 0.0f, 0.0f, .8f);
 }

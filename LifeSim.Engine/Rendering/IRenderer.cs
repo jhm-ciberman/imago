@@ -14,7 +14,7 @@ public interface IRenderer
     IPipelineProvider ShadowMapPass { get; }
     SceneStorage Storage { get; }
     uint MousePickerObjectID { get; }
-    ShadowMapConfig ShadowMapConfig { get; }
+    ShadowMap ShadowMapConfig { get; }
     ITexture ShadowMapTexture { get; }
 
     void Dispose();

@@ -12,16 +12,14 @@ public class RenderJob
     private const uint BINDING_MATERIAL = 2;
     private const uint BINDING_INSTANCE = 3;
     private const uint BINDING_SKELETON = 4;
-    private readonly ResourceSet _passResourceSet;
     private readonly RenderBatcher _batcher;
 
-    public RenderJob(GraphicsDevice gd, ResourceSet passResourceSet, bool shadowmapPass)
+    public RenderJob(GraphicsDevice gd, bool shadowmapPass)
     {
-        this._passResourceSet = passResourceSet;
         this._batcher = new RenderBatcher(gd, shadowmapPass);
     }
 
-    public void DrawRenderList(CommandList commandList, IReadOnlyList<Renderable> renderItems)
+    public void DrawRenderList(CommandList commandList, ResourceSet passResourceSet, IReadOnlyList<Renderable> renderItems)
     {
         this._batcher.PrepareBatches(renderItems);
 
@@ -48,7 +46,7 @@ public class RenderJob
             if (currentPipeline != batch.Pipeline)
             {
                 commandList.SetPipeline(batch.Pipeline);
-                commandList.SetGraphicsResourceSet(BINDING_PASS, this._passResourceSet);
+                commandList.SetGraphicsResourceSet(BINDING_PASS, passResourceSet);
                 currentPipeline = batch.Pipeline;
                 currentTransformRS = null;
                 currentMaterialRS = null;

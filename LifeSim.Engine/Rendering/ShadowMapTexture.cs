@@ -5,11 +5,15 @@ namespace LifeSim.Engine.Rendering;
 
 public class ShadowMapTexture : ITexture, IDisposable
 {
-    public uint Width { get; private set; }
+    public event Action? OnResized;
 
-    public uint Height { get; private set; }
+    uint ITexture.Width => this.Size;
 
-    public uint ArrayLayers { get; private set; }
+    uint ITexture.Height => this.Size;
+
+    public uint Size { get; private set; }
+
+    public uint CascadesCount { get; private set; }
 
     public Veldrid.Texture DeviceTexture { get; private set; }
 
@@ -19,12 +23,15 @@ public class ShadowMapTexture : ITexture, IDisposable
 
     public Framebuffer[] Framebuffers { get; private set; }
 
-    public ShadowMapTexture(GraphicsDevice gd, uint width, uint height, uint arrayLayers)
+    private readonly Renderer _renderer;
+
+    public ShadowMapTexture(Renderer renderer, uint size, uint cascadesCount)
     {
-        this.Width = width;
-        this.Height = height;
-        this.ArrayLayers = arrayLayers;
-        this.DeviceTexture = gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(this.Width, this.Height, 1, this.ArrayLayers, PixelFormat.R32_Float, TextureUsage.DepthStencil | TextureUsage.Sampled));
+        var gd = renderer.GraphicsDevice;
+        this._renderer = renderer;
+        this.Size = size;
+        this.CascadesCount = cascadesCount;
+        this.DeviceTexture = gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(this.Size, this.Size, 1, this.CascadesCount, PixelFormat.R32_Float, TextureUsage.DepthStencil | TextureUsage.Sampled));
 
         this.Sampler = gd.LinearSampler;
 
@@ -36,9 +43,9 @@ public class ShadowMapTexture : ITexture, IDisposable
             0, 0, 0, 0, SamplerBorderColor.OpaqueWhite
         ));
 
-        this.Framebuffers = new Framebuffer[this.ArrayLayers];
+        this.Framebuffers = new Framebuffer[this.CascadesCount];
 
-        for (uint i = 0; i < this.ArrayLayers; i++)
+        for (uint i = 0; i < this.CascadesCount; i++)
         {
             this.Framebuffers[i] = gd.ResourceFactory.CreateFramebuffer(new FramebufferDescription(
                 new FramebufferAttachmentDescription(this.DeviceTexture, i),
@@ -56,5 +63,30 @@ public class ShadowMapTexture : ITexture, IDisposable
         {
             fb.Dispose();
         }
+    }
+
+    internal void Resize(uint size, uint cascadesCount)
+    {
+        var collector = this._renderer.DisposeCollector;
+        collector.Add(this.Framebuffers);
+        collector.Add(this.DeviceTexture);
+
+        this.Size = size;
+        this.CascadesCount = cascadesCount;
+
+        var factory = this._renderer.GraphicsDevice.ResourceFactory;
+        this.DeviceTexture = factory.CreateTexture(TextureDescription.Texture2D(this.Size, this.Size, 1, this.CascadesCount, PixelFormat.R32_Float, TextureUsage.DepthStencil | TextureUsage.Sampled));
+
+        this.Framebuffers = new Framebuffer[this.CascadesCount];
+
+        for (uint i = 0; i < this.CascadesCount; i++)
+        {
+            this.Framebuffers[i] = factory.CreateFramebuffer(new FramebufferDescription(
+                new FramebufferAttachmentDescription(this.DeviceTexture, i),
+                Array.Empty<FramebufferAttachmentDescription>()
+            ));
+        }
+
+        this.OnResized?.Invoke();
     }
 }

@@ -14,7 +14,7 @@ public class ShadowCascade
     public float NormalOffset { get; set; }
     public Matrix4x4 ViewProjectionMatrix { get; set; }
 
-    public void UpdateCascadeMatrix(int cascadeIndex, Camera3D camera, Vector3 lightDirection, float near, float far, ShadowMapConfig config)
+    public void UpdateCascadeMatrix(int cascadeIndex, Camera3D camera, Vector3 lightDirection, float near, float far, ShadowMap config)
     {
         Matrix4x4 cameraProjectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(camera.FieldOfView, camera.AspectRatio, near, far);
         Matrix4x4 cameraViewProjectionMatrix = camera.ViewMatrix * cameraProjectionMatrix;
@@ -52,7 +52,7 @@ public class ShadowCascade
             maxLS = Vector3.Max(maxLS, frustumCornerLS);
         }
 
-        float unitsPerTexel = sphereDiameter / config.ShadowMapResolution;
+        float unitsPerTexel = sphereDiameter / config.Size;
 
         Vector3 frustumCenterWS = (corners.FarBottomLeft + corners.FarTopRight + corners.FarBottomRight + corners.FarTopLeft
             + corners.NearBottomLeft + corners.NearTopRight + corners.NearBottomRight + corners.NearTopLeft) / 8f;

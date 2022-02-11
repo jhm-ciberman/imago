@@ -40,6 +40,6 @@ public class DirectionalLight
 
 
 
-    public ShadowMapConfig Shadow { get; } = new ShadowMapConfig();
+    public ShadowMap ShadowMap { get; } = new ShadowMap();
 
 }

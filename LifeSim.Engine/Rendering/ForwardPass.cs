@@ -14,18 +14,10 @@ public class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
     private struct CameraDataBuffer
     {
         public Matrix4x4 ViewProjectionMatrix { get; set; }
-        //public Vector3 MainLightDirection { get; set; }
-        //private readonly float _padding;
         public Matrix4x4 ShadowMapMatrix0 { get; set; }
         public Matrix4x4 ShadowMapMatrix1 { get; set; }
         public Matrix4x4 ShadowMapMatrix2 { get; set; }
         public Matrix4x4 ShadowMapMatrix3 { get; set; }
-
-        // x = depth bias, y = normal bias, z = unused, w = unused (x4 cascades)
-        //public Vector4 ShadowBiasData0 { get; set; }
-        //public Vector4 ShadowBiasData1 { get; set; }
-        //public Vector4 ShadowBiasData2 { get; set; }
-        //public Vector4 ShadowBiasData3 { get; set; }
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -39,11 +31,12 @@ public class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
         public Vector4 ShadowMapDistances { get; set; } // Each component is the far plane of a cascade
     }
 
+    private readonly Renderer _renderer;
     private readonly GraphicsDevice _gd;
     private readonly DeviceBuffer _lightInfoBuffer;
     private readonly DeviceBuffer _camera3DInfoBuffer;
     private readonly ResourceLayout _resourceLayout;
-    private readonly ResourceSet _resourceSet;
+    private ResourceSet _resourceSet;
     private readonly IRenderTexture _renderTexture;
     private readonly SceneStorage _storage;
     private readonly RenderJob _renderJob;
@@ -53,6 +46,7 @@ public class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
 
     public ForwardPass(Renderer renderer, SceneStorage storage, IRenderTexture mainRenderTexture, ShadowPass shadowPass)
     {
+        this._renderer = renderer;
         this._gd = renderer.GraphicsDevice;
         var factory = this._gd.ResourceFactory;
         this._storage = storage;
@@ -68,21 +62,34 @@ public class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
         this._camera3DInfoBuffer = factory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<CameraDataBuffer>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
         this._lightInfoBuffer = factory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<LightInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
-        this._resourceSet = factory.CreateResourceSet(new ResourceSetDescription(this._resourceLayout,
-            this._camera3DInfoBuffer,
-            this._lightInfoBuffer,
-            shadowPass.ShadowmapTexture.DeviceTexture,
-            shadowPass.ShadowmapTexture.ShadowSampler
-        ));
+        this._resourceSet = this.CreatePassResourceSet();
 
         this._renderTexture = mainRenderTexture;
 
-        this._renderJob = new RenderJob(this._gd, this._resourceSet, false);
+        this._renderJob = new RenderJob(this._gd, false);
 
         this._renderQueue = new RenderQueue();
+
+        this._shadowPass.ShadowmapTexture.OnResized += this.OnShadowmapResized;
     }
 
-    public void Render(CommandList commandList, Scene scene)
+    private void OnShadowmapResized()
+    {
+        this._renderer.DisposeCollector.Add(this._resourceSet);
+        this._resourceSet = this.CreatePassResourceSet();
+    }
+
+    private ResourceSet CreatePassResourceSet()
+    {
+        return this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(this._resourceLayout,
+            this._camera3DInfoBuffer,
+            this._lightInfoBuffer,
+            this._shadowPass.ShadowmapTexture.DeviceTexture,
+            this._shadowPass.ShadowmapTexture.ShadowSampler
+        ));
+    }
+
+    public void Render(CommandList cl, Scene scene)
     {
         Camera3D? camera = scene.Camera;
 
@@ -94,41 +101,36 @@ public class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
         this._renderQueue.AddToRenderQueue(scene.Renderables, camera.FrustumForCulling, camera.Position);
         this._renderQueue.Sort();
 
-        commandList.SetFramebuffer(this._renderTexture.Framebuffer);
+        cl.SetFramebuffer(this._renderTexture.Framebuffer);
 
         if (camera.ClearColor != null)
         {
             ColorF clearColor = camera.ClearColor.Value;
-            commandList.ClearColorTarget(0, new RgbaFloat(clearColor.R, clearColor.G, clearColor.B, clearColor.A));
-            commandList.ClearColorTarget(1, RgbaFloat.Black);
-            commandList.ClearDepthStencil(1f);
+            cl.ClearColorTarget(0, new RgbaFloat(clearColor.R, clearColor.G, clearColor.B, clearColor.A));
+            cl.ClearColorTarget(1, RgbaFloat.Black);
+            cl.ClearDepthStencil(1f);
         }
 
         var mainLightDirection = Vector3.Normalize(scene.MainLight.Direction);
 
         CameraDataBuffer cameraInfo = new CameraDataBuffer();
         cameraInfo.ViewProjectionMatrix = camera.ViewProjectionMatrix;
-        //cameraInfo.MainLightDirection = mainLightDirection;
         cameraInfo.ShadowMapMatrix0 = this._shadowPass.GetShadowCascadeViewProjectionMatrix(0);
         cameraInfo.ShadowMapMatrix1 = this._shadowPass.GetShadowCascadeViewProjectionMatrix(1);
         cameraInfo.ShadowMapMatrix2 = this._shadowPass.GetShadowCascadeViewProjectionMatrix(2);
         cameraInfo.ShadowMapMatrix3 = this._shadowPass.GetShadowCascadeViewProjectionMatrix(3);
-        //cameraInfo.ShadowBiasData0 = this._shadowPass.GetShadowBiasData(0);
-        //cameraInfo.ShadowBiasData1 = this._shadowPass.GetShadowBiasData(1);
-        //cameraInfo.ShadowBiasData2 = this._shadowPass.GetShadowBiasData(2);
-        //cameraInfo.ShadowBiasData3 = this._shadowPass.GetShadowBiasData(3);
 
         LightInfo lightInfo = new LightInfo();
         lightInfo.AmbientColor = scene.AmbientColor;
         lightInfo.MainLightColor = scene.MainLight.Color;
-        lightInfo.ShadowColor = this._shadowPass.Config.ShadowColor;
+        lightInfo.ShadowColor = scene.MainLight.ShadowMap.Color;
         lightInfo.MainLightDirection = mainLightDirection;
         lightInfo.ShadowMapDistances = this._shadowPass.GetShadowCascadeDistances();
 
-        commandList.UpdateBuffer(this._camera3DInfoBuffer, 0, ref cameraInfo);
-        commandList.UpdateBuffer(this._lightInfoBuffer, 0, ref lightInfo);
+        cl.UpdateBuffer(this._camera3DInfoBuffer, 0, ref cameraInfo);
+        cl.UpdateBuffer(this._lightInfoBuffer, 0, ref lightInfo);
 
-        this._renderJob.DrawRenderList(commandList, this._renderQueue);
+        this._renderJob.DrawRenderList(cl, this._resourceSet, this._renderQueue);
     }
 
     public void Dispose()

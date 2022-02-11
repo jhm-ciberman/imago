@@ -6,7 +6,7 @@ using LifeSim.Engine.Rendering;
 
 namespace LifeSim.Engine.SceneGraph;
 
-public class Node3D : IDisposable
+public class Node3D
 {
     public string Name { get; set; } = string.Empty;
     public Node3D? Parent { get; private set; } = null;
@@ -240,13 +240,5 @@ public class Node3D : IDisposable
             currentIndex++;
         }
         return currentNode;
-    }
-
-    public virtual void Dispose()
-    {
-        foreach (var child in this.Children)
-        {
-            child.Dispose();
-        }
     }
 }

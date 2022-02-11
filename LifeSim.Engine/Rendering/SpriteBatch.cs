@@ -163,7 +163,7 @@ public class SpriteBatch : IDisposable
 
     public void SetMaterial(Shader shader, ITexture texture)
     {
-        this.ResourceSet.Dispose();
+        this.ResourceSet.Dispose(); // TODO: add to DisposeCollector
         this.Shader = shader;
         this.Texture = texture;
         this.ResourceSet = this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(

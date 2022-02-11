@@ -7,6 +7,7 @@ using LifeSim.Engine.SceneGraph;
 using Veldrid;
 using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
+using Veldrid.Utilities;
 
 namespace LifeSim.Engine.Rendering;
 
@@ -38,13 +39,11 @@ public class Renderer : ITexture2DManager, IDisposable
     public IPipelineProvider ForwardPass => this._forwardPass;
     public IPipelineProvider ShadowMapPass => this._shadowPass;
 
-
+    public DisposeCollector DisposeCollector { get; }
     public SceneStorage Storage { get; }
     public uint MousePickerObjectID => this._mousePickerPass.ObjectID;
 
     private readonly CommandList _commandList;
-
-    public ShadowMapConfig ShadowMapConfig => this._shadowPass.Config;
 
     public ITexture ShadowMapTexture => this._shadowPass.ShadowmapTexture;
 
@@ -55,7 +54,7 @@ public class Renderer : ITexture2DManager, IDisposable
     public Renderer(Sdl2Window window, GraphicsBackend? graphicsBackend = null)
     {
         GraphicsDeviceOptions options = new GraphicsDeviceOptions(
-            debug: false,
+            debug: true,
             swapchainDepthFormat: null, //PixelFormat.R16_UNorm,
             syncToVerticalBlank: true,
             resourceBindingModel: ResourceBindingModel.Default,
@@ -66,9 +65,11 @@ public class Renderer : ITexture2DManager, IDisposable
 
         this.Factory = new RendererResourceFactory(this);
 
+
         var gd = VeldridStartup.CreateGraphicsDevice(window, options, graphicsBackend ?? VeldridStartup.GetPlatformDefaultBackend());
         this.GraphicsDevice = gd;
 
+        this.DisposeCollector = new DisposeCollector();
         this._factory = this.GraphicsDevice.ResourceFactory;
 
         this._fullScreenRenderTexture = new SwapchainRenderTexture(this, this.GraphicsDevice.MainSwapchain);
@@ -157,15 +158,16 @@ public class Renderer : ITexture2DManager, IDisposable
 
         this._commandList.End();
 
-        if (!this._fence.Signaled)
-        {
-            // If we are GPU bound, then maybe it's a good moment to do a GC :)
-            Console.WriteLine("Performing GC");
-            GC.Collect(0, GCCollectionMode.Optimized);
-        }
+        //if (!this._fence.Signaled)
+        //{
+        //    // If we are GPU bound, then maybe it's a good moment to do a GC :)
+        //    Console.WriteLine("Performing GC");
+        //    GC.Collect(0, GCCollectionMode.Optimized);
+        //}
         this.GraphicsDevice.WaitForIdle();
         this._fence.Reset();
         this.GraphicsDevice.SubmitCommands(this._commandList, this._fence);
+        this.DisposeCollector.DisposeAll();
         this.GraphicsDevice.SwapBuffers();
     }
 

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using LifeSim.Engine.SceneGraph;
 using Veldrid;
 using Veldrid.Utilities;
@@ -34,10 +33,6 @@ public partial class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
     private ShadowCascade[] _cascades { get; } = new ShadowCascade[4];
     private Matrix4x4 _scalingMatrix;
 
-    public ShadowMapConfig Config { get; }
-
-    private bool _shadowMapTextureSizeDirty = false;
-
     private readonly float[] _splitDistances = new float[5]; // 4 splits + 1 for far plane
 
     private readonly RenderQueue[] _renderQueues;
@@ -46,7 +41,6 @@ public partial class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
     {
         this._gd = renderer.GraphicsDevice;
         var factory = this._gd.ResourceFactory;
-        this.Config = new ShadowMapConfig();
         this._storage = storage;
 
         this._renderQueues = new RenderQueue[4];
@@ -59,18 +53,13 @@ public partial class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
             new ResourceLayoutElementDescription("ShadowMapDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
         ));
 
-        uint size = this.Config.ShadowMapResolution;
-        uint count = this.Config.CascadesCount;
-        this.ShadowmapTexture = new ShadowMapTexture(this._gd, size, size, count);
+        this.ShadowmapTexture = new ShadowMapTexture(renderer, size: 16, cascadesCount: 1);
 
         this._shadowmapInfoBuffer = factory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<ShadowMapDataBuffer>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
         this._resourceSet = factory.CreateResourceSet(new ResourceSetDescription(this._resourceLayout, this._shadowmapInfoBuffer));
 
-        this._renderJob = new RenderJob(this._gd, this._resourceSet, true);
-
-        this.Config.OnCascadeCountChanged += this.OnCascadeCountChanged;
-        this.Config.OnShadowMapSizeChanged += this.OnShadowMapSizeChanged;
+        this._renderJob = new RenderJob(this._gd, true);
 
         float verticalFlip = this._gd.IsUvOriginTopLeft ? -1.0f : 1.0f;
         this._scalingMatrix = Matrix4x4.CreateScale(.5f, .5f * verticalFlip, 1f) * Matrix4x4.CreateTranslation(0.5f, 0.5f, 0f);
@@ -81,16 +70,6 @@ public partial class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
         }
     }
 
-    private void OnShadowMapSizeChanged(uint size)
-    {
-        this._shadowMapTextureSizeDirty = true;
-    }
-
-    private void OnCascadeCountChanged(uint cascadesCount)
-    {
-        this._shadowMapTextureSizeDirty = true;
-    }
-
     public void Render(CommandList commandList, Scene scene)
     {
         Camera3D? camera = scene.Camera;
@@ -99,14 +78,16 @@ public partial class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
             return;
         }
 
-        this.UpdateSplitDistances(camera);
+        ShadowMap shadowMap = scene.MainLight.ShadowMap;
 
-        this.UpdateShadowMapTextureSize();
+        this.UpdateSplitDistances(camera, shadowMap);
+
+        this.UpdateShadowMap(shadowMap);
 
         var renderables = scene.Renderables;
         var mainLightDirection = scene.MainLight.Direction;
 
-        for (int i = 0; i < this.Config.CascadesCount; i++)
+        for (int i = 0; i < shadowMap.CascadesCount; i++)
         {
             commandList.SetFramebuffer(this.ShadowmapTexture.Framebuffers[i]);
             commandList.ClearDepthStencil(1f);
@@ -114,7 +95,7 @@ public partial class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
             float near = this._splitDistances[i];
             float far = this._splitDistances[i + 1];
 
-            this._cascades[i].UpdateCascadeMatrix(i, camera, mainLightDirection, near, far, this.Config);
+            this._cascades[i].UpdateCascadeMatrix(i, camera, mainLightDirection, near, far, shadowMap);
 
             BoundingFrustum shadowFrustum = new BoundingFrustum(this._cascades[i].ViewProjectionMatrix);
             this._renderQueues[i].AddToRenderQueue(renderables, shadowFrustum, camera.Position);
@@ -125,13 +106,13 @@ public partial class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
             data.LightDirection = mainLightDirection;
 
             commandList.UpdateBuffer(this._shadowmapInfoBuffer, 0, data);
-            this._renderJob.DrawRenderList(commandList, this._renderQueues[i]);
+            this._renderJob.DrawRenderList(commandList, this._resourceSet, this._renderQueues[i]);
         }
     }
 
     public Matrix4x4 GetShadowCascadeViewProjectionMatrix(int cascadeIndex)
     {
-        if (cascadeIndex < 0 || cascadeIndex >= this.Config.CascadesCount)
+        if (cascadeIndex < 0 || cascadeIndex >= this.ShadowmapTexture.CascadesCount)
         {
             return Matrix4x4.Identity;
         }
@@ -139,15 +120,13 @@ public partial class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
         return this._cascades[cascadeIndex].ViewProjectionMatrix * this._scalingMatrix;
     }
 
-    private void UpdateShadowMapTextureSize()
+    private void UpdateShadowMap(ShadowMap shadowMap)
     {
-        if (!this._shadowMapTextureSizeDirty) return;
-
-        uint count = this.Config.CascadesCount;
-        uint size = this.Config.ShadowMapResolution;
-        this._gd.DisposeWhenIdle(this.ShadowmapTexture);
-        this.ShadowmapTexture = new ShadowMapTexture(this._gd, size, size, count);
-        this._shadowMapTextureSizeDirty = false;
+        var texture = this.ShadowmapTexture;
+        if (shadowMap.Size != texture.Size || shadowMap.CascadesCount != texture.CascadesCount)
+        {
+            this.ShadowmapTexture.Resize(shadowMap.Size, shadowMap.CascadesCount);
+        }
     }
 
     public void Dispose()
@@ -210,16 +189,16 @@ public partial class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
         return resources.ToArray();
     }
 
-    public void UpdateSplitDistances(Camera3D camera)
+    public void UpdateSplitDistances(Camera3D camera, ShadowMap shadowMap)
     {
         // Lerp between uniform and logarithmic split distances.
         // https://developer.nvidia.com/gpugems/gpugems3/part-ii-light-and-shadows/chapter-10-parallel-split-shadow-maps-programmable-gpus
 
         float near = camera.NearPlane;
-        float far = MathF.Min(camera.FarPlane, camera.NearPlane + this.Config.MaximumShadowsDistance);
+        float far = MathF.Min(camera.FarPlane, camera.NearPlane + shadowMap.MaximumShadowsDistance);
         far = MathF.Max(far, near + 0.01f);
 
-        uint count = this.Config.CascadesCount;
+        uint count = shadowMap.CascadesCount;
 
         this._splitDistances[0] = near;
         this._splitDistances[count] = far;
@@ -229,7 +208,7 @@ public partial class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
             float t = (float)i / count;
             float uniformDistance = near + (far - near) * t;
             float logarithmicDistance = near * MathF.Pow(far / near, t);
-            this._splitDistances[i] = MathUtils.Lerp(logarithmicDistance, uniformDistance, this.Config.SplitLambda);
+            this._splitDistances[i] = MathUtils.Lerp(logarithmicDistance, uniformDistance, shadowMap.SplitLambda);
         }
     }
 }

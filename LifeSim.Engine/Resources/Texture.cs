@@ -123,6 +123,6 @@ public class Texture : ITexture
 
     public virtual void Dispose()
     {
-        this.DeviceTexture.Dispose();
+        this._renderer.DisposeCollector.Add(this.DeviceTexture);
     }
 }
