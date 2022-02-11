@@ -1,11 +1,12 @@
 using System;
 using System.Diagnostics;
 using System.Numerics;
+using LifeSim.Engine.SceneGraph;
 using Veldrid;
 
 namespace LifeSim.Engine.Rendering;
 
-public class FullScreenPass : IDisposable
+public class FullScreenPass : IDisposable, IRenderingPass
 {
     private ResourceSet? _resourceSet;
 
@@ -64,7 +65,7 @@ public class FullScreenPass : IDisposable
         this._resourceLayout.Dispose();
     }
 
-    public void Render(CommandList cl)
+    public void Render(CommandList cl, Scene scene)
     {
         cl.SetFramebuffer(this._destinationTexture.Framebuffer);
         cl.SetPipeline(this._pipeline);

@@ -2,14 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using LifeSim.Engine.Gltf;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
+using LifeSim.Engine.SceneGraph;
 using Veldrid;
 
 namespace LifeSim.Engine.Rendering;
 
-public class SkyDomePass : IDisposable
+public class SkyDomePass : IDisposable, IRenderingPass
 {
     private struct Vertex
     {
@@ -116,8 +114,15 @@ public class SkyDomePass : IDisposable
         this._vertexBuffer.Dispose();
     }
 
-    public void Render(CommandList cl, ICamera camera)
+    public void Render(CommandList cl, Scene scene)
     {
+        Camera3D? camera = scene.Camera;
+
+        if (camera == null)
+        {
+            return;
+        }
+
         //this.LutTextureOffset = (this.LutTextureOffset + 0.0005f) % 1f;
 
         var passData = new PassData

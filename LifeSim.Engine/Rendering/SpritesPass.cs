@@ -7,7 +7,7 @@ using Veldrid;
 
 namespace LifeSim.Engine.Rendering;
 
-public class SpritesPass : IDisposable, IPipelineProvider
+public class SpritesPass : IDisposable, IPipelineProvider, IRenderingPass
 {
     public static SpritesPass Instance { get; protected set; } = null!;
 
@@ -151,8 +151,10 @@ public class SpritesPass : IDisposable, IPipelineProvider
         });
     }
 
-    internal void Render(CommandList cl, IReadOnlyList<CanvasLayer> canvasLayers)
+    public void Render(CommandList cl, Scene scene)
     {
+        var canvasLayers = scene.CanvasLayers;
+
         for (int i = 0; i < canvasLayers.Count; i++)
         {
             var canvasLayer = canvasLayers[i];

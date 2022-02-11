@@ -1,10 +1,11 @@
 using System;
 using ImGuiNET;
+using LifeSim.Engine.SceneGraph;
 using Veldrid;
 
 namespace LifeSim.Engine.Rendering;
 
-public class ImGuiPass : IDisposable
+public class ImGuiPass : IDisposable, IRenderingPass
 {
     private readonly GraphicsDevice _gd;
     private readonly Veldrid.ImGuiRenderer _imguiRenderer;
@@ -41,7 +42,7 @@ public class ImGuiPass : IDisposable
         return this._imguiRenderer.GetOrCreateImGuiBinding(this._gd.ResourceFactory, texture.DeviceTexture);
     }
 
-    public void Render(CommandList cl)
+    public void Render(CommandList cl, Scene scene)
     {
         this._imguiRenderer.Render(this._gd, cl);
     }

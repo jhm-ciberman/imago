@@ -8,7 +8,7 @@ using Veldrid;
 
 namespace LifeSim.Engine.Rendering;
 
-public class ParticlesPass : IDisposable
+public class ParticlesPass : IDisposable, IRenderingPass
 {
     private const int PARTICLES_PER_BATCH = 1000;
 
@@ -108,8 +108,16 @@ public class ParticlesPass : IDisposable
 
 
 
-    public void Render(CommandList cl, IReadOnlyList<IParticleSystem> particleSystems, ICamera camera)
+    public void Render(CommandList cl, Scene scene)
     {
+        Camera3D? camera = scene.Camera;
+        if (camera == null)
+        {
+            return;
+        }
+
+        var particleSystems = scene.ParticleSystems;
+
         this._currentTexture = null;
 
         cl.SetFramebuffer(this._renderTexture.Framebuffer);

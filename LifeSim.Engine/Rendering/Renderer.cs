@@ -13,7 +13,7 @@ namespace LifeSim.Engine.Rendering;
 public class Renderer : ITexture2DManager, IDisposable
 {
     private readonly SwapchainRenderTexture _fullScreenRenderTexture;
-    private readonly RenderTexture _mainRenderTexture;
+    public RenderTexture MainRenderTexture { get; }
 
     public GraphicsDevice GraphicsDevice { get; }
     private readonly ResourceFactory _factory;
@@ -50,6 +50,8 @@ public class Renderer : ITexture2DManager, IDisposable
 
     public RendererResourceFactory Factory { get; }
 
+    private readonly List<IRenderingPass> _passes = new List<IRenderingPass>();
+
     public Renderer(Sdl2Window window, GraphicsBackend? graphicsBackend = null)
     {
         GraphicsDeviceOptions options = new GraphicsDeviceOptions(
@@ -70,23 +72,36 @@ public class Renderer : ITexture2DManager, IDisposable
         this._factory = this.GraphicsDevice.ResourceFactory;
 
         this._fullScreenRenderTexture = new SwapchainRenderTexture(this, this.GraphicsDevice.MainSwapchain);
-        this._mainRenderTexture = new RenderTexture(this, (uint)window.Width, (uint)window.Height);
+        this.MainRenderTexture = new RenderTexture(this, (uint)window.Width, (uint)window.Height);
 
         this.Storage = new SceneStorage(gd);
 
-        this._imGuiPass = new ImGuiPass(this, this._mainRenderTexture);
-        this._mousePickerPass = new MousePickingPass(this, this._mainRenderTexture);
-        this._gizmosPass = new GizmosPass(this, this._mainRenderTexture);
-        this._particlesPass = new ParticlesPass(this, this._mainRenderTexture);
+        this._imGuiPass = new ImGuiPass(this, this.MainRenderTexture);
+        this._mousePickerPass = new MousePickingPass(this, this.MainRenderTexture);
+        this._gizmosPass = new GizmosPass(this, this.MainRenderTexture);
+        this._particlesPass = new ParticlesPass(this, this.MainRenderTexture);
         this._shadowPass = new ShadowPass(this, this.Storage);
-        this._forwardPass = new ForwardPass(this, this.Storage, this._mainRenderTexture, this._shadowPass);
-        this._spritesPass = new SpritesPass(this, this._mainRenderTexture);
-        this._skyDomePass = new SkyDomePass(this, this._mainRenderTexture);
+        this._forwardPass = new ForwardPass(this, this.Storage, this.MainRenderTexture, this._shadowPass);
+        this._spritesPass = new SpritesPass(this, this.MainRenderTexture);
+        this._skyDomePass = new SkyDomePass(this, this.MainRenderTexture);
 
-        this._fullScreenPass = new FullScreenPass(this, this._mainRenderTexture, this._fullScreenRenderTexture);
+        this._fullScreenPass = new FullScreenPass(this, this.MainRenderTexture, this._fullScreenRenderTexture);
         this._commandList = this._factory.CreateCommandList();
 
         this._fence = this._factory.CreateFence(false);
+
+        this._passes.AddRange(new IRenderingPass[]
+        {
+            this._shadowPass,
+            this._forwardPass,
+            this._gizmosPass,
+            this._skyDomePass,
+            this._particlesPass,
+            this._spritesPass,
+            this._mousePickerPass,
+            this._imGuiPass,
+            this._fullScreenPass
+        });
     }
 
     protected void UpdateDirtyMaterials()
@@ -125,6 +140,7 @@ public class Renderer : ITexture2DManager, IDisposable
         this._imGuiPass.Update(deltaTime, inputSnapshot);
 
         scene.OnBeforeRender(this);
+        scene.RenderImGui();
 
         this._commandList.Begin();
 
@@ -132,27 +148,13 @@ public class Renderer : ITexture2DManager, IDisposable
         this.UpdateDirtyTextures();
         this.Storage.UpdateBuffers(this._commandList);
 
-        this._commandList.SetFramebuffer(this._mainRenderTexture.Framebuffer);
+        this._commandList.SetFramebuffer(this.MainRenderTexture.Framebuffer);
 
-        Camera3D? camera = scene.Camera;
-
-        if (camera != null)
+        for (int i = 0; i < this._passes.Count; i++)
         {
-            this._shadowPass.Render(this._commandList, scene.Renderables, camera, scene.MainLight.Direction);
-            this._forwardPass.Render(this._commandList, scene.Renderables, camera, scene.MainLight.Direction, scene.MainLight.Color, scene.AmbientColor, this._shadowPass.Config.ShadowColor);
-            this._skyDomePass.Render(this._commandList, camera);
-            this._gizmosPass.Render(this._commandList, scene.Gizmos.Lines, camera);
-            this._particlesPass.Render(this._commandList, scene.ParticleSystems, camera);
+            this._passes[i].Render(this._commandList, scene);
         }
 
-        this._spritesPass.Render(this._commandList, scene.CanvasLayers);
-
-
-        scene.RenderImGui();
-
-        this._imGuiPass.Render(this._commandList);
-        this._mousePickerPass.Render(this._commandList);
-        this._fullScreenPass.Render(this._commandList);
         this._commandList.End();
 
         if (!this._fence.Signaled)
@@ -193,7 +195,7 @@ public class Renderer : ITexture2DManager, IDisposable
         this.GraphicsDevice.ResizeMainWindow(width, height);
         this.GraphicsDevice.WaitForIdle();
         this._fullScreenRenderTexture.Resize(width, height);
-        this._mainRenderTexture.Resize(viewportWidth, viewportHeight);
+        this.MainRenderTexture.Resize(viewportWidth, viewportHeight);
         this._imGuiPass.Resize(viewportWidth, viewportHeight);
     }
 
@@ -201,16 +203,15 @@ public class Renderer : ITexture2DManager, IDisposable
     {
         this.GraphicsDevice.WaitForIdle();
         this._fullScreenRenderTexture.Dispose();
-        this._mainRenderTexture.Dispose();
-        this._imGuiPass.Dispose();
-        this._mousePickerPass.Dispose();
-        this._gizmosPass.Dispose();
-        this._particlesPass.Dispose();
-        this._spritesPass.Dispose();
-        this._fullScreenPass.Dispose();
+        this.MainRenderTexture.Dispose();
         this._commandList.Dispose();
         this._fence.Dispose();
         this.GraphicsDevice.Dispose();
+
+        foreach (var pass in this._passes)
+        {
+            pass.Dispose();
+        }
     }
 
     object ITexture2DManager.CreateTexture(int width, int height)

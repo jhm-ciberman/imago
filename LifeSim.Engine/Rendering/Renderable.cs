@@ -9,8 +9,6 @@ namespace LifeSim.Engine.Rendering;
 public class Renderable
 {
     private static uint _count;
-
-    public int RenderListIndex { get; set; }
     private Matrix4x4 _transform = Matrix4x4.Identity;
     public Vector3 CenterPosition { get; private set; }
     public BoundingBox BoundingBox { get; private set; }

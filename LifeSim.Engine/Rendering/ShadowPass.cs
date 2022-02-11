@@ -10,7 +10,7 @@ using Veldrid.Utilities;
 
 namespace LifeSim.Engine.Rendering;
 
-public partial class ShadowPass : IDisposable, IPipelineProvider
+public partial class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
 {
     [StructLayout(LayoutKind.Sequential)]
     private struct ShadowMapDataBuffer
@@ -91,11 +91,20 @@ public partial class ShadowPass : IDisposable, IPipelineProvider
         this._shadowMapTextureSizeDirty = true;
     }
 
-    public void Render(CommandList commandList, IReadOnlyList<Renderable> renderables, Camera3D camera, Vector3 mainLightDirection)
+    public void Render(CommandList commandList, Scene scene)
     {
+        Camera3D? camera = scene.Camera;
+        if (camera == null)
+        {
+            return;
+        }
+
         this.UpdateSplitDistances(camera);
 
         this.UpdateShadowMapTextureSize();
+
+        var renderables = scene.Renderables;
+        var mainLightDirection = scene.MainLight.Direction;
 
         for (int i = 0; i < this.Config.CascadesCount; i++)
         {

@@ -21,25 +21,17 @@ public abstract class Scene : Node3D
 
     public IReadOnlyList<IParticleSystem> ParticleSystems => this._particleSystems;
 
-
-    private readonly SwapPopList<Renderable> _renderables = new SwapPopList<Renderable>();
-
     private readonly List<CanvasLayer> _canvasLayers = new List<CanvasLayer>();
 
     public IReadOnlyList<CanvasLayer> CanvasLayers => this._canvasLayers;
 
-    public IReadOnlyList<Renderable> Renderables => this._renderables;
-
     private readonly List<Node3D> _transformDirtyList = new List<Node3D>();
 
-    private RenderQueue _shadowmapReadOnlyQueue = new RenderQueue();
+    private readonly SwapPopList<Renderable> _renderables = new SwapPopList<Renderable>();
 
-    private RenderQueue _forwardReadOnlyQueue = new RenderQueue();
+    private readonly Dictionary<Renderable, int> _renderableToIndex = new Dictionary<Renderable, int>();
 
-    private RenderQueue _shadowmapReadWriteQueue = new RenderQueue();
-
-    private RenderQueue _forwardReadWriteQueue = new RenderQueue();
-
+    public IReadOnlyList<Renderable> Renderables => this._renderables;
 
     public Scene()
     {
@@ -85,15 +77,31 @@ public abstract class Scene : Node3D
 
     public void NotifyRenderableAdded(Renderable renderable)
     {
-        renderable.RenderListIndex = this._renderables.Count;
+        if (this._renderableToIndex.ContainsKey(renderable))
+        {
+            return;
+        }
+
+        this._renderableToIndex.Add(renderable, this._renderables.Count);
         this._renderables.Add(renderable);
     }
 
     public void NotifyRenderableRemoved(Renderable renderable)
     {
-        this._renderables[this._renderables.Count - 1].RenderListIndex = renderable.RenderListIndex;
-        this._renderables.RemoveAt(renderable.RenderListIndex);
-        renderable.Free();
+        if (!this._renderableToIndex.TryGetValue(renderable, out var index))
+        {
+            return;
+        }
+
+        var lastRenderable = this._renderables[this._renderables.Count - 1];
+
+        this._renderables.RemoveAt(index); // SwapPopList.RemoveAt() is O(1)
+        this._renderableToIndex.Remove(renderable);
+
+        if (lastRenderable != renderable)
+        {
+            this._renderableToIndex[lastRenderable] = index;
+        }
     }
 
     public void EndUpdate()
@@ -137,13 +145,6 @@ public abstract class Scene : Node3D
         }
 
         this._transformDirtyList.Clear();
-    }
-
-    public void BeginUpdate()
-    {
-        // Swap queues for next frame
-        (this._shadowmapReadOnlyQueue, this._shadowmapReadWriteQueue) = (this._shadowmapReadWriteQueue, this._shadowmapReadOnlyQueue);
-        (this._forwardReadOnlyQueue, this._forwardReadWriteQueue) = (this._forwardReadWriteQueue, this._forwardReadOnlyQueue);
     }
 
     internal void NotifyNodeAdded(Node3D node)

@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using LifeSim.Engine.SceneGraph;
 using Veldrid;
 
 namespace LifeSim.Engine.Rendering;
 
-public class ForwardPass : IDisposable, IPipelineProvider
+public class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
 {
     [StructLayout(LayoutKind.Sequential)]
     private struct CameraDataBuffer
@@ -81,17 +82,16 @@ public class ForwardPass : IDisposable, IPipelineProvider
         this._renderQueue = new RenderQueue();
     }
 
-    public void Render(
-        CommandList commandList,
-        IReadOnlyList<Renderable> renderList,
-        ICamera camera,
-        Vector3 mainLightDirection,
-        ColorF mainLightColor,
-        ColorF ambientColor,
-        ColorF shadowColor
-    )
+    public void Render(CommandList commandList, Scene scene)
     {
-        this._renderQueue.AddToRenderQueue(renderList, camera.FrustumForCulling, camera.Position);
+        Camera3D? camera = scene.Camera;
+
+        if (camera == null)
+        {
+            return;
+        }
+
+        this._renderQueue.AddToRenderQueue(scene.Renderables, camera.FrustumForCulling, camera.Position);
         this._renderQueue.Sort();
 
         commandList.SetFramebuffer(this._renderTexture.Framebuffer);
@@ -104,7 +104,7 @@ public class ForwardPass : IDisposable, IPipelineProvider
             commandList.ClearDepthStencil(1f);
         }
 
-        mainLightDirection = Vector3.Normalize(mainLightDirection);
+        var mainLightDirection = Vector3.Normalize(scene.MainLight.Direction);
 
         CameraDataBuffer cameraInfo = new CameraDataBuffer();
         cameraInfo.ViewProjectionMatrix = camera.ViewProjectionMatrix;
@@ -119,9 +119,9 @@ public class ForwardPass : IDisposable, IPipelineProvider
         //cameraInfo.ShadowBiasData3 = this._shadowPass.GetShadowBiasData(3);
 
         LightInfo lightInfo = new LightInfo();
-        lightInfo.AmbientColor = ambientColor;
-        lightInfo.MainLightColor = mainLightColor;
-        lightInfo.ShadowColor = shadowColor;
+        lightInfo.AmbientColor = scene.AmbientColor;
+        lightInfo.MainLightColor = scene.MainLight.Color;
+        lightInfo.ShadowColor = this._shadowPass.Config.ShadowColor;
         lightInfo.MainLightDirection = mainLightDirection;
         lightInfo.ShadowMapDistances = this._shadowPass.GetShadowCascadeDistances();
 

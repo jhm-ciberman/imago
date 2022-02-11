@@ -1,10 +1,11 @@
 using System;
 using System.Numerics;
+using LifeSim.Engine.SceneGraph;
 using Veldrid;
 
 namespace LifeSim.Engine.Rendering;
 
-public class MousePickingPass : IDisposable
+public class MousePickingPass : IDisposable, IRenderingPass
 {
     private readonly GraphicsDevice _gd;
     private readonly Veldrid.Texture _pixelTexture;
@@ -39,7 +40,7 @@ public class MousePickingPass : IDisposable
         this._mousePosition = mousePos;
     }
 
-    public void Render(CommandList cl)
+    public void Render(CommandList cl, Scene scene)
     {
         var mousePos = this._mousePosition;
         if (this.MouseIsInside(mousePos))

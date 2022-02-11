@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using LifeSim.Engine.SceneGraph;
 using Veldrid;
 
 namespace LifeSim.Engine.Rendering;
 
-public class GizmosPass : IDisposable
+public class GizmosPass : IDisposable, IRenderingPass
 {
     private const int VERTICES_PER_BATCH = 1000;
 
@@ -58,9 +59,13 @@ public class GizmosPass : IDisposable
         this._pipeline = this.MakePipeline(shaderVariant);
     }
 
-    public void Render(CommandList cl, IReadOnlyList<DebugLine> lines, ICamera camera)
+    public void Render(CommandList cl, Scene scene)
     {
-        if (lines.Count == 0) return;
+        Camera3D? camera = scene.Camera;
+        if (camera == null || scene.Gizmos.Lines.Count == 0)
+        {
+            return;
+        }
 
         cl.SetFramebuffer(this._renderTexture.Framebuffer);
         cl.SetPipeline(this._pipeline);
@@ -68,7 +73,7 @@ public class GizmosPass : IDisposable
         var viewProjectionMatrix = camera.ViewProjectionMatrix;
         cl.UpdateBuffer(this._viewProjectionBuffer, 0, ref viewProjectionMatrix);
 
-        this.RenderLinesVertices(cl, lines);
+        this.RenderLinesVertices(cl, scene.Gizmos.Lines);
     }
 
     private void RenderLinesVertices(CommandList cl, IReadOnlyList<DebugLine> lines)
