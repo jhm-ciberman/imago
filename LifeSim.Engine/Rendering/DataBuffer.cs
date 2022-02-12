@@ -37,7 +37,10 @@ internal partial class DataBuffer : IDisposable
         this.BlocksCount = blocksCount;
         this.SizeInBytes = this.BlocksCount * this.BlockSize;
         this._data = Marshal.AllocHGlobal((int)this.SizeInBytes);
-        Unsafe.InitBlockUnaligned((byte*)this._data, 0, (uint)this.SizeInBytes);
+        fixed (void* dataPtr = &this._data)
+        {
+            Unsafe.InitBlockUnaligned((byte*)this._data, 0, (uint)this.SizeInBytes);
+        }
         this._dirty = true;
         this._resourceLayout = resourceLayout;
 
@@ -67,7 +70,10 @@ internal partial class DataBuffer : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public DataBlock RequestBlock()
     {
-        if (this._freeListCount == 0) throw new Exception($"Buffer {this.Name} is full. This should not happen.");
+        if (this._freeListCount == 0)
+        {
+            throw new InvalidOperationException($"No free blocks left in buffer {this.Name}. This should never happen.");
+        }
 
         this._freeListCount--;
         return new DataBlock(this, this._freeList[this._freeListCount]);

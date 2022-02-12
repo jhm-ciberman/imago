@@ -13,8 +13,8 @@ public class RenderNode3D : Node3D
     [StructLayout(LayoutKind.Sequential)]
     private struct InstanceData
     {
-        public Vector4 AlbedoColor { get; set; }
-        public Vector4 TextureST { get; set; }
+        public Vector4 AlbedoColor { get; set; } = new Vector4(1.0f, 1.0f, 1.0f, 0.0f);
+        public Vector4 TextureST { get; set; } = new Vector4(1.0f, 1.0f, 0.0f, 0.0f);
     }
 
     private readonly Renderable _renderable;
@@ -76,7 +76,8 @@ public class RenderNode3D : Node3D
 
     public RenderNode3D()
     {
-        this._renderable = Renderer.Instance.MakeRenderable();
+        this._renderable = Renderer.Instance.MakeRenderable(this, Marshal.SizeOf<InstanceData>());
+        this._renderable.SetInstanceData(this._instanceData);
     }
 
     public RenderNode3D(Mesh mesh) : this()

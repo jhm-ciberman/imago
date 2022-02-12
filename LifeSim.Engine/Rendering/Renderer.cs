@@ -68,7 +68,7 @@ public class Renderer : ITexture2DManager, IDisposable
         this._factory = this.GraphicsDevice.ResourceFactory;
 
         this._fullScreenRenderTexture = new SwapchainRenderTexture();
-        this.MainRenderTexture = new RenderTexture(this, (uint)window.Width, (uint)window.Height);
+        this.MainRenderTexture = new RenderTexture((uint)window.Width, (uint)window.Height);
 
         this.Storage = new SceneStorage(gd);
 
@@ -110,9 +110,9 @@ public class Renderer : ITexture2DManager, IDisposable
         this._disposeCollector.Add(disposables);
     }
 
-    public Renderable MakeRenderable()
+    public Renderable MakeRenderable(RenderNode3D renderNode, int instanceDataBlockSize)
     {
-        return new Renderable(this.Storage);
+        return new Renderable(this.Storage, renderNode, instanceDataBlockSize);
     }
 
     protected void UpdateDirtyMaterials()

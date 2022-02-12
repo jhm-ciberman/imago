@@ -7,7 +7,7 @@ using Veldrid.Utilities;
 
 namespace LifeSim.Engine.Rendering;
 
-public class Renderable
+public class Renderable : IDisposable
 {
     private static uint _count;
     private Matrix4x4 _transform = Matrix4x4.Identity;
@@ -33,12 +33,18 @@ public class Renderable
     private DataBlock _instanceDataBlock;
     private readonly SceneStorage _storage;
 
-    public Renderable(SceneStorage storage)
+    private readonly RenderNode3D _node;
+
+    public Renderable(SceneStorage storage, RenderNode3D node, int instanceDataSize)
     {
         this._storage = storage;
+        this._node = node;
         this.PickingId = ++_count;
         this._transformDataBlock = storage.RequestTransformDataBlock();
         this.TransformResourceSet = this._transformDataBlock.Buffer.ResourceSet;
+
+        this._instanceDataBlock = this._storage.RequestInstanceDataBlock(instanceDataSize);
+        this.InstanceResourceSet = this._instanceDataBlock.Buffer.ResourceSet;
     }
 
     public void SetMesh(Mesh mesh)
@@ -51,14 +57,7 @@ public class Renderable
     public void SetMaterial(Material material)
     {
         this.Material = material;
-        if (this._instanceDataBlock.BlockSize != material.Definition.InstanceDataBlockSize)
-        {
-            this._instanceDataBlock.FreeBlock();
-            this._instanceDataBlock = this._storage.RequestInstanceDataBlock(material.Definition);
-        }
-        this.InstanceResourceSet = this._instanceDataBlock.Buffer.ResourceSet;
-        var span = material.Definition.GetDefaultInstanceData();
-        this._instanceDataBlock.WriteSpan(span);
+
         this.RecomputeOffsetVertexData();
         this.RecomputeSortKey();
     }
@@ -90,12 +89,6 @@ public class Renderable
     public void SetInstanceData<T>(T data) where T : unmanaged
     {
         this._instanceDataBlock.Write(ref data);
-    }
-
-    public void Free()
-    {
-        this._instanceDataBlock.FreeBlock();
-        this._transformDataBlock.FreeBlock();
     }
 
     protected void RecomputeSortKey()
@@ -167,5 +160,11 @@ public class Renderable
         float dist = Vector3.DistanceSquared(this.CenterPosition, cameraPosition);
         uint cameraDistance = Math.Min(uint.MaxValue, (uint) (dist * 1000f));
         return this._cachedSortKey | (cameraDistance & 0xFFFFFF); // 24 bits
+    }
+
+    public void Dispose()
+    {
+        this._instanceDataBlock.FreeBlock();
+        this._transformDataBlock.FreeBlock();
     }
 }

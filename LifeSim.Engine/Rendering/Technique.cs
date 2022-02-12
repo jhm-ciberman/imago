@@ -22,7 +22,6 @@ public class Technique
     public int InstanceDataBlockSize { get; }
     public ResourceLayout ResourceLayout { get; }
     private readonly List<Shader> _shaders = new List<Shader>();
-    private readonly Memory<byte> _instanceDefaultData;
 
     public Technique(IUniform[] uniforms, string[] textures)
     {
@@ -40,14 +39,6 @@ public class Technique
         this.ResourceLayout = Renderer.Instance.GraphicsDevice.ResourceFactory.CreateResourceLayout(new ResourceLayoutDescription(elements));
 
         this.InstanceDataBlockSize = uniforms.Length * 16;
-        this._instanceDefaultData = new Memory<byte>(new byte[this.InstanceDataBlockSize]);
-        for (int i = 0; i < uniforms.Length; i++)
-        {
-            this._instanceUniformData.Add(uniforms[i].Name, i * 16);
-            var dest = this._instanceDefaultData.Span.Slice(i * 16, 16);
-            uniforms[i].CopyTo(dest);
-        }
-
     }
 
     public int GetInstanceUniformDataOffset(string name)
@@ -63,11 +54,6 @@ public class Technique
     {
         this._shaders.Add(new Shader(pass, vertexCode, fragmentCode, this.ResourceLayout));
         return this;
-    }
-
-    public Span<byte> GetDefaultInstanceData()
-    {
-        return this._instanceDefaultData.Span;
     }
 
     public Shader GetShader(IPipelineProvider pass)

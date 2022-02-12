@@ -59,19 +59,18 @@ public class SceneStorage : IDisposable
         this._skeletons.Add(skeleton);
     }
 
-    internal DataBlock RequestInstanceDataBlock(Technique material)
+    internal DataBlock RequestInstanceDataBlock(int instanceDataBlockSize)
     {
-        var blockSize = material.InstanceDataBlockSize;
         for (int i = 0; i < this._instanceDataBuffers.Count; i++)
         {
             var buffer = this._instanceDataBuffers[i];
-            if (buffer.BlockSize == blockSize && !buffer.IsFull)
+            if (buffer.BlockSize == instanceDataBlockSize && !buffer.IsFull)
             {
                 return buffer.RequestBlock();
             }
         }
 
-        var newBuffer = new DataBuffer(this._gd, MIN_BUFFER_BLOCKS, blockSize, this.InstanceResourceLayout);
+        var newBuffer = new DataBuffer(this._gd, MIN_BUFFER_BLOCKS, instanceDataBlockSize, this.InstanceResourceLayout);
         newBuffer.Name = "InstanceDataBuffer " + this._instanceDataBuffers.Count;
         this._instanceDataBuffers.Add(newBuffer);
         return newBuffer.RequestBlock();
