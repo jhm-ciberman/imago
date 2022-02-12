@@ -110,6 +110,11 @@ public class Renderer : ITexture2DManager, IDisposable
         this._disposeCollector.Add(disposables);
     }
 
+    public Renderable MakeRenderable()
+    {
+        return new Renderable(this.Storage);
+    }
+
     protected void UpdateDirtyMaterials()
     {
         lock (this._dirtyMaterials)

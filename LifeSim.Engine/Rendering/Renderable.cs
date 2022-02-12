@@ -1,5 +1,6 @@
 using System;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using LifeSim.Engine.Resources;
 using LifeSim.Engine.SceneGraph;
 using Veldrid.Utilities;
@@ -13,8 +14,7 @@ public class Renderable
     public Vector3 CenterPosition { get; private set; }
     public BoundingBox BoundingBox { get; private set; }
     private ulong _cachedSortKey;
-    public int BatchingHashKey { get; private set; }
-
+    private int _batchingHashKey; // This key is used as an early exit for the batching system.
     internal Veldrid.ResourceSet TransformResourceSet { get; private set; }
     internal Veldrid.ResourceSet? InstanceResourceSet { get; private set; } = null;
     internal Veldrid.ResourceSet? SkeletonResourceSet { get; private set; } = null;
@@ -33,12 +33,9 @@ public class Renderable
     private DataBlock _instanceDataBlock;
     private readonly SceneStorage _storage;
 
-    public RenderNode3D Node { get; }
-
-    public Renderable(SceneStorage storage, RenderNode3D node)
+    public Renderable(SceneStorage storage)
     {
         this._storage = storage;
-        this.Node = node;
         this.PickingId = ++_count;
         this._transformDataBlock = storage.RequestTransformDataBlock();
         this.TransformResourceSet = this._transformDataBlock.Buffer.ResourceSet;
@@ -90,11 +87,9 @@ public class Renderable
         }
     }
 
-    public void SetInstanceData<T>(string name, T data) where T : unmanaged
+    public void SetInstanceData<T>(T data) where T : unmanaged
     {
-        if (this.Material == null) throw new Exception("No material set");
-        var offset = this.Material.Definition.GetInstanceUniformDataOffset(name);
-        this._instanceDataBlock.Write(offset, ref data);
+        this._instanceDataBlock.Write(ref data);
     }
 
     public void Free()
@@ -125,8 +120,8 @@ public class Renderable
         // This key is used to fast check if two instances can be batched together. (They must have the same hash)
         // It could happen that the hash is not unique, but it is extremely unlikely that two instances that are 
         // contiguous after sorting the render queue by the sort key, end up having the same hash.
-        this.BatchingHashKey = HashCode.Combine(
-            meshHash,
+        this._batchingHashKey = HashCode.Combine(
+            this.Mesh.Id,
             this.Material.Id,
             instanceBufferHash,
             skekeletonBufferHash,
@@ -134,16 +129,31 @@ public class Renderable
         );
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool CanBeBatchedWith(Renderable other)
+    {
+        if (this._batchingHashKey != other._batchingHashKey) return false;
+
+        if (this.Mesh != other.Mesh) return false;
+        if (this.Material != other.Material) return false;
+        if (this.Skeleton?.BufferId != other.Skeleton?.BufferId) return false;
+        if (this._instanceDataBlock.Buffer.Id != other._instanceDataBlock.Buffer.Id) return false;
+        if (this._transformDataBlock.Buffer.Id != other._transformDataBlock.Buffer.Id) return false;
+
+        return true;
+    }
+
     private void RecomputeOffsetVertexData()
     {
         if (!this._instanceDataBlock.IsValid) return;
 
-        this.OffsetVertexData = new OffsetVertexData(
-            this._transformDataBlock.BlockIndex,
-            this._instanceDataBlock.BlockIndex,
-            this.Skeleton?.BoneDataOffset ?? 0,
-            this.PickingId // this id is used for picking
-        );
+        this.OffsetVertexData = new OffsetVertexData
+        {
+            TransformDataOffset = this._transformDataBlock.BlockIndex,
+            InstanceDataOffset = this._instanceDataBlock.BlockIndex,
+            BoneDataOffset = this.Skeleton?.BoneDataOffset ?? 0,
+            PickingId = this.PickingId // this id is used for picking
+        };
     }
 
     private void RecomputeBoundingBox()

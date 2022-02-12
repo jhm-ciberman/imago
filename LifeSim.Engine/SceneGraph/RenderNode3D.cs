@@ -1,5 +1,7 @@
 using System;
 using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using LifeSim.Engine.Rendering;
 using LifeSim.Engine.Resources;
 
@@ -7,6 +9,14 @@ namespace LifeSim.Engine.SceneGraph;
 
 public class RenderNode3D : Node3D
 {
+    // Contiguos layout
+    [StructLayout(LayoutKind.Sequential)]
+    private struct InstanceData
+    {
+        public Vector4 AlbedoColor { get; set; }
+        public Vector4 TextureST { get; set; }
+    }
+
     private readonly Renderable _renderable;
 
     private Mesh? _mesh;
@@ -62,9 +72,11 @@ public class RenderNode3D : Node3D
         }
     }
 
+    private InstanceData _instanceData;
+
     public RenderNode3D()
     {
-        this._renderable = new Renderable(Renderer.Instance.Storage, this);
+        this._renderable = Renderer.Instance.MakeRenderable();
     }
 
     public RenderNode3D(Mesh mesh) : this()
@@ -72,21 +84,28 @@ public class RenderNode3D : Node3D
         this.Mesh = mesh;
     }
 
-    public void SetInstanceData<T>(string name, T data) where T : unmanaged
+    public ColorF AlbedoColor
     {
-        this._renderable.SetInstanceData(name, data);
+        get => this._instanceData.AlbedoColor;
+        set { this._instanceData.AlbedoColor = value; this.OnInstanceDataDirty(); }
+    }
+
+    public Vector4 TextureST
+    {
+        get => this._instanceData.TextureST;
+        set { this._instanceData.TextureST = value; this.OnInstanceDataDirty(); }
+    }
+
+    private void OnInstanceDataDirty()
+    {
+        this._renderable.SetInstanceData(this._instanceData);
     }
 
     public override void UpdateWorldMatrix(ref Matrix4x4 parentMatrix)
     {
         base.UpdateWorldMatrix(ref parentMatrix);
 
-        this._renderable?.SetTransform(ref this.WorldMatrix);
-    }
-
-    public override RenderNode3D? FirstRenderable()
-    {
-        return this;
+        this._renderable.SetTransform(ref this.WorldMatrix);
     }
 
     protected override void AttachToSceneRecursive(Scene scene)

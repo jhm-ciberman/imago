@@ -8,11 +8,11 @@ public readonly struct RenderBatch
 {
     public readonly uint InstanceCount { get; }
     public readonly Mesh Mesh { get; }
-    public readonly Veldrid.Pipeline Pipeline { get; }
-    public readonly Veldrid.ResourceSet TransformResourceSet { get; }
-    public readonly Veldrid.ResourceSet MaterialResourceSet { get; }
-    public readonly Veldrid.ResourceSet InstanceResourceSet { get; }
-    public readonly Veldrid.ResourceSet? SkeletonResourceSet { get; }
+    public readonly Pipeline Pipeline { get; }
+    public readonly ResourceSet TransformResourceSet { get; }
+    public readonly ResourceSet MaterialResourceSet { get; }
+    public readonly ResourceSet InstanceResourceSet { get; }
+    public readonly ResourceSet? SkeletonResourceSet { get; }
 
     public RenderBatch(uint instanceCount, Renderable renderable, bool shadowmapPass)
     {

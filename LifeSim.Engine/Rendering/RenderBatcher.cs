@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Veldrid;
 
 namespace LifeSim.Engine.Rendering;
@@ -35,14 +36,13 @@ public class RenderBatcher
             Array.Resize(ref this._offsetVertexData, (int)(renderables.Count * 1.2f));
         }
         Renderable prevRenderable = renderables[0];
-        int prevBatchingHashKey = prevRenderable.BatchingHashKey;
         for (int i = 0; i < renderables.Count; i++)
         {
             Renderable renderable = renderables[i];
             this._offsetVertexData[i] = renderable.OffsetVertexData;
 
             // If it's batcheable, add to current batch. If not, finish batch
-            if (renderable.BatchingHashKey == prevBatchingHashKey)
+            if (renderable.CanBeBatchedWith(prevRenderable))
             {
                 instanceCount++;
             }
@@ -51,7 +51,6 @@ public class RenderBatcher
                 this._batches.Add(new RenderBatch(instanceCount, prevRenderable, this._shadowMapPass));
                 prevRenderable = renderable;
                 instanceCount = 1;
-                prevBatchingHashKey = renderable.BatchingHashKey;
             }
         }
 

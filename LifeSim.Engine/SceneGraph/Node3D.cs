@@ -174,19 +174,6 @@ public class Node3D
         return null;
     }
 
-    public virtual RenderNode3D? FirstRenderable()
-    {
-        foreach (var child in this.Children)
-        {
-            var result = child.FirstRenderable();
-            if (result != null)
-            {
-                return result;
-            }
-        }
-        return null;
-    }
-
     public Node3D? Find(string name)
     {
         if (this.Name == name)
@@ -214,7 +201,7 @@ public class Node3D
         }
     }
 
-    public void ForEachRecursive(System.Action<Node3D> action)
+    public void ForEachRecursive(Action<Node3D> action)
     {
         action(this);
         foreach (var child in this.Children)
