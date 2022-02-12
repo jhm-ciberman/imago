@@ -9,11 +9,10 @@ namespace LifeSim.Engine.Gltf;
 public class SceneInstantiator
 {
     private readonly Dictionary<GLTFNode, Node3D> _nodesCache = new Dictionary<GLTFNode, Node3D>();
-    private readonly Renderer _renderer;
 
-    public SceneInstantiator(Renderer renderer)
+    public SceneInstantiator()
     {
-        this._renderer = renderer;
+        //
     }
 
     internal Node3D Instantiate(GltfScene scene)
@@ -29,7 +28,7 @@ public class SceneInstantiator
 
     private Node3D CreateRenderNode(GltfScene scene, Mesh mesh, Material? material, Skin? skin)
     {
-        RenderNode3D node = new RenderNode3D(this._renderer);
+        RenderNode3D node = new RenderNode3D();
         node.Mesh = mesh;
         if (material != null)
         {
@@ -79,6 +78,6 @@ public class SceneInstantiator
                 ? this.InstantiateNodeRecursive(scene, gltfNode)
                 : throw new System.Exception("Could not bind joint: " + names[i]);
         }
-        return new Skeleton(this._renderer, joints, skin.InverseBindMatrices);
+        return new Skeleton(joints, skin.InverseBindMatrices);
     }
 }

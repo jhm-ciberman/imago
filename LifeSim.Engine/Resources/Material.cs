@@ -17,20 +17,16 @@ public class Material
     private readonly BindableResource[] _resources;
     public Technique Definition { get; }
     private readonly Dictionary<string, Texture> _textures = new Dictionary<string, Texture>();
-
-    private readonly Renderer _renderer;
-
     private readonly GraphicsDevice _gd;
-    public Material(Renderer renderer, Technique definition)
+    public Material(Technique definition)
     {
         this.Id = ++Material._count;
-        this._renderer = renderer;
-        this._gd = renderer.GraphicsDevice;
+        this._gd = Renderer.Instance.GraphicsDevice;
         this.Definition = definition;
-        this.Shader = definition.GetShader(this._renderer.ForwardPass);
-        this.ShadowmapShader = definition.GetShader(this._renderer.ShadowMapPass);
+        this.Shader = definition.GetShader(Renderer.Instance.ForwardPass);
+        this.ShadowmapShader = definition.GetShader(Renderer.Instance.ShadowMapPass);
         this._resources = new BindableResource[definition.ResourceCount];
-        this._renderer.OnMaterialDirty(this);
+        Renderer.Instance.OnMaterialDirty(this);
     }
 
     public void Update()
@@ -67,7 +63,7 @@ public class Material
         if (!this._isDirty)
         {
             this._isDirty = true;
-            this._renderer.OnMaterialDirty(this);
+            Renderer.Instance.OnMaterialDirty(this);
         }
     }
 

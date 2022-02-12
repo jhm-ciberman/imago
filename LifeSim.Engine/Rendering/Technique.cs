@@ -24,10 +24,8 @@ public class Technique
     private readonly List<Shader> _shaders = new List<Shader>();
     private readonly Memory<byte> _instanceDefaultData;
 
-    private readonly Renderer _renderer;
-    public Technique(Renderer renderer, IUniform[] uniforms, string[] textures)
+    public Technique(IUniform[] uniforms, string[] textures)
     {
-        this._renderer = renderer;
         this._textures = new Dictionary<string, int>();
         this.ResourceCount = textures.Length * 2;
         var elements = new ResourceLayoutElementDescription[this.ResourceCount];
@@ -39,7 +37,7 @@ public class Technique
             elements[j++] = new ResourceLayoutElementDescription(name + "Sampler", ResourceKind.Sampler, ShaderStages.Fragment);
         }
 
-        this.ResourceLayout = renderer.GraphicsDevice.ResourceFactory.CreateResourceLayout(new ResourceLayoutDescription(elements));
+        this.ResourceLayout = Renderer.Instance.GraphicsDevice.ResourceFactory.CreateResourceLayout(new ResourceLayoutDescription(elements));
 
         this.InstanceDataBlockSize = uniforms.Length * 16;
         this._instanceDefaultData = new Memory<byte>(new byte[this.InstanceDataBlockSize]);
@@ -50,11 +48,6 @@ public class Technique
             uniforms[i].CopyTo(dest);
         }
 
-    }
-
-    public Material MakeMaterial()
-    {
-        return new Material(this._renderer, this);
     }
 
     public int GetInstanceUniformDataOffset(string name)
@@ -68,7 +61,7 @@ public class Technique
 
     public Technique AddPass(IPipelineProvider pass, string vertexCode, string fragmentCode)
     {
-        this._shaders.Add(new Shader(this._renderer, pass, vertexCode, fragmentCode, this.ResourceLayout));
+        this._shaders.Add(new Shader(pass, vertexCode, fragmentCode, this.ResourceLayout));
         return this;
     }
 

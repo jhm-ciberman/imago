@@ -75,7 +75,7 @@ public class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
 
     private void OnShadowmapResized()
     {
-        this._renderer.DisposeCollector.Add(this._resourceSet);
+        this._renderer.DisposeWhenIdle(this._resourceSet);
         this._resourceSet = this.CreatePassResourceSet();
     }
 

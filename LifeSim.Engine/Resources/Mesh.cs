@@ -8,8 +8,6 @@ public class Mesh : System.IDisposable
 {
     private static int _count = 0;
 
-    private readonly Renderer _renderer;
-
     public int Id { get; private set; }
     public uint IndexCount { get; private set; }
     public VertexFormat VertexFormat { get; private set; }
@@ -19,10 +17,9 @@ public class Mesh : System.IDisposable
 
     public IMeshData MeshData { get; private set; }
 
-    public Mesh(Renderer renderer, IMeshData meshData)
+    public Mesh(IMeshData meshData)
     {
-        this._renderer = renderer;
-        var gd = renderer.GraphicsDevice;
+        var gd = Renderer.Instance.GraphicsDevice;
         this.Id = ++Mesh._count;
         this.VertexFormat = meshData.VertexFormat;
         this.IndexCount = (uint)meshData.Indices.Length;
@@ -34,7 +31,7 @@ public class Mesh : System.IDisposable
 
     public virtual void Dispose()
     {
-        this._renderer.DisposeCollector.Add(this.VertexBuffer);
-        this._renderer.DisposeCollector.Add(this.IndexBuffer);
+        Renderer.Instance.DisposeWhenIdle(this.VertexBuffer);
+        Renderer.Instance.DisposeWhenIdle(this.IndexBuffer);
     }
 }

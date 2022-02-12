@@ -15,11 +15,8 @@ public class GltfLoader
     private readonly GLTFNode?[] _nodesCache;
     private readonly Material? _defaultMaterial;
 
-    private readonly Renderer _renderer;
-
-    public GltfLoader(Renderer renderer, string path, Material? defaultMaterial = null)
+    public GltfLoader(string path, Material? defaultMaterial = null)
     {
-        this._renderer = renderer;
         this._path = path;
         this._model = glTFLoader.Interface.LoadModel(path);
         this._buffersCache = new GltfBuffer[this._model.Buffers.Length];
@@ -97,7 +94,7 @@ public class GltfLoader
     private Mesh GetMesh(int index)
     {
         var meshData = this.GetPrimitive(index).MakeMeshData();
-        return this._renderer.Factory.CreateMesh(meshData);
+        return new Mesh(meshData);
     }
 
     public Animation[] LoadAnimations()
@@ -148,7 +145,7 @@ public class GltfLoader
     {
         var data = this._model.Scenes[index];
         var name = data.Name ?? "Scene_" + index;
-        var scene = new GltfScene(this._renderer, name);
+        var scene = new GltfScene(name);
         foreach (var node in data.Nodes)
         {
             scene.Add(this.GetNode(node));

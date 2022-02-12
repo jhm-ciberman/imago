@@ -15,6 +15,8 @@ public class MousePickingPass : IDisposable, IRenderingPass
     {
         this._gd = renderer.GraphicsDevice;
         var factory = this._gd.ResourceFactory;
+
+        // This is a 1x1 texture that will be used to read the pixel color from the mouse picking pass.
         this._pixelTexture = factory.CreateTexture(new TextureDescription(
             width: 1, height: 1, depth: 1, mipLevels: 1, arrayLayers: 1,
             PixelFormat.R32_UInt, TextureUsage.Staging, TextureType.Texture2D

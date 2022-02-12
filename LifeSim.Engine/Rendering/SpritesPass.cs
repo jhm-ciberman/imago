@@ -9,8 +9,6 @@ namespace LifeSim.Engine.Rendering;
 
 public class SpritesPass : IDisposable, IPipelineProvider, IRenderingPass
 {
-    public static SpritesPass Instance { get; protected set; } = null!;
-
     private readonly DeviceBuffer _camera2DInfoBuffer;
     private readonly ResourceSet _passResourceSet;
     private readonly IRenderTexture _renderTexture;
@@ -24,14 +22,10 @@ public class SpritesPass : IDisposable, IPipelineProvider, IRenderingPass
 
     private readonly ResourceLayout _resourceLayout;
 
-    private readonly Renderer _renderer;
-
     private readonly SpriteBatcher _spriteBatcher;
 
     public SpritesPass(Renderer renderer, IRenderTexture renderTexture)
     {
-        Instance = this;
-        this._renderer = renderer;
         this._gd = renderer.GraphicsDevice;
         var factory = this._gd.ResourceFactory;
 
@@ -52,7 +46,7 @@ public class SpritesPass : IDisposable, IPipelineProvider, IRenderingPass
 
         var vertex = ShaderLoader.Load("sprites.vert.glsl");
         var fragment = ShaderLoader.Load("sprites.frag.glsl");
-        this._defaultShader = new Shader(renderer, this, vertex, fragment, this._resourceLayout);
+        this._defaultShader = new Shader(this, vertex, fragment, this._resourceLayout);
 
         this._camera2DInfoBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
@@ -67,7 +61,7 @@ public class SpritesPass : IDisposable, IPipelineProvider, IRenderingPass
     {
         var vertex = ShaderLoader.Load(vertexFile);
         var fragment = ShaderLoader.Load(fragmentFile);
-        return new Shader(this._renderer, this, vertex, fragment, this._resourceLayout);
+        return new Shader(this, vertex, fragment, this._resourceLayout);
     }
 
     public void Dispose()

@@ -67,9 +67,8 @@ public class ShadowMapTexture : ITexture, IDisposable
 
     internal void Resize(uint size, uint cascadesCount)
     {
-        var collector = this._renderer.DisposeCollector;
-        collector.Add(this.Framebuffers);
-        collector.Add(this.DeviceTexture);
+        this._renderer.DisposeWhenIdle(this.Framebuffers);
+        this._renderer.DisposeWhenIdle(this.DeviceTexture);
 
         this.Size = size;
         this.CascadesCount = cascadesCount;

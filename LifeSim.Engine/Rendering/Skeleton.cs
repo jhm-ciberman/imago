@@ -25,9 +25,9 @@ public class Skeleton : IDisposable
     private readonly SceneStorage _storage;
     private DataBlock _dataBlock;
 
-    public Skeleton(Renderer renderer, IList<Node3D> joints, IList<Matrix4x4> inverseBindMatrices)
+    public Skeleton(IList<Node3D> joints, IList<Matrix4x4> inverseBindMatrices)
     {
-        this._storage = renderer.Storage;
+        this._storage = Renderer.Instance.Storage;
         this.Joints = joints;
         this.InverseBindMatrices = inverseBindMatrices;
         this.BonesMatrices = new Matrix4x4[this.Joints.Count];

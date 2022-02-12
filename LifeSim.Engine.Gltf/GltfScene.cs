@@ -10,11 +10,9 @@ internal class GltfScene : IScenePrefab
     public string Name { get; }
     private readonly List<GLTFNode> _children = new List<GLTFNode>();
     private readonly Dictionary<string, GLTFNode> _nodesByName = new Dictionary<string, GLTFNode>();
-    private readonly Renderer _renderer;
 
-    public GltfScene(Renderer renderer, string name)
+    public GltfScene(string name)
     {
-        this._renderer = renderer;
         this.Name = name;
     }
 
@@ -42,6 +40,6 @@ internal class GltfScene : IScenePrefab
 
     public Node3D Instantiate()
     {
-        return new SceneInstantiator(this._renderer).Instantiate(this);
+        return new SceneInstantiator().Instantiate(this);
     }
 }

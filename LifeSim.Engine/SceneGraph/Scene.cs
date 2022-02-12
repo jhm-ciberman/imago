@@ -12,6 +12,8 @@ public abstract class Scene : Node3D
 
     public ColorF AmbientColor { get; set; } = new ColorF(.2f, .2f, .2f, 100f / 255f);
 
+    public RenderNode3D? SelectedNode { get; set; } // This is set by the mouse picking pass.
+
 
     public GizmosLayer Gizmos { get; } = new GizmosLayer();
 
@@ -63,7 +65,7 @@ public abstract class Scene : Node3D
         throw new NotImplementedException();
     }
 
-    public virtual void OnBeforeRender(Renderer renderer)
+    public virtual void OnBeforeRender()
     {
         // 
     }

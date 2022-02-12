@@ -86,7 +86,7 @@ public class SkyDomePass : IDisposable, IRenderingPass
         var shaderVariant = new ShaderVariant(this._gd, vertexFormat, null, _vertexCode, _fragmentCode);
         this._pipeline = this.MakePipeline(shaderVariant);
 
-        this._lutTexture = renderer.Factory.CreateTexture("./res/skydome_lut.png", srgb: false);
+        this._lutTexture = new ImageTexture("./res/skydome_lut.png", srgb: false);
 
         this._sampler = factory.CreateSampler(new SamplerDescription(
             SamplerAddressMode.Clamp, SamplerAddressMode.Clamp, SamplerAddressMode.Clamp,

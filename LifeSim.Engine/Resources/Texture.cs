@@ -19,11 +19,8 @@ public class Texture : ITexture
 
     private bool _isDirty = false;
 
-    protected readonly Renderer _renderer;
-
-    public Texture(Renderer renderer, uint width, uint height, uint mipLevels = 0, bool srgb = true)
+    public Texture(uint width, uint height, uint mipLevels = 0, bool srgb = true)
     {
-        this._renderer = renderer;
         this.Width = width;
         this.Height = height;
 
@@ -34,21 +31,23 @@ public class Texture : ITexture
         this._data = new byte[width * height * 4];
         PixelFormat pixelFormat = srgb ? PixelFormat.R8_G8_B8_A8_UNorm_SRgb : PixelFormat.R8_G8_B8_A8_UNorm;
 
-        var gd = this._renderer.GraphicsDevice;
+        var gd = Renderer.Instance.GraphicsDevice;
         this.DeviceTexture = gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(
             this.Width, this.Height, this.MipLevels, 1,
             pixelFormat, TextureUsage.Sampled | TextureUsage.GenerateMipmaps
         ));
         this.Sampler = gd.PointSampler;
-        renderer.OnTextureDirty(this);
+        Renderer.Instance.OnTextureDirty(this);
     }
+
+    public IntPtr ImGuiBinding => Renderer.Instance.GetOrCreateImGuiBinding(this);
 
     protected void OnTextureDirty()
     {
         if (!this._isDirty)
         {
             this._isDirty = true;
-            this._renderer.OnTextureDirty(this);
+            Renderer.Instance.OnTextureDirty(this);
         }
     }
 
@@ -123,6 +122,6 @@ public class Texture : ITexture
 
     public virtual void Dispose()
     {
-        this._renderer.DisposeCollector.Add(this.DeviceTexture);
+        Renderer.Instance.DisposeWhenIdle(this.DeviceTexture);
     }
 }

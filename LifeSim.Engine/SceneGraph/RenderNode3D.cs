@@ -62,12 +62,12 @@ public class RenderNode3D : Node3D
         }
     }
 
-    public RenderNode3D(Renderer renderer)
+    public RenderNode3D()
     {
-        this._renderable = new Renderable(renderer.Storage, this);
+        this._renderable = new Renderable(Renderer.Instance.Storage, this);
     }
 
-    public RenderNode3D(Renderer renderer, Mesh mesh) : this(renderer)
+    public RenderNode3D(Mesh mesh) : this()
     {
         this.Mesh = mesh;
     }

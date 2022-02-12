@@ -13,22 +13,24 @@ namespace LifeSim.Engine.Rendering;
 
 public class Renderer : ITexture2DManager, IDisposable
 {
-    private readonly SwapchainRenderTexture _fullScreenRenderTexture;
-    public RenderTexture MainRenderTexture { get; }
+    public static Renderer Instance { get; private set; } = null!;
 
+    public IPipelineProvider ForwardPass => this._forwardPass;
+    public IPipelineProvider ShadowMapPass => this._shadowPass;
+    public SceneStorage Storage { get; }
+    public uint MousePickerObjectID => this._mousePickerPass.ObjectID;
+    public RenderTexture MainRenderTexture { get; }
     public GraphicsDevice GraphicsDevice { get; }
+    public GraphicsBackend BackendType => this.GraphicsDevice.BackendType;
+
+    private readonly SwapchainRenderTexture _fullScreenRenderTexture;
+
     private readonly ResourceFactory _factory;
     private readonly FullScreenPass _fullScreenPass;
     private readonly GizmosPass _gizmosPass;
-
-    public GraphicsBackend BackendType => this.GraphicsDevice.BackendType;
-
     private readonly Fence _fence;
-
     private readonly List<Texture> _dirtyTextures = new List<Texture>();
-
     private readonly List<Material> _dirtyMaterials = new List<Material>();
-
     private readonly ForwardPass _forwardPass;
     private readonly ShadowPass _shadowPass;
     private readonly SpritesPass _spritesPass;
@@ -36,23 +38,19 @@ public class Renderer : ITexture2DManager, IDisposable
     private readonly MousePickingPass _mousePickerPass;
     private readonly ParticlesPass _particlesPass;
     private readonly SkyDomePass _skyDomePass;
-    public IPipelineProvider ForwardPass => this._forwardPass;
-    public IPipelineProvider ShadowMapPass => this._shadowPass;
-
-    public DisposeCollector DisposeCollector { get; }
-    public SceneStorage Storage { get; }
-    public uint MousePickerObjectID => this._mousePickerPass.ObjectID;
-
     private readonly CommandList _commandList;
-
-    public ITexture ShadowMapTexture => this._shadowPass.ShadowmapTexture;
-
-    public RendererResourceFactory Factory { get; }
-
     private readonly List<IRenderingPass> _passes = new List<IRenderingPass>();
+    private readonly DisposeCollector _disposeCollector;
 
     public Renderer(Sdl2Window window, GraphicsBackend? graphicsBackend = null)
     {
+        if (Instance != null)
+        {
+            throw new InvalidOperationException("Only one instance of Renderer can be created.");
+        }
+
+        Instance = this;
+
         GraphicsDeviceOptions options = new GraphicsDeviceOptions(
             debug: true,
             swapchainDepthFormat: null, //PixelFormat.R16_UNorm,
@@ -63,13 +61,10 @@ public class Renderer : ITexture2DManager, IDisposable
             swapchainSrgbFormat: false
         );
 
-        this.Factory = new RendererResourceFactory(this);
-
-
         var gd = VeldridStartup.CreateGraphicsDevice(window, options, graphicsBackend ?? VeldridStartup.GetPlatformDefaultBackend());
         this.GraphicsDevice = gd;
 
-        this.DisposeCollector = new DisposeCollector();
+        this._disposeCollector = new DisposeCollector();
         this._factory = this.GraphicsDevice.ResourceFactory;
 
         this._fullScreenRenderTexture = new SwapchainRenderTexture(this, this.GraphicsDevice.MainSwapchain);
@@ -105,6 +100,16 @@ public class Renderer : ITexture2DManager, IDisposable
         });
     }
 
+    public void DisposeWhenIdle(IDisposable disposable)
+    {
+        this._disposeCollector.Add(disposable);
+    }
+
+    public void DisposeWhenIdle(IDisposable[] disposables)
+    {
+        this._disposeCollector.Add(disposables);
+    }
+
     protected void UpdateDirtyMaterials()
     {
         lock (this._dirtyMaterials)
@@ -120,7 +125,7 @@ public class Renderer : ITexture2DManager, IDisposable
         }
     }
 
-    public void UpdateDirtyTextures()
+    private void UpdateDirtyTextures()
     {
         lock (this._dirtyTextures)
         {
@@ -140,7 +145,7 @@ public class Renderer : ITexture2DManager, IDisposable
         this._mousePickerPass.SetMousePosition(inputSnapshot.MousePosition);
         this._imGuiPass.Update(deltaTime, inputSnapshot);
 
-        scene.OnBeforeRender(this);
+        scene.OnBeforeRender();
         scene.RenderImGui();
 
         this._commandList.Begin();
@@ -157,17 +162,10 @@ public class Renderer : ITexture2DManager, IDisposable
         }
 
         this._commandList.End();
-
-        //if (!this._fence.Signaled)
-        //{
-        //    // If we are GPU bound, then maybe it's a good moment to do a GC :)
-        //    Console.WriteLine("Performing GC");
-        //    GC.Collect(0, GCCollectionMode.Optimized);
-        //}
         this.GraphicsDevice.WaitForIdle();
         this._fence.Reset();
         this.GraphicsDevice.SubmitCommands(this._commandList, this._fence);
-        this.DisposeCollector.DisposeAll();
+        this._disposeCollector.DisposeAll();
         this.GraphicsDevice.SwapBuffers();
     }
 
