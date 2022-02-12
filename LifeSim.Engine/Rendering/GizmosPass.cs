@@ -82,7 +82,7 @@ public class GizmosPass : IDisposable, IRenderingPass
 
         for (var i = 0; i < lines.Count; i++)
         {
-            var line = lines[i];
+            DebugLine line = lines[i];
 
             if (this._verticesCount + 2 >= VERTICES_PER_BATCH)
             {
@@ -111,12 +111,12 @@ public class GizmosPass : IDisposable, IRenderingPass
     private Pipeline MakePipeline(ShaderVariant shaderVariant)
     {
         var rasterizerState = new RasterizerStateDescription(
-                FaceCullMode.None,
-                PolygonFillMode.Wireframe,
-                FrontFace.Clockwise,
-                depthClipEnabled: true,
-                scissorTestEnabled: false
-            );
+            FaceCullMode.None,
+            PolygonFillMode.Wireframe,
+            FrontFace.Clockwise,
+            depthClipEnabled: true,
+            scissorTestEnabled: false
+        );
 
         return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
         {
@@ -126,9 +126,10 @@ public class GizmosPass : IDisposable, IRenderingPass
             BlendState = BlendStateDescription.SingleAlphaBlend,
             RasterizerState = rasterizerState,
             Outputs = this._renderTexture.OutputDescription,
-            ResourceLayouts = new ResourceLayout[] {
-                    this._passResourceLayout,
-                },
+            ResourceLayouts = new ResourceLayout[]
+            {
+                this._passResourceLayout,
+            },
         });
     }
 

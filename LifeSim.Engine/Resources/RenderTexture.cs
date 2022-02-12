@@ -22,14 +22,11 @@ public class RenderTexture : IRenderTexture
 
     public Sampler Sampler { get; private set; }
 
-    private readonly Renderer _renderer;
-
     private readonly GraphicsDevice _gd;
 
-    internal RenderTexture(Renderer renderer, uint width, uint height)
+    internal RenderTexture(uint width, uint height)
     {
-        this._renderer = renderer;
-        this._gd = renderer.GraphicsDevice;
+        this._gd = Renderer.Instance.GraphicsDevice;
         this.DepthTexture = this.CreateDepthTexture(width, height);
         this.DeviceTexture = this.CreateColorTexture(width, height);
         this.PickingTexture = this.CreatePickingIDTexture(width, height);
@@ -59,7 +56,7 @@ public class RenderTexture : IRenderTexture
 
     private Veldrid.Texture CreatePickingIDTexture(uint width, uint height)
     {
-        return this._renderer.GraphicsDevice.ResourceFactory.CreateTexture(new TextureDescription(
+        return this._gd.ResourceFactory.CreateTexture(new TextureDescription(
             width, height, depth: 1, mipLevels: 1, arrayLayers: 1,
             PixelFormat.R32_UInt,
             TextureUsage.RenderTarget | TextureUsage.Sampled,

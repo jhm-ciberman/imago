@@ -67,7 +67,7 @@ public class Renderer : ITexture2DManager, IDisposable
         this._disposeCollector = new DisposeCollector();
         this._factory = this.GraphicsDevice.ResourceFactory;
 
-        this._fullScreenRenderTexture = new SwapchainRenderTexture(this, this.GraphicsDevice.MainSwapchain);
+        this._fullScreenRenderTexture = new SwapchainRenderTexture();
         this.MainRenderTexture = new RenderTexture(this, (uint)window.Width, (uint)window.Height);
 
         this.Storage = new SceneStorage(gd);
@@ -221,7 +221,7 @@ public class Renderer : ITexture2DManager, IDisposable
 
     object ITexture2DManager.CreateTexture(int width, int height)
     {
-        return new DirectTexture(this, (uint)width, (uint)height);
+        return new DirectTexture((uint)width, (uint)height);
     }
 
     void ITexture2DManager.SetTextureData(object texture, System.Drawing.Rectangle bounds, byte[] data)

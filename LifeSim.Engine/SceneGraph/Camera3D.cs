@@ -4,7 +4,7 @@ using Veldrid.Utilities;
 
 namespace LifeSim.Engine.SceneGraph;
 
-public class Camera3D : ICamera
+public class Camera3D
 {
     public ColorF? ClearColor { get; set; } = new ColorF(0.84f, 0.84f, 0.86f, 1.0f);
     private bool _viewMatrixIsDirty = true;
@@ -128,9 +128,9 @@ public class Camera3D : ICamera
         this._projectionMatrixIsDirty = true;
     }
 
-    public ICamera FrustumCullingCamera { get; private set; }
+    public Camera3D FrustumCullingCamera { get; set; }
 
-    public BoundingFrustum FrustumForCulling => new BoundingFrustum(this.ViewProjectionMatrix);
+    public BoundingFrustum FrustumForCulling => new BoundingFrustum(this.FrustumCullingCamera.ViewProjectionMatrix);
 
     public Camera3D(Viewport viewport)
     {

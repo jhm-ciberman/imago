@@ -33,12 +33,6 @@ internal struct DataBlock
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Write<T>(int offset, ref T data) where T : unmanaged
-    {
-        this.Buffer.Write<T>(this.Offset + offset, ref data);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void WriteSpan<T>(ReadOnlySpan<T> data) where T : unmanaged
     {
         this.Buffer.WriteSpan<T>(this.Offset, data);

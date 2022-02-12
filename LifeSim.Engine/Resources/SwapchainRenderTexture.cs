@@ -23,10 +23,10 @@ internal class SwapchainRenderTexture : IRenderTexture, ITexture
 
     private readonly GraphicsDevice _gd;
 
-    internal SwapchainRenderTexture(Renderer renderer, Swapchain swapchain)
+    internal SwapchainRenderTexture()
     {
-        this._gd = renderer.GraphicsDevice;
-        this._swapchain = swapchain;
+        this._gd = Renderer.Instance.GraphicsDevice;
+        this._swapchain = this._gd.MainSwapchain;
     }
 
     public void Resize(uint width, uint height)

@@ -1,8 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.Numerics;
-using System.Threading.Tasks;
-using LifeSim.Engine.SceneGraph;
 
 namespace LifeSim.Engine.Rendering;
 

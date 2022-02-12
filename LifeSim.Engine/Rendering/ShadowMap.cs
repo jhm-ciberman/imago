@@ -132,5 +132,8 @@ public class ShadowMap
     /// </summary>
     public float NormalOffset { get; set; } = 1.9f;
 
+    /// <summary>
+    /// Gets or set the shadow color.
+    /// </summary>
     public ColorF Color { get; set; } = new ColorF(0.0f, 0.0f, 0.0f, .8f);
 }

@@ -23,22 +23,21 @@ public class DirectTexture : ITexture
 
     private readonly GraphicsDevice _gd;
 
-    public DirectTexture(Renderer renderer, uint width, uint height, uint mipLevels = 0, bool srgb = true)
+    public DirectTexture(uint width, uint height, uint mipLevels = 0, bool srgb = true)
     {
-        this._gd = renderer.GraphicsDevice;
+        this._gd = Renderer.Instance.GraphicsDevice;
         this.Width = width;
         this.Height = height;
         this.MipLevels = (mipLevels == 0)
             ? (uint)BitOperations.Log2(Math.Min(width, height))
             : mipLevels;
 
-        var gd = renderer.GraphicsDevice;
-        this.DeviceTexture = gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(
+        this.DeviceTexture = this._gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(
             this.Width, this.Height, this.MipLevels, 1,
             srgb ? PixelFormat.R8_G8_B8_A8_UNorm_SRgb : PixelFormat.R8_G8_B8_A8_UNorm,
             TextureUsage.Sampled | TextureUsage.GenerateMipmaps
         ));
-        this.Sampler = gd.PointSampler;
+        this.Sampler = this._gd.PointSampler;
     }
 
     public unsafe void Update(Image<Rgba32> image)
