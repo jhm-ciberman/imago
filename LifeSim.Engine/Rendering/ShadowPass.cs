@@ -46,7 +46,7 @@ public partial class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
         this._renderQueues = new RenderQueue[4];
         for (int i = 0; i < this._renderQueues.Length; i++)
         {
-            this._renderQueues[i] = new RenderQueue();
+            this._renderQueues[i] = new RenderQueue(RenderQueueFlags.ShadowCaster);
         }
 
         this._resourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(

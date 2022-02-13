@@ -2,7 +2,6 @@ using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using LifeSim.Engine.Resources;
-using LifeSim.Engine.SceneGraph;
 using Veldrid.Utilities;
 
 namespace LifeSim.Engine.Rendering;
@@ -25,7 +24,7 @@ public class Renderable : IDisposable
 
     public Mesh? Mesh { get; private set; } = null;
 
-    public bool Visible { get; set; } = true;
+    public RenderQueueFlags RenderQueueFlags { get; set; } = RenderQueueFlags.All;
     public uint PickingId { get; }
 
     public Skeleton? Skeleton { get; private set; }
@@ -33,17 +32,14 @@ public class Renderable : IDisposable
     private DataBlock _instanceDataBlock;
     private readonly SceneStorage _storage;
 
-    private readonly RenderNode3D _node;
-
-    public Renderable(SceneStorage storage, RenderNode3D node, int instanceDataSize)
+    public Renderable(SceneStorage storage, int instanceDataSize)
     {
         this._storage = storage;
-        this._node = node;
         this.PickingId = ++_count;
         this._transformDataBlock = storage.RequestTransformDataBlock();
         this.TransformResourceSet = this._transformDataBlock.Buffer.ResourceSet;
 
-        this._instanceDataBlock = this._storage.RequestInstanceDataBlock(instanceDataSize);
+        this._instanceDataBlock = storage.RequestInstanceDataBlock(instanceDataSize);
         this.InstanceResourceSet = this._instanceDataBlock.Buffer.ResourceSet;
     }
 

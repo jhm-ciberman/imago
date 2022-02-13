@@ -7,7 +7,7 @@ using LifeSim.Engine.Resources;
 
 namespace LifeSim.Engine.SceneGraph;
 
-public class RenderNode3D : Node3D
+public partial class RenderNode3D : Node3D
 {
     // Contiguos layout
     [StructLayout(LayoutKind.Sequential)]
@@ -72,11 +72,39 @@ public class RenderNode3D : Node3D
         }
     }
 
+    private bool _visible = true;
+
+    public bool Visible
+    {
+        get => this._visible;
+        set
+        {
+            if (this._visible == value) return;
+            this._visible = value;
+            this.RenderQueueFlagsChanged();
+        }
+    }
+
+    private ShadowCasting _shadowCastingMode = ShadowCasting.CastShadows;
+
+    public ShadowCasting ShadowCastingMode
+    {
+        get => this._shadowCastingMode;
+        set
+        {
+            if (this._shadowCastingMode == value) return;
+            this._shadowCastingMode = value;
+            this.RenderQueueFlagsChanged();
+        }
+    }
+
     private InstanceData _instanceData;
 
     public RenderNode3D()
     {
-        this._renderable = Renderer.Instance.MakeRenderable(this, Marshal.SizeOf<InstanceData>());
+        this._instanceData = new InstanceData();
+
+        this._renderable = Renderer.Instance.MakeRenderable(Marshal.SizeOf<InstanceData>());
         this._renderable.SetInstanceData(this._instanceData);
     }
 
@@ -120,5 +148,22 @@ public class RenderNode3D : Node3D
     {
         this.Scene?.NotifyRenderableRemoved(this._renderable);
         base.DetachFromSceneRecursive();
+    }
+
+    private void RenderQueueFlagsChanged()
+    {
+        RenderQueueFlags flags = RenderQueueFlags.None;
+
+        if (this.Visible)
+        {
+            flags |= RenderQueueFlags.Opaque;
+        }
+
+        if (this.ShadowCastingMode == ShadowCasting.CastShadows || this.ShadowCastingMode == ShadowCasting.OnlyShadows)
+        {
+            flags |= RenderQueueFlags.ShadowCaster;
+        }
+
+        this._renderable.RenderQueueFlags = flags;
     }
 }

@@ -68,7 +68,7 @@ public class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
 
         this._renderJob = new RenderJob(this._gd, false);
 
-        this._renderQueue = new RenderQueue();
+        this._renderQueue = new RenderQueue(RenderQueueFlags.Opaque);
 
         this._shadowPass.ShadowmapTexture.OnResized += this.OnShadowmapResized;
     }

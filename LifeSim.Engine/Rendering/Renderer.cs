@@ -110,9 +110,9 @@ public class Renderer : ITexture2DManager, IDisposable
         this._disposeCollector.Add(disposables);
     }
 
-    public Renderable MakeRenderable(RenderNode3D renderNode, int instanceDataBlockSize)
+    public Renderable MakeRenderable(int instanceDataBlockSize)
     {
-        return new Renderable(this.Storage, renderNode, instanceDataBlockSize);
+        return new Renderable(this.Storage, instanceDataBlockSize);
     }
 
     protected void UpdateDirtyMaterials()

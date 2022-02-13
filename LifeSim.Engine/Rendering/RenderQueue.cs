@@ -17,6 +17,14 @@ public class RenderQueue : IEnumerable<Renderable>, IReadOnlyList<Renderable>, I
 
     public Renderable this[int index] => this._items[this._indices[index].Index];
 
+
+    public RenderQueueFlags FilterFlags { get; set; }
+
+    public RenderQueue(RenderQueueFlags filterFlags)
+    {
+        this.FilterFlags = filterFlags;
+    }
+
     public void Sort()
     {
         this._indices.Sort();
@@ -29,7 +37,9 @@ public class RenderQueue : IEnumerable<Renderable>, IReadOnlyList<Renderable>, I
         for (int i = 0; i < renderables.Count; i++)
         {
             Renderable renderable = renderables[i];
-            if (renderable.Visible == false || renderable.Material == null || renderable.Mesh == null) continue;
+            if (renderable.Material == null || renderable.Mesh == null) continue;
+
+            if (!renderable.RenderQueueFlags.HasFlag(this.FilterFlags)) continue;
 
             if (cameraFrustum.Contains(renderable.BoundingBox) != ContainmentType.Disjoint)
             {
