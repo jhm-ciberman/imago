@@ -39,8 +39,7 @@ public class SimpleAnimationBinder
 
     private void AddToDictionaryRecursive(Dictionary<string, Node3D> dictionary, Node3D node)
     {
-        if (node is Node3D spatialNode)
-            dictionary[node.Name] = spatialNode;
+        dictionary[node.Name] = node;
 
         foreach (var child in node.Children)
         {

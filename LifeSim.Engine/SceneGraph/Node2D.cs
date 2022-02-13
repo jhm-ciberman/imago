@@ -14,9 +14,9 @@ public class Node2D
     private readonly List<Node2D> _children = new List<Node2D>();
     public IReadOnlyList<Node2D> Children => this._children;
 
-    private Vector2    _position = Vector2.Zero;
-    private float      _rotation = 0f;
-    private Vector2    _scale = Vector2.One;
+    private Vector2 _position = Vector2.Zero;
+    private float _rotation = 0f;
+    private Vector2 _scale = Vector2.One;
 
     public Vector2 Position { get => this._position; set { this._position = value; this.OnTransformDirty(); } }
     public float Rotation { get => this._rotation; set { this._rotation = value; this.OnTransformDirty(); } }

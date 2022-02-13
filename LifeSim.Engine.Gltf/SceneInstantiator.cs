@@ -18,12 +18,12 @@ public class SceneInstantiator
     internal Node3D Instantiate(GltfScene scene)
     {
         this._nodesCache.Clear();
-        Node3D n = new Node3D();
-        foreach (GLTFNode? node in scene.Children)
+        Node3D node = new Node3D();
+        foreach (GLTFNode? gltfNode in scene.Children)
         {
-            n.Add(this.InstantiateNodeRecursive(scene, node));
+            node.AddChild(this.InstantiateNodeRecursive(scene, gltfNode));
         }
-        return n;
+        return node;
     }
 
     private Node3D CreateRenderNode(GltfScene scene, Mesh mesh, Material? material, Skin? skin)
@@ -59,9 +59,10 @@ public class SceneInstantiator
         node.Rotation = gltfNode.Rotation;
         node.Scale = gltfNode.Scale;
 
+
         foreach (GLTFNode? child in gltfNode.Children)
         {
-            node.Add(this.InstantiateNodeRecursive(scene, child));
+            node.AddChild(this.InstantiateNodeRecursive(scene, child));
         }
 
         return node;

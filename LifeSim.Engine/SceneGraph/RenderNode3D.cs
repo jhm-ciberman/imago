@@ -147,7 +147,7 @@ public partial class RenderNode3D : Node3D
         this._renderable.SetTransform(ref this.WorldMatrix);
     }
 
-    protected override void AttachToSceneRecursive(Scene scene)
+    internal override void AttachToSceneRecursive(Scene scene)
     {
         base.AttachToSceneRecursive(scene);
 
@@ -155,7 +155,7 @@ public partial class RenderNode3D : Node3D
         scene.RegisterPickingId(this._renderable.PickingId, this);
     }
 
-    protected override void DetachFromSceneRecursive()
+    internal override void DetachFromSceneRecursive()
     {
         if (this.Scene is null) return;
         this.Scene.NotifyRenderableRemoved(this._renderable);

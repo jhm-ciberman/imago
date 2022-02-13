@@ -1,15 +1,16 @@
 using System;
+using System.Numerics;
 
 namespace LifeSim;
 
 public struct Rectangle
 {
-    public int X;
-    public int Y;
-    public int Width;
-    public int Height;
+    public float X { get; set; }
+    public float Y { get; set; }
+    public float Width { get; set; }
+    public float Height { get; set; }
 
-    public Rectangle(Vector2Int coords, Vector2Int size)
+    public Rectangle(Vector2 coords, Vector2 size)
     {
         this.X = coords.X;
         this.Y = coords.Y;
@@ -17,7 +18,7 @@ public struct Rectangle
         this.Height = size.Y;
     }
 
-    public Rectangle(int x, int y, int width, int height)
+    public Rectangle(float x, float y, float width, float height)
     {
         this.X = x;
         this.Y = y;
@@ -25,18 +26,18 @@ public struct Rectangle
         this.Height = height;
     }
 
-    public Vector2Int Coords => new Vector2Int(this.X, this.Y);
-    public Vector2Int Size => new Vector2Int(this.Width, this.Height);
+    public Vector2 Coords => new Vector2(this.X, this.Y);
+    public Vector2 Size => new Vector2(this.Width, this.Height);
 
-    public Vector2Int Min => new Vector2Int(this.XMin, this.YMin);
-    public Vector2Int Max => new Vector2Int(this.XMax, this.YMax);
+    public Vector2 Min => new Vector2(this.XMin, this.YMin);
+    public Vector2 Max => new Vector2(this.XMax, this.YMax);
 
-    public int XMin { get => Math.Min(this.X, this.X + this.Width); set { int oldxmax = this.XMax; this.X = value; this.Width = oldxmax - this.X; } }
-    public int YMin { get => Math.Min(this.Y, this.Y + this.Height); set { int oldymax = this.YMax; this.Y = value; this.Height = oldymax - this.Y; } }
-    public int XMax { get => Math.Max(this.X, this.X + this.Width); set { this.Width = value - this.X; } }
-    public int YMax { get => Math.Max(this.Y, this.Y + this.Height); set { this.Height = value - this.Y; } }
+    public float XMin { get => MathF.Min(this.X, this.X + this.Width); set { float oldxmax = this.XMax; this.X = value; this.Width = oldxmax - this.X; } }
+    public float YMin { get => MathF.Min(this.Y, this.Y + this.Height); set { float oldymax = this.YMax; this.Y = value; this.Height = oldymax - this.Y; } }
+    public float XMax { get => MathF.Max(this.X, this.X + this.Width); set { this.Width = value - this.X; } }
+    public float YMax { get => MathF.Max(this.Y, this.Y + this.Height); set { this.Height = value - this.Y; } }
 
-    public bool Contains(Vector2Int position)
+    public bool Contains(Vector2 position)
     {
         return position.X >= this.XMin
             && position.Y >= this.YMin

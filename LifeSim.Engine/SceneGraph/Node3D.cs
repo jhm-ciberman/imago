@@ -8,15 +8,20 @@ namespace LifeSim.Engine.SceneGraph;
 
 public class Node3D
 {
-    public string Name { get; set; } = string.Empty;
-    public Node3D? Parent { get; private set; } = null;
 
-    private readonly SwapPopList<Node3D> _children = new SwapPopList<Node3D>();
-    public IReadOnlyList<Node3D> Children => this._children;
+    public string Name { get; set; } = string.Empty;
+
+    public Node3D? Parent { get; protected set; } = null;
 
     private Vector3    _position = Vector3.Zero;
     private Quaternion _rotation = Quaternion.Identity;
     private Vector3    _scale = Vector3.One;
+
+    private readonly SwapPopList<Node3D> _children = new SwapPopList<Node3D>();
+
+
+    public IReadOnlyList<Node3D> Children => this._children;
+
 
     public Vector3 Position
     {
@@ -69,63 +74,6 @@ public class Node3D
         //
     }
 
-    public void Add(Node3D node)
-    {
-        // Prevent adding self as child
-        if (node.Parent == this || node == this) return;
-
-        // If node already has a parent, remove it from that parent
-        if (node.Parent != null)
-        {
-            node.Parent.Remove(node);
-        }
-
-        // Set node's parent to this
-        this._children.Add(node);
-        node.Parent = this;
-
-        // If the current node has a scene, add the node to the scene
-        if (this.Scene != null)
-        {
-            node.AttachToSceneRecursive(this.Scene);
-        }
-    }
-
-    public void Remove(Node3D node)
-    {
-        if (node.Parent != this) return;
-
-        this._children.Remove(node);
-        node.Parent = null;
-        if (node.Scene != null)
-        {
-            node.DetachFromSceneRecursive();
-        }
-    }
-
-    protected virtual void AttachToSceneRecursive(Scene scene)
-    {
-        if (this.Scene != null) return;
-
-        this.Scene = scene;
-        this.Scene.NotifyNodeAdded(this);
-        foreach (var child in this._children)
-        {
-            child.AttachToSceneRecursive(scene);
-        }
-    }
-
-    protected virtual void DetachFromSceneRecursive()
-    {
-        if (this.Scene == null) return;
-
-        this.Scene.NotifyNodeRemoved(this);
-        foreach (var child in this._children)
-        {
-            child.DetachFromSceneRecursive();
-        }
-        this.Scene = null;
-    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void NotifyTransformDirty()
@@ -147,6 +95,119 @@ public class Node3D
         return ref this._localMatrix;
     }
 
+    // path is a relative path to a node (example: "Armature/Hips/Spine1/Spine2/Head")
+    // The method should be recursive
+    public T? FindPath<T>(string path) where T : Node3D
+    {
+        if (string.IsNullOrEmpty(path)) return null;
+
+        var pathParts = path.Split('/');
+        var currentNode = this;
+        foreach (var pathPart in pathParts)
+        {
+            if (currentNode == null) return null;
+            currentNode = currentNode.FindChild<Node3D>(pathPart);
+        }
+
+        return currentNode as T;
+    }
+
+    public T? FindChild<T>(string name) where T : Node3D
+    {
+        if (string.IsNullOrEmpty(name)) return null;
+
+        foreach (var child in this.Children)
+        {
+            if (child.Name == name) return child as T;
+        }
+
+        return null;
+    }
+
+    public void AddChild(Node3D node)
+    {
+        // Prevent adding self as child
+        if (node.Parent == this || node == this) return;
+
+        // If node already has a parent, remove it from that parent
+        if (node.Parent != null)
+        {
+            node.Parent.RemoveChild(node);
+        }
+
+        // Set node's parent to this
+        this._children.Add(node);
+
+        node.Parent = this;
+
+        // If the current node has a scene, add the node to the scene
+        if (this.Scene != null)
+        {
+            node.AttachToSceneRecursive(this.Scene);
+        }
+    }
+
+    public void RemoveChild(Node3D node)
+    {
+        if (node.Parent != this) return;
+
+        this._children.Remove(node);
+
+        node.Parent = null;
+
+        if (node.Scene != null)
+        {
+            node.DetachFromSceneRecursive();
+        }
+    }
+
+    internal virtual void AttachToSceneRecursive(Scene scene)
+    {
+        if (this.Scene != null) return;
+
+        this.Scene = scene;
+        this.Scene.NotifyNodeAdded(this);
+
+        foreach (var child in this._children)
+        {
+            child.AttachToSceneRecursive(scene);
+        }
+    }
+
+    internal virtual void DetachFromSceneRecursive()
+    {
+        if (this.Scene == null) return;
+
+        this.Scene.NotifyNodeRemoved(this);
+        this.Scene = null;
+
+        foreach (var child in this._children)
+        {
+            child.DetachFromSceneRecursive();
+        }
+    }
+
+    public virtual void PrintHierarchyToConsole(string indent = "")
+    {
+        Console.WriteLine($"{indent}{this.Name}");
+        foreach (var child in this._children)
+        {
+            child.PrintHierarchyToConsole($"{indent}  ");
+        }
+    }
+
+    public void ForEachRecursive<T>(Action<T> action)
+    {
+        if (this is T node)
+        {
+            action(node);
+        }
+        foreach (var child in this._children)
+        {
+            child.ForEachRecursive<T>(action);
+        }
+    }
+
     public virtual void UpdateWorldMatrix(ref Matrix4x4 parentMatrix)
     {
         this._worldMatrix = this.GetLocalMatrix() * parentMatrix;
@@ -155,77 +216,5 @@ public class Node3D
         {
             this.Children[i].UpdateWorldMatrix(ref this._worldMatrix);
         }
-    }
-
-    public T? Find<T>() where T : Node3D
-    {
-        if (this is T childT)
-        {
-            return childT;
-        }
-        foreach (var child in this.Children)
-        {
-            var result = child.Find<T>();
-            if (result != null)
-            {
-                return result;
-            }
-        }
-        return null;
-    }
-
-    public Node3D? Find(string name)
-    {
-        if (this.Name == name)
-        {
-            return this;
-        }
-        foreach (var child in this.Children)
-        {
-            var result = child.Find(name);
-            if (result != null)
-            {
-                return result;
-            }
-        }
-        return null;
-    }
-
-    public virtual void PrintHierarchyToConsole(string indent = "")
-    {
-        Console.WriteLine(indent + "- " + this.GetType().Name + ": " + this.Name + "(scale: " + this.Scale + ")");
-        indent += "  ";
-        foreach (var child in this.Children)
-        {
-            child.PrintHierarchyToConsole(indent);
-        }
-    }
-
-    public void ForEachRecursive(Action<Node3D> action)
-    {
-        action(this);
-        foreach (var child in this.Children)
-        {
-            child.ForEachRecursive(action);
-        }
-    }
-
-    public Node3D? FindPath(string name)
-    {
-        var arrayPaths = name.Split('/');
-        int currentIndex = 0;
-        Node3D currentNode = this;
-        while (currentIndex < arrayPaths.Length)
-        {
-            var currentPath = arrayPaths[currentIndex];
-            var nextNode = currentNode.Find(currentPath);
-            if (nextNode == null)
-            {
-                return null;
-            }
-            currentNode = nextNode;
-            currentIndex++;
-        }
-        return currentNode;
     }
 }
