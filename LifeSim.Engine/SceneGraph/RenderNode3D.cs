@@ -142,11 +142,15 @@ public partial class RenderNode3D : Node3D
         base.AttachToSceneRecursive(scene);
 
         scene.NotifyRenderableAdded(this._renderable);
+        scene.RegisterPickingId(this._renderable.PickingId, this);
     }
 
     protected override void DetachFromSceneRecursive()
     {
-        this.Scene?.NotifyRenderableRemoved(this._renderable);
+        if (this.Scene is null) return;
+        this.Scene.NotifyRenderableRemoved(this._renderable);
+        this.Scene.UnregisterPickingId(this._renderable.PickingId);
+
         base.DetachFromSceneRecursive();
     }
 

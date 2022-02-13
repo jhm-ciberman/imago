@@ -33,6 +33,8 @@ public abstract class Scene : Node3D
 
     private readonly Dictionary<Renderable, int> _renderableToIndex = new Dictionary<Renderable, int>();
 
+    private readonly Dictionary<uint, RenderNode3D> _pickingIdToRenderNode = new Dictionary<uint, RenderNode3D>();
+
     public IReadOnlyList<Renderable> Renderables => this._renderables;
 
     public Scene()
@@ -103,6 +105,26 @@ public abstract class Scene : Node3D
         if (lastRenderable != renderable)
         {
             this._renderableToIndex[lastRenderable] = index;
+        }
+    }
+
+    public void RegisterPickingId(uint pickingId, RenderNode3D renderNode)
+    {
+        this._pickingIdToRenderNode.Add(pickingId, renderNode);
+    }
+
+    public void UnregisterPickingId(uint pickingId)
+    {
+        this._pickingIdToRenderNode.Remove(pickingId);
+    }
+
+    public RenderNode3D? SelectedRenderNode
+    {
+        get
+        {
+            uint pickingId = Renderer.Instance.MousePickerObjectID;
+            this._pickingIdToRenderNode.TryGetValue(pickingId, out var renderNode);
+            return renderNode;
         }
     }
 

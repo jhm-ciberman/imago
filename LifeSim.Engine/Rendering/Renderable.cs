@@ -30,11 +30,9 @@ public class Renderable : IDisposable
     public Skeleton? Skeleton { get; private set; }
     public Material? Material { get; private set; }
     private DataBlock _instanceDataBlock;
-    private readonly SceneStorage _storage;
 
     public Renderable(SceneStorage storage, int instanceDataSize)
     {
-        this._storage = storage;
         this.PickingId = ++_count;
         this._transformDataBlock = storage.RequestTransformDataBlock();
         this.TransformResourceSet = this._transformDataBlock.Buffer.ResourceSet;
