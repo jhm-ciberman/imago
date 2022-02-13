@@ -116,13 +116,23 @@ public partial class RenderNode3D : Node3D
     public ColorF AlbedoColor
     {
         get => this._instanceData.AlbedoColor;
-        set { this._instanceData.AlbedoColor = value; this.OnInstanceDataDirty(); }
+        set
+        {
+            if (this._instanceData.AlbedoColor == value) return;
+            this._instanceData.AlbedoColor = value;
+            this.OnInstanceDataDirty();
+        }
     }
 
     public Vector4 TextureST
     {
         get => this._instanceData.TextureST;
-        set { this._instanceData.TextureST = value; this.OnInstanceDataDirty(); }
+        set
+        {
+            if (this._instanceData.TextureST == value) return;
+            this._instanceData.TextureST = value;
+            this.OnInstanceDataDirty();
+        }
     }
 
     private void OnInstanceDataDirty()
