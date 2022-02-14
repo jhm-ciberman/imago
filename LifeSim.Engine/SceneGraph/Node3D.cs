@@ -95,8 +95,43 @@ public class Node3D
         return ref this._localMatrix;
     }
 
+    public T? FindChild<T>(string name) where T : Node3D
+    {
+        if (this is T tNode && this.Name == name) return tNode;
+
+        foreach (var child in this.Children)
+        {
+            var found = child.FindChild<T>(name);
+            if (found != null) return found;
+        }
+
+        return null;
+    }
+
+    public T? GetChildByName<T>(string name) where T : Node3D
+    {
+        foreach (var child in this.Children)
+        {
+            if (child.Name == name && child is T tChild)
+            {
+                return tChild;
+            }
+        }
+
+        return null;
+    }
+
+    public Node3D? GetChildByName(string name)
+    {
+        foreach (var child in this.Children)
+        {
+            if (child.Name == name) return child;
+        }
+
+        return null;
+    }
+
     // path is a relative path to a node (example: "Armature/Hips/Spine1/Spine2/Head")
-    // The method should be recursive
     public T? FindPath<T>(string path) where T : Node3D
     {
         if (string.IsNullOrEmpty(path)) return null;
@@ -105,23 +140,11 @@ public class Node3D
         var currentNode = this;
         foreach (var pathPart in pathParts)
         {
+            currentNode = currentNode.GetChildByName(pathPart);
             if (currentNode == null) return null;
-            currentNode = currentNode.FindChild<Node3D>(pathPart);
         }
 
         return currentNode as T;
-    }
-
-    public T? FindChild<T>(string name) where T : Node3D
-    {
-        if (string.IsNullOrEmpty(name)) return null;
-
-        foreach (var child in this.Children)
-        {
-            if (child.Name == name) return child as T;
-        }
-
-        return null;
     }
 
     public void AddChild(Node3D node)

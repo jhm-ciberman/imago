@@ -40,7 +40,7 @@ public class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
     private readonly IRenderTexture _renderTexture;
     private readonly SceneStorage _storage;
     private readonly RenderJob _renderJob;
-    private readonly RenderQueue _renderQueue;
+    private readonly RenderQueue _opaqueRenderQueue;
 
     private readonly ShadowPass _shadowPass;
 
@@ -68,7 +68,7 @@ public class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
 
         this._renderJob = new RenderJob(this._gd, false);
 
-        this._renderQueue = new RenderQueue(RenderQueueFlags.Opaque);
+        this._opaqueRenderQueue = new RenderQueue(RenderQueueFlags.Opaque);
 
         this._shadowPass.ShadowmapTexture.OnResized += this.OnShadowmapResized;
     }
@@ -98,8 +98,8 @@ public class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
             return;
         }
 
-        this._renderQueue.AddToRenderQueue(scene.Renderables, camera.FrustumForCulling, camera.Position);
-        this._renderQueue.Sort();
+        this._opaqueRenderQueue.AddToRenderQueue(camera.FrustumForCulling, camera.Position);
+        this._opaqueRenderQueue.Sort();
 
         cl.SetFramebuffer(this._renderTexture.Framebuffer);
 
@@ -130,7 +130,7 @@ public class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
         cl.UpdateBuffer(this._camera3DInfoBuffer, 0, ref cameraInfo);
         cl.UpdateBuffer(this._lightInfoBuffer, 0, ref lightInfo);
 
-        this._renderJob.DrawRenderList(cl, this._resourceSet, this._renderQueue);
+        this._renderJob.DrawRenderList(cl, this._resourceSet, this._opaqueRenderQueue);
     }
 
     public void Dispose()

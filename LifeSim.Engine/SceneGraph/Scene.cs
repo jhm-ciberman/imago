@@ -6,36 +6,23 @@ using LifeSim.Engine.SceneGraph;
 
 namespace LifeSim.Engine.SceneGraph;
 
-public abstract class Scene : Node3D
+public class Scene : Node3D
 {
     public DirectionalLight MainLight { get; set; } = new DirectionalLight();
-
     public ColorF AmbientColor { get; set; } = new ColorF(.2f, .2f, .2f, 100f / 255f);
-
     public RenderNode3D? SelectedNode { get; set; } // This is set by the mouse picking pass.
-
-
     public GizmosLayer Gizmos { get; } = new GizmosLayer();
-
     public Camera3D? Camera { get; set; } = null;
-
-    private readonly List<IParticleSystem> _particleSystems = new List<IParticleSystem>();
+    public IReadOnlyList<CanvasLayer> CanvasLayers => this._canvasLayers;
 
     public IReadOnlyList<IParticleSystem> ParticleSystems => this._particleSystems;
 
+    private readonly List<IParticleSystem> _particleSystems = new List<IParticleSystem>();
     private readonly List<CanvasLayer> _canvasLayers = new List<CanvasLayer>();
-
-    public IReadOnlyList<CanvasLayer> CanvasLayers => this._canvasLayers;
 
     private readonly List<Node3D> _transformDirtyList = new List<Node3D>();
 
-    private readonly SwapPopList<Renderable> _renderables = new SwapPopList<Renderable>();
-
-    private readonly Dictionary<Renderable, int> _renderableToIndex = new Dictionary<Renderable, int>();
-
     private readonly Dictionary<uint, RenderNode3D> _pickingIdToRenderNode = new Dictionary<uint, RenderNode3D>();
-
-    public IReadOnlyList<Renderable> Renderables => this._renderables;
 
     public Scene()
     {
@@ -77,35 +64,9 @@ public abstract class Scene : Node3D
         // 
     }
 
-    public abstract void Update(float deltaTime);
-
-    public void NotifyRenderableAdded(Renderable renderable)
+    public virtual void Update(float deltaTime)
     {
-        if (this._renderableToIndex.ContainsKey(renderable))
-        {
-            return;
-        }
-
-        this._renderableToIndex.Add(renderable, this._renderables.Count);
-        this._renderables.Add(renderable);
-    }
-
-    public void NotifyRenderableRemoved(Renderable renderable)
-    {
-        if (!this._renderableToIndex.TryGetValue(renderable, out var index))
-        {
-            return;
-        }
-
-        var lastRenderable = this._renderables[this._renderables.Count - 1];
-
-        this._renderables.RemoveAt(index); // SwapPopList.RemoveAt() is O(1)
-        this._renderableToIndex.Remove(renderable);
-
-        if (lastRenderable != renderable)
-        {
-            this._renderableToIndex[lastRenderable] = index;
-        }
+        //
     }
 
     public void RegisterPickingId(uint pickingId, RenderNode3D renderNode)

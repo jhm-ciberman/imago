@@ -8,6 +8,10 @@ namespace LifeSim.Engine.Rendering;
 
 public class Renderable : IDisposable
 {
+    public delegate void RenderQueueFlagsChangedHandler(Renderable renderable, RenderQueueFlags oldFlags, RenderQueueFlags newFlags);
+
+    public static event RenderQueueFlagsChangedHandler? OnRenderQueueFlagsChanged;
+
     private static uint _count;
     private Matrix4x4 _transform = Matrix4x4.Identity;
     public Vector3 CenterPosition { get; private set; }
@@ -24,7 +28,20 @@ public class Renderable : IDisposable
 
     public Mesh? Mesh { get; private set; } = null;
 
-    public RenderQueueFlags RenderQueueFlags { get; set; } = RenderQueueFlags.All;
+    private RenderQueueFlags _renderQueueFlags = RenderQueueFlags.All;
+    public RenderQueueFlags RenderQueueFlags
+    {
+        get => this._renderQueueFlags;
+        set
+        {
+            if (this._renderQueueFlags != value)
+            {
+                var oldFlags = this._renderQueueFlags;
+                this._renderQueueFlags = value;
+                OnRenderQueueFlagsChanged?.Invoke(this, oldFlags, value);
+            }
+        }
+    }
     public uint PickingId { get; }
 
     public Skeleton? Skeleton { get; private set; }

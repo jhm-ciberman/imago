@@ -10,54 +10,83 @@ public class RenderQueue : IEnumerable<Renderable>, IReadOnlyList<Renderable>, I
 {
     private const int DEFAULT_CAPACITY = 250;
 
-    private readonly List<RenderIndex> _indices = new List<RenderIndex>(DEFAULT_CAPACITY);
-    private readonly List<Renderable> _items = new List<Renderable>(DEFAULT_CAPACITY);
+    private readonly List<Renderable> _allRenderables = new List<Renderable>();
+    private readonly Dictionary<Renderable, int> _renderableToIndex = new Dictionary<Renderable, int>();
+    private readonly List<RenderIndex> _culledIndices = new List<RenderIndex>(DEFAULT_CAPACITY);
+    private readonly List<Renderable> _culledItems = new List<Renderable>(DEFAULT_CAPACITY);
 
-    public int Count => this._indices.Count;
+    public int Count => this._culledIndices.Count;
 
-    public Renderable this[int index] => this._items[this._indices[index].Index];
-
+    public Renderable this[int index] => this._culledItems[this._culledIndices[index].Index];
 
     public RenderQueueFlags FilterFlags { get; set; }
 
     public RenderQueue(RenderQueueFlags filterFlags)
     {
         this.FilterFlags = filterFlags;
+
+        Renderable.OnRenderQueueFlagsChanged += this.OnRenderQueueFlagsChanged;
+    }
+
+    private void OnRenderQueueFlagsChanged(Renderable renderable, RenderQueueFlags oldFlags, RenderQueueFlags newFlags)
+    {
+        if (newFlags.HasFlag(this.FilterFlags))
+        {
+            this._renderableToIndex.Add(renderable, this._allRenderables.Count);
+            this._allRenderables.Add(renderable);
+        }
+        else
+        {
+            if (oldFlags.HasFlag(this.FilterFlags))
+            {
+                if (this._renderableToIndex.TryGetValue(renderable, out int index))
+                {
+                    // Swap pop algorithm to remove in O(1) time.
+                    var lastIndex = this._allRenderables.Count - 1;
+                    var lastRenderable = this._allRenderables[lastIndex];
+                    this._allRenderables[index] = lastRenderable;
+                    this._renderableToIndex[lastRenderable] = index;
+                    this._allRenderables.RemoveAt(lastIndex);
+                    this._renderableToIndex.Remove(renderable);
+                }
+            }
+        }
     }
 
     public void Sort()
     {
-        this._indices.Sort();
+        this._culledIndices.Sort();
     }
 
-    public void AddToRenderQueue(IReadOnlyList<Renderable> renderables, BoundingFrustum cameraFrustum, Vector3 cameraPosition)
+    public void AddToRenderQueue(BoundingFrustum cameraFrustum, Vector3 cameraPosition)
     {
-        this._indices.Clear();
-        this._items.Clear();
+        this._culledIndices.Clear();
+        this._culledItems.Clear();
+        var renderables = this._allRenderables;
         for (int i = 0; i < renderables.Count; i++)
         {
             Renderable renderable = renderables[i];
-            if (renderable.Material == null || renderable.Mesh == null) continue;
+            //if (renderable.Material == null || renderable.Mesh == null) continue;
 
             if (!renderable.RenderQueueFlags.HasFlag(this.FilterFlags)) continue;
 
             if (cameraFrustum.Contains(renderable.BoundingBox) != ContainmentType.Disjoint)
             {
                 ulong key = renderable.GetSortKey(cameraPosition);
-                this._indices.Add(new RenderIndex(key, this._items.Count));
-                this._items.Add(renderable);
+                this._culledIndices.Add(new RenderIndex(key, this._culledItems.Count));
+                this._culledItems.Add(renderable);
             }
         }
     }
 
     public IEnumerator<Renderable> GetEnumerator()
     {
-        return new Enumerator(this._indices, this._items);
+        return new Enumerator(this._culledIndices, this._culledItems);
     }
 
     IEnumerator IEnumerable.GetEnumerator()
     {
-        return new Enumerator(this._indices, this._items);
+        return new Enumerator(this._culledIndices, this._culledItems);
     }
 
     private struct Enumerator : IEnumerator<Renderable>

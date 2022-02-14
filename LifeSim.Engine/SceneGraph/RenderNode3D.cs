@@ -33,6 +33,7 @@ public partial class RenderNode3D : Node3D
             }
 
             this._renderable.SetMesh(value);
+            this.RenderQueueFlagsChanged();
         }
     }
 
@@ -50,6 +51,7 @@ public partial class RenderNode3D : Node3D
             }
 
             this._renderable.SetMaterial(value);
+            this.RenderQueueFlagsChanged();
         }
     }
 
@@ -151,14 +153,13 @@ public partial class RenderNode3D : Node3D
     {
         base.AttachToSceneRecursive(scene);
 
-        scene.NotifyRenderableAdded(this._renderable);
         scene.RegisterPickingId(this._renderable.PickingId, this);
+        this.RenderQueueFlagsChanged();
     }
 
     internal override void DetachFromSceneRecursive()
     {
         if (this.Scene is null) return;
-        this.Scene.NotifyRenderableRemoved(this._renderable);
         this.Scene.UnregisterPickingId(this._renderable.PickingId);
 
         base.DetachFromSceneRecursive();
@@ -167,6 +168,12 @@ public partial class RenderNode3D : Node3D
     private void RenderQueueFlagsChanged()
     {
         RenderQueueFlags flags = RenderQueueFlags.None;
+
+        if (this.Scene is null || this.Material is null || this.Mesh is null)
+        {
+            this._renderable.RenderQueueFlags = flags;
+            return;
+        }
 
         if (this.Visible)
         {
