@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using LifeSim.Engine.Controls;
 using LifeSim.Engine.Rendering;
 using LifeSim.Engine.SceneGraph;
 
@@ -8,12 +9,15 @@ namespace LifeSim.Engine.SceneGraph;
 
 public class Scene : Node3D
 {
+    public Color? BackgroundColor { get; set; } = Color.CoolGray;
     public DirectionalLight MainLight { get; set; } = new DirectionalLight();
     public ColorF AmbientColor { get; set; } = new ColorF(.2f, .2f, .2f, 100f / 255f);
     public RenderNode3D? SelectedNode { get; set; } // This is set by the mouse picking pass.
     public GizmosLayer Gizmos { get; } = new GizmosLayer();
     public Camera3D? Camera { get; set; } = null;
     public IReadOnlyList<CanvasLayer> CanvasLayers => this._canvasLayers;
+
+    public UILayer? UILayer { get; set; } = null;
 
     public IReadOnlyList<IParticleSystem> ParticleSystems => this._particleSystems;
 

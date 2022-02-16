@@ -9,6 +9,26 @@ public class Font : IDisposable
 {
     private readonly FontSystem _fontSystem;
 
+    private static Font? _defaultFont;
+    public static Font Default
+    {
+        get
+        {
+            if (_defaultFont == null)
+            {
+                _defaultFont = new Font(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"res/fonts/DroidSans.ttf"));
+            }
+
+            return _defaultFont;
+        }
+
+        set => _defaultFont = value;
+    }
+
+    public Font(string path) : this(new string[] { path })
+    {
+    }
+
     public Font(string[] paths)
     {
         var fontLoader = StbTrueTypeSharpFontLoader.Instance;

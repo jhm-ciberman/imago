@@ -161,6 +161,12 @@ public class Renderer : ITexture2DManager, IDisposable
 
         this._commandList.SetFramebuffer(this.MainRenderTexture.Framebuffer);
 
+        if (scene.BackgroundColor != null)
+        {
+            ColorF col = scene.BackgroundColor.Value;
+            this._commandList.ClearColorTarget(0, new RgbaFloat(col.R, col.G, col.B, col.A));
+        }
+
         for (int i = 0; i < this._passes.Count; i++)
         {
             this._passes[i].Render(this._commandList, scene);

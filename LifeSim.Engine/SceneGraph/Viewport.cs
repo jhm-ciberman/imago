@@ -1,3 +1,5 @@
+using System.Numerics;
+
 namespace LifeSim.Engine.Rendering;
 
 public class Viewport
@@ -31,4 +33,5 @@ public class Viewport
     public uint Height { get; private set; }
     public uint X { get; private set; }
     public uint Y { get; private set; }
+    public Vector2 Size => new Vector2(this.Width, this.Height);
 }

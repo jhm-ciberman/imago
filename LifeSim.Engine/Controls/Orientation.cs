@@ -1,4 +1,4 @@
-namespace LifeSim.Engine.SceneGraph;
+namespace LifeSim.Engine.Controls;
 
 
 public enum Orientation

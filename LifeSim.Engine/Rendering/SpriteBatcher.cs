@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using FontStashSharp.Interfaces;
+using LifeSim.Engine.Resources;
+using LifeSim.Engine.SceneGraph;
 using Veldrid;
 
 namespace LifeSim.Engine.Rendering;
@@ -138,6 +140,80 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
         this.TotalSpritesToDraw++;
     }
 
+    public void DrawNinePatch(Shader? shader, ITexture texture, Thickness patchMargin, Vector2 size, Vector2 pivot, ref Matrix3x2 worldMatrix, Color color, bool drawCenter)
+    {
+        var sizeTotal = new Vector2(texture.Width, texture.Height);
+        var sizeTL = new Vector2(patchMargin.Left, patchMargin.Top);
+        var sizeBR = new Vector2(patchMargin.Right, patchMargin.Bottom);
+        var sizeTR = new Vector2(patchMargin.Top, patchMargin.Right);
+        var sizeBL = new Vector2(patchMargin.Left, patchMargin.Bottom);
+
+        var uvTL = sizeTL / sizeTotal;
+        var uvBR = Vector2.One - sizeBR / sizeTotal;
+
+        float scale = 2f;
+
+        // Scale if the size is smaller (after calculating UVs)
+        var minimumRequiredSize = (sizeTL + sizeBR) * scale;
+        if (minimumRequiredSize.X > 0 && minimumRequiredSize.Y > 0)
+        {
+            if (size.X < minimumRequiredSize.X || size.Y < minimumRequiredSize.Y)
+            {
+                scale *= MathF.Min(size.X, size.Y) / MathF.Min(minimumRequiredSize.X, minimumRequiredSize.Y);
+            }
+        }
+
+        sizeTL *= scale;
+        sizeBR *= scale;
+        sizeTR *= scale;
+        sizeBL *= scale;
+        var sizeSegmentCenter = size - sizeTL - sizeBR;
+
+        float depth = 0f;
+
+        if (drawCenter)
+        {
+
+            if (sizeSegmentCenter.X > 0 && sizeSegmentCenter.Y > 0)
+            {
+                this.Draw(shader, texture, -pivot + sizeTL, sizeSegmentCenter, uvTL, uvBR, in worldMatrix, color, depth);
+            }
+        }
+
+        var posTL = new Vector2(0f, 0f);
+        var posTR = new Vector2(size.X - sizeTL.X, 0f);
+        var posBR = new Vector2(size.X - sizeTL.X, size.Y - sizeTL.Y);
+        var posBL = new Vector2(0f, size.Y - sizeTL.Y);
+
+        // Corner Top Left
+        this.Draw(shader, texture, -pivot + posTL, sizeTL, Vector2.Zero, uvTL, in worldMatrix, color, depth);
+        // Corner Top Right
+        this.Draw(shader, texture, -pivot + posTR, sizeTR, new Vector2(uvBR.X, 0f), new Vector2(1f, uvTL.Y), in worldMatrix, color, depth);
+        // Corner Bottom Left
+        this.Draw(shader, texture, -pivot + posBL, sizeBL, new Vector2(0f, uvBR.Y), new Vector2(uvTL.X, 1f), in worldMatrix, color, depth);
+        // Corner Bottom Right
+        this.Draw(shader, texture, -pivot + posBR, sizeBR, uvBR, Vector2.One, in worldMatrix, color, depth);
+
+
+        var sizeTop = new Vector2(size.X - sizeTL.X - sizeTR.X, sizeTL.Y);
+        var sizeBottom = new Vector2(size.X - sizeBL.X - sizeBR.X, sizeBL.Y);
+        var sizeLeft = new Vector2(sizeTL.X, size.Y - sizeTL.Y - sizeBL.Y);
+        var sizeRight = new Vector2(sizeTR.X, size.Y - sizeTR.Y - sizeBR.Y);
+
+        // Lateral Top
+        this.Draw(shader, texture, -pivot + new Vector2(sizeTL.X, 0f), sizeTop, new Vector2(uvTL.X, 0f), new Vector2(uvBR.X, uvTL.Y), in worldMatrix, color, depth);
+        // Lateral Bottom
+        this.Draw(shader, texture, -pivot + new Vector2(sizeBL.X, size.Y - sizeBL.Y), sizeBottom, new Vector2(uvTL.X, uvBR.Y), new Vector2(uvBR.X, 1f), in worldMatrix, color, depth);
+        // Lateral Left
+        this.Draw(shader, texture, -pivot + new Vector2(0f, sizeTL.Y), sizeLeft, new Vector2(0f, uvTL.Y), new Vector2(uvTL.X, uvBR.Y), in worldMatrix, color, depth);
+        // Lateral Right
+        this.Draw(shader, texture, -pivot + new Vector2(size.X - sizeTR.X, sizeTR.Y), sizeRight, new Vector2(uvBR.X, uvTL.Y), new Vector2(1f, uvBR.Y), in worldMatrix, color, depth);
+    }
+
+    public void DrawText(Font font, string text, int fontSize, Vector2 position, Color color, float depth = 0f)
+    {
+        font.GetFont(fontSize).DrawText(this, text, position, color);
+    }
 
     public void Dispose()
     {

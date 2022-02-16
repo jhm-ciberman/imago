@@ -34,6 +34,9 @@ public readonly struct Color
 
     public static Color White => new Color(255, 255, 255, 255);
     public static Color Gray => new Color(128, 128, 128, 255);
+    public static Color LightGray => new Color(192, 192, 192, 255);
+    public static Color DarkGray => new Color(64, 64, 64, 255);
+    public static Color CoolGray => new Color(140, 146, 172, 255);
     public static Color Black => new Color(0, 0, 0, 255);
     public static Color Red => new Color(255, 0, 0, 255);
     public static Color Green => new Color(0, 255, 0, 255);

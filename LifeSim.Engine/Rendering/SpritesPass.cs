@@ -162,5 +162,13 @@ public class SpritesPass : IDisposable, IPipelineProvider, IRenderingPass
             this.BeginPass(cl, canvasLayer.ViewProjectionMatrix);
             this.SubmitBatches(cl, this._spriteBatcher.IndexBuffer, this._spriteBatcher.Batches);
         }
+
+        if (scene.UILayer != null)
+        {
+            this._spriteBatcher.BeginBatch();
+            scene.UILayer.Draw(this._spriteBatcher);
+            this.BeginPass(cl, scene.UILayer.ViewProjectionMatrix);
+            this.SubmitBatches(cl, this._spriteBatcher.IndexBuffer, this._spriteBatcher.Batches);
+        }
     }
 }

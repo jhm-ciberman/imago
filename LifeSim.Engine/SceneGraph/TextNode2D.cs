@@ -10,7 +10,7 @@ public class TextNode2D : RenderNode2D
 
     public Color Color { get; set; } = new Color(0xFFFF4500);
 
-    public Font? Font { get; set; }
+    public Font Font { get; set; } = Font.Default;
 
     public int FontSize { get; set; } = 30;
 
@@ -22,14 +22,13 @@ public class TextNode2D : RenderNode2D
     public TextNode2D(string text, Font? font = null)
     {
         this.Text = text;
-        this.Font = font;
+        this.Font = font ?? Font.Default;
     }
 
     public override void Render(SpriteBatcher spriteBatcher)
     {
-        if (this.Font == null) return;
-        var fontSize = this.Font.GetFont(this.FontSize);
         var pos = this.WorldMatrix.Translation;
-        fontSize.DrawText(spriteBatcher, this.Text, pos, this.Color);
+
+        spriteBatcher.DrawText(this.Font, this.Text, this.FontSize, pos, this.Color);
     }
 }
