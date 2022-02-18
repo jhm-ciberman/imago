@@ -90,11 +90,11 @@ public class Renderer : ITexture2DManager, IDisposable
         {
             this._shadowPass,
             this._forwardPass,
-            this._gizmosPass,
             this._skyDomePass,
-            this._particlesPass,
-            this._spritesPass,
             this._mousePickerPass,
+            this._particlesPass,
+            this._gizmosPass,
+            this._spritesPass,
             this._imGuiPass,
             this._fullScreenPass
         });

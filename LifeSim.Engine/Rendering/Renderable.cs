@@ -162,7 +162,7 @@ public class Renderable : IDisposable
 
     private void RecomputeBoundingBox()
     {
-        this.BoundingBox = BoundingBox.Transform(this.Mesh!.AABB, this._transform);
+        this.BoundingBox = BoundingBox.Transform(this.Mesh!.BoundingBox, this._transform);
         this.CenterPosition = this.BoundingBox.GetCenter();
     }
 

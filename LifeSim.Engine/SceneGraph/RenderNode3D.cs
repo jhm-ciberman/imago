@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using LifeSim.Engine.Rendering;
 using LifeSim.Engine.Resources;
+using Veldrid.Utilities;
 
 namespace LifeSim.Engine.SceneGraph;
 
@@ -186,5 +187,29 @@ public partial class RenderNode3D : Node3D
         }
 
         this._renderable.RenderQueueFlags = flags;
+    }
+
+
+    public bool RayCast(Ray ray, out float distance)
+    {
+        var mesh = this.Mesh;
+        if (mesh is null)
+        {
+            distance = float.MaxValue;
+            return false;
+        }
+
+        // FIXME: If the world matrix is not updated, this will not work
+        Matrix4x4.Invert(this.WorldMatrix, out var invWorld);
+        var localRay = Ray.Transform(ray, invWorld);
+
+        // Fast check for bounding box intersection
+        if (!localRay.Intersects(mesh.BoundingBox))
+        {
+            distance = float.MaxValue;
+            return false;
+        }
+
+        return mesh.MeshData.RayCast(localRay, out distance);
     }
 }
