@@ -1,3 +1,4 @@
+using System;
 using System.Numerics;
 using LifeSim.Engine.Rendering;
 using Veldrid.Utilities;
@@ -181,5 +182,45 @@ public class Camera3D
     {
         Matrix4x4 worldMat = Matrix4x4.CreateWorld(this.Position, this.Position - destPoint, Vector3.UnitY);
         this.Rotation = Quaternion.CreateFromRotationMatrix(worldMat);
+    }
+
+    /// <summary>
+    /// Unproject a point from screen space to world space.
+    /// </summary>
+    /// <param name="point">The point in screen space.</param>
+    /// <returns>The point in world space.</returns>
+    public Vector3 Unproject(Vector3 point)
+    {
+        Matrix4x4.Invert(this.ViewProjectionMatrix, out Matrix4x4 inverseViewProjection);
+        Vector4 v = Vector4.Transform(point, inverseViewProjection);
+        v /= v.W;
+        return new Vector3(v.X, v.Y, v.Z);
+    }
+
+    /// <summary>
+    /// Projects a point from world space to screen space.
+    /// </summary>
+    /// <param name="point">The point in world space.</param>
+    /// <returns>The point in screen space.</returns>
+    public Vector3 Project(Vector3 point)
+    {
+        Vector4 v = Vector4.Transform(point, this.ViewProjectionMatrix);
+        v /= v.W;
+        return new Vector3(v.X, v.Y, v.Z);
+    }
+
+    /// <summary>
+    /// Creates a ray from the camera's position to the given point in screen space.
+    /// </summary>
+    /// <param name="point">The point in screen space.</param>
+    /// <returns>The ray.</returns>
+    public Ray ViewportRay(Vector2 point)
+    {
+        point = point * 2 - Vector2.One;
+        point.Y = -point.Y;
+        Vector3 nearPoint = this.Unproject(new Vector3(point.X, point.Y, 0));
+        Vector3 farPoint = this.Unproject(new Vector3(point.X, point.Y, 1));
+        var ray = new Ray(nearPoint, Vector3.Normalize(farPoint - nearPoint));
+        return ray;
     }
 }
