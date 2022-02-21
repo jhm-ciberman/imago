@@ -14,6 +14,11 @@ public partial class RenderNode3D : Node3D
     [StructLayout(LayoutKind.Sequential)]
     private struct InstanceData
     {
+        public InstanceData()
+        {
+            //
+        }
+
         public Vector4 AlbedoColor { get; set; } = new Vector4(1.0f, 1.0f, 1.0f, 0.0f);
         public Vector4 TextureST { get; set; } = new Vector4(1.0f, 1.0f, 0.0f, 0.0f);
     }
