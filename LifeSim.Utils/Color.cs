@@ -1,3 +1,5 @@
+using System;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -25,6 +27,19 @@ public readonly struct Color
         this.G = g;
         this.B = b;
         this.A = a;
+    }
+
+    public Color(string hexColor)
+    {
+        if (hexColor.Length is not 6 and not 8)
+        {
+            throw new ArgumentException("Invalid hex color string.");
+        }
+
+        this.R = byte.Parse(hexColor.AsSpan(0, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+        this.G = byte.Parse(hexColor.AsSpan(2, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+        this.B = byte.Parse(hexColor.AsSpan(4, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+        this.A = hexColor.Length == 8 ? byte.Parse(hexColor.AsSpan(6, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture) : (byte)255;
     }
 
     public uint ToPackedUInt()
