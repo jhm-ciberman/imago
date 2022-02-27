@@ -41,7 +41,6 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
 
     public readonly DeviceBuffer _indexBuffer;
 
-    private ResourceSet? _resourceSet;
     private readonly int _capacity = 1000;
 
     private readonly SpriteBatch _batch;
@@ -49,7 +48,7 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
     private readonly VertexFormat _vertexFormat;
     private CommandList _commandList = null!;
 
-    private ResourceSet _passResourceSet;
+    private readonly ResourceSet _passResourceSet;
 
     public SpriteBatcher(GraphicsDevice gd, Shader defaultShader, ResourceSet passResourceSet)
     {
@@ -127,7 +126,6 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
         this.TotalSpritesToDraw = 0;
         this._batch.Clear();
         this._currentShader = null!;
-        this._resourceSet = null;
     }
 
     public void Draw(Shader? shader, ITexture texture, Vector2 position, Vector2 size)

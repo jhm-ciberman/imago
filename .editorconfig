@@ -40,7 +40,7 @@ dotnet_style_qualification_for_event = true
 csharp_style_prefer_index_operator = false
 
 # private_fields
-dotnet_naming_symbols.private_fields.applicable_kinds           = property, field
+dotnet_naming_symbols.private_fields.applicable_kinds           = field
 dotnet_naming_symbols.private_fields.applicable_accessibilities = private, protected
 # members_and_fields
 dotnet_naming_symbols.element_group.applicable_kinds           = namespace, class, enum, struct, delegate, event, method, property
