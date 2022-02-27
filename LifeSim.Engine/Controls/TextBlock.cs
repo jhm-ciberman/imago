@@ -25,13 +25,13 @@ public class TextBlock : Control
         this.Text = text;
     }
 
-    protected override void MeasureCore(Vector2 availableSize)
+    protected override Vector2 MeasureCore(Vector2 availableSize)
     {
         var fontSystem = this.Font.GetFont(this.FontSize);
         var size = fontSystem.MeasureString(this.Text);
         size.X = MathF.Min(availableSize.X, size.X);
         size.Y = MathF.Min(availableSize.Y, size.Y);
-        this.DesiredSize = size;
+        return size;
     }
 
     protected override void DrawCore(SpriteBatcher spriteBatcher)

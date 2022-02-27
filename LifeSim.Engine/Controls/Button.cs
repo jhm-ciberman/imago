@@ -86,16 +86,16 @@ public class Button : Control
         this.ActualSize = finalRect.Size;
     }
 
-    protected override void MeasureCore(Vector2 availableSize)
+    protected override Vector2 MeasureCore(Vector2 availableSize)
     {
         if (this.Content != null)
         {
             this.Content.Measure(availableSize);
-            this.DesiredSize = availableSize;
+            return availableSize;
         }
         else
         {
-            this.DesiredSize = availableSize;
+            return availableSize;
         }
     }
 

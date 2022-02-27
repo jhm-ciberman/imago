@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Numerics;
 using LifeSim.Engine.Rendering;
@@ -44,7 +43,7 @@ public abstract class Control
 
     public void Measure(Vector2 availableSize)
     {
-        if (this.Visibility == Visibility.Hidden)
+        if (this.Visibility == Visibility.Collapsed)
         {
             this.DesiredSize = Vector2.Zero;
             return;
@@ -63,16 +62,32 @@ public abstract class Control
             availableSize.Y = this.Height;
         }
 
-        this.MeasureCore(availableSize);
-        this.DesiredSize += margin;
+        this.DesiredSize = this.MeasureCore(availableSize) + margin;
     }
 
     public void Arrange(Rectangle finalRect)
     {
+        Vector2 availableSize = finalRect.Size;
         finalRect.X += this.Margin.Left;
         finalRect.Y += this.Margin.Top;
-        finalRect.Width -= this.Margin.Left + this.Margin.Right;
-        finalRect.Height -= this.Margin.Top + this.Margin.Bottom;
+
+        if (!float.IsNaN(this.Width))
+        {
+            finalRect.Width = this.Width;
+        }
+        else
+        {
+            finalRect.Width -= this.Margin.Left + this.Margin.Right;
+        }
+
+        if (!float.IsNaN(this.Height))
+        {
+            finalRect.Height = this.Height;
+        }
+        else
+        {
+            finalRect.Height -= this.Margin.Top + this.Margin.Bottom;
+        }
 
         var desiredSize = this.DesiredSize;
 
@@ -80,8 +95,8 @@ public abstract class Control
         {
             HorizontalAlignment.Left => 0,
             HorizontalAlignment.Stretch => 0,
-            HorizontalAlignment.Center => (finalRect.Width - desiredSize.X) / 2,
-            HorizontalAlignment.Right => finalRect.Width - desiredSize.X,
+            HorizontalAlignment.Center => (availableSize.X - desiredSize.X) / 2,
+            HorizontalAlignment.Right => availableSize.X - desiredSize.X,
             _ => throw new InvalidOperationException(),
         };
 
@@ -89,8 +104,8 @@ public abstract class Control
         {
             VerticalAlignment.Top => 0,
             VerticalAlignment.Stretch => 0,
-            VerticalAlignment.Center => (finalRect.Height - desiredSize.Y) / 2,
-            VerticalAlignment.Bottom => finalRect.Height - desiredSize.Y,
+            VerticalAlignment.Center => (availableSize.Y - desiredSize.Y) / 2,
+            VerticalAlignment.Bottom => availableSize.Y - desiredSize.Y,
             _ => throw new InvalidOperationException(),
         };
 
@@ -99,7 +114,7 @@ public abstract class Control
 
     public void Draw(SpriteBatcher spriteBatcher)
     {
-        if (this.Visibility == Visibility.Hidden)
+        if (this.Visibility != Visibility.Visible)
         {
             return;
         }
@@ -118,9 +133,9 @@ public abstract class Control
         this.ActualSize = finalRect.Size;
     }
 
-    protected virtual void MeasureCore(Vector2 availableSize)
+    protected virtual Vector2 MeasureCore(Vector2 availableSize)
     {
-        this.DesiredSize = availableSize;
+        return availableSize;
     }
 
     protected virtual void DrawCore(SpriteBatcher spriteBatcher)

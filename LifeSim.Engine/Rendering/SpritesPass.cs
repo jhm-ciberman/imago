@@ -15,8 +15,6 @@ public class SpritesPass : IDisposable, IPipelineProvider, IRenderingPass
     private readonly ResourceLayout _passResourceLayout;
     private readonly GraphicsDevice _gd;
 
-    private Shader? _currentShader;
-    private readonly VertexFormat _vertexFormat;
     private readonly Dictionary<(Shader, Texture), ResourceSet> _resourceSets = new Dictionary<(Shader, Texture), ResourceSet>();
     private readonly Shader _defaultShader;
 
@@ -33,11 +31,7 @@ public class SpritesPass : IDisposable, IPipelineProvider, IRenderingPass
             new ResourceLayoutElementDescription("CameraDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
         ));
 
-        this._vertexFormat = new VertexFormat(new VertexLayoutDescription(
-            new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
-            new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
-            new VertexElementDescription("Color", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Byte4_Norm)
-        ));
+
 
         this._resourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
             new ResourceLayoutElementDescription("MainTexture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
@@ -54,7 +48,7 @@ public class SpritesPass : IDisposable, IPipelineProvider, IRenderingPass
 
         this._renderTexture = renderTexture;
 
-        this._spriteBatcher = new SpriteBatcher(this._gd, this._defaultShader);
+        this._spriteBatcher = new SpriteBatcher(this._gd, this._defaultShader, this._passResourceSet);
     }
 
     public Shader MakeShader(string vertexFile, string fragmentFile)
@@ -81,40 +75,8 @@ public class SpritesPass : IDisposable, IPipelineProvider, IRenderingPass
         commandList.SetFramebuffer(this._renderTexture.Framebuffer);
         commandList.ClearDepthStencil(1f);
         commandList.UpdateBuffer(this._camera2DInfoBuffer, 0, ref projectionMatrix);
-
-        this._currentShader = null;
     }
 
-    public void SubmitBatches(CommandList commandList, DeviceBuffer sharedIndexBuffer, IReadOnlyList<SpriteBatch> batches)
-    {
-        for (int i = 0; i < batches.Count; i++)
-        {
-            var batch = batches[i];
-
-            commandList.UpdateBuffer(batch.VertexBuffer, 0, batch.Items);
-
-            if (this._currentShader != batch.Shader)
-            {
-                this._currentShader = batch.Shader;
-                var pipeline = batch.Shader.GetPipeline(this._vertexFormat);
-
-                commandList.SetPipeline(pipeline);
-                commandList.SetGraphicsResourceSet(0, this._passResourceSet);
-            }
-
-            commandList.SetVertexBuffer(0, batch.VertexBuffer);
-            commandList.SetIndexBuffer(sharedIndexBuffer, IndexFormat.UInt16);
-
-            commandList.SetGraphicsResourceSet(1, batch.ResourceSet);
-            commandList.DrawIndexed(
-                indexCount: (uint)batch.Count * 6,
-                instanceCount: 1,
-                indexStart: 0,
-                vertexOffset: 0,
-                instanceStart: 0
-            );
-        }
-    }
 
     Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant)
     {
@@ -149,26 +111,25 @@ public class SpritesPass : IDisposable, IPipelineProvider, IRenderingPass
     {
         var canvasLayers = scene.CanvasLayers;
 
+        this._spriteBatcher.BeginBatch(cl);
         for (int i = 0; i < canvasLayers.Count; i++)
         {
             var canvasLayer = canvasLayers[i];
-            this._spriteBatcher.BeginBatch();
+            this.BeginPass(cl, canvasLayer.ViewProjectionMatrix);
 
             for (int j = 0; j < canvasLayer.Items.Count; j++)
             {
                 canvasLayer.Items[j].Render(this._spriteBatcher);
             }
 
-            this.BeginPass(cl, canvasLayer.ViewProjectionMatrix);
-            this.SubmitBatches(cl, this._spriteBatcher.IndexBuffer, this._spriteBatcher.Batches);
+            this._spriteBatcher.FlushBatch();
         }
 
         if (scene.UILayer != null)
         {
-            this._spriteBatcher.BeginBatch();
-            scene.UILayer.Draw(this._spriteBatcher);
             this.BeginPass(cl, scene.UILayer.ViewProjectionMatrix);
-            this.SubmitBatches(cl, this._spriteBatcher.IndexBuffer, this._spriteBatcher.Batches);
+            scene.UILayer.Draw(this._spriteBatcher);
+            this._spriteBatcher.FlushBatch();
         }
     }
 }

@@ -12,7 +12,7 @@ public class StackPanel : ItemsControl
         //
     }
 
-    protected override void MeasureCore(Vector2 availableSize)
+    protected override Vector2 MeasureCore(Vector2 availableSize)
     {
         var desiredSize = Vector2.Zero;
 
@@ -34,7 +34,7 @@ public class StackPanel : ItemsControl
             }
         }
 
-        this.DesiredSize = desiredSize;
+        return desiredSize;
     }
 
     protected override void ArrangeCore(Rectangle finalRect)

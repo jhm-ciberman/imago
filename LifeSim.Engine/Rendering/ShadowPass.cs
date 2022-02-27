@@ -30,7 +30,7 @@ public partial class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
     private readonly RenderJob _renderJob;
     private readonly SceneStorage _storage;
 
-    private ShadowCascade[] _cascades { get; } = new ShadowCascade[4];
+    private ShadowCascade[] _cascades = new ShadowCascade[4];
     private Matrix4x4 _scalingMatrix;
 
     private readonly float[] _splitDistances = new float[5]; // 4 splits + 1 for far plane
