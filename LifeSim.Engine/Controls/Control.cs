@@ -18,7 +18,7 @@ public abstract class Control
 
     public VerticalAlignment VerticalAlignment { get; set; } = VerticalAlignment.Top;
 
-    public virtual IEnumerable<Control> VisualChildren => Enumerable.Empty<Control>();
+    public virtual IEnumerable<Control> VisualChildren { get; } = Enumerable.Empty<Control>();
 
     public Control()
     {
@@ -31,6 +31,8 @@ public abstract class Control
     }
 
     public Vector2 Position { get; protected set; } = Vector2.Zero;
+
+    public Vector2 ActualSize { get; protected set; } = Vector2.Zero;
 
     public Visibility Visibility { get; protected set; } = Visibility.Visible;
 
@@ -48,6 +50,9 @@ public abstract class Control
             return;
         }
 
+        var margin = new Vector2(this.Margin.Left + this.Margin.Right, this.Margin.Top + this.Margin.Bottom);
+        availableSize -= margin;
+
         if (!float.IsNaN(this.Width))
         {
             availableSize.X = this.Width;
@@ -58,8 +63,6 @@ public abstract class Control
             availableSize.Y = this.Height;
         }
 
-        var margin = new Vector2(this.Margin.Left + this.Margin.Right, this.Margin.Top + this.Margin.Bottom);
-        availableSize -= margin;
         this.MeasureCore(availableSize);
         this.DesiredSize += margin;
     }
@@ -104,9 +107,15 @@ public abstract class Control
         this.DrawCore(spriteBatcher);
     }
 
+    public virtual void Update(float deltaTime)
+    {
+        // Do nothing. This should be overridden by subclasses.
+    }
+
     protected virtual void ArrangeCore(Rectangle finalRect)
     {
         this.Position = finalRect.Min;
+        this.ActualSize = finalRect.Size;
     }
 
     protected virtual void MeasureCore(Vector2 availableSize)

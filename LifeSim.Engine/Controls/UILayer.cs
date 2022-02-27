@@ -58,4 +58,10 @@ public class UILayer
         if (this._content is null) return;
         this._content.Draw(spriteBatcher);
     }
+
+    internal void Update(float deltaTime)
+    {
+        if (this._content is null) return;
+        this._content.Update(deltaTime);
+    }
 }

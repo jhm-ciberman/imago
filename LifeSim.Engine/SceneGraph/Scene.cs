@@ -93,8 +93,10 @@ public class Scene : Node3D
         }
     }
 
-    public void EndUpdate()
+    public void EndUpdate(float deltaTime)
     {
+        this.UILayer?.Update(deltaTime);
+
         for (int i = 0; i < this._canvasLayers.Count; i++)
         {
             this._canvasLayers[i].UpdateTransforms();

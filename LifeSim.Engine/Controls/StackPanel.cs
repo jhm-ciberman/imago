@@ -60,6 +60,9 @@ public class StackPanel : ItemsControl
                 y += childDesiredSize.Y;
             }
         }
+
+        this.Position = finalRect.Position;
+        this.ActualSize = finalRect.Size;
     }
 
 

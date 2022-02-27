@@ -21,8 +21,11 @@ public static class Input
 
     public static bool GetKey(Key key) => Input.GetInstance().GetKey(key);
     public static bool GetKeyDown(Key key) => Input.GetInstance().GetKeyDown(key);
+    public static bool GetKeyUp(Key key) => Input.GetInstance().GetKeyUp(key);
+
     public static bool GetMouseButton(MouseButton button) => Input.GetInstance().GetMouseButton(button);
     public static bool GetMouseButtonDown(MouseButton button) => Input.GetInstance().GetMouseButtonDown(button);
+    public static bool GetMouseButtonUp(MouseButton button) => Input.GetInstance().GetMouseButtonUp(button);
 
     public static Vector2 MouseDelta => Input.GetInstance().MouseDelta;
     public static Vector2 MousePosition => Input.GetInstance().MousePosition;

@@ -12,8 +12,12 @@ public class InputInstance
     private readonly HashSet<Key> _currentlyPressedKeys = new HashSet<Key>();
     private readonly HashSet<Key> _newKeysThisFrame = new HashSet<Key>();
 
+    private readonly HashSet<Key> _releasedKeysThisFrame = new HashSet<Key>();
+
     private readonly HashSet<MouseButton> _currentlyPressedMouseButtons = new HashSet<MouseButton>();
     private readonly HashSet<MouseButton> _newMouseButtonsThisFrame = new HashSet<MouseButton>();
+
+    private readonly HashSet<MouseButton> _releasedMouseButtonsThisFrame = new HashSet<MouseButton>();
 
     private Vector2 _mousePosition;
     private Vector2 _mouseDelta;
@@ -30,8 +34,9 @@ public class InputInstance
     {
         this.InputSnapshot = this._window.PumpEvents(); //For next frame
         this._newKeysThisFrame.Clear();
+        this._releasedKeysThisFrame.Clear();
         this._newMouseButtonsThisFrame.Clear();
-
+        this._releasedMouseButtonsThisFrame.Clear();
 
         for (int i = 0; i < this.InputSnapshot.KeyEvents.Count; i++)
         {
@@ -98,6 +103,11 @@ public class InputInstance
         return this._newKeysThisFrame.Contains(key);
     }
 
+    public bool GetKeyUp(Key key)
+    {
+        return this._releasedKeysThisFrame.Contains(key);
+    }
+
     public bool GetMouseButton(MouseButton button)
     {
         return this._currentlyPressedMouseButtons.Contains(button);
@@ -108,10 +118,16 @@ public class InputInstance
         return this._newMouseButtonsThisFrame.Contains(button);
     }
 
+    public bool GetMouseButtonUp(MouseButton button)
+    {
+        return this._releasedMouseButtonsThisFrame.Contains(button);
+    }
+
     private void MouseUp(MouseButton mouseButton)
     {
         this._currentlyPressedMouseButtons.Remove(mouseButton);
         this._newMouseButtonsThisFrame.Remove(mouseButton);
+        this._releasedMouseButtonsThisFrame.Add(mouseButton);
     }
 
     private void MouseDown(MouseButton mouseButton)
@@ -119,6 +135,7 @@ public class InputInstance
         if (this._currentlyPressedMouseButtons.Add(mouseButton))
         {
             this._newMouseButtonsThisFrame.Add(mouseButton);
+            this._releasedMouseButtonsThisFrame.Remove(mouseButton);
         }
     }
 
@@ -126,6 +143,7 @@ public class InputInstance
     {
         this._currentlyPressedKeys.Remove(key);
         this._newKeysThisFrame.Remove(key);
+        this._releasedKeysThisFrame.Add(key);
     }
 
     private void KeyDown(Key key)
@@ -133,6 +151,7 @@ public class InputInstance
         if (this._currentlyPressedKeys.Add(key))
         {
             this._newKeysThisFrame.Add(key);
+            this._releasedKeysThisFrame.Remove(key);
         }
     }
 }

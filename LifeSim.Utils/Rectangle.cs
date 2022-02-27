@@ -26,7 +26,7 @@ public struct Rectangle
         this.Height = height;
     }
 
-    public Vector2 Coords => new Vector2(this.X, this.Y);
+    public Vector2 Position => new Vector2(this.X, this.Y);
     public Vector2 Size => new Vector2(this.Width, this.Height);
 
     public Vector2 Min => new Vector2(this.XMin, this.YMin);
