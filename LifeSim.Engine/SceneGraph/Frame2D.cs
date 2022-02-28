@@ -31,7 +31,7 @@ public class Frame2D : RenderNode2D, ICanvasItem
     {
         if (this.Texture != null)
         {
-            spriteBatcher.Draw(this.Shader, this.Texture, -this.Pivot, this.Size, Vector2.Zero, Vector2.One, in this.WorldMatrix, Color.White);
+            spriteBatcher.DrawTexture(this.Shader, this.Texture, -this.Pivot, this.Size, Vector2.Zero, Vector2.One, in this.WorldMatrix, Color.White);
         }
     }
 }

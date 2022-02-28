@@ -37,7 +37,7 @@ public class StackPanel : ItemsControl
         return desiredSize;
     }
 
-    protected override void ArrangeCore(Rectangle finalRect)
+    protected override Rect ArrangeCore(Rect finalRect)
     {
         // use DesiredSize to calculate the final rect
         // and call Arrange on each child recursively
@@ -51,18 +51,17 @@ public class StackPanel : ItemsControl
 
             if (this.Orientation == Orientation.Horizontal)
             {
-                child.Arrange(new Rectangle(x, y, childDesiredSize.X, finalRect.Height));
+                child.Arrange(new Rect(x, y, childDesiredSize.X, finalRect.Height));
                 x += childDesiredSize.X;
             }
             else
             {
-                child.Arrange(new Rectangle(x, y, finalRect.Width, childDesiredSize.Y));
+                child.Arrange(new Rect(x, y, finalRect.Width, childDesiredSize.Y));
                 y += childDesiredSize.Y;
             }
         }
 
-        this.Position = finalRect.Position;
-        this.ActualSize = finalRect.Size;
+        return finalRect;
     }
 
 

@@ -18,6 +18,10 @@ public class Viewport
 
     public void Resize(uint width, uint height)
     {
+        if (this.Width == width && this.Height == height)
+        {
+            return;
+        }
         this.Width = width;
         this.Height = height;
         this.OnResized?.Invoke(this);

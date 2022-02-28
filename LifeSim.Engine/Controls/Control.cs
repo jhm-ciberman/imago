@@ -11,6 +11,8 @@ public abstract class Control
 {
     public string Name { get; set; } = string.Empty;
 
+    public Action<object, float>? Updated { get; set; }
+
     public Thickness Margin { get; set; } = new Thickness(0);
 
     public HorizontalAlignment HorizontalAlignment { get; set; } = HorizontalAlignment.Left;
@@ -18,6 +20,12 @@ public abstract class Control
     public VerticalAlignment VerticalAlignment { get; set; } = VerticalAlignment.Top;
 
     public virtual IEnumerable<Control> VisualChildren { get; } = Enumerable.Empty<Control>();
+
+    public Dock Dock { get; set; } = Dock.None;
+
+    public Color BackgroundColor { get; set; } = Color.Transparent;
+
+    public Control? Parent { get; internal set; }
 
     public Control()
     {
@@ -65,11 +73,13 @@ public abstract class Control
         this.DesiredSize = this.MeasureCore(availableSize) + margin;
     }
 
-    public void Arrange(Rectangle finalRect)
+    public void Arrange(Rect finalRect)
     {
-        Vector2 availableSize = finalRect.Size;
+        float marginW = this.Margin.Left + this.Margin.Right;
+        float marginH = this.Margin.Top + this.Margin.Bottom;
         finalRect.X += this.Margin.Left;
         finalRect.Y += this.Margin.Top;
+        Vector2 availableSize = finalRect.Size;
 
         if (!float.IsNaN(this.Width))
         {
@@ -77,7 +87,7 @@ public abstract class Control
         }
         else
         {
-            finalRect.Width -= this.Margin.Left + this.Margin.Right;
+            finalRect.Width = MathF.Max(0, finalRect.Width - marginW);
         }
 
         if (!float.IsNaN(this.Height))
@@ -86,7 +96,7 @@ public abstract class Control
         }
         else
         {
-            finalRect.Height -= this.Margin.Top + this.Margin.Bottom;
+            finalRect.Height = MathF.Max(0, finalRect.Height - marginH);
         }
 
         var desiredSize = this.DesiredSize;
@@ -109,7 +119,10 @@ public abstract class Control
             _ => throw new InvalidOperationException(),
         };
 
-        this.ArrangeCore(finalRect);
+        var rectPosition = this.ArrangeCore(finalRect);
+
+        this.Position = rectPosition.Position;
+        this.ActualSize = rectPosition.Size;
     }
 
     public void Draw(SpriteBatcher spriteBatcher)
@@ -119,18 +132,24 @@ public abstract class Control
             return;
         }
 
+        if (this.BackgroundColor.A > 0)
+        {
+            spriteBatcher.DrawRectangle(this.Position, this.ActualSize, this.BackgroundColor);
+        }
+
         this.DrawCore(spriteBatcher);
     }
 
     public virtual void Update(float deltaTime)
     {
         // Do nothing. This should be overridden by subclasses.
+
+        this.Updated?.Invoke(this, deltaTime);
     }
 
-    protected virtual void ArrangeCore(Rectangle finalRect)
+    protected virtual Rect ArrangeCore(Rect finalRect)
     {
-        this.Position = finalRect.Min;
-        this.ActualSize = finalRect.Size;
+        return finalRect;
     }
 
     protected virtual Vector2 MeasureCore(Vector2 availableSize)

@@ -69,6 +69,70 @@ public class SpriteBatch
         }
     }
 
+    public void DrawCore(Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, Color color)
+    {
+        this.Add(new Item
+        {
+            TopLeft = new Vertex(position.X, position.Y, 0f, uvTopLeft.X, uvTopLeft.Y, color),
+            TopRight = new Vertex(position.X + size.X, position.Y, 0f, uvBottomRight.X, uvTopLeft.Y, color),
+            BottomLeft = new Vertex(position.X, position.Y + size.Y, 0f, uvTopLeft.X, uvBottomRight.Y, color),
+            BottomRight = new Vertex(position.X + size.X, position.Y + size.Y, 0f, uvBottomRight.X, uvBottomRight.Y, color),
+        });
+    }
+
+    public void DrawCore(Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, Color color, Vector2 scale, float rotation, Vector2 origin, float depth = 0f)
+    {
+        // Adapted from https://github.com/ThomasMiz/TrippyGL/blob/109eaf483d3289c0214963b7d22bdbd320d243ed/TrippyGL/TextureBatchItem.cs#L90
+        // Thank you! :D 
+        float sin = MathF.Sin(rotation);
+        float cos = MathF.Cos(rotation);
+
+        var tl = -origin * scale;
+        var tr = new Vector2(tl.X + size.X * scale.X, tl.Y);
+        var bl = new Vector2(tl.X, tl.Y + size.Y * scale.Y);
+        var br = new Vector2(tr.X, bl.Y);
+
+        var tlPos = new Vector3(cos * tl.X - sin * tl.Y + position.X, sin * tl.X + cos * tl.Y + position.Y, depth);
+        var trPos = new Vector3(cos * tr.X - sin * tr.Y + position.X, sin * tr.X + cos * tr.Y + position.Y, depth);
+        var blPos = new Vector3(cos * bl.X - sin * bl.Y + position.X, sin * bl.X + cos * bl.Y + position.Y, depth);
+        var brPos = new Vector3(cos * br.X - sin * br.Y + position.X, sin * br.X + cos * br.Y + position.Y, depth);
+
+        var tlUVs = uvTopLeft;
+        var trUVs = new Vector2(uvBottomRight.X, uvTopLeft.Y);
+        var blUVs = new Vector2(uvTopLeft.X, uvBottomRight.Y);
+        var brUVs = uvBottomRight;
+
+        this.Add(new Item
+        {
+            TopLeft = new Vertex(tlPos, tlUVs, color),
+            TopRight = new Vertex(trPos, trUVs, color),
+            BottomLeft = new Vertex(blPos, blUVs, color),
+            BottomRight = new Vertex(brPos, brUVs, color),
+        });
+    }
+
+    public void DrawCore(Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, in Matrix3x2 transform, Color color, float depth = 0f)
+    {
+        var tl = position;
+        var tr = position + new Vector2(size.X, 0f);
+        var bl = position + new Vector2(0f, size.Y);
+        var br = position + size;
+
+        var tlUVs = uvTopLeft;
+        var trUVs = new Vector2(uvBottomRight.X, uvTopLeft.Y);
+        var blUVs = new Vector2(uvTopLeft.X, uvBottomRight.Y);
+        var brUVs = uvBottomRight;
+
+        this.Add(new Item
+        {
+            TopLeft = new Vertex(Vector2.Transform(tl, transform), depth, tlUVs, color),
+            TopRight = new Vertex(Vector2.Transform(tr, transform), depth, trUVs, color),
+            BottomLeft = new Vertex(Vector2.Transform(bl, transform), depth, blUVs, color),
+            BottomRight = new Vertex(Vector2.Transform(br, transform), depth, brUVs, color),
+        });
+    }
+
+
     public void Clear()
     {
         this.Count = 0;

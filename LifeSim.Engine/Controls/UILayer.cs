@@ -38,7 +38,7 @@ public class UILayer
     {
         if (this._content is null) return;
         this._content.Measure(this.Viewport.Size);
-        this._content.Arrange(new Rectangle(0, 0, this.Viewport.Width, this.Viewport.Height));
+        this._content.Arrange(new Rect(0, 0, this.Viewport.Width, this.Viewport.Height));
     }
 
     public Control? Content

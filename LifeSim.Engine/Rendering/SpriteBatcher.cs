@@ -11,10 +11,6 @@ namespace LifeSim.Engine.Rendering;
 
 public class SpriteBatcher : IFontStashRenderer, IDisposable
 {
-
-
-
-
     private struct CachedResourceSetKey
     {
         public ITexture Texture { get; set; }
@@ -29,6 +25,7 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
 
     private readonly Dictionary<CachedResourceSetKey, ResourceSet> _cachedResourceSets = new Dictionary<CachedResourceSetKey, ResourceSet>();
 
+    private Shader _currentShader = null!;
 
     public int TotalSpritesToDraw { get; private set; } = 0;
 
@@ -91,10 +88,14 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
 
 
 
-    private void Prepare(Shader shader, ITexture texture)
+    private void Prepare(Shader shader, ITexture texture, int requiredQuads = 1)
     {
         if (this._batch.Shader == shader && this._batch.Texture == texture)
         {
+            if (this._batch.Count + requiredQuads > this._batch.Items.Length)
+            {
+                this.FlushBatch();
+            }
             return;
         }
 
@@ -128,21 +129,21 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
         this._currentShader = null!;
     }
 
-    public void Draw(Shader? shader, ITexture texture, Vector2 position, Vector2 size)
+    public void DrawTexture(Shader? shader, ITexture texture, Vector2 position, Vector2 size)
     {
-        this.Draw(shader, texture, position, size, Vector2.Zero, Vector2.One, Color.White);
+        this.DrawTexture(shader, texture, position, size, Vector2.Zero, Vector2.One, Color.White);
     }
 
-    public void Draw(Shader? shader, ITexture texture, Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, in Matrix3x2 transform, Color color)
+    public void DrawTexture(Shader? shader, ITexture texture, Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, in Matrix3x2 transform, Color color)
     {
         this.Prepare(shader ?? this._defaultShader, texture);
-        this.DrawCore(position, size, uvTopLeft, uvBottomRight, in transform, color);
+        this._batch.DrawCore(position, size, uvTopLeft, uvBottomRight, in transform, color);
     }
 
-    public void Draw(Shader? shader, ITexture texture, Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, Color color)
+    public void DrawTexture(Shader? shader, ITexture texture, Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, Color color)
     {
         this.Prepare(shader ?? this._defaultShader, texture);
-        this.DrawCore(position, size, uvTopLeft, uvBottomRight, color);
+        this._batch.DrawCore(position, size, uvTopLeft, uvBottomRight, color);
     }
 
     void IFontStashRenderer.Draw(
@@ -176,7 +177,7 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
             uvBottomRight = uvTopLeft + size / textureSize;
         }
 
-        this.DrawCore(pos, size, uvTopLeft, uvBottomRight, color, scale, rotation, origin, depth);
+        this._batch.DrawCore(pos, size, uvTopLeft, uvBottomRight, color, scale, rotation, origin, depth);
     }
 
     public void DrawNinePatch(Shader? shader, ITexture texture, Thickness patchMargin, Vector2 size, Vector2 pivot, ref Matrix3x2 worldMatrix, Color color, bool drawCenter)
@@ -208,12 +209,16 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
         sizeBL *= scale;
         var sizeSegmentCenter = size - sizeTL - sizeBR;
 
+        int requiredQuads = drawCenter ? 9 : 8;
+
+        this.Prepare(shader ?? this._defaultShader, texture, requiredQuads);
+
         if (drawCenter)
         {
 
             if (sizeSegmentCenter.X > 0 && sizeSegmentCenter.Y > 0)
             {
-                this.Draw(shader, texture, -pivot + sizeTL, sizeSegmentCenter, uvTL, uvBR, in worldMatrix, color);
+                this._batch.DrawCore(-pivot + sizeTL, sizeSegmentCenter, uvTL, uvBR, in worldMatrix, color);
             }
         }
 
@@ -223,13 +228,13 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
         var posBL = new Vector2(0f, size.Y - sizeTL.Y);
 
         // Corner Top Left
-        this.Draw(shader, texture, -pivot + posTL, sizeTL, Vector2.Zero, uvTL, in worldMatrix, color);
+        this._batch.DrawCore(-pivot + posTL, sizeTL, Vector2.Zero, uvTL, in worldMatrix, color);
         // Corner Top Right
-        this.Draw(shader, texture, -pivot + posTR, sizeTR, new Vector2(uvBR.X, 0f), new Vector2(1f, uvTL.Y), in worldMatrix, color);
+        this._batch.DrawCore(-pivot + posTR, sizeTR, new Vector2(uvBR.X, 0f), new Vector2(1f, uvTL.Y), in worldMatrix, color);
         // Corner Bottom Left
-        this.Draw(shader, texture, -pivot + posBL, sizeBL, new Vector2(0f, uvBR.Y), new Vector2(uvTL.X, 1f), in worldMatrix, color);
+        this._batch.DrawCore(-pivot + posBL, sizeBL, new Vector2(0f, uvBR.Y), new Vector2(uvTL.X, 1f), in worldMatrix, color);
         // Corner Bottom Right
-        this.Draw(shader, texture, -pivot + posBR, sizeBR, uvBR, Vector2.One, in worldMatrix, color);
+        this._batch.DrawCore(-pivot + posBR, sizeBR, uvBR, Vector2.One, in worldMatrix, color);
 
 
         var sizeTop = new Vector2(size.X - sizeTL.X - sizeTR.X, sizeTL.Y);
@@ -238,13 +243,13 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
         var sizeRight = new Vector2(sizeTR.X, size.Y - sizeTR.Y - sizeBR.Y);
 
         // Lateral Top
-        this.Draw(shader, texture, -pivot + new Vector2(sizeTL.X, 0f), sizeTop, new Vector2(uvTL.X, 0f), new Vector2(uvBR.X, uvTL.Y), in worldMatrix, color);
+        this._batch.DrawCore(-pivot + new Vector2(sizeTL.X, 0f), sizeTop, new Vector2(uvTL.X, 0f), new Vector2(uvBR.X, uvTL.Y), in worldMatrix, color);
         // Lateral Bottom
-        this.Draw(shader, texture, -pivot + new Vector2(sizeBL.X, size.Y - sizeBL.Y), sizeBottom, new Vector2(uvTL.X, uvBR.Y), new Vector2(uvBR.X, 1f), in worldMatrix, color);
+        this._batch.DrawCore(-pivot + new Vector2(sizeBL.X, size.Y - sizeBL.Y), sizeBottom, new Vector2(uvTL.X, uvBR.Y), new Vector2(uvBR.X, 1f), in worldMatrix, color);
         // Lateral Left
-        this.Draw(shader, texture, -pivot + new Vector2(0f, sizeTL.Y), sizeLeft, new Vector2(0f, uvTL.Y), new Vector2(uvTL.X, uvBR.Y), in worldMatrix, color);
+        this._batch.DrawCore(-pivot + new Vector2(0f, sizeTL.Y), sizeLeft, new Vector2(0f, uvTL.Y), new Vector2(uvTL.X, uvBR.Y), in worldMatrix, color);
         // Lateral Right
-        this.Draw(shader, texture, -pivot + new Vector2(size.X - sizeTR.X, sizeTR.Y), sizeRight, new Vector2(uvBR.X, uvTL.Y), new Vector2(1f, uvBR.Y), in worldMatrix, color);
+        this._batch.DrawCore(-pivot + new Vector2(size.X - sizeTR.X, sizeTR.Y), sizeRight, new Vector2(uvBR.X, uvTL.Y), new Vector2(1f, uvBR.Y), in worldMatrix, color);
     }
 
     public void DrawText(Font font, string text, int fontSize, Vector2 position, Color color)
@@ -252,72 +257,10 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
         font.GetFont(fontSize).DrawText(this, text, position, color);
     }
 
-    public void DrawCore(Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, Color color)
+    public void DrawRectangle(Vector2 position, Vector2 size, Color color)
     {
-        this._batch.Add(new SpriteBatch.Item
-        {
-            TopLeft = new SpriteBatch.Vertex(position.X, position.Y, 0f, uvTopLeft.X, uvTopLeft.Y, color),
-            TopRight = new SpriteBatch.Vertex(position.X + size.X, position.Y, 0f, uvBottomRight.X, uvTopLeft.Y, color),
-            BottomLeft = new SpriteBatch.Vertex(position.X, position.Y + size.Y, 0f, uvTopLeft.X, uvBottomRight.Y, color),
-            BottomRight = new SpriteBatch.Vertex(position.X + size.X, position.Y + size.Y, 0f, uvBottomRight.X, uvBottomRight.Y, color),
-        });
-
-        this.TotalSpritesToDraw++;
+        this.DrawTexture(this._defaultShader, Texture.White, position, size, Vector2.Zero, Vector2.One, color);
     }
-
-    public void DrawCore(Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, Color color, Vector2 scale, float rotation, Vector2 origin, float depth = 0f)
-    {
-        // Adapted from https://github.com/ThomasMiz/TrippyGL/blob/109eaf483d3289c0214963b7d22bdbd320d243ed/TrippyGL/TextureBatchItem.cs#L90
-        // Thank you! :D 
-        float sin = MathF.Sin(rotation);
-        float cos = MathF.Cos(rotation);
-
-        var tl = -origin * scale;
-        var tr = new Vector2(tl.X + size.X * scale.X, tl.Y);
-        var bl = new Vector2(tl.X, tl.Y + size.Y * scale.Y);
-        var br = new Vector2(tr.X, bl.Y);
-
-        var tlPos = new Vector3(cos * tl.X - sin * tl.Y + position.X, sin * tl.X + cos * tl.Y + position.Y, depth);
-        var trPos = new Vector3(cos * tr.X - sin * tr.Y + position.X, sin * tr.X + cos * tr.Y + position.Y, depth);
-        var blPos = new Vector3(cos * bl.X - sin * bl.Y + position.X, sin * bl.X + cos * bl.Y + position.Y, depth);
-        var brPos = new Vector3(cos * br.X - sin * br.Y + position.X, sin * br.X + cos * br.Y + position.Y, depth);
-
-        var tlUVs = uvTopLeft;
-        var trUVs = new Vector2(uvBottomRight.X, uvTopLeft.Y);
-        var blUVs = new Vector2(uvTopLeft.X, uvBottomRight.Y);
-        var brUVs = uvBottomRight;
-
-        this._batch.Add(new SpriteBatch.Item
-        {
-            TopLeft = new SpriteBatch.Vertex(tlPos, tlUVs, color),
-            TopRight = new SpriteBatch.Vertex(trPos, trUVs, color),
-            BottomLeft = new SpriteBatch.Vertex(blPos, blUVs, color),
-            BottomRight = new SpriteBatch.Vertex(brPos, brUVs, color),
-        });
-    }
-
-    public void DrawCore(Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, in Matrix3x2 transform, Color color, float depth = 0f)
-    {
-        var tl = position;
-        var tr = position + new Vector2(size.X, 0f);
-        var bl = position + new Vector2(0f, size.Y);
-        var br = position + size;
-
-        var tlUVs = uvTopLeft;
-        var trUVs = new Vector2(uvBottomRight.X, uvTopLeft.Y);
-        var blUVs = new Vector2(uvTopLeft.X, uvBottomRight.Y);
-        var brUVs = uvBottomRight;
-
-        this._batch.Add(new SpriteBatch.Item
-        {
-            TopLeft = new SpriteBatch.Vertex(Vector2.Transform(tl, transform), depth, tlUVs, color),
-            TopRight = new SpriteBatch.Vertex(Vector2.Transform(tr, transform), depth, trUVs, color),
-            BottomLeft = new SpriteBatch.Vertex(Vector2.Transform(bl, transform), depth, blUVs, color),
-            BottomRight = new SpriteBatch.Vertex(Vector2.Transform(br, transform), depth, brUVs, color),
-        });
-    }
-
-    private Shader _currentShader = null!;
 
     public void FlushBatch()
     {

@@ -2,14 +2,14 @@ using System;
 
 namespace LifeSim;
 
-public struct RectangleInt
+public struct RectInt
 {
-    public int X;
-    public int Y;
-    public int Width;
-    public int Height;
+    public int X { get; set; }
+    public int Y { get; set; }
+    public int Width { get; set; }
+    public int Height { get; set; }
 
-    public RectangleInt(Vector2Int coords, Vector2Int size)
+    public RectInt(Vector2Int coords, Vector2Int size)
     {
         this.X = coords.X;
         this.Y = coords.Y;
@@ -17,7 +17,7 @@ public struct RectangleInt
         this.Height = size.Y;
     }
 
-    public RectangleInt(int x, int y, int width, int height)
+    public RectInt(int x, int y, int width, int height)
     {
         this.X = x;
         this.Y = y;
@@ -25,7 +25,7 @@ public struct RectangleInt
         this.Height = height;
     }
 
-    public Vector2Int Coords => new Vector2Int(this.X, this.Y);
+    public Vector2Int Position => new Vector2Int(this.X, this.Y);
     public Vector2Int Size => new Vector2Int(this.Width, this.Height);
 
     public Vector2Int Min => new Vector2Int(this.XMin, this.YMin);
@@ -44,7 +44,7 @@ public struct RectangleInt
             && position.Y < this.YMax;
     }
 
-    public bool Overlaps(RectangleInt other)
+    public bool Overlaps(RectInt other)
     {
         return other.XMin < this.XMax
             && other.XMax > this.XMin

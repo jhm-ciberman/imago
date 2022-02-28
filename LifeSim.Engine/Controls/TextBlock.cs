@@ -28,10 +28,7 @@ public class TextBlock : Control
     protected override Vector2 MeasureCore(Vector2 availableSize)
     {
         var fontSystem = this.Font.GetFont(this.FontSize);
-        var size = fontSystem.MeasureString(this.Text);
-        size.X = MathF.Min(availableSize.X, size.X);
-        size.Y = MathF.Min(availableSize.Y, size.Y);
-        return size;
+        return fontSystem.MeasureString(this.Text);
     }
 
     protected override void DrawCore(SpriteBatcher spriteBatcher)

@@ -6,7 +6,43 @@ namespace LifeSim.Engine.Controls;
 
 public abstract class ItemsControl : Control
 {
-    public ObservableCollection<Control> Items { get; } = new ObservableCollection<Control>();
+    public class ItemCollection : Collection<Control>
+    {
+        public ItemCollection(ItemsControl owner)
+        {
+            this.Owner = owner;
+        }
+
+        public ItemsControl Owner { get; }
+
+        protected override void InsertItem(int index, Control item)
+        {
+            base.InsertItem(index, item);
+            item.Parent = this.Owner;
+        }
+
+        protected override void RemoveItem(int index)
+        {
+            var item = this[index];
+            item.Parent = null;
+            base.RemoveItem(index);
+        }
+
+        protected override void SetItem(int index, Control item)
+        {
+            var oldItem = this[index];
+            oldItem.Parent = null;
+            base.SetItem(index, item);
+            item.Parent = this.Owner;
+        }
+    }
+
+    public ItemCollection Items { get; }
+
+    public ItemsControl()
+    {
+        this.Items = new ItemCollection(this);
+    }
 
     public override IEnumerable<Control> VisualChildren => this.Items;
 
@@ -24,6 +60,8 @@ public abstract class ItemsControl : Control
         {
             child.Update(deltaTime);
         }
+
+        base.Update(deltaTime);
     }
 
 }

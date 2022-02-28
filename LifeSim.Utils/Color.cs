@@ -31,6 +31,11 @@ public readonly struct Color
 
     public Color(string hexColor)
     {
+        if (hexColor.StartsWith("#", true, CultureInfo.InvariantCulture))
+        {
+            hexColor = hexColor[1..];
+        }
+
         if (hexColor.Length is not 6 and not 8)
         {
             throw new ArgumentException("Invalid hex color string.");

@@ -75,15 +75,14 @@ public class Button : Control
     private IEnumerable<Control> _visualChildren = Array.Empty<Control>();
     public override IEnumerable<Control> VisualChildren => this._visualChildren;
 
-    protected override void ArrangeCore(Rectangle finalRect)
+    protected override Rect ArrangeCore(Rect finalRect)
     {
         if (this.Content != null)
         {
             this.Content.Arrange(finalRect);
         }
 
-        this.Position = finalRect.Position;
-        this.ActualSize = finalRect.Size;
+        return finalRect;
     }
 
     protected override Vector2 MeasureCore(Vector2 availableSize)
@@ -113,7 +112,7 @@ public class Button : Control
 
         if (texture != null)
         {
-            spriteBatcher.Draw(this.Shader, texture, this.Position, this.ActualSize);
+            spriteBatcher.DrawTexture(this.Shader, texture, this.Position, this.ActualSize);
         }
 
         if (this.Content != null)
@@ -130,7 +129,7 @@ public class Button : Control
         }
 
         Vector2 mousePosition = Input.MousePosition;
-        Rectangle bounds = new Rectangle(this.Position, this.ActualSize);
+        Rect bounds = new Rect(this.Position, this.ActualSize);
         if (bounds.Contains(mousePosition))
         {
             this.IsMouseOver = true;
@@ -149,6 +148,8 @@ public class Button : Control
         {
             this.IsPressed = false;
         }
+
+        base.Update(deltaTime);
     }
 
     public Button()
