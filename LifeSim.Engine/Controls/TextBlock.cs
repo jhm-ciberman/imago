@@ -1,5 +1,6 @@
 using System;
 using System.Numerics;
+using FontStashSharp;
 using LifeSim.Engine.Rendering;
 using LifeSim.Engine.Resources;
 
@@ -11,9 +12,13 @@ public class TextBlock : Control
 
     public Color Color { get; set; } = Color.Black;
 
-    public Font Font { get; set; } = Font.Default;
+    public string? FontFamily { get; set; }
 
     public int FontSize { get; set; } = 30;
+
+    public int Outline { get; set; } = 0;
+
+    public int Blur { get; set; } = 0;
 
     public TextBlock()
     {
@@ -27,12 +32,12 @@ public class TextBlock : Control
 
     protected override Vector2 MeasureCore(Vector2 availableSize)
     {
-        var fontSystem = this.Font.GetFont(this.FontSize);
-        return fontSystem.MeasureString(this.Text);
+        return Font.GetFont(this.FontFamily, this.FontSize).MeasureString(this.Text);
     }
 
     protected override void DrawCore(SpriteBatcher spriteBatcher)
     {
-        spriteBatcher.DrawText(this.Font, this.Text, this.FontSize, this.Position, this.Color);
+        var font = Font.GetFont(this.FontFamily, this.FontSize, this.Outline, this.Blur);
+        spriteBatcher.DrawText(font, this.Text, this.Position, this.Color);
     }
 }

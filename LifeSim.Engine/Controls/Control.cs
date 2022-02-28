@@ -27,16 +27,6 @@ public abstract class Control
 
     public Control? Parent { get; internal set; }
 
-    public Control()
-    {
-        //
-    }
-
-    public Control(string name)
-    {
-        this.Name = name;
-    }
-
     public Vector2 Position { get; protected set; } = Vector2.Zero;
 
     public Vector2 ActualSize { get; protected set; } = Vector2.Zero;
@@ -48,6 +38,31 @@ public abstract class Control
     public float Width { get; set; } = float.NaN;
 
     public float Height { get; set; } = float.NaN;
+
+    private Style? _style;
+
+    public Style? Style
+    {
+        get => this._style;
+        set
+        {
+            if (this._style != value)
+            {
+                this._style = value;
+                value?.Apply(this);
+            }
+        }
+    }
+
+    public Control()
+    {
+        this.Style = Style.GetDefaultStyle(this.GetType());
+    }
+
+    public Control(string name) : this()
+    {
+        this.Name = name;
+    }
 
     public void Measure(Vector2 availableSize)
     {
@@ -181,4 +196,6 @@ public abstract class Control
 
         return null;
     }
+
+
 }

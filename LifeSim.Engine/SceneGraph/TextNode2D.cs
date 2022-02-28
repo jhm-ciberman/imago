@@ -10,25 +10,30 @@ public class TextNode2D : RenderNode2D
 
     public Color Color { get; set; } = new Color(0xFFFF4500);
 
-    public Font Font { get; set; } = Font.Default;
+    public string? FontFamily { get; set; }
 
     public int FontSize { get; set; } = 30;
+
+    public int Outline { get; set; } = 0;
+
+    public int Blur { get; set; } = 0;
 
     public TextNode2D()
     {
         //
     }
 
-    public TextNode2D(string text, Font? font = null)
+    public TextNode2D(string text, string? fontFamily = null)
     {
         this.Text = text;
-        this.Font = font ?? Font.Default;
+        this.FontFamily = fontFamily;
     }
 
     public override void Render(SpriteBatcher spriteBatcher)
     {
         var pos = this.WorldMatrix.Translation;
 
-        spriteBatcher.DrawText(this.Font, this.Text, this.FontSize, pos, this.Color);
+        var font = Font.GetFont(this.FontFamily, this.FontSize, this.Outline, this.Blur);
+        spriteBatcher.DrawText(font, this.Text, pos, this.Color);
     }
 }

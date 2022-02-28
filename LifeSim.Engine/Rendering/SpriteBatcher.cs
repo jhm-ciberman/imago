@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using FontStashSharp;
 using FontStashSharp.Interfaces;
 using LifeSim.Engine.Resources;
 using LifeSim.Engine.SceneGraph;
@@ -252,9 +253,9 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
         this._batch.DrawCore(-pivot + new Vector2(size.X - sizeTR.X, sizeTR.Y), sizeRight, new Vector2(uvBR.X, uvTL.Y), new Vector2(1f, uvBR.Y), in worldMatrix, color);
     }
 
-    public void DrawText(Font font, string text, int fontSize, Vector2 position, Color color)
+    public void DrawText(SpriteFontBase font, string text, Vector2 position, Color color)
     {
-        font.GetFont(fontSize).DrawText(this, text, position, color);
+        font.DrawText(this, text, position, color);
     }
 
     public void DrawRectangle(Vector2 position, Vector2 size, Color color)

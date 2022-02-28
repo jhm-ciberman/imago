@@ -19,17 +19,11 @@ public static class AssetManager
     static AssetManager()
     {
         _loaders.Add(typeof(Texture), LoadTexture);
-        _loaders.Add(typeof(Font), LoadFont);
     }
 
     private static object LoadTexture(string path)
     {
         return new ImageTexture(path);
-    }
-
-    private static object LoadFont(string path)
-    {
-        return new Font(path);
     }
 
     private static string PathResolver(string path)

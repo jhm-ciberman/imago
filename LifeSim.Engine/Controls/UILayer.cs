@@ -10,8 +10,16 @@ public class UILayer
 
     private Control? _content;
 
-    public Matrix4x4 ViewProjectionMatrix => Matrix4x4.CreateOrthographicOffCenter(0, this.Viewport.Width, this.Viewport.Height, 0, -10f, 100f);
+    public float Zoom { get; set; } = 1f;
 
+    public Matrix4x4 ViewProjectionMatrix
+    {
+        get
+        {
+            Vector2 size = this.Viewport.Size / this.Zoom;
+            return Matrix4x4.CreateOrthographicOffCenter(0, size.X, size.Y, 0, -10f, 100f);
+        }
+    }
     public UILayer(Viewport viewport)
     {
         this.Viewport = viewport;
@@ -37,8 +45,10 @@ public class UILayer
     public void TriggerLayoutUpdate()
     {
         if (this._content is null) return;
-        this._content.Measure(this.Viewport.Size);
-        this._content.Arrange(new Rect(0, 0, this.Viewport.Width, this.Viewport.Height));
+
+        Vector2 size = this.Viewport.Size / this.Zoom;
+        this._content.Measure(size);
+        this._content.Arrange(new Rect(0, 0, size.X, size.Y));
     }
 
     public Control? Content
