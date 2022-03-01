@@ -41,6 +41,7 @@ public class Renderer : ITexture2DManager, IDisposable
     private readonly CommandList _commandList;
     private readonly List<IRenderingPass> _passes = new List<IRenderingPass>();
     private readonly DisposeCollector _disposeCollector;
+    private readonly Dictionary<uint, RenderNode3D> _pickingIdToRenderNode = new Dictionary<uint, RenderNode3D>();
 
     public Renderer(Sdl2Window window, GraphicsBackend? graphicsBackend = null)
     {
@@ -233,5 +234,25 @@ public class Renderer : ITexture2DManager, IDisposable
     void ITexture2DManager.SetTextureData(object texture, System.Drawing.Rectangle bounds, byte[] data)
     {
         ((DirectTexture)texture).Update(data, bounds.X, bounds.Y, bounds.Width, bounds.Height);
+    }
+
+    public void RegisterPickingId(uint pickingId, RenderNode3D renderNode)
+    {
+        this._pickingIdToRenderNode.Add(pickingId, renderNode);
+    }
+
+    public void UnregisterPickingId(uint pickingId)
+    {
+        this._pickingIdToRenderNode.Remove(pickingId);
+    }
+
+    public RenderNode3D? SelectedRenderNode
+    {
+        get
+        {
+            uint pickingId = Renderer.Instance.MousePickerObjectID;
+            this._pickingIdToRenderNode.TryGetValue(pickingId, out var renderNode);
+            return renderNode;
+        }
     }
 }

@@ -212,7 +212,7 @@ public class Camera3D
     /// <summary>
     /// Creates a ray from the camera's position to the given point in screen space.
     /// </summary>
-    /// <param name="point">The point in screen space.</param>
+    /// <param name="point">The point in screen space from the top left (0,0) to bottom right (1,1).</param>
     /// <returns>The ray.</returns>
     public Ray ViewportRay(Vector2 point)
     {

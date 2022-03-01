@@ -159,14 +159,14 @@ public partial class RenderNode3D : Node3D
     {
         base.AttachToSceneRecursive(scene);
 
-        scene.RegisterPickingId(this._renderable.PickingId, this);
+        Renderer.Instance.RegisterPickingId(this._renderable.PickingId, this);
         this.RenderQueueFlagsChanged();
     }
 
     internal override void DetachFromSceneRecursive()
     {
         if (this.Scene is null) return;
-        this.Scene.UnregisterPickingId(this._renderable.PickingId);
+        Renderer.Instance.UnregisterPickingId(this._renderable.PickingId);
 
         base.DetachFromSceneRecursive();
     }
@@ -195,12 +195,12 @@ public partial class RenderNode3D : Node3D
     }
 
 
-    public bool RayCast(Ray ray, out float distance)
+    public bool RayCast(Ray ray, out HitInfo hitInfo)
     {
+        hitInfo = default;
         var mesh = this.Mesh;
         if (mesh is null)
         {
-            distance = float.MaxValue;
             return false;
         }
 
@@ -211,10 +211,17 @@ public partial class RenderNode3D : Node3D
         // Fast check for bounding box intersection
         if (!localRay.Intersects(mesh.BoundingBox))
         {
-            distance = float.MaxValue;
             return false;
         }
 
-        return mesh.MeshData.RayCast(localRay, out distance);
+        if (mesh.MeshData.RayCast(localRay, out hitInfo))
+        {
+            hitInfo.Position = Vector3.Transform(hitInfo.Position, this.WorldMatrix);
+            hitInfo.Normal = Vector3.TransformNormal(hitInfo.Normal, this.WorldMatrix);
+            hitInfo.Distance = Vector3.Distance(ray.Origin, hitInfo.Position);
+            return true;
+        }
+
+        return false;
     }
 }

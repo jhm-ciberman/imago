@@ -12,7 +12,6 @@ public class Scene : Node3D
     public Color? BackgroundColor { get; set; } = Color.CoolGray;
     public DirectionalLight MainLight { get; set; } = new DirectionalLight();
     public ColorF AmbientColor { get; set; } = new ColorF(.2f, .2f, .2f, 100f / 255f);
-    public RenderNode3D? SelectedNode { get; set; } // This is set by the mouse picking pass.
     public GizmosLayer Gizmos { get; } = new GizmosLayer();
     public Camera3D? Camera { get; set; } = null;
     public IReadOnlyList<CanvasLayer> CanvasLayers => this._canvasLayers;
@@ -25,8 +24,6 @@ public class Scene : Node3D
     private readonly List<CanvasLayer> _canvasLayers = new List<CanvasLayer>();
 
     private readonly List<Node3D> _transformDirtyList = new List<Node3D>();
-
-    private readonly Dictionary<uint, RenderNode3D> _pickingIdToRenderNode = new Dictionary<uint, RenderNode3D>();
 
     public Scene()
     {
@@ -73,25 +70,6 @@ public class Scene : Node3D
         //
     }
 
-    public void RegisterPickingId(uint pickingId, RenderNode3D renderNode)
-    {
-        this._pickingIdToRenderNode.Add(pickingId, renderNode);
-    }
-
-    public void UnregisterPickingId(uint pickingId)
-    {
-        this._pickingIdToRenderNode.Remove(pickingId);
-    }
-
-    public RenderNode3D? SelectedRenderNode
-    {
-        get
-        {
-            uint pickingId = Renderer.Instance.MousePickerObjectID;
-            this._pickingIdToRenderNode.TryGetValue(pickingId, out var renderNode);
-            return renderNode;
-        }
-    }
 
     public void EndUpdate(float deltaTime)
     {
