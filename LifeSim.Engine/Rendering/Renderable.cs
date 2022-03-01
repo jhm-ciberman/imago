@@ -76,6 +76,8 @@ public class Renderable : IDisposable
     public void SetSkeleton(Skeleton skeleton)
     {
         this.Skeleton = skeleton;
+        Matrix4x4.Invert(this._transform, out Matrix4x4 inverseRootTransform);
+        this.Skeleton.InverseRootTransform = inverseRootTransform;
         this.SkeletonResourceSet = skeleton.ResourceSet;
         this.RecomputeOffsetVertexData();
         this.RecomputeSortKey();
@@ -93,7 +95,8 @@ public class Renderable : IDisposable
 
         if (this.Skeleton != null)
         {
-            this.Skeleton.RootTransform = transform;
+            Matrix4x4.Invert(this._transform, out Matrix4x4 inverseRootTransform);
+            this.Skeleton.InverseRootTransform = inverseRootTransform;
         }
     }
 

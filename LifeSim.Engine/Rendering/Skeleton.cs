@@ -20,7 +20,7 @@ public class Skeleton : IDisposable
 
     public Matrix4x4[] BonesMatrices { get; }
 
-    public Matrix4x4 RootTransform { get; set; }
+    public Matrix4x4 InverseRootTransform { get; set; }
 
     private readonly SceneStorage _storage;
     private DataBlock _dataBlock;
@@ -39,11 +39,9 @@ public class Skeleton : IDisposable
 
     public void Update()
     {
-        Matrix4x4.Invert(this.RootTransform, out Matrix4x4 inverseMeshWorldMatrix);
-
         for (int i = 0; i < this.Joints.Count; i++)
         {
-            this.BonesMatrices[i] = this.InverseBindMatrices[i] * this.Joints[i].WorldMatrix * inverseMeshWorldMatrix;
+            this.BonesMatrices[i] = this.InverseBindMatrices[i] * this.Joints[i].WorldMatrix * this.InverseRootTransform;
         }
 
         this._dataBlock.WriteSpan<Matrix4x4>(this.BonesMatrices);
