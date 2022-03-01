@@ -19,12 +19,14 @@ public abstract class ItemsControl : Control
         {
             base.InsertItem(index, item);
             item.Parent = this.Owner;
+            item.Root = this.Owner.Root;
         }
 
         protected override void RemoveItem(int index)
         {
             var item = this[index];
             item.Parent = null;
+            item.Root = null;
             base.RemoveItem(index);
         }
 
@@ -32,8 +34,10 @@ public abstract class ItemsControl : Control
         {
             var oldItem = this[index];
             oldItem.Parent = null;
+            oldItem.Root = null;
             base.SetItem(index, item);
             item.Parent = this.Owner;
+            item.Root = this.Owner.Root;
         }
     }
 

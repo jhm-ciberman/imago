@@ -5,19 +5,8 @@ using LifeSim.Engine.Rendering;
 
 namespace LifeSim.Engine.Controls;
 
-public class Button : Control
+public class Button : ContentControl
 {
-    private Control? _content;
-    public Control? Content
-    {
-        get => this._content;
-        set
-        {
-            this._content = value;
-            this._visualChildren = value == null ? Array.Empty<Control>() : new[] { value };
-        }
-    }
-
     public Action<Button>? Click { get; set; }
 
     public Action<Button>? MouseEnter { get; set; }
@@ -29,7 +18,7 @@ public class Button : Control
     public bool IsMouseOver
     {
         get => this._isMouseOver;
-        set
+        protected set
         {
             if (this._isMouseOver != value)
             {
@@ -51,7 +40,7 @@ public class Button : Control
     public bool IsPressed
     {
         get => this._isPressed;
-        set
+        protected set
         {
             if (this._isPressed != value)
             {
@@ -72,31 +61,8 @@ public class Button : Control
 
     public Shader? Shader { get; set; }
 
-    private IEnumerable<Control> _visualChildren = Array.Empty<Control>();
-    public override IEnumerable<Control> VisualChildren => this._visualChildren;
 
-    protected override Rect ArrangeCore(Rect finalRect)
-    {
-        if (this.Content != null)
-        {
-            this.Content.Arrange(finalRect);
-        }
 
-        return finalRect;
-    }
-
-    protected override Vector2 MeasureCore(Vector2 availableSize)
-    {
-        if (this.Content != null)
-        {
-            this.Content.Measure(availableSize);
-            return availableSize;
-        }
-        else
-        {
-            return availableSize;
-        }
-    }
 
     protected override void DrawCore(SpriteBatcher spriteBatcher)
     {
@@ -115,20 +81,18 @@ public class Button : Control
             spriteBatcher.DrawTexture(this.Shader, texture, this.Position, this.ActualSize);
         }
 
-        if (this.Content != null)
-        {
-            this.Content.Draw(spriteBatcher);
-        }
+        base.DrawCore(spriteBatcher);
     }
 
     public override void Update(float deltaTime)
     {
+        System.Console.WriteLine(this.Root);
+        if (this.Root == null) return;
         if (this.Content != null)
         {
             this.Content.Update(deltaTime);
         }
-
-        Vector2 mousePosition = Input.MousePosition;
+        Vector2 mousePosition = Input.MousePosition / this.Root.Zoom;
         Rect bounds = new Rect(this.Position, this.ActualSize);
         if (bounds.Contains(mousePosition))
         {

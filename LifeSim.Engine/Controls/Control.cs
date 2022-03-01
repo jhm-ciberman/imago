@@ -15,6 +15,8 @@ public abstract class Control
 
     public Thickness Margin { get; set; } = new Thickness(0);
 
+
+
     public HorizontalAlignment HorizontalAlignment { get; set; } = HorizontalAlignment.Left;
 
     public VerticalAlignment VerticalAlignment { get; set; } = VerticalAlignment.Top;
@@ -26,6 +28,23 @@ public abstract class Control
     public Color BackgroundColor { get; set; } = Color.Transparent;
 
     public Control? Parent { get; internal set; }
+
+    private UILayer? _root;
+    public UILayer? Root
+    {
+        get => this._root;
+        internal set
+        {
+            if (this._root != value)
+            {
+                this._root = value;
+                foreach (var child in this.VisualChildren)
+                {
+                    child.Root = value;
+                }
+            }
+        }
+    }
 
     public Vector2 Position { get; protected set; } = Vector2.Zero;
 

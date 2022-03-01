@@ -56,8 +56,22 @@ public class UILayer
         get => this._content;
         set
         {
-            this._content = value;
-            this.TriggerLayoutUpdate();
+            if (this._content != value)
+            {
+                if (this._content != null)
+                {
+                    this._content.Parent = null;
+                }
+
+                this._content = value;
+
+                if (this._content != null)
+                {
+                    this._content.Root = this;
+                }
+
+                this.TriggerLayoutUpdate();
+            }
         }
     }
 
