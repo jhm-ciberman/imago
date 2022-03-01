@@ -108,6 +108,13 @@ public class Node3D
         return null;
     }
 
+    public T FindChildOrFail<T>(string name) where T : Node3D
+    {
+        var found = this.FindChild<T>(name);
+        if (found == null) throw new InvalidOperationException($"Child with name '{name}' not found.");
+        return found;
+    }
+
     public T? GetChildByName<T>(string name) where T : Node3D
     {
         foreach (var child in this.Children)
@@ -145,6 +152,13 @@ public class Node3D
         }
 
         return currentNode as T;
+    }
+
+    public T FindPathOrFail<T>(string path) where T : Node3D
+    {
+        var found = this.FindPath<T>(path);
+        if (found == null) throw new InvalidOperationException($"Path '{path}' not found.");
+        return found;
     }
 
     public void AddChild(Node3D node)
