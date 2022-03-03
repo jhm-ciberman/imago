@@ -3,6 +3,7 @@ using System.Buffers;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using LifeSim.Engine.Rendering;
+using LifeSim.Engine.Resources;
 using Veldrid;
 
 namespace LifeSim.Engine;
@@ -53,10 +54,7 @@ public class BasicMeshData : BaseMeshData
             vertices[i].TexCoord = this.TexCoords[i];
         }
 
-        uint sizeInBytes = (uint) (Marshal.SizeOf<BasicVertex>() * this.Positions.Length);
-
-        DeviceBuffer vertexBuffer = gd.ResourceFactory.CreateBuffer(new BufferDescription(sizeInBytes, BufferUsage.VertexBuffer));
-        gd.UpdateBuffer(vertexBuffer, 0, new ReadOnlySpan<BasicVertex>(vertices, 0, this.Positions.Length));
+        DeviceBuffer vertexBuffer = BufferFactory.CreateVertexBuffer(gd, vertices);
         ArrayPool<BasicVertex>.Shared.Return(vertices);
         return vertexBuffer;
     }

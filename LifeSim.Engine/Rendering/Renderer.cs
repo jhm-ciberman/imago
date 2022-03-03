@@ -18,7 +18,6 @@ public class Renderer : ITexture2DManager, IDisposable
     public IPipelineProvider ForwardPass => this._forwardPass;
     public IPipelineProvider ShadowMapPass => this._shadowPass;
     public SceneStorage Storage { get; }
-    public uint MousePickerObjectID => this._mousePickerPass.ObjectID;
     public RenderTexture MainRenderTexture { get; }
     public GraphicsDevice GraphicsDevice { get; }
     public GraphicsBackend BackendType => this.GraphicsDevice.BackendType;
@@ -41,7 +40,6 @@ public class Renderer : ITexture2DManager, IDisposable
     private readonly CommandList _commandList;
     private readonly List<IRenderingPass> _passes = new List<IRenderingPass>();
     private readonly DisposeCollector _disposeCollector;
-    private readonly Dictionary<uint, RenderNode3D> _pickingIdToRenderNode = new Dictionary<uint, RenderNode3D>();
 
     public Renderer(Sdl2Window window, GraphicsBackend? graphicsBackend = null)
     {
@@ -226,6 +224,18 @@ public class Renderer : ITexture2DManager, IDisposable
         }
     }
 
+    public RenderNode3D? SelectedRenderNode => this._mousePickerPass.SelectedRenderNode;
+
+    public uint RegisterPickable(RenderNode3D renderNode)
+    {
+        return this._mousePickerPass.RegisterPickable(renderNode);
+    }
+
+    public void UnregisterPickable(uint pickingId)
+    {
+        this._mousePickerPass.UnregisterPickable(pickingId);
+    }
+
     object ITexture2DManager.CreateTexture(int width, int height)
     {
         return new DirectTexture((uint)width, (uint)height);
@@ -234,25 +244,5 @@ public class Renderer : ITexture2DManager, IDisposable
     void ITexture2DManager.SetTextureData(object texture, System.Drawing.Rectangle bounds, byte[] data)
     {
         ((DirectTexture)texture).Update(data, bounds.X, bounds.Y, bounds.Width, bounds.Height);
-    }
-
-    public void RegisterPickingId(uint pickingId, RenderNode3D renderNode)
-    {
-        this._pickingIdToRenderNode.Add(pickingId, renderNode);
-    }
-
-    public void UnregisterPickingId(uint pickingId)
-    {
-        this._pickingIdToRenderNode.Remove(pickingId);
-    }
-
-    public RenderNode3D? SelectedRenderNode
-    {
-        get
-        {
-            uint pickingId = Renderer.Instance.MousePickerObjectID;
-            this._pickingIdToRenderNode.TryGetValue(pickingId, out var renderNode);
-            return renderNode;
-        }
     }
 }

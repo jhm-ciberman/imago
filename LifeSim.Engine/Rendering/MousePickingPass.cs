@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 using LifeSim.Engine.SceneGraph;
 using Veldrid;
@@ -10,6 +11,11 @@ public class MousePickingPass : IDisposable, IRenderingPass
     private readonly GraphicsDevice _gd;
     private readonly Veldrid.Texture _pixelTexture;
     internal RenderTexture RenderTexture { get; set; }
+
+    private uint _pickingIdCounter = 0; // 0 is reserved for "no object"
+
+    private readonly Dictionary<uint, RenderNode3D> _pickingIdToRenderNode = new Dictionary<uint, RenderNode3D>();
+
 
     public MousePickingPass(Renderer renderer, RenderTexture renderTexture)
     {
@@ -42,6 +48,16 @@ public class MousePickingPass : IDisposable, IRenderingPass
         this._mousePosition = mousePos;
     }
 
+    public RenderNode3D? SelectedRenderNode
+    {
+        get
+        {
+            if (this.ObjectID == 0) return null;
+            this._pickingIdToRenderNode.TryGetValue(this.ObjectID, out var renderNode);
+            return renderNode;
+        }
+    }
+
     public void Render(CommandList cl, Scene scene)
     {
         var mousePos = this._mousePosition;
@@ -69,5 +85,22 @@ public class MousePickingPass : IDisposable, IRenderingPass
     public void Dispose()
     {
         this._pixelTexture.Dispose();
+    }
+
+    public uint RegisterPickable(RenderNode3D renderNode)
+    {
+        if (this._pickingIdCounter == uint.MaxValue)
+        {
+            throw new InvalidOperationException("Picking ID counter overflow.");
+        }
+
+        var pickingId = ++this._pickingIdCounter;
+        this._pickingIdToRenderNode.Add(pickingId, renderNode);
+        return pickingId;
+    }
+
+    public void UnregisterPickable(uint pickingId)
+    {
+        this._pickingIdToRenderNode.Remove(pickingId);
     }
 }

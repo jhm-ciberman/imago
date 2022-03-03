@@ -4,6 +4,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using LifeSim.Engine.Gltf;
 using LifeSim.Engine.Rendering;
+using LifeSim.Engine.Resources;
 using Veldrid;
 
 namespace LifeSim.Engine;
@@ -43,10 +44,7 @@ public class ChunkMeshData : BasicMeshData
             vertices[i].Light = this.Lights[i];
         }
 
-        uint sizeInBytes = (uint) (Marshal.SizeOf<ChunkVertex>() * this.Positions.Length);
-
-        DeviceBuffer vertexBuffer = gd.ResourceFactory.CreateBuffer(new BufferDescription(sizeInBytes, BufferUsage.VertexBuffer));
-        gd.UpdateBuffer(vertexBuffer, 0, new ReadOnlySpan<ChunkVertex>(vertices, 0, this.Positions.Length));
+        DeviceBuffer vertexBuffer = BufferFactory.CreateVertexBuffer(gd, vertices);
         ArrayPool<ChunkVertex>.Shared.Return(vertices);
         return vertexBuffer;
     }

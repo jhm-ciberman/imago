@@ -1,6 +1,7 @@
 using System;
 using System.Numerics;
 using LifeSim.Engine.Rendering;
+using LifeSim.Engine.Resources;
 using Veldrid;
 
 namespace LifeSim.Engine;
@@ -58,8 +59,6 @@ public abstract class BaseMeshData : IMeshData
 
     public DeviceBuffer CreateIndexBuffer(GraphicsDevice gd)
     {
-        DeviceBuffer indexBuffer = gd.ResourceFactory.CreateBuffer(new BufferDescription((uint) (sizeof(ushort) * this.Indices.Length), BufferUsage.IndexBuffer));
-        gd.UpdateBuffer<ushort>(indexBuffer, 0, this.Indices);
-        return indexBuffer;
+        return BufferFactory.CreateIndexBuffer(gd, this.Indices);
     }
 }

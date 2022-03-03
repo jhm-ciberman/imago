@@ -3,6 +3,7 @@ using System.Buffers;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using LifeSim.Engine.Rendering;
+using LifeSim.Engine.Resources;
 using Veldrid;
 
 namespace LifeSim.Engine.Gltf;
@@ -36,10 +37,7 @@ public class SkinnedMeshData : BasicMeshData
             vertices[i].Weights = this.Weights[i];
         }
 
-        uint sizeInBytes = (uint) (Marshal.SizeOf<SkinnedVertex>() * this.Positions.Length);
-
-        DeviceBuffer vertexBuffer = gd.ResourceFactory.CreateBuffer(new BufferDescription(sizeInBytes, BufferUsage.VertexBuffer));
-        gd.UpdateBuffer(vertexBuffer, 0, new ReadOnlySpan<SkinnedVertex>(vertices, 0, this.Positions.Length));
+        DeviceBuffer vertexBuffer = BufferFactory.CreateVertexBuffer(gd, vertices);
         ArrayPool<SkinnedVertex>.Shared.Return(vertices);
         return vertexBuffer;
     }

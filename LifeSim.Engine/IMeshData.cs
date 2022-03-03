@@ -14,12 +14,12 @@ public interface IMeshData
     /// <summary>
     /// Gets or sets the vertex positions.
     /// </summary>
-    Vector3[] Positions { get; set; }
+    Vector3[] Positions { get; }
 
     /// <summary>
     /// Gets or sets the vertex indices.
     /// </summary>
-    ushort[] Indices { get; set; }
+    ushort[] Indices { get; }
 
     /// <summary>
     /// Gets the vertex format of the mesh.

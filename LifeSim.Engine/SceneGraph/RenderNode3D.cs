@@ -31,14 +31,14 @@ public partial class RenderNode3D : Node3D
         get => this._mesh;
         set
         {
+            if (this._mesh == value) return;
             this._mesh = value;
 
-            if (value is null)
+            if (value is not null)
             {
-                throw new ArgumentNullException(nameof(value));
+                this._renderable.SetMesh(value);
             }
 
-            this._renderable.SetMesh(value);
             this.RenderQueueFlagsChanged();
         }
     }
@@ -49,14 +49,14 @@ public partial class RenderNode3D : Node3D
         get => this._material;
         set
         {
+            if (this._material == value) return;
             this._material = value;
 
-            if (value is null)
+            if (value is not null)
             {
-                throw new ArgumentNullException(nameof(value));
+                this._renderable.SetMaterial(value);
             }
 
-            this._renderable.SetMaterial(value);
             this.RenderQueueFlagsChanged();
         }
     }
@@ -69,14 +69,13 @@ public partial class RenderNode3D : Node3D
         get => this._skeleton;
         set
         {
+            if (this._skeleton == value) return;
             this._skeleton = value;
 
-            if (value is null)
+            if (value is not null)
             {
-                throw new ArgumentNullException(nameof(value));
+                this._renderable.SetSkeleton(value);
             }
-
-            this._renderable.SetSkeleton(value);
         }
     }
 
@@ -103,6 +102,27 @@ public partial class RenderNode3D : Node3D
             if (this._shadowCastingMode == value) return;
             this._shadowCastingMode = value;
             this.RenderQueueFlagsChanged();
+        }
+    }
+
+    private bool _isPickable = false;
+
+    public bool IsPickable
+    {
+        get => this._isPickable;
+        set
+        {
+            if (this._isPickable == value) return;
+            this._isPickable = value;
+            if (value)
+            {
+                this._renderable.PickingId = Renderer.Instance.RegisterPickable(this);
+            }
+            else
+            {
+                Renderer.Instance.UnregisterPickable(this._renderable.PickingId);
+                this._renderable.PickingId = 0;
+            }
         }
     }
 
@@ -158,16 +178,12 @@ public partial class RenderNode3D : Node3D
     internal override void AttachToSceneRecursive(Scene scene)
     {
         base.AttachToSceneRecursive(scene);
-
-        Renderer.Instance.RegisterPickingId(this._renderable.PickingId, this);
         this.RenderQueueFlagsChanged();
     }
 
     internal override void DetachFromSceneRecursive()
     {
         if (this.Scene is null) return;
-        Renderer.Instance.UnregisterPickingId(this._renderable.PickingId);
-
         base.DetachFromSceneRecursive();
     }
 
@@ -184,9 +200,13 @@ public partial class RenderNode3D : Node3D
         if (this.Visible)
         {
             flags |= RenderQueueFlags.Opaque;
-        }
 
-        if (this.ShadowCastingMode == ShadowCasting.CastShadows || this.ShadowCastingMode == ShadowCasting.OnlyShadows)
+            if (this.ShadowCastingMode == ShadowCasting.CastShadows)
+            {
+                flags |= RenderQueueFlags.ShadowCaster;
+            }
+        }
+        else if (this.ShadowCastingMode == ShadowCasting.OnlyShadows)
         {
             flags |= RenderQueueFlags.ShadowCaster;
         }

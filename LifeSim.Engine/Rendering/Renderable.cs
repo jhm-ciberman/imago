@@ -42,7 +42,20 @@ public class Renderable : IDisposable
             }
         }
     }
-    public uint PickingId { get; }
+
+    private uint _pickingId = 0;
+    public uint PickingId
+    {
+        get => this._pickingId;
+        set
+        {
+            if (this._pickingId != value)
+            {
+                this._pickingId = value;
+                this.RecomputeOffsetVertexData();
+            }
+        }
+    }
 
     public Skeleton? Skeleton { get; private set; }
     public Material? Material { get; private set; }
@@ -159,7 +172,7 @@ public class Renderable : IDisposable
             TransformDataOffset = this._transformDataBlock.BlockIndex,
             InstanceDataOffset = this._instanceDataBlock.BlockIndex,
             BoneDataOffset = this.Skeleton?.BoneDataOffset ?? 0,
-            PickingId = this.PickingId // this id is used for picking
+            PickingId = this.PickingId, // this id is used for picking
         };
     }
 
