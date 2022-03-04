@@ -38,7 +38,45 @@ public class Renderer : ITexture2DManager, IDisposable
     private readonly ParticlesPass _particlesPass;
     private readonly SkyDomePass _skyDomePass;
     private readonly CommandList _commandList;
-    private readonly List<IRenderingPass> _passes = new List<IRenderingPass>();
+
+    private class CommandListJob : IDisposable
+    {
+        public CommandList CommandList { get; }
+
+        public string Name { get; }
+
+        public Fence Fence { get; }
+        public IRenderingPass[] Passes { get; }
+
+        public CommandListJob(string name, ResourceFactory factory, params IRenderingPass[] passes)
+        {
+            this.Name = name;
+            this.CommandList = factory.CreateCommandList();
+            this.Fence = factory.CreateFence(signaled: false);
+            this.Passes = passes;
+        }
+
+        public void Execute(Scene scene)
+        {
+            this.CommandList.Begin();
+            foreach (var pass in this.Passes)
+            {
+                pass.Render(this.CommandList, scene);
+            }
+            this.CommandList.End();
+        }
+
+        public void SubmitCommands(GraphicsDevice gd)
+        {
+            gd.SubmitCommands(this.CommandList, this.Fence);
+        }
+
+        public void Dispose()
+        {
+            this.CommandList.Dispose();
+        }
+    }
+    private readonly List<CommandListJob> _jobs;
     private readonly DisposeCollector _disposeCollector;
 
     public Renderer(Sdl2Window window, GraphicsBackend? graphicsBackend = null)
@@ -85,18 +123,22 @@ public class Renderer : ITexture2DManager, IDisposable
 
         this._fence = this._factory.CreateFence(false);
 
-        this._passes.AddRange(new IRenderingPass[]
+        this._jobs = new List<CommandListJob>
         {
-            this._shadowPass,
-            this._forwardPass,
-            this._skyDomePass,
-            this._mousePickerPass,
-            this._particlesPass,
-            this._gizmosPass,
-            this._spritesPass,
-            this._imGuiPass,
-            this._fullScreenPass
-        });
+            new CommandListJob("Shadows", this._factory,
+                this._shadowPass),
+            new CommandListJob("Forward", this._factory,
+                this._forwardPass),
+            new CommandListJob("Extra", this._factory,
+                this._skyDomePass,
+                this._mousePickerPass,
+                this._particlesPass,
+                this._gizmosPass,
+                this._spritesPass,
+                this._imGuiPass),
+            new CommandListJob("Present", this._factory,
+                this._fullScreenPass),
+        };
     }
 
     public void DisposeWhenIdle(IDisposable disposable)
@@ -153,7 +195,6 @@ public class Renderer : ITexture2DManager, IDisposable
         scene.RenderImGui();
 
         this._commandList.Begin();
-
         this.UpdateDirtyMaterials();
         this.UpdateDirtyTextures();
         this.Storage.UpdateBuffers(this._commandList);
@@ -165,16 +206,23 @@ public class Renderer : ITexture2DManager, IDisposable
             ColorF col = scene.BackgroundColor.Value;
             this._commandList.ClearColorTarget(0, new RgbaFloat(col.R, col.G, col.B, col.A));
         }
+        this._commandList.End();
 
-        for (int i = 0; i < this._passes.Count; i++)
+        for (int i = 0; i < this._jobs.Count; i++)
         {
-            this._passes[i].Render(this._commandList, scene);
+            this._jobs[i].Execute(scene);
         }
 
-        this._commandList.End();
+
         this.GraphicsDevice.WaitForIdle();
         this._fence.Reset();
         this.GraphicsDevice.SubmitCommands(this._commandList, this._fence);
+
+        for (int i = 0; i < this._jobs.Count; i++)
+        {
+            this._jobs[i].SubmitCommands(this.GraphicsDevice);
+        }
+
         this._disposeCollector.DisposeAll();
         this.GraphicsDevice.SwapBuffers();
     }
@@ -218,9 +266,9 @@ public class Renderer : ITexture2DManager, IDisposable
         this._fence.Dispose();
         this.GraphicsDevice.Dispose();
 
-        foreach (var pass in this._passes)
+        foreach (var job in this._jobs)
         {
-            pass.Dispose();
+            job.Dispose();
         }
     }
 
@@ -234,6 +282,16 @@ public class Renderer : ITexture2DManager, IDisposable
     public void UnregisterPickable(uint pickingId)
     {
         this._mousePickerPass.UnregisterPickable(pickingId);
+    }
+
+    public void AddImmediateRenderNode(ImmediateRenderNode3D node)
+    {
+        this._forwardPass.AddImmediateRenderNode(node);
+    }
+
+    public void RemoveImmediateRenderNode(ImmediateRenderNode3D node)
+    {
+        this._forwardPass.RemoveImmediateRenderNode(node);
     }
 
     object ITexture2DManager.CreateTexture(int width, int height)

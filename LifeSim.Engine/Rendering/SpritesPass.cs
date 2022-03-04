@@ -9,15 +9,9 @@ namespace LifeSim.Engine.Rendering;
 
 public class SpritesPass : IDisposable, IPipelineProvider, IRenderingPass
 {
-    private readonly DeviceBuffer _camera2DInfoBuffer;
-    private readonly ResourceSet _passResourceSet;
     private readonly IRenderTexture _renderTexture;
-    private readonly ResourceLayout _passResourceLayout;
     private readonly GraphicsDevice _gd;
-
-    private readonly Dictionary<(Shader, Texture), ResourceSet> _resourceSets = new Dictionary<(Shader, Texture), ResourceSet>();
     private readonly Shader _defaultShader;
-
     private readonly ResourceLayout _resourceLayout;
 
     private readonly SpriteBatcher _spriteBatcher;
@@ -27,28 +21,16 @@ public class SpritesPass : IDisposable, IPipelineProvider, IRenderingPass
         this._gd = renderer.GraphicsDevice;
         var factory = this._gd.ResourceFactory;
 
-        this._passResourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
-            new ResourceLayoutElementDescription("CameraDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
-        ));
-
-
-
         this._resourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
             new ResourceLayoutElementDescription("MainTexture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
             new ResourceLayoutElementDescription("MainSampler", ResourceKind.Sampler, ShaderStages.Fragment)
         ));
 
-        var vertex = ShaderLoader.Load("sprites.vert.glsl");
-        var fragment = ShaderLoader.Load("sprites.frag.glsl");
-        this._defaultShader = new Shader(this, vertex, fragment, this._resourceLayout);
-
-        this._camera2DInfoBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
-
-        this._passResourceSet = factory.CreateResourceSet(new ResourceSetDescription(this._passResourceLayout, this._camera2DInfoBuffer));
+        this._defaultShader = new Shader(this, _vertexShader, _fragmentShader, this._resourceLayout);
 
         this._renderTexture = renderTexture;
 
-        this._spriteBatcher = new SpriteBatcher(this._gd, this._defaultShader, this._passResourceSet);
+        this._spriteBatcher = new SpriteBatcher(this._gd, this._defaultShader);
     }
 
     public Shader MakeShader(string vertexFile, string fragmentFile)
@@ -60,23 +42,8 @@ public class SpritesPass : IDisposable, IPipelineProvider, IRenderingPass
 
     public void Dispose()
     {
-        this._camera2DInfoBuffer.Dispose();
-        this._passResourceLayout.Dispose();
-        this._passResourceSet.Dispose();
-
-        foreach (var set in this._resourceSets.Values)
-        {
-            set.Dispose();
-        }
+        this._spriteBatcher.Dispose();
     }
-
-    public void BeginPass(CommandList commandList, Matrix4x4 projectionMatrix)
-    {
-        commandList.SetFramebuffer(this._renderTexture.Framebuffer);
-        commandList.ClearDepthStencil(1f);
-        commandList.UpdateBuffer(this._camera2DInfoBuffer, 0, ref projectionMatrix);
-    }
-
 
     Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant)
     {
@@ -91,7 +58,7 @@ public class SpritesPass : IDisposable, IPipelineProvider, IRenderingPass
         );
 
         var resources = new ResourceLayout[] {
-            this._passResourceLayout,
+            this._spriteBatcher.PassResourceLayout,
             shaderVariant.MaterialResourceLayout,
         };
 
@@ -111,25 +78,64 @@ public class SpritesPass : IDisposable, IPipelineProvider, IRenderingPass
     {
         var canvasLayers = scene.CanvasLayers;
 
-        this._spriteBatcher.BeginBatch(cl);
+        cl.SetFramebuffer(this._renderTexture.Framebuffer);
+        cl.ClearDepthStencil(1f);
         for (int i = 0; i < canvasLayers.Count; i++)
         {
             var canvasLayer = canvasLayers[i];
-            this.BeginPass(cl, canvasLayer.ViewProjectionMatrix);
+            this._spriteBatcher.Begin(cl, canvasLayer.ViewProjectionMatrix);
 
             for (int j = 0; j < canvasLayer.Items.Count; j++)
             {
                 canvasLayer.Items[j].Render(this._spriteBatcher);
             }
 
-            this._spriteBatcher.FlushBatch();
+            this._spriteBatcher.End();
         }
 
         if (scene.UILayer != null)
         {
-            this.BeginPass(cl, scene.UILayer.ViewProjectionMatrix);
+            this._spriteBatcher.Begin(cl, scene.UILayer.ViewProjectionMatrix);
             scene.UILayer.Draw(this._spriteBatcher);
             this._spriteBatcher.FlushBatch();
         }
     }
+
+    private static readonly string _fragmentShader = @"
+        #version 450
+        layout(location = 0) in vec2 fsin_TexCoords;
+        layout(location = 1) in vec4 fsin_Color;
+
+        layout(set = 1, binding = 0) uniform texture2D MainTexture;
+        layout(set = 1, binding = 1) uniform sampler MainSampler;
+
+        layout(location = 0) out vec4 fsout_color;
+
+        void main()
+        {
+            vec4 textureColor = texture(sampler2D(MainTexture, MainSampler), fsin_TexCoords);
+            fsout_color = textureColor * fsin_Color;
+        }
+    ";
+
+    private static readonly string _vertexShader = @"
+        #version 450
+        layout(set = 0, binding = 0, std140) uniform CameraDataBuffer {
+            mat4 ViewProjection;
+        };
+
+        layout(location = 0) in vec3 Position;
+        layout(location = 1) in vec2 TextureCoords;
+        layout(location = 2) in vec4 Color;
+
+        layout(location = 0) out vec2 fsin_TexCoords;
+        layout(location = 1) out vec4 fsin_Color;
+
+        void main()
+        {
+            gl_Position = ViewProjection * vec4(Position, 1);
+            fsin_TexCoords = TextureCoords;
+            fsin_Color = Color;
+        }
+    ";
 }

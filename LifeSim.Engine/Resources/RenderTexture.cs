@@ -9,6 +9,8 @@ public class RenderTexture : IRenderTexture
 
     public Framebuffer Framebuffer { get; private set; }
 
+    public Framebuffer ColorOnlyFramebuffer { get; private set; }
+
     public Veldrid.Texture DeviceTexture { get; private set; }
 
     public Veldrid.Texture DepthTexture { get; private set; }
@@ -31,6 +33,7 @@ public class RenderTexture : IRenderTexture
         this.DeviceTexture = this.CreateColorTexture(width, height);
         this.PickingTexture = this.CreatePickingIDTexture(width, height);
         this.Framebuffer = this.CreateFramebuffer();
+        this.ColorOnlyFramebuffer = this.CreateColorOnlyFramebuffer();
         this.Sampler = this._gd.LinearSampler;
     }
 
@@ -71,16 +74,25 @@ public class RenderTexture : IRenderTexture
         ));
     }
 
+    private Framebuffer CreateColorOnlyFramebuffer()
+    {
+        return this._gd.ResourceFactory.CreateFramebuffer(new FramebufferDescription(
+            this.DepthTexture, this.DeviceTexture
+        ));
+    }
+
     public void Resize(uint width, uint height)
     {
         this._gd.DisposeWhenIdle(this.DepthTexture);
         this._gd.DisposeWhenIdle(this.DeviceTexture);
         this._gd.DisposeWhenIdle(this.PickingTexture);
         this._gd.DisposeWhenIdle(this.Framebuffer);
+        this._gd.DisposeWhenIdle(this.ColorOnlyFramebuffer);
         this.DepthTexture = this.CreateDepthTexture(width, height);
         this.DeviceTexture = this.CreateColorTexture(width, height);
         this.PickingTexture = this.CreatePickingIDTexture(width, height);
         this.Framebuffer = this.CreateFramebuffer();
+        this.ColorOnlyFramebuffer = this.CreateColorOnlyFramebuffer();
         this.OnResized?.Invoke(this);
     }
 
@@ -90,5 +102,6 @@ public class RenderTexture : IRenderTexture
         this.DeviceTexture?.Dispose();
         this.PickingTexture?.Dispose();
         this.Framebuffer?.Dispose();
+        this.ColorOnlyFramebuffer?.Dispose();
     }
 }

@@ -27,19 +27,16 @@ public interface IMeshData
     VertexFormat VertexFormat { get; }
 
     /// <summary>
-    /// Constructs a <see cref="VertexBuffer"/> from this <see cref="MeshData"/>.
+    /// Constructs a <see cref="DeviceBuffer"/> to use as vertex buffer from this <see cref="MeshData"/>.
     /// </summary>
-    /// <param name="factory">The <see cref="ResourceFactory"/> to use for device resource creation.</param>
-    /// <param name="cl">The <see cref="CommandList"/> to use for device resource creation.</param>
-    /// <returns></returns>
+    /// <param name="gd">The <see cref="GraphicsDevice"/> to use for device resource creation.</param>
+    /// <returns>The constructed <see cref="DeviceBuffer"/>.</returns>
     DeviceBuffer CreateVertexBuffer(GraphicsDevice gd);
 
     /// <summary>
-    /// Constructs a <see cref="IndexBuffer"/> from this <see cref="MeshData"/>.
+    /// Constructs a <see cref="DeviceBuffer"/> to use as undex buffer from this <see cref="MeshData"/>.
     /// </summary>
-    /// <param name="factory">The <see cref="ResourceFactory"/> to use for device resource creation.</param>
-    /// <param name="cl">The <see cref="CommandList"/> to use for device resource creation.</param>
-    /// <returns></returns>
+    /// <param name="gd">The <see cref="GraphicsDevice"/> to use for device resource creation.</param>
+    /// <returns>The constructed <see cref="DeviceBuffer"/>.</returns>
     DeviceBuffer CreateIndexBuffer(GraphicsDevice gd);
-
 }

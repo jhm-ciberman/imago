@@ -12,21 +12,8 @@ namespace LifeSim.Engine.Rendering;
 
 public class SpriteBatcher : IFontStashRenderer, IDisposable
 {
-    private struct CachedResourceSetKey
-    {
-        public ITexture Texture { get; set; }
-        public Shader Shader { get; set; }
 
-        public CachedResourceSetKey(ITexture texture, Shader shader)
-        {
-            this.Texture = texture;
-            this.Shader = shader;
-        }
-    }
-
-    private readonly Dictionary<CachedResourceSetKey, ResourceSet> _cachedResourceSets = new Dictionary<CachedResourceSetKey, ResourceSet>();
-
-    private Shader _currentShader = null!;
+    private Shader _currentShaderInUse = null!;
 
     public int TotalSpritesToDraw { get; private set; } = 0;
 
@@ -48,7 +35,13 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
 
     private readonly ResourceSet _passResourceSet;
 
-    public SpriteBatcher(GraphicsDevice gd, Shader defaultShader, ResourceSet passResourceSet)
+    private readonly DeviceBuffer _camera2DInfoBuffer;
+
+    public ResourceLayout PassResourceLayout { get; }
+
+    private readonly ResourceSetCache _resourceSetCache;
+
+    public SpriteBatcher(GraphicsDevice gd, Shader defaultShader)
     {
         this._gd = gd;
         this._defaultShader = defaultShader;
@@ -84,7 +77,14 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
             new VertexElementDescription("Color", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Byte4_Norm)
         ));
 
-        this._passResourceSet = passResourceSet;
+        this.PassResourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
+            new ResourceLayoutElementDescription("CameraDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
+        ));
+
+        this._camera2DInfoBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+        this._passResourceSet = factory.CreateResourceSet(new ResourceSetDescription(this.PassResourceLayout, this._camera2DInfoBuffer));
+
+        this._resourceSetCache = new ResourceSetCache(factory);
     }
 
 
@@ -106,28 +106,21 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
         this._batch.Texture = texture;
     }
 
-    private ResourceSet GetResourceSet(Shader shader, ITexture texture)
-    {
-        var key = new CachedResourceSetKey(texture, shader);
-        if (this._cachedResourceSets.TryGetValue(key, out var resourceSet))
-        {
-            return resourceSet;
-        }
 
-        resourceSet = this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(
-            shader.MaterialResourceLayout, texture.DeviceTexture, texture.Sampler));
 
-        this._cachedResourceSets.Add(key, resourceSet);
-
-        return resourceSet;
-    }
-
-    public void BeginBatch(CommandList cl)
+    public void Begin(CommandList cl, Matrix4x4 viewProjectionMatrix)
     {
         this._commandList = cl;
         this.TotalSpritesToDraw = 0;
         this._batch.Clear();
-        this._currentShader = null!;
+        this._currentShaderInUse = null!;
+
+        cl.UpdateBuffer(this._camera2DInfoBuffer, 0, ref viewProjectionMatrix);
+    }
+
+    public void End()
+    {
+        this.FlushBatch();
     }
 
     public void DrawTexture(Shader? shader, ITexture texture, Vector2 position, Vector2 size)
@@ -270,10 +263,10 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
 
         this._commandList.UpdateBuffer(this.VertexBuffer, 0, this._batch.Items);
 
-        if (this._batch.Shader != this._currentShader)
+        if (this._batch.Shader != this._currentShaderInUse)
         {
-            this._currentShader = this._batch.Shader ?? this._defaultShader;
-            var pipeline = this._currentShader.GetPipeline(this._vertexFormat);
+            this._currentShaderInUse = this._batch.Shader ?? this._defaultShader;
+            var pipeline = this._currentShaderInUse.GetPipeline(this._vertexFormat);
 
             this._commandList.SetPipeline(pipeline);
             this._commandList.SetGraphicsResourceSet(0, this._passResourceSet);
@@ -283,15 +276,9 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
         this._commandList.SetIndexBuffer(this._indexBuffer, IndexFormat.UInt16);
 
 
-        var resourceSet = this.GetResourceSet(this._currentShader, this._batch.Texture);
+        var resourceSet = this._resourceSetCache.GetResourceSet(this._currentShaderInUse, this._batch.Texture);
         this._commandList.SetGraphicsResourceSet(1, resourceSet);
-        this._commandList.DrawIndexed(
-            indexCount: (uint)this._batch.Count * 6,
-            instanceCount: 1,
-            indexStart: 0,
-            vertexOffset: 0,
-            instanceStart: 0
-        );
+        this._commandList.DrawIndexed((uint)this._batch.Count * 6);
 
         this._batch.Clear();
     }
@@ -301,5 +288,9 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
     {
         this._indexBuffer.Dispose();
         this.VertexBuffer.Dispose();
+        this._camera2DInfoBuffer.Dispose();
+        this.PassResourceLayout.Dispose();
+        this._passResourceSet.Dispose();
+        this._resourceSetCache.Dispose();
     }
 }

@@ -41,8 +41,10 @@ public class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
     private readonly SceneStorage _storage;
     private readonly RenderJob _renderJob;
     private readonly RenderQueue _opaqueRenderQueue;
-
+    private readonly ImmediateBatcher _immediateModeBatcher;
     private readonly ShadowPass _shadowPass;
+
+    private readonly List<ImmediateRenderNode3D> _immediateRenderNodes = new List<ImmediateRenderNode3D>();
 
     public ForwardPass(Renderer renderer, SceneStorage storage, IRenderTexture mainRenderTexture, ShadowPass shadowPass)
     {
@@ -71,12 +73,24 @@ public class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
         this._opaqueRenderQueue = new RenderQueue(RenderQueueFlags.Opaque);
 
         this._shadowPass.ShadowmapTexture.OnResized += this.OnShadowmapResized;
+
+        this._immediateModeBatcher = new ImmediateBatcher(this._gd, this._renderTexture);
     }
 
     private void OnShadowmapResized()
     {
         this._renderer.DisposeWhenIdle(this._resourceSet);
         this._resourceSet = this.CreatePassResourceSet();
+    }
+
+    public void AddImmediateRenderNode(ImmediateRenderNode3D node)
+    {
+        this._immediateRenderNodes.Add(node);
+    }
+
+    public void RemoveImmediateRenderNode(ImmediateRenderNode3D node)
+    {
+        this._immediateRenderNodes.Remove(node);
     }
 
     private ResourceSet CreatePassResourceSet()
@@ -131,6 +145,19 @@ public class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
         cl.UpdateBuffer(this._lightInfoBuffer, 0, ref lightInfo);
 
         this._renderJob.DrawRenderList(cl, this._resourceSet, this._opaqueRenderQueue);
+
+
+        if (this._immediateRenderNodes.Count > 0)
+        {
+            if (this._renderTexture is not RenderTexture renderTexture) return;
+            cl.SetFramebuffer(renderTexture.ColorOnlyFramebuffer);
+            this._immediateModeBatcher.Begin(cl, camera.ViewProjectionMatrix);
+            for (int i = 0; i < this._immediateRenderNodes.Count; i++)
+            {
+                this._immediateRenderNodes[i].Render(this._immediateModeBatcher);
+            }
+            this._immediateModeBatcher.End();
+        }
     }
 
     public void Dispose()
