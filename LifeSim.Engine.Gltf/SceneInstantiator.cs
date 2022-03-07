@@ -28,17 +28,12 @@ public class SceneInstantiator
 
     private Node3D CreateRenderNode(GltfScene scene, Mesh mesh, Material? material, Skin? skin)
     {
-        RenderNode3D node = new RenderNode3D();
-        node.Mesh = mesh;
-        if (material != null)
+        return new RenderNode3D()
         {
-            node.Material = material;
-        }
-        if (skin != null)
-        {
-            node.Skeleton = this.CreateSkeleton(scene, skin);
-        }
-        return node;
+            Mesh = mesh,
+            Material = material,
+            Skeleton = (skin != null) ? this.CreateSkeleton(scene, skin) : null,
+        };
     }
 
     private Node3D InstantiateNodeRecursive(GltfScene scene, GLTFNode gltfNode)

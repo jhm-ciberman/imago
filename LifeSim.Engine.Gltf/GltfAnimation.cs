@@ -28,7 +28,7 @@ internal class GltfAnimation
 
     public Animation LoadAnimation()
     {
-        List<Animation.IChannel> list = new List<Animation.IChannel>();
+        List<IChannel> list = new List<IChannel>();
 
         foreach (var channel in this._channels)
         {
@@ -42,29 +42,39 @@ internal class GltfAnimation
         return new Animation(this._name, list);
     }
 
-    private Animation.IChannel? CreateChannel(glTFLoader.Schema.AnimationChannel channel)
+    private IChannel? CreateChannel(glTFLoader.Schema.AnimationChannel channel)
     {
         var targetIndex = channel.Target.Node;
         if (!targetIndex.HasValue) return null;
-
-        var factory = GetChannelFactory(channel.Target.Path);
-        if (factory == null) return null;
 
         var targetName = this._model.GetNode(targetIndex.Value).Name;
         var sampler = this._samplers[channel.Sampler];
         var input = this.GetSamplerInput(sampler.Input);
         var output = this._model.GetAccessor(sampler.Output);
-        return factory.MakeChannel(targetName, input, output, sampler.Interpolation);
+        return MakeChannel(targetName, channel.Target.Path, input, output, sampler.Interpolation);
     }
 
-    private static IChannelFactory? GetChannelFactory(PathEnum path)
+    protected static InterpolationMode GetInterpolatorType(InterpolationEnum type)
     {
+        return type switch
+        {
+            InterpolationEnum.STEP => InterpolationMode.Step,
+            InterpolationEnum.LINEAR => InterpolationMode.Linear,
+            InterpolationEnum.CUBICSPLINE => InterpolationMode.CubicSpline,
+            _ => InterpolationMode.Step,
+        };
+    }
+
+    private static IChannel MakeChannel(string targetName, PathEnum path, float[] input, GltfAccessor output, InterpolationEnum typeEnum)
+    {
+        var type = GetInterpolatorType(typeEnum);
         return path switch
         {
-            PathEnum.translation => new PositionChannelFactory(),
-            PathEnum.rotation => new RotationChannelFactory(),
-            PathEnum.scale => new ScaleChannelFactory(),
-            _ => null, // Not supported
+            PathEnum.translation => new PositionChannel(targetName, input, output.AsVector3Array(), type),
+            PathEnum.rotation => new RotationChannel(targetName, input, output.AsQuaternionArray(), type),
+            PathEnum.scale => new ScaleChannel(targetName, input, output.AsVector3Array(), type),
+            PathEnum.weights => throw new System.NotImplementedException(),
+            _ => throw new System.NotImplementedException(),
         };
     }
 
@@ -81,59 +91,4 @@ internal class GltfAnimation
         return this._inputsCache[index];
     }
 
-    private interface IChannelFactory
-    {
-        Animation.IChannel MakeChannel(string targetName, float[] input, GltfAccessor output, InterpolationEnum type);
-    }
-
-    private abstract class ChannelFactory<T> : IChannelFactory where T : struct
-    {
-        public abstract Animation.IChannel MakeChannel(string targetName, float[] input, GltfAccessor output, InterpolationEnum type);
-        protected abstract Animation.IInterpolator<T> MakeInterpolator();
-
-        protected Animation.BaseSampler<T> MakeSampler(float[] input, T[] values, InterpolationEnum type)
-        {
-            var interpolator = this.MakeInterpolator();
-            return type switch
-            {
-                InterpolationEnum.STEP => new Animation.SamplerStep<T>(input, values),
-                InterpolationEnum.LINEAR => new Animation.SamplerLinear<T>(input, values, interpolator),
-                InterpolationEnum.CUBICSPLINE => new Animation.SamplerCubicSpline<T>(input, values, interpolator),
-                _ => new Animation.SamplerStep<T>(input, values),
-            };
-        }
-    }
-
-    private class PositionChannelFactory : ChannelFactory<Vector3>
-    {
-        public override Animation.IChannel MakeChannel(string targetName, float[] input, GltfAccessor output, InterpolationEnum type)
-        {
-            var sampler = this.MakeSampler(input, output.AsVector3Array(), type);
-            return new Animation.PositionChannel(targetName, sampler);
-        }
-
-        protected override Animation.IInterpolator<Vector3> MakeInterpolator() => new Animation.Vector3Interpolator();
-    }
-
-    private class RotationChannelFactory : ChannelFactory<Quaternion>
-    {
-        public override Animation.IChannel MakeChannel(string targetName, float[] input, GltfAccessor output, InterpolationEnum type)
-        {
-            var sampler = this.MakeSampler(input, output.AsQuaternionArray(), type);
-            return new Animation.RotationChannel(targetName, sampler);
-        }
-
-        protected override Animation.IInterpolator<Quaternion> MakeInterpolator() => new Animation.QuaternionInterpolator();
-    }
-
-    private class ScaleChannelFactory : ChannelFactory<Vector3>
-    {
-        public override Animation.IChannel MakeChannel(string targetName, float[] input, GltfAccessor output, InterpolationEnum type)
-        {
-            var sampler = this.MakeSampler(input, output.AsVector3Array(), type);
-            return new Animation.ScaleChannel(targetName, sampler);
-        }
-
-        protected override Animation.IInterpolator<Vector3> MakeInterpolator() => new Animation.Vector3Interpolator();
-    }
 }

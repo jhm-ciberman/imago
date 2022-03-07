@@ -10,10 +10,10 @@ public class BindedAnimation
     {
         public Node3D Target { get; }
 
-        public IReadOnlyList<Animation.IChannel> Channels { get; }
+        public IReadOnlyList<IChannel> Channels { get; }
         public int LastTimeIndex;
 
-        public BindedChannel(Node3D target, IReadOnlyList<Animation.IChannel> channels)
+        public BindedChannel(Node3D target, IReadOnlyList<IChannel> channels)
         {
             this.Target = target;
             this.Channels = channels;
@@ -51,7 +51,7 @@ public class BindedAnimation
         }
     }
 
-    public void AddChannel(Node3D target, IReadOnlyList<Animation.IChannel> channels)
+    public void AddChannel(Node3D target, IReadOnlyList<IChannel> channels)
     {
         this._bindedChannels.Add(new BindedChannel(target, channels));
     }
@@ -70,7 +70,7 @@ public class BindedAnimation
             var bindedChannel = this._bindedChannels[i];
             for (int j = 0; j < bindedChannel.Channels.Count; j++)
             {
-                bindedChannel.Channels[j].UpdateTarget(bindedChannel.Target, this._currentTime, this._loop, ref bindedChannel.LastTimeIndex);
+                bindedChannel.Channels[j].Update(bindedChannel.Target, this._currentTime); //, this._loop, ref bindedChannel.LastTimeIndex);
             }
         }
     }

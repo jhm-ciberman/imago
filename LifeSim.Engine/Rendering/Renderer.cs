@@ -186,11 +186,18 @@ public class Renderer : ITexture2DManager, IDisposable
         }
     }
 
-    public void Render(Scene scene, float deltaTime, InputSnapshot inputSnapshot)
+    public void SetMousePickingPosition(Vector2 position)
     {
-        this._mousePickerPass.SetMousePosition(inputSnapshot.MousePosition);
-        this._imGuiPass.Update(deltaTime, inputSnapshot);
+        this._mousePickerPass.SetMousePosition(position);
+    }
 
+    public void UpdateImGui(float deltaTime, InputSnapshot inputSnapshot)
+    {
+        this._imGuiPass.Update(deltaTime, inputSnapshot);
+    }
+
+    public void Render(Scene scene)
+    {
         scene.OnBeforeRender();
         scene.RenderImGui();
 
