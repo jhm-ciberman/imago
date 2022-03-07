@@ -87,41 +87,27 @@ public class Scene : Node3D
     {
         if (this._transformDirtyList.Count == 0) return;
 
-        Matrix4x4 identity = Matrix4x4.Identity;
-
         for (int i = 0; i < this._transformDirtyList.Count; i++)
         {
             Node3D node = this._transformDirtyList[i];
-            if (!node.TransformIsDirty) continue;
+            if (!node.LocalTransformIsDirty) continue;
 
             // Search for the top dirty node
             Node3D topDirty = node;
             while (true)
             {
-                if (node.TransformIsDirty) topDirty = node;
+                if (node.LocalTransformIsDirty) topDirty = node;
                 if (node.Parent == null) break;
                 node = node.Parent;
             }
 
-            if (topDirty.Parent != null)
-            {
-                topDirty.UpdateWorldMatrix(ref topDirty.Parent.WorldMatrix);
-            }
-            else
-            {
-                topDirty.UpdateWorldMatrix(ref identity);
-            }
+            topDirty.UpdateTransform();
         }
 
         this._transformDirtyList.Clear();
     }
 
-    internal void NotifyNodeAdded(Node3D node)
-    {
-        this._transformDirtyList.Add(node);
-    }
-
-    internal void NotifyNodeRemoved(Node3D node)
+    internal void NotifyTransformNotDirty(Node3D node)
     {
         this._transformDirtyList.Remove(node);
     }
@@ -130,5 +116,4 @@ public class Scene : Node3D
     {
         this._transformDirtyList.Add(node);
     }
-
 }

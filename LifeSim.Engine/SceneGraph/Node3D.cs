@@ -8,6 +8,15 @@ namespace LifeSim.Engine.SceneGraph;
 
 public class Node3D
 {
+    [Flags]
+    private enum DirtyFlags
+    {
+        None = 0,
+        LocalMatrix = 1 << 0,
+        WorldMatrix = 1 << 1,
+        All = LocalMatrix | WorldMatrix
+    }
+
 
     public string Name { get; set; } = string.Empty;
 
@@ -30,7 +39,7 @@ public class Node3D
         {
             if (this._position == value) return;
             this._position = value;
-            this.NotifyTransformDirty();
+            this.NotifyLocalTransformDirty();
         }
     }
 
@@ -41,7 +50,7 @@ public class Node3D
         {
             if (this._rotation == value) return;
             this._rotation = value;
-            this.NotifyTransformDirty();
+            this.NotifyLocalTransformDirty();
         }
     }
 
@@ -52,22 +61,18 @@ public class Node3D
         {
             if (this._scale == value) return;
             this._scale = value;
-            this.NotifyTransformDirty();
+            this.NotifyLocalTransformDirty();
         }
     }
 
     public Scene? Scene { get; protected set; } = null;
 
     private Matrix4x4 _localMatrix = Matrix4x4.Identity;
+    private Matrix4x4 _worldMatrix = Matrix4x4.Identity;
+    private DirtyFlags _dirtyFlags = DirtyFlags.All;
 
-    protected Matrix4x4 _worldMatrix = Matrix4x4.Identity;
-    public ref Matrix4x4 WorldMatrix => ref this._worldMatrix;
-
-    protected bool _transformIsDirty = true;
-    public bool TransformIsDirty => this._transformIsDirty;
-
-    public Vector3 WorldPosition => Vector3.Transform(Vector3.Zero, this._worldMatrix);
-    public Vector3 WorldScale => Vector3.Transform(this._scale, this._worldMatrix);
+    public bool LocalTransformIsDirty => (this._dirtyFlags & DirtyFlags.LocalMatrix) != 0;
+    public bool WorldTransformIsDirty => (this._dirtyFlags & DirtyFlags.WorldMatrix) != 0;
 
     public Node3D()
     {
@@ -76,23 +81,72 @@ public class Node3D
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void NotifyTransformDirty()
+    private void NotifyLocalTransformDirty()
     {
-        if (this._transformIsDirty) return;
-        this._transformIsDirty = true;
+        if (this.LocalTransformIsDirty) return;
+        this._dirtyFlags |= DirtyFlags.LocalMatrix | DirtyFlags.WorldMatrix;
         this.Scene?.NotifyTransformDirty(this);
+
+        foreach (var child in this._children)
+        {
+            child.NotifyWorldTransformDirty();
+        }
     }
 
-    public ref Matrix4x4 GetLocalMatrix()
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void NotifyWorldTransformDirty()
     {
-        if (this._transformIsDirty)
+        if (this.WorldTransformIsDirty) return;
+        this._dirtyFlags |= DirtyFlags.WorldMatrix;
+        this.Scene?.NotifyTransformDirty(this);
+
+        foreach (var child in this._children)
         {
-            this._localMatrix = Matrix4x4.CreateScale(this._scale)
-                * Matrix4x4.CreateFromQuaternion(this._rotation)
-                * Matrix4x4.CreateTranslation(this._position);
-            this._transformIsDirty = false;
+            child.NotifyWorldTransformDirty();
         }
-        return ref this._localMatrix;
+    }
+
+    public ref Matrix4x4 LocalMatrix
+    {
+        get
+        {
+            if (this.LocalTransformIsDirty)
+            {
+                this._localMatrix = Matrix4x4.CreateScale(this._scale)
+                    * Matrix4x4.CreateFromQuaternion(this._rotation)
+                    * Matrix4x4.CreateTranslation(this._position);
+                this._dirtyFlags &= ~DirtyFlags.LocalMatrix;
+            }
+            return ref this._localMatrix;
+        }
+    }
+
+    public virtual void UpdateTransform(ref Matrix4x4 parentMatrix)
+    {
+        this._worldMatrix = this.LocalMatrix * parentMatrix;
+        this._dirtyFlags &= ~DirtyFlags.WorldMatrix;
+        for (int i = 0; i < this.Children.Count; i++)
+        {
+            this.Children[i].UpdateTransform(ref this._worldMatrix);
+        }
+    }
+
+    public void UpdateTransform()
+    {
+        Matrix4x4 mat = (this.Parent == null) ? Matrix4x4.Identity : this.Parent.WorldMatrix;
+        this.UpdateTransform(ref mat);
+    }
+
+    public ref Matrix4x4 WorldMatrix
+    {
+        get
+        {
+            if (this.WorldTransformIsDirty)
+            {
+                this.UpdateTransform();
+            }
+            return ref this._worldMatrix;
+        }
     }
 
     public T? FindChild<T>(string name) where T : Node3D
@@ -203,7 +257,7 @@ public class Node3D
         if (this.Scene != null) return;
 
         this.Scene = scene;
-        this.Scene.NotifyNodeAdded(this);
+        this.Scene.NotifyTransformDirty(this);
 
         foreach (var child in this._children)
         {
@@ -215,7 +269,7 @@ public class Node3D
     {
         if (this.Scene == null) return;
 
-        this.Scene.NotifyNodeRemoved(this);
+        this.Scene.NotifyTransformNotDirty(this);
         this.Scene = null;
 
         foreach (var child in this._children)
@@ -245,13 +299,5 @@ public class Node3D
         }
     }
 
-    public virtual void UpdateWorldMatrix(ref Matrix4x4 parentMatrix)
-    {
-        this._worldMatrix = this.GetLocalMatrix() * parentMatrix;
 
-        for (int i = 0; i < this.Children.Count; i++)
-        {
-            this.Children[i].UpdateWorldMatrix(ref this._worldMatrix);
-        }
-    }
 }

@@ -1,6 +1,4 @@
-using System;
 using System.Numerics;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using LifeSim.Engine.Rendering;
 using LifeSim.Engine.Resources;
@@ -14,11 +12,7 @@ public partial class RenderNode3D : Node3D
     [StructLayout(LayoutKind.Sequential)]
     private struct InstanceData
     {
-        public InstanceData()
-        {
-            //
-        }
-
+        public InstanceData() { }
         public Vector4 AlbedoColor { get; set; } = new Vector4(1.0f, 1.0f, 1.0f, 0.0f);
         public Vector4 TextureST { get; set; } = new Vector4(1.0f, 1.0f, 0.0f, 0.0f);
     }
@@ -168,9 +162,9 @@ public partial class RenderNode3D : Node3D
         this._renderable.SetInstanceData(this._instanceData);
     }
 
-    public override void UpdateWorldMatrix(ref Matrix4x4 parentMatrix)
+    public override void UpdateTransform(ref Matrix4x4 parentMatrix)
     {
-        base.UpdateWorldMatrix(ref parentMatrix);
+        base.UpdateTransform(ref parentMatrix);
 
         this._renderable.SetTransform(ref this.WorldMatrix);
     }

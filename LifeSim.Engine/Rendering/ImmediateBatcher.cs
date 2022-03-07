@@ -125,7 +125,7 @@ public class ImmediateBatcher : IPipelineProvider, IDisposable
         this._commandList = cl;
         this._vertexCount = 0;
         this._indexCount = 0;
-        this._currentBatchShader =  null!;
+        this._currentBatchShader = null!;
         this._currentBatchTexture = null!;
         this._currentShaderInUse = null!;
 
