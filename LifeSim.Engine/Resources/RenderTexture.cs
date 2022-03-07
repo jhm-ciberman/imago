@@ -83,11 +83,11 @@ public class RenderTexture : IRenderTexture
 
     public void Resize(uint width, uint height)
     {
-        this._gd.DisposeWhenIdle(this.DepthTexture);
-        this._gd.DisposeWhenIdle(this.DeviceTexture);
-        this._gd.DisposeWhenIdle(this.PickingTexture);
-        this._gd.DisposeWhenIdle(this.Framebuffer);
-        this._gd.DisposeWhenIdle(this.ColorOnlyFramebuffer);
+        Renderer.Instance.DisposeWhenIdle(this.DepthTexture);
+        Renderer.Instance.DisposeWhenIdle(this.DeviceTexture);
+        Renderer.Instance.DisposeWhenIdle(this.PickingTexture);
+        Renderer.Instance.DisposeWhenIdle(this.Framebuffer);
+        Renderer.Instance.DisposeWhenIdle(this.ColorOnlyFramebuffer);
         this.DepthTexture = this.CreateDepthTexture(width, height);
         this.DeviceTexture = this.CreateColorTexture(width, height);
         this.PickingTexture = this.CreatePickingIDTexture(width, height);

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using LifeSim.Engine.Resources;
 using Veldrid;
 
@@ -76,6 +77,8 @@ public class RenderJob
 
             if (currentMesh != batch.Mesh)
             {
+                Debug.Assert(batch.Mesh.VertexBuffer.IsDisposed == false);
+                Debug.Assert(batch.Mesh.IndexBuffer.IsDisposed == false);
                 commandList.SetVertexBuffer(1, batch.Mesh.VertexBuffer, 0);
                 commandList.SetIndexBuffer(batch.Mesh.IndexBuffer, Veldrid.IndexFormat.UInt16);
                 currentMesh = batch.Mesh;
@@ -91,7 +94,5 @@ public class RenderJob
 
             instanceIndex += batch.InstanceCount;
         }
-
-        //Console.WriteLine("DrawCalls: " + drawCallCount);
     }
 }

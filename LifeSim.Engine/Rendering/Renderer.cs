@@ -92,7 +92,7 @@ public class Renderer : ITexture2DManager, IDisposable
             debug: true,
             swapchainDepthFormat: null, //PixelFormat.R16_UNorm,
             syncToVerticalBlank: true,
-            resourceBindingModel: ResourceBindingModel.Default,
+            resourceBindingModel: ResourceBindingModel.Improved,
             preferDepthRangeZeroToOne: true,
             preferStandardClipSpaceYDirection: true,
             swapchainSrgbFormat: false
@@ -143,12 +143,16 @@ public class Renderer : ITexture2DManager, IDisposable
 
     public void DisposeWhenIdle(IDisposable disposable)
     {
+        Console.WriteLine("Disposing " + disposable.GetType().Name);
         this._disposeCollector.Add(disposable);
     }
 
     public void DisposeWhenIdle(IDisposable[] disposables)
     {
-        this._disposeCollector.Add(disposables);
+        foreach (var disposable in disposables)
+        {
+            this.DisposeWhenIdle(disposable);
+        }
     }
 
     public Renderable MakeRenderable(int instanceDataBlockSize)

@@ -17,6 +17,8 @@ public class Mesh : System.IDisposable
 
     public IMeshData MeshData { get; private set; }
 
+    public bool IsDisposed { get; private set; }
+
     public Mesh(IMeshData meshData)
     {
         var gd = Renderer.Instance.GraphicsDevice;
@@ -29,8 +31,11 @@ public class Mesh : System.IDisposable
         this.MeshData = meshData;
     }
 
-    public virtual void Dispose()
+    // use  to dispose
+    public void Dispose()
     {
+        if (this.IsDisposed) return;
+        this.IsDisposed = true;
         Renderer.Instance.DisposeWhenIdle(this.VertexBuffer);
         Renderer.Instance.DisposeWhenIdle(this.IndexBuffer);
     }
