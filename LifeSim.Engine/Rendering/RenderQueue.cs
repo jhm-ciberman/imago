@@ -30,14 +30,19 @@ public class RenderQueue : IEnumerable<Renderable>, IReadOnlyList<Renderable>, I
 
     private void OnRenderQueueFlagsChanged(Renderable renderable, RenderQueueFlags oldFlags, RenderQueueFlags newFlags)
     {
+        // This event could be called from a different thread. The "_allRenderables" list should be locked.
+
         if (newFlags.HasFlag(this.FilterFlags))
         {
-            this._renderableToIndex.Add(renderable, this._allRenderables.Count);
-            this._allRenderables.Add(renderable);
+            lock (this._allRenderables)
+            {
+                this._renderableToIndex.Add(renderable, this._allRenderables.Count);
+                this._allRenderables.Add(renderable);
+            }
         }
-        else
+        else if (oldFlags.HasFlag(this.FilterFlags))
         {
-            if (oldFlags.HasFlag(this.FilterFlags))
+            lock (this._allRenderables)
             {
                 if (this._renderableToIndex.TryGetValue(renderable, out int index))
                 {
@@ -60,21 +65,23 @@ public class RenderQueue : IEnumerable<Renderable>, IReadOnlyList<Renderable>, I
 
     public void AddToRenderQueue(BoundingFrustum cameraFrustum, Vector3 cameraPosition)
     {
-        this._culledIndices.Clear();
-        this._culledItems.Clear();
-        var renderables = this._allRenderables;
-        for (int i = 0; i < renderables.Count; i++)
+        lock (this._allRenderables)
         {
-            Renderable renderable = renderables[i];
-            //if (renderable.Material == null || renderable.Mesh == null) continue;
-
-            if (!renderable.RenderQueueFlags.HasFlag(this.FilterFlags)) continue;
-
-            if (cameraFrustum.Contains(renderable.BoundingBox) != ContainmentType.Disjoint)
+            this._culledIndices.Clear();
+            this._culledItems.Clear();
+            var renderables = this._allRenderables;
+            for (int i = 0; i < renderables.Count; i++)
             {
-                ulong key = renderable.GetSortKey(cameraPosition);
-                this._culledIndices.Add(new RenderIndex(key, this._culledItems.Count));
-                this._culledItems.Add(renderable);
+                Renderable renderable = renderables[i];
+
+                if (!renderable.RenderQueueFlags.HasFlag(this.FilterFlags)) continue;
+
+                if (cameraFrustum.Contains(renderable.BoundingBox) != ContainmentType.Disjoint)
+                {
+                    ulong key = renderable.GetSortKey(cameraPosition);
+                    this._culledIndices.Add(new RenderIndex(key, this._culledItems.Count));
+                    this._culledItems.Add(renderable);
+                }
             }
         }
     }

@@ -143,8 +143,10 @@ public class Renderer : ITexture2DManager, IDisposable
 
     public void DisposeWhenIdle(IDisposable disposable)
     {
-        Console.WriteLine("Disposing " + disposable.GetType().Name);
-        this._disposeCollector.Add(disposable);
+        lock (this._disposeCollector)
+        {
+            this._disposeCollector.Add(disposable);
+        }
     }
 
     public void DisposeWhenIdle(IDisposable[] disposables)
@@ -204,6 +206,7 @@ public class Renderer : ITexture2DManager, IDisposable
     {
         scene.OnBeforeRender();
         scene.RenderImGui();
+        scene.UpdateSceneDirtyTransforms();
 
         this._commandList.Begin();
         this.UpdateDirtyMaterials();

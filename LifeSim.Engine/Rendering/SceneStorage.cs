@@ -11,9 +11,9 @@ public class SceneStorage : IDisposable
     private readonly List<DataBuffer> _instanceDataBuffers = new List<DataBuffer>();
     private readonly List<DataBuffer> _transformDataBuffers = new List<DataBuffer>();
     private readonly List<DataBuffer> _skeletonDataBuffers = new List<DataBuffer>();
-    public readonly ResourceLayout TransformResourceLayout;
-    public readonly ResourceLayout InstanceResourceLayout;
-    public readonly ResourceLayout SkeletonResourceLayout;
+    public ResourceLayout TransformResourceLayout { get; }
+    public ResourceLayout InstanceResourceLayout { get; }
+    public ResourceLayout SkeletonResourceLayout { get; }
 
     private readonly List<Skeleton> _skeletons = new List<Skeleton>();
 
@@ -39,85 +39,112 @@ public class SceneStorage : IDisposable
 
     internal DataBlock RequestTransformDataBlock()
     {
-        for (int i = 0; i < this._transformDataBuffers.Count; i++)
+        lock (this._transformDataBuffers)
         {
-            var buffer = this._transformDataBuffers[i];
-            if (!buffer.IsFull)
+            for (int i = 0; i < this._transformDataBuffers.Count; i++)
             {
-                return buffer.RequestBlock();
+                var buffer = this._transformDataBuffers[i];
+                if (!buffer.IsFull)
+                {
+                    return buffer.RequestBlock();
+                }
             }
+
+            var newBuffer = new DataBuffer(this._gd, MIN_BUFFER_BLOCKS, 64, this.TransformResourceLayout);
+            newBuffer.Name = "TransformDataBuffer " + this._transformDataBuffers.Count;
+            this._transformDataBuffers.Add(newBuffer);
+            return newBuffer.RequestBlock();
         }
-
-        var newBuffer = new DataBuffer(this._gd, MIN_BUFFER_BLOCKS, 64, this.TransformResourceLayout);
-        newBuffer.Name = "TransformDataBuffer " + this._transformDataBuffers.Count;
-        this._transformDataBuffers.Add(newBuffer);
-        return newBuffer.RequestBlock();
-    }
-
-    internal void RegisterSkeleton(Skeleton skeleton)
-    {
-        this._skeletons.Add(skeleton);
     }
 
     internal DataBlock RequestInstanceDataBlock(int instanceDataBlockSize)
     {
-        for (int i = 0; i < this._instanceDataBuffers.Count; i++)
+        lock (this._instanceDataBuffers)
         {
-            var buffer = this._instanceDataBuffers[i];
-            if (buffer.BlockSize == instanceDataBlockSize && !buffer.IsFull)
+            for (int i = 0; i < this._instanceDataBuffers.Count; i++)
             {
-                return buffer.RequestBlock();
+                var buffer = this._instanceDataBuffers[i];
+                if (buffer.BlockSize == instanceDataBlockSize && !buffer.IsFull)
+                {
+                    return buffer.RequestBlock();
+                }
             }
-        }
 
-        var newBuffer = new DataBuffer(this._gd, MIN_BUFFER_BLOCKS, instanceDataBlockSize, this.InstanceResourceLayout);
-        newBuffer.Name = "InstanceDataBuffer " + this._instanceDataBuffers.Count;
-        this._instanceDataBuffers.Add(newBuffer);
-        return newBuffer.RequestBlock();
+            var newBuffer = new DataBuffer(this._gd, MIN_BUFFER_BLOCKS, instanceDataBlockSize, this.InstanceResourceLayout);
+            newBuffer.Name = "InstanceDataBuffer " + this._instanceDataBuffers.Count;
+            this._instanceDataBuffers.Add(newBuffer);
+            return newBuffer.RequestBlock();
+        }
+    }
+
+    internal void RegisterSkeleton(Skeleton skeleton)
+    {
+        lock (this._skeletons)
+        {
+            this._skeletons.Add(skeleton);
+        }
     }
 
     internal void UnregisterSkeleton(Skeleton skeleton)
     {
-        this._skeletons.Remove(skeleton);
+        lock (this._skeletons)
+        {
+            this._skeletons.Remove(skeleton);
+        }
     }
 
     internal DataBlock RequestSkeletonDataBlock()
     {
-        for (int i = 0; i < this._skeletonDataBuffers.Count; i++)
+        lock (this._skeletonDataBuffers)
         {
-            var buffer = this._skeletonDataBuffers[i];
-            if (!buffer.IsFull)
+            for (int i = 0; i < this._skeletonDataBuffers.Count; i++)
             {
-                return buffer.RequestBlock();
+                var buffer = this._skeletonDataBuffers[i];
+                if (!buffer.IsFull)
+                {
+                    return buffer.RequestBlock();
+                }
             }
-        }
 
-        var newBuffer = new DataBuffer(this._gd, MIN_BUFFER_BLOCKS / Skeleton.MAX_NUMBER_OF_BONES, Skeleton.MAX_NUMBER_OF_BONES * 64, this.SkeletonResourceLayout);
-        newBuffer.Name = "SkeletonDataBuffer " + this._skeletonDataBuffers.Count;
-        this._skeletonDataBuffers.Add(newBuffer);
-        return newBuffer.RequestBlock();
+            var newBuffer = new DataBuffer(this._gd, MIN_BUFFER_BLOCKS / Skeleton.MAX_NUMBER_OF_BONES, Skeleton.MAX_NUMBER_OF_BONES * 64, this.SkeletonResourceLayout);
+            newBuffer.Name = "SkeletonDataBuffer " + this._skeletonDataBuffers.Count;
+            this._skeletonDataBuffers.Add(newBuffer);
+            return newBuffer.RequestBlock();
+        }
     }
 
     internal void UpdateBuffers(CommandList commandList)
     {
-        for (int i = 0; i < this._instanceDataBuffers.Count; i++)
+        lock (this._instanceDataBuffers)
         {
-            this._instanceDataBuffers[i].UploadToGPU(commandList);
+            for (int i = 0; i < this._instanceDataBuffers.Count; i++)
+            {
+                this._instanceDataBuffers[i].UploadToGPU(commandList);
+            }
         }
 
-        for (int i = 0; i < this._transformDataBuffers.Count; i++)
+        lock (this._transformDataBuffers)
         {
-            this._transformDataBuffers[i].UploadToGPU(commandList);
+            for (int i = 0; i < this._transformDataBuffers.Count; i++)
+            {
+                this._transformDataBuffers[i].UploadToGPU(commandList);
+            }
         }
 
-        foreach (var skeleton in this._skeletons)
+        lock (this._skeletons)
         {
-            skeleton.Update();
+            foreach (var skeleton in this._skeletons)
+            {
+                skeleton.Update();
+            }
         }
 
-        for (int i = 0; i < this._skeletonDataBuffers.Count; i++)
+        lock (this._instanceDataBuffers)
         {
-            this._skeletonDataBuffers[i].UploadToGPU(commandList);
+            for (int i = 0; i < this._skeletonDataBuffers.Count; i++)
+            {
+                this._skeletonDataBuffers[i].UploadToGPU(commandList);
+            }
         }
     }
 
