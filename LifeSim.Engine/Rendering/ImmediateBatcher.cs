@@ -296,6 +296,12 @@ public class ImmediateBatcher : IPipelineProvider, IDisposable
         void main()
         {
             vec4 textureColor = texture(sampler2D(MainTexture, MainSampler), fsin_TexCoords);
+
+            if (textureColor.a == 0)
+            {
+                discard;
+            }
+
             fsout_color = textureColor * fsin_Color;
         }
     ";
