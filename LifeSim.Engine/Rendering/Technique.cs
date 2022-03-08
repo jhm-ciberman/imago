@@ -7,23 +7,16 @@ namespace LifeSim.Engine.Rendering;
 
 public class Technique
 {
-    public interface IUniform
-    {
-        string Name { get; }
-        void CopyTo(Span<byte> dest);
-    }
-
     private readonly Dictionary<string, int> _instanceUniformData = new Dictionary<string, int>();
     private readonly Dictionary<string, int> _textures = new Dictionary<string, int>();
 
     public int ResourceCount { get; }
     public IReadOnlyDictionary<string, int> Textures => this._textures;
 
-    public int InstanceDataBlockSize { get; }
     public ResourceLayout ResourceLayout { get; }
     private readonly List<Shader> _shaders = new List<Shader>();
 
-    public Technique(IUniform[] uniforms, string[] textures)
+    public Technique(string[] textures)
     {
         this._textures = new Dictionary<string, int>();
         this.ResourceCount = textures.Length * 2;
@@ -36,18 +29,8 @@ public class Technique
             elements[j++] = new ResourceLayoutElementDescription(name + "Sampler", ResourceKind.Sampler, ShaderStages.Fragment);
         }
 
-        this.ResourceLayout = Renderer.Instance.GraphicsDevice.ResourceFactory.CreateResourceLayout(new ResourceLayoutDescription(elements));
-
-        this.InstanceDataBlockSize = uniforms.Length * 16;
-    }
-
-    public int GetInstanceUniformDataOffset(string name)
-    {
-        if (this._instanceUniformData.TryGetValue(name, out int offset))
-        {
-            return offset;
-        }
-        throw new ArgumentException($"Uniform {name} not found");
+        var factory = Renderer.Instance.GraphicsDevice.ResourceFactory;
+        this.ResourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(elements));
     }
 
     public Technique AddPass(IPipelineProvider pass, string vertexCode, string fragmentCode)
