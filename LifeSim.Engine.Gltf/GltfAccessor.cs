@@ -129,7 +129,7 @@ internal class GltfAccessor
 
     private Quaternion[] NormalizeToQuaternion(byte[] sourceArr)
     {
-        if (!this._normalized) throw new System.NotSupportedException();
+        if (!this._normalized) throw new NotSupportedException();
 
         var arr = new Quaternion[sourceArr.Length / 4];
         for (int i = 0; i < arr.Length; i++)
@@ -145,7 +145,7 @@ internal class GltfAccessor
 
     private Quaternion[] NormalizeToQuaternion(ushort[] sourceArr)
     {
-        if (!this._normalized) throw new System.NotSupportedException();
+        if (!this._normalized) throw new NotSupportedException();
 
         var arr = new Quaternion[sourceArr.Length / 4];
         for (int i = 0; i < arr.Length; i++)
@@ -161,15 +161,15 @@ internal class GltfAccessor
 
     private Quaternion[] NormalizeToQuaternion(sbyte[] sourceArr)
     {
-        if (!this._normalized) throw new System.NotSupportedException();
+        if (!this._normalized) throw new NotSupportedException();
 
         var arr = new Quaternion[sourceArr.Length / 4];
         for (int i = 0; i < arr.Length; i++)
         {
-            float x = System.MathF.Max(sourceArr[i + 0] / 127f, -1f);
-            float y = System.MathF.Max(sourceArr[i + 1] / 127f, -1f);
-            float z = System.MathF.Max(sourceArr[i + 2] / 127f, -1f);
-            float w = System.MathF.Max(sourceArr[i + 3] / 127f, -1f);
+            float x = MathF.Max(sourceArr[i + 0] / 127f, -1f);
+            float y = MathF.Max(sourceArr[i + 1] / 127f, -1f);
+            float z = MathF.Max(sourceArr[i + 2] / 127f, -1f);
+            float w = MathF.Max(sourceArr[i + 3] / 127f, -1f);
             arr[i] = new Quaternion(x, y, z, w);
         }
         return arr;
@@ -177,15 +177,15 @@ internal class GltfAccessor
 
     private Quaternion[] NormalizeToQuaternion(short[] sourceArr)
     {
-        if (!this._normalized) throw new System.NotSupportedException();
+        if (!this._normalized) throw new NotSupportedException();
 
         var arr = new Quaternion[sourceArr.Length / 4];
         for (int i = 0; i < arr.Length; i++)
         {
-            float x = System.MathF.Max(sourceArr[i + 0] / 32767f, -1f);
-            float y = System.MathF.Max(sourceArr[i + 1] / 32767f, -1f);
-            float z = System.MathF.Max(sourceArr[i + 2] / 32767f, -1f);
-            float w = System.MathF.Max(sourceArr[i + 3] / 32767f, -1f);
+            float x = MathF.Max(sourceArr[i + 0] / 32767f, -1f);
+            float y = MathF.Max(sourceArr[i + 1] / 32767f, -1f);
+            float z = MathF.Max(sourceArr[i + 2] / 32767f, -1f);
+            float w = MathF.Max(sourceArr[i + 3] / 32767f, -1f);
             arr[i] = new Quaternion(x, y, z, w);
         }
         return arr;

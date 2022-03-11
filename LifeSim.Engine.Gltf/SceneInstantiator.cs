@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using LifeSim.Engine.Anim;
 using LifeSim.Engine.Rendering;
@@ -72,7 +73,7 @@ public class SceneInstantiator
             GLTFNode? gltfNode = scene.FindNodeByName(names[i]);
             joints[i] = gltfNode != null
                 ? this.InstantiateNodeRecursive(scene, gltfNode)
-                : throw new System.Exception("Could not bind joint: " + names[i]);
+                : throw new InvalidOperationException($"Could not bind joint: {names[i]}");
         }
         return new Skeleton(joints, skin.InverseBindMatrices);
     }

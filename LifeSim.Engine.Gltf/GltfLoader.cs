@@ -1,8 +1,12 @@
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Numerics;
 using glTFLoader;
 using LifeSim.Engine.Anim;
 using LifeSim.Engine.Rendering;
 using LifeSim.Engine.Resources;
+using static glTFLoader.Schema.AnimationChannelTarget;
+using static glTFLoader.Schema.AnimationSampler;
 
 namespace LifeSim.Engine.Gltf;
 
@@ -14,6 +18,8 @@ public class GltfLoader
     private readonly GltfBuffer?[] _buffersCache;
     private readonly GLTFNode?[] _nodesCache;
     private readonly Material? _defaultMaterial;
+
+    private readonly Dictionary<int, GltfAccessor> _accessorsCache = new Dictionary<int, GltfAccessor>();
 
     public GltfLoader(string path, Material? defaultMaterial = null)
     {
@@ -91,12 +97,6 @@ public class GltfLoader
         );
     }
 
-    private Mesh GetMesh(int index)
-    {
-        var meshData = this.GetPrimitive(index).MakeMeshData();
-        return new Mesh(meshData);
-    }
-
     public Animation[] LoadAnimations()
     {
         Animation[] animations = new Animation[this._model.Animations.Length];
@@ -109,10 +109,43 @@ public class GltfLoader
 
     public Animation LoadAnimation(int index)
     {
-        var data = this._model.Animations[index];
+        var animationData = this._model.Animations[index];
+        List<IChannel> list = new List<IChannel>();
 
-        var anim = new GltfAnimation(this, data);
-        return anim.LoadAnimation();
+        foreach (var channelData in animationData.Channels)
+        {
+            var targetIndex = channelData.Target.Node;
+            if (!targetIndex.HasValue) continue;
+
+            var targetName = this.GetNodeName(targetIndex.Value);
+            var samplerData = animationData.Samplers[channelData.Sampler];
+            var input = this.GetAccessor(samplerData.Input).AsFloatArray();
+            var output = this.GetAccessor(samplerData.Output);
+            var channel = MakeChannel(targetName, channelData.Target.Path, input, output, samplerData.Interpolation);
+            list.Add(channel);
+        }
+
+        return new Animation(animationData.Name, list);
+    }
+
+    private static IChannel MakeChannel(string targetName, PathEnum path, float[] input, GltfAccessor output, InterpolationEnum typeEnum)
+    {
+        var type = typeEnum switch
+        {
+            InterpolationEnum.STEP => InterpolationMode.Step,
+            InterpolationEnum.LINEAR => InterpolationMode.Linear,
+            InterpolationEnum.CUBICSPLINE => InterpolationMode.CubicSpline,
+            _ => InterpolationMode.Linear,
+        };
+
+        return path switch
+        {
+            PathEnum.translation => new PositionChannel(targetName, input, output.AsVector3Array(), type),
+            PathEnum.rotation => new RotationChannel(targetName, input, output.AsQuaternionArray(), type),
+            PathEnum.scale => new ScaleChannel(targetName, input, output.AsVector3Array(), type),
+            PathEnum.weights => throw new System.NotImplementedException(),
+            _ => throw new System.NotImplementedException(),
+        };
     }
 
     private Skin GetSkin(int index)
@@ -120,15 +153,10 @@ public class GltfLoader
         var data = this._model.Skins[index];
 
         int? matricesIndex = data.InverseBindMatrices;
-        Matrix4x4[] matrices;
-        if (matricesIndex == null)
-        {
-            matrices = new GltfBufferViewZeroed().ReadMatrix4x4Array(0, data.Joints.Length);
-        }
-        else
-        {
-            matrices = this.GetAccessor(matricesIndex.Value).AsMatrix4x4();
-        }
+
+        Matrix4x4[] matrices = matricesIndex == null
+            ? new GltfBufferViewZeroed().ReadMatrix4x4Array(0, data.Joints.Length)
+            : this.GetAccessor(matricesIndex.Value).AsMatrix4x4();
 
         string[] joints = new string[data.Joints.Length];
         for (int i = 0; i < joints.Length; i++)
@@ -153,17 +181,67 @@ public class GltfLoader
         return scene;
     }
 
-    internal GLTFPrimitive GetPrimitive(int index)
+    internal IMeshData GetPrimitive(int index)
     {
         var data = this._model.Meshes[index].Primitives[0];
-        return new GLTFPrimitive(this, data.Indices, data.Attributes);
+        var indicesAccessor = data.Indices.HasValue ? this.GetAccessor(data.Indices.Value) : null;
+        var attributes = data.Attributes;
+
+        var positionAccessor = this.GetPrimitiveAttributeAccessor(attributes, "POSITION");
+        Debug.Assert(positionAccessor != null);
+        var positions = positionAccessor.AsVector3Array();
+
+        var texCoordAccessor = this.GetPrimitiveAttributeAccessor(attributes, "TEXCOORD_0");
+        var texCoords = texCoordAccessor?.AsVector2Array();
+
+        var normalAccessor   = this.GetPrimitiveAttributeAccessor(attributes, "NORMAL");
+        var normals = normalAccessor?.AsVector3Array();
+
+        var jointsAccessor   = this.GetPrimitiveAttributeAccessor(attributes, "JOINTS_0");
+        var weightsAccessor  = this.GetPrimitiveAttributeAccessor(attributes, "WEIGHTS_0");
+
+        var indices = indicesAccessor == null
+            ? MakeFakeIndices(positions.Length)
+            : indicesAccessor.AsIndicesArray();
+
+        if (weightsAccessor != null && jointsAccessor != null)
+        {
+            var joints = jointsAccessor.AsUShort4Array();
+            var weights = weightsAccessor.AsVector4Array();
+            return new SkinnedMeshData(indices, positions, normals, texCoords, joints, weights);
+        }
+        else
+        {
+            return new BasicMeshData(indices, positions, normals, texCoords);
+        }
     }
+
+    private GltfAccessor? GetPrimitiveAttributeAccessor(Dictionary<string, int> attributes, string name)
+    {
+        if (attributes.TryGetValue(name, out int attributeId))
+        {
+            return this.GetAccessor(attributeId);
+        }
+        return null;
+    }
+
+    private Mesh GetMesh(int index)
+    {
+        return new Mesh(this.GetPrimitive(index));
+    }
+
 
     internal GltfAccessor GetAccessor(int index)
     {
-        var data = this._model.Accessors[index];
-        var bufferView = this.GetBufferView(data.BufferView);
-        return new GltfAccessor(bufferView, data.ByteOffset, data.Count, data.ComponentType, data.Type, data.Normalized);
+        if (!this._accessorsCache.TryGetValue(index, out GltfAccessor? accessor))
+        {
+            var data = this._model.Accessors[index];
+            var bufferView = this.GetBufferView(data.BufferView);
+            accessor = new GltfAccessor(bufferView, data.ByteOffset, data.Count, data.ComponentType, data.Type, data.Normalized);
+            this._accessorsCache.Add(index, accessor);
+        }
+
+        return accessor;
     }
 
     private GltfBuffer GetBuffer(int index)
@@ -185,5 +263,18 @@ public class GltfLoader
         var buffer = this.GetBuffer(data.Buffer);
 
         return new GltfBufferView(buffer, data.ByteOffset, data.ByteStride);
+    }
+
+
+
+
+    private static ushort[] MakeFakeIndices(int count)
+    {
+        var arr = new ushort[count];
+        for (int i = 0; i < count; i++)
+        {
+            arr[i] = (ushort)i;
+        }
+        return arr;
     }
 }
