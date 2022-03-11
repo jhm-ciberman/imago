@@ -14,29 +14,28 @@ For now, the possible types of assets are: Texture, Sound, Animation, Scene, Obj
 Then, the asset is loaded by calling the method asset.Load();
 */
 
-using LifeSim.Engine.Gltf;
+using LifeSim.Engine.Rendering;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace LifeSim.Engine.AssetManagment;
 
-
-public class AnimationDefinition : IAssetDefinition
+public class ImageAsset : IAsset
 {
     public string Key { get; } = string.Empty;
-    public string Name { get; } = string.Empty;
     public string Path { get; } = string.Empty;
 
-    public AnimationDefinition() { }
+    public ImageAsset() { }
 
-    public AnimationDefinition(string key, string name, string path)
+    public ImageAsset(string key, string path)
     {
         this.Key = key;
-        this.Name = name;
         this.Path = path;
     }
 
-    public object Load()
+    public virtual object Load()
     {
-        return GltfLoader.Load(this.Path).GetAnimation(this.Name);
+        return Image.Load<Rgba32>(this.Path);
     }
 }
 

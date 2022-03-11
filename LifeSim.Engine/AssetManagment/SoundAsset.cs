@@ -18,14 +18,14 @@ using System;
 
 namespace LifeSim.Engine.AssetManagment;
 
-public class SoundDefinition : IAssetDefinition
+public class SoundAsset : IAsset
 {
     public string Key { get; } = string.Empty;
     public string Path { get; } = string.Empty;
 
-    public SoundDefinition() { }
+    public SoundAsset() { }
 
-    public SoundDefinition(string key, string path)
+    public SoundAsset(string key, string path)
     {
         this.Key = key;
         this.Path = path;

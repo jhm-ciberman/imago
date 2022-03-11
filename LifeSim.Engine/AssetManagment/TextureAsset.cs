@@ -14,11 +14,24 @@ For now, the possible types of assets are: Texture, Sound, Animation, Scene, Obj
 Then, the asset is loaded by calling the method asset.Load();
 */
 
+using LifeSim.Engine.Rendering;
+
 namespace LifeSim.Engine.AssetManagment;
 
-public interface IAssetDefinition
+public class TextureAsset : ImageAsset, IAsset
 {
-    string Key { get; }
-    object Load();
+    public bool Srgb { get; } = false;
+
+    public TextureAsset() { }
+
+    public TextureAsset(string key, string path, bool srgb) : base(key, path)
+    {
+        this.Srgb = srgb;
+    }
+
+    public override object Load()
+    {
+        return new ImageTexture(this.Path, this.Srgb);
+    }
 }
 

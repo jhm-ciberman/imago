@@ -22,12 +22,12 @@ public class AssetManager
     }
 
     // (filepath, asset definition)
-    private readonly Dictionary<string, IAssetDefinition> _definitions = new Dictionary<string, IAssetDefinition>();
+    private readonly Dictionary<string, IAsset> _definitions = new Dictionary<string, IAsset>();
 
     // (key, asset)
     private readonly Dictionary<string, object> _loadedAssets = new Dictionary<string, object>();
 
-    public void RegisterAsset(IAssetDefinition asset)
+    public void RegisterAsset(IAsset asset)
     {
         if (this._definitions.ContainsKey(asset.Key))
         {
@@ -37,7 +37,7 @@ public class AssetManager
         this._definitions.Add(asset.Key, asset);
     }
 
-    public void RegisterAssets(IAssetDefinition[] definitions)
+    public void RegisterAssets(IAsset[] definitions)
     {
         foreach (var definition in definitions)
         {
@@ -52,7 +52,7 @@ public class AssetManager
             return ReturnTypedAsset<T>(asset);
         }
 
-        if (!this._definitions.TryGetValue(key, out IAssetDefinition? definition))
+        if (!this._definitions.TryGetValue(key, out IAsset? definition))
         {
             throw new ArgumentException($"Asset with key {key} not registered.");
         }

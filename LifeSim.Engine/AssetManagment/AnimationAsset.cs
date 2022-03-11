@@ -19,27 +19,21 @@ using LifeSim.Engine.Gltf;
 
 namespace LifeSim.Engine.AssetManagment;
 
-public class SceneDefinition : IAssetDefinition
+
+public class AnimationAsset : IAsset
 {
-
-    public string Key { get; }
+    public string Key { get; } = string.Empty;
     public string? Name { get; }
-
     public int? Index { get; }
-    public string Path { get; }
+    public string Path { get; } = string.Empty;
 
-    public SceneDefinition(string key, string path, string? name)
+    public AnimationAsset() { }
+
+    public AnimationAsset(string key, string name, string path)
     {
         this.Key = key;
-        this.Path = path;
         this.Name = name;
-    }
-
-    public SceneDefinition(string key, string path, int index)
-    {
-        this.Key = key;
         this.Path = path;
-        this.Index = index;
     }
 
     public object Load()
@@ -48,14 +42,14 @@ public class SceneDefinition : IAssetDefinition
         {
             if (!this.Index.HasValue)
             {
-                throw new InvalidOperationException("SceneDefinition: No name or index specified.");
+                throw new InvalidOperationException("AnimationDefinition: No name or index specified.");
             }
 
-            return GltfLoader.Load(this.Path).Scenes[this.Index.Value];
+            return GltfLoader.Load(this.Path).Animations[this.Index.Value];
         }
         else
         {
-            return GltfLoader.Load(this.Path).GetScene(this.Name);
+            return GltfLoader.Load(this.Path).GetAnimation(this.Name);
         }
     }
 }

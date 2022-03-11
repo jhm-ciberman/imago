@@ -86,7 +86,6 @@ public class Button : ContentControl
 
     public override void Update(float deltaTime)
     {
-        System.Console.WriteLine(this.Root);
         if (this.Root == null) return;
         if (this.Content != null)
         {

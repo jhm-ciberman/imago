@@ -72,49 +72,55 @@ public static class AssetXmlParser
         return bool.Parse(attribute.Value);
     }
 
-    private static IAssetDefinition ParseAsset(XmlNode assetNode)
+    private static IAsset ParseAsset(XmlNode assetNode)
     {
         return assetNode.Name switch
         {
             "animation" => ParseAnimation(assetNode),
             "scene" => ParseScene(assetNode),
             "texture" => ParseTexture(assetNode),
+            "image" => ParseImage(assetNode),
             "sound" => ParseSound(assetNode),
             _ => throw new ArgumentException($"Asset type {assetNode.Name} not supported."),
         };
     }
 
-    private static AnimationDefinition ParseAnimation(XmlNode assetNode)
+    private static AnimationAsset ParseAnimation(XmlNode assetNode)
     {
         var key = ReadStringAttribute(assetNode, "key");
         var src = ReadStringAttribute(assetNode, "src");
         var name = ReadStringAttribute(assetNode, "name");
-
-        return new AnimationDefinition(key, src, name);
+        return new AnimationAsset(key, src, name);
     }
 
-    private static SceneDefinition ParseScene(XmlNode assetNode)
+    private static GltfSceneAsset ParseScene(XmlNode assetNode)
     {
         var key = ReadStringAttribute(assetNode, "key");
         var src = ReadStringAttribute(assetNode, "src");
         var name = ReadStringAttribute(assetNode, "name");
-
-        return new SceneDefinition(key, src, name);
+        return new GltfSceneAsset(key, src, name);
     }
 
-    private static TextureDefinition ParseTexture(XmlNode assetNode)
+    private static TextureAsset ParseTexture(XmlNode assetNode)
     {
         var key = ReadStringAttribute(assetNode, "key");
         var src = ReadStringAttribute(assetNode, "src");
         var srgb = ReadBoolAttribute(assetNode, "srgb");
-        return new TextureDefinition(key, src, srgb);
+        return new TextureAsset(key, src, srgb);
     }
 
-    private static SoundDefinition ParseSound(XmlNode assetNode)
+    private static ImageAsset ParseImage(XmlNode assetNode)
     {
         var key = ReadStringAttribute(assetNode, "key");
         var src = ReadStringAttribute(assetNode, "src");
-        return new SoundDefinition(key, src);
+        return new ImageAsset(key, src);
+    }
+
+    private static SoundAsset ParseSound(XmlNode assetNode)
+    {
+        var key = ReadStringAttribute(assetNode, "key");
+        var src = ReadStringAttribute(assetNode, "src");
+        return new SoundAsset(key, src);
     }
 }
 
