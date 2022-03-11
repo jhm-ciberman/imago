@@ -60,7 +60,7 @@ internal class GltfAccessor
         return this._componentType switch
         {
             ComponentTypeEnum.FLOAT => this._bufferView.ReadFloatArray(this._byteOffset, this._count),
-            _ => throw new System.NotSupportedException(),
+            _ => throw new NotSupportedException(),
         };
     }
 
@@ -69,7 +69,7 @@ internal class GltfAccessor
         return this._componentType switch
         {
             ComponentTypeEnum.FLOAT => this._bufferView.ReadVector2Array(this._byteOffset, this._count),
-            _ => throw new System.NotSupportedException(),
+            _ => throw new NotSupportedException(),
         };
     }
 
@@ -78,7 +78,7 @@ internal class GltfAccessor
         return this._componentType switch
         {
             ComponentTypeEnum.FLOAT => this._bufferView.ReadVector3Array(this._byteOffset, this._count),
-            _ => throw new System.NotSupportedException(),
+            _ => throw new NotSupportedException(),
         };
     }
 
@@ -87,7 +87,7 @@ internal class GltfAccessor
         return this._componentType switch
         {
             ComponentTypeEnum.FLOAT => this._bufferView.ReadVector4Array(this._byteOffset, this._count),
-            _ => throw new System.NotSupportedException(),
+            _ => throw new NotSupportedException(),
         };
     }
 
@@ -100,7 +100,7 @@ internal class GltfAccessor
             ComponentTypeEnum.UNSIGNED_BYTE => this.NormalizeToQuaternion(this._bufferView.ReadByteArray(this._byteOffset, this._count)),
             ComponentTypeEnum.SHORT => this.NormalizeToQuaternion(this._bufferView.ReadShortArray(this._byteOffset, this._count)),
             ComponentTypeEnum.UNSIGNED_SHORT => this.NormalizeToQuaternion(this._bufferView.ReadUShortArray(this._byteOffset, this._count)),
-            _ => throw new System.NotSupportedException(),
+            _ => throw new NotSupportedException(),
         };
     }
 
@@ -191,12 +191,8 @@ internal class GltfAccessor
         return arr;
     }
 
-    //public Matrix3x2[] GetMatrix2x3() => this.bufferView.ReadMatrix2x2Array(this.byteOffset, this.count);
-    //public Matrix4x4[] GetMatrix3x3() => this.bufferView.ReadMatrix3x3Array(this.byteOffset, this.count);
     public Matrix4x4[] AsMatrix4x4()
     {
         return this._bufferView.ReadMatrix4x4Array(this._byteOffset, this._count);
     }
-
-
 }

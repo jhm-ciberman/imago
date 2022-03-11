@@ -5,5 +5,6 @@ namespace LifeSim.Engine;
 
 public interface IScenePrefab
 {
+    string Name { get; }
     Node3D Instantiate();
 }

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Numerics;
 using glTFLoader;
 using LifeSim.Engine.Anim;
@@ -12,6 +13,19 @@ namespace LifeSim.Engine.Gltf;
 
 public class GltfLoader
 {
+    private static readonly Dictionary<string, GltfAsset> _cache = new Dictionary<string, GltfAsset>();
+
+    public static GltfAsset Load(string path)
+    {
+        if (!_cache.TryGetValue(path, out GltfAsset? asset))
+        {
+            asset = new GltfLoader(path).LoadAll();
+            _cache.Add(path, asset);
+        }
+
+        return asset;
+    }
+
     private readonly string _path;
     private readonly glTFLoader.Schema.Gltf _model;
 
@@ -276,5 +290,20 @@ public class GltfLoader
             arr[i] = (ushort)i;
         }
         return arr;
+    }
+
+    public GltfAsset LoadAll()
+    {
+        var scenes = new List<IScenePrefab>();
+        for (int i = 0; i < this._model.Scenes.Length; i++)
+        {
+            scenes.Add(this.LoadScene(i));
+        }
+        var animations = new List<Animation>();
+        for (int i = 0; i < this._model.Animations.Length; i++)
+        {
+            animations.Add(this.LoadAnimation(i));
+        }
+        return new GltfAsset(scenes, animations);
     }
 }
