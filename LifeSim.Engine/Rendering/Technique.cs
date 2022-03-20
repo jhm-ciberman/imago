@@ -1,13 +1,10 @@
-using System;
 using System.Collections.Generic;
-using System.Numerics;
 using Veldrid;
 
 namespace LifeSim.Engine.Rendering;
 
 public class Technique
 {
-    private readonly Dictionary<string, int> _instanceUniformData = new Dictionary<string, int>();
     private readonly Dictionary<string, int> _textures = new Dictionary<string, int>();
 
     public int ResourceCount { get; }
