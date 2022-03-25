@@ -295,14 +295,21 @@ public class GltfLoader
     public GltfAsset LoadAll()
     {
         var scenes = new List<IScenePrefab>();
-        for (int i = 0; i < this._model.Scenes.Length; i++)
+        if (this._model.Scenes != null)
         {
-            scenes.Add(this.LoadScene(i));
+            for (int i = 0; i < this._model.Scenes.Length; i++)
+            {
+                scenes.Add(this.LoadScene(i));
+            }
         }
         var animations = new List<Animation>();
-        for (int i = 0; i < this._model.Animations.Length; i++)
+
+        if (this._model.Animations != null)
         {
-            animations.Add(this.LoadAnimation(i));
+            for (int i = 0; i < this._model.Animations.Length; i++)
+            {
+                animations.Add(this.LoadAnimation(i));
+            }
         }
         return new GltfAsset(scenes, animations);
     }
