@@ -280,7 +280,7 @@ public class Node3D
 
     public virtual void PrintHierarchyToConsole(string indent = "")
     {
-        Console.WriteLine($"{indent}{this.Name}");
+        Console.WriteLine($"{indent}{this.Name} (Scale: {this.Scale})");
         foreach (var child in this._children)
         {
             child.PrintHierarchyToConsole($"{indent}  ");

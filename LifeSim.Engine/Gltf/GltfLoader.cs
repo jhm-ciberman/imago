@@ -26,6 +26,14 @@ public class GltfLoader
         return asset;
     }
 
+    public static Animation LoadAnimation(string path, string? animationName = null)
+    {
+        var gltf = Load(path);
+        return string.IsNullOrEmpty(animationName)
+            ? gltf.Animations[0]
+            : gltf.Animations.First(a => a.Name == animationName);
+    }
+
     private readonly string _path;
     private readonly glTFLoader.Schema.Gltf _model;
 
