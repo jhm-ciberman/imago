@@ -15,7 +15,7 @@ public class GltfLoader
 {
     private static readonly Dictionary<string, GltfAsset> _cache = new Dictionary<string, GltfAsset>();
 
-    public static GltfAsset Load(string path)
+    public static GltfAsset LoadFile(string path)
     {
         if (!_cache.TryGetValue(path, out GltfAsset? asset))
         {
@@ -28,10 +28,18 @@ public class GltfLoader
 
     public static Animation LoadAnimation(string path, string? animationName = null)
     {
-        var gltf = Load(path);
+        var gltf = LoadFile(path);
         return string.IsNullOrEmpty(animationName)
             ? gltf.Animations[0]
             : gltf.Animations.First(a => a.Name == animationName);
+    }
+
+    public static IScenePrefab LoadScenePrefab(string path, string? sceneName = null)
+    {
+        var gltf = LoadFile(path);
+        return string.IsNullOrEmpty(sceneName)
+            ? gltf.Scenes[0]
+            : gltf.Scenes.First(s => s.Name == sceneName);
     }
 
     private readonly string _path;

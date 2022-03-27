@@ -11,13 +11,13 @@ namespace LifeSim;
 /// resource and the path is used to determine the location of the resource.
 /// 
 /// For example, the following URI specifies a texture:
-/// "texture://path/to/texture.png"
+/// "texture:path/to/texture.png"
 /// 
 /// Additionally, URIs can contain arguments. These arguments are specified after the
 /// file path using a query string. For example:
-/// "texture://path/to/texture.png?srgb=true"
-/// "gltf://path/to/model.gltf?scene=Scene&scale=0.5&origin=0.5,0.5"
-/// "procedural://multiplane-mesh-billboard?width=<width>&height=<height>&planes=<planes>"
+/// "texture:path/to/texture.png?srgb=true"
+/// "model:path/to/model.gltf?scene=Scene&scale=0.5&origin=0.5,0.5"
+/// "procedural:multiplane?width=<width>&height=<height>&planes=<planes>"
 /// 
 /// URIs without scheme are will be parsed with a default empty protocol.
 /// 
@@ -55,8 +55,8 @@ public class ResourceUri
     {
         this.OriginalUri = uri;
 
-        // First we fast check for simple URIs without protocol nor arguments. (not "://" and not "?")
-        if (!uri.Contains("://") && !uri.Contains('?'))
+        // First we fast check for simple URIs without protocol nor arguments. (not ":" and not "?")
+        if (!uri.Contains(':') && !uri.Contains('?'))
         {
             this.Scheme = "";
             this.Path = uri;
@@ -66,12 +66,12 @@ public class ResourceUri
         // We need to handle the case where the URI does not contain a protocol.
         // In this case, we will assume the protocol is empty.
 
-        if (!uri.Contains("://"))
+        if (!uri.Contains(':'))
         {
-            uri = "://" + uri;
+            uri = ':' + uri;
         }
 
-        var uriParts = uri.Split("://");
+        var uriParts = uri.Split(':');
         this.Scheme = uriParts[0];
 
         // We need to handle the case where the file path does not contain a query string.
