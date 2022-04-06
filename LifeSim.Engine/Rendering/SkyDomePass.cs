@@ -70,9 +70,9 @@ public class SkyDomePass : IDisposable, IRenderingPass
 
         this._indexCount = indices.Length;
 
-        var vertexFormat = new VertexFormat(new VertexLayoutDescription(
+        var vertexFormat = new VertexLayoutDescription(
             new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3)
-        ));
+        );
 
         this._resourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
             new ResourceLayoutElementDescription("PassDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex),
@@ -83,8 +83,8 @@ public class SkyDomePass : IDisposable, IRenderingPass
         this._passDataBuffer = factory.CreateBuffer(new BufferDescription(
             (uint)Marshal.SizeOf<PassData>(), BufferUsage.UniformBuffer));
 
-        var shaderVariant = new ShaderVariant(this._gd, vertexFormat, null, _vertexCode, _fragmentCode);
-        this._pipeline = this.MakePipeline(shaderVariant);
+        var shaderSet = ShaderCompiler.Compile(this._gd, new[] { vertexFormat }, _vertexCode, _fragmentCode);
+        this._pipeline = this.MakePipeline(shaderSet);
 
         this._lutTexture = new ImageTexture("./res/skydome_lut.png", srgb: false);
 
@@ -147,7 +147,7 @@ public class SkyDomePass : IDisposable, IRenderingPass
     }
 
 
-    private Pipeline MakePipeline(ShaderVariant shaderVariant)
+    private Pipeline MakePipeline(ShaderSetDescription shaderSetDescription)
     {
         var rasterizerState = new RasterizerStateDescription(
             FaceCullMode.Front,
@@ -161,7 +161,7 @@ public class SkyDomePass : IDisposable, IRenderingPass
         {
             DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
             PrimitiveTopology = PrimitiveTopology.TriangleList,
-            ShaderSet = shaderVariant.ShaderSetDescription,
+            ShaderSet = shaderSetDescription,
             BlendState = BlendStateDescription.SingleOverrideBlend,
             RasterizerState = rasterizerState,
             Outputs = this._renderTexture.OutputDescription,

@@ -33,8 +33,6 @@ public class GizmosPass : IDisposable, IRenderingPass
 
     private readonly DeviceBuffer _viewProjectionBuffer;
 
-    private readonly VertexFormat _vertexFormat;
-
     public GizmosPass(Renderer renderer, IRenderTexture renderTexture)
     {
         this._renderTexture = renderTexture;
@@ -50,13 +48,13 @@ public class GizmosPass : IDisposable, IRenderingPass
 
         this._passResourceSet = factory.CreateResourceSet(new ResourceSetDescription(this._passResourceLayout, this._viewProjectionBuffer));
 
-        this._vertexFormat = new VertexFormat(new VertexLayoutDescription(
+        var vertexLayout = new VertexLayoutDescription(
             new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
             new VertexElementDescription("Color", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Byte4_Norm)
-        ));
+        );
 
-        var shaderVariant = new ShaderVariant(this._gd, this._vertexFormat, null, this._vertex, this._fragment);
-        this._pipeline = this.MakePipeline(shaderVariant);
+        var shaderSet = ShaderCompiler.Compile(this._gd, new[] { vertexLayout }, this._vertex, this._fragment);
+        this._pipeline = this.MakePipeline(shaderSet);
     }
 
     public void Render(CommandList cl, Scene scene)
@@ -108,7 +106,7 @@ public class GizmosPass : IDisposable, IRenderingPass
         this._verticesCount = 0;
     }
 
-    private Pipeline MakePipeline(ShaderVariant shaderVariant)
+    private Pipeline MakePipeline(ShaderSetDescription shaderSetDescription)
     {
         var rasterizerState = new RasterizerStateDescription(
             FaceCullMode.None,
@@ -122,7 +120,7 @@ public class GizmosPass : IDisposable, IRenderingPass
         {
             DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
             PrimitiveTopology = PrimitiveTopology.LineList,
-            ShaderSet = shaderVariant.ShaderSetDescription,
+            ShaderSet = shaderSetDescription,
             BlendState = BlendStateDescription.SingleAlphaBlend,
             RasterizerState = rasterizerState,
             Outputs = this._renderTexture.OutputDescription,

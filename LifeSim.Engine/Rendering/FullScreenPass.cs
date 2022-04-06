@@ -30,17 +30,17 @@ public class FullScreenPass : IDisposable, IRenderingPass
 
         this._destinationTexture = destinationRenderTexture;
 
-        var vertexFormat = new VertexFormat(new VertexLayoutDescription(
+        var vertexLayouts = new VertexLayoutDescription(
             new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float4)
-        ));
+        );
 
         this._resourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
             new ResourceLayoutElementDescription("MainTexture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
             new ResourceLayoutElementDescription("MainSampler", ResourceKind.Sampler, ShaderStages.Fragment)
         ));
 
-        var shaderVariant = new ShaderVariant(this._gd, vertexFormat, this._resourceLayout, _vertexCode, _fragmentCode);
-        this._pipeline = this.MakePipeline(shaderVariant);
+        var shaderSet = ShaderCompiler.Compile(this._gd, new[] { vertexLayouts }, _vertexCode, _fragmentCode);
+        this._pipeline = this.MakePipeline(shaderSet, this._resourceLayout);
 
         this._vertexBuffer = factory.CreateBuffer(new BufferDescription(16 * 6, BufferUsage.VertexBuffer));
         (float top, float bottom) = this._gd.IsUvOriginTopLeft ? (1f, 0f) : (0f, 1f);
@@ -81,27 +81,17 @@ public class FullScreenPass : IDisposable, IRenderingPass
             this._resourceLayout, renderTexture.DeviceTexture, this._gd.LinearSampler));
     }
 
-    private Pipeline MakePipeline(ShaderVariant shaderVariant)
+    private Pipeline MakePipeline(ShaderSetDescription shaderSetDescription, ResourceLayout resourceLayout)
     {
-        Debug.Assert(shaderVariant.MaterialResourceLayout != null);
-
-        var rasterizerState = new RasterizerStateDescription(
-                FaceCullMode.None,
-                PolygonFillMode.Solid,
-                FrontFace.Clockwise,
-                depthClipEnabled: true,
-                scissorTestEnabled: false
-            );
-
-        return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
+        return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription
         {
             DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
             PrimitiveTopology = PrimitiveTopology.TriangleList,
-            ShaderSet = shaderVariant.ShaderSetDescription,
+            ShaderSet = shaderSetDescription,
             BlendState = BlendStateDescription.SingleOverrideBlend,
-            RasterizerState = rasterizerState,
+            RasterizerState = RasterizerStateDescription.CullNone,
             Outputs = this._destinationTexture.OutputDescription,
-            ResourceLayouts = new ResourceLayout[] { shaderVariant.MaterialResourceLayout },
+            ResourceLayouts = new ResourceLayout[] { resourceLayout },
         });
     }
 

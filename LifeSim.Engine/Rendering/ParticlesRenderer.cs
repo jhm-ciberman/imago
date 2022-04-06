@@ -88,7 +88,8 @@ public class ParticlesPass : IDisposable, IRenderingPass
 
         this._passResourceSet = factory.CreateResourceSet(new ResourceSetDescription(this._passResourceLayout, this._viewProjectionBuffer));
 
-        var vertexFormat = new VertexFormat(
+        var vertexLayouts = new[]
+        {
             new VertexLayoutDescription(
                 new VertexElementDescription("VertexPosition", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
                 new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2)
@@ -97,13 +98,10 @@ public class ParticlesPass : IDisposable, IRenderingPass
                 new VertexElementDescription("PositionSize", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float4),
                 new VertexElementDescription("Color", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Byte4_Norm)
             )
-        );
+        };
 
-        var vertex = ShaderLoader.Load("particles.vert.glsl");
-        var fragment = ShaderLoader.Load("particles.frag.glsl");
-
-        var shaderVariant = new ShaderVariant(this._gd, vertexFormat, this._materialResourceLayout, vertex, fragment);
-        this._pipeline = this.MakePipeline(shaderVariant);
+        var shaderSet = ShaderCompiler.Compile(this._gd, vertexLayouts, _vertexShader, _fragmentShader);
+        this._pipeline = this.MakePipeline(shaderSet, this._materialResourceLayout);
     }
 
 
@@ -196,7 +194,7 @@ public class ParticlesPass : IDisposable, IRenderingPass
         return resourceSet;
     }
 
-    private Pipeline MakePipeline(ShaderVariant shaderVariant)
+    private Pipeline MakePipeline(ShaderSetDescription shaderSetDescription, ResourceLayout materialResourceLayout)
     {
         var rasterizerState = new RasterizerStateDescription(
             FaceCullMode.None,
@@ -206,19 +204,17 @@ public class ParticlesPass : IDisposable, IRenderingPass
             scissorTestEnabled: false
         );
 
-        Debug.Assert(shaderVariant.MaterialResourceLayout != null);
-
         return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
         {
             DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
             PrimitiveTopology = PrimitiveTopology.TriangleStrip,
-            ShaderSet = shaderVariant.ShaderSetDescription,
+            ShaderSet = shaderSetDescription,
             BlendState = BlendStateDescription.SingleAlphaBlend,
             RasterizerState = rasterizerState,
             Outputs = this._renderTexture.OutputDescription,
             ResourceLayouts = new ResourceLayout[] {
                     this._passResourceLayout,
-                    shaderVariant.MaterialResourceLayout,
+                    materialResourceLayout,
                 },
         });
     }
@@ -231,4 +227,57 @@ public class ParticlesPass : IDisposable, IRenderingPass
         this._passResourceSet.Dispose();
         this._pipeline.Dispose();
     }
+
+    private static readonly string _vertexShader = @"
+        #version 450
+        layout(set = 0, binding = 0, std140) uniform CameraDataBuffer {
+            mat4 ViewProjection;
+            vec3 CameraRight;
+            vec3 CameraUp;
+        };
+
+        layout(location = 0) in vec2 VertexPosition;
+        layout(location = 1) in vec2 TextureCoords;
+
+        layout(location = 2) in vec4 PositionSize; // xyz = Position, w = Size
+        layout(location = 3) in vec4 Color;
+
+        layout(location = 0) out vec2 fsin_TexCoords;
+        layout(location = 1) out vec4 fsin_Color;
+
+        void main()
+        {
+            float size = PositionSize.w;
+            vec3 center = PositionSize.xyz;
+
+            vec3 worldPos = center
+                + CameraRight * VertexPosition.x * size
+                + CameraUp * VertexPosition.y * size;
+
+            gl_Position = ViewProjection * vec4(worldPos, 1.0);
+
+            fsin_TexCoords = TextureCoords;
+            fsin_Color = Color;
+        }
+        ";
+
+    private static readonly string _fragmentShader = @"
+        #version 450
+        layout(location = 0) in vec2 fsin_TexCoords;
+        layout(location = 1) in vec4 fsin_Color;
+
+        layout(set = 1, binding = 0) uniform texture2D MainTexture;
+        layout(set = 1, binding = 1) uniform sampler MainSampler;
+
+        layout(location = 0) out vec4 fsout_color;
+
+        void main()
+        {
+            vec4 textureColor = texture(sampler2D(MainTexture, MainSampler), fsin_TexCoords);
+
+            if (textureColor.a < 0.01) discard;
+
+            fsout_color = textureColor * fsin_Color;
+        }
+        ";
 }

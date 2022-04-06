@@ -9,14 +9,15 @@ public static class ShaderCompiler
 {
 
 
-    public static Veldrid.Shader[] Compile(GraphicsDevice gd, string vertexCode, string fragmentCode, IEnumerable<MacroDefinition>? macros = null)
+    public static ShaderSetDescription Compile(GraphicsDevice gd, VertexLayoutDescription[] vertexLayouts, string vertexCode, string fragmentCode, IEnumerable<MacroDefinition>? macros = null)
     {
         var macroDefinitions = GetMacroDefinitions(macros, gd.BackendType);
         var debug = IsDebug(gd.BackendType);
         var options = new GlslCompileOptions(debug, macroDefinitions);
         var vertGlslShader = CompileGlslToSpirv(vertexCode, ShaderStages.Vertex, options);
         var fragGlslShader = CompileGlslToSpirv(fragmentCode, ShaderStages.Fragment, options);
-        return gd.ResourceFactory.CreateFromSpirv(vertGlslShader, fragGlslShader);
+        var shaders = gd.ResourceFactory.CreateFromSpirv(vertGlslShader, fragGlslShader);
+        return new ShaderSetDescription(vertexLayouts, shaders);
     }
 
     private static bool IsDebug(GraphicsBackend backendType)

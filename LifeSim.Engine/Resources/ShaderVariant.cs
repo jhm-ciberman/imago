@@ -17,10 +17,9 @@ public class ShaderVariant : IDisposable
     {
         this.VertexFormat = vertexFormat;
         this.MaterialResourceLayout = materialResourceLayout;
-        var layout = GetVertexLayout(vertexFormat);
+        var layouts = GetVertexLayout(vertexFormat.Layouts, vertexFormat.IsSurface);
         var macros = GetMacroDefinitions(vertexFormat.Layouts);
-        var shaderDescription = ShaderCompiler.Compile(gd, vertexCode, fragmentCode, macros);
-        this.ShaderSetDescription = new ShaderSetDescription(layout, shaderDescription);
+        this.ShaderSetDescription = ShaderCompiler.Compile(gd, layouts, vertexCode, fragmentCode, macros);
     }
 
     private static List<MacroDefinition> GetMacroDefinitions(VertexLayoutDescription[] vertexLayouts)
@@ -36,17 +35,19 @@ public class ShaderVariant : IDisposable
         return macros;
     }
 
-    private static VertexLayoutDescription[] GetVertexLayout(VertexFormat vertexFormat)
+    private static VertexLayoutDescription[] GetVertexLayout(VertexLayoutDescription[] vertexLayouts, bool isSurface)
     {
-        if (!vertexFormat.IsSurface)
-            return vertexFormat.Layouts;
+        if (!isSurface)
+        {
+            return vertexLayouts;
+        }
 
-        var arr = new VertexLayoutDescription[vertexFormat.Layouts.Length + 1];
-        arr[0] = new VertexLayoutDescription(stride: 16, instanceStepRate: 1,
-            new VertexElementDescription("Offsets", VertexElementSemantic.TextureCoordinate, VertexElementFormat.UInt4)
-        );
-        Array.Copy(vertexFormat.Layouts, 0, arr, 1, vertexFormat.Layouts.Length);
-        return arr;
+        var list = new List<VertexLayoutDescription>(vertexLayouts.Length + 1)
+        {
+            new VertexLayoutDescription(stride: 16, instanceStepRate: 1, new VertexElementDescription("Offsets", VertexElementSemantic.TextureCoordinate, VertexElementFormat.UInt4))
+        };
+        list.AddRange(vertexLayouts);
+        return list.ToArray();
     }
 
     public void Dispose()
