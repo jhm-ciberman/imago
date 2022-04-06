@@ -4,9 +4,9 @@ namespace LifeSim.Engine.Rendering;
 
 public class VertexFormat
 {
-    public VertexLayoutDescription[] Layouts;
-    public bool IsSkinned = false;
-    public bool IsSurface = false;
+    public VertexLayoutDescription[] Layouts { get; set; }
+    public bool IsSkinned { get; set; } = false;
+    public bool IsSurface { get; set; } = false;
 
     public VertexFormat(params VertexLayoutDescription[] layouts)
     {

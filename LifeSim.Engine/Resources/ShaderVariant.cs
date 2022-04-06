@@ -15,55 +15,25 @@ public class ShaderVariant : IDisposable
 
     internal ShaderVariant(GraphicsDevice gd, VertexFormat vertexFormat, ResourceLayout? materialResourceLayout, string vertexCode, string fragmentCode)
     {
-        bool debug = gd.BackendType == GraphicsBackend.OpenGL || gd.BackendType == GraphicsBackend.OpenGLES;
-#if DEBUG
-        debug = true;
-#endif
-
-        var macros = GetMacroDefinitions(vertexFormat, gd.BackendType);
-        var options = new GlslCompileOptions(debug: debug, macros);
-        var vertGlslShader = CompileGlslToSpirv(vertexCode, ShaderStages.Vertex, options);
-        var fragGlslShader = CompileGlslToSpirv(fragmentCode, ShaderStages.Fragment, options);
-
         this.VertexFormat = vertexFormat;
-
         this.MaterialResourceLayout = materialResourceLayout;
         var layout = GetVertexLayout(vertexFormat);
-        this.ShaderSetDescription = new ShaderSetDescription(layout, gd.ResourceFactory.CreateFromSpirv(vertGlslShader, fragGlslShader));
+        var macros = GetMacroDefinitions(vertexFormat.Layouts);
+        var shaderDescription = ShaderCompiler.Compile(gd, vertexCode, fragmentCode, macros);
+        this.ShaderSetDescription = new ShaderSetDescription(layout, shaderDescription);
     }
 
-    private static MacroDefinition[] GetMacroDefinitions(VertexFormat vertexFormat, GraphicsBackend backend)
+    private static List<MacroDefinition> GetMacroDefinitions(VertexLayoutDescription[] vertexLayouts)
     {
         var macros = new List<MacroDefinition>();
-
-        switch (backend)
+        foreach (var layout in vertexLayouts)
         {
-            case GraphicsBackend.Direct3D11:
-                macros.Add(new MacroDefinition("D3D11"));
-                break;
-            case GraphicsBackend.Vulkan:
-                //macros.Add(new MacroDefinition("VULKAN"));
-                break;
-            case GraphicsBackend.OpenGL:
-                macros.Add(new MacroDefinition("OPENGL"));
-                break;
-            case GraphicsBackend.Metal:
-                macros.Add(new MacroDefinition("METAL"));
-                break;
-            case GraphicsBackend.OpenGLES:
-                macros.Add(new MacroDefinition("OPENGLES"));
-                break;
-        }
-
-        foreach (var lqayot in vertexFormat.Layouts)
-        {
-            foreach (var element in lqayot.Elements)
+            foreach (var element in layout.Elements)
             {
                 macros.Add(new MacroDefinition("USE_" + element.Name.ToUpperInvariant()));
             }
         }
-
-        return macros.ToArray();
+        return macros;
     }
 
     private static VertexLayoutDescription[] GetVertexLayout(VertexFormat vertexFormat)
@@ -78,67 +48,6 @@ public class ShaderVariant : IDisposable
         Array.Copy(vertexFormat.Layouts, 0, arr, 1, vertexFormat.Layouts.Length);
         return arr;
     }
-
-    private static ShaderDescription CompileGlslToSpirv(string sourceText, ShaderStages stage, GlslCompileOptions options)
-    {
-        try
-        {
-            var result = SpirvCompilation.CompileGlslToSpirv(sourceText, stage.ToString(), stage, options);
-            return new ShaderDescription(stage, result.SpirvBytes, "main");
-        }
-        catch (SpirvCompilationException e)
-        {
-            // Messages start always with "Compilation failed: Fragment:145: ..."
-            string prefix = "Compilation failed: " + stage.ToString() + ":";
-            if (e.Message.Contains(prefix))
-            {
-                ParseError(e.Message, out int lineNumber, out string _, out string message);
-
-                string[] sourceCodeLines = sourceText.Split('\n');
-                int linesRange = 3; // Show 3 lines before and after the error
-                int startLine = lineNumber - linesRange;
-                int endLine = lineNumber + linesRange;
-                startLine = Math.Max(0, startLine);
-                endLine = Math.Min(sourceCodeLines.Length - 1, endLine);
-
-                string exceptionStr = "Compilation failed at line " + lineNumber + ":\n";
-                exceptionStr += message + "\n";
-                exceptionStr += "Source code:\n";
-
-                for (int i = startLine; i <= endLine; i++)
-                {
-                    // pad the line number with spaces
-                    string lineNumberStr = i.ToString().PadLeft(5) + ": ";
-
-                    exceptionStr += lineNumberStr + sourceCodeLines[i] + "\n";
-                    if (i == lineNumber)
-                        exceptionStr += new string(' ', lineNumberStr.Length) + "^^^^ ERROR HERE ^^^^\n";
-                }
-                throw new Exception(exceptionStr);
-            }
-
-            Console.WriteLine(sourceText);
-            throw e;
-        }
-    }
-
-    private static void ParseError(string originalExceptionMessage, out int lineNumber, out string filename, out string errorMessage)
-    {
-        // The format is "Compilation failed: FileName:LineNumber:ErrorMessage".
-        // The ErrorMessage can contain colons.
-
-        string[] parts = originalExceptionMessage.Split(':');
-        filename = parts[1];
-        lineNumber = int.Parse(parts[2]);
-        errorMessage = parts[3];
-
-        if (parts.Length > 3)
-        {
-            for (int i = 4; i < parts.Length; i++)
-                errorMessage += ":" + parts[i];
-        }
-    }
-
 
     public void Dispose()
     {
