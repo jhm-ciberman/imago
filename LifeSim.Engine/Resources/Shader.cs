@@ -16,8 +16,8 @@ public class Shader : IDisposable
     public ResourceLayout? MaterialResourceLayout { get; }
     private readonly List<ShaderVariant> _variants = new List<ShaderVariant>();
     private readonly GraphicsDevice _gd;
-    private readonly string _vertexCode;
-    private readonly string _fragmentCode;
+    public string VertexCode { get; }
+    public string FragmentCode { get; }
 
 
     public Shader(IPipelineProvider pass, string vertexCode, string fragmentCode, ResourceLayout? materialResourceLayout = null)
@@ -26,8 +26,8 @@ public class Shader : IDisposable
 
         this.Pass = pass;
 
-        this._vertexCode = vertexCode;
-        this._fragmentCode = fragmentCode;
+        this.VertexCode = vertexCode;
+        this.FragmentCode = fragmentCode;
 
         this._gd = Renderer.Instance.GraphicsDevice;
 
@@ -69,7 +69,7 @@ public class Shader : IDisposable
             }
         }
 
-        var variant = new ShaderVariant(this._gd, vertexFormat, this.MaterialResourceLayout, this._vertexCode, this._fragmentCode);
+        var variant = new ShaderVariant(this._gd, vertexFormat, this.MaterialResourceLayout, this.VertexCode, this.FragmentCode);
         this._variants.Add(variant);
         return variant;
     }
