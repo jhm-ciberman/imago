@@ -11,20 +11,20 @@ public class Material
     public int Id { get; private set; }
     public Shader Shader { get; private set; }
     public Shader ShadowmapShader { get; }
-    public ResourceSet? ResourceSet { get; internal set; }
+    public ResourceSet ResourceSet { get; internal set; }
 
     private bool _isDirty = true;
     private readonly BindableResource[] _resources;
     public Technique Definition { get; }
-    private readonly Dictionary<string, Texture> _textures = new Dictionary<string, Texture>();
+    private Texture _texture = Texture.Magenta;
     private readonly GraphicsDevice _gd;
     public Material(Technique definition)
     {
         this.Id = ++Material._count;
         this._gd = Renderer.Instance.GraphicsDevice;
         this.Definition = definition;
-        this.Shader = definition.GetShader(Renderer.Instance.ForwardPass);
-        this.ShadowmapShader = definition.GetShader(Renderer.Instance.ShadowMapPass);
+        this.Shader = definition.ForwardShader;
+        this.ShadowmapShader = definition.ShadowMapShader;
         this._resources = new BindableResource[definition.ResourceCount];
         Renderer.Instance.OnMaterialDirty(this);
     }
@@ -33,28 +33,32 @@ public class Material
     {
         this.ResourceSet?.Dispose();
 
-        this.ResourceSet = this._gd.ResourceFactory.CreateResourceSet(
-            new ResourceSetDescription(this.Definition.ResourceLayout, this._resources));
+        this.ResourceSet = this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(this.GetResourceLayout(), this._resources));
 
         this._isDirty = false;
     }
 
-    public Texture GetTexture(string name)
+    protected ResourceLayout GetResourceLayout()
     {
-        return this._textures[name];
+        return this.Definition.ResourceLayout;
     }
 
-    public void SetTexture(string name, Texture texture)
+    public Texture Texture
     {
-        if (this._textures.TryGetValue(name, out var oldTexture))
+        get => this._texture;
+        set
         {
-            if (oldTexture == texture) return;
-        }
+            if (this._texture == value) return;
 
-        this._textures[name] = texture;
-        int index = this.Definition.Textures[name];
-        this._resources[index * 2 + 0] = texture.DeviceTexture;
-        this._resources[index * 2 + 1] = texture.Sampler;
+            this._texture = value;
+            this.SetTexture(0, this._texture);
+        }
+    }
+
+    protected void SetTexture(int textureIndex, Texture value)
+    {
+        this._resources[textureIndex * 2 + 0] = value.DeviceTexture;
+        this._resources[textureIndex * 2 + 1] = value.Sampler;
         this.OnDirty();
     }
 

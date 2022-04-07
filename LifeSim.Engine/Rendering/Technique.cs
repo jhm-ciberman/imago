@@ -1,51 +1,28 @@
-using System.Collections.Generic;
+using System;
 using Veldrid;
 
 namespace LifeSim.Engine.Rendering;
 
 public class Technique
 {
-    private readonly Dictionary<string, int> _textures = new Dictionary<string, int>();
-
     public int ResourceCount { get; }
-    public IReadOnlyDictionary<string, int> Textures => this._textures;
 
-    public ResourceLayout ResourceLayout { get; }
-    private readonly List<Shader> _shaders = new List<Shader>();
+    public ResourceLayout ResourceLayout => this.ForwardShader.MaterialResourceLayout;
 
-    public Technique(string[] textures)
+    public Shader ForwardShader { get; private set; }
+
+    public Shader ShadowMapShader { get; private set; }
+
+    public Technique(Shader forwardShader, Shader shadowMapShader)
     {
-        this._textures = new Dictionary<string, int>();
-        this.ResourceCount = textures.Length * 2;
-        var elements = new ResourceLayoutElementDescription[this.ResourceCount];
-        for (int i = 0, j = 0; i < textures.Length; i++)
+        if (forwardShader.MaterialResourceLayout != shadowMapShader.MaterialResourceLayout)
         {
-            var name = textures[i];
-            this._textures.Add(name, i);
-            elements[j++] = new ResourceLayoutElementDescription(name + "Texture", ResourceKind.TextureReadOnly, ShaderStages.Fragment);
-            elements[j++] = new ResourceLayoutElementDescription(name + "Sampler", ResourceKind.Sampler, ShaderStages.Fragment);
+            throw new ArgumentException("Forward and shadowmap shaders must use the same resource layout.");
         }
 
-        var factory = Renderer.Instance.GraphicsDevice.ResourceFactory;
-        this.ResourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(elements));
-    }
+        this.ForwardShader = forwardShader;
+        this.ShadowMapShader = shadowMapShader;
 
-    public Technique AddPass(IPipelineProvider pass, string vertexCode, string fragmentCode)
-    {
-        this._shaders.Add(new Shader(pass, vertexCode, fragmentCode, this.ResourceLayout));
-        return this;
+        this.ResourceCount = forwardShader.Textures.Length * 2;
     }
-
-    public Shader GetShader(IPipelineProvider pass)
-    {
-        for (int i = 0; i < this._shaders.Count; i++)
-        {
-            if (this._shaders[i].Pass == pass)
-            {
-                return this._shaders[i];
-            }
-        }
-        throw new System.Exception("The material does not support this kind of pass");
-    }
-
 }

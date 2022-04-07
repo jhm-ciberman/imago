@@ -2,7 +2,6 @@ using System;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using LifeSim.Engine.SceneGraph;
 using Veldrid;
 
 namespace LifeSim.Engine.Rendering;
@@ -52,7 +51,6 @@ public class ImmediateBatcher : IPipelineProvider, IDisposable
     private readonly ushort[] _indices;
     private readonly ResourceLayout _passResourceLayout;
 
-    private readonly ResourceLayout _materialResourceLayout;
     private readonly DeviceBuffer _passDataBuffer;
 
     private readonly ResourceSet _passResourceSet;
@@ -109,11 +107,7 @@ public class ImmediateBatcher : IPipelineProvider, IDisposable
                 new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
                 new VertexElementDescription("Color", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Byte4_Norm)));
 
-        this._materialResourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
-            new ResourceLayoutElementDescription("MainTexture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
-            new ResourceLayoutElementDescription("MainSampler", ResourceKind.Sampler, ShaderStages.Fragment)));
-
-        this._defaultShader = new Shader(this, _vertexShader, _fragmentShader, this._materialResourceLayout);
+        this._defaultShader = new Shader(this, _vertexShader, _fragmentShader, new[] { "Main" });
 
         this._resourceSetCache = new ResourceSetCache(factory);
 

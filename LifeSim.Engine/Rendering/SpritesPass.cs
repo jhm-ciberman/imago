@@ -12,32 +12,17 @@ public class SpritesPass : IDisposable, IPipelineProvider, IRenderingPass
     private readonly IRenderTexture _renderTexture;
     private readonly GraphicsDevice _gd;
     private readonly Shader _defaultShader;
-    private readonly ResourceLayout _resourceLayout;
 
     private readonly SpriteBatcher _spriteBatcher;
 
     public SpritesPass(Renderer renderer, IRenderTexture renderTexture)
     {
         this._gd = renderer.GraphicsDevice;
-        var factory = this._gd.ResourceFactory;
-
-        this._resourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
-            new ResourceLayoutElementDescription("MainTexture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
-            new ResourceLayoutElementDescription("MainSampler", ResourceKind.Sampler, ShaderStages.Fragment)
-        ));
-
-        this._defaultShader = new Shader(this, _vertexShader, _fragmentShader, this._resourceLayout);
+        this._defaultShader = new Shader(this, _vertexShader, _fragmentShader, new[] { "Main" });
 
         this._renderTexture = renderTexture;
 
         this._spriteBatcher = new SpriteBatcher(this._gd, this._defaultShader);
-    }
-
-    public Shader MakeShader(string vertexFile, string fragmentFile)
-    {
-        var vertex = ShaderLoader.Load(vertexFile);
-        var fragment = ShaderLoader.Load(fragmentFile);
-        return new Shader(this, vertex, fragment, this._resourceLayout);
     }
 
     public void Dispose()

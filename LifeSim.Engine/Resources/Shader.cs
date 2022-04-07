@@ -13,14 +13,14 @@ public class Shader : IDisposable
     public IPipelineProvider Pass { get; private set; }
 
     private readonly List<CachedPipeline> _pipelines = new List<CachedPipeline>();
-    public ResourceLayout? MaterialResourceLayout { get; }
+    public ResourceLayout MaterialResourceLayout { get; }
     private readonly List<ShaderVariant> _variants = new List<ShaderVariant>();
     private readonly GraphicsDevice _gd;
     public string VertexCode { get; }
     public string FragmentCode { get; }
+    public string[] Textures { get; internal set; }
 
-
-    public Shader(IPipelineProvider pass, string vertexCode, string fragmentCode, ResourceLayout? materialResourceLayout = null)
+    public Shader(IPipelineProvider pass, string vertexCode, string fragmentCode, string[]? textures = null)
     {
         this.Id = ++Shader._count;
 
@@ -31,7 +31,21 @@ public class Shader : IDisposable
 
         this._gd = Renderer.Instance.GraphicsDevice;
 
-        this.MaterialResourceLayout = materialResourceLayout;
+        this.Textures = textures ?? Array.Empty<string>();
+        this.MaterialResourceLayout = Renderer.Instance.GetResourceLayout(this.MakeResourceLayoutDescription());
+    }
+
+    private ResourceLayoutDescription MakeResourceLayoutDescription()
+    {
+        var elements = new List<ResourceLayoutElementDescription>();
+        for (int i = 0; i < this.Textures.Length; i++)
+        {
+            var name = this.Textures[i];
+            elements.Add(new ResourceLayoutElementDescription(name + "Texture", ResourceKind.TextureReadOnly, ShaderStages.Fragment));
+            elements.Add(new ResourceLayoutElementDescription(name + "Sampler", ResourceKind.Sampler, ShaderStages.Fragment));
+        }
+
+        return new ResourceLayoutDescription(elements.ToArray());
     }
 
     public Pipeline GetPipeline(VertexFormat vertexFormat)

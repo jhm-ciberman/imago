@@ -14,12 +14,7 @@ public class Texture : ITexture
     public static Texture Black { get; } = new ImageTexture(new Image<Rgba32>(2, 2, new Rgba32(0, 0, 0, 255)));
 
     public static Texture Transparent { get; } = new ImageTexture(new Image<Rgba32>(2, 2, new Rgba32(0, 0, 0, 0)));
-
-    public static Texture Red { get; } = new ImageTexture(new Image<Rgba32>(2, 2, new Rgba32(255, 0, 0, 255)));
-
-    public static Texture Green { get; } = new ImageTexture(new Image<Rgba32>(2, 2, new Rgba32(0, 255, 0, 255)));
-
-    public static Texture Blue { get; } = new ImageTexture(new Image<Rgba32>(2, 2, new Rgba32(0, 0, 255, 255)));
+    public static Texture Magenta { get; } = new ImageTexture(new Image<Rgba32>(2, 2, new Rgba32(255, 0, 255, 255)));
 
     public Veldrid.Texture DeviceTexture { get; protected set; }
     public Sampler Sampler { get; private set; }
@@ -53,6 +48,8 @@ public class Texture : ITexture
     }
 
     public IntPtr ImGuiBinding => Renderer.Instance.GetOrCreateImGuiBinding(this);
+
+
 
     protected void OnTextureDirty()
     {

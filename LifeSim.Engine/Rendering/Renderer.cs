@@ -79,6 +79,8 @@ public class Renderer : ITexture2DManager, IDisposable
     private readonly List<CommandListJob> _jobs;
     private readonly DisposeCollector _disposeCollector;
 
+    private readonly Dictionary<ResourceLayoutDescription, ResourceLayout> _resourceLayoutCache = new Dictionary<ResourceLayoutDescription, ResourceLayout>();
+
     public Renderer(Sdl2Window window, GraphicsBackend? graphicsBackend = null)
     {
         if (Instance != null)
@@ -259,6 +261,19 @@ public class Renderer : ITexture2DManager, IDisposable
         lock (this._dirtyMaterials)
         {
             this._dirtyMaterials.Add(material);
+        }
+    }
+
+    public ResourceLayout GetResourceLayout(ResourceLayoutDescription description)
+    {
+        lock (this._resourceLayoutCache)
+        {
+            if (!this._resourceLayoutCache.TryGetValue(description, out ResourceLayout? layout))
+            {
+                layout = this._factory.CreateResourceLayout(description);
+                this._resourceLayoutCache.Add(description, layout);
+            }
+            return layout;
         }
     }
 
