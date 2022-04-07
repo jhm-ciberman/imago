@@ -39,7 +39,8 @@ public class FullScreenPass : IDisposable, IRenderingPass
             new ResourceLayoutElementDescription("MainSampler", ResourceKind.Sampler, ShaderStages.Fragment)
         ));
 
-        var shaderSet = ShaderCompiler.Compile(this._gd, new[] { vertexLayouts }, _vertexCode, _fragmentCode);
+        var shaders = ShaderCompiler.CompileShaders(this._gd, _vertexCode, _fragmentCode);
+        var shaderSet = new ShaderSetDescription(new[] { vertexLayouts }, shaders);
         this._pipeline = this.MakePipeline(shaderSet, this._resourceLayout);
 
         this._vertexBuffer = factory.CreateBuffer(new BufferDescription(16 * 6, BufferUsage.VertexBuffer));

@@ -83,8 +83,8 @@ public class SkyDomePass : IDisposable, IRenderingPass
         this._passDataBuffer = factory.CreateBuffer(new BufferDescription(
             (uint)Marshal.SizeOf<PassData>(), BufferUsage.UniformBuffer));
 
-        var shaderSet = ShaderCompiler.Compile(this._gd, new[] { vertexFormat }, _vertexCode, _fragmentCode);
-        this._pipeline = this.MakePipeline(shaderSet);
+        var shaders = ShaderCompiler.CompileShaders(this._gd, _vertexCode, _fragmentCode);
+        this._pipeline = this.MakePipeline(new ShaderSetDescription(new[] { vertexFormat }, shaders));
 
         this._lutTexture = new ImageTexture("./res/skydome_lut.png", srgb: false);
 

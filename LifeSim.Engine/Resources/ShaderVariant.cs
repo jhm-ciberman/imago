@@ -13,26 +13,14 @@ public class ShaderVariant : IDisposable
 
     public ResourceLayout? MaterialResourceLayout { get; }
 
-    internal ShaderVariant(GraphicsDevice gd, VertexFormat vertexFormat, ResourceLayout? materialResourceLayout, string vertexCode, string fragmentCode)
+    internal ShaderVariant(GraphicsDevice gd, VertexFormat vertexFormat, Shader shader)
     {
         this.VertexFormat = vertexFormat;
-        this.MaterialResourceLayout = materialResourceLayout;
+        this.MaterialResourceLayout = shader.MaterialResourceLayout;
         var layouts = GetVertexLayout(vertexFormat.Layouts, vertexFormat.IsSurface);
-        var macros = GetMacroDefinitions(vertexFormat.Layouts);
-        this.ShaderSetDescription = ShaderCompiler.Compile(gd, layouts, vertexCode, fragmentCode, macros);
-    }
-
-    private static List<MacroDefinition> GetMacroDefinitions(VertexLayoutDescription[] vertexLayouts)
-    {
-        var macros = new List<MacroDefinition>();
-        foreach (var layout in vertexLayouts)
-        {
-            foreach (var element in layout.Elements)
-            {
-                macros.Add(new MacroDefinition("USE_" + element.Name.ToUpperInvariant()));
-            }
-        }
-        return macros;
+        var macros = vertexFormat.GetMacroDefinitions();
+        var shaders = ShaderCompiler.CompileShaders(gd, shader.VertexCode, shader.FragmentCode, macros);
+        this.ShaderSetDescription = new ShaderSetDescription(layouts, shaders);
     }
 
     private static VertexLayoutDescription[] GetVertexLayout(VertexLayoutDescription[] vertexLayouts, bool isSurface)

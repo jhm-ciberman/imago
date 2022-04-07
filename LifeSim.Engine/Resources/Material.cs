@@ -11,7 +11,7 @@ public class Material
     public int Id { get; private set; }
     public Shader Shader { get; private set; }
     public Shader ShadowmapShader { get; }
-    public ResourceSet ResourceSet { get; internal set; }
+    public ResourceSet ResourceSet { get; internal set; } = null!;
 
     private bool _isDirty = true;
     private readonly BindableResource[] _resources;
@@ -33,14 +33,9 @@ public class Material
     {
         this.ResourceSet?.Dispose();
 
-        this.ResourceSet = this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(this.GetResourceLayout(), this._resources));
+        this.ResourceSet = this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(this.Definition.ResourceLayout, this._resources));
 
         this._isDirty = false;
-    }
-
-    protected ResourceLayout GetResourceLayout()
-    {
-        return this.Definition.ResourceLayout;
     }
 
     public Texture Texture

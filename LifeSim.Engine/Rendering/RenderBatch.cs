@@ -18,7 +18,6 @@ public readonly struct RenderBatch
     {
         Contract.Assume(renderable.Mesh != null);
         Contract.Assume(renderable.Material != null);
-        Contract.Assume(renderable.Material.ResourceSet != null);
         Contract.Assume(renderable.InstanceResourceSet != null);
 
         this.InstanceCount = instanceCount;

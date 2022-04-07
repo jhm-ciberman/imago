@@ -83,7 +83,7 @@ public class Shader : IDisposable
             }
         }
 
-        var variant = new ShaderVariant(this._gd, vertexFormat, this.MaterialResourceLayout, this.VertexCode, this.FragmentCode);
+        var variant = new ShaderVariant(this._gd, vertexFormat, this);
         this._variants.Add(variant);
         return variant;
     }
@@ -94,7 +94,7 @@ public class Shader : IDisposable
         {
             this._variants[i].Dispose();
         }
-        this.MaterialResourceLayout?.Dispose();
+        this.MaterialResourceLayout.Dispose();
     }
 
     private struct CachedPipeline

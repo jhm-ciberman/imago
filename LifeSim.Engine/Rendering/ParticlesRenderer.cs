@@ -100,7 +100,8 @@ public class ParticlesPass : IDisposable, IRenderingPass
             )
         };
 
-        var shaderSet = ShaderCompiler.Compile(this._gd, vertexLayouts, _vertexShader, _fragmentShader);
+        var shaders = ShaderCompiler.CompileShaders(this._gd, _vertexShader, _fragmentShader);
+        var shaderSet = new ShaderSetDescription(vertexLayouts, shaders);
         this._pipeline = this.MakePipeline(shaderSet, this._materialResourceLayout);
     }
 

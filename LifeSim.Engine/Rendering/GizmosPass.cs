@@ -53,8 +53,8 @@ public class GizmosPass : IDisposable, IRenderingPass
             new VertexElementDescription("Color", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Byte4_Norm)
         );
 
-        var shaderSet = ShaderCompiler.Compile(this._gd, new[] { vertexLayout }, this._vertex, this._fragment);
-        this._pipeline = this.MakePipeline(shaderSet);
+        var shaders = ShaderCompiler.CompileShaders(this._gd, this._vertex, this._fragment);
+        this._pipeline = this.MakePipeline(new ShaderSetDescription(new[] { vertexLayout }, shaders));
     }
 
     public void Render(CommandList cl, Scene scene)
