@@ -182,7 +182,7 @@ public class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
         {
             DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
             PrimitiveTopology = PrimitiveTopology.TriangleList,
-            ShaderSet = new ShaderSetDescription(GetVertexLayout(shaderVariant.VertexFormat.Layouts), shaderVariant.Shaders),
+            ShaderSet = new ShaderSetDescription(GetVertexLayout(shaderVariant.VertexFormat), shaderVariant.Shaders),
             BlendState = new BlendStateDescription(
                 RgbaFloat.Black,
                 BlendAttachmentDescription.OverrideBlend,
@@ -194,25 +194,26 @@ public class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
         });
     }
 
-    private static VertexLayoutDescription[] GetVertexLayout(VertexLayoutDescription[] vertexLayouts)
+    private static VertexLayoutDescription[] GetVertexLayout(VertexFormat vertexFormat)
     {
-        var list = new List<VertexLayoutDescription>(vertexLayouts.Length + 1)
+        var list = new List<VertexLayoutDescription>(vertexFormat.Layouts.Length + 1)
         {
             new VertexLayoutDescription(stride: 16, instanceStepRate: 1,
                 new VertexElementDescription("Offsets", VertexElementSemantic.TextureCoordinate, VertexElementFormat.UInt4))
         };
-        list.AddRange(vertexLayouts);
+        list.AddRange(vertexFormat.Layouts);
         return list.ToArray();
     }
 
     private ResourceLayout[] GetResourceLayouts(ShaderVariant shaderVariant)
     {
-        var resources = new List<ResourceLayout> {
-                this._resourceLayout,
-                this._storage.TransformResourceLayout,
-                shaderVariant.MaterialResourceLayout,
-                this._storage.InstanceResourceLayout
-            };
+        var resources = new List<ResourceLayout>
+        {
+            this._resourceLayout,
+            this._storage.TransformResourceLayout,
+            shaderVariant.MaterialResourceLayout,
+            this._storage.InstanceResourceLayout
+        };
 
         if (shaderVariant.VertexFormat.IsSkinned)
         {

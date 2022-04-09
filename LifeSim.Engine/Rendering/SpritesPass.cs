@@ -18,7 +18,7 @@ public class SpritesPass : IDisposable, IPipelineProvider, IRenderingPass
     public SpritesPass(Renderer renderer, IRenderTexture renderTexture)
     {
         this._gd = renderer.GraphicsDevice;
-        this._defaultShader = new Shader(this, _vertexShader, _fragmentShader, new[] { "Main" });
+        this._defaultShader = new Shader(_vertexShader, _fragmentShader, new[] { "Main" });
 
         this._renderTexture = renderTexture;
 
@@ -44,7 +44,7 @@ public class SpritesPass : IDisposable, IPipelineProvider, IRenderingPass
         {
             DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
             PrimitiveTopology = PrimitiveTopology.TriangleList,
-            ShaderSet = new ShaderSetDescription(shaderVariant.VertexFormat.Layouts, shaderVariant.Shaders),
+            ShaderSet = shaderVariant.ShaderSetDescription,
             BlendState = BlendStateDescription.SingleAlphaBlend,
             RasterizerState = rasterizerState,
             Outputs = this._renderTexture.OutputDescription,

@@ -107,7 +107,7 @@ public class ImmediateBatcher : IPipelineProvider, IDisposable
                 new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
                 new VertexElementDescription("Color", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Byte4_Norm)));
 
-        this._defaultShader = new Shader(this, _vertexShader, _fragmentShader, new[] { "Main" });
+        this._defaultShader = new Shader(_vertexShader, _fragmentShader, new[] { "Main" });
 
         this._resourceSetCache = new ResourceSetCache(factory);
 
@@ -224,26 +224,23 @@ public class ImmediateBatcher : IPipelineProvider, IDisposable
             scissorTestEnabled: false
         );
 
-        var resources = new ResourceLayout[] {
-            this._passResourceLayout,
-            shaderVariant.MaterialResourceLayout,
-        };
-
-        var renderTexture = (RenderTexture)this._renderTexture;
-
         return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
         {
             DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
             PrimitiveTopology = PrimitiveTopology.TriangleList,
-            ShaderSet = new ShaderSetDescription(shaderVariant.VertexFormat.Layouts, shaderVariant.Shaders),
+            ShaderSet = shaderVariant.ShaderSetDescription,
             BlendState = new BlendStateDescription(
                 RgbaFloat.Black,
                 BlendAttachmentDescription.OverrideBlend,
                 BlendAttachmentDescription.Disabled
             ),
             RasterizerState = rasterizerState,
-            Outputs = renderTexture.ColorOnlyFramebuffer.OutputDescription,
-            ResourceLayouts = resources,
+            Outputs = ((RenderTexture)this._renderTexture).ColorOnlyFramebuffer.OutputDescription,
+            ResourceLayouts = new ResourceLayout[]
+            {
+                this._passResourceLayout,
+                shaderVariant.MaterialResourceLayout,
+            },
         });
     }
 

@@ -9,9 +9,6 @@ public class Shader : IDisposable
     private static int _count = 0;
 
     public int Id { get; set; }
-
-    public IPipelineProvider Pass { get; private set; }
-
     private readonly List<CachedPipeline> _pipelines = new List<CachedPipeline>();
     public ResourceLayout MaterialResourceLayout { get; }
     private readonly List<ShaderVariant> _variants = new List<ShaderVariant>();
@@ -20,11 +17,9 @@ public class Shader : IDisposable
     public string FragmentCode { get; }
     public string[] Textures { get; internal set; }
 
-    public Shader(IPipelineProvider pass, string vertexCode, string fragmentCode, string[]? textures = null)
+    public Shader(string vertexCode, string fragmentCode, string[]? textures = null)
     {
         this.Id = ++Shader._count;
-
-        this.Pass = pass;
 
         this.VertexCode = vertexCode;
         this.FragmentCode = fragmentCode;
@@ -50,15 +45,8 @@ public class Shader : IDisposable
 
     public Pipeline GetPipeline(IPipelineProvider pass, VertexFormat vertexFormat)
     {
-        for (int i = 0; i < this._pipelines.Count; i++)
-        {
-            if (this._pipelines[i].VertexFormat == vertexFormat)
-                return this._pipelines[i].Pipeline;
-        }
-
         lock (this._pipelines)
         {
-            // Search again, but this time with locking
             for (int i = 0; i < this._pipelines.Count; i++)
             {
                 if (this._pipelines[i].VertexFormat == vertexFormat)
@@ -75,37 +63,75 @@ public class Shader : IDisposable
 
     private ShaderVariant GetShaderVariant(VertexFormat vertexFormat)
     {
-        for (int i = 0; i < this._variants.Count; i++)
+        lock (this._variants)
         {
-            if (this._variants[i].VertexFormat == vertexFormat)
+            for (int i = 0; i < this._variants.Count; i++)
             {
-                return this._variants[i];
+                if (this._variants[i].VertexFormat == vertexFormat)
+                {
+                    return this._variants[i];
+                }
             }
-        }
 
-        var variant = new ShaderVariant(this._gd, vertexFormat, this);
-        this._variants.Add(variant);
-        return variant;
+            var macros = vertexFormat.GetMacroDefinitions();
+            var shaders = ShaderCompiler.CompileShaders(this._gd, this.VertexCode, this.FragmentCode, macros);
+            var variant = new ShaderVariant(this, vertexFormat, shaders);
+            this._variants.Add(variant);
+            return variant;
+        }
     }
 
     public void Dispose()
     {
-        for (int i = 0; i < this._variants.Count; i++)
-        {
-            this._variants[i].Dispose();
-        }
         this.MaterialResourceLayout.Dispose();
+        foreach (var variant in this._variants)
+        {
+            variant.Dispose();
+        }
+        foreach (var pipeline in this._pipelines)
+        {
+            pipeline.Pipeline.Dispose();
+        }
     }
 
     private struct CachedPipeline
     {
-        public VertexFormat VertexFormat;
-        public Pipeline Pipeline;
+        public VertexFormat VertexFormat { get; }
+        public Pipeline Pipeline { get; }
 
         public CachedPipeline(VertexFormat vertexFormat, Pipeline pipeline)
         {
             this.VertexFormat = vertexFormat;
             this.Pipeline = pipeline;
+        }
+    }
+}
+
+public class ShaderVariant : IDisposable
+{
+    public Shader Shader { get; }
+
+    public VertexFormat VertexFormat { get; }
+
+    public Veldrid.Shader[] Shaders { get; }
+
+    public ShaderSetDescription ShaderSetDescription { get; internal set; }
+
+    public ResourceLayout MaterialResourceLayout => this.Shader.MaterialResourceLayout;
+
+    internal ShaderVariant(Shader shader, VertexFormat vertexFormat, Veldrid.Shader[] shaders)
+    {
+        this.Shader = shader;
+        this.VertexFormat = vertexFormat;
+        this.Shaders = shaders;
+        this.ShaderSetDescription = new ShaderSetDescription(vertexFormat.Layouts, shaders);
+    }
+
+    public void Dispose()
+    {
+        foreach (var shader in this.Shaders)
+        {
+            shader.Dispose();
         }
     }
 }
