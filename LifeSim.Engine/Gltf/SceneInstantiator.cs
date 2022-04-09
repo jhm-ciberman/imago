@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using LifeSim.Engine.Anim;
 using LifeSim.Engine.Rendering;
-using LifeSim.Engine.Rendering;
 using LifeSim.Engine.SceneGraph;
 
 namespace LifeSim.Engine.Gltf;

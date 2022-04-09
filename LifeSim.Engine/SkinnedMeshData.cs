@@ -1,8 +1,6 @@
 using System;
 using System.Buffers;
 using System.Numerics;
-using System.Runtime.InteropServices;
-using LifeSim.Engine.Rendering;
 using LifeSim.Engine.Rendering;
 using Veldrid;
 
