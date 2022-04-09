@@ -41,10 +41,13 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
 
     private readonly ResourceSetCache _resourceSetCache;
 
-    public SpriteBatcher(GraphicsDevice gd, Shader defaultShader)
+    private readonly IPipelineProvider _pass;
+
+    public SpriteBatcher(GraphicsDevice gd, Shader defaultShader, IPipelineProvider pass)
     {
         this._gd = gd;
         this._defaultShader = defaultShader;
+        this._pass = pass;
         var factory = gd.ResourceFactory;
 
         var vertexBufferSize = (uint) (Marshal.SizeOf<SpriteBatch.Item>() * 4 * this._capacity);
@@ -266,7 +269,7 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
         if (this._batch.Shader != this._currentShaderInUse)
         {
             this._currentShaderInUse = this._batch.Shader ?? this._defaultShader;
-            var pipeline = this._currentShaderInUse.GetPipeline(this._vertexFormat);
+            var pipeline = this._currentShaderInUse.GetPipeline(this._pass, this._vertexFormat);
 
             this._commandList.SetPipeline(pipeline);
             this._commandList.SetGraphicsResourceSet(0, this._passResourceSet);

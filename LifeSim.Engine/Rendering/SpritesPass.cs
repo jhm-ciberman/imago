@@ -22,7 +22,7 @@ public class SpritesPass : IDisposable, IPipelineProvider, IRenderingPass
 
         this._renderTexture = renderTexture;
 
-        this._spriteBatcher = new SpriteBatcher(this._gd, this._defaultShader);
+        this._spriteBatcher = new SpriteBatcher(this._gd, this._defaultShader, this);
     }
 
     public void Dispose()
@@ -42,11 +42,6 @@ public class SpritesPass : IDisposable, IPipelineProvider, IRenderingPass
             scissorTestEnabled: false
         );
 
-        var resources = new ResourceLayout[] {
-            this._spriteBatcher.PassResourceLayout,
-            shaderVariant.MaterialResourceLayout,
-        };
-
         return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
         {
             DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
@@ -55,7 +50,11 @@ public class SpritesPass : IDisposable, IPipelineProvider, IRenderingPass
             BlendState = BlendStateDescription.SingleAlphaBlend,
             RasterizerState = rasterizerState,
             Outputs = this._renderTexture.OutputDescription,
-            ResourceLayouts = resources,
+            ResourceLayouts = new ResourceLayout[]
+            {
+                this._spriteBatcher.PassResourceLayout,
+                shaderVariant.MaterialResourceLayout,
+            },
         });
     }
 

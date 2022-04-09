@@ -48,7 +48,7 @@ public class Shader : IDisposable
         return new ResourceLayoutDescription(elements.ToArray());
     }
 
-    public Pipeline GetPipeline(VertexFormat vertexFormat)
+    public Pipeline GetPipeline(IPipelineProvider pass, VertexFormat vertexFormat)
     {
         for (int i = 0; i < this._pipelines.Count; i++)
         {
@@ -66,7 +66,7 @@ public class Shader : IDisposable
             }
 
             ShaderVariant shaderVariant = this.GetShaderVariant(vertexFormat);
-            var pipeline = this.Pass.MakePipeline(shaderVariant);
+            var pipeline = pass.MakePipeline(shaderVariant);
             this._pipelines.Add(new CachedPipeline(vertexFormat, pipeline));
 
             return pipeline;

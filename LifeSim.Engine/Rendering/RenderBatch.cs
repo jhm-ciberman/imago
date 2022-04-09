@@ -22,11 +22,20 @@ public readonly struct RenderBatch
 
         this.InstanceCount = instanceCount;
         this.Mesh = renderable.Mesh;
-        var shader = shadowmapPass ? renderable.Material.ShadowmapShader : renderable.Material.Shader;
-        this.Pipeline = shader.GetPipeline(renderable.Mesh.VertexFormat);
         this.TransformResourceSet = renderable.TransformResourceSet;
         this.MaterialResourceSet = renderable.Material.ResourceSet;
         this.InstanceResourceSet = renderable.InstanceResourceSet;
         this.SkeletonResourceSet = renderable.SkeletonResourceSet;
+
+        if (shadowmapPass)
+        {
+            var shader = renderable.Material.ShadowmapShader;
+            this.Pipeline = shader.GetPipeline(Renderer.Instance.ShadowMapPass, renderable.Mesh.VertexFormat);
+        }
+        else
+        {
+            var shader = renderable.Material.ForwardShader;
+            this.Pipeline = shader.GetPipeline(Renderer.Instance.ForwardPass, renderable.Mesh.VertexFormat);
+        }
     }
 }

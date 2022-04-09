@@ -29,7 +29,7 @@ public class Renderer : ITexture2DManager, IDisposable
     private readonly GizmosPass _gizmosPass;
     private readonly Fence _fence;
     private readonly List<Texture> _dirtyTextures = new List<Texture>();
-    private readonly List<Material> _dirtyMaterials = new List<Material>();
+    private readonly List<MaterialBase> _dirtyMaterials = new List<MaterialBase>();
     private readonly ForwardPass _forwardPass;
     private readonly ShadowPass _shadowPass;
     private readonly SpritesPass _spritesPass;
@@ -172,7 +172,7 @@ public class Renderer : ITexture2DManager, IDisposable
             {
                 foreach (var material in this._dirtyMaterials)
                 {
-                    material.Update();
+                    material.Update(this._factory);
                 }
                 this._dirtyMaterials.Clear();
             }
@@ -256,7 +256,7 @@ public class Renderer : ITexture2DManager, IDisposable
         }
     }
 
-    internal void OnMaterialDirty(Material material)
+    internal void OnMaterialDirty(MaterialBase material)
     {
         lock (this._dirtyMaterials)
         {

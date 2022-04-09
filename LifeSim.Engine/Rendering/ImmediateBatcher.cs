@@ -200,7 +200,8 @@ public class ImmediateBatcher : IPipelineProvider, IDisposable
         if (this._currentBatchShader != this._currentShaderInUse)
         {
             this._currentShaderInUse = this._currentBatchShader;
-            this._commandList.SetPipeline(this._currentShaderInUse.GetPipeline(this._vertexFormat));
+            var pipeline = this._currentShaderInUse.GetPipeline(this, this._vertexFormat);
+            this._commandList.SetPipeline(pipeline);
         }
 
         this._commandList.SetGraphicsResourceSet(0, this._passResourceSet);
