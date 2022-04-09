@@ -1,7 +1,7 @@
 using System.Runtime.CompilerServices;
 using Veldrid;
 
-namespace LifeSim.Engine.Resources;
+namespace LifeSim.Engine.Rendering;
 
 public static class BufferFactory
 {

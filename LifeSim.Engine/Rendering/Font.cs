@@ -4,7 +4,7 @@ using System.IO;
 using FontStashSharp;
 using LifeSim.Engine.Rendering;
 
-namespace LifeSim.Engine.Resources;
+namespace LifeSim.Engine.Rendering;
 
 public static class Font
 {

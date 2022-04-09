@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using LifeSim.Engine.Anim;
 using LifeSim.Engine.Rendering;
-using LifeSim.Engine.Resources;
+using LifeSim.Engine.Rendering;
 
 namespace LifeSim.Engine.Gltf;
 

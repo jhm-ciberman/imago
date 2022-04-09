@@ -2,7 +2,7 @@ using LifeSim.Engine.Rendering;
 using Veldrid;
 using Veldrid.Utilities;
 
-namespace LifeSim.Engine.Resources;
+namespace LifeSim.Engine.Rendering;
 
 public class Mesh : System.IDisposable
 {

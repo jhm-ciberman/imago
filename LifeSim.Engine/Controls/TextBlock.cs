@@ -2,7 +2,7 @@ using System;
 using System.Numerics;
 using FontStashSharp;
 using LifeSim.Engine.Rendering;
-using LifeSim.Engine.Resources;
+using LifeSim.Engine.Rendering;
 
 namespace LifeSim.Engine.Controls;
 

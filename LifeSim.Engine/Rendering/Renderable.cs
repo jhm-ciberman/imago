@@ -1,7 +1,7 @@
 using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using LifeSim.Engine.Resources;
+using LifeSim.Engine.Rendering;
 using Veldrid.Utilities;
 
 namespace LifeSim.Engine.Rendering;

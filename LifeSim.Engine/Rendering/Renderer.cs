@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using FontStashSharp.Interfaces;
-using LifeSim.Engine.Resources;
+using LifeSim.Engine.Rendering;
 using LifeSim.Engine.SceneGraph;
 using Veldrid;
 using Veldrid.Sdl2;

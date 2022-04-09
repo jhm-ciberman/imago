@@ -5,7 +5,7 @@ using System.Numerics;
 using glTFLoader;
 using LifeSim.Engine.Anim;
 using LifeSim.Engine.Rendering;
-using LifeSim.Engine.Resources;
+using LifeSim.Engine.Rendering;
 using static glTFLoader.Schema.AnimationChannelTarget;
 using static glTFLoader.Schema.AnimationSampler;
 

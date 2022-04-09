@@ -3,7 +3,7 @@ using System.Buffers;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using LifeSim.Engine.Rendering;
-using LifeSim.Engine.Resources;
+using LifeSim.Engine.Rendering;
 using Veldrid;
 
 namespace LifeSim.Engine.Gltf;

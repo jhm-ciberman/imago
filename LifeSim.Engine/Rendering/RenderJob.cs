@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using LifeSim.Engine.Resources;
+using LifeSim.Engine.Rendering;
 using Veldrid;
 
 namespace LifeSim.Engine.Rendering;
