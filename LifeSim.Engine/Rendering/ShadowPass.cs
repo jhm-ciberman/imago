@@ -156,12 +156,23 @@ public partial class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
         {
             DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
             PrimitiveTopology = PrimitiveTopology.TriangleList,
-            ShaderSet = shaderVariant.ShaderSetDescription,
+            ShaderSet = new ShaderSetDescription(GetVertexLayout(shaderVariant.VertexFormat.Layouts), shaderVariant.Shaders),
             BlendState = BlendStateDescription.Empty,
             RasterizerState = rasterizerState,
             Outputs = this.ShadowmapTexture.Framebuffers[0].OutputDescription,
             ResourceLayouts = this.GetResourceLayouts(shaderVariant),
         });
+    }
+
+    private static VertexLayoutDescription[] GetVertexLayout(VertexLayoutDescription[] vertexLayouts)
+    {
+        var list = new List<VertexLayoutDescription>(vertexLayouts.Length + 1)
+        {
+            new VertexLayoutDescription(stride: 16, instanceStepRate: 1,
+                new VertexElementDescription("Offsets", VertexElementSemantic.TextureCoordinate, VertexElementFormat.UInt4))
+        };
+        list.AddRange(vertexLayouts);
+        return list.ToArray();
     }
 
     internal Vector4 GetShadowCascadeDistances()
@@ -171,8 +182,6 @@ public partial class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
 
     private ResourceLayout[] GetResourceLayouts(ShaderVariant shaderVariant)
     {
-        Debug.Assert(shaderVariant.MaterialResourceLayout != null);
-
         var resources = new List<ResourceLayout> {
             this._resourceLayout,
             this._storage.TransformResourceLayout,

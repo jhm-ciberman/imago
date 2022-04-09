@@ -32,8 +32,6 @@ public class SpritesPass : IDisposable, IPipelineProvider, IRenderingPass
 
     Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant)
     {
-        Debug.Assert(shaderVariant.MaterialResourceLayout != null);
-
         var rasterizerState = new RasterizerStateDescription(
             FaceCullMode.None,
             PolygonFillMode.Solid,
@@ -46,7 +44,7 @@ public class SpritesPass : IDisposable, IPipelineProvider, IRenderingPass
         {
             DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
             PrimitiveTopology = PrimitiveTopology.TriangleList,
-            ShaderSet = shaderVariant.ShaderSetDescription,
+            ShaderSet = new ShaderSetDescription(shaderVariant.VertexFormat.Layouts, shaderVariant.Shaders),
             BlendState = BlendStateDescription.SingleAlphaBlend,
             RasterizerState = rasterizerState,
             Outputs = this._renderTexture.OutputDescription,

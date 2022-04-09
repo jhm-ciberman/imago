@@ -182,7 +182,7 @@ public class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
         {
             DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
             PrimitiveTopology = PrimitiveTopology.TriangleList,
-            ShaderSet = shaderVariant.ShaderSetDescription,
+            ShaderSet = new ShaderSetDescription(GetVertexLayout(shaderVariant.VertexFormat.Layouts), shaderVariant.Shaders),
             BlendState = new BlendStateDescription(
                 RgbaFloat.Black,
                 BlendAttachmentDescription.OverrideBlend,
@@ -194,10 +194,19 @@ public class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
         });
     }
 
+    private static VertexLayoutDescription[] GetVertexLayout(VertexLayoutDescription[] vertexLayouts)
+    {
+        var list = new List<VertexLayoutDescription>(vertexLayouts.Length + 1)
+        {
+            new VertexLayoutDescription(stride: 16, instanceStepRate: 1,
+                new VertexElementDescription("Offsets", VertexElementSemantic.TextureCoordinate, VertexElementFormat.UInt4))
+        };
+        list.AddRange(vertexLayouts);
+        return list.ToArray();
+    }
+
     private ResourceLayout[] GetResourceLayouts(ShaderVariant shaderVariant)
     {
-        Debug.Assert(shaderVariant.MaterialResourceLayout != null);
-
         var resources = new List<ResourceLayout> {
                 this._resourceLayout,
                 this._storage.TransformResourceLayout,

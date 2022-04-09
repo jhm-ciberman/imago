@@ -216,8 +216,6 @@ public class ImmediateBatcher : IPipelineProvider, IDisposable
 
     public Pipeline MakePipeline(ShaderVariant shaderVariant)
     {
-        Debug.Assert(shaderVariant.MaterialResourceLayout != null);
-
         var rasterizerState = new RasterizerStateDescription(
             FaceCullMode.None,
             PolygonFillMode.Solid,
@@ -237,7 +235,7 @@ public class ImmediateBatcher : IPipelineProvider, IDisposable
         {
             DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
             PrimitiveTopology = PrimitiveTopology.TriangleList,
-            ShaderSet = shaderVariant.ShaderSetDescription,
+            ShaderSet = new ShaderSetDescription(shaderVariant.VertexFormat.Layouts, shaderVariant.Shaders),
             BlendState = new BlendStateDescription(
                 RgbaFloat.Black,
                 BlendAttachmentDescription.OverrideBlend,
