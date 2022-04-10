@@ -8,9 +8,10 @@ namespace LifeSim.Engine.Rendering;
 
 public class Renderable : IDisposable
 {
-    public delegate void RenderQueueFlagsChangedHandler(Renderable renderable, RenderQueueFlags oldFlags, RenderQueueFlags newFlags);
-
-    public static event RenderQueueFlagsChangedHandler? OnRenderQueueFlagsChanged;
+    public delegate void RenderQueuesChangedHandler(Renderable renderable, RenderQueues oldFlags, RenderQueues newFlags);
+    public delegate void PipelineDirtyHandler(Renderable renderable);
+    public static event RenderQueuesChangedHandler? RenderQueuesChanged;
+    public static event PipelineDirtyHandler? PipelineDirty;
 
     private static uint _count;
     private Matrix4x4 _transform = Matrix4x4.Identity;
@@ -28,8 +29,8 @@ public class Renderable : IDisposable
 
     public Mesh? Mesh { get; private set; } = null;
 
-    private RenderQueueFlags _renderQueueFlags = RenderQueueFlags.All;
-    public RenderQueueFlags RenderQueueFlags
+    private RenderQueues _renderQueueFlags = RenderQueues.All;
+    public RenderQueues RenderQueueFlags
     {
         get => this._renderQueueFlags;
         set
@@ -38,7 +39,7 @@ public class Renderable : IDisposable
             {
                 var oldFlags = this._renderQueueFlags;
                 this._renderQueueFlags = value;
-                OnRenderQueueFlagsChanged?.Invoke(this, oldFlags, value);
+                RenderQueuesChanged?.Invoke(this, oldFlags, value);
             }
         }
     }
@@ -59,6 +60,13 @@ public class Renderable : IDisposable
 
     public Skeleton? Skeleton { get; private set; }
     public Material? Material { get; private set; }
+
+    public Veldrid.Pipeline? ForwardPipeline { get; private set; }
+
+    public Veldrid.Pipeline? ShadowMapPipeline { get; private set; }
+
+    private bool _pipelineDirty = false;
+
     private DataBlock _instanceDataBlock;
 
     public Renderable(SceneStorage storage, int instanceDataSize)
@@ -73,27 +81,39 @@ public class Renderable : IDisposable
 
     public void SetMesh(Mesh mesh)
     {
+        if (this.Mesh == mesh) return;
         this.Mesh = mesh;
-        this.RecomputeSortKey();
+
         this.RecomputeBoundingBox();
+        this.NotifyPipelineDirty();
     }
 
     public void SetMaterial(Material material)
     {
+        if (this.Material == material) return;
         this.Material = material;
 
         this.RecomputeOffsetVertexData();
-        this.RecomputeSortKey();
+        this.NotifyPipelineDirty();
     }
 
     public void SetSkeleton(Skeleton skeleton)
     {
+        if (this.Skeleton == skeleton) return;
+
         this.Skeleton = skeleton;
-        Matrix4x4.Invert(this._transform, out Matrix4x4 inverseRootTransform);
+        _ = Matrix4x4.Invert(this._transform, out Matrix4x4 inverseRootTransform);
         this.Skeleton.InverseRootTransform = inverseRootTransform;
         this.SkeletonResourceSet = skeleton.ResourceSet;
         this.RecomputeOffsetVertexData();
-        this.RecomputeSortKey();
+        this.NotifyPipelineDirty();
+    }
+
+    protected void NotifyPipelineDirty()
+    {
+        if (this._pipelineDirty) return;
+        this._pipelineDirty = true;
+        PipelineDirty?.Invoke(this);
     }
 
     public void SetTransform(ref Matrix4x4 transform)
@@ -108,7 +128,7 @@ public class Renderable : IDisposable
 
         if (this.Skeleton != null)
         {
-            Matrix4x4.Invert(this._transform, out Matrix4x4 inverseRootTransform);
+            _ = Matrix4x4.Invert(this._transform, out Matrix4x4 inverseRootTransform);
             this.Skeleton.InverseRootTransform = inverseRootTransform;
         }
     }
@@ -116,6 +136,48 @@ public class Renderable : IDisposable
     public void SetInstanceData<T>(T data) where T : unmanaged
     {
         this._instanceDataBlock.Write(ref data);
+    }
+
+    public void Update(Renderer renderer)
+    {
+        if (this._pipelineDirty)
+        {
+            this._pipelineDirty = false;
+
+            this.RecomputeSortKey();
+
+            if (this.Material != null && this.Mesh != null && this.RenderQueueFlags != RenderQueues.None)
+            {
+                // Update the forward pipeline
+                if (this.RenderQueueFlags.HasFlag(RenderQueues.Opaque))
+                {
+                    this.ForwardPipeline = this.Material.GetForwardPipeline(renderer, this.Mesh.VertexFormat);
+                }
+                else if (this.RenderQueueFlags.HasFlag(RenderQueues.Transparent))
+                {
+                    this.ForwardPipeline = this.Material.GetForwardPipeline(renderer, this.Mesh.VertexFormat);
+                }
+                else
+                {
+                    this.ForwardPipeline = null;
+                }
+
+                // Update the shadow map pipeline
+                if (this.RenderQueueFlags.HasFlag(RenderQueues.ShadowCaster))
+                {
+                    this.ShadowMapPipeline = this.Material.GetShadowmapPipeline(renderer, this.Mesh.VertexFormat);
+                }
+                else
+                {
+                    this.ShadowMapPipeline = null;
+                }
+            }
+            else
+            {
+                this.ForwardPipeline = null;
+                this.ShadowMapPipeline = null;
+            }
+        }
     }
 
     protected void RecomputeSortKey()
@@ -152,15 +214,14 @@ public class Renderable : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool CanBeBatchedWith(Renderable other)
     {
-        if (this._batchingHashKey != other._batchingHashKey) return false;
-
-        if (this.Mesh != other.Mesh) return false;
-        if (this.Material != other.Material) return false;
-        if (this.Skeleton?.BufferId != other.Skeleton?.BufferId) return false;
-        if (this._instanceDataBlock.Buffer.Id != other._instanceDataBlock.Buffer.Id) return false;
-        if (this._transformDataBlock.Buffer.Id != other._transformDataBlock.Buffer.Id) return false;
-
-        return true;
+        // First, fast check using the hash key. If the keys are different, we can early out.
+        // If the keys are equal, we need to check the actual data.
+        return this._batchingHashKey != other._batchingHashKey
+            && this.Mesh != other.Mesh
+            && this.Material != other.Material
+            && this.Skeleton?.BufferId != other.Skeleton?.BufferId
+            && this._instanceDataBlock.Buffer.Id != other._instanceDataBlock.Buffer.Id
+            && this._transformDataBlock.Buffer.Id != other._transformDataBlock.Buffer.Id;
     }
 
     private void RecomputeOffsetVertexData()

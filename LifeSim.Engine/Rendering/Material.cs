@@ -1,3 +1,4 @@
+using System;
 using Veldrid;
 
 namespace LifeSim.Engine.Rendering;
@@ -81,5 +82,15 @@ public class Material : MaterialBase
     public void Dispose()
     {
         this.ResourceSet?.Dispose();
+    }
+
+    public Pipeline GetForwardPipeline(Renderer renderer, VertexFormat vertexFormat)
+    {
+        return this.ForwardShader.GetPipeline(renderer.ForwardPass, vertexFormat);
+    }
+
+    public Pipeline GetShadowmapPipeline(Renderer renderer, VertexFormat vertexFormat)
+    {
+        return this.ShadowmapShader.GetPipeline(renderer.ShadowMapPass, vertexFormat);
     }
 }

@@ -182,7 +182,7 @@ public partial class RenderNode3D : Node3D
 
     private void RenderQueueFlagsChanged()
     {
-        RenderQueueFlags flags = RenderQueueFlags.None;
+        RenderQueues flags = RenderQueues.None;
 
         if (this.Scene is null || this.Material is null || this.Mesh is null)
         {
@@ -192,16 +192,16 @@ public partial class RenderNode3D : Node3D
 
         if (this.Visible)
         {
-            flags |= RenderQueueFlags.Opaque;
+            flags |= RenderQueues.Opaque;
 
             if (this.ShadowCastingMode == ShadowCasting.CastShadows)
             {
-                flags |= RenderQueueFlags.ShadowCaster;
+                flags |= RenderQueues.ShadowCaster;
             }
         }
         else if (this.ShadowCastingMode == ShadowCasting.OnlyShadows)
         {
-            flags |= RenderQueueFlags.ShadowCaster;
+            flags |= RenderQueues.ShadowCaster;
         }
 
         this._renderable.RenderQueueFlags = flags;

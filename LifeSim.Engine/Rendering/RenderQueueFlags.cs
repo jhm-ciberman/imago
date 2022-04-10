@@ -3,7 +3,7 @@ using System;
 namespace LifeSim.Engine.Rendering;
 
 [Flags]
-public enum RenderQueueFlags : byte
+public enum RenderQueues : byte
 {
     None = 0,
     Opaque = 1 << 0,

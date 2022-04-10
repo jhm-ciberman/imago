@@ -11,7 +11,7 @@ using Veldrid.Utilities;
 
 namespace LifeSim.Engine.Rendering;
 
-public class Renderer : ITexture2DManager, IDisposable
+public partial class Renderer : ITexture2DManager, IDisposable
 {
     public static Renderer Instance { get; private set; } = null!;
 
@@ -30,6 +30,7 @@ public class Renderer : ITexture2DManager, IDisposable
     private readonly Fence _fence;
     private readonly List<Texture> _dirtyTextures = new List<Texture>();
     private readonly List<MaterialBase> _dirtyMaterials = new List<MaterialBase>();
+    private readonly List<Renderable> _dirtyRenderables = new List<Renderable>();
     private readonly ForwardPass _forwardPass;
     private readonly ShadowPass _shadowPass;
     private readonly SpritesPass _spritesPass;
@@ -38,44 +39,6 @@ public class Renderer : ITexture2DManager, IDisposable
     private readonly ParticlesPass _particlesPass;
     private readonly SkyDomePass _skyDomePass;
     private readonly CommandList _commandList;
-
-    private class CommandListJob : IDisposable
-    {
-        public CommandList CommandList { get; }
-
-        public string Name { get; }
-
-        public Fence Fence { get; }
-        public IRenderingPass[] Passes { get; }
-
-        public CommandListJob(string name, ResourceFactory factory, params IRenderingPass[] passes)
-        {
-            this.Name = name;
-            this.CommandList = factory.CreateCommandList();
-            this.Fence = factory.CreateFence(signaled: false);
-            this.Passes = passes;
-        }
-
-        public void Execute(Scene scene)
-        {
-            this.CommandList.Begin();
-            foreach (var pass in this.Passes)
-            {
-                pass.Render(this.CommandList, scene);
-            }
-            this.CommandList.End();
-        }
-
-        public void SubmitCommands(GraphicsDevice gd)
-        {
-            gd.SubmitCommands(this.CommandList, this.Fence);
-        }
-
-        public void Dispose()
-        {
-            this.CommandList.Dispose();
-        }
-    }
     private readonly List<CommandListJob> _jobs;
     private readonly DisposeCollector _disposeCollector;
 
@@ -141,6 +104,8 @@ public class Renderer : ITexture2DManager, IDisposable
             new CommandListJob("Present", this._factory,
                 this._fullScreenPass),
         };
+
+        Renderable.PipelineDirty += this.OnRenderablePipelineDirty;
     }
 
     public void DisposeWhenIdle(IDisposable disposable)
@@ -194,6 +159,21 @@ public class Renderer : ITexture2DManager, IDisposable
         }
     }
 
+    private void UpdateDirtyRenderables()
+    {
+        lock (this._dirtyRenderables)
+        {
+            if (this._dirtyRenderables.Count > 0)
+            {
+                foreach (var renderable in this._dirtyRenderables)
+                {
+                    renderable.Update(this);
+                }
+                this._dirtyRenderables.Clear();
+            }
+        }
+    }
+
     public void SetMousePickingPosition(Vector2 position)
     {
         this._mousePickerPass.SetMousePosition(position);
@@ -213,6 +193,7 @@ public class Renderer : ITexture2DManager, IDisposable
         this._commandList.Begin();
         this.UpdateDirtyMaterials();
         this.UpdateDirtyTextures();
+        this.UpdateDirtyRenderables();
         this.Storage.UpdateBuffers(this._commandList);
 
         this._commandList.SetFramebuffer(this.MainRenderTexture.Framebuffer);
@@ -261,6 +242,14 @@ public class Renderer : ITexture2DManager, IDisposable
         lock (this._dirtyMaterials)
         {
             this._dirtyMaterials.Add(material);
+        }
+    }
+
+    private void OnRenderablePipelineDirty(Renderable renderable)
+    {
+        lock (this._dirtyRenderables)
+        {
+            this._dirtyRenderables.Add(renderable);
         }
     }
 

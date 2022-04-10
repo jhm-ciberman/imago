@@ -26,16 +26,11 @@ public readonly struct RenderBatch
         this.MaterialResourceSet = renderable.Material.ResourceSet;
         this.InstanceResourceSet = renderable.InstanceResourceSet;
         this.SkeletonResourceSet = renderable.SkeletonResourceSet;
+        this.Pipeline = shadowmapPass ? renderable.ShadowMapPipeline! : renderable.ForwardPipeline!;
 
-        if (shadowmapPass)
-        {
-            var shader = renderable.Material.ShadowmapShader;
-            this.Pipeline = shader.GetPipeline(Renderer.Instance.ShadowMapPass, renderable.Mesh.VertexFormat);
-        }
-        else
-        {
-            var shader = renderable.Material.ForwardShader;
-            this.Pipeline = shader.GetPipeline(Renderer.Instance.ForwardPass, renderable.Mesh.VertexFormat);
-        }
+        Contract.Assert(this.TransformResourceSet != null);
+        Contract.Assert(this.MaterialResourceSet != null);
+        Contract.Assert(this.InstanceResourceSet != null);
+        Contract.Assert(this.Pipeline != null);
     }
 }

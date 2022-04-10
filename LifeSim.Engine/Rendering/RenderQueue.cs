@@ -19,16 +19,16 @@ public class RenderQueue : IEnumerable<Renderable>, IReadOnlyList<Renderable>, I
 
     public Renderable this[int index] => this._culledItems[this._culledIndices[index].Index];
 
-    public RenderQueueFlags FilterFlags { get; set; }
+    public RenderQueues FilterFlags { get; set; }
 
-    public RenderQueue(RenderQueueFlags filterFlags)
+    public RenderQueue(RenderQueues filterFlags)
     {
         this.FilterFlags = filterFlags;
 
-        Renderable.OnRenderQueueFlagsChanged += this.OnRenderQueueFlagsChanged;
+        Renderable.RenderQueuesChanged += this.OnRenderQueueFlagsChanged;
     }
 
-    private void OnRenderQueueFlagsChanged(Renderable renderable, RenderQueueFlags oldFlags, RenderQueueFlags newFlags)
+    private void OnRenderQueueFlagsChanged(Renderable renderable, RenderQueues oldFlags, RenderQueues newFlags)
     {
         // This event could be called from a different thread. The "_allRenderables" list should be locked.
 
