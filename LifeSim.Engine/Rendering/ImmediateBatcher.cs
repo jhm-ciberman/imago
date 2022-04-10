@@ -200,7 +200,7 @@ public class ImmediateBatcher : IPipelineProvider, IDisposable
         if (this._currentBatchShader != this._currentShaderInUse)
         {
             this._currentShaderInUse = this._currentBatchShader;
-            var pipeline = this._currentShaderInUse.GetPipeline(this, this._vertexFormat);
+            var pipeline = this._currentShaderInUse.GetPipeline(this, this._vertexFormat, RenderFlags.Default);
             this._commandList.SetPipeline(pipeline);
         }
 
@@ -214,16 +214,8 @@ public class ImmediateBatcher : IPipelineProvider, IDisposable
         this._indexCount = 0;
     }
 
-    public Pipeline MakePipeline(ShaderVariant shaderVariant)
+    Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant, RenderFlags flags)
     {
-        var rasterizerState = new RasterizerStateDescription(
-            FaceCullMode.None,
-            PolygonFillMode.Solid,
-            FrontFace.Clockwise,
-            depthClipEnabled: true,
-            scissorTestEnabled: false
-        );
-
         return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
         {
             DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
@@ -234,7 +226,13 @@ public class ImmediateBatcher : IPipelineProvider, IDisposable
                 BlendAttachmentDescription.OverrideBlend,
                 BlendAttachmentDescription.Disabled
             ),
-            RasterizerState = rasterizerState,
+            RasterizerState = new RasterizerStateDescription(
+                FaceCullMode.Back,
+                PolygonFillMode.Solid,
+                FrontFace.CounterClockwise,
+                depthClipEnabled: true,
+                scissorTestEnabled: false
+            ),
             Outputs = ((RenderTexture)this._renderTexture).ColorOnlyFramebuffer.OutputDescription,
             ResourceLayouts = new ResourceLayout[]
             {

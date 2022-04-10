@@ -43,19 +43,19 @@ public class Shader : IDisposable
         return new ResourceLayoutDescription(elements.ToArray());
     }
 
-    public Pipeline GetPipeline(IPipelineProvider pass, VertexFormat vertexFormat)
+    public Pipeline GetPipeline(IPipelineProvider pass, VertexFormat vertexFormat, RenderFlags flags)
     {
         lock (this._pipelines)
         {
             for (int i = 0; i < this._pipelines.Count; i++)
             {
-                if (this._pipelines[i].VertexFormat == vertexFormat)
+                if (this._pipelines[i].VertexFormat == vertexFormat && this._pipelines[i].Flags == flags)
                     return this._pipelines[i].Pipeline;
             }
 
             ShaderVariant shaderVariant = this.GetShaderVariant(vertexFormat);
-            var pipeline = pass.MakePipeline(shaderVariant);
-            this._pipelines.Add(new CachedPipeline(vertexFormat, pipeline));
+            var pipeline = pass.MakePipeline(shaderVariant, flags);
+            this._pipelines.Add(new CachedPipeline(vertexFormat, pipeline, flags));
 
             return pipeline;
         }
@@ -98,11 +98,13 @@ public class Shader : IDisposable
     {
         public VertexFormat VertexFormat { get; }
         public Pipeline Pipeline { get; }
+        public RenderFlags Flags { get; }
 
-        public CachedPipeline(VertexFormat vertexFormat, Pipeline pipeline)
+        public CachedPipeline(VertexFormat vertexFormat, Pipeline pipeline, RenderFlags flags)
         {
             this.VertexFormat = vertexFormat;
             this.Pipeline = pipeline;
+            this.Flags = flags;
         }
     }
 }

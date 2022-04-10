@@ -8,7 +8,7 @@ using Veldrid;
 
 namespace LifeSim.Engine.Rendering;
 
-public class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
+public partial class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
 {
     [StructLayout(LayoutKind.Sequential)]
     private struct CameraDataBuffer
@@ -168,27 +168,33 @@ public class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
         this._lightInfoBuffer.Dispose();
     }
 
-    Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant)
+    Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant, RenderFlags flags)
     {
-        var rasterizerState = new RasterizerStateDescription(
-            FaceCullMode.Front,
-            PolygonFillMode.Solid,
-            FrontFace.Clockwise,
-            depthClipEnabled: true,
-            scissorTestEnabled: false
-        );
+        var blendDescription = flags.HasFlag(RenderFlags.AlphaBlending) ? BlendAttachmentDescription.AlphaBlend : BlendAttachmentDescription.OverrideBlend;
+        var cullMode = flags.HasFlag(RenderFlags.DoubleSided) ? FaceCullMode.None : FaceCullMode.Back;
+        var depthTestEnabled = flags.HasFlag(RenderFlags.DepthTest);
+        var depthWriteEnabled = flags.HasFlag(RenderFlags.DepthWrite);
+        var fillMode = flags.HasFlag(RenderFlags.Wireframe) ? PolygonFillMode.Wireframe : PolygonFillMode.Solid;
 
         return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
         {
-            DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
+            DepthStencilState = new DepthStencilStateDescription(
+                depthTestEnabled, depthWriteEnabled, ComparisonKind.LessEqual
+            ),
             PrimitiveTopology = PrimitiveTopology.TriangleList,
             ShaderSet = new ShaderSetDescription(GetVertexLayout(shaderVariant.VertexFormat), shaderVariant.Shaders),
             BlendState = new BlendStateDescription(
                 RgbaFloat.Black,
-                BlendAttachmentDescription.OverrideBlend,
+                blendDescription,
                 BlendAttachmentDescription.Disabled
             ),
-            RasterizerState = rasterizerState,
+            RasterizerState = new RasterizerStateDescription(
+                cullMode,
+                fillMode,
+                FrontFace.CounterClockwise,
+                depthClipEnabled: true,
+                scissorTestEnabled: false
+            ),
             Outputs = this._renderTexture.OutputDescription,
             ResourceLayouts = this.GetResourceLayouts(shaderVariant),
         });

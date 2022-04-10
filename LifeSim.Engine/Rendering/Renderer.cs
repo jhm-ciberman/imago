@@ -106,6 +106,7 @@ public partial class Renderer : ITexture2DManager, IDisposable
         };
 
         Renderable.PipelineDirty += this.OnRenderablePipelineDirty;
+        MaterialBase.MaterialResourceSetDirty += this.OnMaterialResourceSetDirty;
     }
 
     public void DisposeWhenIdle(IDisposable disposable)
@@ -237,7 +238,7 @@ public partial class Renderer : ITexture2DManager, IDisposable
         }
     }
 
-    internal void OnMaterialDirty(MaterialBase material)
+    private void OnMaterialResourceSetDirty(MaterialBase material)
     {
         lock (this._dirtyMaterials)
         {

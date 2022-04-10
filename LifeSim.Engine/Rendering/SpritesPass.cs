@@ -30,23 +30,21 @@ public class SpritesPass : IDisposable, IPipelineProvider, IRenderingPass
         this._spriteBatcher.Dispose();
     }
 
-    Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant)
+    Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant, RenderFlags flags)
     {
-        var rasterizerState = new RasterizerStateDescription(
-            FaceCullMode.None,
-            PolygonFillMode.Solid,
-            FrontFace.Clockwise,
-            depthClipEnabled: true,
-            scissorTestEnabled: false
-        );
-
         return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
         {
             DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
             PrimitiveTopology = PrimitiveTopology.TriangleList,
             ShaderSet = shaderVariant.ShaderSetDescription,
             BlendState = BlendStateDescription.SingleAlphaBlend,
-            RasterizerState = rasterizerState,
+            RasterizerState = new RasterizerStateDescription(
+                FaceCullMode.Back,
+                PolygonFillMode.Solid,
+                FrontFace.CounterClockwise,
+                depthClipEnabled: true,
+                scissorTestEnabled: false
+            ),
             Outputs = this._renderTexture.OutputDescription,
             ResourceLayouts = new ResourceLayout[]
             {

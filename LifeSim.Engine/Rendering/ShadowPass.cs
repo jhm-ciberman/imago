@@ -142,23 +142,21 @@ public partial class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
         return new Vector4(cascade.DepthBias, cascade.NormalOffset, 0.0f, 0.0f);
     }
 
-    Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant)
+    Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant, RenderFlags flags)
     {
-        var rasterizerState = new RasterizerStateDescription(
-            FaceCullMode.Front,
-            PolygonFillMode.Solid,
-            FrontFace.Clockwise,
-            depthClipEnabled: false, // Shadow pancaking! Love pancakes!
-            scissorTestEnabled: false
-        );
-
         return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
         {
             DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
             PrimitiveTopology = PrimitiveTopology.TriangleList,
             ShaderSet = new ShaderSetDescription(GetVertexLayout(shaderVariant.VertexFormat), shaderVariant.Shaders),
             BlendState = BlendStateDescription.Empty,
-            RasterizerState = rasterizerState,
+            RasterizerState = new RasterizerStateDescription(
+                FaceCullMode.Back,
+                PolygonFillMode.Solid,
+                FrontFace.CounterClockwise,
+                depthClipEnabled: false, // Shadow pancaking! Love pancakes!
+                scissorTestEnabled: false
+            ),
             Outputs = this.ShadowmapTexture.Framebuffers[0].OutputDescription,
             ResourceLayouts = this.GetResourceLayouts(shaderVariant),
         });

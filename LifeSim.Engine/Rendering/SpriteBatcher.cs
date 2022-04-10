@@ -269,7 +269,7 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
         if (this._batch.Shader != this._currentShaderInUse)
         {
             this._currentShaderInUse = this._batch.Shader ?? this._defaultShader;
-            var pipeline = this._currentShaderInUse.GetPipeline(this._pass, this._vertexFormat);
+            var pipeline = this._currentShaderInUse.GetPipeline(this._pass, this._vertexFormat, RenderFlags.Default);
 
             this._commandList.SetPipeline(pipeline);
             this._commandList.SetGraphicsResourceSet(0, this._passResourceSet);

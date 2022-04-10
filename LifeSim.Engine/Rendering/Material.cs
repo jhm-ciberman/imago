@@ -5,35 +5,91 @@ namespace LifeSim.Engine.Rendering;
 
 public abstract class MaterialBase
 {
+    public delegate void MaterialResourceSetDirtyHandler(MaterialBase material);
+    public delegate void MaterialStateChangedHandler(MaterialBase material);
+    public event MaterialStateChangedHandler? PipelineDirty;
+    public static event MaterialResourceSetDirtyHandler? MaterialResourceSetDirty;
+
     private static int _count = 0;
 
     public int Id { get; private set; }
 
-    private bool _isDirty = true;
+    private bool _resourceSetDirty = false;
+
+    protected RenderFlags RenderFlags { get; private set; } = RenderFlags.Default;
+
+    public bool DoubleSided { get => this.GetRenderFlag(RenderFlags.DoubleSided); set => this.SetRenderFlag(RenderFlags.DoubleSided, value); }
+
+    public bool Wireframe { get => this.GetRenderFlag(RenderFlags.Wireframe); set => this.SetRenderFlag(RenderFlags.Wireframe, value); }
+
+    public bool AlphaBlending { get => this.GetRenderFlag(RenderFlags.AlphaBlending); set => this.SetRenderFlag(RenderFlags.AlphaBlending, value); }
+
+    public bool DepthTest { get => this.GetRenderFlag(RenderFlags.DepthTest); set => this.SetRenderFlag(RenderFlags.DepthTest, value); }
+
+    public bool DepthWrite { get => this.GetRenderFlag(RenderFlags.DepthWrite); set => this.SetRenderFlag(RenderFlags.DepthWrite, value); }
 
     public MaterialBase()
     {
         this.Id = ++Material._count;
-        Renderer.Instance.OnMaterialDirty(this);
+        this.NotifyResourcesDirty();
     }
 
     public void Update(ResourceFactory factory)
     {
-        if (!this._isDirty) return;
-        this._isDirty = false;
+        if (!this._resourceSetDirty) return;
+        this._resourceSetDirty = false;
 
-        this.UpdateResources(factory);
+        this.UpdateResourceSet(factory);
     }
 
-    protected void OnDirty()
+    protected void NotifyResourcesDirty()
     {
-        if (this._isDirty) return;
-        this._isDirty = true;
-
-        Renderer.Instance.OnMaterialDirty(this);
+        if (!this._resourceSetDirty)
+        {
+            this._resourceSetDirty = true;
+            MaterialResourceSetDirty?.Invoke(this);
+        }
     }
 
-    protected abstract void UpdateResources(ResourceFactory factory);
+    protected bool SetProperty<T>(ref T backingField, T newValue)
+    {
+        if (backingField == null && newValue == null) return false;
+        if (backingField != null && newValue != null && backingField.Equals(newValue)) return false;
+
+        backingField = newValue;
+        this.NotifyResourcesDirty();
+        return true;
+    }
+
+    protected void NotifyPipelineDirty()
+    {
+        this.PipelineDirty?.Invoke(this);
+    }
+
+    protected bool SetRenderFlag(RenderFlags flags, bool value)
+    {
+        if (value)
+        {
+            if ((this.RenderFlags & flags) == flags) return false;
+            this.RenderFlags |= flags;
+            this.NotifyPipelineDirty();
+            return true;
+        }
+        else
+        {
+            if ((this.RenderFlags & flags) == 0) return false;
+            this.RenderFlags &= ~flags;
+            this.NotifyPipelineDirty();
+            return true;
+        }
+    }
+
+    protected bool GetRenderFlag(RenderFlags flag)
+    {
+        return (this.RenderFlags & flag) == flag;
+    }
+
+    protected abstract void UpdateResourceSet(ResourceFactory factory);
 }
 
 public class Material : MaterialBase
@@ -53,7 +109,7 @@ public class Material : MaterialBase
         this._resources = new BindableResource[definition.ResourceCount];
     }
 
-    protected override void UpdateResources(ResourceFactory factory)
+    protected override void UpdateResourceSet(ResourceFactory factory)
     {
         this.ResourceSet?.Dispose();
 
@@ -76,7 +132,7 @@ public class Material : MaterialBase
     {
         this._resources[textureIndex * 2 + 0] = value.DeviceTexture;
         this._resources[textureIndex * 2 + 1] = value.Sampler;
-        this.OnDirty();
+        this.NotifyResourcesDirty();
     }
 
     public void Dispose()
@@ -86,11 +142,11 @@ public class Material : MaterialBase
 
     public Pipeline GetForwardPipeline(Renderer renderer, VertexFormat vertexFormat)
     {
-        return this.ForwardShader.GetPipeline(renderer.ForwardPass, vertexFormat);
+        return this.ForwardShader.GetPipeline(renderer.ForwardPass, vertexFormat, this.RenderFlags);
     }
 
     public Pipeline GetShadowmapPipeline(Renderer renderer, VertexFormat vertexFormat)
     {
-        return this.ShadowmapShader.GetPipeline(renderer.ShadowMapPass, vertexFormat);
+        return this.ShadowmapShader.GetPipeline(renderer.ShadowMapPass, vertexFormat, RenderFlags.Default);
     }
 }

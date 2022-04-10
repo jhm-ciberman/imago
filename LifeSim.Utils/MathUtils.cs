@@ -130,7 +130,15 @@ public static class MathUtils
         return euler;
     }
 
-
+    /// <summary>
+    /// Computes a ray to triangle intersection.
+    /// </summary>
+    /// <param name="rayOrigin">The ray origin.</param>
+    /// <param name="rayDirection">The ray direction.</param>
+    /// <param name="vertexA">The first vertex of the triangle.</param>
+    /// <param name="vertexB">The second vertex of the triangle.</param>
+    /// <param name="vertexC">The third vertex of the triangle.</param>
+    /// <returns>True if the ray intersects the triangle, false otherwise.</returns>
     public static bool RayTriangleIntersection(Vector3 rayOrigin, Vector3 rayDirection, Vector3 vertexA, Vector3 vertexB, Vector3 vertexC)
     {
         // Computes the ray to triangle intersection 
@@ -174,5 +182,36 @@ public static class MathUtils
 
         // Ray intersects triangle.
         return true;
+    }
+
+
+    /// <summary>
+    /// Calculates a weighted linearly interpolated value using 3 points to form a triangle and barycentric coordinates.
+    /// This can be used to calculate a weighted value from a set of 3 points.
+    /// For example when wanting to interpolate between 3 vertices of a triangle.
+    /// </summary>
+    /// <param name="a">The first point</param>
+    /// <param name="b">The second point</param>
+    /// <param name="c">The third point</param>
+    /// <param name="hA">The value asociated with the first point</param>
+    /// <param name="hB">The value asociated with the second point</param>
+    /// <param name="hC">The value asociated with the third point</param>
+    /// <param name="p">The point to calculate the value for</param>
+    /// <returns>The weighted value</returns>
+    public static float BarycentricLerp(Vector2 a, Vector2 b, Vector2 c, float hA, float hB, float hC, Vector2 p)
+    {
+        var v0 = b - a;
+        var v1 = c - a;
+        var v2 = p - a;
+        var d00 = Vector2.Dot(v0, v0);
+        var d01 = Vector2.Dot(v0, v1);
+        var d11 = Vector2.Dot(v1, v1);
+        var d20 = Vector2.Dot(v2, v0);
+        var d21 = Vector2.Dot(v2, v1);
+        var denom = d00 * d11 - d01 * d01;
+        var v = (d11 * d20 - d01 * d21) / denom;
+        var w = (d00 * d21 - d01 * d20) / denom;
+        var u = 1 - v - w;
+        return u * hA + v * hB + w * hC;
     }
 }
