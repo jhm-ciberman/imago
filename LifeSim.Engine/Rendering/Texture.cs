@@ -9,6 +9,9 @@ namespace LifeSim.Engine.Rendering;
 
 public class Texture : ITexture
 {
+    public delegate void TextureDirtyHandler(Texture texture);
+    public static event TextureDirtyHandler? TextureDirty;
+
     public static Texture White { get; } = new ImageTexture(new Image<Rgba32>(2, 2, new Rgba32(255, 255, 255, 255)));
 
     public static Texture Black { get; } = new ImageTexture(new Image<Rgba32>(2, 2, new Rgba32(0, 0, 0, 255)));
@@ -44,19 +47,19 @@ public class Texture : ITexture
             pixelFormat, TextureUsage.Sampled | TextureUsage.GenerateMipmaps
         ));
         this.Sampler = gd.PointSampler;
-        Renderer.Instance.OnTextureDirty(this);
+        this.NotifyTextureDirty();
     }
 
     public IntPtr ImGuiBinding => Renderer.Instance.GetOrCreateImGuiBinding(this);
 
 
 
-    protected void OnTextureDirty()
+    protected void NotifyTextureDirty()
     {
         if (!this._isDirty)
         {
             this._isDirty = true;
-            Renderer.Instance.OnTextureDirty(this);
+            TextureDirty?.Invoke(this);
         }
     }
 
@@ -69,7 +72,7 @@ public class Texture : ITexture
             this._data[i + 2] = fillColor.B;
             this._data[i + 3] = fillColor.A;
         }
-        this.OnTextureDirty();
+        this.NotifyTextureDirty();
     }
 
     public unsafe void SetDataFromImage(Image<Rgba32> img)
@@ -87,7 +90,7 @@ public class Texture : ITexture
         var dest = new Span<byte>(this._data);
         MemoryMarshal.Cast<Rgba32, byte>(pixels).CopyTo(dest);
 
-        this.OnTextureDirty();
+        this.NotifyTextureDirty();
     }
 
     public unsafe void SetDataFromBytes(int x, int y, int width, int height, byte[] data)
@@ -112,11 +115,14 @@ public class Texture : ITexture
             }
         }
 
-        this.OnTextureDirty();
+        this.NotifyTextureDirty();
     }
 
     public void Update(GraphicsDevice gd, CommandList cl)
     {
+        if (!this._isDirty) return;
+        this._isDirty = false;
+
         gd.UpdateTexture(this.DeviceTexture, this._data,
             x: 0, y: 0, z: 0,
             width: (uint)this.Width, height: (uint)this.Height, depth: 1,
@@ -126,7 +132,6 @@ public class Texture : ITexture
         {
             cl.GenerateMipmaps(this.DeviceTexture);
         }
-        this._isDirty = false;
     }
 
     public virtual void Dispose()

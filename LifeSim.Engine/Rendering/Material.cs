@@ -140,9 +140,11 @@ public class Material : MaterialBase
         this.ResourceSet?.Dispose();
     }
 
-    public Pipeline GetForwardPipeline(Renderer renderer, VertexFormat vertexFormat)
+    public Pipeline GetForwardPipeline(Renderer renderer, VertexFormat vertexFormat, bool forceWireframe)
     {
-        return this.ForwardShader.GetPipeline(renderer.ForwardPass, vertexFormat, this.RenderFlags);
+        RenderFlags flags = this.RenderFlags;
+        if (forceWireframe) flags |= RenderFlags.Wireframe;
+        return this.ForwardShader.GetPipeline(renderer.ForwardPass, vertexFormat, flags);
     }
 
     public Pipeline GetShadowmapPipeline(Renderer renderer, VertexFormat vertexFormat)

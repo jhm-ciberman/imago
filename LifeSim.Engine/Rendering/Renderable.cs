@@ -7,10 +7,27 @@ namespace LifeSim.Engine.Rendering;
 
 public class Renderable : IDisposable
 {
+
+    private static readonly SwapPopList<Renderable> _renderables = new SwapPopList<Renderable>();
     public delegate void RenderQueuesChangedHandler(Renderable renderable, RenderQueues oldFlags, RenderQueues newFlags);
     public delegate void PipelineDirtyHandler(Renderable renderable);
     public static event RenderQueuesChangedHandler? RenderQueuesChanged;
     public static event PipelineDirtyHandler? PipelineDirty;
+
+    private static bool _forceWireframe = false;
+    public static bool ForceWireframe
+    {
+        get => _forceWireframe;
+        set
+        {
+            if (_forceWireframe == value) return;
+            _forceWireframe = value;
+            foreach (var renderable in _renderables)
+            {
+                renderable.NotifyPipelineDirty();
+            }
+        }
+    }
 
     private static uint _count;
     private Matrix4x4 _transform = Matrix4x4.Identity;
@@ -74,6 +91,8 @@ public class Renderable : IDisposable
 
         this._instanceDataBlock = storage.RequestInstanceDataBlock(instanceDataSize);
         this.InstanceResourceSet = this._instanceDataBlock.Buffer.ResourceSet;
+
+        _renderables.Add(this);
     }
 
     public Mesh? Mesh
@@ -162,10 +181,6 @@ public class Renderable : IDisposable
         PipelineDirty?.Invoke(this);
     }
 
-
-
-
-
     public void SetInstanceData<T>(T data) where T : unmanaged
     {
         this._instanceDataBlock.Write(ref data);
@@ -184,11 +199,11 @@ public class Renderable : IDisposable
                 // Update the forward pipeline
                 if (this.RenderQueueFlags.HasFlag(RenderQueues.Opaque))
                 {
-                    this.ForwardPipeline = this._material.GetForwardPipeline(renderer, this._mesh.VertexFormat);
+                    this.ForwardPipeline = this._material.GetForwardPipeline(renderer, this._mesh.VertexFormat, _forceWireframe);
                 }
                 else if (this.RenderQueueFlags.HasFlag(RenderQueues.Transparent))
                 {
-                    this.ForwardPipeline = this._material.GetForwardPipeline(renderer, this._mesh.VertexFormat);
+                    this.ForwardPipeline = this._material.GetForwardPipeline(renderer, this._mesh.VertexFormat, _forceWireframe);
                 }
                 else
                 {
@@ -326,5 +341,6 @@ public class Renderable : IDisposable
     {
         this._instanceDataBlock.FreeBlock();
         this._transformDataBlock.FreeBlock();
+        _renderables.Remove(this);
     }
 }
