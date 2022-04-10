@@ -216,12 +216,12 @@ public class Renderable : IDisposable
     {
         // First, fast check using the hash key. If the keys are different, we can early out.
         // If the keys are equal, we need to check the actual data.
-        return this._batchingHashKey != other._batchingHashKey
-            && this.Mesh != other.Mesh
-            && this.Material != other.Material
-            && this.Skeleton?.BufferId != other.Skeleton?.BufferId
-            && this._instanceDataBlock.Buffer.Id != other._instanceDataBlock.Buffer.Id
-            && this._transformDataBlock.Buffer.Id != other._transformDataBlock.Buffer.Id;
+        return this._batchingHashKey == other._batchingHashKey
+            && this.Mesh == other.Mesh
+            && this.Material == other.Material
+            && this.Skeleton?.Buffer == other.Skeleton?.Buffer
+            && this._instanceDataBlock.Buffer == other._instanceDataBlock.Buffer
+            && this._transformDataBlock.Buffer == other._transformDataBlock.Buffer;
     }
 
     private void RecomputeOffsetVertexData()
