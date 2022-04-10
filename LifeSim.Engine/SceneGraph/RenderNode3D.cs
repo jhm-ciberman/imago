@@ -18,85 +18,9 @@ public partial class RenderNode3D : Node3D
 
     private readonly Renderable _renderable;
 
-    private Mesh? _mesh;
-    public Mesh? Mesh
-    {
-        get => this._mesh;
-        set
-        {
-            if (this._mesh == value) return;
-            this._mesh = value;
-
-            if (value is not null)
-            {
-                this._renderable.SetMesh(value);
-            }
-
-            this.RenderQueueFlagsChanged();
-        }
-    }
-
-    private Material? _material;
-    public Material? Material
-    {
-        get => this._material;
-        set
-        {
-            if (this._material == value) return;
-            this._material = value;
-
-            if (value is not null)
-            {
-                this._renderable.SetMaterial(value);
-            }
-
-            this.RenderQueueFlagsChanged();
-        }
-    }
-
-
-
-    private Skeleton? _skeleton;
-    public Skeleton? Skeleton
-    {
-        get => this._skeleton;
-        set
-        {
-            if (this._skeleton == value) return;
-            this._skeleton = value;
-
-            if (value is not null)
-            {
-                this._renderable.SetSkeleton(value);
-            }
-        }
-    }
-
-    private bool _visible = true;
-
-    public bool Visible
-    {
-        get => this._visible;
-        set
-        {
-            if (this._visible == value) return;
-            this._visible = value;
-            this.RenderQueueFlagsChanged();
-        }
-    }
-
-    private ShadowCasting _shadowCastingMode = ShadowCasting.CastShadows;
-
-    public ShadowCasting ShadowCastingMode
-    {
-        get => this._shadowCastingMode;
-        set
-        {
-            if (this._shadowCastingMode == value) return;
-            this._shadowCastingMode = value;
-            this.RenderQueueFlagsChanged();
-        }
-    }
+    public Mesh? Mesh { get => this._renderable.Mesh; set => this._renderable.Mesh = value; }
+    public Material? Material { get => this._renderable.Material; set => this._renderable.Material = value; }
+    public Skeleton? Skeleton { get => this._renderable.Skeleton; set => this._renderable.Skeleton = value; }
 
     private bool _isPickable = false;
 
@@ -117,6 +41,21 @@ public partial class RenderNode3D : Node3D
                 this._renderable.PickingId = 0;
             }
         }
+    }
+
+    public ShadowCasting ShadowCastingMode { get => this._renderable.ShadowCastingMode; set => this._renderable.ShadowCastingMode = value; }
+
+    private bool _visible = true;
+    public bool Visible
+    {
+        get => this._visible;
+        set
+        {
+            if (this._visible == value) return;
+            this._visible = value;
+            this._renderable.Visible = value && this.Scene != null;
+        }
+
     }
 
     private InstanceData _instanceData;
@@ -165,48 +104,21 @@ public partial class RenderNode3D : Node3D
     {
         base.UpdateTransform(ref parentMatrix);
 
-        this._renderable.SetTransform(ref this.WorldMatrix);
+        this._renderable.Transform = this.WorldMatrix;
     }
 
     internal override void AttachToSceneRecursive(Scene scene)
     {
         base.AttachToSceneRecursive(scene);
-        this.RenderQueueFlagsChanged();
+        this._renderable.Visible = this._visible;
     }
 
     internal override void DetachFromSceneRecursive()
     {
         if (this.Scene is null) return;
         base.DetachFromSceneRecursive();
+        this._renderable.Visible = false;
     }
-
-    private void RenderQueueFlagsChanged()
-    {
-        RenderQueues flags = RenderQueues.None;
-
-        if (this.Scene is null || this.Material is null || this.Mesh is null)
-        {
-            this._renderable.RenderQueueFlags = flags;
-            return;
-        }
-
-        if (this.Visible)
-        {
-            flags |= RenderQueues.Opaque;
-
-            if (this.ShadowCastingMode == ShadowCasting.CastShadows)
-            {
-                flags |= RenderQueues.ShadowCaster;
-            }
-        }
-        else if (this.ShadowCastingMode == ShadowCasting.OnlyShadows)
-        {
-            flags |= RenderQueues.ShadowCaster;
-        }
-
-        this._renderable.RenderQueueFlags = flags;
-    }
-
 
     public bool RayCast(Ray ray, out HitInfo hitInfo)
     {

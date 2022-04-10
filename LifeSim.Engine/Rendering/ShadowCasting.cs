@@ -1,4 +1,4 @@
-namespace LifeSim.Engine.SceneGraph;
+namespace LifeSim.Engine.Rendering;
 
 public enum ShadowCasting
 {

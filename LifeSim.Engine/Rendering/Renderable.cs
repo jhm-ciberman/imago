@@ -1,7 +1,6 @@
 using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using LifeSim.Engine.Rendering;
 using Veldrid.Utilities;
 
 namespace LifeSim.Engine.Rendering;
@@ -24,16 +23,12 @@ public class Renderable : IDisposable
     internal Veldrid.ResourceSet? SkeletonResourceSet { get; private set; } = null;
 
     public OffsetVertexData OffsetVertexData { get; set; }
-
     private DataBlock _transformDataBlock;
-
-    public Mesh? Mesh { get; private set; } = null;
-
     private RenderQueues _renderQueueFlags = RenderQueues.All;
     public RenderQueues RenderQueueFlags
     {
         get => this._renderQueueFlags;
-        set
+        private set
         {
             if (this._renderQueueFlags != value)
             {
@@ -50,16 +45,18 @@ public class Renderable : IDisposable
         get => this._pickingId;
         set
         {
-            if (this._pickingId != value)
-            {
-                this._pickingId = value;
-                this.RecomputeOffsetVertexData();
-            }
+            if (this._pickingId == value) return;
+
+            this._pickingId = value;
+            this.RecomputeOffsetVertexData();
         }
     }
 
-    public Skeleton? Skeleton { get; private set; }
-    public Material? Material { get; private set; }
+    private Mesh? _mesh;
+    private Skeleton? _skeleton;
+    private Material? _material;
+    private bool _visible = true;
+    private ShadowCasting _shadowCastingMode = ShadowCasting.CastShadows;
 
     public Veldrid.Pipeline? ForwardPipeline { get; private set; }
 
@@ -79,34 +76,83 @@ public class Renderable : IDisposable
         this.InstanceResourceSet = this._instanceDataBlock.Buffer.ResourceSet;
     }
 
-    public void SetMesh(Mesh mesh)
+    public Mesh? Mesh
     {
-        if (this.Mesh == mesh) return;
-        this.Mesh = mesh;
+        get => this._mesh;
+        set
+        {
+            if (this._mesh == value) return;
+            this._mesh = value;
 
-        this.RecomputeBoundingBox();
-        this.NotifyPipelineDirty();
+            this.RenderQueueFlagsChanged();
+            this.RecomputeBoundingBox();
+            this.NotifyPipelineDirty();
+        }
     }
 
-    public void SetMaterial(Material material)
+    public Material? Material
     {
-        if (this.Material == material) return;
-        this.Material = material;
+        get => this._material;
+        set
+        {
+            if (this._material == value) return;
+            this._material = value;
 
-        this.RecomputeOffsetVertexData();
-        this.NotifyPipelineDirty();
+            this.RenderQueueFlagsChanged();
+            this.RecomputeOffsetVertexData();
+            this.NotifyPipelineDirty();
+        }
     }
 
-    public void SetSkeleton(Skeleton skeleton)
+    public Skeleton? Skeleton
     {
-        if (this.Skeleton == skeleton) return;
+        get => this._skeleton;
+        set
+        {
+            if (this._skeleton == value) return;
 
-        this.Skeleton = skeleton;
-        _ = Matrix4x4.Invert(this._transform, out Matrix4x4 inverseRootTransform);
-        this.Skeleton.InverseRootTransform = inverseRootTransform;
-        this.SkeletonResourceSet = skeleton.ResourceSet;
-        this.RecomputeOffsetVertexData();
-        this.NotifyPipelineDirty();
+            this._skeleton = value;
+            this.SkeletonResourceSet = this._skeleton?.ResourceSet;
+            this.UpdateSkeletonTransform();
+            this.RecomputeOffsetVertexData();
+            this.NotifyPipelineDirty();
+        }
+    }
+
+    public Matrix4x4 Transform
+    {
+        get => this._transform;
+        set
+        {
+            this._transform = value;
+            this._transformDataBlock.Write(ref value);
+
+            this.RecomputeBoundingBox();
+            this.UpdateSkeletonTransform();
+        }
+    }
+
+    public bool Visible
+    {
+        get => this._visible;
+        set
+        {
+            if (this._visible == value) return;
+            this._visible = value;
+            this.RenderQueueFlagsChanged();
+        }
+    }
+
+
+    public ShadowCasting ShadowCastingMode
+    {
+        get => this._shadowCastingMode;
+        set
+        {
+            if (this._shadowCastingMode == value) return;
+            this._shadowCastingMode = value;
+            this.RenderQueueFlagsChanged();
+        }
     }
 
     protected void NotifyPipelineDirty()
@@ -116,22 +162,9 @@ public class Renderable : IDisposable
         PipelineDirty?.Invoke(this);
     }
 
-    public void SetTransform(ref Matrix4x4 transform)
-    {
-        this._transform = transform;
-        this._transformDataBlock.Write(ref transform);
 
-        if (this.Mesh != null)
-        {
-            this.RecomputeBoundingBox();
-        }
 
-        if (this.Skeleton != null)
-        {
-            _ = Matrix4x4.Invert(this._transform, out Matrix4x4 inverseRootTransform);
-            this.Skeleton.InverseRootTransform = inverseRootTransform;
-        }
-    }
+
 
     public void SetInstanceData<T>(T data) where T : unmanaged
     {
@@ -146,16 +179,16 @@ public class Renderable : IDisposable
 
             this.RecomputeSortKey();
 
-            if (this.Material != null && this.Mesh != null && this.RenderQueueFlags != RenderQueues.None)
+            if (this._material != null && this._mesh != null && this.RenderQueueFlags != RenderQueues.None)
             {
                 // Update the forward pipeline
                 if (this.RenderQueueFlags.HasFlag(RenderQueues.Opaque))
                 {
-                    this.ForwardPipeline = this.Material.GetForwardPipeline(renderer, this.Mesh.VertexFormat);
+                    this.ForwardPipeline = this._material.GetForwardPipeline(renderer, this._mesh.VertexFormat);
                 }
                 else if (this.RenderQueueFlags.HasFlag(RenderQueues.Transparent))
                 {
-                    this.ForwardPipeline = this.Material.GetForwardPipeline(renderer, this.Mesh.VertexFormat);
+                    this.ForwardPipeline = this._material.GetForwardPipeline(renderer, this._mesh.VertexFormat);
                 }
                 else
                 {
@@ -165,7 +198,7 @@ public class Renderable : IDisposable
                 // Update the shadow map pipeline
                 if (this.RenderQueueFlags.HasFlag(RenderQueues.ShadowCaster))
                 {
-                    this.ShadowMapPipeline = this.Material.GetShadowmapPipeline(renderer, this.Mesh.VertexFormat);
+                    this.ShadowMapPipeline = this._material.GetShadowmapPipeline(renderer, this._mesh.VertexFormat);
                 }
                 else
                 {
@@ -182,13 +215,13 @@ public class Renderable : IDisposable
 
     protected void RecomputeSortKey()
     {
-        if (this.Material == null || this.Mesh == null) return;
+        if (this._material == null || this._mesh == null) return;
 
-        ulong materialHash        = (ulong) (this.Material.Id & 0xFFF);
-        ulong meshHash            = (ulong) (this.Mesh.Id & 0xFFF);
+        ulong materialHash        = (ulong) (this._material.Id & 0xFFF);
+        ulong meshHash            = (ulong) (this._mesh.Id & 0xFFF);
         ulong transformBufferHash = (ulong) (this._transformDataBlock.Buffer.Id & 0xFF);
         ulong instanceBufferHash  = (ulong) (this._instanceDataBlock.Buffer.Id & 0xFF);
-        ulong skekeletonBufferHash = (this.Skeleton != null) ? (ulong)(this.Skeleton.BufferId & 0xF) : 0;
+        ulong skekeletonBufferHash = (this._skeleton != null) ? (ulong)(this._skeleton.BufferId & 0xF) : 0;
 
         // The sort key is a 64-bit number that is used to sort renderables.
         ulong key = (materialHash   << 56) // 8 bits (max: 255)
@@ -203,8 +236,8 @@ public class Renderable : IDisposable
         // It could happen that the hash is not unique, but it is extremely unlikely that two instances that are 
         // contiguous after sorting the render queue by the sort key, end up having the same hash.
         this._batchingHashKey = HashCode.Combine(
-            this.Mesh.Id,
-            this.Material.Id,
+            this._mesh.Id,
+            this._material.Id,
             instanceBufferHash,
             skekeletonBufferHash,
             transformBufferHash
@@ -217,9 +250,9 @@ public class Renderable : IDisposable
         // First, fast check using the hash key. If the keys are different, we can early out.
         // If the keys are equal, we need to check the actual data.
         return this._batchingHashKey == other._batchingHashKey
-            && this.Mesh == other.Mesh
-            && this.Material == other.Material
-            && this.Skeleton?.Buffer == other.Skeleton?.Buffer
+            && this._mesh == other._mesh
+            && this._material == other._material
+            && this._skeleton?.Buffer == other._skeleton?.Buffer
             && this._instanceDataBlock.Buffer == other._instanceDataBlock.Buffer
             && this._transformDataBlock.Buffer == other._transformDataBlock.Buffer;
     }
@@ -232,15 +265,27 @@ public class Renderable : IDisposable
         {
             TransformDataOffset = this._transformDataBlock.BlockIndex,
             InstanceDataOffset = this._instanceDataBlock.BlockIndex,
-            BoneDataOffset = this.Skeleton?.BoneDataOffset ?? 0,
+            BoneDataOffset = this._skeleton?.BoneDataOffset ?? 0,
             PickingId = this.PickingId, // this id is used for picking
         };
     }
 
     private void RecomputeBoundingBox()
     {
-        this.BoundingBox = BoundingBox.Transform(this.Mesh!.BoundingBox, this._transform);
-        this.CenterPosition = this.BoundingBox.GetCenter();
+        if (this.Mesh != null)
+        {
+            this.BoundingBox = BoundingBox.Transform(this.Mesh.BoundingBox, this.Transform);
+            this.CenterPosition = this.BoundingBox.GetCenter();
+        }
+    }
+
+    private void UpdateSkeletonTransform()
+    {
+        if (this._skeleton != null)
+        {
+            _ = Matrix4x4.Invert(this._transform, out Matrix4x4 inverseRootTransform);
+            this._skeleton.InverseRootTransform = inverseRootTransform;
+        }
     }
 
     internal ulong GetSortKey(Vector3 cameraPosition)
@@ -248,6 +293,33 @@ public class Renderable : IDisposable
         float dist = Vector3.DistanceSquared(this.CenterPosition, cameraPosition);
         uint cameraDistance = Math.Min(uint.MaxValue, (uint) (dist * 1000f));
         return this._cachedSortKey | (cameraDistance & 0xFFFFFF); // 24 bits
+    }
+
+    private void RenderQueueFlagsChanged()
+    {
+        RenderQueues flags = RenderQueues.None;
+
+        if (this.Material is null || this.Mesh is null)
+        {
+            this.RenderQueueFlags = flags;
+            return;
+        }
+
+        if (this.Visible)
+        {
+            flags |= RenderQueues.Opaque;
+
+            if (this.ShadowCastingMode == ShadowCasting.CastShadows)
+            {
+                flags |= RenderQueues.ShadowCaster;
+            }
+        }
+        else if (this.ShadowCastingMode == ShadowCasting.OnlyShadows)
+        {
+            flags |= RenderQueues.ShadowCaster;
+        }
+
+        this.RenderQueueFlags = flags;
     }
 
     public void Dispose()
