@@ -170,11 +170,16 @@ public partial class ForwardPass : IDisposable, IPipelineProvider, IRenderingPas
 
     Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant, RenderFlags flags)
     {
-        var blendDescription = flags.HasFlag(RenderFlags.AlphaBlending) ? BlendAttachmentDescription.AlphaBlend : BlendAttachmentDescription.OverrideBlend;
+        var blendDescription = flags.HasFlag(RenderFlags.Transparent) ? BlendAttachmentDescription.AlphaBlend : BlendAttachmentDescription.OverrideBlend;
         var cullMode = flags.HasFlag(RenderFlags.DoubleSided) ? FaceCullMode.None : FaceCullMode.Back;
         var depthTestEnabled = flags.HasFlag(RenderFlags.DepthTest);
         var depthWriteEnabled = flags.HasFlag(RenderFlags.DepthWrite);
         var fillMode = flags.HasFlag(RenderFlags.Wireframe) ? PolygonFillMode.Wireframe : PolygonFillMode.Solid;
+        var outputDescription = this._renderTexture.OutputDescription;
+        if (!flags.HasFlag(RenderFlags.MousePick))
+        {
+            outputDescription = new OutputDescription(outputDescription.DepthAttachment, outputDescription.ColorAttachments[0]);
+        }
 
         return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
         {
@@ -195,7 +200,7 @@ public partial class ForwardPass : IDisposable, IPipelineProvider, IRenderingPas
                 depthClipEnabled: true,
                 scissorTestEnabled: false
             ),
-            Outputs = this._renderTexture.OutputDescription,
+            Outputs = outputDescription,
             ResourceLayouts = this.GetResourceLayouts(shaderVariant),
         });
     }

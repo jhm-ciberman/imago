@@ -7,12 +7,14 @@ namespace LifeSim.Engine.Rendering;
 
 public class VertexFormat
 {
+    public string Name { get; set; }
     public VertexLayoutDescription[] Layouts { get; set; }
     public bool IsSkinned { get; set; } = false;
     public bool IsSurface { get; set; } = false;
 
-    public VertexFormat(params VertexLayoutDescription[] layouts)
+    public VertexFormat(string name, params VertexLayoutDescription[] layouts)
     {
+        this.Name = name;
         this.Layouts = layouts;
     }
 

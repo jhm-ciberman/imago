@@ -17,12 +17,15 @@ public class Shader : IDisposable
     public string FragmentCode { get; }
     public string[] Textures { get; internal set; }
 
-    public Shader(string vertexCode, string fragmentCode, string[]? textures = null)
+    public RenderFlags SupportedRenderFlags { get; } = RenderFlags.None;
+
+    public Shader(string vertexCode, string fragmentCode, string[]? textures = null, RenderFlags suportedRenderFlags = RenderFlags.None)
     {
         this.Id = ++Shader._count;
 
         this.VertexCode = vertexCode;
         this.FragmentCode = fragmentCode;
+        this.SupportedRenderFlags = suportedRenderFlags;
 
         this._gd = Renderer.Instance.GraphicsDevice;
 
@@ -53,7 +56,7 @@ public class Shader : IDisposable
                     return this._pipelines[i].Pipeline;
             }
 
-            ShaderVariant shaderVariant = this.GetShaderVariant(vertexFormat);
+            ShaderVariant shaderVariant = this.GetShaderVariant(vertexFormat, flags);
             var pipeline = pass.MakePipeline(shaderVariant, flags);
             this._pipelines.Add(new CachedPipeline(vertexFormat, pipeline, flags));
 
@@ -61,23 +64,44 @@ public class Shader : IDisposable
         }
     }
 
-    private ShaderVariant GetShaderVariant(VertexFormat vertexFormat)
+    private ShaderVariant GetShaderVariant(VertexFormat vertexFormat, RenderFlags flags)
     {
+        flags &= this.SupportedRenderFlags;
+
         lock (this._variants)
         {
             for (int i = 0; i < this._variants.Count; i++)
             {
-                if (this._variants[i].VertexFormat == vertexFormat)
-                {
+                if (this._variants[i].VertexFormat == vertexFormat && this._variants[i].Flags == flags)
                     return this._variants[i];
-                }
             }
 
             var macros = vertexFormat.GetMacroDefinitions();
+            AddFlagsMacros(macros, flags);
             var shaders = ShaderCompiler.CompileShaders(this._gd, this.VertexCode, this.FragmentCode, macros);
-            var variant = new ShaderVariant(this, vertexFormat, shaders);
+            var variant = new ShaderVariant(this, vertexFormat, shaders, flags);
             this._variants.Add(variant);
             return variant;
+        }
+    }
+
+    private static readonly Dictionary<RenderFlags, string> _renderFlagMacros = new Dictionary<RenderFlags, string>
+    {
+        [RenderFlags.DoubleSided] = "ENABLE_DOUBLE_SIDED",
+        [RenderFlags.Wireframe] = "ENABLE_WIREFRAME",
+        [RenderFlags.Transparent] = "ENABLE_ALPHA_BLENDING",
+        [RenderFlags.AlphaTest] = "ENABLE_ALPHA_TEST",
+        [RenderFlags.DepthTest] = "ENABLE_DEPTH_TEST",
+        [RenderFlags.DepthWrite] = "ENABLE_DEPTH_WRITE",
+        [RenderFlags.MousePick] = "ENABLE_MOUSE_PICK",
+    };
+
+    private static void AddFlagsMacros(List<Veldrid.SPIRV.MacroDefinition> macros, RenderFlags flags)
+    {
+        foreach (var flag in _renderFlagMacros)
+        {
+            if (flags.HasFlag(flag.Key))
+                macros.Add(new Veldrid.SPIRV.MacroDefinition(flag.Value, "1"));
         }
     }
 
@@ -96,6 +120,7 @@ public class Shader : IDisposable
 
     private struct CachedPipeline
     {
+        private static int _debugCounter = 0;
         public VertexFormat VertexFormat { get; }
         public Pipeline Pipeline { get; }
         public RenderFlags Flags { get; }
@@ -105,12 +130,16 @@ public class Shader : IDisposable
             this.VertexFormat = vertexFormat;
             this.Pipeline = pipeline;
             this.Flags = flags;
+
+            // Debug:
+            Console.WriteLine($"Cached pipeline {++_debugCounter} ({vertexFormat.Name} {flags})");
         }
     }
 }
 
 public class ShaderVariant : IDisposable
 {
+    private static int _debugCounter = 0;
     public Shader Shader { get; }
 
     public VertexFormat VertexFormat { get; }
@@ -121,12 +150,18 @@ public class ShaderVariant : IDisposable
 
     public ResourceLayout MaterialResourceLayout => this.Shader.MaterialResourceLayout;
 
-    internal ShaderVariant(Shader shader, VertexFormat vertexFormat, Veldrid.Shader[] shaders)
+    public RenderFlags Flags { get; }
+
+    internal ShaderVariant(Shader shader, VertexFormat vertexFormat, Veldrid.Shader[] shaders, RenderFlags flags)
     {
         this.Shader = shader;
         this.VertexFormat = vertexFormat;
         this.Shaders = shaders;
+        this.Flags = flags;
         this.ShaderSetDescription = new ShaderSetDescription(vertexFormat.Layouts, shaders);
+
+        // Debug:
+        Console.WriteLine($"Shader variant {++_debugCounter} ({vertexFormat.Name} {flags})");
     }
 
     public void Dispose()

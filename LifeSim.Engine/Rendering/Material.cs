@@ -16,17 +16,19 @@ public abstract class MaterialBase
 
     private bool _resourceSetDirty = false;
 
-    protected RenderFlags RenderFlags { get; private set; } = RenderFlags.Default;
+    protected RenderFlags RenderFlags { get; private set; } = RenderFlags.DepthTest | RenderFlags.DepthWrite;
 
     public bool DoubleSided { get => this.GetRenderFlag(RenderFlags.DoubleSided); set => this.SetRenderFlag(RenderFlags.DoubleSided, value); }
 
     public bool Wireframe { get => this.GetRenderFlag(RenderFlags.Wireframe); set => this.SetRenderFlag(RenderFlags.Wireframe, value); }
 
-    public bool AlphaBlending { get => this.GetRenderFlag(RenderFlags.AlphaBlending); set => this.SetRenderFlag(RenderFlags.AlphaBlending, value); }
-
     public bool DepthTest { get => this.GetRenderFlag(RenderFlags.DepthTest); set => this.SetRenderFlag(RenderFlags.DepthTest, value); }
 
     public bool DepthWrite { get => this.GetRenderFlag(RenderFlags.DepthWrite); set => this.SetRenderFlag(RenderFlags.DepthWrite, value); }
+
+    public bool AlphaTest { get => this.GetRenderFlag(RenderFlags.AlphaTest); set => this.SetRenderFlag(RenderFlags.AlphaTest, value); }
+
+    public bool Transparent { get => this.GetRenderFlag(RenderFlags.Transparent); set => this.SetRenderFlag(RenderFlags.Transparent, value); }
 
     public MaterialBase()
     {
@@ -128,6 +130,8 @@ public class Material : MaterialBase
         }
     }
 
+
+
     protected void SetTexture(int textureIndex, Texture value)
     {
         this._resources[textureIndex * 2 + 0] = value.DeviceTexture;
@@ -140,15 +144,15 @@ public class Material : MaterialBase
         this.ResourceSet?.Dispose();
     }
 
-    public Pipeline GetForwardPipeline(Renderer renderer, VertexFormat vertexFormat, bool forceWireframe)
+    public Pipeline GetForwardPipeline(Renderer renderer, VertexFormat vertexFormat, RenderFlags additionalFlags)
     {
-        RenderFlags flags = this.RenderFlags;
-        if (forceWireframe) flags |= RenderFlags.Wireframe;
-        return this.ForwardShader.GetPipeline(renderer.ForwardPass, vertexFormat, flags);
+        return this.ForwardShader.GetPipeline(renderer.ForwardPass, vertexFormat, this.RenderFlags | additionalFlags);
     }
 
     public Pipeline GetShadowmapPipeline(Renderer renderer, VertexFormat vertexFormat)
     {
-        return this.ShadowmapShader.GetPipeline(renderer.ShadowMapPass, vertexFormat, RenderFlags.Default);
+        RenderFlags shadowSupportFlags = RenderFlags.AlphaTest;
+        RenderFlags flags = this.RenderFlags & shadowSupportFlags;
+        return this.ShadowmapShader.GetPipeline(renderer.ShadowMapPass, vertexFormat, flags);
     }
 }

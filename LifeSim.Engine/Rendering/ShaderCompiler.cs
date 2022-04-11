@@ -83,7 +83,7 @@ public static class ShaderCompiler
                     // pad the line number with spaces
                     string lineNumberStr = i.ToString().PadLeft(5) + ": ";
 
-                    exceptionStr += lineNumberStr + sourceCodeLines[i] + "\n";
+                    exceptionStr += lineNumberStr + sourceCodeLines[i - 1] + "\n";
                     if (i == lineNumber)
                         exceptionStr += new string(' ', lineNumberStr.Length) + "^^^^ ERROR HERE ^^^^\n";
                 }

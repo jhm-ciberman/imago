@@ -74,7 +74,7 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
 
         this._batch = new SpriteBatch(this._capacity);
 
-        this._vertexFormat = new VertexFormat(new VertexLayoutDescription(
+        this._vertexFormat = new VertexFormat("SpriteVertex", new VertexLayoutDescription(
             new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
             new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
             new VertexElementDescription("Color", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Byte4_Norm)
@@ -269,7 +269,7 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
         if (this._batch.Shader != this._currentShaderInUse)
         {
             this._currentShaderInUse = this._batch.Shader ?? this._defaultShader;
-            var pipeline = this._currentShaderInUse.GetPipeline(this._pass, this._vertexFormat, RenderFlags.Default);
+            var pipeline = this._currentShaderInUse.GetPipeline(this._pass, this._vertexFormat, RenderFlags.None);
 
             this._commandList.SetPipeline(pipeline);
             this._commandList.SetGraphicsResourceSet(0, this._passResourceSet);

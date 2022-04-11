@@ -31,7 +31,7 @@ public struct SkinnedVertex
         {
             if (_vertexFormat != null) return _vertexFormat;
 
-            _vertexFormat = new VertexFormat(new VertexLayoutDescription(
+            _vertexFormat = new VertexFormat("SkinnedVertex", new VertexLayoutDescription(
                 new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
                 new VertexElementDescription("Normal", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
                 new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),

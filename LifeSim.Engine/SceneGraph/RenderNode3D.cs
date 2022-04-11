@@ -12,8 +12,9 @@ public partial class RenderNode3D : Node3D
     private struct InstanceData
     {
         public InstanceData() { }
-        public Vector4 AlbedoColor { get; set; } = new Vector4(1.0f, 1.0f, 1.0f, 0.0f);
-        public Vector4 TextureST { get; set; } = new Vector4(1.0f, 1.0f, 0.0f, 0.0f);
+        public Vector4 AlbedoColor = new Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+        public Vector4 TextureST = new Vector4(1.0f, 1.0f, 0.0f, 0.0f);
+        public Vector4 HightlightColor = new Vector4(1.0f, 1.0f, 1.0f, 0.0f);
     }
 
     private readonly Renderable _renderable;
@@ -76,23 +77,27 @@ public partial class RenderNode3D : Node3D
     public ColorF AlbedoColor
     {
         get => this._instanceData.AlbedoColor;
-        set
-        {
-            if (this._instanceData.AlbedoColor == value) return;
-            this._instanceData.AlbedoColor = value;
-            this.OnInstanceDataDirty();
-        }
+        set => this.SetInstanceData(ref this._instanceData.AlbedoColor, value);
     }
 
     public Vector4 TextureST
     {
         get => this._instanceData.TextureST;
-        set
-        {
-            if (this._instanceData.TextureST == value) return;
-            this._instanceData.TextureST = value;
-            this.OnInstanceDataDirty();
-        }
+        set => this.SetInstanceData(ref this._instanceData.TextureST, value);
+    }
+
+    public ColorF HightlightColor
+    {
+        get => this._instanceData.HightlightColor;
+        set => this.SetInstanceData(ref this._instanceData.HightlightColor, value);
+    }
+
+    protected bool SetInstanceData<T>(ref T backingField, T value) where T : unmanaged
+    {
+        if (backingField.Equals(value)) return false;
+        backingField = value;
+        this.OnInstanceDataDirty();
+        return true;
     }
 
     private void OnInstanceDataDirty()

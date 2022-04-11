@@ -101,8 +101,7 @@ public class ImmediateBatcher : IPipelineProvider, IDisposable
             this._passDataBuffer
         ));
 
-        this._vertexFormat = new VertexFormat(
-            new VertexLayoutDescription(
+        this._vertexFormat = new VertexFormat("ImmediateVertex", new VertexLayoutDescription(
                 new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
                 new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
                 new VertexElementDescription("Color", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Byte4_Norm)));
@@ -200,7 +199,7 @@ public class ImmediateBatcher : IPipelineProvider, IDisposable
         if (this._currentBatchShader != this._currentShaderInUse)
         {
             this._currentShaderInUse = this._currentBatchShader;
-            var pipeline = this._currentShaderInUse.GetPipeline(this, this._vertexFormat, RenderFlags.Default);
+            var pipeline = this._currentShaderInUse.GetPipeline(this, this._vertexFormat, RenderFlags.None);
             this._commandList.SetPipeline(pipeline);
         }
 
