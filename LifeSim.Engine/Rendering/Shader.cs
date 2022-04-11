@@ -95,6 +95,7 @@ public class Shader : IDisposable
         [RenderFlags.DepthWrite] = "ENABLE_DEPTH_WRITE",
         [RenderFlags.MousePick] = "ENABLE_MOUSE_PICK",
         [RenderFlags.ReceiveShadows] = "ENABLE_RECEIVE_SHADOWS",
+        [RenderFlags.Fog] = "ENABLE_FOG",
     };
 
     private static void AddFlagsMacros(List<Veldrid.SPIRV.MacroDefinition> macros, RenderFlags flags)

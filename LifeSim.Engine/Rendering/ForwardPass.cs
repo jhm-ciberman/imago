@@ -28,6 +28,11 @@ public partial class ForwardPass : IDisposable, IPipelineProvider, IRenderingPas
         public ColorF ShadowColor { get; set; } // rgb = color, a = intensity
         public Vector3 MainLightDirection { get; set; }
         private readonly float _padding0;
+        public ColorF FogColor { get; set; } // rgb = color, a = unused
+        public float FogStart { get; set; }
+        public float FogEnd { get; set; }
+        private readonly float _padding1;
+        private readonly float _padding2;
         public Vector4 ShadowMapDistances { get; set; } // Each component is the far plane of a cascade
     }
 
@@ -141,6 +146,9 @@ public partial class ForwardPass : IDisposable, IPipelineProvider, IRenderingPas
         lightInfo.MainLightColor = scene.MainLight.Color;
         lightInfo.ShadowColor = scene.MainLight.ShadowMap.Color;
         lightInfo.MainLightDirection = mainLightDirection;
+        lightInfo.FogColor = scene.FogColor;
+        lightInfo.FogStart = scene.FogStart; // / (camera.FarPlane - camera.NearPlane);
+        lightInfo.FogEnd = scene.FogEnd; // / (camera.FarPlane - camera.NearPlane);
         lightInfo.ShadowMapDistances = this._shadowPass.GetShadowCascadeDistances();
 
         cl.UpdateBuffer(this._camera3DInfoBuffer, 0, ref cameraInfo);

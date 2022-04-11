@@ -16,7 +16,7 @@ public abstract class MaterialBase
 
     private bool _resourceSetDirty = false;
 
-    protected RenderFlags RenderFlags { get; private set; } = RenderFlags.DepthTest | RenderFlags.DepthWrite | RenderFlags.ReceiveShadows;
+    protected RenderFlags RenderFlags { get; set; } = RenderFlags.DepthTest | RenderFlags.DepthWrite | RenderFlags.ReceiveShadows;
 
     public bool DoubleSided { get => this.GetRenderFlag(RenderFlags.DoubleSided); set => this.SetRenderFlag(RenderFlags.DoubleSided, value); }
 

@@ -323,4 +323,33 @@ public partial class Renderer : ITexture2DManager, IDisposable
     {
         ((DirectTexture)texture).Update(data, bounds.X, bounds.Y, bounds.Width, bounds.Height);
     }
+
+    public delegate void GlobalRenderSettingsChangedEventHandler(Renderer renderer);
+
+    public event GlobalRenderSettingsChangedEventHandler? GlobalRenderSettingsChanged;
+
+    private bool _forceWireframe = false;
+    public bool ForceWireframe
+    {
+        get => _forceWireframe;
+        set
+        {
+            if (_forceWireframe == value) return;
+            _forceWireframe = value;
+            GlobalRenderSettingsChanged?.Invoke(this);
+        }
+    }
+
+    private bool _enableFog = true;
+
+    public bool EnableFog
+    {
+        get => _enableFog;
+        set
+        {
+            if (_enableFog == value) return;
+            _enableFog = value;
+            GlobalRenderSettingsChanged?.Invoke(this);
+        }
+    }
 }

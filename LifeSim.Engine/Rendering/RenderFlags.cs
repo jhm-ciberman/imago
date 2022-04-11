@@ -4,7 +4,7 @@ namespace LifeSim.Engine.Rendering;
 
 
 [Flags]
-public enum RenderFlags : byte
+public enum RenderFlags : short
 {
     None = 0,
     DoubleSided = 1 << 0,
@@ -15,4 +15,5 @@ public enum RenderFlags : byte
     DepthWrite = 1 << 5,
     MousePick = 1 << 6,
     ReceiveShadows = 1 << 7,
+    Fog = 1 << 8,
 }

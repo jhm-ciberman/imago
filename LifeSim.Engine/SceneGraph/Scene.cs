@@ -20,6 +20,10 @@ public class Scene : Node3D
 
     public IReadOnlyList<IParticleSystem> ParticleSystems => this._particleSystems;
 
+    public ColorF FogColor { get; set; } = new ColorF("#6d6b4e");
+    public float FogStart { get; set; } = 50f;
+    public float FogEnd { get; set; } = 300f;
+
     private readonly List<IParticleSystem> _particleSystems = new List<IParticleSystem>();
     private readonly List<CanvasLayer> _canvasLayers = new List<CanvasLayer>();
 

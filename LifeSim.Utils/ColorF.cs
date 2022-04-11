@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
@@ -17,6 +18,16 @@ public readonly struct ColorF
         this.G = g;
         this.B = b;
         this.A = a;
+    }
+
+    public ColorF(string hexColor)
+    {
+        Color colorTmp = new Color(hexColor);
+
+        this.R = colorTmp.R / 255f;
+        this.G = colorTmp.G / 255f;
+        this.B = colorTmp.B / 255f;
+        this.A = colorTmp.A / 255f;
     }
 
     public static ColorF White => new ColorF(1f, 1f, 1f, 1f);
