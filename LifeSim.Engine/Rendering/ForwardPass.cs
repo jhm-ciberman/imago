@@ -41,6 +41,7 @@ public partial class ForwardPass : IDisposable, IPipelineProvider, IRenderingPas
     private readonly SceneStorage _storage;
     private readonly RenderJob _renderJob;
     private readonly RenderQueue _opaqueRenderQueue;
+    private readonly RenderQueue _transparentRenderQueue;
     private readonly ImmediateBatcher _immediateModeBatcher;
     private readonly ShadowPass _shadowPass;
 
@@ -71,6 +72,7 @@ public partial class ForwardPass : IDisposable, IPipelineProvider, IRenderingPas
         this._renderJob = new RenderJob(this._gd, false);
 
         this._opaqueRenderQueue = new RenderQueue(RenderQueues.Opaque);
+        this._transparentRenderQueue = new RenderQueue(RenderQueues.Transparent);
 
         this._shadowPass.ShadowmapTexture.OnResized += this.OnShadowmapResized;
 
@@ -112,8 +114,8 @@ public partial class ForwardPass : IDisposable, IPipelineProvider, IRenderingPas
             return;
         }
 
-        this._opaqueRenderQueue.AddToRenderQueue(camera.FrustumForCulling, camera.Position);
-        this._opaqueRenderQueue.Sort();
+        this._opaqueRenderQueue.Update(camera.FrustumForCulling, camera.Position);
+        this._transparentRenderQueue.Update(camera.FrustumForCulling, camera.Position);
 
         cl.SetFramebuffer(this._renderTexture.Framebuffer);
 
@@ -145,6 +147,8 @@ public partial class ForwardPass : IDisposable, IPipelineProvider, IRenderingPas
         cl.UpdateBuffer(this._lightInfoBuffer, 0, ref lightInfo);
 
         this._renderJob.DrawRenderList(cl, this._resourceSet, this._opaqueRenderQueue);
+
+        this._renderJob.DrawRenderList(cl, this._resourceSet, this._transparentRenderQueue);
 
 
         if (this._immediateRenderNodes.Count > 0)

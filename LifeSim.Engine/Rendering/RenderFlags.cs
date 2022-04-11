@@ -14,4 +14,5 @@ public enum RenderFlags : byte
     DepthTest = 1 << 4,
     DepthWrite = 1 << 5,
     MousePick = 1 << 6,
+    ReceiveShadows = 1 << 7,
 }

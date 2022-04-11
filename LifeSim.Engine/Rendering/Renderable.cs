@@ -42,7 +42,7 @@ public class Renderable : IDisposable
     public OffsetVertexData OffsetVertexData { get; set; }
     private DataBlock _transformDataBlock;
     private RenderQueues _renderQueueFlags = RenderQueues.All;
-    public RenderQueues RenderQueueFlags
+    public RenderQueues RenderQueues
     {
         get => this._renderQueueFlags;
         private set
@@ -74,10 +74,7 @@ public class Renderable : IDisposable
     private Skeleton? _skeleton;
     private Material? _material;
     private bool _visible = true;
-    private ShadowCasting _shadowCastingMode = ShadowCasting.CastShadows;
-
     public Veldrid.Pipeline? ForwardPipeline { get; private set; }
-
     public Veldrid.Pipeline? ShadowMapPipeline { get; private set; }
 
     private bool _pipelineDirty = false;
@@ -104,7 +101,6 @@ public class Renderable : IDisposable
             if (this._mesh == value) return;
             this._mesh = value;
 
-            this.RenderQueueFlagsChanged();
             this.RecomputeBoundingBox();
             this.NotifyPipelineDirty();
         }
@@ -118,7 +114,6 @@ public class Renderable : IDisposable
             if (this._material == value) return;
             this._material = value;
 
-            this.RenderQueueFlagsChanged();
             this.RecomputeOffsetVertexData();
             this.NotifyPipelineDirty();
         }
@@ -159,10 +154,11 @@ public class Renderable : IDisposable
         {
             if (this._visible == value) return;
             this._visible = value;
-            this.RenderQueueFlagsChanged();
+            this.NotifyPipelineDirty();
         }
     }
 
+    private ShadowCasting _shadowCastingMode = ShadowCasting.CastShadows;
 
     public ShadowCasting ShadowCastingMode
     {
@@ -171,7 +167,7 @@ public class Renderable : IDisposable
         {
             if (this._shadowCastingMode == value) return;
             this._shadowCastingMode = value;
-            this.RenderQueueFlagsChanged();
+            this.NotifyPipelineDirty();
         }
     }
 
@@ -193,33 +189,8 @@ public class Renderable : IDisposable
         {
             this._pipelineDirty = false;
             this.RecomputeSortKey();
-
-            if (this._material != null && this._mesh != null && this.RenderQueueFlags != RenderQueues.None)
-            {
-                bool isTransparent = this.RenderQueueFlags.HasFlag(RenderQueues.Transparent);
-                bool isOpaque = this.RenderQueueFlags.HasFlag(RenderQueues.Opaque);
-                bool isShadowcaster = this.RenderQueueFlags.HasFlag(RenderQueues.ShadowCaster);
-
-                RenderFlags flags = RenderFlags.None;
-                if (_forceWireframe) flags |= RenderFlags.Wireframe;
-                if (this.PickingId != 0) flags |= RenderFlags.MousePick;
-                if (isTransparent) flags |= RenderFlags.Transparent;
-
-                // Update the forward pipeline
-                this.ForwardPipeline = isOpaque || isTransparent
-                    ? this._material.GetForwardPipeline(renderer, this._mesh.VertexFormat, flags)
-                    : null;
-
-                // Update the shadow map pipeline
-                this.ShadowMapPipeline = isShadowcaster
-                    ? this._material.GetShadowmapPipeline(renderer, this._mesh.VertexFormat)
-                    : null;
-            }
-            else
-            {
-                this.ForwardPipeline = null;
-                this.ShadowMapPipeline = null;
-            }
+            this.RecomputeRenderQueue();
+            this.RecomputePipeline(renderer);
         }
     }
 
@@ -305,38 +276,57 @@ public class Renderable : IDisposable
         return this._cachedSortKey | (cameraDistance & 0xFFFFFF); // 24 bits
     }
 
-    private void RenderQueueFlagsChanged()
+    private void RecomputeRenderQueue()
     {
         RenderQueues flags = RenderQueues.None;
 
-        if (this.Material is null || this.Mesh is null)
+        if (this.Material is null || this.Mesh is null || this.Visible == false)
         {
-            this.RenderQueueFlags = flags;
+            this.RenderQueues = flags;
             return;
         }
 
-        if (this.Visible)
+        if (this.ShadowCastingMode != ShadowCasting.OnlyShadows)
         {
-            if (this.Material.Transparent)
-            {
-                flags |= RenderQueues.Transparent;
-            }
-            else
-            {
-                flags |= RenderQueues.Opaque;
-            }
-
-            if (this.ShadowCastingMode == ShadowCasting.CastShadows)
-            {
-                flags |= RenderQueues.ShadowCaster;
-            }
+            flags |= this.Material.Transparent ? RenderQueues.Transparent : RenderQueues.Opaque;
         }
-        else if (this.ShadowCastingMode == ShadowCasting.OnlyShadows)
+
+        if (this.ShadowCastingMode != ShadowCasting.NoShadows)
         {
             flags |= RenderQueues.ShadowCaster;
         }
 
-        this.RenderQueueFlags = flags;
+        this.RenderQueues = flags;
+    }
+
+    private void RecomputePipeline(Renderer renderer)
+    {
+        if (this._material != null && this._mesh != null && this.RenderQueues != RenderQueues.None)
+        {
+            bool isTransparent = this.RenderQueues.HasFlag(RenderQueues.Transparent);
+            bool isOpaque = this.RenderQueues.HasFlag(RenderQueues.Opaque);
+            bool isShadowcaster = this.RenderQueues.HasFlag(RenderQueues.ShadowCaster);
+
+            RenderFlags flags = RenderFlags.None;
+            if (_forceWireframe) flags |= RenderFlags.Wireframe;
+            if (this.PickingId != 0) flags |= RenderFlags.MousePick;
+            if (isTransparent) flags |= RenderFlags.Transparent;
+
+            // Update the forward pipeline
+            this.ForwardPipeline = isOpaque || isTransparent
+                ? this._material.GetForwardPipeline(renderer, this._mesh.VertexFormat, flags)
+                : null;
+
+            // Update the shadow map pipeline
+            this.ShadowMapPipeline = isShadowcaster
+                ? this._material.GetShadowmapPipeline(renderer, this._mesh.VertexFormat)
+                : null;
+        }
+        else
+        {
+            this.ForwardPipeline = null;
+            this.ShadowMapPipeline = null;
+        }
     }
 
     public void Dispose()

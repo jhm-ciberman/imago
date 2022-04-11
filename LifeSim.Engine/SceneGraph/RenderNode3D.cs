@@ -19,6 +19,22 @@ public partial class RenderNode3D : Node3D
 
     private readonly Renderable _renderable;
 
+    private InstanceData _instanceData;
+
+    public RenderNode3D()
+    {
+        this._instanceData = new InstanceData();
+
+        this._renderable = Renderer.Instance.MakeRenderable(Marshal.SizeOf<InstanceData>());
+        this._renderable.SetInstanceData(this._instanceData);
+    }
+
+    public RenderNode3D(Mesh mesh) : this()
+    {
+        this.Mesh = mesh;
+    }
+
+
     public Mesh? Mesh { get => this._renderable.Mesh; set => this._renderable.Mesh = value; }
     public Material? Material { get => this._renderable.Material; set => this._renderable.Material = value; }
     public Skeleton? Skeleton { get => this._renderable.Skeleton; set => this._renderable.Skeleton = value; }
@@ -44,8 +60,6 @@ public partial class RenderNode3D : Node3D
         }
     }
 
-    public ShadowCasting ShadowCastingMode { get => this._renderable.ShadowCastingMode; set => this._renderable.ShadowCastingMode = value; }
-
     private bool _visible = true;
     public bool Visible
     {
@@ -59,20 +73,12 @@ public partial class RenderNode3D : Node3D
 
     }
 
-    private InstanceData _instanceData;
-
-    public RenderNode3D()
+    public ShadowCasting ShadowCastingMode
     {
-        this._instanceData = new InstanceData();
-
-        this._renderable = Renderer.Instance.MakeRenderable(Marshal.SizeOf<InstanceData>());
-        this._renderable.SetInstanceData(this._instanceData);
+        get => this._renderable.ShadowCastingMode;
+        set => this._renderable.ShadowCastingMode = value;
     }
 
-    public RenderNode3D(Mesh mesh) : this()
-    {
-        this.Mesh = mesh;
-    }
 
     public ColorF AlbedoColor
     {
@@ -90,6 +96,12 @@ public partial class RenderNode3D : Node3D
     {
         get => this._instanceData.HightlightColor;
         set => this.SetInstanceData(ref this._instanceData.HightlightColor, value);
+    }
+
+    public float Alpha
+    {
+        get => this._instanceData.AlbedoColor.W;
+        set => this.SetInstanceData(ref this._instanceData.AlbedoColor.W, value);
     }
 
     protected bool SetInstanceData<T>(ref T backingField, T value) where T : unmanaged

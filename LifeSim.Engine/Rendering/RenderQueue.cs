@@ -10,10 +10,28 @@ public class RenderQueue : IEnumerable<Renderable>, IReadOnlyList<Renderable>, I
 {
     private const int DEFAULT_CAPACITY = 250;
 
+    private class FrontToBackComparer : IComparer<RenderIndex>
+    {
+        public int Compare(RenderIndex x, RenderIndex y)
+        {
+            return x.Key.CompareTo(y.Key);
+        }
+    }
+
+    private class BackToFrontComparer : IComparer<RenderIndex>
+    {
+        public int Compare(RenderIndex x, RenderIndex y)
+        {
+            return y.Key.CompareTo(x.Key);
+        }
+    }
+
     private readonly List<Renderable> _allRenderables = new List<Renderable>();
     private readonly Dictionary<Renderable, int> _renderableToIndex = new Dictionary<Renderable, int>();
     private readonly List<RenderIndex> _culledIndices = new List<RenderIndex>(DEFAULT_CAPACITY);
     private readonly List<Renderable> _culledItems = new List<Renderable>(DEFAULT_CAPACITY);
+
+    private readonly IComparer<RenderIndex> _comparer;
 
     public int Count => this._culledIndices.Count;
 
@@ -24,6 +42,19 @@ public class RenderQueue : IEnumerable<Renderable>, IReadOnlyList<Renderable>, I
     public RenderQueue(RenderQueues filterFlags)
     {
         this.FilterFlags = filterFlags;
+
+        if (filterFlags == RenderQueues.Opaque || filterFlags == RenderQueues.ShadowCaster)
+        {
+            this._comparer = new FrontToBackComparer();
+        }
+        else if (filterFlags == RenderQueues.Transparent)
+        {
+            this._comparer = new BackToFrontComparer();
+        }
+        else
+        {
+            throw new ArgumentException("Invalid filter flags.");
+        }
 
         Renderable.RenderQueuesChanged += this.OnRenderQueueFlagsChanged;
     }
@@ -58,12 +89,7 @@ public class RenderQueue : IEnumerable<Renderable>, IReadOnlyList<Renderable>, I
         }
     }
 
-    public void Sort()
-    {
-        this._culledIndices.Sort();
-    }
-
-    public void AddToRenderQueue(BoundingFrustum cameraFrustum, Vector3 cameraPosition)
+    public void Update(BoundingFrustum cameraFrustum, Vector3 cameraPosition)
     {
         lock (this._allRenderables)
         {
@@ -74,7 +100,7 @@ public class RenderQueue : IEnumerable<Renderable>, IReadOnlyList<Renderable>, I
             {
                 Renderable renderable = renderables[i];
 
-                if (!renderable.RenderQueueFlags.HasFlag(this.FilterFlags)) continue;
+                if (!renderable.RenderQueues.HasFlag(this.FilterFlags)) continue;
 
                 if (cameraFrustum.Contains(renderable.BoundingBox) != ContainmentType.Disjoint)
                 {
@@ -83,6 +109,8 @@ public class RenderQueue : IEnumerable<Renderable>, IReadOnlyList<Renderable>, I
                     this._culledItems.Add(renderable);
                 }
             }
+
+            this._culledIndices.Sort(this._comparer);
         }
     }
 
@@ -140,7 +168,7 @@ public class RenderQueue : IEnumerable<Renderable>, IReadOnlyList<Renderable>, I
         }
     }
 
-    private readonly struct RenderIndex : IComparable<RenderIndex>
+    private readonly struct RenderIndex
     {
         public readonly ulong Key;
         public readonly int Index;
@@ -155,10 +183,7 @@ public class RenderQueue : IEnumerable<Renderable>, IReadOnlyList<Renderable>, I
         {
             return Convert.ToString((long)this.Key, 16).PadLeft(16, '0');
         }
-
-        int IComparable<RenderIndex>.CompareTo(RenderIndex other)
-        {
-            return (this.Key < other.Key) ? -1 : (this.Key == other.Key) ? 0 : 1;
-        }
     }
+
+
 }

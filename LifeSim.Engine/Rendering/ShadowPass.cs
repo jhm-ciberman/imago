@@ -97,7 +97,7 @@ public partial class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
             this._cascades[i].UpdateCascadeMatrix(i, camera, mainLightDirection, near, far, shadowMap);
 
             BoundingFrustum shadowFrustum = new BoundingFrustum(this._cascades[i].ViewProjectionMatrix);
-            this._renderQueues[i].AddToRenderQueue(shadowFrustum, camera.Position);
+            this._renderQueues[i].Update(shadowFrustum, camera.Position);
 
             ShadowMapDataBuffer data = new ShadowMapDataBuffer();
             data.ShadowMapMatrix = this._cascades[i].ViewProjectionMatrix;
