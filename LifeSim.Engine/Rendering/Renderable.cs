@@ -24,7 +24,7 @@ public class Renderable : IDisposable
 
     public OffsetVertexData OffsetVertexData { get; set; }
     private DataBlock _transformDataBlock;
-    private RenderQueues _renderQueueFlags = RenderQueues.All;
+    private RenderQueues _renderQueueFlags = RenderQueues.None;
     public RenderQueues RenderQueues
     {
         get => this._renderQueueFlags;
@@ -57,6 +57,7 @@ public class Renderable : IDisposable
     private Skeleton? _skeleton;
     private Material? _material;
     private bool _visible = true;
+    private bool _transparent = false;
     public Veldrid.Pipeline? ForwardPipeline { get; private set; }
     public Veldrid.Pipeline? ShadowMapPipeline { get; private set; }
 
@@ -142,6 +143,17 @@ public class Renderable : IDisposable
         {
             if (this._visible == value) return;
             this._visible = value;
+            this.NotifyPipelineDirty();
+        }
+    }
+
+    public bool Transparent
+    {
+        get => this._transparent;
+        set
+        {
+            if (this._transparent == value) return;
+            this._transparent = value;
             this.NotifyPipelineDirty();
         }
     }
@@ -276,7 +288,7 @@ public class Renderable : IDisposable
 
         if (this.ShadowCastingMode != ShadowCasting.OnlyShadows)
         {
-            flags |= this.Material.Transparent ? RenderQueues.Transparent : RenderQueues.Opaque;
+            flags |= this.Material.Transparent || this._transparent ? RenderQueues.Transparent : RenderQueues.Opaque;
         }
 
         if (this.ShadowCastingMode != ShadowCasting.NoShadows)

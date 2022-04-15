@@ -63,6 +63,11 @@ public class RenderQueue : IEnumerable<Renderable>, IReadOnlyList<Renderable>, I
     {
         // This event could be called from a different thread. The "_allRenderables" list should be locked.
 
+        if ((newFlags & this.FilterFlags) == (oldFlags & this.FilterFlags))
+        {
+            return;
+        }
+
         if (newFlags.HasFlag(this.FilterFlags))
         {
             lock (this._allRenderables)

@@ -101,7 +101,13 @@ public partial class RenderNode3D : Node3D
     public float Alpha
     {
         get => this._instanceData.AlbedoColor.W;
-        set => this.SetInstanceData(ref this._instanceData.AlbedoColor.W, value);
+        set
+        {
+            if (this.SetInstanceData(ref this._instanceData.AlbedoColor.W, value))
+            {
+                this._renderable.Transparent = value < 1.0f;
+            }
+        }
     }
 
     protected bool SetInstanceData<T>(ref T backingField, T value) where T : unmanaged
