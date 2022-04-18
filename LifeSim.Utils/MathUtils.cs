@@ -9,6 +9,10 @@ public static class MathUtils
     private const float K_EPSILON = 0.00001f;
     private const float K_EPSILON_NORMAL_SQRT = 1e-15f;
 
+    public static float PiOverTwo { get; } = (float)Math.PI / 2f;
+
+    public static float TwoPi { get; } = (float)Math.PI * 2f;
+
     /// <summary>
     /// Linearly interpolates between two values.
     /// </summary>
@@ -30,6 +34,18 @@ public static class MathUtils
         return MoveTowards(current, target, maxDelta);
     }
 
+    /// <summary>
+    /// Smoothly interpolates between two values.
+    /// </summary>
+    /// <param name="v1">The first value.</param>
+    /// <param name="v2">The second value.</param>
+    /// <param name="lerpProgress">The interpolation factor.</param>
+    /// <returns>The interpolated value.</returns>
+    public static float SmoothStep(float v1, float v2, float lerpProgress)
+    {
+        return Lerp(v1, v2, lerpProgress * lerpProgress * (3f - 2f * lerpProgress));
+    }
+
     // Moves a value /current/ towards /target/.
     public static float MoveTowards(float current, float target, float maxDelta)
     {
@@ -46,9 +62,14 @@ public static class MathUtils
         return delta;
     }
 
-    // Returns the angle in radians between /from/ and /to/.
+    /// <summary>
+    /// Returns the angle difference in radians between /from/ and /to/.
+    /// </summary>
+    /// <param name="from">The source angle in radians.</param>
+    /// <param name="to">The target angle in radians.</param>
+    /// <returns>The delta angle in radians.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float Angle(Vector2 from, Vector2 to)
+    public static float AngleDifference(Vector2 from, Vector2 to)
     {
         // sqrt(a) * sqrt(b) = sqrt(a * b) -- valid for real numbers
         float denominator = (float)MathF.Sqrt(from.LengthSquared() * to.LengthSquared());
@@ -59,17 +80,45 @@ public static class MathUtils
         return MathF.Acos(dot);
     }
 
+    /// <summary>
+    /// Clamps a value between a minimum and maximum value.
+    /// </summary>
+    /// <param name="value">The value to clamp.</param>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
+    /// <returns>The clamped value.</returns>
+    public static float Clamp(float value, float min, float max)
+    {
+        if (value < min)
+            return min;
+        if (value > max)
+            return max;
+        return value;
+    }
 
     /// <summary>
-    /// Returns an unsigned integer containing 32 reasonably-well-scrambled
+    /// Returns the angle in radians between -Pi and Pi.
+    /// </summary>
+    /// <param name="2f">The angle in radians.</param>
+    /// <returns>The angle in the range -Pi to Pi.</returns>
+    public static float WrapAngle(float value)
+    {
+        value %= MathF.PI * 2f;
+        if (value < 0f)
+            value += MathF.PI * 2f;
+        return value;
+    }
+
+
+    /// <summary>
+    /// Returns an integer containing 32 reasonably-well-scrambled
     /// bits, based on a given (signed) integer input parameter `n` and optional
     /// `seed`.  Kind of like looking up a value in an infinitely large
     /// non-existent table of previously generated random numbers.
     /// </summary>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
-    /// <param name="z"></param>
-    /// <returns></returns>
+    /// <param name="n">The integer to scramble.</param>
+    /// <param name="seed">An optional seed to use.</param>
+    /// <returns>A random integer.</returns>
     public static int Squirrel3(int n, int seed)
     {
         unchecked
@@ -92,7 +141,7 @@ public static class MathUtils
     /// <summary>
     /// Converts a Quaternion to a Vector3 representing the euler angles in a right handed coordinate system.
     /// </summary>
-    /// <param name="quaternion">The quaternion</param>
+    /// <param name="q">The quaternion</param>
     /// <returns>The euler angles in a right handed coordinate system</returns>
     public static Vector3 QuaternionToEuler(Quaternion q)
     {

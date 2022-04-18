@@ -67,31 +67,23 @@ public class InputInstance
         var center = new Vector2(this._window.Width / 2, this._window.Height / 2);
         this._mouseDelta = newPos - center;
         this._mousePosition = newPos;
-        if (this.MouseIsLocked)
-        {
-            this._window.SetMousePosition(center);
-        }
     }
 
-    public void LockMouse()
+    public void MoveMouseToCenter()
     {
         var center = new Vector2(this._window.Width / 2, this._window.Height / 2);
         this._window.SetMousePosition(center);
         this._mouseDelta = new Vector2(0, 0);
         this._mousePosition = center;
-        this.MouseIsLocked = true;
-        this._window.CursorVisible = false;
-    }
-
-    public void UnlockMouse()
-    {
-        this.MouseIsLocked = false;
-        this._window.CursorVisible = true;
     }
 
     public Vector2 MousePosition => this._mousePosition;
     public Vector2 MouseDelta => this._mouseDelta;
-    public bool MouseIsLocked { get; private set; } = false;
+    public bool CursorIsVisible
+    {
+        get => this._window.CursorVisible;
+        set => this._window.CursorVisible = value;
+    }
 
     public bool GetKey(Key key)
     {

@@ -1,3 +1,4 @@
+using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using Veldrid;
@@ -9,27 +10,33 @@ public static class Input
     public static void SetInstance(InputInstance instance) => Input._instance = instance;
     private static InputInstance? _instance = null;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static InputInstance GetInstance()
+    public static InputInstance Instance
     {
-        if (Input._instance == null)
+        set => _instance = value;
+        get
         {
-            throw new System.Exception("Input is not initialized");
+            if (_instance == null)
+            {
+                throw new System.Exception("Input is not initialized");
+            }
+            return _instance;
         }
-        return Input._instance;
     }
 
-    public static bool GetKey(Key key) => Input.GetInstance().GetKey(key);
-    public static bool GetKeyDown(Key key) => Input.GetInstance().GetKeyDown(key);
-    public static bool GetKeyUp(Key key) => Input.GetInstance().GetKeyUp(key);
+    public static bool GetKey(Key key) => Input.Instance.GetKey(key);
+    public static bool GetKeyDown(Key key) => Input.Instance.GetKeyDown(key);
+    public static bool GetKeyUp(Key key) => Input.Instance.GetKeyUp(key);
 
-    public static bool GetMouseButton(MouseButton button) => Input.GetInstance().GetMouseButton(button);
-    public static bool GetMouseButtonDown(MouseButton button) => Input.GetInstance().GetMouseButtonDown(button);
-    public static bool GetMouseButtonUp(MouseButton button) => Input.GetInstance().GetMouseButtonUp(button);
+    public static bool GetMouseButton(MouseButton button) => Input.Instance.GetMouseButton(button);
+    public static bool GetMouseButtonDown(MouseButton button) => Input.Instance.GetMouseButtonDown(button);
+    public static bool GetMouseButtonUp(MouseButton button) => Input.Instance.GetMouseButtonUp(button);
 
-    public static Vector2 MouseDelta => Input.GetInstance().MouseDelta;
-    public static Vector2 MousePosition => Input.GetInstance().MousePosition;
-    public static bool MouseIsLocked => Input.GetInstance().MouseIsLocked;
-    public static void LockMouse() => Input.GetInstance().LockMouse();
-    public static void UnlockMouse() => Input.GetInstance().UnlockMouse();
+    public static Vector2 MouseDelta => Input.Instance.MouseDelta;
+    public static Vector2 MousePosition => Input.Instance.MousePosition;
+    public static bool CursorIsVisible
+    {
+        get => Input.Instance.CursorIsVisible;
+        set => Input.Instance.CursorIsVisible = value;
+    }
+    public static void MoveCursorToCenter() => Input.Instance.MoveMouseToCenter();
 }
