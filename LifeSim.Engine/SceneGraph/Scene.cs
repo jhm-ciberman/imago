@@ -76,6 +76,11 @@ public class Scene : Node3D
         this.UILayer?.Update(deltaTime);
     }
 
+    public virtual void Tick(float deltaTime)
+    {
+        //
+    }
+
     public void UpdateSceneDirtyTransforms()
     {
         for (int i = 0; i < this._canvasLayers.Count; i++)
@@ -114,4 +119,6 @@ public class Scene : Node3D
     {
         this._transformDirtyList.Add(node);
     }
+
+
 }
