@@ -96,6 +96,8 @@ public static class MathUtils
         return value;
     }
 
+
+
     /// <summary>
     /// Returns the angle in radians between -Pi and Pi.
     /// </summary>
@@ -107,6 +109,19 @@ public static class MathUtils
         if (value < 0f)
             value += MathF.PI * 2f;
         return value;
+    }
+
+    /// <summary>
+    /// Linearly interpolates the angle in radians.
+    /// </summary>
+    /// <param name="a">The first angle in radians.</param>
+    /// <param name="b">The second angle in radians.</param>
+    /// <param name="t">The interpolation factor.</param>
+    /// <returns>The interpolated angle in radians.</returns>
+    public static float LerpAngle(float a, float b, float t)
+    {
+        float delta = DeltaAngle(a, b);
+        return a + delta * t;
     }
 
 
@@ -262,5 +277,26 @@ public static class MathUtils
         var w = (d00 * d21 - d01 * d20) / denom;
         var u = 1 - v - w;
         return u * hA + v * hB + w * hC;
+    }
+
+    /// <summary>
+    /// Extract the yaw, pitch and roll of a quaternion. This is the inverse of System.Numerics.Quaternion.CreateFromYawPitchRoll().
+    /// </summary>
+    /// <param name="q">The quaternion to get the yaw, pitch and roll from.</param>
+    /// <param name="yaw">The yaw of the quaternion.</param>
+    /// <param name="pitch">The pitch of the quaternion.</param>
+    /// <param name="roll">The roll of the quaternion.</param>
+    public static void GetYawPitchRoll(Quaternion q, out float yaw, out float pitch, out float roll)
+    {
+        // Source: https://stackoverflow.com/a/18115837/2022985
+
+        // Get the yaw as the atan2 of the x and z components.
+        yaw = MathF.Atan2(2.0f * (q.Y * q.Z + q.W * q.X), q.W * q.W - q.X * q.X - q.Y * q.Y + q.Z * q.Z);
+
+        // Get the pitch as the asin of the x and w components.
+        pitch = MathF.Asin(-2.0f * (q.X * q.Z - q.W * q.Y));
+
+        // Get the roll as the atan2 of the y and z components.
+        roll = MathF.Atan2(2.0f * (q.X * q.Y + q.W * q.Z), q.W * q.W + q.X * q.X - q.Y * q.Y - q.Z * q.Z);
     }
 }
