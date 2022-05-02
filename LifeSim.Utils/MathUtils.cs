@@ -248,55 +248,133 @@ public static class MathUtils
         return true;
     }
 
-
     /// <summary>
-    /// Calculates a weighted linearly interpolated value using 3 points to form a triangle and barycentric coordinates.
-    /// This can be used to calculate a weighted value from a set of 3 points.
-    /// For example when wanting to interpolate between 3 vertices of a triangle.
+    /// Computes the 2d cross product of two vectors.
     /// </summary>
-    /// <param name="a">The first point</param>
-    /// <param name="b">The second point</param>
-    /// <param name="c">The third point</param>
-    /// <param name="hA">The value asociated with the first point</param>
-    /// <param name="hB">The value asociated with the second point</param>
-    /// <param name="hC">The value asociated with the third point</param>
-    /// <param name="p">The point to calculate the value for</param>
-    /// <returns>The weighted value</returns>
-    public static float BarycentricLerp(Vector2 a, Vector2 b, Vector2 c, float hA, float hB, float hC, Vector2 p)
+    /// <param name="a">The first vector.</param>
+    /// <param name="b">The second vector.</param>
+    /// <returns>The cross product of the two vectors.</returns>
+    public static float Cross(Vector2 a, Vector2 b)
     {
-        var v0 = b - a;
-        var v1 = c - a;
-        var v2 = p - a;
-        var d00 = Vector2.Dot(v0, v0);
-        var d01 = Vector2.Dot(v0, v1);
-        var d11 = Vector2.Dot(v1, v1);
-        var d20 = Vector2.Dot(v2, v0);
-        var d21 = Vector2.Dot(v2, v1);
-        var denom = d00 * d11 - d01 * d01;
-        var v = (d11 * d20 - d01 * d21) / denom;
-        var w = (d00 * d21 - d01 * d20) / denom;
-        var u = 1 - v - w;
-        return u * hA + v * hB + w * hC;
+        return a.X * b.Y - a.Y * b.X;
     }
 
     /// <summary>
-    /// Extract the yaw, pitch and roll of a quaternion. This is the inverse of System.Numerics.Quaternion.CreateFromYawPitchRoll().
+    /// Computes the intersection of two 2d segments.
     /// </summary>
-    /// <param name="q">The quaternion to get the yaw, pitch and roll from.</param>
-    /// <param name="yaw">The yaw of the quaternion.</param>
-    /// <param name="pitch">The pitch of the quaternion.</param>
-    /// <param name="roll">The roll of the quaternion.</param>
-    public static void GetYawPitchRoll(Quaternion q, out float yaw, out float pitch, out float roll)
+    /// <param name="aStart">The start of the first segment.</param>
+    /// <param name="aEnd">The end of the first segment.</param>
+    /// <param name="bStart">The start of the second segment.</param>
+    /// <param name="bEnd">The end of the second segment.</param>
+    /// <param name="intersection">The intersection of the two segments.</param>
+    /// <returns>True if the segments intersect, false otherwise.</returns>
+    public static bool SegmentToSegmentIntersection(Vector2 aStart, Vector2 aEnd, Vector2 bStart, Vector2 bEnd, out Vector2 intersection)
     {
-        // Source: https://stackoverflow.com/a/18115837/2022985
+        // Source: https://stackoverflow.com/a/1968345/2022985
 
-        // Get the yaw as the atan2 of the x and z components.
-        yaw = MathF.Atan2(2.0f * (q.Y * q.Z + q.W * q.X), q.W * q.W - q.X * q.X - q.Y * q.Y + q.Z * q.Z);
+        var s1 = new Vector2(aEnd.X - aStart.X, aEnd.Y - aStart.Y);
+        var s2 = new Vector2(bEnd.X - bStart.X, bEnd.Y - bStart.Y);
 
-        // Get the pitch as the asin of the x and w components.
-        pitch = MathF.Asin(-2.0f * (q.X * q.Z - q.W * q.Y));
+        var s = (-s1.Y * (aStart.X - bStart.X) + s1.X * (aStart.Y - bStart.Y)) / (-s2.X * s1.Y + s1.X * s2.Y);
+        var t = (s2.X * (aStart.Y - bStart.Y) - s2.Y * (aStart.X - bStart.X)) / (-s2.X * s1.Y + s1.X * s2.Y);
 
-        // Get the roll as the atan2 of the y and z components.
-        roll = MathF.Atan2(2.0f * (q.X * q.Y + q.W * q.Z), q.W * q.W + q.X * q.X - q.Y * q.Y - q.Z * q.Z);
+        if (s >= 0 && s <= 1 && t >= 0 && t <= 1)
+        {
+            // Collision detected
+            intersection.X = aStart.X + (t * s1.X);
+            intersection.Y = aStart.Y + (t * s1.Y);
+            return true;
+        }
+
+        intersection = Vector2.Zero;
+        return false; // No collision
+    }
+
+
+    /// <summary>
+    /// Calculates the point of intersection between a 2d segment and a 2d triangle. Returns false if the ray does not intersect the triangle.
+    /// </summary>
+    /// <param name="rayStart">The start of the ray.</param>
+    /// <param name="rayEnd">The end  of the ray.</param>
+    /// <param name="pA">The first vertex of the triangle.</param>
+    /// <param name="pB">The second vertex of the triangle.</param>
+    /// <param name="pC">The third vertex of the triangle.</param>
+    /// <param name="intersectionPoint">The point of intersection.</param>
+    /// <returns>True if the ray intersects the triangle, false otherwise.</returns>
+    public static bool SegmentToTriangleIntersection(Vector2 rayStart, Vector2 rayEnd, Vector2 pA, Vector2 pB, Vector2 pC, out Vector2 intersectionPoint)
+    {
+        return SegmentToSegmentIntersection(rayStart, rayEnd, pA, pB, out intersectionPoint)
+         || SegmentToSegmentIntersection(rayStart, rayEnd, pB, pC, out intersectionPoint)
+         || SegmentToSegmentIntersection(rayStart, rayEnd, pC, pA, out intersectionPoint);
+    }
+
+    /// <summary>
+    /// Computes the point of intersection between a 2d segment and a circle. Returns false if the ray does not intersect the circle.
+    /// </summary>
+    /// <param name="rayStart">The start of the ray.</param>
+    /// <param name="rayEnd">The end  of the ray.</param>
+    /// <param name="circleCenter">The center of the circle.</param>
+    /// <param name="radius">The radius of the circle.</param>
+    /// <param name="intersectionPoint">The point of intersection.</param>
+    /// <returns>True if the ray intersects the circle, false otherwise.</returns>
+    public static bool SegmentToCircleIntersection(Vector2 rayStart, Vector2 rayEnd, Vector2 circleCenter, float radius, out Vector2 intersectionPoint)
+    {
+        // Source: https://stackoverflow.com/a/1968345/2022985
+
+        var d = rayEnd - rayStart;
+        var f = rayStart - circleCenter;
+
+        var a = Vector2.Dot(d, d);
+        var b = 2 * Vector2.Dot(f, d);
+        var c = Vector2.Dot(f, f) - radius * radius;
+
+        var discriminant = b * b - 4 * a * c;
+        if (discriminant < 0)
+        {
+            // No intersection
+            intersectionPoint = Vector2.Zero;
+            return false;
+        }
+
+        var t = (-b - MathF.Sqrt(discriminant)) / (2 * a);
+        if (t < 0 || t > 1)
+        {
+            // No intersection
+            intersectionPoint = Vector2.Zero;
+            return false;
+        }
+
+        intersectionPoint = rayStart + t * d;
+        return true;
+    }
+
+
+    // Triangle to circle intersection
+
+    /// <summary>
+    /// Computes the point of intersection between a circle and a 2d triangle. Returns false if the triangle does not intersect the circle.
+    /// </summary>
+    /// <param name="circleCenter">The center of the circle.</param>
+    /// <param name="radius">The radius of the circle.</param>
+    /// <param name="pA">The first vertex of the triangle.</param>
+    /// <param name="pB">The second vertex of the triangle.</param>
+    /// <param name="pC">The third vertex of the triangle.</param>
+    /// <param name="intersectionPoint">The point of intersection.</param>
+    /// <returns>True if the triangle intersects the circle, false otherwise.</returns>
+    public static bool CircleToTriangleIntersection(Vector2 circleCenter, float radius, Vector2 pA, Vector2 pB, Vector2 pC, out Vector2 intersectionPoint)
+    {
+        intersectionPoint = Vector2.Zero;
+        return false;
+    }
+
+    /// <summary>
+    /// Projects a point onto a vector.
+    /// </summary>
+    /// <param name="point">The point to project.</param>
+    /// <param name="axis">The vector to project onto.</param>
+    /// <returns>The projected point.</returns>
+    public static Vector2 ProjectPoint(Vector2 point, Vector2 axis)
+    {
+        return Vector2.Dot(point, axis) * axis;
     }
 }
