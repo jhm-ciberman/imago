@@ -320,4 +320,29 @@ public class GizmosLayer
             this.DrawLine(v3, v1, color, lifeTime, drawInFront);
         }
     }
+
+    /// <summary>
+    /// Draws a circle at the given position, aligned in the XZ plane.
+    /// </summary>
+    /// <param name="position">The position of the circle.</param>
+    /// <param name="radius">The radius of the circle.</param>
+    /// <param name="color">The color of the circle.</param>
+    /// <param name="segments">The amount of segments the circle will be divided into.</param>
+    /// <param name="lifeTime">The amount of time the circle will be visible. A value of 0 means that the circle will be drawn until the next frame.</param>
+    /// <param name="drawInFront">Whether the circle should be drawn in front other objects or using depth.</param>
+    public void DrawCircle(Vector3 position, float radius, Color color, int segments = 32, float lifeTime = 0, bool drawInFront = false)
+    {
+        var step = MathF.PI * 2 / segments;
+        var angle = 0f;
+
+        for (int i = 0; i < segments; i++)
+        {
+            var p1 = position + new Vector3(MathF.Cos(angle), 0, MathF.Sin(angle)) * radius;
+            var p2 = position + new Vector3(MathF.Cos(angle + step), 0, MathF.Sin(angle + step)) * radius;
+
+            this.DrawLine(p1, p2, color, lifeTime, drawInFront);
+
+            angle += step;
+        }
+    }
 }
