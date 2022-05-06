@@ -54,7 +54,7 @@ public partial class Renderer : ITexture2DManager, IDisposable
         Instance = this;
 
         GraphicsDeviceOptions options = new GraphicsDeviceOptions(
-            debug: true,
+            debug: false,
             swapchainDepthFormat: null, //PixelFormat.R16_UNorm,
             syncToVerticalBlank: true,
             resourceBindingModel: ResourceBindingModel.Improved,
