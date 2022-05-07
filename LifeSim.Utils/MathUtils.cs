@@ -6,7 +6,6 @@ namespace LifeSim;
 
 public static class MathUtils
 {
-    private const float K_EPSILON = 0.00001f;
     private const float K_EPSILON_NORMAL_SQRT = 1e-15f;
 
     public static float HalfPi { get; } = (float)Math.PI / 2f;
