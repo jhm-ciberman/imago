@@ -9,6 +9,8 @@ namespace LifeSim;
 /// </summary>
 public struct BoundingBox2d
 {
+    public static BoundingBox2d Empty => new BoundingBox2d(Vector2.Zero, Vector2.Zero);
+
     /// <summary>
     /// Gets or sets the minimum point of the box.
     /// </summary>
@@ -18,6 +20,16 @@ public struct BoundingBox2d
     /// Gets or sets the maximum point of the box.
     /// </summary>
     public Vector2 Max { get; set; }
+
+    /// <summary>
+    /// Gets the size of the box.
+    /// </summary>
+    public Vector2 Size => this.Max - this.Min;
+
+    /// <summary>
+    /// Gets the center of the box.
+    /// </summary>
+    public Vector2 Center => (this.Min + this.Max) / 2;
 
     /// <summary>
     /// Constructs a new bounding box.
@@ -63,6 +75,17 @@ public struct BoundingBox2d
     public bool Intersects(BoundingBox2d other)
     {
         return this.Min.X <= other.Max.X && this.Max.X >= other.Min.X && this.Min.Y <= other.Max.Y && this.Max.Y >= other.Min.Y;
+    }
+
+    /// <summary>
+    /// Returns whether the bounding box intersects the given bounding box.
+    /// </summary>
+    /// <param name="min">The minimum point of the bounding box to test.</param>
+    /// <param name="max">The maximum point of the bounding box to test.</param>
+    /// <returns>Whether the bounding box intersects the given bounding box.</returns>
+    public bool Intersects(Vector2 min, Vector2 max)
+    {
+        return this.Min.X <= max.X && this.Max.X >= min.X && this.Min.Y <= max.Y && this.Max.Y >= min.Y;
     }
 
     /// <summary>
