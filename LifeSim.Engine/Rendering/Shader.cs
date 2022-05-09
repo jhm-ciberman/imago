@@ -96,6 +96,7 @@ public class Shader : IDisposable
         [RenderFlags.MousePick] = "ENABLE_MOUSE_PICK",
         [RenderFlags.ReceiveShadows] = "ENABLE_RECEIVE_SHADOWS",
         [RenderFlags.Fog] = "ENABLE_FOG",
+        [RenderFlags.PixelPerfactShadows] = "ENABLE_PIXEL_PERFECT_SHADOWS",
     };
 
     private static void AddFlagsMacros(List<Veldrid.SPIRV.MacroDefinition> macros, RenderFlags flags)

@@ -312,6 +312,7 @@ public class Renderable : IDisposable
             if (this.PickingId != 0) flags |= RenderFlags.MousePick;
             if (isTransparent) flags |= RenderFlags.Transparent;
             if (renderer.EnableFog) flags |= RenderFlags.Fog;
+            if (renderer.EnablePixelPerfectShadows) flags |= RenderFlags.PixelPerfactShadows;
 
             // Update the forward pipeline
             this.ForwardPipeline = isOpaque || isTransparent

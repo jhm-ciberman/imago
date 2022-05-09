@@ -331,11 +331,11 @@ public partial class Renderer : ITexture2DManager, IDisposable
     private bool _forceWireframe = false;
     public bool ForceWireframe
     {
-        get => _forceWireframe;
+        get => this._forceWireframe;
         set
         {
             if (_forceWireframe == value) return;
-            _forceWireframe = value;
+            this._forceWireframe = value;
             GlobalRenderSettingsChanged?.Invoke(this);
         }
     }
@@ -344,11 +344,24 @@ public partial class Renderer : ITexture2DManager, IDisposable
 
     public bool EnableFog
     {
-        get => _enableFog;
+        get => this._enableFog;
         set
         {
-            if (_enableFog == value) return;
-            _enableFog = value;
+            if (this._enableFog == value) return;
+            this._enableFog = value;
+            GlobalRenderSettingsChanged?.Invoke(this);
+        }
+    }
+
+    private bool _enablePixelPerfectShadows = true;
+
+    public bool EnablePixelPerfectShadows
+    {
+        get => this._enablePixelPerfectShadows;
+        set
+        {
+            if (this._enablePixelPerfectShadows == value) return;
+            this._enablePixelPerfectShadows = value;
             GlobalRenderSettingsChanged?.Invoke(this);
         }
     }

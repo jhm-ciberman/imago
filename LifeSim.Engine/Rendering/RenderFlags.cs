@@ -16,4 +16,5 @@ public enum RenderFlags : short
     MousePick = 1 << 6,
     ReceiveShadows = 1 << 7,
     Fog = 1 << 8,
+    PixelPerfactShadows = 1 << 9,
 }
