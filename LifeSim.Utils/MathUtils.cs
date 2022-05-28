@@ -79,6 +79,13 @@ public static class MathUtils
         return MathF.Acos(dot);
     }
 
+    public static Vector2 ClampMagnitude(Vector2 velocity, float maxMagnitude)
+    {
+        if (velocity.LengthSquared() > maxMagnitude * maxMagnitude)
+            return Vector2.Normalize(velocity) * maxMagnitude;
+        return velocity;
+    }
+
     /// <summary>
     /// Clamps a value between a minimum and maximum value.
     /// </summary>
