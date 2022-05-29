@@ -66,6 +66,10 @@ public partial class Renderer : ITexture2DManager, IDisposable
         var gd = VeldridStartup.CreateGraphicsDevice(window, options, graphicsBackend ?? VeldridStartup.GetPlatformDefaultBackend());
         this.GraphicsDevice = gd;
 
+        Renderable.PipelineDirty += this.OnRenderablePipelineDirty;
+        MaterialBase.MaterialResourceSetDirty += this.OnMaterialResourceSetDirty;
+        Texture.TextureDirty += this.OnTextureDirty;
+
         this._disposeCollector = new DisposeCollector();
         this._factory = this.GraphicsDevice.ResourceFactory;
 
@@ -73,10 +77,6 @@ public partial class Renderer : ITexture2DManager, IDisposable
         this.MainRenderTexture = new RenderTexture((uint)window.Width, (uint)window.Height);
 
         this.Storage = new SceneStorage(gd);
-        Renderable.PipelineDirty += this.OnRenderablePipelineDirty;
-        MaterialBase.MaterialResourceSetDirty += this.OnMaterialResourceSetDirty;
-        Texture.TextureDirty += this.OnTextureDirty;
-
 
         this._imGuiPass = new ImGuiPass(this, this.MainRenderTexture);
         this._mousePickerPass = new MousePickingPass(this, this.MainRenderTexture);
@@ -108,6 +108,8 @@ public partial class Renderer : ITexture2DManager, IDisposable
             new CommandListJob("Present", this._factory,
                 this._fullScreenPass),
         };
+
+        Texture.InitializeDefaultTextures();
     }
 
     public void DisposeWhenIdle(IDisposable disposable)

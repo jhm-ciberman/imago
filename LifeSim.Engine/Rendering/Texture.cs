@@ -12,12 +12,18 @@ public class Texture : ITexture
     public delegate void TextureDirtyHandler(Texture texture);
     public static event TextureDirtyHandler? TextureDirty;
 
-    public static Texture White { get; } = new ImageTexture(new Image<Rgba32>(2, 2, new Rgba32(255, 255, 255, 255)));
+    public static Texture White { get; private set; } = null!;
+    public static Texture Black { get; private set; } = null!;
+    public static Texture Transparent { get; private set; } = null!;
+    public static Texture Magenta { get; private set; } = null!;
 
-    public static Texture Black { get; } = new ImageTexture(new Image<Rgba32>(2, 2, new Rgba32(0, 0, 0, 255)));
-
-    public static Texture Transparent { get; } = new ImageTexture(new Image<Rgba32>(2, 2, new Rgba32(0, 0, 0, 0)));
-    public static Texture Magenta { get; } = new ImageTexture(new Image<Rgba32>(2, 2, new Rgba32(255, 0, 255, 255)));
+    public static void InitializeDefaultTextures()
+    {
+        White = new ImageTexture(new Image<Rgba32>(2, 2, new Rgba32(255, 255, 255, 255)));
+        Black = new ImageTexture(new Image<Rgba32>(2, 2, new Rgba32(0, 0, 0, 255)));
+        Transparent = new ImageTexture(new Image<Rgba32>(2, 2, new Rgba32(0, 0, 0, 0)));
+        Magenta = new ImageTexture(new Image<Rgba32>(2, 2, new Rgba32(255, 0, 255, 255)));
+    }
 
     public Veldrid.Texture DeviceTexture { get; protected set; }
     public Sampler Sampler { get; private set; }
