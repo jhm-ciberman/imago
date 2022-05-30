@@ -3,12 +3,18 @@ using System.Numerics;
 
 namespace LifeSim;
 
-public struct Rect
+public struct Rect : IEquatable<Rect>
 {
+    public static Rect Empty { get; } = new Rect(0, 0, 0, 0);
+
+    public static Rect Infinite { get; } = new Rect(float.NegativeInfinity, float.NegativeInfinity, float.PositiveInfinity, float.PositiveInfinity);
+
     public float X { get; set; }
     public float Y { get; set; }
     public float Width { get; set; }
     public float Height { get; set; }
+
+
 
     public Rect(Vector2 coords, Vector2 size)
     {
@@ -66,5 +72,28 @@ public struct Rect
             && other.Right > this.Left
             && other.Top < this.Bottom
             && other.Bottom > this.Top;
+    }
+
+    public bool Equals(Rect other)
+    {
+        return this.X == other.X
+            && this.Y == other.Y
+            && this.Width == other.Width
+            && this.Height == other.Height;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return obj is Rect other && this.Equals(other);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(this.X, this.Y, this.Width, this.Height);
+    }
+
+    public override string ToString()
+    {
+        return $"{this.X}, {this.Y}, {this.Width}, {this.Height}";
     }
 }

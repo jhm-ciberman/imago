@@ -9,26 +9,51 @@ namespace LifeSim.Engine.Controls;
 
 public abstract class Control
 {
+    /// <summary>
+    /// Gets or sets the name of the control.
+    /// </summary>
     public string Name { get; set; } = string.Empty;
 
     public Action<object, float>? Updated { get; set; }
 
+    /// <summary>
+    /// Gets or sets the margin of the control.
+    /// </summary>
     public Thickness Margin { get; set; } = new Thickness(0);
 
-
-
+    /// <summary>
+    /// Gets or sets the horizontal alignment of the control.
+    /// </summary>
     public HorizontalAlignment HorizontalAlignment { get; set; } = HorizontalAlignment.Left;
 
+    /// <summary>
+    /// Gets or sets the vertical alignment of the control.
+    /// </summary>
     public VerticalAlignment VerticalAlignment { get; set; } = VerticalAlignment.Top;
 
+    /// <summary>
+    /// Gets an enumerable collection of the control's visual children.
+    /// </summary>
     public virtual IEnumerable<Control> VisualChildren { get; } = Enumerable.Empty<Control>();
 
+    /// <summary>
+    /// Gets or sets the dock position of the control.
+    /// </summary>
     public Dock Dock { get; set; } = Dock.None;
 
+    /// <summary>
+    /// Gets or sets the background color of the control.
+    /// </summary>
     public Color BackgroundColor { get; set; } = Color.Transparent;
 
+    /// <summary>
+    /// Gets the parent of the control or null if the control has no parent.
+    /// </summary>
     public Control? Parent { get; internal set; }
 
+    /// <summary>
+    /// Gets the root of the control.
+    /// </summary>
     private UILayer? _root;
     public UILayer? Root
     {
@@ -46,18 +71,39 @@ public abstract class Control
         }
     }
 
+    /// <summary>
+    /// Gets or sets the position of the control.
+    /// </summary>
     public Vector2 Position { get; protected set; } = Vector2.Zero;
 
+    /// <summary>
+    /// Gets or sets the actual size of the control. That is, the real size the control takes up.
+    /// </summary>
     public Vector2 ActualSize { get; protected set; } = Vector2.Zero;
 
+    /// <summary>
+    /// Gets or sets the visibility of the control.
+    /// </summary>
     public Visibility Visibility { get; protected set; } = Visibility.Visible;
 
+    /// <summary>
+    /// Gets the desired size of the control. That is the size that the control has requested to take up after the measure pass.
+    /// </summary>
     public Vector2 DesiredSize { get; protected set; } = Vector2.Zero;
 
+    /// <summary>
+    /// Gets or sets the width of the control. A value of float.NaN indicates that the width should be calculated automatically using the control's content.
+    /// </summary>
     public float Width { get; set; } = float.NaN;
 
+    /// <summary>
+    /// Gets or sets the height of the control. A value of float.NaN indicates that the height should be calculated automatically using the control's content.
+    /// </summary>
     public float Height { get; set; } = float.NaN;
 
+    /// <summary>
+    /// Gets or sets the style of the control.
+    /// </summary>
     private Style? _style;
 
     public Style? Style
@@ -73,16 +119,28 @@ public abstract class Control
         }
     }
 
+    /// <summary>
+    /// Creates a new instance of the <see cref="Control"/> class.
+    /// </summary>
     public Control()
     {
         this.Style = Style.GetDefaultStyle(this.GetType());
     }
 
+    /// <summary>
+    /// Creates a new instance of the <see cref="Control"/> class.
+    /// </summary>
+    /// <param name="name">The name of the control.</param>
     public Control(string name) : this()
     {
         this.Name = name;
     }
 
+    /// <summary>
+    /// Performs the measure pass of the layout process. In the measure pass, the control computes the desired size of the control
+    /// and updates the <see cref="DesiredSize"/> property.
+    /// </summary>
+    /// <param name="availableSize">The available size that this object can give to child objects. Infinity can be specified as a value to indicate that the object will size to whatever content is available.</param>
     public void Measure(Vector2 availableSize)
     {
         if (this.Visibility == Visibility.Collapsed)
@@ -107,6 +165,10 @@ public abstract class Control
         this.DesiredSize = this.MeasureCore(availableSize) + margin;
     }
 
+    /// <summary>
+    /// Performs the arrange pass of the layout process. In the arrange pass, the control positions its children and computes the actual size of the control.
+    /// </summary>
+    /// <param name="finalSize">The final size that this object should use to arrange itself and its children.</param>
     public void Arrange(Rect finalRect)
     {
         float marginW = this.Margin.Left + this.Margin.Right;
@@ -159,6 +221,10 @@ public abstract class Control
         this.ActualSize = rectPosition.Size;
     }
 
+    /// <summary>
+    /// Draws the control.
+    /// </summary>
+    /// <param name="spriteBatcher">The sprite batch to use for drawing.</param>
     public void Draw(SpriteBatcher spriteBatcher)
     {
         if (this.Visibility != Visibility.Visible)
@@ -174,6 +240,9 @@ public abstract class Control
         this.DrawCore(spriteBatcher);
     }
 
+    /// <summary>
+    /// Updates the control. This method is called by the <see cref="Root"/> of the control in each frame.
+    /// </summary>
     public virtual void Update(float deltaTime)
     {
         // Do nothing. This should be overridden by subclasses.
@@ -196,6 +265,12 @@ public abstract class Control
         //
     }
 
+    /// <summary>
+    /// Finds a child control of the specified type by its name recursively.
+    /// </summary>
+    /// <typeparam name="T">The type of the control to find.</typeparam>
+    /// <param name="name">The name of the control to find.</param>
+    /// <returns>The control if found, otherwise null.</returns>
     public T? FindByName<T>(string name) where T : Control
     {
         if (this.Name == name)

@@ -65,6 +65,12 @@ public readonly struct Color
     public static Color Cyan => new Color(0, 255, 255, 255);
     public static Color Magenta => new Color(255, 0, 255, 255);
     public static Color Transparent => new Color(0, 0, 0, 0);
+    public static Color Orange => new Color(255, 128, 0, 255);
+    public static Color Purple => new Color(128, 0, 128, 255);
+    public static Color Brown => new Color(128, 64, 0, 255);
+    public static Color Pink => new Color(255, 192, 203, 255);
+    public static Color Indigo => new Color(75, 0, 130, 255);
+    public static Color Violet => new Color(238, 130, 238, 255);
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

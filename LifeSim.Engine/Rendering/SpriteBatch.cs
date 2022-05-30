@@ -22,6 +22,8 @@ public class SpriteBatch
 
     public bool IsFull => this.Count >= this.Items.Length;
 
+    public RenderFlags RenderFlags { get; internal set; } = RenderFlags.None;
+
     public void Add(Item item)
     {
         if (this.IsFull)
@@ -136,5 +138,10 @@ public class SpriteBatch
     public void Clear()
     {
         this.Count = 0;
+    }
+
+    internal void SetScissorRectangle(Rect scisorRectangle)
+    {
+        throw new NotImplementedException();
     }
 }

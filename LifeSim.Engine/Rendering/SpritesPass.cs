@@ -32,6 +32,7 @@ public class SpritesPass : IDisposable, IPipelineProvider, IRenderingPass
 
     Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant, RenderFlags flags)
     {
+        var scissorTestEnabled = flags.HasFlag(RenderFlags.ScisorTest);
         return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
         {
             DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
@@ -43,7 +44,7 @@ public class SpritesPass : IDisposable, IPipelineProvider, IRenderingPass
                 PolygonFillMode.Solid,
                 FrontFace.CounterClockwise,
                 depthClipEnabled: true,
-                scissorTestEnabled: false
+                scissorTestEnabled
             ),
             Outputs = this._renderTexture.OutputDescription,
             ResourceLayouts = new ResourceLayout[]

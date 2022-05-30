@@ -188,6 +188,7 @@ public partial class ForwardPass : IDisposable, IPipelineProvider, IRenderingPas
         var depthWriteEnabled = flags.HasFlag(RenderFlags.DepthWrite);
         var fillMode = flags.HasFlag(RenderFlags.Wireframe) ? PolygonFillMode.Wireframe : PolygonFillMode.Solid;
         var outputDescription = this._renderTexture.OutputDescription;
+        var scissorTestEnabled = flags.HasFlag(RenderFlags.ScisorTest);
         if (!flags.HasFlag(RenderFlags.MousePick))
         {
             outputDescription = new OutputDescription(outputDescription.DepthAttachment, outputDescription.ColorAttachments[0]);
@@ -210,7 +211,7 @@ public partial class ForwardPass : IDisposable, IPipelineProvider, IRenderingPas
                 fillMode,
                 FrontFace.CounterClockwise,
                 depthClipEnabled: true,
-                scissorTestEnabled: false
+                scissorTestEnabled
             ),
             Outputs = outputDescription,
             ResourceLayouts = this.GetResourceLayouts(shaderVariant),

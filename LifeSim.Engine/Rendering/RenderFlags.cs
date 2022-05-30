@@ -17,4 +17,5 @@ public enum RenderFlags : short
     ReceiveShadows = 1 << 7,
     Fog = 1 << 8,
     PixelPerfactShadows = 1 << 9,
+    ScisorTest = 1 << 10,
 }

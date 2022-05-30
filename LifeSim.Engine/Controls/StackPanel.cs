@@ -16,19 +16,22 @@ public class StackPanel : ItemsControl
     {
         var desiredSize = Vector2.Zero;
 
-        foreach (var child in this.Items)
+        if (this.Orientation == Orientation.Horizontal)
         {
-            child.Measure(availableSize);
-
-            var childDesiredSize = child.DesiredSize;
-
-            if (this.Orientation == Orientation.Horizontal)
+            foreach (var child in this.Items)
             {
+                child.Measure(availableSize);
+                var childDesiredSize = child.DesiredSize;
                 desiredSize.X += childDesiredSize.X;
                 desiredSize.Y = Math.Max(desiredSize.Y, childDesiredSize.Y);
             }
-            else
+        }
+        else
+        {
+            foreach (var child in this.Items)
             {
+                child.Measure(availableSize);
+                var childDesiredSize = child.DesiredSize;
                 desiredSize.X = Math.Max(desiredSize.X, childDesiredSize.X);
                 desiredSize.Y += childDesiredSize.Y;
             }
@@ -45,23 +48,28 @@ public class StackPanel : ItemsControl
         var x = finalRect.X;
         var y = finalRect.Y;
 
-        foreach (var child in this.Items)
+        if (this.Orientation == Orientation.Horizontal)
         {
-            var childDesiredSize = child.DesiredSize;
-
-            if (this.Orientation == Orientation.Horizontal)
+            foreach (var child in this.Items)
             {
+                var childDesiredSize = child.DesiredSize;
                 child.Arrange(new Rect(x, y, childDesiredSize.X, finalRect.Height));
                 x += childDesiredSize.X;
             }
-            else
+
+            return new Rect(finalRect.X, finalRect.Y, x - finalRect.X, finalRect.Height);
+        }
+        else
+        {
+            foreach (var child in this.Items)
             {
+                var childDesiredSize = child.DesiredSize;
                 child.Arrange(new Rect(x, y, finalRect.Width, childDesiredSize.Y));
                 y += childDesiredSize.Y;
             }
-        }
 
-        return finalRect;
+            return new Rect(finalRect.X, finalRect.Y, finalRect.Width, y - finalRect.Y);
+        }
     }
 
 

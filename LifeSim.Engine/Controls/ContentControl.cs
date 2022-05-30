@@ -40,15 +40,12 @@ public class ContentControl : Control
         }
     }
 
-    protected override Rect ArrangeCore(Rect finalRect)
-    {
-        if (this.Content != null)
-        {
-            this.Content.Arrange(finalRect);
-        }
 
-        return finalRect;
-    }
+    /// <summary>
+    /// Gets or sets whether the content is clipped to the control's bounds.
+    /// </summary>
+    public bool ClipToBounds { get; set; } = false;
+
 
     protected override Vector2 MeasureCore(Vector2 availableSize)
     {
@@ -63,11 +60,31 @@ public class ContentControl : Control
         }
     }
 
+    protected override Rect ArrangeCore(Rect finalRect)
+    {
+        if (this.Content != null)
+        {
+            this.Content.Arrange(finalRect);
+        }
+
+        return finalRect;
+    }
+
     protected override void DrawCore(SpriteBatcher spriteBatcher)
     {
         if (this.Content != null)
         {
-            this.Content.Draw(spriteBatcher);
+            if (this.ClipToBounds)
+            {
+                Rect rect = new Rect(this.Position * this.Root!.Zoom, this.ActualSize * this.Root!.Zoom);
+                spriteBatcher.BeginClipRectangle(rect);
+                this.Content.Draw(spriteBatcher);
+                spriteBatcher.EndClipRectangle();
+            }
+            else
+            {
+                this.Content.Draw(spriteBatcher);
+            }
         }
     }
 }

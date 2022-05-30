@@ -43,6 +43,10 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
 
     private readonly IPipelineProvider _pass;
 
+    private readonly Stack<Rect> _clipRectStack = new Stack<Rect>();
+
+    private RenderFlags _currentPipelineFlags = RenderFlags.None;
+
     public SpriteBatcher(GraphicsDevice gd, Shader defaultShader, IPipelineProvider pass)
     {
         this._gd = gd;
@@ -117,6 +121,7 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
         this.TotalSpritesToDraw = 0;
         this._batch.Clear();
         this._currentShaderInUse = null!;
+        this._batch.RenderFlags = RenderFlags.None;
 
         cl.UpdateBuffer(this._camera2DInfoBuffer, 0, ref viewProjectionMatrix);
     }
@@ -259,6 +264,35 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
         this.DrawTexture(this._defaultShader, Texture.White, position, size, Vector2.Zero, Vector2.One, color);
     }
 
+    public void BeginClipRectangle(Rect rect)
+    {
+        this.FlushBatch();
+        this._clipRectStack.Push(rect);
+        this._batch.RenderFlags |= RenderFlags.ScisorTest;
+        this._commandList.SetScissorRect(0, (uint)rect.X, (uint)rect.Y, (uint)rect.Width, (uint)rect.Height);
+    }
+
+    public void EndClipRectangle()
+    {
+        this.FlushBatch();
+
+        if (this._clipRectStack.Count > 0)
+        {
+            this._clipRectStack.Pop();
+            if (this._clipRectStack.Count > 0)
+            {
+                var rect = this._clipRectStack.Peek();
+                this._batch.RenderFlags |= RenderFlags.ScisorTest;
+                this._commandList.SetScissorRect(0, (uint)rect.X, (uint)rect.Y, (uint)rect.Width, (uint)rect.Height);
+            }
+            else
+            {
+                this._batch.RenderFlags &= ~RenderFlags.ScisorTest;
+                this._commandList.SetFullScissorRect(0);
+            }
+        }
+    }
+
     public void FlushBatch()
     {
         if (this._batch.Count == 0 || this._batch.Texture == null)
@@ -266,10 +300,11 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
 
         this._commandList.UpdateBuffer(this.VertexBuffer, 0, this._batch.Items);
 
-        if (this._batch.Shader != this._currentShaderInUse)
+        if (this._batch.Shader != this._currentShaderInUse || this._batch.RenderFlags != this._currentPipelineFlags)
         {
             this._currentShaderInUse = this._batch.Shader ?? this._defaultShader;
-            var pipeline = this._currentShaderInUse.GetPipeline(this._pass, this._vertexFormat, RenderFlags.None);
+            this._currentPipelineFlags = this._batch.RenderFlags;
+            var pipeline = this._currentShaderInUse.GetPipeline(this._pass, this._vertexFormat, this._currentPipelineFlags);
 
             this._commandList.SetPipeline(pipeline);
             this._commandList.SetGraphicsResourceSet(0, this._passResourceSet);
