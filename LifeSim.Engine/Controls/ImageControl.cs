@@ -60,8 +60,11 @@ public class ImageControl : Control
 
     protected override void DrawCore(SpriteBatcher spriteBatcher)
     {
-        if (this.Texture == null) return;
+        base.DrawCore(spriteBatcher);
 
-        spriteBatcher.DrawTexture(this.Shader, this.Texture, this.Position, this.DesiredSize);
+        if (this.Texture != null)
+        {
+            spriteBatcher.DrawTexture(this.Shader, this.Texture, this.Position, this.DesiredSize);
+        }
     }
 }

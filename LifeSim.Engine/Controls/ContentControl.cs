@@ -40,13 +40,6 @@ public class ContentControl : Control
         }
     }
 
-
-    /// <summary>
-    /// Gets or sets whether the content is clipped to the control's bounds.
-    /// </summary>
-    public bool ClipToBounds { get; set; } = false;
-
-
     protected override Vector2 MeasureCore(Vector2 availableSize)
     {
         if (this.Content != null)
@@ -72,19 +65,11 @@ public class ContentControl : Control
 
     protected override void DrawCore(SpriteBatcher spriteBatcher)
     {
+        base.DrawCore(spriteBatcher);
+
         if (this.Content != null)
         {
-            if (this.ClipToBounds)
-            {
-                Rect rect = new Rect(this.Position * this.Root!.Zoom, this.ActualSize * this.Root!.Zoom);
-                spriteBatcher.PushScissorRectangle(rect);
-                this.Content.Draw(spriteBatcher);
-                spriteBatcher.PopScissorRectangle();
-            }
-            else
-            {
-                this.Content.Draw(spriteBatcher);
-            }
+            this.Content.Draw(spriteBatcher);
         }
     }
 }

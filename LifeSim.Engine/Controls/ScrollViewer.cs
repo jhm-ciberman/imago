@@ -24,8 +24,6 @@ public class ScrollViewer : ContentControl
 
     private Vector2 _scrollOffset;
 
-    private Matrix3x2 _scrollMatrix = Matrix3x2.Identity;
-
     /// <summary>
     /// Gets or sets the scroll viewer's scroll offset.
     /// </summary>
@@ -37,7 +35,10 @@ public class ScrollViewer : ContentControl
             if (this._scrollOffset != value)
             {
                 this._scrollOffset = value;
-                this._scrollMatrix = Matrix3x2.CreateTranslation(-this._scrollOffset.X, -this._scrollOffset.Y);
+                if (this.Content != null)
+                {
+                    this.Content.Transform = Matrix3x2.CreateTranslation(-this._scrollOffset.X, -this._scrollOffset.Y);
+                }
             }
         }
     }
@@ -134,9 +135,7 @@ public class ScrollViewer : ContentControl
 
     protected override void DrawCore(SpriteBatcher spriteBatcher)
     {
-        spriteBatcher.PushMatrix(this._scrollMatrix);
         base.DrawCore(spriteBatcher);
-        spriteBatcher.PopMatrix();
 
         var thumb = this.ScrollBarThumb;
         if (thumb.Visibility == Visibility.Visible)

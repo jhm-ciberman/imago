@@ -52,6 +52,8 @@ public abstract class ItemsControl : Control
 
     protected override void DrawCore(SpriteBatcher spriteBatcher)
     {
+        base.DrawCore(spriteBatcher);
+
         foreach (var child in this.Items)
         {
             child.Draw(spriteBatcher);

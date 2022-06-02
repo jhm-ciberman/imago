@@ -47,6 +47,21 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
 
     private readonly Stack<Matrix4x4> _matrixStack = new Stack<Matrix4x4>();
 
+    private readonly Stack<float> _opacityStack = new Stack<float>();
+
+    internal void PushOpacity(float opacity)
+    {
+        opacity *= this._opacityStack.Peek();
+        this._opacityStack.Push(opacity);
+        this._batch.Opacity = opacity;
+    }
+
+    internal void PopOpacity()
+    {
+        this._opacityStack.Pop();
+        this._batch.Opacity = this._opacityStack.Peek();
+    }
+
     private bool _currentMatrixIsDirty = true;
 
     private RenderFlags _currentPipelineFlags = RenderFlags.None;
@@ -123,12 +138,13 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
     {
         this._commandList = cl;
         this.TotalSpritesToDraw = 0;
-        this._batch.Clear();
+        this._batch.Reset();
         this._matrixStack.Clear();
         this._matrixStack.Push(viewProjectionMatrix);
+        this._opacityStack.Clear();
+        this._opacityStack.Push(1f);
         this._currentMatrixIsDirty = false;
         this._currentShaderInUse = null!;
-        this._batch.RenderFlags = RenderFlags.None;
 
         cl.UpdateBuffer(this._matrixBuffer, 0, ref viewProjectionMatrix);
     }

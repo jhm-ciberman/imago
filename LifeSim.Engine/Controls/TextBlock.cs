@@ -34,6 +34,8 @@ public class TextBlock : Control
 
     protected override void DrawCore(SpriteBatcher spriteBatcher)
     {
+        base.DrawCore(spriteBatcher);
+
         var font = Font.GetFont(this.FontFamily, this.FontSize, this.Outline, this.Blur);
         spriteBatcher.DrawText(font, this.Text, this.Position, this.Foreground);
     }

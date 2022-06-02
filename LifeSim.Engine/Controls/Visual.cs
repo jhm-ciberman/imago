@@ -1,0 +1,145 @@
+using System.Collections.Generic;
+using System.Linq;
+using System.Numerics;
+using LifeSim.Engine.Rendering;
+
+namespace LifeSim.Engine.Controls;
+
+public abstract class Visual
+{
+    /// <summary>
+    /// Gets or sets the name of the element.
+    /// </summary>
+    public string Name { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the visibility of the control.
+    /// </summary>
+    public Visibility Visibility { get; set; } = Visibility.Visible;
+
+
+    private Matrix3x2 _transform = Matrix3x2.Identity;
+    private bool _transformIsIdentity = true;
+
+    /// <summary>
+    /// Gets or sets the visual transform of the control.
+    /// </summary>
+    public Matrix3x2 Transform
+    {
+        get => this._transform;
+        set
+        {
+            this._transform = value;
+            this._transformIsIdentity = value == Matrix3x2.Identity;
+        }
+    }
+
+    /// <summary>
+    /// Gets the root of the control.
+    /// </summary>
+    private UILayer? _root;
+    public UILayer? Root
+    {
+        get => this._root;
+        internal set
+        {
+            if (this._root != value)
+            {
+                this._root = value;
+                foreach (var child in this.VisualChildren)
+                {
+                    child.Root = value;
+                }
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// Gets or sets the opacity of the control.
+    /// </summary>
+    public float Opacity { get; set; } = 1f;
+
+    /// <summary>
+    /// Gets an enumerable collection of the control's visual children.
+    /// </summary>
+    public virtual IEnumerable<Control> VisualChildren { get; } = Enumerable.Empty<Control>();
+
+    /// <summary>
+    /// Gets or sets whether the content is clipped to the control's bounds.
+    /// </summary>
+    public bool ClipToBounds { get; set; } = false;
+
+    /// <summary>
+    /// Draws the control.
+    /// </summary>
+    /// <param name="spriteBatcher">The sprite batch to use for drawing.</param>
+    public void Draw(SpriteBatcher spriteBatcher)
+    {
+        if (this.Visibility != Visibility.Visible || this.Opacity <= 0f)
+        {
+            return;
+        }
+
+        if (this.Opacity < 1f)
+        {
+            spriteBatcher.PushOpacity(this.Opacity);
+        }
+
+        if (!this._transformIsIdentity)
+        {
+            spriteBatcher.PushMatrix(this.Transform);
+        }
+
+        if (this.ClipToBounds)
+        {
+            spriteBatcher.PushScissorRectangle(GetBounds() * this.Root!.Zoom);
+            this.DrawCore(spriteBatcher);
+            spriteBatcher.PopScissorRectangle();
+        }
+        else
+        {
+            this.DrawCore(spriteBatcher);
+        }
+
+        if (!this._transformIsIdentity)
+        {
+            spriteBatcher.PopMatrix();
+        }
+
+        if (this.Opacity < 1f)
+        {
+            spriteBatcher.PopOpacity();
+        }
+    }
+
+    protected abstract Rect GetBounds();
+
+    protected abstract void DrawCore(SpriteBatcher spriteBatcher);
+
+    /// <summary>
+    /// Finds a child control of the specified type by its name recursively.
+    /// </summary>
+    /// <typeparam name="T">The type of the control to find.</typeparam>
+    /// <param name="name">The name of the control to find.</param>
+    /// <returns>The control if found, otherwise null.</returns>
+    public T? FindByName<T>(string name) where T : Control
+    {
+        if (this.Name == name)
+        {
+            return (T)this;
+        }
+
+        foreach (var child in this.VisualChildren)
+        {
+            var result = child.FindByName<T>(name);
+
+            if (result != null)
+            {
+                return result;
+            }
+        }
+
+        return null;
+    }
+}

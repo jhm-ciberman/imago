@@ -7,13 +7,8 @@ using LifeSim.Engine.SceneGraph;
 
 namespace LifeSim.Engine.Controls;
 
-public class Control
+public class Control : Visual
 {
-    /// <summary>
-    /// Gets or sets the name of the control.
-    /// </summary>
-    public string Name { get; set; } = string.Empty;
-
     public Action<object, float>? Updated { get; set; }
 
     /// <summary>
@@ -32,11 +27,6 @@ public class Control
     public VerticalAlignment VerticalAlignment { get; set; } = VerticalAlignment.Top;
 
     /// <summary>
-    /// Gets an enumerable collection of the control's visual children.
-    /// </summary>
-    public virtual IEnumerable<Control> VisualChildren { get; } = Enumerable.Empty<Control>();
-
-    /// <summary>
     /// Gets or sets the dock position of the control.
     /// </summary>
     public Dock Dock { get; set; } = Dock.None;
@@ -51,38 +41,6 @@ public class Control
     /// </summary>
     public Control? Parent { get; internal set; }
 
-    private Matrix3x2 _transform = Matrix3x2.Identity;
-
-    private bool _transformIsIdentity = true;
-    public Matrix3x2 Transform
-    {
-        get => this._transform;
-        set
-        {
-            this._transform = value;
-            this._transformIsIdentity = value == Matrix3x2.Identity;
-        }
-    }
-
-    /// <summary>
-    /// Gets the root of the control.
-    /// </summary>
-    private UILayer? _root;
-    public UILayer? Root
-    {
-        get => this._root;
-        internal set
-        {
-            if (this._root != value)
-            {
-                this._root = value;
-                foreach (var child in this.VisualChildren)
-                {
-                    child.Root = value;
-                }
-            }
-        }
-    }
 
     /// <summary>
     /// Gets the position of the control.
@@ -93,11 +51,6 @@ public class Control
     /// Gets the actual size of the control. That is, the real size the control takes up.
     /// </summary>
     public Vector2 ActualSize { get; protected set; } = Vector2.Zero;
-
-    /// <summary>
-    /// Gets or sets the visibility of the control.
-    /// </summary>
-    public Visibility Visibility { get; set; } = Visibility.Visible;
 
     /// <summary>
     /// Gets the desired size of the control. That is the size that the control has requested to take up after the measure pass.
@@ -236,38 +189,9 @@ public class Control
         this.ActualSize = rectPosition.Size;
     }
 
-    /// <summary>
-    /// Draws the control.
-    /// </summary>
-    /// <param name="spriteBatcher">The sprite batch to use for drawing.</param>
-    public void Draw(SpriteBatcher spriteBatcher)
+    protected override Rect GetBounds()
     {
-        if (this.Visibility != Visibility.Visible)
-        {
-            return;
-        }
-
-        if (!this._transformIsIdentity)
-        {
-            spriteBatcher.PushMatrix(this.Transform);
-
-            if (this.Background.A > 0)
-            {
-                spriteBatcher.DrawRectangle(this.Position, this.ActualSize, this.Background);
-            }
-            this.DrawCore(spriteBatcher);
-
-            spriteBatcher.PopMatrix();
-        }
-        else
-        {
-            if (this.Background.A > 0)
-            {
-                spriteBatcher.DrawRectangle(this.Position, this.ActualSize, this.Background);
-            }
-
-            this.DrawCore(spriteBatcher);
-        }
+        return new Rect(this.Position, this.ActualSize);
     }
 
     /// <summary>
@@ -290,36 +214,11 @@ public class Control
         return availableSize;
     }
 
-    protected virtual void DrawCore(SpriteBatcher spriteBatcher)
+    protected override void DrawCore(SpriteBatcher spriteBatcher)
     {
-        //
-    }
-
-    /// <summary>
-    /// Finds a child control of the specified type by its name recursively.
-    /// </summary>
-    /// <typeparam name="T">The type of the control to find.</typeparam>
-    /// <param name="name">The name of the control to find.</param>
-    /// <returns>The control if found, otherwise null.</returns>
-    public T? FindByName<T>(string name) where T : Control
-    {
-        if (this.Name == name)
+        if (this.Background.A > 0)
         {
-            return (T)this;
+            spriteBatcher.DrawRectangle(this.Position, this.ActualSize, this.Background);
         }
-
-        foreach (var child in this.VisualChildren)
-        {
-            var result = child.FindByName<T>(name);
-
-            if (result != null)
-            {
-                return result;
-            }
-        }
-
-        return null;
     }
-
-
 }

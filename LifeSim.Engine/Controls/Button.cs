@@ -66,6 +66,8 @@ public class Button : ContentControl
 
     protected override void DrawCore(SpriteBatcher spriteBatcher)
     {
+        base.DrawCore(spriteBatcher);
+
         var texture = this.NormalTexture;
         if (this.IsPressed)
         {
@@ -80,8 +82,6 @@ public class Button : ContentControl
         {
             spriteBatcher.DrawTexture(this.Shader, texture, this.Position, this.ActualSize);
         }
-
-        base.DrawCore(spriteBatcher);
     }
 
     public override void Update(float deltaTime)

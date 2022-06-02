@@ -24,6 +24,8 @@ public class SpriteBatch
 
     public RenderFlags RenderFlags { get; internal set; } = RenderFlags.None;
 
+    private float _opacity { get; set; } = 1f;
+
     public void Add(Item item)
     {
         if (this.IsFull)
@@ -71,8 +73,30 @@ public class SpriteBatch
         }
     }
 
+    public float Opacity
+    {
+        get => this._opacity;
+        set
+        {
+            if (this._opacity != value)
+            {
+                this._opacity = value;
+                if (value >= 1f)
+                {
+                    this.RenderFlags &= ~RenderFlags.Transparent;
+                }
+                else
+                {
+                    this.RenderFlags |= RenderFlags.Transparent;
+                }
+            }
+        }
+    }
+
     public void DrawCore(Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, Color color)
     {
+        color = new Color(color.R, color.G, color.B, (byte)(color.A * this.Opacity));
+
         this.Add(new Item
         {
             TopLeft = new Vertex(position.X, position.Y, 0f, uvTopLeft.X, uvTopLeft.Y, color),
@@ -104,6 +128,8 @@ public class SpriteBatch
         var blUVs = new Vector2(uvTopLeft.X, uvBottomRight.Y);
         var brUVs = uvBottomRight;
 
+        color = new Color(color.R, color.G, color.B, (byte)(color.A * this.Opacity));
+
         this.Add(new Item
         {
             TopLeft = new Vertex(tlPos, tlUVs, color),
@@ -125,6 +151,8 @@ public class SpriteBatch
         var blUVs = new Vector2(uvTopLeft.X, uvBottomRight.Y);
         var brUVs = uvBottomRight;
 
+        color = new Color(color.R, color.G, color.B, (byte)(color.A * this.Opacity));
+
         this.Add(new Item
         {
             TopLeft = new Vertex(Vector2.Transform(tl, transform), depth, tlUVs, color),
@@ -140,8 +168,10 @@ public class SpriteBatch
         this.Count = 0;
     }
 
-    internal void SetScissorRectangle(Rect scisorRectangle)
+    public void Reset()
     {
-        throw new NotImplementedException();
+        this.Count = 0;
+        this.Opacity = 1f;
+        this.RenderFlags = RenderFlags.None;
     }
 }
