@@ -7,7 +7,7 @@ using LifeSim.Engine.SceneGraph;
 
 namespace LifeSim.Engine.Controls;
 
-public abstract class Control
+public class Control
 {
     /// <summary>
     /// Gets or sets the name of the control.
@@ -44,12 +44,25 @@ public abstract class Control
     /// <summary>
     /// Gets or sets the background color of the control.
     /// </summary>
-    public Color BackgroundColor { get; set; } = Color.Transparent;
+    public Color Background { get; set; } = Color.Transparent;
 
     /// <summary>
     /// Gets the parent of the control or null if the control has no parent.
     /// </summary>
     public Control? Parent { get; internal set; }
+
+    private Matrix3x2 _transform = Matrix3x2.Identity;
+
+    private bool _transformIsIdentity = true;
+    public Matrix3x2 Transform
+    {
+        get => this._transform;
+        set
+        {
+            this._transform = value;
+            this._transformIsIdentity = value == Matrix3x2.Identity;
+        }
+    }
 
     /// <summary>
     /// Gets the root of the control.
@@ -72,19 +85,19 @@ public abstract class Control
     }
 
     /// <summary>
-    /// Gets or sets the position of the control.
+    /// Gets the position of the control.
     /// </summary>
     public Vector2 Position { get; protected set; } = Vector2.Zero;
 
     /// <summary>
-    /// Gets or sets the actual size of the control. That is, the real size the control takes up.
+    /// Gets the actual size of the control. That is, the real size the control takes up.
     /// </summary>
     public Vector2 ActualSize { get; protected set; } = Vector2.Zero;
 
     /// <summary>
     /// Gets or sets the visibility of the control.
     /// </summary>
-    public Visibility Visibility { get; protected set; } = Visibility.Visible;
+    public Visibility Visibility { get; set; } = Visibility.Visible;
 
     /// <summary>
     /// Gets the desired size of the control. That is the size that the control has requested to take up after the measure pass.
@@ -152,17 +165,19 @@ public abstract class Control
         var margin = new Vector2(this.Margin.Left + this.Margin.Right, this.Margin.Top + this.Margin.Bottom);
         availableSize -= margin;
 
+        Vector2 desiredSize = this.MeasureCore(availableSize);
+
         if (!float.IsNaN(this.Width))
         {
-            availableSize.X = this.Width;
+            desiredSize.X = this.Width;
         }
 
         if (!float.IsNaN(this.Height))
         {
-            availableSize.Y = this.Height;
+            desiredSize.Y = this.Height;
         }
 
-        this.DesiredSize = this.MeasureCore(availableSize) + margin;
+        this.DesiredSize = desiredSize + margin;
     }
 
     /// <summary>
@@ -232,12 +247,27 @@ public abstract class Control
             return;
         }
 
-        if (this.BackgroundColor.A > 0)
+        if (!this._transformIsIdentity)
         {
-            spriteBatcher.DrawRectangle(this.Position, this.ActualSize, this.BackgroundColor);
-        }
+            spriteBatcher.PushMatrix(this.Transform);
 
-        this.DrawCore(spriteBatcher);
+            if (this.Background.A > 0)
+            {
+                spriteBatcher.DrawRectangle(this.Position, this.ActualSize, this.Background);
+            }
+            this.DrawCore(spriteBatcher);
+
+            spriteBatcher.PopMatrix();
+        }
+        else
+        {
+            if (this.Background.A > 0)
+            {
+                spriteBatcher.DrawRectangle(this.Position, this.ActualSize, this.Background);
+            }
+
+            this.DrawCore(spriteBatcher);
+        }
     }
 
     /// <summary>

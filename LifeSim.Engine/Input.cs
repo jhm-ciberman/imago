@@ -38,5 +38,7 @@ public static class Input
         get => Input.Instance.CursorIsVisible;
         set => Input.Instance.CursorIsVisible = value;
     }
+    public static float MouseWheelDelta => Input.Instance.MouseWheelDelta;
+
     public static void MoveCursorToCenter() => Input.Instance.MoveMouseToCenter();
 }

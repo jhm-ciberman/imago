@@ -16,7 +16,7 @@ public struct Thickness
     public Vector2 BottomLeft => new Vector2(this.Left, this.Bottom);
     public Vector2 BottomRight => new Vector2(this.Right, this.Bottom);
 
-
+    public Vector2 Total => new Vector2(this.Left + this.Right, this.Top + this.Bottom);
 
     public Thickness(float all)
     {
@@ -52,14 +52,14 @@ public struct Thickness
         return new Thickness(a.Left - b.Left, a.Top - b.Top, a.Right - b.Right, a.Bottom - b.Bottom);
     }
 
-    public static implicit operator Vector2(Thickness thickness)
+    public static Vector2 operator +(Thickness a, Vector2 b)
     {
-        return new Vector2(thickness.Left, thickness.Top);
+        return new Vector2(a.Left + b.X, a.Top + b.Y);
     }
 
-    public static implicit operator Thickness(Vector2 vector)
+    public static Vector2 operator -(Thickness a, Vector2 b)
     {
-        return new Thickness(vector.X, vector.Y);
+        return new Vector2(a.Left - b.X, a.Top - b.Y);
     }
 
     public static implicit operator Vector4(Thickness thickness)

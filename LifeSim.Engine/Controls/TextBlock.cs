@@ -7,7 +7,7 @@ public class TextBlock : Control
 {
     public string Text { get; set; } = string.Empty;
 
-    public Color Color { get; set; } = Color.Black;
+    public Color Foreground { get; set; } = Color.Black;
 
     public string? FontFamily { get; set; }
 
@@ -29,12 +29,12 @@ public class TextBlock : Control
 
     protected override Vector2 MeasureCore(Vector2 availableSize)
     {
-        return Font.GetFont(this.FontFamily, this.FontSize).MeasureString(this.Text);
+        return Font.GetFont(this.FontFamily, this.FontSize, this.Outline, this.Blur).MeasureString(this.Text);
     }
 
     protected override void DrawCore(SpriteBatcher spriteBatcher)
     {
         var font = Font.GetFont(this.FontFamily, this.FontSize, this.Outline, this.Blur);
-        spriteBatcher.DrawText(font, this.Text, this.Position, this.Color);
+        spriteBatcher.DrawText(font, this.Text, this.Position, this.Foreground);
     }
 }

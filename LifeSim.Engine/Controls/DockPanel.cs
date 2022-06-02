@@ -6,6 +6,11 @@ namespace LifeSim.Engine.Controls;
 
 public class DockPanel : ItemsControl
 {
+    /// <summary>
+    /// Gets or sets whether the last child is stretched to fill the remaining space.
+    /// </summary>
+    public bool LastChildFill { get; set; } = true;
+
     public DockPanel()
     {
         //
@@ -29,7 +34,7 @@ public class DockPanel : ItemsControl
 
             childDesiredSize = Vector2.Min(childDesiredSize, availableSize);
 
-            if (isLast)
+            if (isLast && this.LastChildFill)
             {
                 availableSize.X = 0;
                 availableSize.Y = 0;
@@ -71,7 +76,7 @@ public class DockPanel : ItemsControl
 
             Vector2 childDesiredSize = child.DesiredSize;
 
-            if (isLast)
+            if (isLast && this.LastChildFill)
             {
                 child.Arrange(availableRect);
             }

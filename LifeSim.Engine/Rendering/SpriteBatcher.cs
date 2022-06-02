@@ -35,7 +35,7 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
 
     private readonly ResourceSet _passResourceSet;
 
-    private readonly DeviceBuffer _camera2DInfoBuffer;
+    private readonly DeviceBuffer _matrixBuffer;
 
     public ResourceLayout PassResourceLayout { get; }
 
@@ -44,6 +44,10 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
     private readonly IPipelineProvider _pass;
 
     private readonly Stack<Rect> _clipRectStack = new Stack<Rect>();
+
+    private readonly Stack<Matrix4x4> _matrixStack = new Stack<Matrix4x4>();
+
+    private bool _currentMatrixIsDirty = true;
 
     private RenderFlags _currentPipelineFlags = RenderFlags.None;
 
@@ -88,8 +92,8 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
             new ResourceLayoutElementDescription("CameraDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
         ));
 
-        this._camera2DInfoBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
-        this._passResourceSet = factory.CreateResourceSet(new ResourceSetDescription(this.PassResourceLayout, this._camera2DInfoBuffer));
+        this._matrixBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+        this._passResourceSet = factory.CreateResourceSet(new ResourceSetDescription(this.PassResourceLayout, this._matrixBuffer));
 
         this._resourceSetCache = new ResourceSetCache(factory);
     }
@@ -120,10 +124,13 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
         this._commandList = cl;
         this.TotalSpritesToDraw = 0;
         this._batch.Clear();
+        this._matrixStack.Clear();
+        this._matrixStack.Push(viewProjectionMatrix);
+        this._currentMatrixIsDirty = false;
         this._currentShaderInUse = null!;
         this._batch.RenderFlags = RenderFlags.None;
 
-        cl.UpdateBuffer(this._camera2DInfoBuffer, 0, ref viewProjectionMatrix);
+        cl.UpdateBuffer(this._matrixBuffer, 0, ref viewProjectionMatrix);
     }
 
     public void End()
@@ -264,7 +271,7 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
         this.DrawTexture(this._defaultShader, Texture.White, position, size, Vector2.Zero, Vector2.One, color);
     }
 
-    public void BeginClipRectangle(Rect rect)
+    public void PushScissorRectangle(Rect rect)
     {
         this.FlushBatch();
         this._clipRectStack.Push(rect);
@@ -272,7 +279,7 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
         this._commandList.SetScissorRect(0, (uint)rect.X, (uint)rect.Y, (uint)rect.Width, (uint)rect.Height);
     }
 
-    public void EndClipRectangle()
+    public void PopScissorRectangle()
     {
         this.FlushBatch();
 
@@ -291,6 +298,20 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
                 this._commandList.SetFullScissorRect(0);
             }
         }
+    }
+
+    public void PushMatrix(Matrix3x2 matrix)
+    {
+        this.FlushBatch();
+        this._matrixStack.Push(new Matrix4x4(matrix) * this._matrixStack.Peek());
+        this._currentMatrixIsDirty = true;
+    }
+
+    public void PopMatrix()
+    {
+        this.FlushBatch();
+        this._matrixStack.Pop();
+        this._currentMatrixIsDirty = true;
     }
 
     public void FlushBatch()
@@ -313,6 +334,10 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
         this._commandList.SetVertexBuffer(0, this.VertexBuffer);
         this._commandList.SetIndexBuffer(this._indexBuffer, IndexFormat.UInt16);
 
+        if (this._currentMatrixIsDirty)
+        {
+            this._commandList.UpdateBuffer(this._matrixBuffer, 0, this._matrixStack.Peek());
+        }
 
         var resourceSet = this._resourceSetCache.GetResourceSet(this._currentShaderInUse, this._batch.Texture);
         this._commandList.SetGraphicsResourceSet(1, resourceSet);
@@ -326,7 +351,7 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
     {
         this._indexBuffer.Dispose();
         this.VertexBuffer.Dispose();
-        this._camera2DInfoBuffer.Dispose();
+        this._matrixBuffer.Dispose();
         this.PassResourceLayout.Dispose();
         this._passResourceSet.Dispose();
         this._resourceSetCache.Dispose();

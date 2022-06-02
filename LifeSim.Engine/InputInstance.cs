@@ -22,6 +22,7 @@ public class InputInstance
     private Vector2 _mousePosition;
     private Vector2 _mouseDelta;
 
+    public float MouseWheelDelta { get; private set; }
     public InputSnapshot InputSnapshot { get; private set; }
 
     public InputInstance(Sdl2Window window)
@@ -67,6 +68,8 @@ public class InputInstance
         var center = new Vector2(this._window.Width / 2, this._window.Height / 2);
         this._mouseDelta = newPos - center;
         this._mousePosition = newPos;
+
+        this.MouseWheelDelta = this.InputSnapshot.WheelDelta;
     }
 
     public void MoveMouseToCenter()
@@ -84,6 +87,7 @@ public class InputInstance
         get => this._window.CursorVisible;
         set => this._window.CursorVisible = value;
     }
+
 
     public bool GetKey(Key key)
     {

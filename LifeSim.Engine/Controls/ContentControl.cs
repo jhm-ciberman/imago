@@ -52,11 +52,11 @@ public class ContentControl : Control
         if (this.Content != null)
         {
             this.Content.Measure(availableSize);
-            return availableSize;
+            return this.Content.DesiredSize;
         }
         else
         {
-            return availableSize;
+            return Vector2.Zero;
         }
     }
 
@@ -77,9 +77,9 @@ public class ContentControl : Control
             if (this.ClipToBounds)
             {
                 Rect rect = new Rect(this.Position * this.Root!.Zoom, this.ActualSize * this.Root!.Zoom);
-                spriteBatcher.BeginClipRectangle(rect);
+                spriteBatcher.PushScissorRectangle(rect);
                 this.Content.Draw(spriteBatcher);
-                spriteBatcher.EndClipRectangle();
+                spriteBatcher.PopScissorRectangle();
             }
             else
             {

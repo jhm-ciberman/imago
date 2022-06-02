@@ -96,4 +96,14 @@ public struct Rect : IEquatable<Rect>
     {
         return $"{this.X}, {this.Y}, {this.Width}, {this.Height}";
     }
+
+    public static bool operator ==(Rect left, Rect right)
+    {
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(Rect left, Rect right)
+    {
+        return !(left == right);
+    }
 }
