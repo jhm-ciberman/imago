@@ -24,7 +24,7 @@ public class SpriteBatch
 
     public RenderFlags RenderFlags { get; internal set; } = RenderFlags.None;
 
-    private float _opacity { get; set; } = 1f;
+    private float _opacity = 1f;
 
     public void Add(Item item)
     {
