@@ -112,6 +112,8 @@ public partial class Renderer : ITexture2DManager, IDisposable
         Texture.InitializeDefaultTextures();
     }
 
+    public int SpritePassDrawCallCount => this._spritesPass.DrawCallCount;
+
     public void DisposeWhenIdle(IDisposable disposable)
     {
         lock (this._disposeCollector)

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
+using LifeSim.Engine.Controls;
 using LifeSim.Engine.SceneGraph;
 using Veldrid;
 
@@ -58,6 +59,7 @@ public class SpritesPass : IDisposable, IPipelineProvider, IRenderingPass
     public void Render(CommandList cl, Scene scene)
     {
         var canvasLayers = scene.CanvasLayers;
+        this.DrawCallCount = 0;
 
         cl.SetFramebuffer(this._renderTexture.Framebuffer);
         cl.ClearDepthStencil(1f);
@@ -72,15 +74,19 @@ public class SpritesPass : IDisposable, IPipelineProvider, IRenderingPass
             }
 
             this._spriteBatcher.End();
+            this.DrawCallCount += this._spriteBatcher.DrawCallCount;
         }
 
         if (scene.UILayer != null)
         {
             this._spriteBatcher.Begin(cl, scene.UILayer.ViewProjectionMatrix);
             scene.UILayer.Draw(this._spriteBatcher);
-            this._spriteBatcher.FlushBatch();
+            this._spriteBatcher.End();
+            this.DrawCallCount += this._spriteBatcher.DrawCallCount;
         }
     }
+
+    public int DrawCallCount { get; private set; }
 
     private static readonly string _fragmentShader = @"
         #version 450
