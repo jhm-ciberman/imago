@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace LifeSim.Engine.Anim;
 
-public class Animation
+public class Animation : IDisposable
 {
     private readonly Dictionary<string, List<IChannel>> _channels = new Dictionary<string, List<IChannel>>();
 
@@ -39,7 +39,10 @@ public class Animation
         this.Duration = MathF.Max(channel.Duration, this.Duration);
     }
 
-
+    public void Dispose()
+    {
+        // TODO: Dispose animation.
+    }
 
     public IReadOnlyList<IChannel>? FindChannels(string targetName)
     {

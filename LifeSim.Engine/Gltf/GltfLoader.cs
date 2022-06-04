@@ -53,7 +53,7 @@ public class GltfLoader
     public GltfLoader(string path, Material? defaultMaterial = null)
     {
         this._path = path;
-        this._model = glTFLoader.Interface.LoadModel(path);
+        this._model = Interface.LoadModel(path);
         this._buffersCache = new GltfBuffer[this._model.Buffers.Length];
         this._nodesCache = new GLTFNode[this._model.Nodes.Length];
         this._defaultMaterial = defaultMaterial;

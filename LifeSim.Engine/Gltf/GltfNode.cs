@@ -5,7 +5,7 @@ using LifeSim.Engine.Rendering;
 
 namespace LifeSim.Engine.Gltf;
 
-internal class GLTFNode
+public class GLTFNode
 {
     public string Name { get; set; }
     public Vector3 Position { get; set; }

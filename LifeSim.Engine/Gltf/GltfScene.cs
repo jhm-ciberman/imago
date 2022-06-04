@@ -42,4 +42,9 @@ internal class GltfScene : IScenePrefab
     {
         return new SceneInstantiator().Instantiate(this);
     }
+
+    public void Dispose()
+    {
+        // TODO: Dispose of all children.
+    }
 }
