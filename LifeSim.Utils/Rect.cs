@@ -82,6 +82,65 @@ public struct Rect : IEquatable<Rect>
             && this.Height == other.Height;
     }
 
+    public void Expand(Vector2 point)
+    {
+        if (point.X < this.X)
+        {
+            this.Width += this.X - point.X;
+            this.X = point.X;
+        }
+        else if (point.X > this.Right)
+        {
+            this.Width = point.X - this.X;
+        }
+
+        if (point.Y < this.Y)
+        {
+            this.Height += this.Y - point.Y;
+            this.Y = point.Y;
+        }
+        else if (point.Y > this.Bottom)
+        {
+            this.Height = point.Y - this.Y;
+        }
+    }
+
+    public void Expand(Rect rect)
+    {
+        if (rect.X < this.X)
+        {
+            this.Width += this.X - rect.X;
+            this.X = rect.X;
+        }
+        else if (rect.Right > this.Right)
+        {
+            this.Width = rect.Right - this.X;
+        }
+
+        if (rect.Y < this.Y)
+        {
+            this.Height += this.Y - rect.Y;
+            this.Y = rect.Y;
+        }
+        else if (rect.Bottom > this.Bottom)
+        {
+            this.Height = rect.Bottom - this.Y;
+        }
+    }
+
+    public void Transform(Matrix3x2 transform)
+    {
+        var topLeft = Vector2.Transform(new Vector2(this.X, this.Y), transform);
+        var topRight = Vector2.Transform(new Vector2(this.Right, this.Y), transform);
+        var bottomLeft = Vector2.Transform(new Vector2(this.X, this.Bottom), transform);
+        var bottomRight = Vector2.Transform(new Vector2(this.Right, this.Bottom), transform);
+
+        this.X = MathF.Min(topLeft.X, MathF.Min(topRight.X, MathF.Min(bottomLeft.X, bottomRight.X)));
+        this.Y = MathF.Min(topLeft.Y, MathF.Min(topRight.Y, MathF.Min(bottomLeft.Y, bottomRight.Y)));
+        this.Width = MathF.Max(topLeft.X, MathF.Max(topRight.X, MathF.Max(bottomLeft.X, bottomRight.X))) - this.X;
+        this.Height = MathF.Max(topLeft.Y, MathF.Max(topRight.Y, MathF.Max(bottomLeft.Y, bottomRight.Y))) - this.Y;
+    }
+
     public override bool Equals(object? obj)
     {
         return obj is Rect other && this.Equals(other);
