@@ -1,17 +1,48 @@
-namespace LifeSim.Engine;
+namespace LifeSim.Engine.Resources;
 
 // Based in "A Thousand Ways to Pack the Bin - A Practical Approach to Two-Dimensional Rectangle Bin Packing" (2010)
 // It uses a GUILLOTINE-MINAS-BAF heuristic (Guillotine algorithm, Min area split, Best Area fit)
+
+/// <summary>
+/// The BinPacker class is used to pack Rectangles into a single Rectangle. This class does not operates with
+/// textures, only with rectangles.
+/// </summary>
 public class BinPacker
 {
     private readonly SwapPopList<Node> _freeList;
     private uint _freeArea;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BinPacker"/> class.
+    /// </summary>
+    /// <param name="width">The total width of the container rectangle.</param>
+    /// <param name="height">The total height of the container rectangle.</param>
     public BinPacker(uint width, uint height)
     {
         this._freeList = new SwapPopList<Node>(4);
         this._freeArea = width * height;
         this._freeList.Add(new Node(0, 0, width, height));
+    }
+
+    /// <summary>
+    /// Try to insert a rectangle into the bin. Returns whether the rectangle was successfully inserted.
+    /// </summary>
+    /// <param name="width">The width of the rectangle.</param>
+    /// <param name="height">The height of the rectangle.</param>
+    /// <param name="coords">The coorddinates where the rectangle was inserted.</param>
+    /// <returns>Whether the rectangle was successfully inserted.</returns>
+    public bool TryFit(uint width, uint height, out Vector2Int coords)
+    {
+        int nodeIndex = this.FindFreeSpaceIndex(width, height);
+        if (nodeIndex == -1)
+        {
+            coords = Vector2Int.Zero;
+            return false;
+        }
+
+        coords = new Vector2Int(this._freeList[nodeIndex].X, this._freeList[nodeIndex].Y);
+        this.InsertAt(nodeIndex, width, height);
+        return true;
     }
 
     private void InsertAt(int nodeIndex, uint width, uint height)
@@ -92,28 +123,6 @@ public class BinPacker
         }
 
         return minWastedIndex;
-    }
-
-
-    /// <summary>
-    /// Try to insert a rectangle into the bin. Returns whether the rectangle was successfully inserted.
-    /// </summary>
-    /// <param name="width">The width of the rectangle.</param>
-    /// <param name="height">The height of the rectangle.</param>
-    /// <param name="coords">The coorddinates where the rectangle was inserted.</param>
-    /// <returns>Whether the rectangle was successfully inserted.</returns>
-    public bool TryFit(uint width, uint height, out Vector2Int coords)
-    {
-        int nodeIndex = this.FindFreeSpaceIndex(width, height);
-        if (nodeIndex == -1)
-        {
-            coords = Vector2Int.Zero;
-            return false;
-        }
-
-        coords = new Vector2Int(this._freeList[nodeIndex].X, this._freeList[nodeIndex].Y);
-        this.InsertAt(nodeIndex, width, height);
-        return true;
     }
 
     private struct Node

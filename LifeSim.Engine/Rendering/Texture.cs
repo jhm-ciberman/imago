@@ -58,7 +58,7 @@ public class Texture : ITexture
 
     public IntPtr ImGuiBinding => Renderer.Instance.GetOrCreateImGuiBinding(this);
 
-
+    public Vector2Int Size => new Vector2Int((int)this.Width, (int)this.Height);
 
     protected void NotifyTextureDirty()
     {
