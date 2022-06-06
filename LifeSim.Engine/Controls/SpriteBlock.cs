@@ -48,7 +48,7 @@ public class SpriteBlock : Control
     /// <summary>
     /// Gets or sets the speed of the animation measured in frames per second.
     /// </summary>
-    public float FramesPerSecond { get; set; } = 30f;
+    public float FramesPerSecond { get; set; } = 0f;
 
     /// <summary>
     /// Gets or sets whether the animation should loop.
@@ -98,7 +98,7 @@ public class SpriteBlock : Control
 
     public override void Update(float deltaTime)
     {
-        if (this.Sprite != null)
+        if (this.Sprite != null && this.FramesPerSecond != 0)
         {
             this._frameIndex += this.FramesPerSecond * deltaTime;
 

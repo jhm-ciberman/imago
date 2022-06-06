@@ -1,20 +1,32 @@
 using System;
-using System.Collections.Generic;
 using System.Numerics;
 using LifeSim.Engine.Rendering;
+using LifeSim.Engine.Resources;
 
 namespace LifeSim.Engine.Controls;
 
 public class Button : ContentControl
 {
+    /// <summary>
+    /// Event that is raised when the button is clicked.
+    /// </summary>
     public Action<Button>? Click { get; set; }
 
+    /// <summary>
+    /// Event that is raised when the mouse enters the button.
+    /// </summary>
     public Action<Button>? MouseEnter { get; set; }
 
+    /// <summary>
+    /// Event that is raised when the mouse leaves the button.
+    /// </summary>
     public Action<Button>? MouseLeave { get; set; }
 
     private bool _isMouseOver = false;
 
+    /// <summary>
+    /// Gets whether the mouse is currently over the button.
+    /// </summary>
     public bool IsMouseOver
     {
         get => this._isMouseOver;
@@ -37,6 +49,9 @@ public class Button : ContentControl
 
     private bool _isPressed = false;
 
+    /// <summary>
+    /// Gets whether the button is currently pressed.
+    /// </summary>
     public bool IsPressed
     {
         get => this._isPressed;
@@ -53,34 +68,63 @@ public class Button : ContentControl
         }
     }
 
-    public Texture? NormalTexture { get; set; }
+    /// <summary>
+    /// Gets or sets whether the button is enabled.
+    /// </summary>
+    public bool IsEnabled { get; set; } = true;
 
-    public Texture? HoverTexture { get; set; }
+    /// <summary>
+    /// Gets or sets the button default texture.
+    /// </summary>
+    public PackedTexture? NormalTexture { get; set; }
 
-    public Texture? PressedTexture { get; set; }
+    /// <summary>
+    /// Gets or sets the button mouse over texture.
+    /// </summary>
+    public PackedTexture? HoverTexture { get; set; }
+
+    /// <summary>
+    /// Gets or sets the button pressed texture.
+    /// </summary>
+    public PackedTexture? PressedTexture { get; set; }
+
+    /// <summary>
+    /// Gets or sets the button disabled texture.
+    /// </summary>
+    public PackedTexture? DisabledTexture { get; set; }
+
 
     public Shader? Shader { get; set; }
 
 
-
+    protected PackedTexture? GetCurrentTexture()
+    {
+        if (!this.IsEnabled)
+        {
+            return this.DisabledTexture ?? this.NormalTexture;
+        }
+        else if (this.IsPressed)
+        {
+            return this.PressedTexture;
+        }
+        else if (this.IsMouseOver)
+        {
+            return this.HoverTexture ?? this.NormalTexture;
+        }
+        else
+        {
+            return this.NormalTexture;
+        }
+    }
 
     protected override void DrawCore(SpriteBatcher spriteBatcher)
     {
         base.DrawCore(spriteBatcher);
 
-        var texture = this.NormalTexture;
-        if (this.IsPressed)
-        {
-            texture = this.PressedTexture;
-        }
-        else if (this.IsMouseOver)
-        {
-            texture = this.HoverTexture;
-        }
-
+        var texture = this.GetCurrentTexture();
         if (texture != null)
         {
-            spriteBatcher.DrawTexture(this.Shader, texture, this.Position, this.ActualSize);
+            spriteBatcher.DrawTexture(this.Shader, texture.Texture, this.Position, this.ActualSize, texture.TopLeft, texture.BottomRight, Color.White);
         }
     }
 
