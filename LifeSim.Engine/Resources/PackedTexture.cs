@@ -47,17 +47,17 @@ public class PackedTexture
     /// <summary>
     /// Gets the size of the packed texture in pixels.
     /// </summary>
-    public Vector2 PixelSize => this.Size * this.Texture.Size;
+    public Vector2Int PixelSize => new Vector2Int((int)(this.Size.X * this.Texture.Size.X), (int)(this.Size.Y * this.Texture.Size.Y));
 
     /// <summary>
     /// Gets the position of the left top corner of the packed texture in pixels.
     /// </summary>
-    public Vector2 PixelTopLeft => this.TopLeft * this.Texture.Size;
+    public Vector2Int PixelTopLeft => new Vector2Int((int)(this.TopLeft.X * this.Texture.Size.X), (int)(this.TopLeft.Y * this.Texture.Size.Y));
 
     /// <summary>
     /// Gets the position of the right bottom corner of the packed texture in pixels.
     /// </summary>
-    public Vector2 PixelBottomRight => this.BottomRight * this.Texture.Size;
+    public Vector2Int PixelBottomRight => new Vector2Int((int)(this.BottomRight.X * this.Texture.Size.X), (int)(this.BottomRight.Y * this.Texture.Size.Y));
 
     public Vector4 GetTextureST()
     {

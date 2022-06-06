@@ -71,6 +71,18 @@ public class TexturePacker
     }
 
     /// <summary>
+    /// Packs the specified image from disk and returns a packed texture.
+    /// </summary>
+    /// <param name="path">The path to the image to pack.</param>
+    /// <returns>The packed texture.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when the texture is already packed or it's too big to be packed in any page.</exception>
+    public PackedTexture Pack(string path)
+    {
+        var unpackedTexture = new TextureDrawOperation(path);
+        return this.Pack(unpackedTexture);
+    }
+
+    /// <summary>
     /// Flushes all the changes made to the texture packer.
     /// </summary>
     public void FlushChanges()

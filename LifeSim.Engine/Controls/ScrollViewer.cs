@@ -126,6 +126,7 @@ public class ScrollViewer : ContentControl
         {
             Rect rect = new Rect(finalRect.Position, Vector2.Min(this.Content.DesiredSize, finalRect.Size));
             this.Content.Arrange(rect);
+            this.ActualSize = finalRect.Size; // I set up the ActualSize here so it can be used by "OnScrollChanged"
             this.ScrollBarThumb.Arrange(finalRect);
             this.OnScrollChanged();
         }

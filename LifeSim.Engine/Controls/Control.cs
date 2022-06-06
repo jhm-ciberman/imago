@@ -115,7 +115,7 @@ public class Control : Visual
             return;
         }
 
-        var margin = new Vector2(this.Margin.Left + this.Margin.Right, this.Margin.Top + this.Margin.Bottom);
+        var margin = this.Margin.Total;
         availableSize -= margin;
 
         Vector2 desiredSize = this.MeasureCore(availableSize);
