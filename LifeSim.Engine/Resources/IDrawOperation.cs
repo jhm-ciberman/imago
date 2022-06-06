@@ -14,6 +14,6 @@ public interface IDrawOperation
     /// Draws the texture to the specified image.
     /// </summary>
     /// <param name="destination">The image to draw to.</param>
-    /// <param name="rect">The rectangle to draw to. It's size is at least as big as the texture, but it can be bigger.</param>
-    void Draw(Image<Rgba32> destination, RectInt rect);
+    /// <param name="position">The position to draw the texture at.</param>
+    void Draw(Image<Rgba32> destination, Vector2Int position);
 }

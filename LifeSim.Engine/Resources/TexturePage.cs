@@ -33,19 +33,19 @@ public class TexturePage
     public Texture Texture { get; }
 
     /// <summary>
-    /// Gets or sets a tag that can be used to classify the page.
+    /// Gets the group that this page belongs to.
     /// </summary>
-    public string Tag { get; set; } = string.Empty;
+    public TextureGroup Group { get; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TexturePage"/> class.
     /// </summary>
-    /// <param name="atlasSize">The size of the atlas.</param>
-    /// <param name="tileSize">The tile size.</param>
-    public TexturePage(uint atlasSize, uint tileSize)
+    /// <param name="group">The group that the page belongs to.</param>
+    public TexturePage(TextureGroup group)
     {
-        tileSize = NextPowOfTwo(tileSize);
-        atlasSize = (uint)1 << BitOperations.Log2(atlasSize);
+        this.Group = group;
+        uint tileSize = NextPowOfTwo(group.TileSize);
+        uint atlasSize = (uint)1 << BitOperations.Log2(group.AtlasSize);
         uint mipMapLevels = (uint)BitOperations.Log2(tileSize);
 
         uint size = atlasSize / tileSize;
@@ -53,7 +53,7 @@ public class TexturePage
         this._tileSize = tileSize;
 
         this.Image = new Image<Rgba32>((int)atlasSize, (int)atlasSize);
-        this.Texture = new Texture((uint)this.Image.Width, (uint)this.Image.Height, mipMapLevels);
+        this.Texture = new Texture((uint)this.Image.Width, (uint)this.Image.Height, mipMapLevels, group.IsSrgb);
     }
 
     /// <summary>
@@ -83,8 +83,17 @@ public class TexturePage
             return false;
         }
 
-        uint w = (uint) MathF.Ceiling(operation.Size.X / (float) this._tileSize);
-        uint h = (uint) MathF.Ceiling(operation.Size.Y / (float) this._tileSize);
+        uint w, h;
+        if (this._tileSize == 0)
+        {
+            w = (uint)operation.Size.X;
+            h = (uint)operation.Size.Y;
+        }
+        else
+        {
+            w = (uint)MathF.Ceiling(operation.Size.X / (float)this._tileSize);
+            h = (uint)MathF.Ceiling(operation.Size.Y / (float)this._tileSize);
+        }
 
         if (!this._binPacker.TryFit(w, h, out Vector2Int coords))
         {
@@ -92,9 +101,12 @@ public class TexturePage
             return false;
         }
 
-        coords *= this._tileSize;
-        var fillSize = new Vector2Int(w, h) * this._tileSize;
-        operation.Draw(this.Image, new RectInt(coords, fillSize));
+        if (this._tileSize != 0)
+        {
+            coords *= this._tileSize;
+        }
+
+        operation.Draw(this.Image, coords);
         this.IsDirty = true;
 
         Vector2 imgSize = new Vector2(this.Image.Width, this.Image.Height);
