@@ -53,11 +53,11 @@ public class Button : ContentControl
         }
     }
 
-    public Rendering.Texture? NormalTexture { get; set; }
+    public Texture? NormalTexture { get; set; }
 
-    public Rendering.Texture? HoverTexture { get; set; }
+    public Texture? HoverTexture { get; set; }
 
-    public Rendering.Texture? PressedTexture { get; set; }
+    public Texture? PressedTexture { get; set; }
 
     public Shader? Shader { get; set; }
 

@@ -1,6 +1,7 @@
 using System;
 using System.Buffers;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using LifeSim.Engine.Rendering;
 using Veldrid;
 
@@ -35,7 +36,10 @@ public class SkinnedMeshData : BasicMeshData
             vertices[i].Weights = this.Weights[i];
         }
 
-        DeviceBuffer vertexBuffer = BufferFactory.CreateVertexBuffer(gd, vertices);
+        uint sizeInBytes = (uint)(this.Positions.Length * Unsafe.SizeOf<SkinnedVertex>());
+        DeviceBuffer vertexBuffer = gd.ResourceFactory.CreateBuffer(new BufferDescription((uint)sizeInBytes, BufferUsage.VertexBuffer));
+        gd.UpdateBuffer(vertexBuffer, (uint)0, new ReadOnlySpan<SkinnedVertex>(vertices, 0, this.Positions.Length));
+
         ArrayPool<SkinnedVertex>.Shared.Return(vertices);
         return vertexBuffer;
     }

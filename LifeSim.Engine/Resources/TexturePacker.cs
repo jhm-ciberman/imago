@@ -10,8 +10,6 @@ public class TexturePacker
     /// </summary>
     public event EventHandler<TexturePage>? PageAdded;
 
-    private readonly List<TexturePage> _pages = new();
-
     /// <summary>
     /// Gets a list of all the pages in the texture manager.
     /// </summary>
@@ -25,6 +23,8 @@ public class TexturePacker
     /// <summary>
     /// Gets the size of each tile in the texture manager in pixels.
     public uint TileSize { get; }
+
+    private readonly List<TexturePage> _pages = new(1);
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TexturePacker"/> class.

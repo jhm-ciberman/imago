@@ -13,7 +13,20 @@ namespace LifeSim.Engine.Rendering;
 
 public partial class Renderer : ITexture2DManager, IDisposable
 {
+    /// <summary>
+    /// Gets the global instance of the renderer.
+    /// </summary>
     public static Renderer Instance { get; private set; } = null!;
+
+    /// <summary>
+    /// Event that is raised at the start of the rendering of each frame.
+    /// </summary>
+    public event EventHandler? RenderStarted;
+
+    /// <summary>
+    /// Event that is raised at the end of the rendering of each frame.
+    /// </summary>
+    public event EventHandler? RenderEnded;
 
     public IPipelineProvider ForwardPass => this._forwardPass;
     public IPipelineProvider ShadowMapPass => this._shadowPass;
@@ -41,8 +54,7 @@ public partial class Renderer : ITexture2DManager, IDisposable
     private readonly CommandList _commandList;
     private readonly List<CommandListJob> _jobs;
     private readonly DisposeCollector _disposeCollector;
-
-    private readonly Dictionary<ResourceLayoutDescription, ResourceLayout> _resourceLayoutCache = new Dictionary<ResourceLayoutDescription, ResourceLayout>();
+    private readonly Dictionary<ResourceLayoutDescription, ResourceLayout> _resourceLayoutCache = new();
 
     public Renderer(Sdl2Window window, GraphicsBackend? graphicsBackend = null)
     {
@@ -192,6 +204,8 @@ public partial class Renderer : ITexture2DManager, IDisposable
 
     public void Render(Scene scene)
     {
+        this.RenderStarted?.Invoke(this, EventArgs.Empty);
+
         scene.OnBeforeRender();
         scene.RenderImGui();
         scene.UpdateSceneDirtyTransforms();
@@ -228,6 +242,8 @@ public partial class Renderer : ITexture2DManager, IDisposable
 
         this._disposeCollector.DisposeAll();
         this.GraphicsDevice.SwapBuffers();
+
+        this.RenderEnded?.Invoke(this, EventArgs.Empty);
     }
 
     public IntPtr GetOrCreateImGuiBinding(Texture texture)

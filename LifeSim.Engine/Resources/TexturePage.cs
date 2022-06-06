@@ -33,6 +33,11 @@ public class TexturePage
     public Texture Texture { get; }
 
     /// <summary>
+    /// Gets or sets a tag that can be used to classify the page.
+    /// </summary>
+    public string Tag { get; set; } = string.Empty;
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="TexturePage"/> class.
     /// </summary>
     /// <param name="atlasSize">The size of the atlas.</param>
@@ -72,6 +77,12 @@ public class TexturePage
     /// <returns>True if the element was added to the atlas, false otherwise.</returns>
     public bool TryPack(IDrawOperation operation, [MaybeNullWhen(false)] out PackedTexture result)
     {
+        if (this._binPacker.IsFull) // Early out if the atlas is full
+        {
+            result = default;
+            return false;
+        }
+
         uint w = (uint) MathF.Ceiling(operation.Size.X / (float) this._tileSize);
         uint h = (uint) MathF.Ceiling(operation.Size.Y / (float) this._tileSize);
 
@@ -83,7 +94,7 @@ public class TexturePage
 
         coords *= this._tileSize;
         var fillSize = new Vector2Int(w, h) * this._tileSize;
-        operation.Draw(this.Image, coords, fillSize);
+        operation.Draw(this.Image, new RectInt(coords, fillSize));
         this.IsDirty = true;
 
         Vector2 imgSize = new Vector2(this.Image.Width, this.Image.Height);

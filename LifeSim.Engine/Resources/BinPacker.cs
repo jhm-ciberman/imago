@@ -25,6 +25,11 @@ public class BinPacker
     }
 
     /// <summary>
+    /// Gets whether the bin is full.
+    /// </summary>
+    public bool IsFull => this._freeArea == 0;
+
+    /// <summary>
     /// Try to insert a rectangle into the bin. Returns whether the rectangle was successfully inserted.
     /// </summary>
     /// <param name="width">The width of the rectangle.</param>

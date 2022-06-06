@@ -1,6 +1,7 @@
 using System;
 using System.Buffers;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using LifeSim.Engine.Rendering;
 using Veldrid;
 
@@ -51,8 +52,10 @@ public class BasicMeshData : BaseMeshData
             vertices[i].Normal = this.Normals[i];
             vertices[i].TexCoord = this.TexCoords[i];
         }
+        uint sizeInBytes = (uint)(this.Positions.Length * Unsafe.SizeOf<BasicVertex>());
+        DeviceBuffer vertexBuffer = gd.ResourceFactory.CreateBuffer(new BufferDescription((uint)sizeInBytes, BufferUsage.VertexBuffer));
+        gd.UpdateBuffer(vertexBuffer, (uint)0, new ReadOnlySpan<BasicVertex>(vertices, 0, this.Positions.Length));
 
-        DeviceBuffer vertexBuffer = BufferFactory.CreateVertexBuffer(gd, vertices);
         ArrayPool<BasicVertex>.Shared.Return(vertices);
         return vertexBuffer;
     }
