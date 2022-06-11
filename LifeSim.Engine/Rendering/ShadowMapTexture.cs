@@ -5,7 +5,10 @@ namespace LifeSim.Engine.Rendering;
 
 public class ShadowMapTexture : ITexture, IDisposable
 {
-    public event Action? OnResized;
+    /// <summary>
+    /// Event raised when the texture is resized.
+    /// </summary>
+    public event EventHandler? Resized;
 
     uint ITexture.Width => this.Size;
 
@@ -86,6 +89,6 @@ public class ShadowMapTexture : ITexture, IDisposable
             ));
         }
 
-        this.OnResized?.Invoke();
+        this.Resized?.Invoke(this, EventArgs.Empty);
     }
 }

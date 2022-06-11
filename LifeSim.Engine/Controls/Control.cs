@@ -9,7 +9,10 @@ namespace LifeSim.Engine.Controls;
 
 public class Control : Visual
 {
-    public Action<object, float>? Updated { get; set; }
+    /// <summary>
+    /// Raised when the control is updated.
+    /// </summary>
+    public event EventHandler<float>? Updated;
 
     /// <summary>
     /// Gets or sets the margin of the control.

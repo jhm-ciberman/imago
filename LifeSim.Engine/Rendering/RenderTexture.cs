@@ -5,7 +5,10 @@ namespace LifeSim.Engine.Rendering;
 
 public class RenderTexture : IRenderTexture
 {
-    public event Action<IRenderTexture>? OnResized;
+    /// <summary>
+    /// Raised when the render texture is resized.
+    /// </summary>
+    public event EventHandler? Resized;
 
     public Framebuffer Framebuffer { get; private set; }
 
@@ -93,7 +96,7 @@ public class RenderTexture : IRenderTexture
         this.PickingTexture = this.CreatePickingIDTexture(width, height);
         this.Framebuffer = this.CreateFramebuffer();
         this.ColorOnlyFramebuffer = this.CreateColorOnlyFramebuffer();
-        this.OnResized?.Invoke(this);
+        this.Resized?.Invoke(this, EventArgs.Empty);
     }
 
     public void Dispose()

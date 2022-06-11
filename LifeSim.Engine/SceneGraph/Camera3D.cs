@@ -115,17 +115,16 @@ public class Camera3D
         {
             if (this._viewport != value)
             {
-                this._viewport.OnResized -= this.OnViewportResized;
+                this._viewport.Resized -= this.Viewport_Resized;
                 this._viewport = value;
                 this._projectionMatrixIsDirty = true;
-                this._viewport.OnResized += this.OnViewportResized;
+                this._viewport.Resized += this.Viewport_Resized;
             }
         }
     }
 
-    private void OnViewportResized(Viewport viewport)
+    private void Viewport_Resized(object? sender, EventArgs e)
     {
-        this._viewport = viewport;
         this._projectionMatrixIsDirty = true;
     }
 

@@ -79,12 +79,12 @@ public partial class ForwardPass : IDisposable, IPipelineProvider, IRenderingPas
         this._opaqueRenderQueue = new RenderQueue(RenderQueues.Opaque);
         this._transparentRenderQueue = new RenderQueue(RenderQueues.Transparent);
 
-        this._shadowPass.ShadowmapTexture.OnResized += this.OnShadowmapResized;
+        this._shadowPass.ShadowmapTexture.Resized += this.Shadowmap_Resized;
 
         this._immediateModeBatcher = new ImmediateBatcher(this._gd, this._renderTexture);
     }
 
-    private void OnShadowmapResized()
+    private void Shadowmap_Resized(object? sender, EventArgs e)
     {
         this._renderer.DisposeWhenIdle(this._resourceSet);
         this._resourceSet = this.CreatePassResourceSet();

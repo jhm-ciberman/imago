@@ -23,8 +23,7 @@ public class UILayer
     public UILayer(Viewport viewport)
     {
         this.Viewport = viewport;
-        this.Viewport.OnResized += this.OnViewportResized;
-        this.OnViewportResized(this.Viewport);
+        this.Viewport.Resized += (sender, e) => this.TriggerLayoutUpdate();
     }
 
     public T? FindByName<T>(string name) where T : Control
@@ -35,11 +34,6 @@ public class UILayer
         }
 
         return null;
-    }
-
-    private void OnViewportResized(Viewport viewport)
-    {
-        this.TriggerLayoutUpdate();
     }
 
     public void TriggerLayoutUpdate()

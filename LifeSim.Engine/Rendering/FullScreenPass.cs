@@ -26,7 +26,7 @@ public class FullScreenPass : IDisposable, IRenderingPass
         var factory = this._gd.ResourceFactory;
 
         this._sourceTexture = sourceRenderTexture;
-        this._sourceTexture.OnResized += this.OnSourceTextureResized;
+        this._sourceTexture.Resized += (sender, args) => this.RegenerateResourceSet();
 
         this._destinationTexture = destinationRenderTexture;
 
@@ -55,7 +55,7 @@ public class FullScreenPass : IDisposable, IRenderingPass
             new Vector4(-1f,  1f, 0f, bottom),
         });
 
-        this.OnSourceTextureResized(this._sourceTexture);
+        this.RegenerateResourceSet();
     }
 
 
@@ -75,11 +75,11 @@ public class FullScreenPass : IDisposable, IRenderingPass
         cl.Draw(6);
     }
 
-    private void OnSourceTextureResized(IRenderTexture renderTexture)
+    private void RegenerateResourceSet()
     {
         this._resourceSet?.Dispose();
         this._resourceSet = this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(
-            this._resourceLayout, renderTexture.DeviceTexture, this._gd.LinearSampler));
+            this._resourceLayout, this._sourceTexture.DeviceTexture, this._gd.LinearSampler));
     }
 
     private Pipeline MakePipeline(ShaderSetDescription shaderSetDescription, ResourceLayout resourceLayout)

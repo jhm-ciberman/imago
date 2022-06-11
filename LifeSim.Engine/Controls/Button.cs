@@ -10,17 +10,17 @@ public class Button : ContentControl
     /// <summary>
     /// Event that is raised when the button is clicked.
     /// </summary>
-    public Action<Button>? Click { get; set; }
+    public event EventHandler? Click;
 
     /// <summary>
     /// Event that is raised when the mouse enters the button.
     /// </summary>
-    public Action<Button>? MouseEnter { get; set; }
+    public event EventHandler? MouseEnter;
 
     /// <summary>
     /// Event that is raised when the mouse leaves the button.
     /// </summary>
-    public Action<Button>? MouseLeave { get; set; }
+    public event EventHandler? MouseLeave;
 
     private bool _isMouseOver = false;
 
@@ -37,11 +37,11 @@ public class Button : ContentControl
                 this._isMouseOver = value;
                 if (this._isMouseOver)
                 {
-                    this.MouseEnter?.Invoke(this);
+                    this.MouseEnter?.Invoke(this, EventArgs.Empty);
                 }
                 else
                 {
-                    this.MouseLeave?.Invoke(this);
+                    this.MouseLeave?.Invoke(this, EventArgs.Empty);
                 }
             }
         }
@@ -62,7 +62,7 @@ public class Button : ContentControl
                 this._isPressed = value;
                 if (this._isPressed)
                 {
-                    this.Click?.Invoke(this);
+                    this.Click?.Invoke(this, EventArgs.Empty);
                 }
             }
         }

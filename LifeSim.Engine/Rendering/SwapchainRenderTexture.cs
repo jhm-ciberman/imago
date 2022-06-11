@@ -5,7 +5,8 @@ namespace LifeSim.Engine.Rendering;
 
 internal class SwapchainRenderTexture : IRenderTexture, ITexture
 {
-    public event Action<IRenderTexture>? OnResized;
+    /// <inheritdoc />
+    public event EventHandler? Resized;
 
     public Framebuffer Framebuffer => this._swapchain.Framebuffer;
 
@@ -32,7 +33,7 @@ internal class SwapchainRenderTexture : IRenderTexture, ITexture
     public void Resize(uint width, uint height)
     {
         this._swapchain.Resize(width, height);
-        this.OnResized?.Invoke(this);
+        this.Resized?.Invoke(this, EventArgs.Empty);
     }
 
     public void Dispose()
