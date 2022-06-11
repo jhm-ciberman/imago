@@ -1,9 +1,10 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
 using LifeSim.Engine.Rendering;
+using LifeSim.Utils;
 using Veldrid;
 
-namespace LifeSim.Engine;
+namespace LifeSim.Engine.Meshes;
 
 [StructLayout(LayoutKind.Sequential)]
 public struct SkinnedVertex

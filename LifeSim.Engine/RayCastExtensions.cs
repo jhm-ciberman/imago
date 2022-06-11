@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Numerics;
+using LifeSim.Engine.Meshes;
 using Veldrid.Utilities;
 
 namespace LifeSim.Engine;

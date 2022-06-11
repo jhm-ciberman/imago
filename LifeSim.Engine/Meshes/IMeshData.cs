@@ -3,7 +3,7 @@ using LifeSim.Engine.Rendering;
 using Veldrid;
 using Veldrid.Utilities;
 
-namespace LifeSim.Engine;
+namespace LifeSim.Engine.Meshes;
 
 /// <summary>
 /// An object describing generic mesh data. This can be used to construct a <see cref="VertexBuffer"/> and

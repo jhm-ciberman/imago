@@ -2,7 +2,7 @@ using System.Numerics;
 using LifeSim.Engine.Rendering;
 using Veldrid;
 
-namespace LifeSim.Engine;
+namespace LifeSim.Engine.Meshes;
 
 public struct ChunkVertex
 {

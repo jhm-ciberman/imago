@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using LifeSim.Engine.Rendering;
 using Veldrid;
 
-namespace LifeSim.Engine;
+namespace LifeSim.Engine.Meshes;
 
 public class ChunkMeshData : BasicMeshData
 {

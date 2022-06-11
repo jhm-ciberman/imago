@@ -3,9 +3,10 @@ using System.Buffers;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using LifeSim.Engine.Rendering;
+using LifeSim.Utils;
 using Veldrid;
 
-namespace LifeSim.Engine.Gltf;
+namespace LifeSim.Engine.Meshes;
 
 public class SkinnedMeshData : BasicMeshData
 {

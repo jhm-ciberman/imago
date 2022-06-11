@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using LifeSim.Engine.Meshes;
 using LifeSim.Engine.Rendering;
 using Veldrid.Utilities;
 
