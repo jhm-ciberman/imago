@@ -10,12 +10,7 @@ public class DirectionalLight
     /// <summary>
     /// Gets or sets the light direction.
     /// </summary>
-    /// <remarks>
-    /// The direction will be normalized.
-    /// </remarks>
-    /// <exception cref="ArgumentOutOfRangeException">
-    /// The direction cannot be zero.
-    /// </exception>
+    /// <exception cref="ArgumentOutOfRangeException">The direction cannot be zero.</exception>
     public Vector3 Direction
     {
         get => this._direction;

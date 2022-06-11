@@ -28,22 +28,49 @@ public partial class Renderer : ITexture2DManager, IDisposable
     /// </summary>
     public event EventHandler? RenderEnded;
 
-    public IPipelineProvider ForwardPass => this._forwardPass;
-    public IPipelineProvider ShadowMapPass => this._shadowPass;
-    public SceneStorage Storage { get; }
+    /// <summary>
+    /// Get the forward pass of the renderer.
+    /// </summary>
+    internal IPipelineProvider ForwardPass => this._forwardPass;
+
+    /// <summary>
+    /// Gets the shadow map pass of the renderer.
+    /// </summary>
+    internal IPipelineProvider ShadowMapPass => this._shadowPass;
+
+    /// <summary>
+    /// Gets the <see cref="SceneStorage"/> of the renderer.
+    /// </summary>
+    internal SceneStorage Storage { get; }
+
+    /// <summary>
+    /// Gets the current Veldrid's GraphicsDevice.
+    /// </summary>
+    internal GraphicsDevice GraphicsDevice { get; }
+
+    /// <summary>
+    /// Gets the main render texture.
+    /// </summary>
     public RenderTexture MainRenderTexture { get; }
-    public GraphicsDevice GraphicsDevice { get; }
+
+    /// <summary>
+    /// Gets the current backend used by the renderer.
+    /// </summary>
     public GraphicsBackend BackendType => this.GraphicsDevice.BackendType;
 
-    private readonly SwapchainRenderTexture _fullScreenRenderTexture;
+    /// <summary>
+    /// Gets the <see cref="RenderSettings"/> used by the renderer.
+    /// </summary>
+    public RenderSettings Settings { get; }
 
+    private readonly SwapchainRenderTexture _fullScreenRenderTexture;
     private readonly ResourceFactory _factory;
     private readonly FullScreenPass _fullScreenPass;
     private readonly GizmosPass _gizmosPass;
     private readonly Fence _fence;
-    private readonly List<Texture> _dirtyTextures = new List<Texture>();
-    private readonly List<MaterialBase> _dirtyMaterials = new List<MaterialBase>();
-    private readonly List<Renderable> _dirtyRenderables = new List<Renderable>();
+    private readonly List<Texture> _dirtyTextures = new();
+    private readonly List<MaterialBase> _dirtyMaterials = new();
+    private readonly List<Renderable> _dirtyRenderables = new();
     private readonly ForwardPass _forwardPass;
     private readonly ShadowPass _shadowPass;
     private readonly SpritesPass _spritesPass;
@@ -56,6 +83,12 @@ public partial class Renderer : ITexture2DManager, IDisposable
     private readonly DisposeCollector _disposeCollector;
     private readonly Dictionary<ResourceLayoutDescription, ResourceLayout> _resourceLayoutCache = new();
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Renderer"/> class.
+    /// </summary>
+    /// <param name="window">The window to render to.</param>
+    /// <param name="graphicsBackend">The graphics backend to use.</param>
+    /// <exception cref="InvalidOperationException">Thrown if the renderer is already initialized.</exception>
     public Renderer(Sdl2Window window, GraphicsBackend? graphicsBackend = null)
     {
         if (Instance != null)
@@ -89,6 +122,8 @@ public partial class Renderer : ITexture2DManager, IDisposable
         this.MainRenderTexture = new RenderTexture((uint)window.Width, (uint)window.Height);
 
         this.Storage = new SceneStorage(gd);
+
+        this.Settings = new RenderSettings(this);
 
         this._imGuiPass = new ImGuiPass(this, this.MainRenderTexture);
         this._mousePickerPass = new MousePickingPass(this, this.MainRenderTexture);
@@ -144,7 +179,7 @@ public partial class Renderer : ITexture2DManager, IDisposable
 
     public Renderable MakeRenderable(int instanceDataBlockSize)
     {
-        return new Renderable(this.Storage, instanceDataBlockSize);
+        return new Renderable(this, instanceDataBlockSize);
     }
 
     protected void UpdateDirtyMaterials()
@@ -342,47 +377,5 @@ public partial class Renderer : ITexture2DManager, IDisposable
     void ITexture2DManager.SetTextureData(object texture, System.Drawing.Rectangle bounds, byte[] data)
     {
         ((DirectTexture)texture).Update(data, bounds.X, bounds.Y, bounds.Width, bounds.Height);
-    }
-
-    public delegate void GlobalRenderSettingsChangedEventHandler(Renderer renderer);
-
-    public event GlobalRenderSettingsChangedEventHandler? GlobalRenderSettingsChanged;
-
-    private bool _forceWireframe = false;
-    public bool ForceWireframe
-    {
-        get => this._forceWireframe;
-        set
-        {
-            if (_forceWireframe == value) return;
-            this._forceWireframe = value;
-            GlobalRenderSettingsChanged?.Invoke(this);
-        }
-    }
-
-    private bool _enableFog = true;
-
-    public bool EnableFog
-    {
-        get => this._enableFog;
-        set
-        {
-            if (this._enableFog == value) return;
-            this._enableFog = value;
-            GlobalRenderSettingsChanged?.Invoke(this);
-        }
-    }
-
-    private bool _enablePixelPerfectShadows = true;
-
-    public bool EnablePixelPerfectShadows
-    {
-        get => this._enablePixelPerfectShadows;
-        set
-        {
-            if (this._enablePixelPerfectShadows == value) return;
-            this._enablePixelPerfectShadows = value;
-            GlobalRenderSettingsChanged?.Invoke(this);
-        }
     }
 }

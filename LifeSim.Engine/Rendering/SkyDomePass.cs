@@ -97,7 +97,7 @@ public class SkyDomePass : IDisposable, IRenderingPass
         this._resourceSet = factory.CreateResourceSet(new ResourceSetDescription(
             this._resourceLayout,
             this._passDataBuffer,
-            this._lutTexture.DeviceTexture,
+            this._lutTexture.VeldridTexture,
             this._sampler
         ));
     }

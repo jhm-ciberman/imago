@@ -15,9 +15,9 @@ public class DirectTexture : ITexture
 
     public uint Height { get; }
 
-    public Veldrid.Texture DeviceTexture { get; }
+    public Veldrid.Texture VeldridTexture { get; }
 
-    public Sampler Sampler { get; }
+    public Sampler VeldridSampler { get; }
 
     public uint MipLevels { get; }
 
@@ -32,12 +32,12 @@ public class DirectTexture : ITexture
             ? (uint)BitOperations.Log2(Math.Min(width, height))
             : mipLevels;
 
-        this.DeviceTexture = this._gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(
+        this.VeldridTexture = this._gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(
             this.Width, this.Height, this.MipLevels, 1,
             srgb ? PixelFormat.R8_G8_B8_A8_UNorm_SRgb : PixelFormat.R8_G8_B8_A8_UNorm,
             TextureUsage.Sampled | TextureUsage.GenerateMipmaps
         ));
-        this.Sampler = this._gd.PointSampler;
+        this.VeldridSampler = this._gd.PointSampler;
     }
 
     public unsafe void Update(Image<Rgba32> image)
@@ -54,7 +54,7 @@ public class DirectTexture : ITexture
 
         fixed (void* ptr = &span.GetPinnableReference())
         {
-            this._gd.UpdateTexture(this.DeviceTexture, (IntPtr)ptr, (uint)(span.Length * sizeof(Rgba32)),
+            this._gd.UpdateTexture(this.VeldridTexture, (IntPtr)ptr, (uint)(span.Length * sizeof(Rgba32)),
                 x: 0, y: 0, z: 0, width: this.Width, height: this.Height, depth: 1, mipLevel: 0, arrayLayer: 0);
         }
 
@@ -75,7 +75,7 @@ public class DirectTexture : ITexture
 
         fixed (void* ptr = &span.GetPinnableReference())
         {
-            this._gd.UpdateTexture(this.DeviceTexture, (IntPtr)ptr, (uint)(span.Length * sizeof(Rgba32)),
+            this._gd.UpdateTexture(this.VeldridTexture, (IntPtr)ptr, (uint)(span.Length * sizeof(Rgba32)),
                 x: x, y: y, z: 0, width: (uint)image.Width, height: (uint)image.Height, depth: 1, mipLevel: 0, arrayLayer: 0);
         }
 
@@ -91,7 +91,7 @@ public class DirectTexture : ITexture
 
         fixed (void* ptr = &bytes[0])
         {
-            this._gd.UpdateTexture(this.DeviceTexture, (IntPtr)ptr, (uint)bytes.Length,
+            this._gd.UpdateTexture(this.VeldridTexture, (IntPtr)ptr, (uint)bytes.Length,
                 x: (uint)x, y: (uint)y, z: 0, width: (uint)width, height: (uint)height, depth: 1, mipLevel: 0, arrayLayer: 0);
         }
 
@@ -105,7 +105,7 @@ public class DirectTexture : ITexture
         {
             var cl = this._gd.ResourceFactory.CreateCommandList();
             cl.Begin();
-            cl.GenerateMipmaps(this.DeviceTexture);
+            cl.GenerateMipmaps(this.VeldridTexture);
             cl.End();
             this._gd.SubmitCommands(cl);
             cl.Dispose();

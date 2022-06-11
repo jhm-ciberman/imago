@@ -42,7 +42,7 @@ public class ResourceSetCache : IDisposable
         }
 
         resourceSet = this._factory.CreateResourceSet(new ResourceSetDescription(
-            shader.MaterialResourceLayout, texture.DeviceTexture, texture.Sampler));
+            shader.MaterialResourceLayout, texture.VeldridTexture, texture.VeldridSampler));
 
         this._cachedResourceSets.Add(key, resourceSet);
 

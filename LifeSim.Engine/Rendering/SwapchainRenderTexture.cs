@@ -10,7 +10,7 @@ internal class SwapchainRenderTexture : IRenderTexture, ITexture
 
     public Framebuffer Framebuffer => this._swapchain.Framebuffer;
 
-    public Veldrid.Texture DeviceTexture => this.Framebuffer.ColorTargets[0].Target;
+    public Veldrid.Texture VeldridTexture => this.Framebuffer.ColorTargets[0].Target;
 
     public OutputDescription OutputDescription => this.Framebuffer.OutputDescription;
 
@@ -18,7 +18,7 @@ internal class SwapchainRenderTexture : IRenderTexture, ITexture
 
     public uint Height => this.Framebuffer.Height;
 
-    public Sampler Sampler => this._gd.LinearSampler;
+    public Sampler VeldridSampler => this._gd.LinearSampler;
 
     private readonly Swapchain _swapchain;
 

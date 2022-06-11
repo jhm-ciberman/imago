@@ -39,7 +39,7 @@ public class ImGuiPass : IDisposable, IRenderingPass
 
     public IntPtr GetOrCreateBinding(Texture texture)
     {
-        return this._imguiRenderer.GetOrCreateImGuiBinding(this._gd.ResourceFactory, texture.DeviceTexture);
+        return this._imguiRenderer.GetOrCreateImGuiBinding(this._gd.ResourceFactory, texture.VeldridTexture);
     }
 
     public void Render(CommandList cl, Scene scene)

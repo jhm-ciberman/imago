@@ -16,7 +16,7 @@ public class ShadowCascade
 
     public void UpdateCascadeMatrix(int cascadeIndex, Camera3D camera, Vector3 lightDirection, float near, float far, ShadowMap config)
     {
-        Matrix4x4 cameraProjectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(camera.FieldOfView, camera.AspectRatio, near, far);
+        Matrix4x4 cameraProjectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(camera.FieldOfView, camera.Viewport.AspectRatio, near, far);
         Matrix4x4 cameraViewProjectionMatrix = camera.ViewMatrix * cameraProjectionMatrix;
 
         BoundingFrustum mainCameraFrustum = new BoundingFrustum(cameraViewProjectionMatrix);

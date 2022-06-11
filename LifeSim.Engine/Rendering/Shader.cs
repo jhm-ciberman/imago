@@ -123,7 +123,6 @@ public class Shader : IDisposable
 
     private struct CachedPipeline
     {
-        private static int _debugCounter = 0;
         public VertexFormat VertexFormat { get; }
         public Pipeline Pipeline { get; }
         public RenderFlags Flags { get; }
@@ -133,21 +132,17 @@ public class Shader : IDisposable
             this.VertexFormat = vertexFormat;
             this.Pipeline = pipeline;
             this.Flags = flags;
-
-            // Debug:
-            Console.WriteLine($"Cached pipeline {++_debugCounter} ({vertexFormat.Name} {flags})");
         }
     }
 }
 
 public class ShaderVariant : IDisposable
 {
-    private static int _debugCounter = 0;
     public Shader Shader { get; }
 
     public VertexFormat VertexFormat { get; }
 
-    public Veldrid.Shader[] Shaders { get; }
+    public Veldrid.Shader[] VeldridShaders { get; }
 
     public ShaderSetDescription ShaderSetDescription { get; internal set; }
 
@@ -159,17 +154,14 @@ public class ShaderVariant : IDisposable
     {
         this.Shader = shader;
         this.VertexFormat = vertexFormat;
-        this.Shaders = shaders;
+        this.VeldridShaders = shaders;
         this.Flags = flags;
         this.ShaderSetDescription = new ShaderSetDescription(vertexFormat.Layouts, shaders);
-
-        // Debug:
-        Console.WriteLine($"Shader variant {++_debugCounter} ({vertexFormat.Name} {flags})");
     }
 
     public void Dispose()
     {
-        foreach (var shader in this.Shaders)
+        foreach (var shader in this.VeldridShaders)
         {
             shader.Dispose();
         }

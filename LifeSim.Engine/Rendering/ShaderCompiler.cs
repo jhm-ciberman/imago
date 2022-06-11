@@ -35,7 +35,7 @@ public static class ShaderCompiler
                 list.Add(new MacroDefinition("D3D11"));
                 break;
             case GraphicsBackend.Vulkan:
-                //macros.Add(new MacroDefinition("VULKAN"));
+                // The "VULKAN" macro is defined automatically by Veldrid SPIRVCompiler.
                 break;
             case GraphicsBackend.OpenGL:
                 list.Add(new MacroDefinition("OPENGL"));

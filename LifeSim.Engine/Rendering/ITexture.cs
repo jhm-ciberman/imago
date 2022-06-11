@@ -15,10 +15,10 @@ public interface ITexture
     /// <summary>
     /// Gets the underlying Veldrid texture.
     /// </summary>
-    Veldrid.Texture DeviceTexture { get; }
+    Veldrid.Texture VeldridTexture { get; }
 
     /// <summary>
     /// Gets the underlying Veldrid sampler.
     /// </summary>
-    Veldrid.Sampler Sampler { get; }
+    Veldrid.Sampler VeldridSampler { get; }
 }

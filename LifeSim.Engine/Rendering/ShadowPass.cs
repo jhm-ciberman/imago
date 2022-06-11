@@ -148,7 +148,7 @@ public partial class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
         {
             DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
             PrimitiveTopology = PrimitiveTopology.TriangleList,
-            ShaderSet = new ShaderSetDescription(GetVertexLayout(shaderVariant.VertexFormat), shaderVariant.Shaders),
+            ShaderSet = new ShaderSetDescription(GetVertexLayout(shaderVariant.VertexFormat), shaderVariant.VeldridShaders),
             BlendState = BlendStateDescription.Empty,
             RasterizerState = new RasterizerStateDescription(
                 FaceCullMode.Back,

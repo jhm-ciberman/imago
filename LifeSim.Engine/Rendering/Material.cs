@@ -132,8 +132,8 @@ public class Material : MaterialBase
 
     protected void SetTexture(int textureIndex, Texture value)
     {
-        this._resources[textureIndex * 2 + 0] = value.DeviceTexture;
-        this._resources[textureIndex * 2 + 1] = value.Sampler;
+        this._resources[textureIndex * 2 + 0] = value.VeldridTexture;
+        this._resources[textureIndex * 2 + 1] = value.VeldridSampler;
         this.NotifyResourcesDirty();
     }
 

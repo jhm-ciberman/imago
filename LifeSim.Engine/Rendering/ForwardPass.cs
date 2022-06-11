@@ -5,6 +5,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using LifeSim.Engine.SceneGraph;
 using Veldrid;
+using Veldrid.Utilities;
 
 namespace LifeSim.Engine.Rendering;
 
@@ -105,7 +106,7 @@ public partial class ForwardPass : IDisposable, IPipelineProvider, IRenderingPas
         return this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(this._resourceLayout,
             this._camera3DInfoBuffer,
             this._lightInfoBuffer,
-            this._shadowPass.ShadowmapTexture.DeviceTexture,
+            this._shadowPass.ShadowmapTexture.VeldridTexture,
             this._shadowPass.ShadowmapTexture.ShadowSampler
         ));
     }
@@ -119,8 +120,9 @@ public partial class ForwardPass : IDisposable, IPipelineProvider, IRenderingPas
             return;
         }
 
-        this._opaqueRenderQueue.Update(camera.FrustumForCulling, camera.Position);
-        this._transparentRenderQueue.Update(camera.FrustumForCulling, camera.Position);
+        var frustumForCulling = new BoundingFrustum(camera.FrustumCullingCamera.ViewProjectionMatrix);
+        this._opaqueRenderQueue.Update(frustumForCulling, camera.Position);
+        this._transparentRenderQueue.Update(frustumForCulling, camera.Position);
 
         cl.SetFramebuffer(this._renderTexture.Framebuffer);
 
@@ -200,7 +202,7 @@ public partial class ForwardPass : IDisposable, IPipelineProvider, IRenderingPas
                 depthTestEnabled, depthWriteEnabled, ComparisonKind.LessEqual
             ),
             PrimitiveTopology = PrimitiveTopology.TriangleList,
-            ShaderSet = new ShaderSetDescription(GetVertexLayout(shaderVariant.VertexFormat), shaderVariant.Shaders),
+            ShaderSet = new ShaderSetDescription(GetVertexLayout(shaderVariant.VertexFormat), shaderVariant.VeldridShaders),
             BlendState = new BlendStateDescription(
                 RgbaFloat.Black,
                 blendDescription,

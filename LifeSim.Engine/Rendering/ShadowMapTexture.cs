@@ -18,9 +18,9 @@ public class ShadowMapTexture : ITexture, IDisposable
 
     public uint CascadesCount { get; private set; }
 
-    public Veldrid.Texture DeviceTexture { get; private set; }
+    public Veldrid.Texture VeldridTexture { get; private set; }
 
-    public Sampler Sampler { get; private set; }
+    public Sampler VeldridSampler { get; private set; }
 
     public Sampler ShadowSampler { get; private set; }
 
@@ -34,9 +34,9 @@ public class ShadowMapTexture : ITexture, IDisposable
         this._renderer = renderer;
         this.Size = size;
         this.CascadesCount = cascadesCount;
-        this.DeviceTexture = gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(this.Size, this.Size, 1, this.CascadesCount, PixelFormat.R32_Float, TextureUsage.DepthStencil | TextureUsage.Sampled));
+        this.VeldridTexture = gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(this.Size, this.Size, 1, this.CascadesCount, PixelFormat.R32_Float, TextureUsage.DepthStencil | TextureUsage.Sampled));
 
-        this.Sampler = gd.LinearSampler;
+        this.VeldridSampler = gd.LinearSampler;
 
         this.ShadowSampler = gd.ResourceFactory.CreateSampler(new SamplerDescription(
             SamplerAddressMode.Border, SamplerAddressMode.Border, SamplerAddressMode.Border,
@@ -51,7 +51,7 @@ public class ShadowMapTexture : ITexture, IDisposable
         for (uint i = 0; i < this.CascadesCount; i++)
         {
             this.Framebuffers[i] = gd.ResourceFactory.CreateFramebuffer(new FramebufferDescription(
-                new FramebufferAttachmentDescription(this.DeviceTexture, i),
+                new FramebufferAttachmentDescription(this.VeldridTexture, i),
                 Array.Empty<FramebufferAttachmentDescription>()
             ));
         }
@@ -59,8 +59,8 @@ public class ShadowMapTexture : ITexture, IDisposable
 
     public void Dispose()
     {
-        this.DeviceTexture.Dispose();
-        this.Sampler.Dispose();
+        this.VeldridTexture.Dispose();
+        this.VeldridSampler.Dispose();
 
         foreach (Framebuffer fb in this.Framebuffers)
         {
@@ -71,20 +71,20 @@ public class ShadowMapTexture : ITexture, IDisposable
     internal void Resize(uint size, uint cascadesCount)
     {
         this._renderer.DisposeWhenIdle(this.Framebuffers);
-        this._renderer.DisposeWhenIdle(this.DeviceTexture);
+        this._renderer.DisposeWhenIdle(this.VeldridTexture);
 
         this.Size = size;
         this.CascadesCount = cascadesCount;
 
         var factory = this._renderer.GraphicsDevice.ResourceFactory;
-        this.DeviceTexture = factory.CreateTexture(TextureDescription.Texture2D(this.Size, this.Size, 1, this.CascadesCount, PixelFormat.R32_Float, TextureUsage.DepthStencil | TextureUsage.Sampled));
+        this.VeldridTexture = factory.CreateTexture(TextureDescription.Texture2D(this.Size, this.Size, 1, this.CascadesCount, PixelFormat.R32_Float, TextureUsage.DepthStencil | TextureUsage.Sampled));
 
         this.Framebuffers = new Framebuffer[this.CascadesCount];
 
         for (uint i = 0; i < this.CascadesCount; i++)
         {
             this.Framebuffers[i] = factory.CreateFramebuffer(new FramebufferDescription(
-                new FramebufferAttachmentDescription(this.DeviceTexture, i),
+                new FramebufferAttachmentDescription(this.VeldridTexture, i),
                 Array.Empty<FramebufferAttachmentDescription>()
             ));
         }

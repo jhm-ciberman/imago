@@ -25,8 +25,8 @@ public class Texture : ITexture
         Magenta = new ImageTexture(new Image<Rgba32>(2, 2, new Rgba32(255, 0, 255, 255)));
     }
 
-    public Veldrid.Texture DeviceTexture { get; protected set; }
-    public Sampler Sampler { get; private set; }
+    public Veldrid.Texture VeldridTexture { get; protected set; }
+    public Sampler VeldridSampler { get; private set; }
     public uint Width { get; protected set; }
     public uint Height { get; protected set; }
     public uint MipLevels { get; protected set; }
@@ -48,11 +48,11 @@ public class Texture : ITexture
         PixelFormat pixelFormat = srgb ? PixelFormat.R8_G8_B8_A8_UNorm_SRgb : PixelFormat.R8_G8_B8_A8_UNorm;
 
         var gd = Renderer.Instance.GraphicsDevice;
-        this.DeviceTexture = gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(
+        this.VeldridTexture = gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(
             this.Width, this.Height, this.MipLevels, 1,
             pixelFormat, TextureUsage.Sampled | TextureUsage.GenerateMipmaps
         ));
-        this.Sampler = gd.PointSampler;
+        this.VeldridSampler = gd.PointSampler;
         this.NotifyTextureDirty();
     }
 
@@ -129,19 +129,19 @@ public class Texture : ITexture
         if (!this._isDirty) return;
         this._isDirty = false;
 
-        gd.UpdateTexture(this.DeviceTexture, this._data,
+        gd.UpdateTexture(this.VeldridTexture, this._data,
             x: 0, y: 0, z: 0,
             width: (uint)this.Width, height: (uint)this.Height, depth: 1,
             arrayLayer: 0, mipLevel: 0);
 
         if (this.MipLevels > 1)
         {
-            cl.GenerateMipmaps(this.DeviceTexture);
+            cl.GenerateMipmaps(this.VeldridTexture);
         }
     }
 
     public virtual void Dispose()
     {
-        Renderer.Instance.DisposeWhenIdle(this.DeviceTexture);
+        Renderer.Instance.DisposeWhenIdle(this.VeldridTexture);
     }
 }

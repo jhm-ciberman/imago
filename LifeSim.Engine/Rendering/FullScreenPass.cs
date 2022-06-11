@@ -79,7 +79,7 @@ public class FullScreenPass : IDisposable, IRenderingPass
     {
         this._resourceSet?.Dispose();
         this._resourceSet = this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(
-            this._resourceLayout, this._sourceTexture.DeviceTexture, this._gd.LinearSampler));
+            this._resourceLayout, this._sourceTexture.VeldridTexture, this._gd.LinearSampler));
     }
 
     private Pipeline MakePipeline(ShaderSetDescription shaderSetDescription, ResourceLayout resourceLayout)

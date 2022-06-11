@@ -32,6 +32,11 @@ public class Viewport
         this.Height = height;
     }
 
+    /// <summary>
+    /// Resizes the viewport.
+    /// </summary>
+    /// <param name="width">The new width of the viewport.</param>
+    /// <param name="height">The new height of the viewport.</param>
     public void Resize(uint width, uint height)
     {
         if (this.Width == width && this.Height == height)
@@ -43,15 +48,33 @@ public class Viewport
         this.Resized?.Invoke(this, EventArgs.Empty);
     }
 
-    public void Move(uint x, uint y)
-    {
-        this.X = x;
-        this.Y = y;
-    }
-
+    /// <summary>
+    /// Gets the width of the viewport.
+    /// </summary>
     public uint Width { get; private set; }
+
+    /// <summary>
+    /// Gets the height of the viewport.
+    /// </summary>
     public uint Height { get; private set; }
+
+    /// <summary>
+    /// Gets the x-coordinate of the viewport.
+    /// </summary>
     public uint X { get; private set; }
+
+    /// <summary>
+    /// Gets the y-coordinate of the viewport.
+    /// </summary>
     public uint Y { get; private set; }
+
+    /// <summary>
+    /// Gets the aspect ratio of the viewport.
+    /// </summary>
+    public float AspectRatio => (float)this.Width / (float)this.Height;
+
+    /// <summary>
+    /// Gets the size of the viewport as a <see cref="Vector2"/>.
+    /// </summary>
     public Vector2 Size => new Vector2(this.Width, this.Height);
 }

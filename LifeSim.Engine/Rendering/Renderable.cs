@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using Veldrid.Utilities;
@@ -49,7 +50,7 @@ public class Renderable : IDisposable
 
             this._pickingId = value;
             this.RecomputeOffsetVertexData();
-            this.NotifyPipelineDirty();
+            this.OnPipelineDirty();
         }
     }
 
@@ -65,8 +66,9 @@ public class Renderable : IDisposable
 
     private DataBlock _instanceDataBlock;
 
-    public Renderable(SceneStorage storage, int instanceDataSize)
+    public Renderable(Renderer renderer, int instanceDataSize)
     {
+        var storage = renderer.Storage;
         this.PickingId = ++_count;
         this._transformDataBlock = storage.RequestTransformDataBlock();
         this.TransformResourceSet = this._transformDataBlock.Buffer.ResourceSet;
@@ -74,12 +76,12 @@ public class Renderable : IDisposable
         this._instanceDataBlock = storage.RequestInstanceDataBlock(instanceDataSize);
         this.InstanceResourceSet = this._instanceDataBlock.Buffer.ResourceSet;
 
-        Renderer.Instance.GlobalRenderSettingsChanged += this.OnGlobalRenderSettingsChanged;
+        renderer.Settings.PropertyChanged += this.RenderSettings_PropertyChanged;
     }
 
-    private void OnGlobalRenderSettingsChanged(Renderer renderer)
+    private void RenderSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        this.NotifyPipelineDirty();
+        this.OnPipelineDirty();
     }
 
     public Mesh? Mesh
@@ -91,7 +93,7 @@ public class Renderable : IDisposable
             this._mesh = value;
 
             this.RecomputeBoundingBox();
-            this.NotifyPipelineDirty();
+            this.OnPipelineDirty();
         }
     }
 
@@ -104,7 +106,7 @@ public class Renderable : IDisposable
             this._material = value;
 
             this.RecomputeOffsetVertexData();
-            this.NotifyPipelineDirty();
+            this.OnPipelineDirty();
         }
     }
 
@@ -119,7 +121,7 @@ public class Renderable : IDisposable
             this.SkeletonResourceSet = this._skeleton?.ResourceSet;
             this.UpdateSkeletonTransform();
             this.RecomputeOffsetVertexData();
-            this.NotifyPipelineDirty();
+            this.OnPipelineDirty();
         }
     }
 
@@ -143,7 +145,7 @@ public class Renderable : IDisposable
         {
             if (this._visible == value) return;
             this._visible = value;
-            this.NotifyPipelineDirty();
+            this.OnPipelineDirty();
         }
     }
 
@@ -154,7 +156,7 @@ public class Renderable : IDisposable
         {
             if (this._transparent == value) return;
             this._transparent = value;
-            this.NotifyPipelineDirty();
+            this.OnPipelineDirty();
         }
     }
 
@@ -167,11 +169,11 @@ public class Renderable : IDisposable
         {
             if (this._shadowCastingMode == value) return;
             this._shadowCastingMode = value;
-            this.NotifyPipelineDirty();
+            this.OnPipelineDirty();
         }
     }
 
-    protected void NotifyPipelineDirty()
+    protected void OnPipelineDirty()
     {
         if (this._pipelineDirty) return;
         this._pipelineDirty = true;
@@ -307,12 +309,13 @@ public class Renderable : IDisposable
             bool isOpaque = this.RenderQueues.HasFlag(RenderQueues.Opaque);
             bool isShadowcaster = this.RenderQueues.HasFlag(RenderQueues.ShadowCaster);
 
+            var settings = renderer.Settings;
             RenderFlags flags = RenderFlags.None;
-            if (renderer.ForceWireframe) flags |= RenderFlags.Wireframe;
+            if (settings.ForceWireframe) flags |= RenderFlags.Wireframe;
             if (this.PickingId != 0) flags |= RenderFlags.MousePick;
             if (isTransparent) flags |= RenderFlags.Transparent;
-            if (renderer.EnableFog) flags |= RenderFlags.Fog;
-            if (renderer.EnablePixelPerfectShadows) flags |= RenderFlags.PixelPerfactShadows;
+            if (settings.EnableFog) flags |= RenderFlags.Fog;
+            if (settings.EnablePixelPerfectShadows) flags |= RenderFlags.PixelPerfactShadows;
 
             // Update the forward pipeline
             this.ForwardPipeline = isOpaque || isTransparent
@@ -335,6 +338,6 @@ public class Renderable : IDisposable
     {
         this._instanceDataBlock.FreeBlock();
         this._transformDataBlock.FreeBlock();
-        Renderer.Instance.GlobalRenderSettingsChanged -= this.OnGlobalRenderSettingsChanged;
+        Renderer.Instance.Settings.PropertyChanged -= this.RenderSettings_PropertyChanged;
     }
 }

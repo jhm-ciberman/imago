@@ -190,7 +190,7 @@ public class ParticlesPass : IDisposable, IRenderingPass
             return resourceSet;
         }
 
-        resourceSet = this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(this._materialResourceLayout, texture.DeviceTexture, texture.Sampler));
+        resourceSet = this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(this._materialResourceLayout, texture.VeldridTexture, texture.VeldridSampler));
         this._textures.Add(texture, resourceSet);
         return resourceSet;
     }
