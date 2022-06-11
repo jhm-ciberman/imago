@@ -50,9 +50,8 @@ public class DockPanel : ItemsControl
                         availableSize.X -= childDesiredSize.X;
                         availableSize.Y -= childDesiredSize.Y;
                         break;
-                    case Dock.None:
                     default:
-                        throw new InvalidOperationException();
+                        throw new NotSupportedException();
                 }
             }
         }
@@ -103,9 +102,8 @@ public class DockPanel : ItemsControl
                         child.Arrange(new Rect(availableRect.X, availableRect.Bottom - childDesiredSize.Y, availableRect.Width, childDesiredSize.Y));
                         availableRect.Height -= childDesiredSize.Y;
                         break;
-                    case Dock.None:
                     default:
-                        throw new InvalidOperationException();
+                        throw new NotSupportedException();
                 }
             }
         }

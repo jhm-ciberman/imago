@@ -29,7 +29,7 @@ public class Control : Visual
     /// <summary>
     /// Gets or sets the dock position of the control.
     /// </summary>
-    public Dock Dock { get; set; } = Dock.None;
+    public Dock Dock { get; set; } = Dock.Left;
 
     /// <summary>
     /// Gets or sets the background color of the control.
