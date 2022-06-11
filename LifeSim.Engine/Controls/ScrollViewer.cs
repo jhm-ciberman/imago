@@ -149,7 +149,7 @@ public class ScrollViewer : ContentControl
     {
         base.Update(deltaTime);
 
-        float wheelDelta = -Input.MouseWheelDelta;
+        float wheelDelta = -Input.Instance.MouseWheelDelta;
 
         if (wheelDelta != 0)
         {
