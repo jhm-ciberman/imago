@@ -1,3 +1,11 @@
 namespace LifeSim.Engine.Anim;
 
-public enum InterpolationMode { Step, Linear, CubicSpline }
+/// <summary>
+/// Represents the interpolation mode of an animation.
+/// </summary>
+public enum InterpolationMode
+{
+    Step,
+    Linear,
+    CubicSpline
+}
