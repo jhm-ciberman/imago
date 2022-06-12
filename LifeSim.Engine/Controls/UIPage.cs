@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 using LifeSim.Engine.Rendering;
 
@@ -14,6 +15,8 @@ public class UIPage
     /// Gets or sets the global zoom of the page. This will scale all controls on the page by the given factor.
     /// </summary>
     public float Zoom { get; set; } = 1f;
+
+    private HashSet<IAnimatedBrush> _animatedBrushes = new HashSet<IAnimatedBrush>();
 
     public Matrix4x4 ViewProjectionMatrix
     {
@@ -73,6 +76,12 @@ public class UIPage
     internal void Update(float deltaTime)
     {
         if (this._content is null) return;
+
+        foreach (var brush in this._animatedBrushes)
+        {
+            brush.Update(deltaTime);
+        }
+
         this._content.Update(deltaTime);
     }
 
@@ -86,5 +95,15 @@ public class UIPage
     {
         //
         _ = control;
+    }
+
+    internal void AddAnimatedBrush(IAnimatedBrush animatedBrush)
+    {
+        this._animatedBrushes.Add(animatedBrush);
+    }
+
+    internal void RemoveAnimatedBrush(IAnimatedBrush animatedBrush)
+    {
+        this._animatedBrushes.Remove(animatedBrush);
     }
 }

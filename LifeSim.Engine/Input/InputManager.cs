@@ -109,7 +109,6 @@ public class InputManager
         for (int i = 0; i < this.InputSnapshot.KeyEvents.Count; i++)
         {
             KeyEvent ke = this.InputSnapshot.KeyEvents[i];
-            Console.WriteLine(ke);
             if (ke.Down)
             {
                 this.ReleaseKey(ke.Key);

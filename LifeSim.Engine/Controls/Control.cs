@@ -10,11 +10,6 @@ namespace LifeSim.Engine.Controls;
 public class Control : Visual
 {
     /// <summary>
-    /// Raised when the control is updated.
-    /// </summary>
-    public event EventHandler<float>? Updated;
-
-    /// <summary>
     /// Gets or sets the margin of the control.
     /// </summary>
     public Thickness Margin { get; set; } = new Thickness(0);
@@ -34,10 +29,16 @@ public class Control : Visual
     /// </summary>
     public Dock Dock { get; set; } = Dock.Left;
 
+    private IBrush? _background = null;
+
     /// <summary>
-    /// Gets or sets the background color of the control.
+    /// Gets or sets the background brush of the control.
     /// </summary>
-    public Color Background { get; set; } = Color.Transparent;
+    public IBrush? Background
+    {
+        get => this._background;
+        set => this.SetBrushImpl(value);
+    }
 
     /// <summary>
     /// Gets the parent of the control or null if the control has no parent.
@@ -69,24 +70,6 @@ public class Control : Visual
     /// Gets or sets the height of the control. A value of float.NaN indicates that the height should be calculated automatically using the control's content.
     /// </summary>
     public float Height { get; set; } = float.NaN;
-
-    /// <summary>
-    /// Gets or sets the style of the control.
-    /// </summary>
-    private Style? _style;
-
-    public Style? Style
-    {
-        get => this._style;
-        set
-        {
-            if (this._style != value)
-            {
-                this._style = value;
-                value?.Apply(this);
-            }
-        }
-    }
 
     /// <summary>
     /// Gets whether the measure pass is valid.
@@ -122,6 +105,9 @@ public class Control : Visual
     /// <param name="availableSize">The available size that this object can give to child objects. Infinity can be specified as a value to indicate that the object will size to whatever content is available.</param>
     public void Measure(Vector2 availableSize)
     {
+        if (this.IsMeasureValid) return;
+        this.IsMeasureValid = true;
+
         if (this.Visibility == Visibility.Collapsed)
         {
             this.DesiredSize = Vector2.Zero;
@@ -152,6 +138,9 @@ public class Control : Visual
     /// <param name="finalSize">The final size that this object should use to arrange itself and its children.</param>
     public void Arrange(Rect finalRect)
     {
+        if (this.IsArrangeValid) return;
+        this.IsArrangeValid = true;
+
         float marginW = this.Margin.Left + this.Margin.Right;
         float marginH = this.Margin.Top + this.Margin.Bottom;
         finalRect.X += this.Margin.Left;
@@ -213,8 +202,6 @@ public class Control : Visual
     public virtual void Update(float deltaTime)
     {
         // Do nothing. This should be overridden by subclasses.
-
-        this.Updated?.Invoke(this, deltaTime);
     }
 
     protected virtual Rect ArrangeCore(Rect finalRect)
@@ -229,10 +216,7 @@ public class Control : Visual
 
     protected override void DrawCore(SpriteBatcher spriteBatcher)
     {
-        if (this.Background.A > 0)
-        {
-            spriteBatcher.DrawRectangle(this.Position, this.ActualSize, this.Background);
-        }
+        this.Background?.DrawRectangle(spriteBatcher, this.Position, this.ActualSize);
     }
 
     protected virtual void InvalidateMeasure()
@@ -250,6 +234,43 @@ public class Control : Visual
         {
             this.IsArrangeValid = false;
             this.Root?.InvalidateArrange(this);
+        }
+    }
+
+    public override void OnAddedToVisualTree(UIPage page)
+    {
+        base.OnAddedToVisualTree(page);
+
+        if (this.Background is IAnimatedBrush animatedBrush)
+        {
+            page.AddAnimatedBrush(animatedBrush);
+        }
+    }
+
+    public override void OnRemovedFromVisualTree(UIPage page)
+    {
+        base.OnRemovedFromVisualTree(page);
+
+        if (this.Background is IAnimatedBrush animatedBrush)
+        {
+            page.RemoveAnimatedBrush(animatedBrush);
+        }
+    }
+
+    protected void SetBrushImpl(IBrush brush)
+    {
+        if (this._background == brush) return;
+
+        if (this.Root != null && this._background is IAnimatedBrush animatedBrush)
+        {
+            this.Root.RemoveAnimatedBrush(animatedBrush);
+        }
+
+        this._background = brush;
+
+        if (this.Root != null && this._background is IAnimatedBrush animatedBrush2)
+        {
+            this.Root.AddAnimatedBrush(animatedBrush2);
         }
     }
 }

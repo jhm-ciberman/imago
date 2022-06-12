@@ -61,6 +61,24 @@ public abstract class Visual
     public bool ClipToBounds { get; set; } = false;
 
     /// <summary>
+    /// Gets or sets the style of the control.
+    /// </summary>
+    private Style? _style;
+
+    public Style? Style
+    {
+        get => this._style;
+        set
+        {
+            if (this._style != value)
+            {
+                this._style = value;
+                value?.Apply(this);
+            }
+        }
+    }
+
+    /// <summary>
     /// Draws the control.
     /// </summary>
     /// <param name="spriteBatcher">The sprite batch to use for drawing.</param>

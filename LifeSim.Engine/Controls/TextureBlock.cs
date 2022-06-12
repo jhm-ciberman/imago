@@ -3,31 +3,31 @@ using LifeSim.Engine.Rendering;
 
 namespace LifeSim.Engine.Controls;
 
-public class ImageControl : Control
+public class TextureBlock : Control
 {
-    public ImageControl() : base()
+    public TextureBlock() : base()
     {
         //
     }
 
-    public ImageControl(Texture texture, Vector2 size) : base()
+    public TextureBlock(Texture texture, Vector2 size) : base()
     {
         this.Texture = texture;
         this.Size = size;
     }
 
-    public ImageControl(Texture texture)
+    public TextureBlock(Texture texture)
     {
         this.Texture = texture;
         this.Size = new Vector2(texture.Width, texture.Height);
     }
 
-    public ImageControl(Vector2 size) : base()
+    public TextureBlock(Vector2 size) : base()
     {
         this.Size = size;
     }
 
-    public ImageControl(Vector2 position, Vector2 size) : base()
+    public TextureBlock(Vector2 position, Vector2 size) : base()
     {
         this.Position = position;
         this.Size = size;
