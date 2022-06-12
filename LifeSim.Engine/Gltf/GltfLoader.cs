@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -13,6 +14,18 @@ namespace LifeSim.Engine.Gltf;
 
 public class GltfLoader
 {
+    public class GltfAsset
+    {
+        public IReadOnlyList<IScenePrefab> Scenes { get; } = Array.Empty<IScenePrefab>();
+        public IReadOnlyList<Animation> Animations { get; } = Array.Empty<Animation>();
+
+        public GltfAsset(IReadOnlyList<IScenePrefab> scenes, IReadOnlyList<Animation> animations)
+        {
+            this.Scenes = scenes;
+            this.Animations = animations;
+        }
+    }
+
     private static readonly Dictionary<string, GltfAsset> _cache = new Dictionary<string, GltfAsset>();
 
     public static GltfAsset LoadFile(string path)

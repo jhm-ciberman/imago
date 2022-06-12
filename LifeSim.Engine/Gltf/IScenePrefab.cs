@@ -1,7 +1,7 @@
 using System;
 using LifeSim.Engine.SceneGraph;
 
-namespace LifeSim.Engine;
+namespace LifeSim.Engine.Gltf;
 
 public interface IScenePrefab : IDisposable
 {

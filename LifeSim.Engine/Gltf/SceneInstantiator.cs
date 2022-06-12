@@ -45,8 +45,8 @@ public class SceneInstantiator
         }
 
         Node3D node = (gltfNode.Mesh != null)
-                    ? this.CreateRenderNode(scene, gltfNode.Mesh, gltfNode.Material, gltfNode.Skin)
-                    : new Node3D();
+            ? this.CreateRenderNode(scene, gltfNode.Mesh, gltfNode.Material, gltfNode.Skin)
+            : new Node3D();
 
         this._nodesCache[gltfNode] = node;
         node.Name = gltfNode.Name;

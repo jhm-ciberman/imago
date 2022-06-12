@@ -9,7 +9,7 @@ namespace LifeSim.Engine.SceneGraph;
 public class Node3D
 {
     [Flags]
-    private enum DirtyFlags
+    private enum DirtyFlags : byte
     {
         None = 0,
         LocalMatrix = 1 << 0,
@@ -18,20 +18,31 @@ public class Node3D
     }
 
 
+    /// <summary>
+    /// Gets the name of the node.
+    /// </summary>
     public string Name { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Gets the parent of this node.
+    /// </summary>
     public Node3D? Parent { get; protected set; } = null;
 
-    private Vector3    _position = Vector3.Zero;
+    private Vector3 _position = Vector3.Zero;
     private Quaternion _rotation = Quaternion.Identity;
-    private Vector3    _scale = Vector3.One;
+    private Vector3 _scale = Vector3.One;
 
     private readonly SwapPopList<Node3D> _children = new SwapPopList<Node3D>();
 
 
+    /// <summary>
+    /// Gets a list of all children of this node.
+    /// </summary>
     public IReadOnlyList<Node3D> Children => this._children;
 
-
+    /// <summary>
+    /// Gets or sets the position of the node.
+    /// </summary>
     public Vector3 Position
     {
         get => this._position;
@@ -43,6 +54,9 @@ public class Node3D
         }
     }
 
+    /// <summary>
+    /// Gets or sets the rotation of the node.
+    /// </summary>
     public Quaternion Rotation
     {
         get => this._rotation;
@@ -54,6 +68,9 @@ public class Node3D
         }
     }
 
+    /// <summary>
+    /// Gets or sets the scale of the node.
+    /// </summary>
     public Vector3 Scale
     {
         get => this._scale;
@@ -65,15 +82,28 @@ public class Node3D
         }
     }
 
+    /// <summary>
+    /// Gets the scene this node is in or null if it is not in a scene.
+    /// </summary>
     public Scene? Scene { get; protected set; } = null;
 
     private Matrix4x4 _localMatrix = Matrix4x4.Identity;
     private Matrix4x4 _worldMatrix = Matrix4x4.Identity;
     private DirtyFlags _dirtyFlags = DirtyFlags.All;
 
+    /// <summary>
+    /// Gets whether the local transform of this node is dirty.
+    /// </summary>
     public bool LocalTransformIsDirty => (this._dirtyFlags & DirtyFlags.LocalMatrix) != 0;
+
+    /// <summary>
+    /// Gets whether the world transform of this node is dirty.
+    /// </summary>
     public bool WorldTransformIsDirty => (this._dirtyFlags & DirtyFlags.WorldMatrix) != 0;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Node3D"/> class.
+    /// </summary>
     public Node3D()
     {
         //
@@ -106,6 +136,9 @@ public class Node3D
         }
     }
 
+    /// <summary>
+    /// Gets the local transform of this node.
+    /// </summary>
     public ref Matrix4x4 LocalMatrix
     {
         get
@@ -121,6 +154,10 @@ public class Node3D
         }
     }
 
+    /// <summary>
+    /// Recursively updates the world transform of this node and all its children.
+    /// </summary>
+    /// <param name="parentMatrix">The world transform of the parent node.</param>
     public virtual void UpdateTransform(ref Matrix4x4 parentMatrix)
     {
         this._worldMatrix = this.LocalMatrix * parentMatrix;
@@ -131,12 +168,18 @@ public class Node3D
         }
     }
 
+    /// <summary>
+    /// Recursively updates the world transform of this node and all its children.
+    /// </summary>
     public void UpdateTransform()
     {
         Matrix4x4 mat = (this.Parent == null) ? Matrix4x4.Identity : this.Parent.WorldMatrix;
         this.UpdateTransform(ref mat);
     }
 
+    /// <summary>
+    /// Gets the world transform of this node.
+    /// </summary>
     public ref Matrix4x4 WorldMatrix
     {
         get
@@ -149,72 +192,10 @@ public class Node3D
         }
     }
 
-    public T? FindChild<T>(string name) where T : Node3D
-    {
-        if (this is T tNode && this.Name == name) return tNode;
-
-        foreach (var child in this.Children)
-        {
-            var found = child.FindChild<T>(name);
-            if (found != null) return found;
-        }
-
-        return null;
-    }
-
-    public T FindChildOrFail<T>(string name) where T : Node3D
-    {
-        var found = this.FindChild<T>(name);
-        if (found == null) throw new InvalidOperationException($"Child with name '{name}' not found.");
-        return found;
-    }
-
-    public T? GetChildByName<T>(string name) where T : Node3D
-    {
-        foreach (var child in this.Children)
-        {
-            if (child.Name == name && child is T tChild)
-            {
-                return tChild;
-            }
-        }
-
-        return null;
-    }
-
-    public Node3D? GetChildByName(string name)
-    {
-        foreach (var child in this.Children)
-        {
-            if (child.Name == name) return child;
-        }
-
-        return null;
-    }
-
-    // path is a relative path to a node (example: "Armature/Hips/Spine1/Spine2/Head")
-    public T? FindPath<T>(string path) where T : Node3D
-    {
-        if (string.IsNullOrEmpty(path)) return null;
-
-        var pathParts = path.Split('/');
-        var currentNode = this;
-        foreach (var pathPart in pathParts)
-        {
-            currentNode = currentNode.GetChildByName(pathPart);
-            if (currentNode == null) return null;
-        }
-
-        return currentNode as T;
-    }
-
-    public T FindPathOrFail<T>(string path) where T : Node3D
-    {
-        var found = this.FindPath<T>(path);
-        if (found == null) throw new InvalidOperationException($"Path '{path}' not found.");
-        return found;
-    }
-
+    /// <summary>
+    /// Adds a child node to this node.
+    /// </summary>
+    /// <param name="node">The node to add.</param>
     public void AddChild(Node3D node)
     {
         // Prevent adding self as child
@@ -238,6 +219,10 @@ public class Node3D
         }
     }
 
+    /// <summary>
+    /// Removes a child node from this node.
+    /// </summary>
+    /// <param name="node">The node to remove.</param>
     public void RemoveChild(Node3D node)
     {
         if (node.Parent != this) return;
@@ -286,18 +271,5 @@ public class Node3D
             child.PrintHierarchyToConsole($"{indent}  ");
         }
     }
-
-    public void ForEachRecursive<T>(Action<T> action)
-    {
-        if (this is T node)
-        {
-            action(node);
-        }
-        foreach (var child in this._children)
-        {
-            child.ForEachRecursive<T>(action);
-        }
-    }
-
 
 }

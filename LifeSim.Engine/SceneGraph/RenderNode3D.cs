@@ -5,7 +5,10 @@ using Veldrid.Utilities;
 
 namespace LifeSim.Engine.SceneGraph;
 
-public partial class RenderNode3D : Node3D
+/// <summary>
+/// A node capable of rendering a mesh with a material.
+/// </summary>
+public class RenderNode3D : Node3D
 {
     // Contiguos layout
     [StructLayout(LayoutKind.Sequential)]
@@ -21,6 +24,9 @@ public partial class RenderNode3D : Node3D
 
     private InstanceData _instanceData;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RenderNode3D"/> class.
+    /// </summary>
     public RenderNode3D()
     {
         this._instanceData = new InstanceData();
@@ -29,18 +35,35 @@ public partial class RenderNode3D : Node3D
         this._renderable.SetInstanceData(this._instanceData);
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RenderNode3D"/> class.
+    /// </summary>
+    /// <param name="mesh">The mesh to render.</param>
     public RenderNode3D(Mesh mesh) : this()
     {
         this.Mesh = mesh;
     }
 
-
+    /// <summary>
+    /// Gets or sets the mesh to render.
+    /// </summary>
     public Mesh? Mesh { get => this._renderable.Mesh; set => this._renderable.Mesh = value; }
+
+    /// <summary>
+    /// Gets or sets the material to use.
+    /// </summary>
     public Material? Material { get => this._renderable.Material; set => this._renderable.Material = value; }
+
+    /// <summary>
+    /// Gets or sets the skeleton to use.
+    /// </summary>
     public Skeleton? Skeleton { get => this._renderable.Skeleton; set => this._renderable.Skeleton = value; }
 
     private bool _isPickable = false;
 
+    /// <summary>
+    /// Gets or sets whether this node is pickable by the user using the mouse.
+    /// </summary>
     public bool IsPickable
     {
         get => this._isPickable;
@@ -61,6 +84,10 @@ public partial class RenderNode3D : Node3D
     }
 
     private bool _visible = true;
+
+    /// <summary>
+    /// Gets or sets whether this node is visible.
+    /// </summary>
     public bool Visible
     {
         get => this._visible;
@@ -73,32 +100,46 @@ public partial class RenderNode3D : Node3D
 
     }
 
+    /// <summary>
+    /// Gets or sets the shadow cast mode.
+    /// </summary>
     public ShadowCasting ShadowCastingMode
     {
         get => this._renderable.ShadowCastingMode;
         set => this._renderable.ShadowCastingMode = value;
     }
 
-
+    /// <summary>
+    /// Gets or sets the albedo color of this node.
+    /// </summary>
     public ColorF AlbedoColor
     {
         get => this._instanceData.AlbedoColor;
         set => this.SetInstanceData(ref this._instanceData.AlbedoColor, value);
     }
 
+    /// <summary>
+    /// Gets or sets the texture ST value of this node.
+    /// </summary>
     public Vector4 TextureST
     {
         get => this._instanceData.TextureST;
         set => this.SetInstanceData(ref this._instanceData.TextureST, value);
     }
 
+    /// <summary>
+    /// Gets or sets the highlight color of this node.
+    /// </summary>
     public ColorF HightlightColor
     {
         get => this._instanceData.HightlightColor;
         set => this.SetInstanceData(ref this._instanceData.HightlightColor, value);
     }
 
-    public float Alpha
+    /// <summary>
+    /// Gets or sets the opacity of this node.
+    /// </summary>
+    public float Opacity
     {
         get => this._instanceData.AlbedoColor.W;
         set
@@ -143,6 +184,12 @@ public partial class RenderNode3D : Node3D
         this._renderable.Visible = false;
     }
 
+    /// <summary>
+    /// Tests whether the given ray intersects this node.
+    /// </summary>
+    /// <param name="ray">The ray to test.</param>
+    /// <param name="hitInfo">The hit info if the ray intersects this node.</param>
+    /// <returns>True if the ray intersects this node, false otherwise.</returns>
     public bool RayCast(Ray ray, out HitInfo hitInfo)
     {
         hitInfo = default;

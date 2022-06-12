@@ -31,7 +31,9 @@ public class DirectionalLight
     public ColorF Color { get; set; } = ColorF.White;
 
 
-
+    /// <summary>
+    /// Gets the shadow map for this light.
+    /// </summary>
     public ShadowMap ShadowMap { get; } = new ShadowMap();
 
 }
