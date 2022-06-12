@@ -21,7 +21,10 @@ public class ContentControl : Control
                 if (this._content != null)
                 {
                     this._content.Parent = null;
-                    this._content.Root = null;
+                    if (this.Root != null)
+                    {
+                        this._content.OnRemovedFromVisualTree(this.Root);
+                    }
                 }
 
                 this._content = value;
@@ -29,7 +32,10 @@ public class ContentControl : Control
                 if (this._content != null)
                 {
                     this._content.Parent = this;
-                    this._content.Root = this.Root;
+                    if (this.Root != null)
+                    {
+                        this._content.OnAddedToVisualTree(this.Root);
+                    }
                     this._visualChildren = new[] { this._content };
                 }
                 else

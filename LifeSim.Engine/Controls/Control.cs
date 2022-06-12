@@ -89,6 +89,16 @@ public class Control : Visual
     }
 
     /// <summary>
+    /// Gets whether the measure pass is valid.
+    /// </summary>
+    public bool IsMeasureValid { get; private set; } = false;
+
+    /// <summary>
+    /// Gets whether the arrange pass is valid.
+    /// </summary>
+    public bool IsArrangeValid { get; private set; } = false;
+
+    /// <summary>
     /// Creates a new instance of the <see cref="Control"/> class.
     /// </summary>
     public Control()
@@ -222,6 +232,24 @@ public class Control : Visual
         if (this.Background.A > 0)
         {
             spriteBatcher.DrawRectangle(this.Position, this.ActualSize, this.Background);
+        }
+    }
+
+    protected virtual void InvalidateMeasure()
+    {
+        if (this.IsMeasureValid)
+        {
+            this.IsMeasureValid = false;
+            this.Root?.InvalidateMeasure(this);
+        }
+    }
+
+    protected virtual void InvalidateArrange()
+    {
+        if (this.IsArrangeValid)
+        {
+            this.IsArrangeValid = false;
+            this.Root?.InvalidateArrange(this);
         }
     }
 }

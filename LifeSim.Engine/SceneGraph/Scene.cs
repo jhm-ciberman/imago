@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Numerics;
 using LifeSim.Engine.Controls;
 using LifeSim.Engine.Rendering;
-using LifeSim.Engine.SceneGraph;
 
 namespace LifeSim.Engine.SceneGraph;
 
@@ -16,7 +14,7 @@ public class Scene : Node3D
     public Camera3D? Camera { get; set; } = null;
     public IReadOnlyList<CanvasLayer> CanvasLayers => this._canvasLayers;
 
-    public UILayer? UILayer { get; set; } = null;
+    public UIPage? UIPage { get; set; } = null;
 
     public IReadOnlyList<IParticleSystem> ParticleSystems => this._particleSystems;
 
@@ -73,7 +71,7 @@ public class Scene : Node3D
     {
         //
 
-        this.UILayer?.Update(deltaTime);
+        this.UIPage?.Update(deltaTime);
     }
 
     public void UpdateSceneDirtyTransforms()

@@ -37,21 +37,11 @@ public abstract class Visual
     /// <summary>
     /// Gets the root of the control.
     /// </summary>
-    private UILayer? _root;
-    public UILayer? Root
+    private UIPage? _root;
+    public UIPage? Root
     {
         get => this._root;
-        internal set
-        {
-            if (this._root != value)
-            {
-                this._root = value;
-                foreach (var child in this.VisualChildren)
-                {
-                    child.Root = value;
-                }
-            }
-        }
+        private set => this._root = value;
     }
 
 
@@ -116,6 +106,30 @@ public abstract class Visual
     protected abstract Rect GetBounds();
 
     protected abstract void DrawCore(SpriteBatcher spriteBatcher);
+
+    public virtual void OnAddedToVisualTree(UIPage page)
+    {
+        if (this.Root != page)
+        {
+            this.Root = page;
+            foreach (var child in this.VisualChildren)
+            {
+                child.OnAddedToVisualTree(page);
+            }
+        }
+    }
+
+    public virtual void OnRemovedFromVisualTree(UIPage page)
+    {
+        if (this.Root == page)
+        {
+            this.Root = null;
+            foreach (var child in this.VisualChildren)
+            {
+                child.OnRemovedFromVisualTree(page);
+            }
+        }
+    }
 
     /// <summary>
     /// Finds a child control of the specified type by its name recursively.

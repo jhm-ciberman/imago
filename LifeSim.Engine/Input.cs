@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Veldrid;
@@ -5,33 +6,57 @@ using Veldrid.Sdl2;
 
 namespace LifeSim.Engine;
 
+/// <summary>
+/// Captures and manages the mouse and keyboard input.
+/// </summary>
 public class Input
 {
     private static Input _instance = null!;
+
+    /// <summary>
+    /// Gets the instance of the input.
+    /// </summary>
     public static Input Instance
     {
         protected set => _instance = value;
         get => _instance;
     }
 
-    private readonly Sdl2Window _window;
-
-    private readonly HashSet<Key> _currentlyPressedKeys = new HashSet<Key>();
-    private readonly HashSet<Key> _newKeysThisFrame = new HashSet<Key>();
-
-    private readonly HashSet<Key> _releasedKeysThisFrame = new HashSet<Key>();
-
-    private readonly HashSet<MouseButton> _currentlyPressedMouseButtons = new HashSet<MouseButton>();
-    private readonly HashSet<MouseButton> _newMouseButtonsThisFrame = new HashSet<MouseButton>();
-
-    private readonly HashSet<MouseButton> _releasedMouseButtonsThisFrame = new HashSet<MouseButton>();
-
-    private Vector2 _mousePosition;
-    private Vector2 _mouseDelta;
-
+    /// <summary>
+    /// Gets the mouse wheel delta for this frame.
+    /// </summary>
     public float MouseWheelDelta { get; private set; }
+
+    /// <summary>
+    /// Gets the Input Snapshot for the current frame.
+    /// </summary>
     public InputSnapshot InputSnapshot { get; private set; }
 
+    private readonly Sdl2Window _window;
+
+    private readonly HashSet<Key> _currentlyPressedKeys = new();
+
+    private readonly HashSet<Key> _newKeysThisFrame = new();
+
+    private readonly HashSet<Key> _releasedKeysThisFrame = new();
+
+    private readonly HashSet<MouseButton> _currentlyPressedMouseButtons = new();
+
+    private readonly HashSet<MouseButton> _newMouseButtonsThisFrame = new();
+
+    private readonly HashSet<MouseButton> _releasedMouseButtonsThisFrame = new();
+
+    private IReadOnlyList<char> _typedCharactersThisFrame = Array.Empty<char>();
+
+    private Vector2 _mousePosition;
+
+    private Vector2 _mouseDelta;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Input"/> class.
+    /// </summary>
+    /// <param name="window">The window to capture input from.</param>
+    /// <exception cref="System.Exception">Thrown if the Input instance has already been created.</exception>
     public Input(Sdl2Window window)
     {
         if (_instance != null)
@@ -44,6 +69,9 @@ public class Input
         this.InputSnapshot = window.PumpEvents();
     }
 
+    /// <summary>
+    /// Updates the input state.
+    /// </summary>
     public void UpdateFrameInput()
     {
         this.InputSnapshot = this._window.PumpEvents(); //For next frame
@@ -57,11 +85,11 @@ public class Input
             KeyEvent ke = this.InputSnapshot.KeyEvents[i];
             if (ke.Down)
             {
-                this.KeyDown(ke.Key);
+                this.ReleaseKey(ke.Key);
             }
             else
             {
-                this.KeyUp(ke.Key);
+                this.PressKey(ke.Key);
             }
         }
         for (int i = 0; i < this.InputSnapshot.MouseEvents.Count; i++)
@@ -69,13 +97,15 @@ public class Input
             MouseEvent me = this.InputSnapshot.MouseEvents[i];
             if (me.Down)
             {
-                this.MouseDown(me.MouseButton);
+                this.ReleaseMouseButton(me.MouseButton);
             }
             else
             {
-                this.MouseUp(me.MouseButton);
+                this.PressMouseButton(me.MouseButton);
             }
         }
+
+        this._typedCharactersThisFrame = this.InputSnapshot.KeyCharPresses;
 
         var newPos = this.InputSnapshot.MousePosition;
         var center = new Vector2(this._window.Width / 2, this._window.Height / 2);
@@ -85,6 +115,9 @@ public class Input
         this.MouseWheelDelta = this.InputSnapshot.WheelDelta;
     }
 
+    /// <summary>
+    /// Moves the mouse cursor to the center of the screen.
+    /// </summary>
     public void MoveMouseToCenter()
     {
         var center = new Vector2(this._window.Width / 2, this._window.Height / 2);
@@ -93,8 +126,19 @@ public class Input
         this._mousePosition = center;
     }
 
+    /// <summary>
+    /// Gets the current mouse position.
+    /// </summary>
     public Vector2 MousePosition => this._mousePosition;
+
+    /// <summary>
+    /// Gets the mouse delta since the last frame.
+    /// </summary>
     public Vector2 MouseDelta => this._mouseDelta;
+
+    /// <summary>
+    /// Gets or sets whether the mouse is currently visible.
+    /// </summary>
     public bool CursorIsVisible
     {
         get => this._window.CursorVisible;
@@ -102,44 +146,82 @@ public class Input
     }
 
 
+    /// <summary>
+    /// Gets whether the specified key is currently pressed.
+    /// </summary>
+    /// <param name="key">The key to check.</param>
+    /// <returns>Whether the specified key is currently pressed.</returns>
     public bool GetKey(Key key)
     {
         return this._currentlyPressedKeys.Contains(key);
     }
 
+    /// <summary>
+    /// Gets whether the specified key was pressed this frame.
+    /// </summary>
+    /// <param name="key">The key to check.</param>
+    /// <returns>Whether the specified key was pressed this frame.</returns>
     public bool GetKeyDown(Key key)
     {
         return this._newKeysThisFrame.Contains(key);
     }
 
+    /// <summary>
+    /// Gets whether the specified key was released this frame.
+    /// </summary>
+    /// <param name="key">The key to check.</param>
+    /// <returns>Whether the specified key was released this frame.</returns>
     public bool GetKeyUp(Key key)
     {
         return this._releasedKeysThisFrame.Contains(key);
     }
 
+    /// <summary>
+    /// Gets whether the specified mouse button is currently pressed.
+    /// </summary>
+    /// <param name="button">The mouse button to check.</param>
+    /// <returns>Whether the specified mouse button is currently pressed.</returns>
     public bool GetMouseButton(MouseButton button)
     {
         return this._currentlyPressedMouseButtons.Contains(button);
     }
 
+    /// <summary>
+    /// Gets whether the specified mouse button was pressed this frame.
+    /// </summary>
+    /// <param name="button">The mouse button to check.</param>
+    /// <returns>Whether the specified mouse button was pressed this frame.</returns>
     public bool GetMouseButtonDown(MouseButton button)
     {
         return this._newMouseButtonsThisFrame.Contains(button);
     }
 
+    /// <summary>
+    /// Gets whether the specified mouse button was released this frame.
+    /// </summary>
+    /// <param name="button">The mouse button to check.</param>
+    /// <returns>Whether the specified mouse button was released this frame.</returns>
     public bool GetMouseButtonUp(MouseButton button)
     {
         return this._releasedMouseButtonsThisFrame.Contains(button);
     }
 
-    private void MouseUp(MouseButton mouseButton)
+    /// <summary>
+    /// Simulates pressing the specified mouse button.
+    /// </summary>
+    /// <param name="mouseButton">The mouse button to press.</param>
+    public void PressMouseButton(MouseButton mouseButton)
     {
         this._currentlyPressedMouseButtons.Remove(mouseButton);
         this._newMouseButtonsThisFrame.Remove(mouseButton);
         this._releasedMouseButtonsThisFrame.Add(mouseButton);
     }
 
-    private void MouseDown(MouseButton mouseButton)
+    /// <summary>
+    /// Simulates releasing the specified mouse button.
+    /// </summary>
+    /// <param name="mouseButton">The mouse button to release.</param>
+    public void ReleaseMouseButton(MouseButton mouseButton)
     {
         if (this._currentlyPressedMouseButtons.Add(mouseButton))
         {
@@ -148,14 +230,22 @@ public class Input
         }
     }
 
-    private void KeyUp(Key key)
+    /// <summary>
+    /// Simulates pressing the specified key.
+    /// </summary>
+    /// <param name="key">The key to press.</param>
+    public void PressKey(Key key)
     {
         this._currentlyPressedKeys.Remove(key);
         this._newKeysThisFrame.Remove(key);
         this._releasedKeysThisFrame.Add(key);
     }
 
-    private void KeyDown(Key key)
+    /// <summary>
+    /// Simulates releasing the specified key.
+    /// </summary>
+    /// <param name="key">The key to release.</param>
+    public void ReleaseKey(Key key)
     {
         if (this._currentlyPressedKeys.Add(key))
         {
@@ -163,4 +253,9 @@ public class Input
             this._releasedKeysThisFrame.Remove(key);
         }
     }
+
+    /// <summary>
+    /// Gets a read-only list of the currently pressed characters.
+    /// </summary>
+    public IReadOnlyList<char> TypedCharacters => this._typedCharactersThisFrame;
 }

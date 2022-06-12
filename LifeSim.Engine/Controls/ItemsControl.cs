@@ -19,14 +19,20 @@ public abstract class ItemsControl : Control
         {
             base.InsertItem(index, item);
             item.Parent = this.Owner;
-            item.Root = this.Owner.Root;
+            if (this.Owner.Root != null)
+            {
+                item.OnAddedToVisualTree(this.Owner.Root);
+            }
         }
 
         protected override void RemoveItem(int index)
         {
             var item = this[index];
             item.Parent = null;
-            item.Root = null;
+            if (this.Owner.Root != null)
+            {
+                item.OnRemovedFromVisualTree(this.Owner.Root);
+            }
             base.RemoveItem(index);
         }
 
@@ -34,10 +40,16 @@ public abstract class ItemsControl : Control
         {
             var oldItem = this[index];
             oldItem.Parent = null;
-            oldItem.Root = null;
+            if (this.Owner.Root != null)
+            {
+                oldItem.OnRemovedFromVisualTree(this.Owner.Root);
+            }
             base.SetItem(index, item);
             item.Parent = this.Owner;
-            item.Root = this.Owner.Root;
+            if (this.Owner.Root != null)
+            {
+                item.OnAddedToVisualTree(this.Owner.Root);
+            }
         }
     }
 

@@ -1,3 +1,4 @@
+using System;
 using System.Numerics;
 using LifeSim.Engine.Rendering;
 
@@ -5,7 +6,16 @@ namespace LifeSim.Engine.Controls;
 
 public class TextBlock : Control
 {
-    public string Text { get; set; } = string.Empty;
+    protected string _text = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the text of the text block.
+    /// </summary>
+    public string Text
+    {
+        get => this._text;
+        set => this._text = value;
+    }
 
     public Color Foreground { get; set; } = Color.Black;
 

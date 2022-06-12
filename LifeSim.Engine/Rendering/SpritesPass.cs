@@ -77,10 +77,10 @@ public class SpritesPass : IDisposable, IPipelineProvider, IRenderingPass
             this.DrawCallCount += this._spriteBatcher.DrawCallCount;
         }
 
-        if (scene.UILayer != null)
+        if (scene.UIPage != null)
         {
-            this._spriteBatcher.Begin(cl, scene.UILayer.ViewProjectionMatrix);
-            scene.UILayer.Draw(this._spriteBatcher);
+            this._spriteBatcher.Begin(cl, scene.UIPage.ViewProjectionMatrix);
+            scene.UIPage.Draw(this._spriteBatcher);
             this._spriteBatcher.End();
             this.DrawCallCount += this._spriteBatcher.DrawCallCount;
         }
