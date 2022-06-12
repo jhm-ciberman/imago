@@ -68,7 +68,7 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
 
     private RenderFlags _currentPipelineFlags = RenderFlags.None;
 
-    public SpriteBatcher(GraphicsDevice gd, Shader defaultShader, IPipelineProvider pass)
+    internal SpriteBatcher(GraphicsDevice gd, Shader defaultShader, IPipelineProvider pass)
     {
         this._gd = gd;
         this._defaultShader = defaultShader;

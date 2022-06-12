@@ -4,21 +4,11 @@ using Veldrid;
 
 namespace LifeSim.Engine.Rendering;
 
-public class ResourceSetCache : IDisposable
+internal class ResourceSetCache : IDisposable
 {
-    private struct CachedResourceSetKey
-    {
-        public ITexture Texture { get; set; }
-        public Shader Shader { get; set; }
+    private record struct Key(ITexture Texture, Shader Shader);
 
-        public CachedResourceSetKey(ITexture texture, Shader shader)
-        {
-            this.Texture = texture;
-            this.Shader = shader;
-        }
-    }
-
-    private readonly Dictionary<CachedResourceSetKey, ResourceSet> _cachedResourceSets = new Dictionary<CachedResourceSetKey, ResourceSet>();
+    private readonly Dictionary<Key, ResourceSet> _cachedResourceSets = new Dictionary<Key, ResourceSet>();
 
     private readonly ResourceFactory _factory;
 
@@ -35,7 +25,7 @@ public class ResourceSetCache : IDisposable
     /// <returns>The resource set.</returns>
     public ResourceSet GetResourceSet(Shader shader, ITexture texture)
     {
-        var key = new CachedResourceSetKey(texture, shader);
+        var key = new Key(texture, shader);
         if (this._cachedResourceSets.TryGetValue(key, out var resourceSet))
         {
             return resourceSet;

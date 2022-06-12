@@ -6,7 +6,17 @@ using Veldrid.Utilities;
 
 namespace LifeSim.Engine.Rendering;
 
-public class RenderQueue : IEnumerable<Renderable>, IReadOnlyList<Renderable>, IReadOnlyCollection<Renderable>
+[Flags]
+internal enum RenderQueues : byte
+{
+    None = 0,
+    Opaque = 1 << 0,
+    Transparent = 1 << 1,
+    ShadowCaster = 1 << 2,
+    All = Opaque | Transparent | ShadowCaster,
+}
+
+internal class RenderQueue : IEnumerable<Renderable>, IReadOnlyList<Renderable>, IReadOnlyCollection<Renderable>
 {
     private const int DEFAULT_CAPACITY = 250;
 

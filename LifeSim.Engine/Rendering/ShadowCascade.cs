@@ -5,7 +5,7 @@ using Veldrid.Utilities;
 
 namespace LifeSim.Engine.Rendering;
 
-public class ShadowCascade
+internal class ShadowCascade
 {
     public float SplitNear { get; set; }
     public float SplitFar { get; set; }

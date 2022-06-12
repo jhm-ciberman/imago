@@ -5,7 +5,7 @@ using Veldrid;
 
 namespace LifeSim.Engine.Rendering;
 
-public class RenderBatcher
+internal class RenderBatcher
 {
     private DeviceBuffer? _offsetsVertexBuffer = null;
     private OffsetVertexData[] _offsetVertexData;

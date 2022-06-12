@@ -6,7 +6,7 @@ using Veldrid;
 
 namespace LifeSim.Engine.Rendering;
 
-public class FullScreenPass : IDisposable, IRenderingPass
+internal class FullScreenPass : IDisposable, IRenderingPass
 {
     private ResourceSet? _resourceSet;
 

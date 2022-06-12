@@ -8,17 +8,44 @@ public class Shader : IDisposable
 {
     private static int _count = 0;
 
+    /// <summary>
+    /// Gets the unique ID of this shader.
+    /// </summary>
     public int Id { get; set; }
+
+    /// <summary>
+    /// Gets the source vertex shader code.
+    /// </summary>
+    public string VertexCode { get; }
+
+    /// <summary>
+    /// Gets the source fragment shader code.
+    /// </summary>
+    public string FragmentCode { get; }
+
+    /// <summary>
+    /// Gets an array of the names of the textures used by this shader.
+    /// </summary>
+    public string[] Textures { get; internal set; }
+
+    /// <summary>
+    /// Gets the <see cref="RenderFlags"/> supported by this shader.
+    /// </summary>
+    public RenderFlags SupportedRenderFlags { get; } = RenderFlags.None;
+
+    private record struct CachedPipeline(VertexFormat VertexFormat, Pipeline Pipeline, RenderFlags Flags);
     private readonly List<CachedPipeline> _pipelines = new List<CachedPipeline>();
     public ResourceLayout MaterialResourceLayout { get; }
     private readonly List<ShaderVariant> _variants = new List<ShaderVariant>();
     private readonly GraphicsDevice _gd;
-    public string VertexCode { get; }
-    public string FragmentCode { get; }
-    public string[] Textures { get; internal set; }
 
-    public RenderFlags SupportedRenderFlags { get; } = RenderFlags.None;
-
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Shader"/> class.
+    /// </summary>
+    /// <param name="vertexCode">The source vertex shader code.</param>
+    /// <param name="fragmentCode">The source fragment shader code.</param>
+    /// <param name="textures">The names of the textures used by this shader.</param>
+    /// <param name="suportedRenderFlags">The <see cref="RenderFlags"/> supported by this shader.</param>
     public Shader(string vertexCode, string fragmentCode, string[]? textures = null, RenderFlags suportedRenderFlags = RenderFlags.None)
     {
         this.Id = ++Shader._count;
@@ -46,7 +73,14 @@ public class Shader : IDisposable
         return new ResourceLayoutDescription(elements.ToArray());
     }
 
-    public Pipeline GetPipeline(IPipelineProvider pass, VertexFormat vertexFormat, RenderFlags flags)
+    /// <summary>
+    /// Gets or creates a veldrid pipeline.
+    /// </summary>
+    /// <param name="pass">The pass to use.</param>
+    /// <param name="vertexFormat">The vertex format to use.</param>
+    /// <param name="flags">The render flags to use.</param>
+    /// <returns>The veldrid pipeline.</returns>
+    internal Pipeline GetPipeline(IPipelineProvider pass, VertexFormat vertexFormat, RenderFlags flags)
     {
         lock (this._pipelines)
         {
@@ -108,6 +142,9 @@ public class Shader : IDisposable
         }
     }
 
+    /// <summary>
+    /// Disposes this shader.
+    /// </summary>
     public void Dispose()
     {
         this.MaterialResourceLayout.Dispose();
@@ -121,22 +158,10 @@ public class Shader : IDisposable
         }
     }
 
-    private struct CachedPipeline
-    {
-        public VertexFormat VertexFormat { get; }
-        public Pipeline Pipeline { get; }
-        public RenderFlags Flags { get; }
 
-        public CachedPipeline(VertexFormat vertexFormat, Pipeline pipeline, RenderFlags flags)
-        {
-            this.VertexFormat = vertexFormat;
-            this.Pipeline = pipeline;
-            this.Flags = flags;
-        }
-    }
 }
 
-public class ShaderVariant : IDisposable
+internal class ShaderVariant : IDisposable
 {
     public Shader Shader { get; }
 

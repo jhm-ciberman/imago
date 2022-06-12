@@ -2,7 +2,10 @@ using System;
 
 namespace LifeSim.Engine.Rendering;
 
-
+/// <summary>
+/// <see cref="RenderFlags"/> is a bitmask that is used to specify the features that should
+/// be used when rendering.
+/// </summary>
 [Flags]
 public enum RenderFlags : short
 {

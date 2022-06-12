@@ -63,14 +63,16 @@ public partial class Renderer : ITexture2DManager, IDisposable
     /// </summary>
     public RenderSettings Settings { get; }
 
+    /// <summary>
+    /// Gets the currently selected <see cref="RenderNode3D"/> under the mouse.
+    /// </summary>
+    public RenderNode3D? SelectedRenderNode => this._mousePickerPass.SelectedRenderNode;
+
     private readonly SwapchainRenderTexture _fullScreenRenderTexture;
     private readonly ResourceFactory _factory;
     private readonly FullScreenPass _fullScreenPass;
     private readonly GizmosPass _gizmosPass;
     private readonly Fence _fence;
-    private readonly List<Texture> _dirtyTextures = new();
-    private readonly List<MaterialBase> _dirtyMaterials = new();
-    private readonly List<Renderable> _dirtyRenderables = new();
     private readonly ForwardPass _forwardPass;
     private readonly ShadowPass _shadowPass;
     private readonly SpritesPass _spritesPass;
@@ -111,17 +113,13 @@ public partial class Renderer : ITexture2DManager, IDisposable
         var gd = VeldridStartup.CreateGraphicsDevice(window, options, graphicsBackend ?? VeldridStartup.GetPlatformDefaultBackend());
         this.GraphicsDevice = gd;
 
-        Renderable.PipelineDirty += this.OnRenderablePipelineDirty;
-        MaterialBase.MaterialResourceSetDirty += this.OnMaterialResourceSetDirty;
-        Texture.TextureDirty += this.OnTextureDirty;
-
         this._disposeCollector = new DisposeCollector();
         this._factory = this.GraphicsDevice.ResourceFactory;
 
         this._fullScreenRenderTexture = new SwapchainRenderTexture();
         this.MainRenderTexture = new RenderTexture((uint)window.Width, (uint)window.Height);
 
-        this.Storage = new SceneStorage(gd);
+        this.Storage = new SceneStorage(this);
 
         this.Settings = new RenderSettings(this);
 
@@ -177,54 +175,9 @@ public partial class Renderer : ITexture2DManager, IDisposable
         }
     }
 
-    public Renderable MakeRenderable(int instanceDataBlockSize)
+    internal Renderable MakeRenderable(int instanceDataBlockSize)
     {
         return new Renderable(this, instanceDataBlockSize);
-    }
-
-    protected void UpdateDirtyMaterials()
-    {
-        lock (this._dirtyMaterials)
-        {
-            if (this._dirtyMaterials.Count > 0)
-            {
-                foreach (var material in this._dirtyMaterials)
-                {
-                    material.Update(this._factory);
-                }
-                this._dirtyMaterials.Clear();
-            }
-        }
-    }
-
-    private void UpdateDirtyTextures()
-    {
-        lock (this._dirtyTextures)
-        {
-            if (this._dirtyTextures.Count > 0)
-            {
-                foreach (var resource in this._dirtyTextures)
-                {
-                    resource.Update(this.GraphicsDevice, this._commandList);
-                }
-                this._dirtyTextures.Clear();
-            }
-        }
-    }
-
-    private void UpdateDirtyRenderables()
-    {
-        lock (this._dirtyRenderables)
-        {
-            if (this._dirtyRenderables.Count > 0)
-            {
-                foreach (var renderable in this._dirtyRenderables)
-                {
-                    renderable.Update(this);
-                }
-                this._dirtyRenderables.Clear();
-            }
-        }
     }
 
     public void SetMousePickingPosition(Vector2 position)
@@ -246,9 +199,6 @@ public partial class Renderer : ITexture2DManager, IDisposable
         scene.UpdateSceneDirtyTransforms();
 
         this._commandList.Begin();
-        this.UpdateDirtyMaterials();
-        this.UpdateDirtyTextures();
-        this.UpdateDirtyRenderables();
         this.Storage.UpdateBuffers(this._commandList);
 
         this._commandList.SetFramebuffer(this.MainRenderTexture.Framebuffer);
@@ -286,30 +236,6 @@ public partial class Renderer : ITexture2DManager, IDisposable
         return this._imGuiPass.GetOrCreateBinding(texture);
     }
 
-    private void OnTextureDirty(Texture texture)
-    {
-        lock (this._dirtyTextures)
-        {
-            this._dirtyTextures.Add(texture);
-        }
-    }
-
-    private void OnMaterialResourceSetDirty(MaterialBase material)
-    {
-        lock (this._dirtyMaterials)
-        {
-            this._dirtyMaterials.Add(material);
-        }
-    }
-
-    private void OnRenderablePipelineDirty(Renderable renderable)
-    {
-        lock (this._dirtyRenderables)
-        {
-            this._dirtyRenderables.Add(renderable);
-        }
-    }
-
     public ResourceLayout GetResourceLayout(ResourceLayoutDescription description)
     {
         lock (this._resourceLayoutCache)
@@ -323,6 +249,13 @@ public partial class Renderer : ITexture2DManager, IDisposable
         }
     }
 
+    /// <summary>
+    /// Resizes the main render texture.
+    /// </summary>
+    /// <param name="width">The new width of the render texture.</param>
+    /// <param name="height">The new height of the render texture.</param>
+    /// <param name="viewportWidth">The width of the viewport.</param>
+    /// <param name="viewportHeight">The height of the viewport.</param>
     public void Resize(uint width, uint height, uint viewportWidth, uint viewportHeight)
     {
         this.GraphicsDevice.ResizeMainWindow(width, height);
@@ -332,6 +265,9 @@ public partial class Renderer : ITexture2DManager, IDisposable
         this._imGuiPass.Resize(viewportWidth, viewportHeight);
     }
 
+    /// <summary>
+    /// Disposes the renderer.
+    /// </summary>
     public void Dispose()
     {
         this.GraphicsDevice.WaitForIdle();
@@ -346,8 +282,6 @@ public partial class Renderer : ITexture2DManager, IDisposable
             job.Dispose();
         }
     }
-
-    public RenderNode3D? SelectedRenderNode => this._mousePickerPass.SelectedRenderNode;
 
     public uint RegisterPickable(RenderNode3D renderNode)
     {

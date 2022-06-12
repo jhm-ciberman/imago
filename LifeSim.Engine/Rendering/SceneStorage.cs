@@ -7,34 +7,55 @@ namespace LifeSim.Engine.Rendering;
 public class SceneStorage : IDisposable
 {
     public const int MIN_BUFFER_BLOCKS = 1024;
+
+    /// <summary>
+    /// Gets the <see cref="Renderer"/> that owns this <see cref="SceneStorage"/>.
+    /// </summary>
+    public Renderer Renderer { get; }
+
     private readonly GraphicsDevice _gd;
+    private readonly ResourceFactory _factory;
     private readonly List<DataBuffer> _instanceDataBuffers = new List<DataBuffer>();
     private readonly List<DataBuffer> _transformDataBuffers = new List<DataBuffer>();
     private readonly List<DataBuffer> _skeletonDataBuffers = new List<DataBuffer>();
+
+    private readonly List<Texture> _dirtyTextures = new();
+    private readonly List<MaterialBase> _dirtyMaterials = new();
+    private readonly List<Renderable> _dirtyRenderables = new();
+
     public ResourceLayout TransformResourceLayout { get; }
     public ResourceLayout InstanceResourceLayout { get; }
     public ResourceLayout SkeletonResourceLayout { get; }
 
     private readonly List<Skeleton> _skeletons = new List<Skeleton>();
 
-    public SceneStorage(GraphicsDevice gd)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SceneStorage"/> class.
+    /// </summary>
+    /// <param name="renderer">The <see cref="Renderer"/> that owns this <see cref="SceneStorage"/>.</param>
+    public SceneStorage(Renderer renderer)
     {
-        this._gd = gd;
-        var factory = gd.ResourceFactory;
-        this.InstanceResourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
+        this.Renderer = renderer;
+        this._gd = renderer.GraphicsDevice;
+        this._factory = this._gd.ResourceFactory;
+        this.InstanceResourceLayout = this._factory.CreateResourceLayout(new ResourceLayoutDescription(
             new ResourceLayoutElementDescription("InstanceDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex | ShaderStages.Fragment)
         ));
         this.InstanceResourceLayout.Name = "InstanceData Resource Layout";
 
-        this.TransformResourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
+        this.TransformResourceLayout = this._factory.CreateResourceLayout(new ResourceLayoutDescription(
             new ResourceLayoutElementDescription("TransformDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
         ));
         this.TransformResourceLayout.Name = "TransformData Resource Layout";
 
-        this.SkeletonResourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
+        this.SkeletonResourceLayout = this._factory.CreateResourceLayout(new ResourceLayoutDescription(
             new ResourceLayoutElementDescription("BonesDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
         ));
         this.SkeletonResourceLayout.Name = "BonesData Resource Layout";
+
+        Renderable.PipelineDirty += this.OnRenderablePipelineDirty;
+        MaterialBase.MaterialResourceSetDirty += this.OnMaterialResourceSetDirty;
+        Texture.TextureDirty += this.OnTextureDirty;
     }
 
     internal DataBlock RequestTransformDataBlock()
@@ -145,6 +166,66 @@ public class SceneStorage : IDisposable
             {
                 this._skeletonDataBuffers[i].UploadToGPU(commandList);
             }
+        }
+
+        lock (this._dirtyMaterials)
+        {
+            if (this._dirtyMaterials.Count > 0)
+            {
+                foreach (var material in this._dirtyMaterials)
+                {
+                    material.Update(this._factory);
+                }
+                this._dirtyMaterials.Clear();
+            }
+        }
+
+        lock (this._dirtyTextures)
+        {
+            if (this._dirtyTextures.Count > 0)
+            {
+                foreach (var resource in this._dirtyTextures)
+                {
+                    resource.Update(this._gd, commandList);
+                }
+                this._dirtyTextures.Clear();
+            }
+        }
+
+        lock (this._dirtyRenderables)
+        {
+            if (this._dirtyRenderables.Count > 0)
+            {
+                foreach (var renderable in this._dirtyRenderables)
+                {
+                    renderable.Update(this.Renderer);
+                }
+                this._dirtyRenderables.Clear();
+            }
+        }
+    }
+
+    private void OnTextureDirty(Texture texture)
+    {
+        lock (this._dirtyTextures)
+        {
+            this._dirtyTextures.Add(texture);
+        }
+    }
+
+    private void OnMaterialResourceSetDirty(MaterialBase material)
+    {
+        lock (this._dirtyMaterials)
+        {
+            this._dirtyMaterials.Add(material);
+        }
+    }
+
+    private void OnRenderablePipelineDirty(Renderable renderable)
+    {
+        lock (this._dirtyRenderables)
+        {
+            this._dirtyRenderables.Add(renderable);
         }
     }
 

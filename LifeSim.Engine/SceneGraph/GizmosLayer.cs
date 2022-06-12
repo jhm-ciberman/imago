@@ -2,10 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using LifeSim.Engine.Meshes;
-using LifeSim.Engine.Rendering;
 using Veldrid.Utilities;
 
 namespace LifeSim.Engine.SceneGraph;
+
+public struct DebugLine
+{
+    public Vector3 Start;
+    public Vector3 End;
+    public Color Color;
+    public float LifeTime;
+    public bool DrawInFront;
+}
 
 public class GizmosLayer
 {

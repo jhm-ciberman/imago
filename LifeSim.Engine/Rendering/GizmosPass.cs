@@ -7,7 +7,7 @@ using Veldrid;
 
 namespace LifeSim.Engine.Rendering;
 
-public class GizmosPass : IDisposable, IRenderingPass
+internal class GizmosPass : IDisposable, IRenderingPass
 {
     private const int VERTICES_PER_BATCH = 1000;
 

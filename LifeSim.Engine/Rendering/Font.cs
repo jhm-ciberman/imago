@@ -8,27 +8,11 @@ namespace LifeSim.Engine.Rendering;
 
 public static class Font
 {
-    private struct FontKey
-    {
-        public string FontFamily { get; }
-        public int Outline { get; }
+    public record struct Key(string FontFamily, int Outline, int Blur);
 
-        public int Blur { get; }
+    public record struct FontData(byte[] Data);
 
-        public FontKey(string name, int outline, int blur)
-        {
-            this.FontFamily = name;
-            this.Outline = outline;
-            this.Blur = blur;
-        }
-    }
-
-    public struct FontData
-    {
-        public byte[] Data { get; set; }
-    }
-
-    private static readonly Dictionary<FontKey, FontSystem> _fontSystems = new Dictionary<FontKey, FontSystem>();
+    private static readonly Dictionary<Key, FontSystem> _fontSystems = new Dictionary<Key, FontSystem>();
 
     private static readonly Dictionary<string, FontData[]> _fontsBytes = new Dictionary<string, FontData[]>();
 
@@ -60,7 +44,7 @@ public static class Font
 
     public static DynamicSpriteFont GetFont(string? fontFamily, int size, int outline = 0, int blur = 0)
     {
-        var key = new FontKey(fontFamily ?? _fallbackFontFamily, outline, blur);
+        var key = new Key(fontFamily ?? _fallbackFontFamily, outline, blur);
         if (!_fontSystems.TryGetValue(key, out var fontSystem))
         {
             fontSystem = MakeSystem(key);
@@ -68,7 +52,7 @@ public static class Font
         return fontSystem.GetFont(size);
     }
 
-    private static FontSystem MakeSystem(FontKey fontKey)
+    private static FontSystem MakeSystem(Key fontKey)
     {
         if (!_fontsBytes.ContainsKey(fontKey.FontFamily))
         {
@@ -87,7 +71,4 @@ public static class Font
         _fontSystems.Add(fontKey, fontSystem);
         return fontSystem;
     }
-
-
-
 }

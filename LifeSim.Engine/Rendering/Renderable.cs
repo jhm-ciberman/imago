@@ -6,12 +6,12 @@ using Veldrid.Utilities;
 
 namespace LifeSim.Engine.Rendering;
 
-public class Renderable : IDisposable
+internal class Renderable : IDisposable
 {
-    public delegate void RenderQueuesChangedHandler(Renderable renderable, RenderQueues oldFlags, RenderQueues newFlags);
-    public delegate void PipelineDirtyHandler(Renderable renderable);
-    public static event RenderQueuesChangedHandler? RenderQueuesChanged;
-    public static event PipelineDirtyHandler? PipelineDirty;
+    internal delegate void RenderQueuesChangedHandler(Renderable renderable, RenderQueues oldFlags, RenderQueues newFlags);
+    internal delegate void PipelineDirtyHandler(Renderable renderable);
+    internal static event RenderQueuesChangedHandler? RenderQueuesChanged;
+    internal static event PipelineDirtyHandler? PipelineDirty;
 
     private static uint _count;
     private Matrix4x4 _transform = Matrix4x4.Identity;
@@ -26,7 +26,7 @@ public class Renderable : IDisposable
     public OffsetVertexData OffsetVertexData { get; set; }
     private DataBlock _transformDataBlock;
     private RenderQueues _renderQueueFlags = RenderQueues.None;
-    public RenderQueues RenderQueues
+    internal RenderQueues RenderQueues
     {
         get => this._renderQueueFlags;
         private set

@@ -6,7 +6,7 @@ using Veldrid;
 
 namespace LifeSim.Engine.Rendering;
 
-public class RenderJob
+internal class RenderJob
 {
     private const uint BINDING_PASS = 0;
     private const uint BINDING_TRANSFORM = 1;

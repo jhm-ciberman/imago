@@ -1,6 +1,6 @@
 namespace LifeSim.Engine.Rendering;
 
-public interface IPipelineProvider
+internal interface IPipelineProvider
 {
     Veldrid.Pipeline MakePipeline(ShaderVariant shaderVariant, RenderFlags flags);
 }

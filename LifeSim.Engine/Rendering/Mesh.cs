@@ -5,6 +5,9 @@ using Veldrid.Utilities;
 
 namespace LifeSim.Engine.Rendering;
 
+/// <summary>
+/// Represents a mesh that can be rendered by the <see cref="Renderer"/>.
+/// </summary>
 public class Mesh : IDisposable
 {
     private static int _count = 0;

@@ -4,7 +4,7 @@ using Veldrid;
 
 namespace LifeSim.Engine.Rendering;
 
-public readonly struct RenderBatch
+internal readonly struct RenderBatch
 {
     public readonly uint InstanceCount { get; }
     public readonly Mesh Mesh { get; }

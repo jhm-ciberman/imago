@@ -9,7 +9,7 @@ using Veldrid.Utilities;
 
 namespace LifeSim.Engine.Rendering;
 
-public partial class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
+internal class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
 {
     [StructLayout(LayoutKind.Sequential)]
     private struct CameraDataBuffer
