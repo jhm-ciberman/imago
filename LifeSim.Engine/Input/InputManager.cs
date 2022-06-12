@@ -6,21 +6,47 @@ using Veldrid.Sdl2;
 
 namespace LifeSim.Engine;
 
+public struct KeyEventArgs
+{
+
+}
+
+
 /// <summary>
 /// Captures and manages the mouse and keyboard input.
 /// </summary>
-public class Input
+public class InputManager
 {
-    private static Input _instance = null!;
+    private static InputManager _instance = null!;
 
     /// <summary>
     /// Gets the instance of the input.
     /// </summary>
-    public static Input Instance
+    public static InputManager Current
     {
         protected set => _instance = value;
         get => _instance;
     }
+
+    /// <summary>
+    /// Event that is raised when a key is pressed.
+    /// </summary>
+    public event EventHandler<KeyEvent>? KeyPressed;
+
+    /// <summary>
+    /// Event that is raised when a key is released.
+    /// </summary>
+    public event EventHandler<KeyEvent>? KeyReleased;
+
+    /// <summary>
+    /// Event that is raised when a mouse button is pressed.
+    /// </summary>
+    public event EventHandler<MouseEvent>? MouseButtonPressed;
+
+    /// <summary>
+    /// Event that is raised when a mouse button is released.
+    /// </summary>
+    public event EventHandler<MouseEvent>? MouseButtonReleased;
 
     /// <summary>
     /// Gets the mouse wheel delta for this frame.
@@ -53,11 +79,11 @@ public class Input
     private Vector2 _mouseDelta;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Input"/> class.
+    /// Initializes a new instance of the <see cref="InputManager"/> class.
     /// </summary>
     /// <param name="window">The window to capture input from.</param>
     /// <exception cref="System.Exception">Thrown if the Input instance has already been created.</exception>
-    public Input(Sdl2Window window)
+    public InputManager(Sdl2Window window)
     {
         if (_instance != null)
         {
@@ -83,25 +109,31 @@ public class Input
         for (int i = 0; i < this.InputSnapshot.KeyEvents.Count; i++)
         {
             KeyEvent ke = this.InputSnapshot.KeyEvents[i];
+            Console.WriteLine(ke);
             if (ke.Down)
             {
                 this.ReleaseKey(ke.Key);
+                this.KeyPressed?.Invoke(this, ke);
             }
             else
             {
                 this.PressKey(ke.Key);
+                this.KeyReleased?.Invoke(this, ke);
             }
         }
+
         for (int i = 0; i < this.InputSnapshot.MouseEvents.Count; i++)
         {
             MouseEvent me = this.InputSnapshot.MouseEvents[i];
             if (me.Down)
             {
                 this.ReleaseMouseButton(me.MouseButton);
+                this.MouseButtonPressed?.Invoke(this, me);
             }
             else
             {
                 this.PressMouseButton(me.MouseButton);
+                this.MouseButtonReleased?.Invoke(this, me);
             }
         }
 

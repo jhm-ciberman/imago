@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using FontStashSharp;
 using LifeSim.Engine.Rendering;
+using Veldrid;
 
 namespace LifeSim.Engine.Controls;
 
@@ -135,6 +136,34 @@ public class TextField : Control
         return this.GetFont().MeasureString(this.Text);
     }
 
+    private void InputManager_KeyPressed(object? sender, KeyEvent e)
+    {
+        if (!this.IsFocused) return;
+
+        switch (e.Key)
+        {
+            case Key.BackSpace:
+                this.CaretIndex--;
+                this.RemoveCharacter(this.CaretIndex);
+                break;
+            case Key.Delete:
+                this.RemoveCharacter(this.CaretIndex);
+                break;
+            case Key.Left:
+                this.CaretIndex--;
+                break;
+            case Key.Right:
+                this.CaretIndex++;
+                break;
+            case Key.Home:
+                this.CaretIndex = 0;
+                break;
+            case Key.End:
+                this.CaretIndex = this.Text.Length;
+                break;
+        }
+    }
+
     public override void Update(float deltaTime)
     {
         base.Update(deltaTime);
@@ -149,39 +178,7 @@ public class TextField : Control
                 this._caretBlinkTimer = this.CaretBlinkSpeed;
             }
 
-            if (Input.Instance.GetKeyDown(Veldrid.Key.BackSpace))
-            {
-                if (this.CaretIndex > 0)
-                {
-                    this.CaretIndex--;
-                    this.Text = this.Text.Remove(this.CaretIndex, 1);
-                }
-            }
-            else if (Input.Instance.GetKeyDown(Veldrid.Key.Delete))
-            {
-                if (this.CaretIndex < this.Text.Length)
-                {
-                    this.Text = this.Text.Remove(this.CaretIndex, 1);
-                }
-            }
-            else if (Input.Instance.GetKeyDown(Veldrid.Key.Left))
-            {
-                this.CaretIndex--;
-            }
-            else if (Input.Instance.GetKeyDown(Veldrid.Key.Right))
-            {
-                this.CaretIndex++;
-            }
-            else if (Input.Instance.GetKeyDown(Veldrid.Key.Home))
-            {
-                this.CaretIndex = 0;
-            }
-            else if (Input.Instance.GetKeyDown(Veldrid.Key.End))
-            {
-                this.CaretIndex = this.Text.Length;
-            }
-
-            var typedCharacters = Input.Instance.TypedCharacters;
+            var typedCharacters = InputManager.Current.TypedCharacters;
             if (typedCharacters.Count > 0)
             {
                 string typedText = string.Join(string.Empty, typedCharacters);
@@ -189,6 +186,15 @@ public class TextField : Control
                 this.CaretIndex += typedText.Length;
             }
         }
+    }
+
+    protected void RemoveCharacter(int index)
+    {
+        if (index >= this.Text.Length || index < 0) return;
+
+        this.Text = char.IsSurrogate(this.Text, index)
+            ? this.Text.Remove(index - 1, 2)
+            : this.Text.Remove(index, 1);
     }
 
     protected override void DrawCore(SpriteBatcher spriteBatcher)
@@ -219,6 +225,17 @@ public class TextField : Control
 
         this.IsFocused = true;
         this.CaretIndex = this.Text.Length;
+
+        InputManager.Current.KeyPressed += this.InputManager_KeyPressed;
     }
+
+    public override void OnRemovedFromVisualTree(UIPage page)
+    {
+        base.OnRemovedFromVisualTree(page);
+
+        InputManager.Current.KeyPressed -= this.InputManager_KeyPressed;
+    }
+
+
 }
 

@@ -135,13 +135,13 @@ public class Button : ContentControl
         {
             this.Content.Update(deltaTime);
         }
-        Vector2 mousePosition = Input.Instance.MousePosition / this.Root.Zoom;
+        Vector2 mousePosition = InputManager.Current.MousePosition / this.Root.Zoom;
         Rect bounds = new Rect(this.Position, this.ActualSize);
         if (bounds.Contains(mousePosition))
         {
             this.IsMouseOver = true;
 
-            if (Input.Instance.GetMouseButtonDown(Veldrid.MouseButton.Left))
+            if (InputManager.Current.GetMouseButtonDown(Veldrid.MouseButton.Left))
             {
                 this.IsPressed = true;
             }
@@ -151,7 +151,7 @@ public class Button : ContentControl
             this.IsMouseOver = false;
         }
 
-        if (this.IsPressed && Input.Instance.GetMouseButtonUp(Veldrid.MouseButton.Left))
+        if (this.IsPressed && InputManager.Current.GetMouseButtonUp(Veldrid.MouseButton.Left))
         {
             this.IsPressed = false;
         }
