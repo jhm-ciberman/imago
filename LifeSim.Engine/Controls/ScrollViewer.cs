@@ -33,13 +33,15 @@ public class ScrollViewer : ContentControl
         get => this._scrollOffset;
         set
         {
+            if (this.Content == null)
+            {
+                value = Vector2.Zero;
+            }
+
             if (this._scrollOffset != value)
             {
                 this._scrollOffset = value;
-                if (this.Content != null)
-                {
-                    this.Content.Transform = Matrix3x2.CreateTranslation(-this._scrollOffset.X, -this._scrollOffset.Y);
-                }
+                this.InvalidateArrange();
             }
         }
     }
@@ -125,7 +127,7 @@ public class ScrollViewer : ContentControl
     {
         if (this.Content != null)
         {
-            Rect rect = new Rect(finalRect.Position, Vector2.Min(this.Content.DesiredSize, finalRect.Size));
+            Rect rect = new Rect(finalRect.Position - this._scrollOffset, Vector2.Min(this.Content.DesiredSize, finalRect.Size));
             this.Content.Arrange(rect);
             this.ActualSize = finalRect.Size; // I set up the ActualSize here so it can be used by "OnScrollChanged"
             this.ScrollBarThumb.Arrange(finalRect);
@@ -188,6 +190,8 @@ public class ScrollViewer : ContentControl
         }
     }
 
+    private Vector2 _thumbPosition;
+
     private void OnScrollChanged()
     {
         var thumb = this.ScrollBarThumb;
@@ -201,18 +205,18 @@ public class ScrollViewer : ContentControl
             // Modify scroll bar thumb position (thumb.Transform matrix)
             Vector2 thumbSize = thumb.ActualSize + thumb.Margin.Total;
 
-            float x, y;
+            Vector2 pos;
             if (this.ScrollDirection == ScrollDirection.Vertical)
             {
-                x = this.ActualSize.X - thumbSize.X;
-                y = this.ScrollPercentageY * (this.ActualSize.Y - thumbSize.Y);
+                pos.X = this.ActualSize.X - thumbSize.X;
+                pos.Y = this.ScrollPercentageY * (this.ActualSize.Y - thumbSize.Y);
             }
             else
             {
-                x = this.ScrollPercentageX * (this.ActualSize.X - thumbSize.X);
-                y = this.ActualSize.Y - thumbSize.Y;
+                pos.X = this.ScrollPercentageX * (this.ActualSize.X - thumbSize.X);
+                pos.Y = this.ActualSize.Y - thumbSize.Y;
             }
-            thumb.Transform = Matrix3x2.CreateTranslation(x, y);
+            this._thumbPosition = pos;
         }
         else
         {

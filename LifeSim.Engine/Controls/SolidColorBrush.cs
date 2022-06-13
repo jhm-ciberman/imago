@@ -46,10 +46,6 @@ public class SolidColorBrush : IBrush
     public void DrawRectangle(SpriteBatcher spriteBatcher, Vector2 position, Vector2 size)
     {
         if (this.Color.A == 0) return;
-        if (this.Color.A < 255)
-        {
-            System.Console.WriteLine("Warning: SolidColorBrush.DrawRectangle() does not support transparency.");
-        }
 
         spriteBatcher.DrawRectangle(position, size, this.Color);
     }

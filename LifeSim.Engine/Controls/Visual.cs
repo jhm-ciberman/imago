@@ -17,23 +17,6 @@ public abstract class Visual
     /// </summary>
     public Visibility Visibility { get; set; } = Visibility.Visible;
 
-
-    private Matrix3x2 _transform = Matrix3x2.Identity;
-    private bool _transformIsIdentity = true;
-
-    /// <summary>
-    /// Gets or sets the visual transform of the control.
-    /// </summary>
-    public Matrix3x2 Transform
-    {
-        get => this._transform;
-        set
-        {
-            this._transform = value;
-            this._transformIsIdentity = value == Matrix3x2.Identity;
-        }
-    }
-
     /// <summary>
     /// Gets the root of the control.
     /// </summary>
@@ -94,11 +77,6 @@ public abstract class Visual
             spriteBatcher.PushOpacity(this.Opacity);
         }
 
-        if (!this._transformIsIdentity)
-        {
-            spriteBatcher.PushMatrix(this.Transform);
-        }
-
         if (this.ClipToBounds)
         {
             spriteBatcher.PushScissorRectangle(GetBounds() * this.Root!.Zoom);
@@ -108,11 +86,6 @@ public abstract class Visual
         else
         {
             this.DrawCore(spriteBatcher);
-        }
-
-        if (!this._transformIsIdentity)
-        {
-            spriteBatcher.PopMatrix();
         }
 
         if (this.Opacity < 1f)

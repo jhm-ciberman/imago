@@ -135,6 +135,7 @@ public class Button : ContentControl
         }
         Vector2 mousePosition = InputManager.Current.MousePosition / this.Root.Zoom;
         Rect bounds = new Rect(this.Position, this.ActualSize);
+
         if (bounds.Contains(mousePosition))
         {
             this.IsMouseOver = true;
