@@ -5,7 +5,9 @@ using System.Runtime.InteropServices;
 using FontStashSharp;
 using FontStashSharp.Interfaces;
 using LifeSim.Engine.Rendering;
+using LifeSim.Engine.Resources;
 using LifeSim.Engine.SceneGraph;
+using LifeSim.Utils;
 using Veldrid;
 
 namespace LifeSim.Engine.Rendering;
@@ -210,18 +212,18 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
         this._batch.DrawCore(pos, size, uvTopLeft, uvBottomRight, color, scale, rotation, origin, depth);
     }
 
-    public void DrawNinePatch(Shader? shader, ITexture texture, Thickness patchMargin, Vector2 size, Vector2 pivot, ref Matrix3x2 worldMatrix, Color color, bool drawCenter)
+    public void DrawNinePatch(Shader? shader, PackedTexture texture, Vector2 position, Vector2 size, Thickness patchMargin, Color color, bool drawCenter, float scale)
     {
-        var sizeTotal = new Vector2(texture.Width, texture.Height);
         var sizeTL = new Vector2(patchMargin.Left, patchMargin.Top);
         var sizeBR = new Vector2(patchMargin.Right, patchMargin.Bottom);
         var sizeTR = new Vector2(patchMargin.Top, patchMargin.Right);
         var sizeBL = new Vector2(patchMargin.Left, patchMargin.Bottom);
 
-        var uvTL = sizeTL / sizeTotal;
-        var uvBR = Vector2.One - sizeBR / sizeTotal;
-
-        float scale = 2f;
+        var sizeTotal = texture.PixelSize;
+        var uvExtTL = texture.TopLeft;
+        var uvExtBR = texture.BottomRight;
+        var uvIntTL = uvExtTL + (sizeTL / sizeTotal * texture.Size);
+        var uvIntBR = uvExtBR - (sizeBR / sizeTotal * texture.Size);
 
         // Scale if the size is smaller (after calculating UVs)
         var minimumRequiredSize = (sizeTL + sizeBR) * scale;
@@ -241,15 +243,11 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
 
         int requiredQuads = drawCenter ? 9 : 8;
 
-        this.Prepare(shader ?? this._defaultShader, texture, requiredQuads);
+        this.Prepare(shader ?? this._defaultShader, texture.Texture, requiredQuads);
 
-        if (drawCenter)
+        if (drawCenter && sizeSegmentCenter.X > 0 && sizeSegmentCenter.Y > 0)
         {
-
-            if (sizeSegmentCenter.X > 0 && sizeSegmentCenter.Y > 0)
-            {
-                this._batch.DrawCore(-pivot + sizeTL, sizeSegmentCenter, uvTL, uvBR, in worldMatrix, color);
-            }
+            this._batch.DrawCore(position + sizeTL, sizeSegmentCenter, uvIntTL, uvIntBR, color);
         }
 
         var posTL = new Vector2(0f, 0f);
@@ -258,13 +256,21 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
         var posBL = new Vector2(0f, size.Y - sizeTL.Y);
 
         // Corner Top Left
-        this._batch.DrawCore(-pivot + posTL, sizeTL, Vector2.Zero, uvTL, in worldMatrix, color);
+        this._batch.DrawCore(position + posTL, sizeTL,
+            uvExtTL, uvIntTL, color);
+
         // Corner Top Right
-        this._batch.DrawCore(-pivot + posTR, sizeTR, new Vector2(uvBR.X, 0f), new Vector2(1f, uvTL.Y), in worldMatrix, color);
+        this._batch.DrawCore(position + posTR, sizeTR,
+            new Vector2(uvIntBR.X, uvExtTL.Y), new Vector2(uvExtBR.X, uvIntTL.Y), color);
+
         // Corner Bottom Left
-        this._batch.DrawCore(-pivot + posBL, sizeBL, new Vector2(0f, uvBR.Y), new Vector2(uvTL.X, 1f), in worldMatrix, color);
+        this._batch.DrawCore(position + posBL, sizeBL,
+            new Vector2(uvExtTL.X, uvIntBR.Y), new Vector2(uvIntTL.X, uvExtBR.Y), color);
+
         // Corner Bottom Right
-        this._batch.DrawCore(-pivot + posBR, sizeBR, uvBR, Vector2.One, in worldMatrix, color);
+        this._batch.DrawCore(position + posBR, sizeBR,
+            uvIntBR, uvExtBR, color);
+
 
 
         var sizeTop = new Vector2(size.X - sizeTL.X - sizeTR.X, sizeTL.Y);
@@ -273,13 +279,20 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
         var sizeRight = new Vector2(sizeTR.X, size.Y - sizeTR.Y - sizeBR.Y);
 
         // Lateral Top
-        this._batch.DrawCore(-pivot + new Vector2(sizeTL.X, 0f), sizeTop, new Vector2(uvTL.X, 0f), new Vector2(uvBR.X, uvTL.Y), in worldMatrix, color);
+        this._batch.DrawCore(position + new Vector2(sizeTL.X, 0f), sizeTop,
+            new Vector2(uvIntTL.X, uvExtTL.Y), new Vector2(uvIntBR.X, uvIntTL.Y), color);
+
         // Lateral Bottom
-        this._batch.DrawCore(-pivot + new Vector2(sizeBL.X, size.Y - sizeBL.Y), sizeBottom, new Vector2(uvTL.X, uvBR.Y), new Vector2(uvBR.X, 1f), in worldMatrix, color);
+        this._batch.DrawCore(position + new Vector2(sizeBL.X, size.Y - sizeBL.Y), sizeBottom,
+            new Vector2(uvIntTL.X, uvIntBR.Y), new Vector2(uvIntBR.X, uvExtBR.Y), color);
+
         // Lateral Left
-        this._batch.DrawCore(-pivot + new Vector2(0f, sizeTL.Y), sizeLeft, new Vector2(0f, uvTL.Y), new Vector2(uvTL.X, uvBR.Y), in worldMatrix, color);
+        this._batch.DrawCore(position + new Vector2(0f, sizeTL.Y), sizeLeft,
+            new Vector2(uvExtTL.X, uvIntTL.Y), new Vector2(uvIntTL.X, uvIntBR.Y), color);
+
         // Lateral Right
-        this._batch.DrawCore(-pivot + new Vector2(size.X - sizeTR.X, sizeTR.Y), sizeRight, new Vector2(uvBR.X, uvTL.Y), new Vector2(1f, uvBR.Y), in worldMatrix, color);
+        this._batch.DrawCore(position + new Vector2(size.X - sizeTR.X, sizeTR.Y), sizeRight,
+            new Vector2(uvIntBR.X, uvIntTL.Y), new Vector2(uvExtBR.X, uvIntBR.Y), color);
     }
 
     public void DrawText(SpriteFontBase font, string text, Vector2 position, Color color)

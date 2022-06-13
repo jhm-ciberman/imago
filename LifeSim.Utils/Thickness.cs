@@ -2,7 +2,7 @@ using System;
 using System.Globalization;
 using System.Numerics;
 
-namespace LifeSim.Engine.SceneGraph;
+namespace LifeSim.Utils;
 
 public struct Thickness
 {

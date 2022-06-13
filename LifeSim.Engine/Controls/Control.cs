@@ -1,9 +1,7 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
 using LifeSim.Engine.Rendering;
-using LifeSim.Engine.SceneGraph;
+using LifeSim.Utils;
 
 namespace LifeSim.Engine.Controls;
 
@@ -219,26 +217,65 @@ public class Control : Visual
         this.Background?.DrawRectangle(spriteBatcher, this.Position, this.ActualSize);
     }
 
-    protected virtual void InvalidateMeasure()
+    protected internal void InvalidateMeasure()
     {
-        if (this.IsMeasureValid)
+        this.ForceMeasure();
+        this.PropagateInvalidMeasureToChildren();
+    }
+
+    private void PropagateInvalidMeasureToChildren()
+    {
+        foreach (var child in this.VisualChildren)
         {
-            this.IsMeasureValid = false;
-            this.Root?.InvalidateMeasure(this);
+            if (!child.IsMeasureValid) continue;
+
+            child.IsMeasureValid = false;
+            child.IsArrangeValid = false;
+            child.PropagateInvalidMeasureToChildren();
         }
     }
 
-    protected virtual void InvalidateArrange()
+    private void ForceMeasure()
     {
-        if (this.IsArrangeValid)
+        if (!this.IsMeasureValid) return;
+
+        this.IsMeasureValid = false;
+        this.IsArrangeValid = false;
+
+        this.Parent?.ForceMeasure();
+    }
+
+    protected internal void InvalidateArrange()
+    {
+        this.ForceArrange();
+        this.PropagateInvalidArrangeToChildren();
+    }
+
+    private void PropagateInvalidArrangeToChildren()
+    {
+        foreach (var child in this.VisualChildren)
         {
-            this.IsArrangeValid = false;
-            this.Root?.InvalidateArrange(this);
+            if (!child.IsArrangeValid) continue;
+
+            child.IsArrangeValid = false;
+            child.PropagateInvalidArrangeToChildren();
         }
+    }
+
+    private void ForceArrange()
+    {
+        if (!this.IsArrangeValid) return;
+
+        this.IsArrangeValid = false;
+
+        this.Parent?.ForceArrange();
     }
 
     public override void OnAddedToVisualTree(UIPage page)
     {
+        this.IsArrangeValid = false;
+        this.IsMeasureValid = false;
+
         base.OnAddedToVisualTree(page);
 
         if (this.Background is IAnimatedBrush animatedBrush)
@@ -257,7 +294,7 @@ public class Control : Visual
         }
     }
 
-    protected void SetBrushImpl(IBrush brush)
+    protected void SetBrushImpl(IBrush? brush)
     {
         if (this._background == brush) return;
 
@@ -271,6 +308,24 @@ public class Control : Visual
         if (this.Root != null && this._background is IAnimatedBrush animatedBrush2)
         {
             this.Root.AddAnimatedBrush(animatedBrush2);
+        }
+    }
+
+    public void InvalidateArrangeRecursive()
+    {
+        this.InvalidateArrange();
+        foreach (var child in this.VisualChildren)
+        {
+            child.InvalidateArrangeRecursive();
+        }
+    }
+
+    public void InvalidateMeasureRecursive()
+    {
+        this.InvalidateMeasure();
+        foreach (var child in this.VisualChildren)
+        {
+            child.InvalidateMeasureRecursive();
         }
     }
 }

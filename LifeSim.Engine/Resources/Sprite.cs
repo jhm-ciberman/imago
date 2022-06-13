@@ -71,4 +71,16 @@ public class Sprite
 
         return sprite;
     }
+
+    /// <summary>
+    /// Creates a sprite with a single frame.
+    /// </summary>
+    /// <param name="packedTexture">The texture of the frame.</param>
+    /// <returns>The new sprite.</returns>
+    public static Sprite FromSingleFrame(PackedTexture packedTexture)
+    {
+        var sprite = new Sprite();
+        sprite.AddFrame(packedTexture);
+        return sprite;
+    }
 }

@@ -16,7 +16,7 @@ public class UIPage
     /// </summary>
     public float Zoom { get; set; } = 1f;
 
-    private HashSet<IAnimatedBrush> _animatedBrushes = new HashSet<IAnimatedBrush>();
+    private readonly HashSet<IAnimatedBrush> _animatedBrushes = new HashSet<IAnimatedBrush>();
 
     public Matrix4x4 ViewProjectionMatrix
     {
@@ -30,16 +30,12 @@ public class UIPage
     public UIPage(Viewport viewport)
     {
         this.Viewport = viewport;
-        this.Viewport.Resized += (sender, e) => this.TriggerLayoutUpdate();
+        this.Viewport.Resized += this.Viewport_Resized;
     }
 
-    public void TriggerLayoutUpdate()
+    private void Viewport_Resized(object? sender, EventArgs e)
     {
-        if (this._content is null) return;
-
-        Vector2 size = this.Viewport.Size / this.Zoom;
-        this._content.Measure(size);
-        this._content.Arrange(new Rect(0, 0, size.X, size.Y));
+        this.Content?.InvalidateMeasure();
     }
 
     public Control? Content
@@ -59,7 +55,6 @@ public class UIPage
                 if (this._content != null)
                 {
                     this._content.OnAddedToVisualTree(this);
-                    this.TriggerLayoutUpdate();
                 }
             }
         }
@@ -70,6 +65,14 @@ public class UIPage
     internal void Draw(SpriteBatcher spriteBatcher)
     {
         if (this._content is null) return;
+
+        if (!this._content.IsArrangeValid || !this._content.IsMeasureValid)
+        {
+            Vector2 size = this.Viewport.Size / this.Zoom;
+            this._content.Measure(size);
+            this._content.Arrange(new Rect(0, 0, size.X, size.Y));
+        }
+
         this._content.Draw(spriteBatcher);
     }
 
@@ -85,18 +88,6 @@ public class UIPage
         this._content.Update(deltaTime);
     }
 
-    internal void InvalidateMeasure(Control control)
-    {
-        //
-        _ = control;
-    }
-
-    internal void InvalidateArrange(Control control)
-    {
-        //
-        _ = control;
-    }
-
     internal void AddAnimatedBrush(IAnimatedBrush animatedBrush)
     {
         this._animatedBrushes.Add(animatedBrush);
@@ -105,5 +96,11 @@ public class UIPage
     internal void RemoveAnimatedBrush(IAnimatedBrush animatedBrush)
     {
         this._animatedBrushes.Remove(animatedBrush);
+    }
+
+    public T? GetElementByName<T>(string name) where T : Visual
+    {
+        if (this.Content == null) return null;
+        return this.Content.GetElementByName<T>(name);
     }
 }

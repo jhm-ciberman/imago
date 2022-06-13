@@ -42,6 +42,8 @@ public class ContentControl : Control
                 {
                     this._visualChildren = Array.Empty<Control>();
                 }
+
+                this.InvalidateMeasure();
             }
         }
     }
@@ -77,5 +79,12 @@ public class ContentControl : Control
         {
             this.Content.Draw(spriteBatcher);
         }
+    }
+
+    public override void Update(float deltaTime)
+    {
+        this.Content?.Update(deltaTime);
+
+        base.Update(deltaTime);
     }
 }

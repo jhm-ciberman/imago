@@ -155,7 +155,7 @@ public abstract class Visual
     /// <typeparam name="T">The type of the control to find.</typeparam>
     /// <param name="name">The name of the control to find.</param>
     /// <returns>The control if found, otherwise null.</returns>
-    public T? FindByName<T>(string name) where T : Control
+    public T? GetElementByName<T>(string name) where T : Visual
     {
         if (this.Name == name)
         {
@@ -164,7 +164,7 @@ public abstract class Visual
 
         foreach (var child in this.VisualChildren)
         {
-            var result = child.FindByName<T>(name);
+            var result = child.GetElementByName<T>(name);
 
             if (result != null)
             {

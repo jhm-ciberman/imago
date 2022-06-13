@@ -73,59 +73,57 @@ public class Button : ContentControl
     /// </summary>
     public bool IsEnabled { get; set; } = true;
 
-    /// <summary>
-    /// Gets or sets the button default texture.
-    /// </summary>
-    public PackedTexture? NormalTexture { get; set; }
 
-    /// <summary>
-    /// Gets or sets the button mouse over texture.
-    /// </summary>
-    public PackedTexture? HoverTexture { get; set; }
-
-    /// <summary>
-    /// Gets or sets the button pressed texture.
-    /// </summary>
-    public PackedTexture? PressedTexture { get; set; }
-
-    /// <summary>
-    /// Gets or sets the button disabled texture.
-    /// </summary>
-    public PackedTexture? DisabledTexture { get; set; }
-
-
-    public Shader? Shader { get; set; }
-
-
-    protected PackedTexture? GetCurrentTexture()
+    protected void UpdateBackgroundBrush()
     {
-        if (!this.IsEnabled)
+        var background = this.Background;
+        if (background == null) return;
+
+        if (background is SpriteBrush spriteBrush)
         {
-            return this.DisabledTexture ?? this.NormalTexture;
+            if (spriteBrush.Sprite == null) return;
+            if (!this.IsEnabled)
+            {
+                spriteBrush.FrameIndex = 3;
+            }
+            else if (this.IsPressed)
+            {
+                spriteBrush.FrameIndex = 2;
+            }
+            else if (this.IsMouseOver)
+            {
+                spriteBrush.FrameIndex = 1;
+            }
+            else
+            {
+                spriteBrush.FrameIndex = 0;
+            }
         }
-        else if (this.IsPressed)
+        else if (background is SolidColorBrush solidColor)
         {
-            return this.PressedTexture;
-        }
-        else if (this.IsMouseOver)
-        {
-            return this.HoverTexture ?? this.NormalTexture;
-        }
-        else
-        {
-            return this.NormalTexture;
+            // Change opacity
+            if (!this.IsEnabled)
+            {
+                solidColor.Opacity = 0.5f;
+            }
+            else if (this.IsPressed)
+            {
+                solidColor.Opacity = 0.8f;
+            }
+            else if (this.IsMouseOver)
+            {
+                solidColor.Opacity = 0.9f;
+            }
+            else
+            {
+                solidColor.Opacity = 1.0f;
+            }
         }
     }
 
     protected override void DrawCore(SpriteBatcher spriteBatcher)
     {
         base.DrawCore(spriteBatcher);
-
-        var texture = this.GetCurrentTexture();
-        if (texture != null)
-        {
-            spriteBatcher.DrawTexture(this.Shader, texture.Texture, this.Position, this.ActualSize, texture.TopLeft, texture.BottomRight, Color.White);
-        }
     }
 
     public override void Update(float deltaTime)
@@ -156,19 +154,32 @@ public class Button : ContentControl
             this.IsPressed = false;
         }
 
+        this.UpdateBackgroundBrush();
+
         base.Update(deltaTime);
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Button"/> class.
+    /// </summary>
     public Button()
     {
         //
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Button"/> class.
+    /// </summary>
+    /// <param name="content">The content of the button.</param>
     public Button(Control? content)
     {
         this.Content = content;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Button"/> class.
+    /// </summary>
+    /// <param name="text">The text of the button.</param>
     public Button(string text)
     {
         this.Content = new TextBlock(text);

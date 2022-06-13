@@ -1,6 +1,7 @@
 using System.Numerics;
 using LifeSim.Engine.Rendering;
 using LifeSim.Engine.Resources;
+using LifeSim.Engine.SceneGraph;
 
 namespace LifeSim.Engine.Controls;
 
@@ -132,11 +133,23 @@ public class SpriteBrush : IAnimatedBrush
         }
     }
 
-    public void DrawRectangle(SpriteBatcher spriteBatcher, Vector2 position, Vector2 size)
+    protected PackedTexture? GetCurrentTexture()
     {
         if (this.Sprite != null)
         {
-            var frame = this.Sprite.Frames[(int)this._frameIndex];
+            return this.Sprite.Frames[(int)this._frameIndex];
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public virtual void DrawRectangle(SpriteBatcher spriteBatcher, Vector2 position, Vector2 size)
+    {
+        var frame = this.GetCurrentTexture();
+        if (frame != null)
+        {
             spriteBatcher.DrawTexture(null, frame.Texture, position, size, frame.TopLeft, frame.BottomRight, this.Color);
         }
     }

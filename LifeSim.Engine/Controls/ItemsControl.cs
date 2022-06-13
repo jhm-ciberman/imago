@@ -23,6 +23,7 @@ public abstract class ItemsControl : Control
             {
                 item.OnAddedToVisualTree(this.Owner.Root);
             }
+            this.Owner.InvalidateMeasure();
         }
 
         protected override void RemoveItem(int index)
@@ -33,6 +34,7 @@ public abstract class ItemsControl : Control
             {
                 item.OnRemovedFromVisualTree(this.Owner.Root);
             }
+            this.Owner.InvalidateMeasure();
             base.RemoveItem(index);
         }
 
@@ -50,6 +52,7 @@ public abstract class ItemsControl : Control
             {
                 item.OnAddedToVisualTree(this.Owner.Root);
             }
+            this.Owner.InvalidateMeasure();
         }
     }
 
