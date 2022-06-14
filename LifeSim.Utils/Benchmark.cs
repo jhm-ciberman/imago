@@ -6,14 +6,14 @@ namespace LifeSim;
 
 public static class Benchmark
 {
-    private static readonly Action<object> _defaultLogger = System.Console.WriteLine;
-    private static Action<object> _loggerFunction = Benchmark._defaultLogger;
+    private static readonly Action<object> _defaultLogger = Console.WriteLine;
+    private static Action<object> _loggerFunction = _defaultLogger;
 
     private static readonly Dictionary<string, Stopwatch> _parts = new Dictionary<string, Stopwatch>();
 
     public static void SetLogger(Action<object> logger)
     {
-        Benchmark._loggerFunction = logger ?? Benchmark._defaultLogger;
+        _loggerFunction = logger ?? _defaultLogger;
     }
 
     public static T Run<T>(string taskName, Func<T> callback)
@@ -24,7 +24,7 @@ public static class Benchmark
 
         sw.Stop();
 
-        Benchmark._loggerFunction("\"" + taskName + "\" took " + sw.ElapsedMilliseconds + " milliseconds");
+        _loggerFunction("\"" + taskName + "\" took " + sw.ElapsedMilliseconds + " milliseconds");
 
         return value;
     }
@@ -37,7 +37,7 @@ public static class Benchmark
 
         sw.Stop();
 
-        Benchmark._loggerFunction("\"" + taskName + "\" took " + sw.ElapsedMilliseconds + " milliseconds");
+        _loggerFunction("\"" + taskName + "\" took " + sw.ElapsedMilliseconds + " milliseconds");
     }
 
 
@@ -49,15 +49,15 @@ public static class Benchmark
 
         sw.Stop();
 
-        Benchmark._loggerFunction("\"" + taskName + "\" took " + sw.ElapsedTicks + " ticks");
+        _loggerFunction("\"" + taskName + "\" took " + sw.ElapsedTicks + " ticks");
     }
 
     private static Stopwatch GetStopWatch(string taskName)
     {
-        if (!Benchmark._parts.TryGetValue(taskName, out Stopwatch? sw))
+        if (!_parts.TryGetValue(taskName, out Stopwatch? sw))
         {
             sw = new Stopwatch();
-            Benchmark._parts.Add(taskName, sw);
+            _parts.Add(taskName, sw);
         }
         return sw;
     }

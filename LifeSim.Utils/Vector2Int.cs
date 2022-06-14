@@ -5,20 +5,40 @@ using System.Runtime.CompilerServices;
 
 namespace LifeSim;
 
+/// <summary>
+/// Represents a 2D vector with integer components.
+/// </summary>
 public struct Vector2Int : IEquatable<Vector2Int>
 {
+    /// <summary>
+    /// The X component of the vector.
+    /// </summary>
     public int X;
+
+    /// <summary>
+    /// The Y component of the vector.
+    /// </summary>
     public int Y;
 
     public static Vector2Int One => new Vector2Int(1, 1);
     public static Vector2Int Zero => new Vector2Int(0, 0);
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Vector2Int"/> struct.
+    /// </summary>
+    /// <param name="x">The X component of the vector.</param>
+    /// <param name="y">The Y component of the vector.</param>
     public Vector2Int(int x, int y)
     {
         this.X = x;
         this.Y = y;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Vector2Int"/> struct.
+    /// </summary>
+    /// <param name="x">The X component of the vector.</param>
+    /// <param name="y">The Y component of the vector.</param>
     public Vector2Int(uint x, uint y)
     {
         this.X = (int)x;

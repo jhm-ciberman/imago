@@ -4,24 +4,72 @@ using System.Numerics;
 
 namespace LifeSim.Utils;
 
+/// <summary>
+/// Describes the thickness of a frame around a rectangle.
+/// </summary>
 public struct Thickness
 {
     public static Thickness Zero => new Thickness(0);
+
+    /// <summary>
+    /// The left thickness of the frame.
+    /// </summary>
     public float Left { get; set; }
+
+    /// <summary>
+    /// The top thickness of the frame.
+    /// </summary>
     public float Top { get; set; }
+
+    /// <summary>
+    /// The right thickness of the frame.
+    /// </summary>
     public float Right { get; set; }
+
+    /// <summary>
+    /// The bottom thickness of the frame.
+    /// </summary>
     public float Bottom { get; set; }
+
+    /// <summary>
+    /// The top left thickness of the frame as a <see cref="Vector2"/>.
+    /// </summary>
     public Vector2 TopLeft => new Vector2(this.Left, this.Top);
+
+    /// <summary>
+    /// The top right thickness of the frame as a <see cref="Vector2"/>.
+    /// </summary>
     public Vector2 TopRight => new Vector2(this.Right, this.Top);
+
+    /// <summary>
+    /// The bottom left thickness of the frame as a <see cref="Vector2"/>.
+    /// </summary>
     public Vector2 BottomLeft => new Vector2(this.Left, this.Bottom);
+
+    /// <summary>
+    /// The bottom right thickness of the frame as a <see cref="Vector2"/>.
+    /// </summary>
     public Vector2 BottomRight => new Vector2(this.Right, this.Bottom);
 
+    /// <summary>
+    /// The total thickness of the frame as a <see cref="Vector2"/>.
+    /// </summary>
     public Vector2 Total => new Vector2(this.Left + this.Right, this.Top + this.Bottom);
 
+    /// <summary>
+    /// The horizontal thickness of the frame.
+    /// </summary>
     public float Horizontal => this.Left + this.Right;
 
+    /// <summary>
+    /// The vertical thickness of the frame.
+    /// </summary>
     public float Vertical => this.Top + this.Bottom;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Thickness"/> struct.
+    /// </summary>
+    /// <param name="all">The thickness of the frame. This value is used for all four sides.</param>
     public Thickness(float all)
     {
         this.Left = all;
@@ -30,6 +78,11 @@ public struct Thickness
         this.Bottom = all;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Thickness"/> struct.
+    /// </summary>
+    /// <param name="horizontal">The horizontal thickness of the frame that will be used for the left and right sides.</param>
+    /// <param name="vertical">The vertical thickness of the frame that will be used for the top and bottom sides.</param>
     public Thickness(float horizontal, float vertical)
     {
         this.Left = horizontal;
@@ -38,6 +91,13 @@ public struct Thickness
         this.Bottom = vertical;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Thickness"/> struct.
+    /// </summary>
+    /// <param name="left">The left thickness of the frame.</param>
+    /// <param name="top">The top thickness of the frame.</param>
+    /// <param name="right">The right thickness of the frame.</param>
+    /// <param name="bottom">The bottom thickness of the frame.</param>
     public Thickness(float left, float top, float right, float bottom)
     {
         this.Left = left;

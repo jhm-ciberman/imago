@@ -1,6 +1,9 @@
 using System;
 namespace LifeSim.Utils;
 
+/// <summary>
+/// Represents a command that can be executed.
+/// </summary>
 public interface IRelayCommand : ICommand
 {
     /// <summary>
@@ -9,6 +12,10 @@ public interface IRelayCommand : ICommand
     void OnCanExecuteChanged();
 }
 
+/// <summary>
+/// Represents a command that can be executed and receives a parameter of type T.
+/// </summary>
+/// <typeparam name="T">The type of the command parameter.</typeparam>
 public interface IRelayCommand<T> : IRelayCommand, ICommand
 {
     /// <summary>

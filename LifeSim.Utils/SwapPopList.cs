@@ -5,8 +5,12 @@ using System.Runtime.CompilerServices;
 
 namespace LifeSim;
 
-// List that inserts and removes in O(1). (Regular System.Collections.Generic.List<T> removes in O(n))
-// This list does not conserves the order of the elements when removing an element.
+/// <summary>
+/// Represents a list that inserts and removes in O(1) by assuming the order of elements is not important. 
+/// By comparison, the default implementation of System.Collections.Generic.List<T> removes in O(n).
+/// This is made by swapping the last element with the element to be removed.
+/// </summary>
+/// <typeparam name="T">The type of the elements in the list.</typeparam>
 public class SwapPopList<T> : IList<T>, ICollection<T>, IReadOnlyList<T>, IEnumerable<T>
 {
     private readonly List<T> _list;
@@ -39,7 +43,7 @@ public class SwapPopList<T> : IList<T>, ICollection<T>, IReadOnlyList<T>, IEnume
 
     public void Insert(int index, T item)
     {
-        throw new System.NotSupportedException("Insert method is not supported since SwapPopList does not guarantee any order of the elements");
+        throw new NotSupportedException("Insert method is not supported since SwapPopList does not guarantee any order of the elements");
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

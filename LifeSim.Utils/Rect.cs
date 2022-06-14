@@ -3,19 +3,40 @@ using System.Numerics;
 
 namespace LifeSim;
 
+/// <summary>
+/// Represents a 2D rectangle.
+/// </summary>
 public struct Rect : IEquatable<Rect>
 {
     public static Rect Empty { get; } = new Rect(0, 0, 0, 0);
 
     public static Rect Infinite { get; } = new Rect(float.NegativeInfinity, float.NegativeInfinity, float.PositiveInfinity, float.PositiveInfinity);
 
+    /// <summary>
+    /// The X position of the rectangle.
+    /// </summary>
     public float X { get; set; }
+
+    /// <summary>
+    /// The Y position of the rectangle.
+    /// </summary>
     public float Y { get; set; }
+
+    /// <summary>
+    /// The width of the rectangle.
+    /// </summary>
     public float Width { get; set; }
+
+    /// <summary>
+    /// The height of the rectangle.
+    /// </summary>
     public float Height { get; set; }
 
-
-
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Rect"/> struct.
+    /// </summary>
+    /// <param name="coords">The position of the rectangle.</param>
+    /// <param name="size">The size of the rectangle.</param>
     public Rect(Vector2 coords, Vector2 size)
     {
         this.X = coords.X;
@@ -24,6 +45,13 @@ public struct Rect : IEquatable<Rect>
         this.Height = size.Y;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Rect"/> struct.
+    /// </summary>
+    /// <param name="x">The X position of the rectangle.</param>
+    /// <param name="y">The Y position of the rectangle.</param>
+    /// <param name="width">The width of the rectangle.</param>
+    /// <param name="height">The height of the rectangle.</param>
     public Rect(float x, float y, float width, float height)
     {
         this.X = x;
@@ -32,6 +60,9 @@ public struct Rect : IEquatable<Rect>
         this.Height = height;
     }
 
+    /// <summary>
+    /// Gets or sets the position of the rectangle.
+    /// </summary>
     public Vector2 Position
     {
         get => new Vector2(this.X, this.Y);
@@ -42,6 +73,9 @@ public struct Rect : IEquatable<Rect>
         }
     }
 
+    /// <summary>
+    /// Gets or sets the size of the rectangle.
+    /// </summary>
     public Vector2 Size
     {
         get => new Vector2(this.Width, this.Height);
@@ -52,20 +86,44 @@ public struct Rect : IEquatable<Rect>
         }
     }
 
+    /// <summary>
+    /// Get or sets the rightmost position of the rectangle.
+    /// </summary>
     public float Right { get => this.X + this.Width; set => this.Width = value - this.X; }
+
+    /// <summary>
+    /// Get or sets the bottommost position of the rectangle.
+    /// </summary>
     public float Bottom { get => this.Y + this.Height; set => this.Height = value - this.Y; }
+
+    /// <summary>
+    /// Get or sets the leftmost position of the rectangle.
+    /// </summary>
     public float Left { get => this.X; set => this.X = value; }
+
+    /// <summary>
+    /// Get or sets the topmost position of the rectangle.
+    /// </summary>
     public float Top { get => this.Y; set => this.Y = value; }
 
-
-    public bool Contains(Vector2 position)
+    /// <summary>
+    /// Returns whether the rectangle contains the specified point.
+    /// </summary>
+    /// <param name="point">The point to test.</param>
+    /// <returns>True if the rectangle contains the point, otherwise false.</returns>
+    public bool Contains(Vector2 point)
     {
-        return position.X >= this.Left
-            && position.Y >= this.Top
-            && position.X < this.Right
-            && position.Y < this.Bottom;
+        return point.X >= this.Left
+            && point.Y >= this.Top
+            && point.X < this.Right
+            && point.Y < this.Bottom;
     }
 
+    /// <summary>
+    /// Returns whether the rectangle overlaps the specified rectangle.
+    /// </summary>
+    /// <param name="other">The rectangle to test.</param>
+    /// <returns>True if the rectangle overlaps the other rectangle, otherwise false.</returns>
     public bool Overlaps(Rect other)
     {
         return other.Left < this.Right
@@ -74,6 +132,11 @@ public struct Rect : IEquatable<Rect>
             && other.Bottom > this.Top;
     }
 
+    /// <summary>
+    /// Returns whether the rectangle is equal to the specified rectangle.
+    /// </summary>
+    /// <param name="other">The rectangle to test.</param>
+    /// <returns>True if the rectangle is equal to the other rectangle, otherwise false.</returns>
     public bool Equals(Rect other)
     {
         return this.X == other.X
@@ -82,6 +145,10 @@ public struct Rect : IEquatable<Rect>
             && this.Height == other.Height;
     }
 
+    /// <summary>
+    /// Expands the rectangle by the specified amount.
+    /// </summary>
+    /// <param name="point">The amount to expand the rectangle.</param>
     public void Expand(Vector2 point)
     {
         if (point.X < this.X)
@@ -105,6 +172,10 @@ public struct Rect : IEquatable<Rect>
         }
     }
 
+    /// <summary>
+    /// Expands the rectangle in order to contain the specified rectangle.
+    /// </summary>
+    /// <param name="rect">The rectangle to contain.</param>
     public void Expand(Rect rect)
     {
         if (rect.X < this.X)
@@ -128,6 +199,10 @@ public struct Rect : IEquatable<Rect>
         }
     }
 
+    /// <summary>
+    /// Transforms the rectangle by the specified matrix.
+    /// </summary>
+    /// <param name="transform">The matrix to transform the rectangle by.</param>
     public void Transform(Matrix3x2 transform)
     {
         var topLeft = Vector2.Transform(new Vector2(this.X, this.Y), transform);

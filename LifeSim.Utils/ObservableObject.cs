@@ -4,6 +4,9 @@ using System.Runtime.CompilerServices;
 
 namespace LifeSim;
 
+/// <summary>
+/// Represents an object that can notify listeners of changes.
+/// </summary>
 public class ObservableObject : INotifyPropertyChanged
 {
     /// <summary>
