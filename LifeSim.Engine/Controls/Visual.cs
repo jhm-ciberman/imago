@@ -55,10 +55,41 @@ public abstract class Visual
         {
             if (this._style != value)
             {
-                this._style = value;
-                value?.Apply(this);
+                this._style = value ?? Style.GetDefaultStyle(this.GetType());
+                this._style.Apply(this);
             }
         }
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Visual"/> class.
+    /// </summary>
+    public Visual()
+    {
+        this._style = Style.GetDefaultStyle(this.GetType());
+        this._style.Apply(this);
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Visual"/> class.
+    /// </summary>
+    /// <param name="style"></param>
+    public Visual(Style? style)
+    {
+        this._style = style ?? Style.GetDefaultStyle(this.GetType());
+        this._style.Apply(this);
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Visual"/> class.
+    /// </summary>
+    /// <param name="name">The name of the element.</param>
+    /// <param name="style">The style of the element.</param>
+    public Visual(string name, Style? style = null)
+    {
+        this.Name = name;
+        this._style = style ?? Style.GetDefaultStyle(this.GetType());
+        this._style.Apply(this);
     }
 
     /// <summary>

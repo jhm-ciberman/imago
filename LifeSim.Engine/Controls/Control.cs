@@ -80,21 +80,22 @@ public class Control : Visual
     public bool IsArrangeValid { get; private set; } = false;
 
     /// <summary>
-    /// Creates a new instance of the <see cref="Control"/> class.
+    /// Initializes a new instance of the <see cref="Control"/> class.
     /// </summary>
-    public Control()
-    {
-        this.Style = Style.GetDefaultStyle(this.GetType());
-    }
+    public Control() : base() { }
 
     /// <summary>
-    /// Creates a new instance of the <see cref="Control"/> class.
+    /// Initializes a new instance of the <see cref="Control"/> class.
+    /// </summary>
+    /// <param name="style">The style of the control.</param>
+    public Control(Style? style) : base(style) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Control"/> class.
     /// </summary>
     /// <param name="name">The name of the control.</param>
-    public Control(string name) : this()
-    {
-        this.Name = name;
-    }
+    /// <param name="style">The style of the control.</param>
+    public Control(string name, Style? style = null) : base(name, style) { }
 
     /// <summary>
     /// Performs the measure pass of the layout process. In the measure pass, the control computes the desired size of the control

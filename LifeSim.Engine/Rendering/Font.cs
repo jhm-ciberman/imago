@@ -16,9 +16,44 @@ public static class Font
 
     private static readonly Dictionary<string, FontData[]> _fontsBytes = new Dictionary<string, FontData[]>();
 
-    private static string _fallbackFontFamily = "";
+    /// <summary>
+    /// Gets or sets the default font family name. 
+    /// </summary>
+    public static string DefaultFontFamily { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Loads a font from a file and registers it with the specified font family name.
+    /// </summary>
+    /// <param name="name">The name of the font family.</param>
+    /// <param name="paths">The paths to the font files.</param>
     public static void LoadFont(string name, params string[] paths)
+    {
+        if (IsFontLoaded(name))
+        {
+            throw new InvalidOperationException($"Font '{name}' is already loaded.");
+        }
+
+        LoadFontCore(name, paths);
+    }
+
+    /// <summary>
+    /// Loads a font from a file and registers it with the specified font family name only if it is not already loaded.
+    /// </summary>
+    /// <param name="name">The name of the font family.</param>
+    /// <param name="paths">The paths to the font files.</param>
+    /// <returns>True if the font was loaded, false otherwise.</returns>
+    public static bool TryLoadFont(string name, params string[] paths)
+    {
+        if (IsFontLoaded(name))
+        {
+            return false;
+        }
+
+        LoadFontCore(name, paths);
+        return true;
+    }
+
+    private static void LoadFontCore(string name, string[] paths)
     {
         var fontBytes = new FontData[paths.Length];
         for (var i = 0; i < paths.Length; i++)
@@ -30,21 +65,26 @@ public static class Font
 
         _fontsBytes.Add(name, fontBytes);
 
-        if (_fallbackFontFamily == "")
+        if (DefaultFontFamily == "")
         {
-            _fallbackFontFamily = name;
+            DefaultFontFamily = name;
         }
     }
 
-    public static void SetFallbackFont(string name)
+    /// <summary>
+    /// Gets whether the specified font family is loaded.
+    /// </summary>
+    /// <param name="name">The name of the font family.</param>
+    /// <returns>true if the font family is loaded; otherwise, false.</returns>
+    public static bool IsFontLoaded(string name)
     {
-        _fallbackFontFamily = name;
+        return _fontsBytes.ContainsKey(name);
     }
 
 
     public static DynamicSpriteFont GetFont(string? fontFamily, int size, int outline = 0, int blur = 0)
     {
-        var key = new Key(fontFamily ?? _fallbackFontFamily, outline, blur);
+        var key = new Key(fontFamily ?? DefaultFontFamily, outline, blur);
         if (!_fontSystems.TryGetValue(key, out var fontSystem))
         {
             fontSystem = MakeSystem(key);

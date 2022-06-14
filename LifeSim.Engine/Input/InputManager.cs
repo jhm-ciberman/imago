@@ -6,12 +6,6 @@ using Veldrid.Sdl2;
 
 namespace LifeSim.Engine;
 
-public struct KeyEventArgs
-{
-
-}
-
-
 /// <summary>
 /// Captures and manages the mouse and keyboard input.
 /// </summary>

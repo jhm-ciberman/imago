@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -71,7 +72,7 @@ public readonly struct Color
     public static Color Pink => new Color(255, 192, 203, 255);
     public static Color Indigo => new Color(75, 0, 130, 255);
     public static Color Violet => new Color(238, 130, 238, 255);
-
+    public static Color GhostWhite => new Color(248, 248, 255, 255);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator ColorF(Color color)
@@ -89,5 +90,27 @@ public readonly struct Color
     public static implicit operator Color(System.Drawing.Color color)
     {
         return new Color(color.R, color.G, color.B, color.A);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool operator ==(Color left, Color right)
+    {
+        return left.R == right.R && left.G == right.G && left.B == right.B && left.A == right.A;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool operator !=(Color left, Color right)
+    {
+        return !(left == right);
+    }
+
+    public override bool Equals([NotNullWhen(true)] object? obj)
+    {
+        return obj is Color color && this == color;
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(this.R, this.G, this.B, this.A);
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using LifeSim.Engine.Rendering;
 
 namespace LifeSim.Engine.Resources;
 
@@ -15,6 +16,41 @@ public class Sprite
     /// Gets a list of all frames of the sprite.
     /// </summary>
     public IReadOnlyList<PackedTexture> Frames => this._frames;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Sprite"/> class.
+    /// </summary>
+    public Sprite()
+    {
+        //
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Sprite"/> class from a <see cref="PackedTexture"/>.
+    /// </summary>
+    /// <param name="texture">The texture to display.</param>
+    public Sprite(PackedTexture texture)
+    {
+        this._frames.Add(texture);
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Sprite"/> class from a list of <see cref="PackedTexture"/>.
+    /// </summary>
+    /// <param name="frames">The list of textures to display.</param>
+    public Sprite(IEnumerable<PackedTexture> frames)
+    {
+        this._frames.AddRange(frames);
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Sprite"/> class from a <see cref="Texture"/>.
+    /// </summary>
+    /// <param name="texture">The texture to display.</param>
+    public Sprite(Texture texture)
+        : this(new PackedTexture(texture, Vector2.Zero, Vector2.One))
+    {
+    }
 
     /// <summary>
     /// Adds a frame to the sprite.
@@ -69,18 +105,6 @@ public class Sprite
             }
         }
 
-        return sprite;
-    }
-
-    /// <summary>
-    /// Creates a sprite with a single frame.
-    /// </summary>
-    /// <param name="packedTexture">The texture of the frame.</param>
-    /// <returns>The new sprite.</returns>
-    public static Sprite FromSingleFrame(PackedTexture packedTexture)
-    {
-        var sprite = new Sprite();
-        sprite.AddFrame(packedTexture);
         return sprite;
     }
 }

@@ -47,8 +47,6 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
 
     private readonly Stack<Rect> _clipRectStack = new Stack<Rect>();
 
-    private readonly Stack<Matrix4x4> _matrixStack = new Stack<Matrix4x4>();
-
     private readonly Stack<float> _opacityStack = new Stack<float>();
 
     public int DrawCallCount { get; private set; } = 0;
@@ -65,8 +63,6 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
         this._opacityStack.Pop();
         this._batch.Opacity = this._opacityStack.Peek();
     }
-
-    private bool _currentMatrixIsDirty = true;
 
     private RenderFlags _currentPipelineFlags = RenderFlags.None;
 
@@ -143,11 +139,8 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
         this._commandList = cl;
         this.TotalSpritesToDraw = 0;
         this._batch.Reset();
-        this._matrixStack.Clear();
-        this._matrixStack.Push(viewProjectionMatrix);
         this._opacityStack.Clear();
         this._opacityStack.Push(1f);
-        this._currentMatrixIsDirty = false;
         this._currentShaderInUse = null!;
         this._currentPipelineFlags = RenderFlags.None;
         this._clipRectStack.Clear();
@@ -334,20 +327,6 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
         }
     }
 
-    public void PushMatrix(Matrix3x2 matrix)
-    {
-        this.FlushBatch();
-        this._matrixStack.Push(new Matrix4x4(matrix) * this._matrixStack.Peek());
-        this._currentMatrixIsDirty = true;
-    }
-
-    public void PopMatrix()
-    {
-        this.FlushBatch();
-        this._matrixStack.Pop();
-        this._currentMatrixIsDirty = true;
-    }
-
     public void FlushBatch()
     {
         if (this._batch.Count == 0 || this._batch.Texture == null)
@@ -367,11 +346,6 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
 
         this._commandList.SetVertexBuffer(0, this.VertexBuffer);
         this._commandList.SetIndexBuffer(this._indexBuffer, IndexFormat.UInt16);
-
-        if (this._currentMatrixIsDirty)
-        {
-            this._commandList.UpdateBuffer(this._matrixBuffer, 0, this._matrixStack.Peek());
-        }
 
         var resourceSet = this._resourceSetCache.GetResourceSet(this._currentShaderInUse, this._batch.Texture);
         this._commandList.SetGraphicsResourceSet(1, resourceSet);

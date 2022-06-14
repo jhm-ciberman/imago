@@ -2,6 +2,7 @@ using System;
 using System.Numerics;
 using LifeSim.Engine.Rendering;
 using LifeSim.Engine.Resources;
+using LifeSim.Utils;
 
 namespace LifeSim.Engine.Controls;
 
@@ -60,9 +61,17 @@ public class Button : ContentControl
             if (this._isPressed != value)
             {
                 this._isPressed = value;
-                if (this._isPressed)
+                if (!this._isPressed && this.IsMouseOver)
                 {
                     this.Click?.Invoke(this, EventArgs.Empty);
+
+                    if (this.Command != null)
+                    {
+                        if (this.Command.CanExecute(this.CommandParameter))
+                        {
+                            this.Command.Execute(this.CommandParameter);
+                        }
+                    }
                 }
             }
         }
@@ -73,6 +82,15 @@ public class Button : ContentControl
     /// </summary>
     public bool IsEnabled { get; set; } = true;
 
+    /// <summary>
+    /// Command that is executed when the button is clicked.
+    /// </summary>
+    public ICommand? Command { get; set; } = null;
+
+    /// <summary>
+    /// Parameter that is passed to the command.
+    /// </summary>
+    public object? CommandParameter { get; set; } = null;
 
     protected void UpdateBackgroundBrush()
     {
@@ -148,6 +166,7 @@ public class Button : ContentControl
         else
         {
             this.IsMouseOver = false;
+            this.IsPressed = false;
         }
 
         if (this.IsPressed && InputManager.Current.GetMouseButtonUp(Veldrid.MouseButton.Left))

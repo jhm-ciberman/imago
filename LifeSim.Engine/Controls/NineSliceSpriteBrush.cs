@@ -31,6 +31,26 @@ public class NineSliceSpriteBrush : SpriteBrush
     }
 
     /// <summary>
+    /// Initializes a new instance of the <see cref="NineSliceSpriteBrush"/> class from a <see cref="Texture"/>.
+    /// </summary>
+    /// <param name="texture">The texture to display.</param>
+    /// <param name="margin">The margin of the sprite for the nine slice mode.</param>
+    public NineSliceSpriteBrush(Texture texture, Thickness margin)
+        : this(new Sprite(texture), margin)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="NineSliceSpriteBrush"/> class from a <see cref="PackedTexture"/>.
+    /// </summary>
+    /// <param name="texture">The texture to display.</param>
+    /// <param name="margin">The margin of the sprite for the nine slice mode.</param>
+    public NineSliceSpriteBrush(PackedTexture texture, Thickness margin)
+        : this(new Sprite(texture), margin)
+    {
+    }
+
+    /// <summary>
     /// Gets or sets the margin used when drawing the sprite in 9 slice mode.
     /// </summary>
     public Thickness Margin { get; set; } = Thickness.Zero;

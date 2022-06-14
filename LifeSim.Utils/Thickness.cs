@@ -18,6 +18,10 @@ public struct Thickness
 
     public Vector2 Total => new Vector2(this.Left + this.Right, this.Top + this.Bottom);
 
+    public float Horizontal => this.Left + this.Right;
+
+    public float Vertical => this.Top + this.Bottom;
+
     public Thickness(float all)
     {
         this.Left = all;
