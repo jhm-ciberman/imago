@@ -219,4 +219,11 @@ public class RenderNode3D : Node3D
 
         return false;
     }
+
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
+
+        this._renderable?.Dispose();
+    }
 }

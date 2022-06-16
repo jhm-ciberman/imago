@@ -100,41 +100,47 @@ public class Button : ContentControl
         if (background is SpriteBrush spriteBrush)
         {
             if (spriteBrush.Sprite == null) return;
-            if (!this.IsEnabled)
+            if (this.IsEnabled)
             {
-                spriteBrush.FrameIndex = 3;
-            }
-            else if (this.IsPressed)
-            {
-                spriteBrush.FrameIndex = 2;
-            }
-            else if (this.IsMouseOver)
-            {
-                spriteBrush.FrameIndex = 1;
+                if (this.IsPressed)
+                {
+                    spriteBrush.FrameIndex = 2;
+                }
+                else if (this.IsMouseOver)
+                {
+                    spriteBrush.FrameIndex = 1;
+                }
+                else
+                {
+                    spriteBrush.FrameIndex = 0;
+                }
             }
             else
             {
-                spriteBrush.FrameIndex = 0;
+                spriteBrush.FrameIndex = 3;
             }
         }
         else if (background is SolidColorBrush solidColor)
         {
             // Change opacity
-            if (!this.IsEnabled)
+            if (this.IsEnabled)
             {
-                solidColor.Opacity = 0.5f;
-            }
-            else if (this.IsPressed)
-            {
-                solidColor.Opacity = 0.8f;
-            }
-            else if (this.IsMouseOver)
-            {
-                solidColor.Opacity = 0.9f;
+                if (this.IsPressed)
+                {
+                    solidColor.Opacity = 0.8f;
+                }
+                else if (this.IsMouseOver)
+                {
+                    solidColor.Opacity = 0.9f;
+                }
+                else
+                {
+                    solidColor.Opacity = 1.0f;
+                }
             }
             else
             {
-                solidColor.Opacity = 1.0f;
+                solidColor.Opacity = 0.5f;
             }
         }
     }

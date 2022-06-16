@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace LifeSim.Engine.Rendering;
 
-internal struct DataBlock
+internal struct DataBlock : IDisposable
 {
     internal DataBuffer Buffer { get; set; }
     public int Offset { get; set; }
@@ -45,8 +45,9 @@ internal struct DataBlock
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void FreeBlock()
+    public void Dispose()
     {
         this.Buffer?.FreeBlock(this.Offset);
+        this.Buffer = null!;
     }
 }

@@ -6,6 +6,11 @@ using Veldrid.Utilities;
 
 namespace LifeSim.Engine.Rendering;
 
+/// <summary>
+/// Represents a low-level renderable object in 3D space that can be rendered by the renderer.
+/// This object contains the information about the mesh, material, and skeleton to use when rendering
+/// as well as the transform and information for culling and batching.
+/// </summary>
 internal class Renderable : IDisposable
 {
     internal delegate void RenderQueuesChangedHandler(Renderable renderable, RenderQueues oldFlags, RenderQueues newFlags);
@@ -50,7 +55,7 @@ internal class Renderable : IDisposable
 
             this._pickingId = value;
             this.RecomputeOffsetVertexData();
-            this.OnPipelineDirty();
+            this.InvalidatePipeline();
         }
     }
 
@@ -75,13 +80,6 @@ internal class Renderable : IDisposable
 
         this._instanceDataBlock = storage.RequestInstanceDataBlock(instanceDataSize);
         this.InstanceResourceSet = this._instanceDataBlock.Buffer.ResourceSet;
-
-        renderer.Settings.PropertyChanged += this.RenderSettings_PropertyChanged;
-    }
-
-    private void RenderSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        this.OnPipelineDirty();
     }
 
     public Mesh? Mesh
@@ -93,7 +91,7 @@ internal class Renderable : IDisposable
             this._mesh = value;
 
             this.RecomputeBoundingBox();
-            this.OnPipelineDirty();
+            this.InvalidatePipeline();
         }
     }
 
@@ -106,7 +104,7 @@ internal class Renderable : IDisposable
             this._material = value;
 
             this.RecomputeOffsetVertexData();
-            this.OnPipelineDirty();
+            this.InvalidatePipeline();
         }
     }
 
@@ -121,7 +119,7 @@ internal class Renderable : IDisposable
             this.SkeletonResourceSet = this._skeleton?.ResourceSet;
             this.UpdateSkeletonTransform();
             this.RecomputeOffsetVertexData();
-            this.OnPipelineDirty();
+            this.InvalidatePipeline();
         }
     }
 
@@ -145,7 +143,7 @@ internal class Renderable : IDisposable
         {
             if (this._visible == value) return;
             this._visible = value;
-            this.OnPipelineDirty();
+            this.InvalidatePipeline();
         }
     }
 
@@ -156,7 +154,7 @@ internal class Renderable : IDisposable
         {
             if (this._transparent == value) return;
             this._transparent = value;
-            this.OnPipelineDirty();
+            this.InvalidatePipeline();
         }
     }
 
@@ -169,11 +167,11 @@ internal class Renderable : IDisposable
         {
             if (this._shadowCastingMode == value) return;
             this._shadowCastingMode = value;
-            this.OnPipelineDirty();
+            this.InvalidatePipeline();
         }
     }
 
-    protected void OnPipelineDirty()
+    public void InvalidatePipeline()
     {
         if (this._pipelineDirty) return;
         this._pipelineDirty = true;
@@ -226,6 +224,8 @@ internal class Renderable : IDisposable
             transformBufferHash
         );
     }
+
+
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool CanBeBatchedWith(Renderable other)
@@ -336,8 +336,7 @@ internal class Renderable : IDisposable
 
     public void Dispose()
     {
-        this._instanceDataBlock.FreeBlock();
-        this._transformDataBlock.FreeBlock();
-        Renderer.Instance.Settings.PropertyChanged -= this.RenderSettings_PropertyChanged;
+        this._transformDataBlock.Dispose();
+        this._instanceDataBlock.Dispose();
     }
 }

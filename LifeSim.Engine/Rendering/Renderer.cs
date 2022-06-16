@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Numerics;
 using FontStashSharp.Interfaces;
 using LifeSim.Engine.Rendering;
@@ -84,6 +85,7 @@ public partial class Renderer : ITexture2DManager, IDisposable
     private readonly List<CommandListJob> _jobs;
     private readonly DisposeCollector _disposeCollector;
     private readonly Dictionary<ResourceLayoutDescription, ResourceLayout> _resourceLayoutCache = new();
+    private readonly SwapPopList<Renderable> _renderables = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Renderer"/> class.
@@ -154,7 +156,17 @@ public partial class Renderer : ITexture2DManager, IDisposable
                 this._fullScreenPass),
         };
 
+        this.Settings.PropertyChanged += this.Settings_PropertyChanged;
         Texture.InitializeDefaultTextures();
+    }
+
+    private void Settings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        // Force recreation of pipeline for all renderables.
+        foreach (var renderable in this._renderables)
+        {
+            renderable.InvalidatePipeline();
+        }
     }
 
     public int SpritePassDrawCallCount => this._spritesPass.DrawCallCount;
@@ -177,7 +189,9 @@ public partial class Renderer : ITexture2DManager, IDisposable
 
     internal Renderable MakeRenderable(int instanceDataBlockSize)
     {
-        return new Renderable(this, instanceDataBlockSize);
+        var renderable = new Renderable(this, instanceDataBlockSize);
+        this._renderables.Add(renderable);
+        return renderable;
     }
 
     public void SetMousePickingPosition(Vector2 position)

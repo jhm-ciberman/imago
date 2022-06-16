@@ -2,11 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using LifeSim.Engine.Rendering;
 
 namespace LifeSim.Engine.SceneGraph;
 
-public class Node3D
+public class Node3D : IDisposable
 {
     [Flags]
     private enum DirtyFlags : byte
@@ -91,6 +90,7 @@ public class Node3D
     private Matrix4x4 _worldMatrix = Matrix4x4.Identity;
     private DirtyFlags _dirtyFlags = DirtyFlags.All;
 
+
     /// <summary>
     /// Gets whether the local transform of this node is dirty.
     /// </summary>
@@ -100,6 +100,13 @@ public class Node3D
     /// Gets whether the world transform of this node is dirty.
     /// </summary>
     public bool WorldTransformIsDirty => (this._dirtyFlags & DirtyFlags.WorldMatrix) != 0;
+
+    private bool _disposedValue;
+
+    /// <summary>
+    /// Gets whether this node is disposed.
+    /// </summary>
+    public bool IsDisposed => this._disposedValue;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Node3D"/> class.
@@ -237,6 +244,16 @@ public class Node3D
         }
     }
 
+    /// <summary>
+    /// Removes a child node from this node and disposes it.
+    /// </summary>
+    /// <param name="node">The node to remove and dispose.</param>
+    public void RemoveAndDisposeChild(Node3D node)
+    {
+        this.RemoveChild(node);
+        node.Dispose();
+    }
+
     internal virtual void AttachToSceneRecursive(Scene scene)
     {
         if (this.Scene != null) return;
@@ -272,4 +289,25 @@ public class Node3D
         }
     }
 
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposedValue)
+        {
+            if (disposing)
+            {
+                foreach (var child in this._children)
+                {
+                    child.Dispose();
+                }
+            }
+
+            _disposedValue = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
 }

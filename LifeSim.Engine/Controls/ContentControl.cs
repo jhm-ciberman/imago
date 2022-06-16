@@ -11,6 +11,10 @@ public class ContentControl : Control
     public override IEnumerable<Control> VisualChildren => this._visualChildren;
 
     private Control? _content;
+
+    /// <summary>
+    /// Gets or sets the content of the control.
+    /// </summary>
     public Control? Content
     {
         get => this._content;

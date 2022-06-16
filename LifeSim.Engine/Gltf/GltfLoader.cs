@@ -57,12 +57,10 @@ public class GltfLoader
 
     private readonly string _path;
     private readonly glTFLoader.Schema.Gltf _model;
-
     private readonly GltfBuffer?[] _buffersCache;
     private readonly GLTFNode?[] _nodesCache;
     private readonly Material? _defaultMaterial;
-
-    private readonly Dictionary<int, GltfAccessor> _accessorsCache = new Dictionary<int, GltfAccessor>();
+    private readonly Dictionary<int, GltfAccessor> _accessorsCache = new();
 
     public GltfLoader(string path, Material? defaultMaterial = null)
     {
@@ -73,13 +71,13 @@ public class GltfLoader
         this._defaultMaterial = defaultMaterial;
     }
 
-    internal string GetNodeName(int index)
+    private string GetNodeName(int index)
     {
         var data = this._model.Nodes[index];
         return string.IsNullOrWhiteSpace(data.Name) ? "Node_" + index : data.Name;
     }
 
-    internal GLTFNode GetNode(int index)
+    private GLTFNode GetNode(int index)
     {
         GLTFNode? node = this._nodesCache[index];
         if (node != null) return node;
@@ -140,6 +138,10 @@ public class GltfLoader
         );
     }
 
+    /// <summary>
+    /// Loads all animations from the glTF file.
+    /// </summary>
+    /// <returns>An array of animations.</returns>
     public Animation[] LoadAnimations()
     {
         Animation[] animations = new Animation[this._model.Animations.Length];
@@ -150,6 +152,11 @@ public class GltfLoader
         return animations;
     }
 
+    /// <summary>
+    /// Loads an animation from the glTF file. By default, the first animation is loaded.
+    /// </summary>
+    /// <param name="index">The index of the animation in the glTF file.</param>
+    /// <returns>The animation.</returns>
     public Animation LoadAnimation(int index)
     {
         var animationData = this._model.Animations[index];
@@ -212,6 +219,11 @@ public class GltfLoader
         return new Skin(matrices, joints, root);
     }
 
+    /// <summary>
+    /// Loads a scene from the gltf file. By default, the first scene is loaded.
+    /// </summary>
+    /// <param name="index">The index of the scene to load.</param>
+    /// <returns>The scene as a <see cref="IScenePrefab"/>.</returns>
     public IScenePrefab LoadScene(int index = 0)
     {
         var data = this._model.Scenes[index];
@@ -224,7 +236,7 @@ public class GltfLoader
         return scene;
     }
 
-    internal IMeshData GetPrimitive(int index)
+    private IMeshData GetPrimitive(int index)
     {
         var data = this._model.Meshes[index].Primitives[0];
         var indicesAccessor = data.Indices.HasValue ? this.GetAccessor(data.Indices.Value) : null;
@@ -274,7 +286,7 @@ public class GltfLoader
     }
 
 
-    internal GltfAccessor GetAccessor(int index)
+    private GltfAccessor GetAccessor(int index)
     {
         if (!this._accessorsCache.TryGetValue(index, out GltfAccessor? accessor))
         {
@@ -321,6 +333,10 @@ public class GltfLoader
         return arr;
     }
 
+    /// <summary>
+    /// Loads all resources from the gltf file.
+    /// </summary>
+    /// <returns>A <see cref="GltfAsset"/> object containing all resources.</returns>
     public GltfAsset LoadAll()
     {
         var scenes = new List<IScenePrefab>();

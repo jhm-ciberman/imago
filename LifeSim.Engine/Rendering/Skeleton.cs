@@ -51,7 +51,7 @@ public class Skeleton : IDisposable
 
     public void Dispose()
     {
-        this._dataBlock.FreeBlock();
+        this._dataBlock.Dispose();
         this._storage.UnregisterSkeleton(this);
     }
 }
