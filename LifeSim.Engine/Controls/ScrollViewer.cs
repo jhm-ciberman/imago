@@ -190,7 +190,7 @@ public class ScrollViewer : ContentControl
         }
     }
 
-    private Vector2 _thumbPosition;
+    //private Vector2 _thumbPosition;
 
     private void OnScrollChanged()
     {
@@ -216,7 +216,7 @@ public class ScrollViewer : ContentControl
                 pos.X = this.ScrollPercentageX * (this.ActualSize.X - thumbSize.X);
                 pos.Y = this.ActualSize.Y - thumbSize.Y;
             }
-            this._thumbPosition = pos;
+            //this._thumbPosition = pos;
         }
         else
         {
