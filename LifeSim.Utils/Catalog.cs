@@ -6,21 +6,10 @@ using System.Linq;
 namespace LifeSim.Utils;
 
 /// <summary>
-/// Represents an identifiable object.
-/// </summary>
-public interface IIdentifiable
-{
-    /// <summary>
-    /// Gets the identifier of this object.
-    /// </summary>
-    string Identifier { get; }
-}
-
-/// <summary>
 /// Represents a catalog of identifiable objects.
 /// </summary>
 /// <typeparam name="TElement">The type of the elements in the catalog.</typeparam>
-public abstract class Catalog<TElement> where TElement : IIdentifiable
+public abstract class Catalog<TElement> where TElement : class, IIdentifiable
 {
     private readonly Dictionary<string, TElement> _elements = new Dictionary<string, TElement>();
 
@@ -48,6 +37,13 @@ public abstract class Catalog<TElement> where TElement : IIdentifiable
     /// Gets the number of elements in this catalog.
     /// </summary>
     public int Count => this._elements.Count;
+
+    /// <summary>
+    /// Gets the element with the specified identifier.
+    /// </summary>
+    /// <param name="identifier">The identifier of the element to get.</param>
+    /// <returns>The element with the specified identifier.</returns>
+    public IIdentifiable this[string identifier] => this.Get(identifier);
 
     /// <summary>
     /// Adds an element to this catalog.
@@ -156,4 +152,5 @@ public abstract class Catalog<TElement> where TElement : IIdentifiable
     {
         return this._elements.Values;
     }
+
 }
