@@ -223,17 +223,75 @@ public class GltfLoader
     /// Loads a scene from the gltf file. By default, the first scene is loaded.
     /// </summary>
     /// <param name="index">The index of the scene to load.</param>
+    /// <param name="rootNodeName">The name of the root node of the scene. If null, the whole scene is loaded.</param>
     /// <returns>The scene as a <see cref="IScenePrefab"/>.</returns>
-    public IScenePrefab LoadScene(int index = 0)
+    public IScenePrefab LoadScene(int index = 0, string? rootNodeName = null)
     {
         var data = this._model.Scenes[index];
         var name = data.Name ?? "Scene_" + index;
         var scene = new GltfScene(name);
-        foreach (var node in data.Nodes)
+
+        if (rootNodeName == null)
         {
-            scene.Add(this.GetNode(node));
+            foreach (var node in data.Nodes)
+            {
+                scene.Add(this.GetNode(node));
+            }
         }
+        else
+        {
+            int nodeIndex = this.FindNodeIndex(rootNodeName);
+            if (nodeIndex == -1)
+            {
+                throw new Exception($"Node {rootNodeName} not found in scene {name}");
+            }
+            scene.Add(this.GetNode(nodeIndex));
+        }
+
         return scene;
+    }
+
+    /// <summary>
+    /// Loads a scene from the gltf file. 
+    /// </summary>
+    /// <param name="name">The name of the scene to load.</param>
+    /// <param name="rootNodeName">The name of the root node of the scene. If null, the whole scene is loaded.</param>
+    /// <returns>The scene as a <see cref="IScenePrefab"/>.</returns>
+    public IScenePrefab LoadScene(string? name, string? rootNodeName = null)
+    {
+        var index = name == null ? 0 : this.FindSceneIndex(name);
+        if (index == -1)
+        {
+            throw new Exception($"Scene {name} not found");
+        }
+        return this.LoadScene(index, rootNodeName);
+    }
+
+
+    private int FindNodeIndex(string name)
+    {
+        for (int i = 0; i < this._model.Nodes.Length; i++)
+        {
+            if (this._model.Nodes[i].Name == name)
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    private int FindSceneIndex(string name)
+    {
+        for (int i = 0; i < this._model.Scenes.Length; i++)
+        {
+            if (this._model.Scenes[i].Name == name)
+            {
+                return i;
+            }
+        }
+
+        return -1;
     }
 
     private IMeshData GetPrimitive(int index)

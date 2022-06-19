@@ -21,7 +21,7 @@ public abstract class CatalogRef<TObj> where TObj : class, IIdentifiable
     /// <summary>
     /// Gets the object referenced by this reference.
     /// </summary>
-    public TObj Element
+    public TObj Value
     {
         get
         {
@@ -69,6 +69,6 @@ public abstract class CatalogRef<TObj> where TObj : class, IIdentifiable
 
     public static implicit operator TObj(CatalogRef<TObj> reference)
     {
-        return reference.Element;
+        return reference.Value;
     }
 }
