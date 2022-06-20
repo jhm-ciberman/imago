@@ -8,9 +8,13 @@ public static class MathUtils
 {
     private const float K_EPSILON_NORMAL_SQRT = 1e-15f;
 
-    public static float HalfPi { get; } = (float)Math.PI / 2f;
+    public static float HalfPi { get; } = MathF.PI / 2f;
 
-    public static float TwoPi { get; } = (float)Math.PI * 2f;
+    public static float TwoPi { get; } = MathF.PI * 2f;
+
+    public static float DegToRad { get; } = MathF.PI / 180f;
+
+    public static float RadToDeg { get; } = 180f / MathF.PI;
 
     /// <summary>
     /// Linearly interpolates between two values.

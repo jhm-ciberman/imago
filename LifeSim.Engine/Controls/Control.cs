@@ -166,25 +166,38 @@ public class Control : Visual
 
         var desiredSize = this.DesiredSize;
 
-        finalRect.X += this.HorizontalAlignment switch
+        switch (this.HorizontalAlignment)
         {
-            HorizontalAlignment.Left => 0,
-            HorizontalAlignment.Stretch => 0,
-            HorizontalAlignment.Center => (availableSize.X - desiredSize.X) / 2,
-            HorizontalAlignment.Right => availableSize.X - desiredSize.X,
-            _ => throw new InvalidOperationException(),
+            case HorizontalAlignment.Center:
+                finalRect.X += (availableSize.X - desiredSize.X) / 2;
+                break;
+            case HorizontalAlignment.Right:
+                finalRect.X += availableSize.X - desiredSize.X;
+                break;
         };
 
-        finalRect.Y += this.VerticalAlignment switch
+        switch (this.VerticalAlignment)
         {
-            VerticalAlignment.Top => 0,
-            VerticalAlignment.Stretch => 0,
-            VerticalAlignment.Center => (availableSize.Y - desiredSize.Y) / 2,
-            VerticalAlignment.Bottom => availableSize.Y - desiredSize.Y,
-            _ => throw new InvalidOperationException(),
+            case VerticalAlignment.Center:
+                finalRect.Y += (availableSize.Y - desiredSize.Y) / 2;
+                break;
+            case VerticalAlignment.Bottom:
+                finalRect.Y += availableSize.Y - desiredSize.Y;
+                break;
         };
 
         var rectPosition = this.ArrangeCore(finalRect);
+
+
+        if (this.HorizontalAlignment == HorizontalAlignment.Stretch)
+        {
+            rectPosition.Width = finalRect.Width;
+        }
+
+        if (this.VerticalAlignment == VerticalAlignment.Stretch)
+        {
+            rectPosition.Height = finalRect.Height;
+        }
 
         this.Position = rectPosition.Position;
         this.ActualSize = rectPosition.Size;
