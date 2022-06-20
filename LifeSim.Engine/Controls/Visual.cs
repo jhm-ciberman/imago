@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -33,10 +34,12 @@ public abstract class Visual
     /// </summary>
     public float Opacity { get; set; } = 1f;
 
+    private readonly List<Visual> _visualChildren = new List<Visual>();
+
     /// <summary>
     /// Gets an enumerable collection of the control's visual children.
     /// </summary>
-    public virtual IEnumerable<Control> VisualChildren { get; } = Enumerable.Empty<Control>();
+    public virtual IReadOnlyList<Visual> VisualChildren => this._visualChildren;
 
     /// <summary>
     /// Gets or sets whether the content is clipped to the control's bounds.
@@ -55,7 +58,7 @@ public abstract class Visual
         {
             if (this._style != value)
             {
-                this._style = value ?? Style.GetDefaultStyle(this.GetType());
+                this._style = value ?? StyleManager.GetDefaultStyle(this.GetType());
                 this._style.Apply(this);
             }
         }
@@ -66,7 +69,7 @@ public abstract class Visual
     /// </summary>
     public Visual()
     {
-        this._style = Style.GetDefaultStyle(this.GetType());
+        this._style = StyleManager.GetDefaultStyle(this.GetType());
         this._style.Apply(this);
     }
 
@@ -76,7 +79,7 @@ public abstract class Visual
     /// <param name="style"></param>
     public Visual(Style? style)
     {
-        this._style = style ?? Style.GetDefaultStyle(this.GetType());
+        this._style = style ?? StyleManager.GetDefaultStyle(this.GetType());
         this._style.Apply(this);
     }
 
@@ -88,7 +91,7 @@ public abstract class Visual
     public Visual(string name, Style? style = null)
     {
         this.Name = name;
-        this._style = style ?? Style.GetDefaultStyle(this.GetType());
+        this._style = style ?? StyleManager.GetDefaultStyle(this.GetType());
         this._style.Apply(this);
     }
 
@@ -131,25 +134,29 @@ public abstract class Visual
 
     public virtual void OnAddedToVisualTree(UIPage page)
     {
-        if (this.Root != page)
+        if (this.Root != null)
         {
-            this.Root = page;
-            foreach (var child in this.VisualChildren)
-            {
-                child.OnAddedToVisualTree(page);
-            }
+            throw new InvalidOperationException("The control is already added to a page.");
+        }
+
+        this.Root = page;
+        foreach (var child in this.VisualChildren)
+        {
+            child.OnAddedToVisualTree(page);
         }
     }
 
     public virtual void OnRemovedFromVisualTree(UIPage page)
     {
-        if (this.Root == page)
+        if (this.Root != page)
         {
-            this.Root = null;
-            foreach (var child in this.VisualChildren)
-            {
-                child.OnRemovedFromVisualTree(page);
-            }
+            throw new InvalidOperationException("The control is not added to the specified page.");
+        }
+
+        this.Root = null;
+        foreach (var child in this.VisualChildren)
+        {
+            child.OnRemovedFromVisualTree(page);
         }
     }
 
@@ -177,5 +184,23 @@ public abstract class Visual
         }
 
         return null;
+    }
+
+    protected virtual void AddVisualChild(Visual child)
+    {
+        this._visualChildren.Add(child);
+        if (this.Root != null)
+        {
+            child.OnAddedToVisualTree(this.Root);
+        }
+    }
+
+    protected virtual void RemoveVisualChild(Visual child)
+    {
+        this._visualChildren.Remove(child);
+        if (this.Root != null)
+        {
+            child.OnRemovedFromVisualTree(this.Root);
+        }
     }
 }

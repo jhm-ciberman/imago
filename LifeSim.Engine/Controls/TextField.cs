@@ -1,58 +1,17 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Numerics;
-using FontStashSharp;
 using LifeSim.Engine.Rendering;
+using LifeSim.Utils;
 using Veldrid;
 
 namespace LifeSim.Engine.Controls;
 
 public class TextField : Control
 {
+    /// <summary>
+    /// Gets whether the text field is focused.
+    /// </summary>
     public bool IsFocused { get; private set; } = true;
-
-    public Color Foreground { get; set; } = Color.Black;
-
-    private string? _fontFamily = null;
-    private int _fontSize = 30;
-    private int _outline = 0;
-    private int _blur = 0;
-
-    protected bool SetFontProperty<T>(ref T backingField, T value)
-    {
-        if (!EqualityComparer<T>.Default.Equals(backingField, value))
-        {
-            backingField = value;
-            this._font = null;
-            return true;
-        }
-        return false;
-    }
-
-    public string? FontFamily
-    {
-        get => this._fontFamily;
-        set => this.SetFontProperty(ref this._fontFamily, value);
-    }
-
-    public int FontSize
-    {
-        get => this._fontSize;
-        set => this.SetFontProperty(ref this._fontSize, value);
-    }
-
-    public int Outline
-    {
-        get => this._outline;
-        set => this.SetFontProperty(ref this._outline, value);
-    }
-
-    public int Blur
-    {
-        get => this._blur;
-        set => this.SetFontProperty(ref this._blur, value);
-    }
 
     private int _caretIndex = 0;
 
@@ -94,46 +53,87 @@ public class TextField : Control
     /// </summary>
     public Color? CaretColor { get; set; } = null;
 
-    protected string _text = string.Empty;
-
     /// <summary>
     /// Gets or sets the text of the text block.
     /// </summary>
     public string Text
     {
-        get => this._text;
-        set
-        {
-            if (this._text != value)
-            {
-                this._text = value;
-                this._caretIndex = Math.Min(this._caretIndex, this._text.Length);
-                this._caretBlinkTimer = this.CaretBlinkSpeed;
-                this._caretVisible = true;
-                this.InvalidateMeasure();
-            }
-        }
+        get => this.TextBlock.Text;
+        set => this.TextBlock.Text = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the style of the inner text block.
+    /// </summary>
+    public Style? TextBlockStyle
+    {
+        get => this.TextBlock.Style;
+        set => this.TextBlock.Style = value;
     }
 
     private float _caretBlinkTimer = 0f;
 
     private bool _caretVisible = true;
 
-    private SpriteFontBase? _font = null;
 
-    public SpriteFontBase GetFont()
+    private void TextBlock_TextChanged(object? sender, EventArgs e)
     {
-        if (this._font == null)
-        {
-            this._font = Font.GetFont(this.FontFamily, this.FontSize, this.Outline, this.Blur);
-        }
-
-        return this._font;
+        this._caretIndex = Math.Min(this._caretIndex, this.Text.Length);
+        this._caretBlinkTimer = this.CaretBlinkSpeed;
+        this._caretVisible = true;
     }
 
-    protected override Vector2 MeasureCore(Vector2 availableSize)
+    private TextBlock? _textBlock = null;
+
+    /// <summary>
+    /// Gets or sets the inner text block used by the text field.
+    /// </summary>
+    public TextBlock TextBlock
     {
-        return this.GetFont().MeasureString(this.Text);
+        get
+        {
+            if (this._textBlock == null)
+            {
+                this._textBlock = new TextBlock();
+                this._textBlock.TextChanged += this.TextBlock_TextChanged;
+                this.AddVisualChild(this._textBlock);
+            }
+
+            return this._textBlock;
+        }
+        set
+        {
+            if (this._textBlock != value)
+            {
+                if (this._textBlock != null)
+                {
+                    this._textBlock.TextChanged -= this.TextBlock_TextChanged;
+                    this.RemoveVisualChild(this._textBlock);
+                }
+
+                this._textBlock = value;
+                this._textBlock.TextChanged += this.TextBlock_TextChanged;
+                this.AddVisualChild(this._textBlock);
+            }
+        }
+    }
+
+    private Thickness _padding = new Thickness(0);
+
+    /// <summary>
+    /// Gets or sets the padding of the text field.
+    /// </summary>
+    public Thickness Padding
+    {
+        get => this._padding;
+        set
+        {
+            if (this._padding != value)
+            {
+                this._padding = value;
+                this.InvalidateMeasure();
+            }
+        }
     }
 
     private void InputManager_KeyPressed(object? sender, KeyEvent e)
@@ -156,9 +156,11 @@ public class TextField : Control
                 this.CaretIndex++;
                 break;
             case Key.Home:
+            case Key.Up:
                 this.CaretIndex = 0;
                 break;
             case Key.End:
+            case Key.Down:
                 this.CaretIndex = this.Text.Length;
                 break;
         }
@@ -197,24 +199,40 @@ public class TextField : Control
             : this.Text.Remove(index, 1);
     }
 
+    protected override Vector2 MeasureCore(Vector2 availableSize)
+    {
+        var padding = this.Padding.Total;
+        availableSize -= padding;
+        this.TextBlock.Measure(availableSize);
+        return this.TextBlock.DesiredSize + padding;
+    }
+
+    protected override Rect ArrangeCore(Rect finalRect)
+    {
+        Rect rect = finalRect;
+        rect.Position += this.Padding.TopLeft;
+        rect.Size -= this.Padding.Total;
+        this.TextBlock.Arrange(rect);
+        return finalRect;
+    }
+
     protected override void DrawCore(SpriteBatcher spriteBatcher)
     {
-        // Base method draws the text. We'll draw the caret after that.
         base.DrawCore(spriteBatcher);
 
-        var font = this.GetFont();
-        spriteBatcher.DrawText(font, this.Text, this.Position, this.Foreground);
+        var tb = this.TextBlock;
+        tb.Draw(spriteBatcher);
 
         if (this._caretVisible)
         {
             Vector2 size = Vector2.Zero;
-            if (this.Text.Length > 0)
+            if (tb.Text.Length > 0)
             {
-                size = font.MeasureString(this.Text[..this.CaretIndex]);
+                size = tb.MeasureString(this.CaretIndex);
             }
-            ColorF caretColor = this.CaretColor ?? this.Foreground;
-            Vector2 caretPos = new Vector2(this.Position.X + size.X, this.Position.Y);
-            Vector2 caretSize = new Vector2(this.CaretWidth, this.FontSize);
+            ColorF caretColor = this.CaretColor ?? tb.Foreground;
+            Vector2 caretPos = new Vector2(this.Position.X + size.X, this.Position.Y) + this.Padding.TopLeft;
+            Vector2 caretSize = new Vector2(this.CaretWidth, tb.FontSize);
             spriteBatcher.DrawRectangle(caretPos, caretSize, caretColor);
         }
     }

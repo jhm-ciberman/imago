@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace LifeSim.Engine.Controls;
 
-public class Style
+public class StyleManager
 {
     private static readonly Dictionary<Type, Style> _defaultStyles = new Dictionary<Type, Style>();
 
@@ -12,17 +13,7 @@ public class Style
     /// <summary>
     /// An empty style.
     /// </summary>
-    public static Style Empty { get; } = new Style();
-
-    /// <summary>
-    /// Registers a style to be used by default for all the controls of the specified type.
-    /// </summary>
-    /// <typeparam name="T">The type of the control.</typeparam>
-    /// <param name="style">The style to register.</param>
-    public static void RegisterDefaultStyle<T>(Style style)
-    {
-        _defaultStyles[typeof(T)] = style;
-    }
+    public static Style Empty { get; } = new Style(typeof(object));
 
     /// <summary>
     /// Gets the default style for the specified type.
@@ -60,17 +51,31 @@ public class Style
     /// <summary>
     /// Registers a style with the specified name.
     /// </summary>
-    /// <param name="name">The name of the style.</param>
     /// <param name="style">The style to register.</param>
     /// <exception cref="ArgumentException">Thrown if the style with the same name already exists.</exception>
-    public static void RegisterStyle(string name, Style style)
+    public static void RegisterStyle(Style style)
     {
-        if (_styles.ContainsKey(name))
+        Style.ValidateStyle(style);
+
+        if (!style.IsDefault && style.Name == null)
         {
-            throw new ArgumentException($"A style with the name {name} already exists.");
+            throw new ArgumentException("A style must have a name or be marked as default.");
         }
 
-        _styles[name] = style;
+        if (style.IsDefault)
+        {
+            _defaultStyles[style.TargetType] = style;
+        }
+
+        if (style.Name != null)
+        {
+            if (_styles.ContainsKey(style.Name))
+            {
+                throw new ArgumentException($"A style with the name '{style.Name}' already exists.");
+            }
+
+            _styles[style.Name] = style;
+        }
     }
 
     /// <summary>
@@ -79,7 +84,7 @@ public class Style
     /// <param name="name">The name of the style.</param>
     /// <returns>The style with the specified name.</returns>
     /// <exception cref="ArgumentException">Thrown if the style with the specified name does not exist.</exception>
-    public static Style Find(string name)
+    public static Style GetStyle(string name)
     {
         if (!_styles.TryGetValue(name, out var style))
         {
@@ -88,45 +93,64 @@ public class Style
 
         return style;
     }
+}
 
+
+public class Style
+{
     private readonly Dictionary<string, object> _properties = new Dictionary<string, object>();
+
+    /// <summary>
+    /// Gets or sets the name of the style.
+    /// </summary>
+    public string? Name { get; set; }
 
     /// <summary>
     /// Gets or sets the parent style. All the properties of the parent style are also available in this style.
     /// </summary>
-    public Style? BasedOn { get; set; }
+    public Style? BaseStyle { get; set; }
 
     /// <summary>
-    /// Gets or sets the target type of the style. This is used to determine the default style for the target type.
+    /// Gets the target type of the style. This is used to determine the default style for the target type.
     /// </summary>
-    public Type? TargetType { get; }
+    public Type TargetType { get; }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Style"/> class.
+    /// Gets or sets whether the style is the default style for the target type.
     /// </summary>
-    public Style()
+    public bool IsDefault { get; set; } = false;
+
+    /// <summary>
+    /// Gets or sets the name of the parent style.
+    /// </summary>
+    /// <exception cref="ArgumentException">Thrown if the parent style with the specified name does not exist.</exception>
+    public string? BasedOn
     {
-
+        get => this.BaseStyle?.Name;
+        set => this.BaseStyle = value == null ? null : StyleManager.GetStyle(value);
     }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Style"/> class.
     /// </summary>
     /// <param name="targetType">The target type of the style.</param>
-    public Style(Type targetType)
+    /// <param name="name">The name of the style.</param>
+    /// <param name="baseStyle">The parent style.</param>
+    public Style(Type targetType, string? name = null, Style? baseStyle = null)
     {
         this.TargetType = targetType;
+        this.Name = name;
+        this.BaseStyle = baseStyle;
     }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Style"/> class.
     /// </summary>
     /// <param name="targetType">The target type of the style.</param>
-    /// <param name="basedOn">The parent style.</param>
-    public Style(Type targetType, Style? basedOn)
+    /// <param name="baseStyle">The parent style.</param>
+    protected Style(Type targetType, Style? baseStyle = null)
+        : this(targetType, null, baseStyle)
     {
-        this.TargetType = targetType;
-        this.BasedOn = basedOn;
     }
 
 
@@ -145,9 +169,9 @@ public class Style
                 return value;
             }
 
-            if (this.BasedOn != null)
+            if (this.BaseStyle != null)
             {
-                return this.BasedOn[key];
+                return this.BaseStyle[key];
             }
 
             throw new KeyNotFoundException($"Property '{key}' not found in the style.");
@@ -161,7 +185,7 @@ public class Style
     /// <param name="target">The object to apply the style to.</param>
     public void Apply(object target)
     {
-        this.BasedOn?.Apply(target);
+        this.BaseStyle?.Apply(target);
 
         foreach (var property in this._properties)
         {
@@ -174,44 +198,61 @@ public class Style
     }
 
     /// <summary>
-    /// Copies all the style properties to the specified style.
+    /// Validates a style and ensure that all the properties are valid, assignable to the target type, 
+    /// and the properties values are of the correct type.
     /// </summary>
-    /// <param name="destination">The style to copy the properties to.</param>
-    public void Copy(Style destination)
+    /// <param name="style">The style to validate.</param>
+    /// <exception cref="InvalidOperationException">Thrown if the style is invalid.</exception>
+    public static void ValidateStyle(Style style)
     {
-        if (this.BasedOn != null)
+        if (style.BaseStyle != null)
         {
-            this.BasedOn.Copy(destination);
+            ValidateStyle(style.BaseStyle);
         }
 
-        foreach (var property in this._properties)
+        foreach (var property in style._properties)
         {
-            destination[property.Key] = property.Value;
+            var targetProperty = style.TargetType?.GetProperty(property.Key);
+            if (targetProperty == null)
+            {
+                throw new InvalidOperationException($"Property '{property.Key}' not found in the target type '{style.TargetType?.Name}'.");
+            }
+
+            var propertyType = targetProperty.PropertyType;
+            if (!propertyType.IsAssignableFrom(property.Value.GetType()))
+            {
+                throw new InvalidOperationException($"Property '{property.Key}' has an invalid value of type '{property.Value.GetType().Name}'. It must be assignable to '{propertyType.Name}'.");
+            }
         }
     }
 
-    /// <summary>
-    /// Creates a clone of the style.
-    /// </summary>
-    /// <returns>A clone of the style.</returns>
-    public Style Clone()
+    // Implicit string to Style conversion
+    public static implicit operator Style(string name)
     {
-        var clone = new Style();
-        this.Copy(clone);
-        return clone;
+        return StyleManager.GetStyle(name);
+    }
+}
+
+
+
+public class Style<T> : Style
+{
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Style{T}"/> class.
+    /// </summary>
+    /// <param name="name">The name of the style.</param>
+    /// <param name="baseStyle">The parent style.</param>
+    public Style(string? name = null, Style? baseStyle = null)
+        : base(typeof(T), name, baseStyle)
+    {
     }
 
     /// <summary>
-    /// Merges two styles.
+    /// Initializes a new instance of the <see cref="Style{T}"/> class.
     /// </summary>
-    /// <param name="style1">The first style to merge.</param>
-    /// <param name="style2">The second style to merge.</param>
-    /// <returns>The merged style.</returns>
-    public static Style Merge(Style style1, Style style2)
+    /// <param name="baseStyle">The parent style.</param>
+    protected Style(Style? baseStyle = null)
+        : base(typeof(T), baseStyle)
     {
-        var merged = new Style();
-        style1.Copy(merged);
-        style2.Copy(merged);
-        return merged;
     }
 }

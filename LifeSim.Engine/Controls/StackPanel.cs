@@ -6,8 +6,14 @@ namespace LifeSim.Engine.Controls;
 
 public class StackPanel : ItemsControl
 {
+    /// <summary>
+    /// Gets or sets the orientation of the stack panel.
+    /// </summary>
     public Orientation Orientation { get; set; } = Orientation.Vertical;
 
+    /// <summary>
+    /// Gets or sets the padding of the stack panel.
+    /// </summary>
     public Thickness Padding { get; set; } = new Thickness(0);
 
     public StackPanel()

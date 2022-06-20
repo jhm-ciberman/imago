@@ -8,6 +8,8 @@ namespace LifeSim.Engine.Controls;
 
 public class TextBlock : Control
 {
+    public event EventHandler? TextChanged;
+
     protected string _text = string.Empty;
     protected Color _foreground = Color.Black;
     protected int _fontSize = 12;
@@ -17,7 +19,7 @@ public class TextBlock : Control
 
     private DynamicSpriteFont? _font = null;
     private float _lineHeight = float.NaN;
-    private int _lineCount = 0;
+    private int _textLineCount = 0;
 
     /// <summary>
     /// Gets or sets the text of the text block.
@@ -30,23 +32,11 @@ public class TextBlock : Control
             if (this._text != value)
             {
                 this._text = value;
-                this._lineCount = GetLineCount(value);
+                this._textLineCount = GetLineCount(value);
+                this.TextChanged?.Invoke(this, EventArgs.Empty);
                 this.InvalidateMeasure();
             }
         }
-    }
-
-    private static int GetLineCount(string value)
-    {
-        var lineCount = 1;
-        for (var i = 0; i < value.Length; i++)
-        {
-            if (value[i] == '\n')
-            {
-                lineCount++;
-            }
-        }
-        return lineCount;
     }
 
     /// <summary>
@@ -166,7 +156,7 @@ public class TextBlock : Control
         var lineHeight = float.IsNaN(this._lineHeight)
             ? font.MeasureString("M").Y
             : this._lineHeight;
-        return new Vector2(size.X, lineHeight * this._lineCount);
+        return new Vector2(size.X, lineHeight * this._textLineCount);
     }
 
     protected override void DrawCore(SpriteBatcher spriteBatcher)
@@ -174,5 +164,30 @@ public class TextBlock : Control
         base.DrawCore(spriteBatcher);
 
         spriteBatcher.DrawText(this.GetFont(), this.Text, this.Position, this.Foreground);
+    }
+
+    internal Vector2 MeasureString(int charNumber)
+    {
+        ReadOnlySpan<char> span = this.Text.AsSpan(0, charNumber);
+        int lineCount = GetLineCount(span);
+        var font = this.GetFont();
+        var size = font.MeasureString(span.ToString());
+        var lineHeight = float.IsNaN(this._lineHeight)
+            ? font.MeasureString("M").Y
+            : this._lineHeight;
+        return new Vector2(size.X, lineHeight * lineCount);
+    }
+
+    private static int GetLineCount(ReadOnlySpan<char> value)
+    {
+        var lineCount = 1;
+        for (var i = 0; i < value.Length; i++)
+        {
+            if (value[i] == '\n')
+            {
+                lineCount++;
+            }
+        }
+        return lineCount;
     }
 }

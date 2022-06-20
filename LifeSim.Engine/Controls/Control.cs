@@ -7,25 +7,77 @@ namespace LifeSim.Engine.Controls;
 
 public class Control : Visual
 {
+    private Thickness _margin = new Thickness(0);
+
+    private HorizontalAlignment _horizontalAlignment = HorizontalAlignment.Left;
+
+    private VerticalAlignment _verticalAlignment = VerticalAlignment.Top;
+
     /// <summary>
     /// Gets or sets the margin of the control.
     /// </summary>
-    public Thickness Margin { get; set; } = new Thickness(0);
+    public Thickness Margin
+    {
+        get => this._margin;
+        set
+        {
+            if (this._margin != value)
+            {
+                this._margin = value;
+                this.InvalidateMeasure();
+            }
+        }
+    }
 
     /// <summary>
     /// Gets or sets the horizontal alignment of the control.
     /// </summary>
-    public HorizontalAlignment HorizontalAlignment { get; set; } = HorizontalAlignment.Left;
+    public HorizontalAlignment HorizontalAlignment
+    {
+        get => this._horizontalAlignment;
+        set
+        {
+            if (this._horizontalAlignment != value)
+            {
+                this._horizontalAlignment = value;
+                this.InvalidateArrange();
+            }
+        }
+    }
 
     /// <summary>
     /// Gets or sets the vertical alignment of the control.
     /// </summary>
-    public VerticalAlignment VerticalAlignment { get; set; } = VerticalAlignment.Top;
+    public VerticalAlignment VerticalAlignment
+    {
+        get => this._verticalAlignment;
+        set
+        {
+            if (this._verticalAlignment != value)
+            {
+                this._verticalAlignment = value;
+                this.InvalidateArrange();
+            }
+        }
+    }
+
+    private Dock _dock = Dock.Left;
 
     /// <summary>
     /// Gets or sets the dock position of the control.
     /// </summary>
-    public Dock Dock { get; set; } = Dock.Left;
+    public Dock Dock
+    {
+        get => this._dock;
+        set
+        {
+            if (this._dock != value)
+            {
+                this._dock = value;
+                this.InvalidateArrange();
+            }
+        }
+    }
 
     private IBrush? _background = null;
 
@@ -59,15 +111,40 @@ public class Control : Visual
     /// </summary>
     public Vector2 DesiredSize { get; protected set; } = Vector2.Zero;
 
+    private float _width = float.NaN;
+    private float _height = float.NaN;
+
     /// <summary>
     /// Gets or sets the width of the control. A value of float.NaN indicates that the width should be calculated automatically using the control's content.
     /// </summary>
-    public float Width { get; set; } = float.NaN;
+    public float Width
+    {
+        get => this._width;
+        set
+        {
+            if (this._width != value)
+            {
+                this._width = value;
+                this.InvalidateMeasure();
+            }
+        }
+    }
 
     /// <summary>
     /// Gets or sets the height of the control. A value of float.NaN indicates that the height should be calculated automatically using the control's content.
     /// </summary>
-    public float Height { get; set; } = float.NaN;
+    public float Height
+    {
+        get => this._height;
+        set
+        {
+            if (this._height != value)
+            {
+                this._height = value;
+                this.InvalidateMeasure();
+            }
+        }
+    }
 
     /// <summary>
     /// Gets whether the measure pass is valid.
@@ -188,7 +265,6 @@ public class Control : Visual
 
         var rectPosition = this.ArrangeCore(finalRect);
 
-
         if (this.HorizontalAlignment == HorizontalAlignment.Stretch)
         {
             rectPosition.Width = finalRect.Width;
@@ -241,11 +317,12 @@ public class Control : Visual
     {
         foreach (var child in this.VisualChildren)
         {
-            if (!child.IsMeasureValid) continue;
+            if (child is not Control childControl) continue;
+            if (!childControl.IsMeasureValid) continue;
 
-            child.IsMeasureValid = false;
-            child.IsArrangeValid = false;
-            child.PropagateInvalidMeasureToChildren();
+            childControl.IsMeasureValid = false;
+            childControl.IsArrangeValid = false;
+            childControl.PropagateInvalidMeasureToChildren();
         }
     }
 
@@ -269,10 +346,11 @@ public class Control : Visual
     {
         foreach (var child in this.VisualChildren)
         {
-            if (!child.IsArrangeValid) continue;
+            if (child is not Control childControl) continue;
+            if (!childControl.IsArrangeValid) continue;
 
-            child.IsArrangeValid = false;
-            child.PropagateInvalidArrangeToChildren();
+            childControl.IsArrangeValid = false;
+            childControl.PropagateInvalidArrangeToChildren();
         }
     }
 
@@ -330,7 +408,8 @@ public class Control : Visual
         this.InvalidateArrange();
         foreach (var child in this.VisualChildren)
         {
-            child.InvalidateArrangeRecursive();
+            if (child is not Control childControl) continue;
+            childControl.InvalidateArrangeRecursive();
         }
     }
 
@@ -339,7 +418,23 @@ public class Control : Visual
         this.InvalidateMeasure();
         foreach (var child in this.VisualChildren)
         {
-            child.InvalidateMeasureRecursive();
+            if (child is not Control childControl) continue;
+            childControl.InvalidateMeasureRecursive();
         }
+    }
+
+    protected override void AddVisualChild(Visual child)
+    {
+        base.AddVisualChild(child);
+        if (child is not Control control) return;
+        control.Parent = this;
+        control.InvalidateMeasure();
+    }
+
+    protected override void RemoveVisualChild(Visual child)
+    {
+        base.RemoveVisualChild(child);
+        if (child is not Control) return;
+        this.InvalidateMeasure();
     }
 }
