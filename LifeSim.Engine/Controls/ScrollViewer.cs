@@ -18,10 +18,16 @@ public enum ScrollDirection
 
 public class ScrollViewer : ContentControl
 {
+    private ScrollDirection _scrollDirection = ScrollDirection.Vertical;
+
     /// <summary>
     /// Gets or sets the direction of the scroll.
     /// </summary>
-    public ScrollDirection ScrollDirection { get; set; } = ScrollDirection.Vertical;
+    public ScrollDirection ScrollDirection
+    {
+        get => this._scrollDirection;
+        set => this.SetPropertyAndInvalidateMeasure(ref this._scrollDirection, value);
+    }
 
     private Vector2 _scrollOffset;
 
@@ -107,7 +113,7 @@ public class ScrollViewer : ContentControl
         this.ClipToBounds = true;
     }
 
-    protected override Vector2 MeasureCore(Vector2 availableSize)
+    protected override Vector2 MeasureOverride(Vector2 availableSize)
     {
         if (this.ScrollDirection == ScrollDirection.Horizontal)
         {
@@ -120,10 +126,10 @@ public class ScrollViewer : ContentControl
 
         this.ScrollBarThumb.Measure(availableSize);
 
-        return base.MeasureCore(availableSize);
+        return base.MeasureOverride(availableSize);
     }
 
-    protected override Rect ArrangeCore(Rect finalRect)
+    protected override Rect ArrangeOverride(Rect finalRect)
     {
         if (this.Content != null)
         {

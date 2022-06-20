@@ -43,6 +43,11 @@ public class InputManager
     public event EventHandler<MouseEvent>? MouseButtonReleased;
 
     /// <summary>
+    /// Event that is raised when one or more characters are typed.
+    /// </summary>
+    public event EventHandler<TextEventArgs>? TextEntered;
+
+    /// <summary>
     /// Gets the mouse wheel delta for this frame.
     /// </summary>
     public float MouseWheelDelta { get; private set; }
@@ -131,6 +136,11 @@ public class InputManager
         }
 
         this._typedCharactersThisFrame = this.InputSnapshot.KeyCharPresses;
+
+        if (this.TextEntered != null && this._typedCharactersThisFrame.Count > 0)
+        {
+            this.TextEntered.Invoke(this, new TextEventArgs(this._typedCharactersThisFrame));
+        }
 
         var newPos = this.InputSnapshot.MousePosition;
         var center = new Vector2(this._window.Width / 2, this._window.Height / 2);

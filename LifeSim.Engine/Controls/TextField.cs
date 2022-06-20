@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Numerics;
 using LifeSim.Engine.Rendering;
 using LifeSim.Utils;
@@ -76,11 +77,17 @@ public class TextField : Control
     private bool _caretVisible = true;
 
 
-    private void TextBlock_TextChanged(object? sender, EventArgs e)
+    private void TextBlock_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        this._caretIndex = Math.Min(this._caretIndex, this.Text.Length);
-        this._caretBlinkTimer = this.CaretBlinkSpeed;
-        this._caretVisible = true;
+        if (e.PropertyName == nameof(this.TextBlock.Text)
+            || e.PropertyName == nameof(this.TextBlock.FontSize)
+            || e.PropertyName == nameof(this.TextBlock.FontFamily))
+        {
+            this._caretIndex = Math.Min(this._caretIndex, this.Text.Length);
+            this._caretBlinkTimer = this.CaretBlinkSpeed;
+            this._caretVisible = true;
+            this.InvalidateMeasure();
+        }
     }
 
     private TextBlock? _textBlock = null;
@@ -95,7 +102,7 @@ public class TextField : Control
             if (this._textBlock == null)
             {
                 this._textBlock = new TextBlock();
-                this._textBlock.TextChanged += this.TextBlock_TextChanged;
+                this._textBlock.PropertyChanged += this.TextBlock_PropertyChanged;
                 this.AddVisualChild(this._textBlock);
             }
 
@@ -107,12 +114,12 @@ public class TextField : Control
             {
                 if (this._textBlock != null)
                 {
-                    this._textBlock.TextChanged -= this.TextBlock_TextChanged;
+                    this._textBlock.PropertyChanged -= this.TextBlock_PropertyChanged;
                     this.RemoveVisualChild(this._textBlock);
                 }
 
                 this._textBlock = value;
-                this._textBlock.TextChanged += this.TextBlock_TextChanged;
+                this._textBlock.PropertyChanged += this.TextBlock_PropertyChanged;
                 this.AddVisualChild(this._textBlock);
             }
         }
@@ -166,6 +173,16 @@ public class TextField : Control
         }
     }
 
+    private void InputManager_TextEntered(object? sender, TextEventArgs e)
+    {
+        if (this.IsFocused && e.Characters.Count > 0)
+        {
+            string typedText = string.Join(string.Empty, e.Characters);
+            this.Text = this.Text.Insert(this.CaretIndex, typedText);
+            this.CaretIndex += typedText.Length;
+        }
+    }
+
     public override void Update(float deltaTime)
     {
         base.Update(deltaTime);
@@ -179,14 +196,6 @@ public class TextField : Control
                 this._caretVisible = !this._caretVisible;
                 this._caretBlinkTimer = this.CaretBlinkSpeed;
             }
-
-            var typedCharacters = InputManager.Current.TypedCharacters;
-            if (typedCharacters.Count > 0)
-            {
-                string typedText = string.Join(string.Empty, typedCharacters);
-                this.Text = this.Text.Insert(this.CaretIndex, typedText);
-                this.CaretIndex += typedText.Length;
-            }
         }
     }
 
@@ -199,15 +208,20 @@ public class TextField : Control
             : this.Text.Remove(index, 1);
     }
 
-    protected override Vector2 MeasureCore(Vector2 availableSize)
+    protected override Vector2 MeasureOverride(Vector2 availableSize)
     {
+        if (this.Text.Length == 0)
+        {
+            return new Vector2(0f, this.TextBlock.ActualLineHeight) + this.Padding.Total;
+        }
+
         var padding = this.Padding.Total;
         availableSize -= padding;
         this.TextBlock.Measure(availableSize);
         return this.TextBlock.DesiredSize + padding;
     }
 
-    protected override Rect ArrangeCore(Rect finalRect)
+    protected override Rect ArrangeOverride(Rect finalRect)
     {
         Rect rect = finalRect;
         rect.Position += this.Padding.TopLeft;
@@ -245,6 +259,7 @@ public class TextField : Control
         this.CaretIndex = this.Text.Length;
 
         InputManager.Current.KeyPressed += this.InputManager_KeyPressed;
+        InputManager.Current.TextEntered += this.InputManager_TextEntered;
     }
 
     public override void OnRemovedFromVisualTree(UIPage page)
@@ -252,8 +267,7 @@ public class TextField : Control
         base.OnRemovedFromVisualTree(page);
 
         InputManager.Current.KeyPressed -= this.InputManager_KeyPressed;
+        InputManager.Current.TextEntered -= this.InputManager_TextEntered;
     }
-
-
 }
 

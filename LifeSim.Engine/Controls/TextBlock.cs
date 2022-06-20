@@ -8,8 +8,6 @@ namespace LifeSim.Engine.Controls;
 
 public class TextBlock : Control
 {
-    public event EventHandler? TextChanged;
-
     protected string _text = string.Empty;
     protected Color _foreground = Color.Black;
     protected int _fontSize = 12;
@@ -33,8 +31,8 @@ public class TextBlock : Control
             {
                 this._text = value;
                 this._textLineCount = GetLineCount(value);
-                this.TextChanged?.Invoke(this, EventArgs.Empty);
                 this.InvalidateMeasure();
+                this.OnPropertyChanged(nameof(this.Text));
             }
         }
     }
@@ -45,7 +43,7 @@ public class TextBlock : Control
     public Color Foreground
     {
         get => this._foreground;
-        set => this.SetPropertyAndInvalidateFont(ref this._foreground, value);
+        set => this.SetProperty(ref this._foreground, value);
     }
 
     /// <summary>
@@ -54,7 +52,13 @@ public class TextBlock : Control
     public string? FontFamily
     {
         get => this._fontFamily;
-        set => this.SetPropertyAndInvalidateFont(ref this._fontFamily, value);
+        set
+        {
+            if (this.SetPropertyAndInvalidateMeasure(ref this._fontFamily, value))
+            {
+                this._actualLineHeight = float.NaN;
+            }
+        }
     }
 
     /// <summary>
@@ -63,7 +67,13 @@ public class TextBlock : Control
     public int FontSize
     {
         get => this._fontSize;
-        set => this.SetPropertyAndInvalidateFont(ref this._fontSize, value);
+        set
+        {
+            if (this.SetPropertyAndInvalidateMeasure(ref this._fontSize, value))
+            {
+                this._actualLineHeight = float.NaN;
+            }
+        }
     }
 
     /// <summary>
@@ -72,7 +82,13 @@ public class TextBlock : Control
     public int Outline
     {
         get => this._outline;
-        set => this.SetPropertyAndInvalidateFont(ref this._outline, value);
+        set
+        {
+            if (this.SetPropertyAndInvalidateMeasure(ref this._outline, value))
+            {
+                this._actualLineHeight = float.NaN;
+            }
+        }
     }
 
     /// <summary>
@@ -81,7 +97,33 @@ public class TextBlock : Control
     public int Blur
     {
         get => this._blur;
-        set => this.SetPropertyAndInvalidateFont(ref this._blur, value);
+        set
+        {
+            if (this.SetPropertyAndInvalidateMeasure(ref this._blur, value))
+            {
+                this._actualLineHeight = float.NaN;
+            }
+        }
+    }
+
+    private float _actualLineHeight = float.NaN;
+
+    /// <summary>
+    /// Gets the actual height of each line of text.
+    /// </summary>
+    public float ActualLineHeight
+    {
+        get
+        {
+            if (float.IsNaN(this._actualLineHeight))
+            {
+                this._actualLineHeight = float.IsNaN(this._lineHeight)
+                    ? this.GetFont().MeasureString("M").Y
+                    : this._lineHeight;
+            }
+
+            return this._actualLineHeight;
+        }
     }
 
     /// <summary>
@@ -95,6 +137,7 @@ public class TextBlock : Control
             if (this._lineHeight != value)
             {
                 this._lineHeight = value;
+                this._actualLineHeight = float.NaN;
                 this.InvalidateMeasure();
             }
         }
@@ -149,14 +192,15 @@ public class TextBlock : Control
         return this._font;
     }
 
-    protected override Vector2 MeasureCore(Vector2 availableSize)
+    protected override Vector2 MeasureOverride(Vector2 availableSize)
     {
-        var font = this.GetFont();
-        var size = font.MeasureString(this.Text);
-        var lineHeight = float.IsNaN(this._lineHeight)
-            ? font.MeasureString("M").Y
-            : this._lineHeight;
-        return new Vector2(size.X, lineHeight * this._textLineCount);
+        if (this.Text == string.Empty)
+        {
+            return Vector2.Zero;
+        }
+
+        var size = this.GetFont().MeasureString(this.Text);
+        return new Vector2(size.X, this.ActualLineHeight * this._textLineCount);
     }
 
     protected override void DrawCore(SpriteBatcher spriteBatcher)
@@ -170,16 +214,17 @@ public class TextBlock : Control
     {
         ReadOnlySpan<char> span = this.Text.AsSpan(0, charNumber);
         int lineCount = GetLineCount(span);
-        var font = this.GetFont();
-        var size = font.MeasureString(span.ToString());
-        var lineHeight = float.IsNaN(this._lineHeight)
-            ? font.MeasureString("M").Y
-            : this._lineHeight;
-        return new Vector2(size.X, lineHeight * lineCount);
+        var size = this.GetFont().MeasureString(span.ToString());
+        return new Vector2(size.X, this.ActualLineHeight * lineCount);
     }
 
     private static int GetLineCount(ReadOnlySpan<char> value)
     {
+        if (value.IsEmpty)
+        {
+            return 0;
+        }
+
         var lineCount = 1;
         for (var i = 0; i < value.Length; i++)
         {

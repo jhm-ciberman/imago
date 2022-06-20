@@ -6,22 +6,29 @@ namespace LifeSim.Engine.Controls;
 
 public class StackPanel : ItemsControl
 {
+    private Orientation _orientation = Orientation.Vertical;
+
+    private Thickness _padding = new Thickness(0);
+
     /// <summary>
     /// Gets or sets the orientation of the stack panel.
     /// </summary>
-    public Orientation Orientation { get; set; } = Orientation.Vertical;
+    public Orientation Orientation
+    {
+        get => this._orientation;
+        set => this.SetPropertyAndInvalidateMeasure(ref this._orientation, value);
+    }
 
     /// <summary>
     /// Gets or sets the padding of the stack panel.
     /// </summary>
-    public Thickness Padding { get; set; } = new Thickness(0);
-
-    public StackPanel()
+    public Thickness Padding
     {
-        //
+        get => this._padding;
+        set => this.SetPropertyAndInvalidateMeasure(ref this._padding, value);
     }
 
-    protected override Vector2 MeasureCore(Vector2 availableSize)
+    protected override Vector2 MeasureOverride(Vector2 availableSize)
     {
         var desiredSize = Vector2.Zero;
 
@@ -51,7 +58,7 @@ public class StackPanel : ItemsControl
         return desiredSize + this.Padding.Total;
     }
 
-    protected override Rect ArrangeCore(Rect finalRect)
+    protected override Rect ArrangeOverride(Rect finalRect)
     {
         // use DesiredSize to calculate the final rect
         // and call Arrange on each child recursively

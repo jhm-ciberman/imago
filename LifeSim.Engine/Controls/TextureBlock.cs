@@ -39,7 +39,7 @@ public class TextureBlock : Control
 
     public Vector2 Size { get; set; } = new Vector2(float.NaN, float.NaN);
 
-    protected override Vector2 MeasureCore(Vector2 availableSize)
+    protected override Vector2 MeasureOverride(Vector2 availableSize)
     {
         if (this.Texture == null)
         {

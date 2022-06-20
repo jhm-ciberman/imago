@@ -43,7 +43,7 @@ public class ContentControlBase<TContent> : Control where TContent : Control
         }
     }
 
-    protected override Vector2 MeasureCore(Vector2 availableSize)
+    protected override Vector2 MeasureOverride(Vector2 availableSize)
     {
         if (this.ContentInternal != null)
         {
@@ -56,7 +56,7 @@ public class ContentControlBase<TContent> : Control where TContent : Control
         }
     }
 
-    protected override Rect ArrangeCore(Rect finalRect)
+    protected override Rect ArrangeOverride(Rect finalRect)
     {
         if (this.ContentInternal != null)
         {
