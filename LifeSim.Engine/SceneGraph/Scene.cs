@@ -5,8 +5,16 @@ using LifeSim.Engine.Rendering;
 
 namespace LifeSim.Engine.SceneGraph;
 
-public class Scene : Node3D
+public class Scene
 {
+    private class RootNode : Node3D
+    {
+        public RootNode(Scene scene)
+        {
+            this.Scene = scene;
+        }
+    }
+
     public Color? BackgroundColor { get; set; } = Color.CoolGray;
     public DirectionalLight MainLight { get; set; } = new DirectionalLight();
     public ColorF AmbientColor { get; set; } = new ColorF(.2f, .2f, .2f, 100f / 255f);
@@ -27,9 +35,11 @@ public class Scene : Node3D
 
     private readonly List<Node3D> _transformDirtyList = new List<Node3D>();
 
+    public Node3D Root { get; }
+
     public Scene()
     {
-        this.Scene = this;
+        this.Root = new RootNode(this);
     }
 
     public void AddParticleSystem(IParticleSystem particleSystem)
