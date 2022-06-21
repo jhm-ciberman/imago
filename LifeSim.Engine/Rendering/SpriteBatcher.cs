@@ -12,7 +12,7 @@ using Veldrid;
 
 namespace LifeSim.Engine.Rendering;
 
-public class SpriteBatcher : IFontStashRenderer, IDisposable
+public class SpriteBatcher : IFontStashRenderer2, IDisposable
 {
 
     private Shader _currentShaderInUse = null!;
@@ -171,40 +171,6 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
         this._batch.DrawCore(position, size, uvTopLeft, uvBottomRight, color);
     }
 
-    void IFontStashRenderer.Draw(
-        object texture,
-        Vector2 position,
-        System.Drawing.Rectangle? sourceRectangle,
-        System.Drawing.Color color,
-        float rotation,
-        Vector2 origin,
-        Vector2 scale,
-        float depth
-    )
-    {
-        ITexture tex = (ITexture)texture;
-        this.Prepare(this._defaultShader, tex);
-
-        Vector2 pos = new Vector2(position.X, position.Y);
-        Vector2 textureSize = new Vector2(tex.Width, tex.Height);
-        Vector2 size, uvTopLeft, uvBottomRight;
-        if (sourceRectangle == null)
-        {
-            size = textureSize;
-            uvTopLeft = Vector2.Zero;
-            uvBottomRight = Vector2.One;
-        }
-        else
-        {
-            var r = sourceRectangle.Value;
-            size = new Vector2(r.Width, r.Height);
-            uvTopLeft = new Vector2(r.X, r.Y) / textureSize;
-            uvBottomRight = uvTopLeft + size / textureSize;
-        }
-
-        this._batch.DrawCore(pos, size, uvTopLeft, uvBottomRight, color, scale, rotation, origin, depth);
-    }
-
     public void DrawNinePatch(Shader? shader, PackedTexture texture, Vector2 position, Vector2 size, Thickness patchMargin, Color color, bool drawCenter, float scale)
     {
         var sizeTL = new Vector2(patchMargin.Left, patchMargin.Top);
@@ -293,6 +259,23 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
         font.DrawText(this, text, position, color);
     }
 
+    ITexture2DManager IFontStashRenderer2.TextureManager { get; } = new FontStashTextureManager();
+
+    void IFontStashRenderer2.DrawQuad(object texture, ref VertexPositionColorTexture topLeft, ref VertexPositionColorTexture topRight, ref VertexPositionColorTexture bottomLeft, ref VertexPositionColorTexture bottomRight)
+    {
+        var v1 = new SpriteBatch.Vertex(topLeft.Position, topLeft.TextureCoordinate, topLeft.Color);
+        var v2 = new SpriteBatch.Vertex(topRight.Position, topRight.TextureCoordinate, topRight.Color);
+        var v3 = new SpriteBatch.Vertex(bottomLeft.Position, bottomLeft.TextureCoordinate, bottomLeft.Color);
+        var v4 = new SpriteBatch.Vertex(bottomRight.Position, bottomRight.TextureCoordinate, bottomRight.Color);
+        this.DrawQuad((ITexture)texture, ref v1, ref v2, ref v3, ref v4);
+    }
+
+    public void DrawQuad(ITexture texture, ref SpriteBatch.Vertex topLeft, ref SpriteBatch.Vertex topRight, ref SpriteBatch.Vertex bottomLeft, ref SpriteBatch.Vertex bottomRight)
+    {
+        this.Prepare(this._defaultShader, texture, 1);
+        this._batch.DrawCore(ref topLeft, ref topRight, ref bottomLeft, ref bottomRight);
+    }
+
     public void DrawRectangle(Vector2 position, Vector2 size, Color color)
     {
         this.DrawTexture(this._defaultShader, Texture.White, position, size, Vector2.Zero, Vector2.One, color);
@@ -364,5 +347,26 @@ public class SpriteBatcher : IFontStashRenderer, IDisposable
         this.PassResourceLayout.Dispose();
         this._passResourceSet.Dispose();
         this._resourceSetCache.Dispose();
+    }
+
+
+
+    private class FontStashTextureManager : ITexture2DManager
+    {
+        object ITexture2DManager.CreateTexture(int width, int height)
+        {
+            return new DirectTexture((uint)width, (uint)height);
+        }
+
+        void ITexture2DManager.SetTextureData(object texture, System.Drawing.Rectangle bounds, byte[] data)
+        {
+            ((DirectTexture)texture).Update(data, bounds.X, bounds.Y, bounds.Width, bounds.Height);
+        }
+
+        System.Drawing.Point ITexture2DManager.GetTextureSize(object texture)
+        {
+            var texture2D = (DirectTexture)texture;
+            return new System.Drawing.Point((int)texture2D.Width, (int)texture2D.Height);
+        }
     }
 }

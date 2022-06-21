@@ -12,7 +12,7 @@ using Veldrid.Utilities;
 
 namespace LifeSim.Engine.Rendering;
 
-public partial class Renderer : ITexture2DManager, IDisposable
+public partial class Renderer : IDisposable
 {
     /// <summary>
     /// Gets the global instance of the renderer.
@@ -315,15 +315,5 @@ public partial class Renderer : ITexture2DManager, IDisposable
     public void RemoveImmediateRenderNode(ImmediateRenderNode3D node)
     {
         this._forwardPass.RemoveImmediateRenderNode(node);
-    }
-
-    object ITexture2DManager.CreateTexture(int width, int height)
-    {
-        return new DirectTexture((uint)width, (uint)height);
-    }
-
-    void ITexture2DManager.SetTextureData(object texture, System.Drawing.Rectangle bounds, byte[] data)
-    {
-        ((DirectTexture)texture).Update(data, bounds.X, bounds.Y, bounds.Width, bounds.Height);
     }
 }

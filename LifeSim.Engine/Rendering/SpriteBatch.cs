@@ -3,9 +3,42 @@ using System.Numerics;
 
 namespace LifeSim.Engine.Rendering;
 
-public class SpriteBatch
+public partial class SpriteBatch
 {
+    public struct Vertex
+    {
+        public Vector3 Position { get; }
+        public Vector2 Uv { get; }
+        public uint Color { get; }
 
+        public Vertex(Vector3 position, Vector2 uv, Color color)
+        {
+            this.Position = position;
+            this.Uv = uv;
+            this.Color = color.ToPackedUInt();
+        }
+
+        public Vertex(Vector3 position, Vector2 uv, uint color)
+        {
+            this.Position = position;
+            this.Uv = uv;
+            this.Color = color;
+        }
+
+        public Vertex(Vector2 position, float depth, Vector2 uv, Color color)
+        {
+            this.Position = new Vector3(position, depth);
+            this.Uv = uv;
+            this.Color = color.ToPackedUInt();
+        }
+
+        public Vertex(float x, float y, float z, float u, float v, Color color)
+        {
+            this.Position = new Vector3(x, y, z);
+            this.Uv = new Vector2(u, v);
+            this.Color = color.ToPackedUInt();
+        }
+    }
 
     public Shader? Shader { get; set; }
 
@@ -40,35 +73,6 @@ public class SpriteBatch
         public Vertex TopRight { get; set; }
         public Vertex BottomRight { get; set; }
         public Vertex BottomLeft { get; set; }
-    }
-
-
-    public struct Vertex
-    {
-        public Vector3 Position { get; }
-        public Vector2 Uv { get; }
-        public uint Color { get; }
-
-        public Vertex(Vector3 position, Vector2 uv, Color color)
-        {
-            this.Position = position;
-            this.Uv = uv;
-            this.Color = color.ToPackedUInt();
-        }
-
-        public Vertex(Vector2 position, float depth, Vector2 uv, Color color)
-        {
-            this.Position = new Vector3(position, depth);
-            this.Uv = uv;
-            this.Color = color.ToPackedUInt();
-        }
-
-        public Vertex(float x, float y, float z, float u, float v, Color color)
-        {
-            this.Position = new Vector3(x, y, z);
-            this.Uv = new Vector2(u, v);
-            this.Color = color.ToPackedUInt();
-        }
     }
 
     public float Opacity { get; set; }
@@ -144,6 +148,17 @@ public class SpriteBatch
             TopRight = new Vertex(Vector2.Transform(tr, transform), depth, trUVs, color),
             BottomLeft = new Vertex(Vector2.Transform(bl, transform), depth, blUVs, color),
             BottomRight = new Vertex(Vector2.Transform(br, transform), depth, brUVs, color),
+        });
+    }
+
+    public void DrawCore(ref Vertex topLeft, ref Vertex topRight, ref Vertex bottomLeft, ref Vertex bottomRight)
+    {
+        this.Add(new Item
+        {
+            TopLeft = topLeft,
+            TopRight = topRight,
+            BottomLeft = bottomLeft,
+            BottomRight = bottomRight,
         });
     }
 

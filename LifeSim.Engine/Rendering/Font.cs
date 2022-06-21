@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using FontStashSharp;
+using FontStashSharp.Interfaces;
 using LifeSim.Engine.Rendering;
 
 namespace LifeSim.Engine.Rendering;
@@ -99,8 +100,7 @@ public static class Font
             throw new ArgumentException($"Font {fontKey.FontFamily} not loaded.");
         }
 
-        int atlasSize = 1024;
-        var fontSystem = new FontSystem(Renderer.Instance, atlasSize, atlasSize, fontKey.Blur, fontKey.Outline, false);
+        var fontSystem = new FontSystem();
         var dataArr = _fontsBytes[fontKey.FontFamily];
 
         for (var i = 0; i < dataArr.Length; i++)
