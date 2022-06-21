@@ -1,6 +1,7 @@
 using System;
 using System.Numerics;
 using LifeSim.Engine.Rendering;
+using LifeSim.Utils;
 
 namespace LifeSim.Engine.Controls;
 
@@ -14,7 +15,18 @@ public class DockPanel : ItemsControl
     public bool LastChildFill
     {
         get => this._lastChildFill;
-        set => this.SetPropertyAndInvalidateMeasure(ref this._lastChildFill, value);
+        set => this.SetPropertyAndInvalidateArrange(ref this._lastChildFill, value);
+    }
+
+    private Thickness _padding = new Thickness(0);
+
+    /// <summary>
+    /// Gets or sets the padding of the dock panel.
+    /// </summary>
+    public Thickness Padding
+    {
+        get => this._padding;
+        set => this.SetPropertyAndInvalidateMeasure(ref this._padding, value);
     }
 
     public DockPanel()
@@ -22,72 +34,33 @@ public class DockPanel : ItemsControl
         //
     }
 
-    protected override Vector2 MeasureOverride(Vector2 availableSize)
-    {
-        // Use the "Dock" property to measure the children.
-        // The last child is always stretched to fill the remaining space.
-
-        Vector2 orinalAvailableSize = availableSize;
-
-        for (var i = 0; i < this.Items.Count; i++)
-        {
-            var child = this.Items[i];
-            bool isLast = i == this.Items.Count - 1;
-
-            child.Measure(availableSize);
-
-            Vector2 childDesiredSize = child.DesiredSize;
-
-            childDesiredSize = Vector2.Min(childDesiredSize, availableSize);
-
-            if (isLast && this.LastChildFill)
-            {
-                availableSize.X = 0;
-                availableSize.Y = 0;
-            }
-            else
-            {
-                switch (child.Dock)
-                {
-                    case Dock.Left:
-                    case Dock.Top:
-                    case Dock.Right:
-                    case Dock.Bottom:
-                        availableSize.X -= childDesiredSize.X;
-                        availableSize.Y -= childDesiredSize.Y;
-                        break;
-                    default:
-                        throw new NotSupportedException();
-                }
-            }
-        }
-
-        return orinalAvailableSize;
-    }
-
     protected override Rect ArrangeOverride(Rect finalRect)
     {
         // Use the "Dock" property to arrange the children.
-        // The last child is always stretched to fill the remaining space.
-
         // We need to adjust the availableRect in each iteration so we can
         // position the children correctly.
         Rect availableRect = finalRect;
+        availableRect.Position += this.Padding.TopLeft;
+        availableRect.Size -= this.Padding.Total;
 
         for (var i = 0; i < this.Items.Count; i++)
         {
             var child = this.Items[i];
             bool isLast = i == this.Items.Count - 1;
 
-            Vector2 childDesiredSize = child.DesiredSize;
+            Vector2 childDesiredSize = Vector2.Min(child.DesiredSize, availableRect.Size);
 
-            if (isLast && this.LastChildFill)
+            if (isLast)
             {
+                if (!this.LastChildFill)
+                {
+                    availableRect.Size = childDesiredSize;
+                }
+
                 child.Arrange(availableRect);
             }
             else
             {
-
                 switch (child.Dock)
                 {
                     case Dock.Left:
@@ -112,8 +85,53 @@ public class DockPanel : ItemsControl
                         throw new NotSupportedException();
                 }
             }
+
         }
 
         return finalRect;
+    }
+
+    protected override Vector2 MeasureOverride(Vector2 availableSize)
+    {
+        // Use the "Dock" property to measure the children.
+        // We need to adjust the availableSize in each iteration so we can
+        // measure the children correctly.
+        Rect availableRect = new Rect(Vector2.Zero, availableSize);
+        availableRect.Position += this.Padding.TopLeft;
+        availableRect.Size -= this.Padding.Total;
+        Vector2 desiredSize = Vector2.Zero;
+
+        for (var i = 0; i < this.Items.Count; i++)
+        {
+            var child = this.Items[i];
+
+            child.Measure(availableRect.Size);
+            Vector2 childDesiredSize = child.DesiredSize;
+            desiredSize = Vector2.Max(desiredSize, childDesiredSize + availableRect.Position);
+
+            switch (child.Dock)
+            {
+                case Dock.Left:
+                    availableRect.X += childDesiredSize.X;
+                    availableRect.Width -= childDesiredSize.X;
+                    break;
+                case Dock.Top:
+                    availableRect.Y += childDesiredSize.Y;
+                    availableRect.Height -= childDesiredSize.Y;
+                    break;
+                case Dock.Right:
+                    availableRect.X += childDesiredSize.X;
+                    availableRect.Width -= childDesiredSize.X;
+                    break;
+                case Dock.Bottom:
+                    availableRect.Y += childDesiredSize.Y;
+                    availableRect.Height -= childDesiredSize.Y;
+                    break;
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+
+        return desiredSize + this.Padding.Total;
     }
 }

@@ -57,6 +57,7 @@ public class TextBlock : Control
             if (this.SetPropertyAndInvalidateMeasure(ref this._fontFamily, value))
             {
                 this._actualLineHeight = float.NaN;
+                this._font = null;
             }
         }
     }
@@ -72,6 +73,7 @@ public class TextBlock : Control
             if (this.SetPropertyAndInvalidateMeasure(ref this._fontSize, value))
             {
                 this._actualLineHeight = float.NaN;
+                this._font = null;
             }
         }
     }
@@ -87,6 +89,7 @@ public class TextBlock : Control
             if (this.SetPropertyAndInvalidateMeasure(ref this._outline, value))
             {
                 this._actualLineHeight = float.NaN;
+                this._font = null;
             }
         }
     }
@@ -102,6 +105,7 @@ public class TextBlock : Control
             if (this.SetPropertyAndInvalidateMeasure(ref this._blur, value))
             {
                 this._actualLineHeight = float.NaN;
+                this._font = null;
             }
         }
     }

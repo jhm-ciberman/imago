@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Numerics;
 using LifeSim.Engine.Rendering;
 using LifeSim.Utils;
@@ -104,17 +103,18 @@ public class Control : Visual
         var margin = this.Margin.Total;
         availableSize -= margin;
 
-        Vector2 desiredSize = this.MeasureOverride(availableSize);
-
         if (!float.IsNaN(this.Width))
         {
-            desiredSize.X = this.Width;
+            availableSize.X = this.Width;
         }
 
         if (!float.IsNaN(this.Height))
         {
-            desiredSize.Y = this.Height;
+            availableSize.Y = this.Height;
         }
+
+        Vector2 desiredSize = this.MeasureOverride(availableSize);
+
 
         return desiredSize + margin;
     }
