@@ -11,11 +11,6 @@ public class TextNode2D : RenderNode2D
     public string? FontFamily { get; set; }
 
     public int FontSize { get; set; } = 30;
-
-    public int Outline { get; set; } = 0;
-
-    public int Blur { get; set; } = 0;
-
     public TextNode2D()
     {
         //
@@ -31,7 +26,7 @@ public class TextNode2D : RenderNode2D
     {
         var pos = this.WorldMatrix.Translation;
 
-        var font = Font.GetFont(this.FontFamily, this.FontSize, this.Outline, this.Blur);
+        var font = FontManager.GetFont(this.FontFamily, this.FontSize);
         spriteBatcher.DrawText(font, this.Text, pos, this.Color);
     }
 }

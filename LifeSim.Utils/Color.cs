@@ -48,6 +48,12 @@ public readonly struct Color
         this.A = hexColor.Length == 8 ? byte.Parse(hexColor.AsSpan(6, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture) : (byte)255;
     }
 
+    public static Color FromColorAlpha(Color color, float alpha)
+    {
+        alpha = color.A / 255f * alpha;
+        return new Color(color.R, color.G, color.B, (byte)(alpha * 255));
+    }
+
     public uint ToPackedUInt()
     {
         return (uint)((this.A << 24) | (this.B << 16) | (this.G << 8) | (this.R << 0));

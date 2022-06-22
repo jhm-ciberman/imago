@@ -6,16 +6,15 @@ using LifeSim.Engine.Rendering;
 
 namespace LifeSim.Engine.Controls;
 
+
 public class TextBlock : Control
 {
     protected string _text = string.Empty;
-    protected Color _foreground = Color.Black;
+    private ITextEffect? _textEffect;
     protected int _fontSize = 12;
     protected string? _fontFamily = null;
-    protected int _outline = 0;
-    protected int _blur = 0;
-
-    private DynamicSpriteFont? _font = null;
+    protected SpriteFontBase? _font = null;
+    protected Color _foreground = Color.Black;
     private float _lineHeight = float.NaN;
     private int _textLineCount = 0;
 
@@ -78,38 +77,6 @@ public class TextBlock : Control
         }
     }
 
-    /// <summary>
-    /// Gets or sets the outline of the text block.
-    /// </summary>
-    public int Outline
-    {
-        get => this._outline;
-        set
-        {
-            if (this.SetPropertyAndInvalidateMeasure(ref this._outline, value))
-            {
-                this._actualLineHeight = float.NaN;
-                this._font = null;
-            }
-        }
-    }
-
-    /// <summary>
-    /// Gets or sets the blur of the text block.
-    /// </summary>
-    public int Blur
-    {
-        get => this._blur;
-        set
-        {
-            if (this.SetPropertyAndInvalidateMeasure(ref this._blur, value))
-            {
-                this._actualLineHeight = float.NaN;
-                this._font = null;
-            }
-        }
-    }
-
     private float _actualLineHeight = float.NaN;
 
     /// <summary>
@@ -147,16 +114,28 @@ public class TextBlock : Control
         }
     }
 
-    protected bool SetPropertyAndInvalidateFont<T>(ref T field, T value)
+    /// <summary>
+    /// Gets or sets the text effect of the text block.
+    /// </summary>
+    public ITextEffect? TextEffect
     {
-        if (EqualityComparer<T>.Default.Equals(field, value))
+        get => this._textEffect;
+        set
         {
-            return false;
+            if (this.SetPropertyAndInvalidateMeasure(ref this._textEffect, value))
+            {
+                this._font = null;
+                this._actualLineHeight = float.NaN;
+            }
         }
+    }
 
-        field = value;
+    private void TextEffect_FontChanged(object? sender, EventArgs e)
+    {
+        // The font of the text effect has changed, so we need to invalidate the measure and the cached font.
         this._font = null;
-        return true;
+        this._actualLineHeight = float.NaN;
+        this.InvalidateMeasure();
     }
 
     /// <summary>
@@ -190,7 +169,9 @@ public class TextBlock : Control
     {
         if (this._font == null)
         {
-            this._font = Font.GetFont(this.FontFamily, this.FontSize, this.Outline, this.Blur);
+            this._font = this._textEffect == null
+                ? FontManager.GetFont(this.FontFamily, this.FontSize)
+                : this._textEffect.InvalidateFont(this.FontFamily, this.FontSize);
         }
 
         return this._font;
@@ -203,23 +184,36 @@ public class TextBlock : Control
             return Vector2.Zero;
         }
 
-        var size = this.GetFont().MeasureString(this.Text);
-        return new Vector2(size.X, this.ActualLineHeight * this._textLineCount);
+        var font = this.GetFont();
+        var size = font.MeasureString(this.Text);
+        return new Vector2(size.X, font.LineHeight * this._textLineCount);
     }
 
     protected override void DrawCore(SpriteBatcher spriteBatcher)
     {
         base.DrawCore(spriteBatcher);
 
-        spriteBatcher.DrawText(this.GetFont(), this.Text, this.Position, this.Foreground);
+        if (this.Text == string.Empty)
+        {
+            return;
+        }
+
+        var font = this.GetFont();
+        if (this._textEffect == null)
+        {
+            spriteBatcher.DrawText(font, this.Text, this.Position, this.Foreground);
+        }
+        else
+        {
+            this._textEffect.Draw(spriteBatcher, this.Text, this.Position, this.Foreground);
+        }
     }
 
     internal Vector2 MeasureString(int charNumber)
     {
         ReadOnlySpan<char> span = this.Text.AsSpan(0, charNumber);
-        int lineCount = GetLineCount(span);
         var size = this.GetFont().MeasureString(span.ToString());
-        return new Vector2(size.X, this.ActualLineHeight * lineCount);
+        return size;
     }
 
     private static int GetLineCount(ReadOnlySpan<char> value)
