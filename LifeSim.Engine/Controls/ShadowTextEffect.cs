@@ -121,7 +121,8 @@ public class ShadowTextEffect : ITextEffect
         // Draw the shadow
         if (this.Color.A > 0)
         {
-            spriteBatcher.DrawText(this._shadowFont!, text, position + this.Offset, this.Color);
+            var offset = this.Offset - new Vector2(this.BlurAmount, this.BlurAmount);
+            spriteBatcher.DrawText(this._shadowFont!, text, position + offset, this.Color);
         }
 
         // Draw the text
