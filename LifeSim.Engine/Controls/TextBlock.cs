@@ -79,6 +79,8 @@ public class TextBlock : Control
 
     private float _actualLineHeight = float.NaN;
 
+    private float _lineSpacing = 0f;
+
     /// <summary>
     /// Gets the actual height of each line of text.
     /// </summary>
@@ -89,8 +91,9 @@ public class TextBlock : Control
             if (float.IsNaN(this._actualLineHeight))
             {
                 this._actualLineHeight = float.IsNaN(this._lineHeight)
-                    ? this.GetFont().MeasureString("M").Y
+                    ? this.GetFont().LineHeight
                     : this._lineHeight;
+                this._lineSpacing = this._actualLineHeight - this.FontSize;
             }
 
             return this._actualLineHeight;
@@ -186,7 +189,7 @@ public class TextBlock : Control
 
         var font = this.GetFont();
         var size = font.MeasureString(this.Text);
-        return new Vector2(size.X, font.LineHeight * this._textLineCount);
+        return new Vector2(size.X, this.ActualLineHeight * this._textLineCount);
     }
 
     protected override void DrawCore(SpriteBatcher spriteBatcher)
@@ -199,13 +202,14 @@ public class TextBlock : Control
         }
 
         var font = this.GetFont();
+        var offset = new Vector2(0f, MathF.Ceiling(this._lineSpacing / 2f));
         if (this._textEffect == null)
         {
-            spriteBatcher.DrawText(font, this.Text, this.Position, this.Foreground);
+            spriteBatcher.DrawText(font, this.Text, this.Position + offset, this.Foreground);
         }
         else
         {
-            this._textEffect.Draw(spriteBatcher, this.Text, this.Position, this.Foreground);
+            this._textEffect.Draw(spriteBatcher, this.Text, this.Position + offset, this.Foreground);
         }
     }
 
