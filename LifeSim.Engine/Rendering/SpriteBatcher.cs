@@ -254,9 +254,9 @@ public class SpriteBatcher : IFontStashRenderer2, IDisposable
             new Vector2(uvIntBR.X, uvIntTL.Y), new Vector2(uvExtBR.X, uvIntBR.Y), color);
     }
 
-    public void DrawText(SpriteFontBase font, string text, Vector2 position, Color color)
+    public void DrawText(Font font, string text, Vector2 position, Color color)
     {
-        font.DrawText(this, text, position, color);
+        font.FontBase.DrawText(this, text, position, color);
     }
 
     ITexture2DManager IFontStashRenderer2.TextureManager { get; } = new FontStashTextureManager();

@@ -35,37 +35,18 @@ public class StrokeTextEffect : ITextEffect
     {
     }
 
-    private SpriteFontBase? _font = null;
-
-    public SpriteFontBase InvalidateFont(string? fontFamily, int fontSize)
-    {
-        this._font = FontManager.GetFont(fontFamily, fontSize);
-        return this._font;
-    }
-
     private static readonly Vector2[] _strokeOffsets = new Vector2[]
     {
         new Vector2(0, -1), new Vector2(1, 0), new Vector2(0, 1), new Vector2(-1, 0)
     };
 
-    protected static void ThrowFontNotInitialized()
-    {
-        throw new InvalidOperationException("Font not initialized. You must call InvalidateFont before calling this method.");
-    }
-
-    public void Draw(SpriteBatcher spriteBatcher, string text, Vector2 position, Color color)
+    public void Draw(SpriteBatcher spriteBatcher, string text, Font font, Vector2 position, Color color)
     {
         if (string.IsNullOrWhiteSpace(text))
         {
             return;
         }
 
-        if (this._font == null)
-        {
-            ThrowFontNotInitialized();
-        }
-
-        var font = this._font!;
         var strokeColor = this.Color;
         var strokeThickness = this.Thickness;
 

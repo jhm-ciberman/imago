@@ -10,30 +10,17 @@ public class ShadowTextEffect : ITextEffect
     /// <summary>
     /// Gets or sets the color of the shadow.
     /// </summary>
-    public Color Color { get; set; } = LifeSim.Color.Black;
+    public Color Color { get; set; } = Color.Black;
 
     /// <summary>
     /// Gets or sets the offset of the shadow.
     /// </summary>
     public Vector2 Offset { get; set; } = Vector2.Zero;
 
-    private int _blurAmount = 0;
-
     /// <summary>
     /// Gets or sets the blur amount of the shadow.
     /// </summary>
-    public int BlurAmount
-    {
-        get => this._blurAmount;
-        set
-        {
-            if (this._blurAmount != value)
-            {
-                this._blurAmount = value;
-                this.InvalidateFontPrivate();
-            }
-        }
-    }
+    public int BlurAmount { get; set; } = 0;
 
     /// <summary>
     /// Gets or sets the shadow opacity.
@@ -78,57 +65,25 @@ public class ShadowTextEffect : ITextEffect
         this.BlurAmount = blurAmount;
     }
 
-    private SpriteFontBase? _shadowFont = null;
-
-    private SpriteFontBase? _textFont = null;
-
-    private string? _ownerFontFamily = null;
-
-    private int _ownerFontSize = -1;
-
-    public SpriteFontBase InvalidateFont(string? fontFamily, int fontSize)
-    {
-        this._ownerFontFamily = fontFamily;
-        this._ownerFontSize = fontSize;
-        this._textFont = FontManager.GetFont(fontFamily, fontSize);
-        this._shadowFont = this.BlurAmount == 0 ? this._textFont : FontManager.GetBlurredFont(fontFamily, fontSize, this.BlurAmount);
-        return this._textFont;
-    }
-
-    private void InvalidateFontPrivate()
-    {
-        if (this._ownerFontSize == -1) return; // The font hasn't been set yet.
-        this.InvalidateFont(this._ownerFontFamily, this._ownerFontSize);
-    }
-
-    protected static void ThrowFontNotInitialized()
-    {
-        throw new InvalidOperationException("Font not initialized. You must call InvalidateFont before calling this method.");
-    }
-
-    public void Draw(SpriteBatcher spriteBatcher, string text, Vector2 position, Color color)
+    public void Draw(SpriteBatcher spriteBatcher, string text, Font font, Vector2 position, Color color)
     {
         if (string.IsNullOrWhiteSpace(text))
         {
             return;
         }
 
-        if (this._shadowFont == null)
-        {
-            ThrowFontNotInitialized();
-        }
-
         // Draw the shadow
         if (this.Color.A > 0)
         {
             var offset = this.Offset - new Vector2(this.BlurAmount, this.BlurAmount);
-            spriteBatcher.DrawText(this._shadowFont!, text, position + offset, this.Color);
+            var shadowFont = this.BlurAmount == 0 ? font : Font.GetBlurredFont(font.FontFamily, font.FontSize, this.BlurAmount);
+            spriteBatcher.DrawText(shadowFont, text, position + offset, this.Color);
         }
 
         // Draw the text
         if (color.A > 0)
         {
-            spriteBatcher.DrawText(this._textFont!, text, position, color);
+            spriteBatcher.DrawText(font, text, position, color);
         }
     }
 }

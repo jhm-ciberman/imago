@@ -26,7 +26,7 @@ public class TextNode2D : RenderNode2D
     {
         var pos = this.WorldMatrix.Translation;
 
-        var font = FontManager.GetFont(this.FontFamily, this.FontSize);
+        var font = Font.GetFont(this.FontFamily, this.FontSize);
         spriteBatcher.DrawText(font, this.Text, pos, this.Color);
     }
 }

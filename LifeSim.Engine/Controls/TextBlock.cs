@@ -13,7 +13,7 @@ public class TextBlock : Control
     private ITextEffect? _textEffect;
     protected int _fontSize = 12;
     protected string? _fontFamily = null;
-    protected SpriteFontBase? _font = null;
+    protected Font? _font = null;
     protected Color _foreground = Color.Black;
     private float _lineHeight = float.NaN;
     private int _textLineCount = 0;
@@ -168,13 +168,11 @@ public class TextBlock : Control
         this.Text = text;
     }
 
-    protected SpriteFontBase GetFont()
+    protected Font GetFont()
     {
         if (this._font == null)
         {
-            this._font = this._textEffect == null
-                ? FontManager.GetFont(this.FontFamily, this.FontSize)
-                : this._textEffect.InvalidateFont(this.FontFamily, this.FontSize);
+            this._font = Font.GetFont(this.FontFamily, this.FontSize);
         }
 
         return this._font;
@@ -188,7 +186,7 @@ public class TextBlock : Control
         }
 
         var font = this.GetFont();
-        var size = font.MeasureString(this.Text);
+        var size = font.FontBase.MeasureString(this.Text);
         return new Vector2(size.X, this.ActualLineHeight * this._textLineCount);
     }
 
@@ -209,14 +207,14 @@ public class TextBlock : Control
         }
         else
         {
-            this._textEffect.Draw(spriteBatcher, this.Text, this.Position + offset, this.Foreground);
+            this._textEffect.Draw(spriteBatcher, this.Text, font, this.Position + offset, this.Foreground);
         }
     }
 
     internal Vector2 MeasureString(int charNumber)
     {
         ReadOnlySpan<char> span = this.Text.AsSpan(0, charNumber);
-        var size = this.GetFont().MeasureString(span.ToString());
+        var size = this.GetFont().FontBase.MeasureString(span.ToString());
         return size;
     }
 
