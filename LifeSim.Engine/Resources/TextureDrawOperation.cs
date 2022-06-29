@@ -1,10 +1,11 @@
+using System;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 
 namespace LifeSim.Engine.Resources;
 
-public class TextureDrawOperation : IDrawOperation
+public class TextureDrawOperation : IDrawOperation, IDisposable
 {
     /// <inheritdoc />
     public Vector2Int Size { get; }
@@ -33,5 +34,10 @@ public class TextureDrawOperation : IDrawOperation
     void IDrawOperation.Draw(Image<Rgba32> destination, Vector2Int position)
     {
         destination.Mutate(ctx => ctx.DrawImage(this._image, new Point(position.X, position.Y), 1f));
+    }
+
+    public void Dispose()
+    {
+        this._image.Dispose();
     }
 }

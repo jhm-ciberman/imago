@@ -190,9 +190,17 @@ public class Style
         foreach (var property in this._properties)
         {
             var targetProperty = target.GetType().GetProperty(property.Key);
+
             if (targetProperty != null)
             {
-                targetProperty.SetValue(target, property.Value);
+                object? value = property.Value;
+
+                if (value is ICloneable cloneable)
+                {
+                    value = cloneable.Clone();
+                }
+
+                targetProperty.SetValue(target, value);
             }
         }
     }

@@ -101,7 +101,8 @@ public class TexturePacker
     /// <exception cref="InvalidOperationException">Thrown when the texture is already packed or it's too big to be packed in any page.</exception>
     public PackedTexture Pack(string path, string? groupName = null)
     {
-        return this.Pack(new TextureDrawOperation(path), groupName);
+        using var unpackedTexture = new TextureDrawOperation(path);
+        return this.Pack(unpackedTexture, groupName);
     }
 
     /// <summary>

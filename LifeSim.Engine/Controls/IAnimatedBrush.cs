@@ -1,9 +1,11 @@
+using System;
+
 namespace LifeSim.Engine.Controls;
 
 /// <summary>
 /// A brush that is animated.
 /// </summary>
-public interface IAnimatedBrush : IBrush
+public interface IAnimatedBrush : IBrush, ICloneable
 {
     /// <summary>
     /// Updates the brush.

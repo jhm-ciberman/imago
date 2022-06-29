@@ -64,4 +64,9 @@ public class PackedTexture
         Vector2 size = this.Size;
         return new Vector4(size.X, size.Y, this.TopLeft.X, this.TopLeft.Y);
     }
+
+    public override string ToString()
+    {
+        return $"{this.Texture.Name} {this.TopLeft} {this.BottomRight}";
+    }
 }

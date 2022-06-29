@@ -171,7 +171,7 @@ public class SpriteBatcher : IFontStashRenderer2, IDisposable
         this._batch.DrawCore(position, size, uvTopLeft, uvBottomRight, color);
     }
 
-    public void DrawNinePatch(Shader? shader, PackedTexture texture, Vector2 position, Vector2 size, Thickness patchMargin, Color color, bool drawCenter, float scale)
+    public void DrawNinePatch(Shader? shader, PackedTexture texture, Vector2 position, Vector2 size, Thickness patchMargin, Color color, float scale)
     {
         var sizeTL = new Vector2(patchMargin.Left, patchMargin.Top);
         var sizeBR = new Vector2(patchMargin.Right, patchMargin.Bottom);
@@ -200,11 +200,9 @@ public class SpriteBatcher : IFontStashRenderer2, IDisposable
         sizeBL *= scale;
         var sizeSegmentCenter = size - sizeTL - sizeBR;
 
-        int requiredQuads = drawCenter ? 9 : 8;
+        this.Prepare(shader ?? this._defaultShader, texture.Texture, 9);
 
-        this.Prepare(shader ?? this._defaultShader, texture.Texture, requiredQuads);
-
-        if (drawCenter && sizeSegmentCenter.X > 0 && sizeSegmentCenter.Y > 0)
+        if (sizeSegmentCenter.X > 0 && sizeSegmentCenter.Y > 0)
         {
             this._batch.DrawCore(position + sizeTL, sizeSegmentCenter, uvIntTL, uvIntBR, color);
         }

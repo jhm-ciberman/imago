@@ -1,3 +1,4 @@
+using System;
 using System.Numerics;
 using LifeSim.Engine.Rendering;
 using LifeSim.Engine.Resources;
@@ -133,24 +134,25 @@ public class SpriteBrush : IAnimatedBrush
         }
     }
 
-    protected PackedTexture? GetCurrentTexture()
+    public virtual void DrawRectangle(SpriteBatcher spriteBatcher, Vector2 position, Vector2 size)
     {
-        if (this.Sprite != null)
+        if (this.Sprite == null) return;
+
+        int frameIndex = (int)this._frameIndex;
+        var frame = this.Sprite.Frames[frameIndex];
+        var sprite = this.Sprite;
+        if (sprite.IsNineSlice)
         {
-            return this.Sprite.Frames[(int)this._frameIndex];
+            spriteBatcher.DrawNinePatch(null, frame, position, size, sprite.NineSliceMargin, this.Color, sprite.Scale);
         }
         else
         {
-            return null;
+            spriteBatcher.DrawTexture(null, frame.Texture, position, size, frame.TopLeft, frame.BottomRight, this.Color);
         }
     }
 
-    public virtual void DrawRectangle(SpriteBatcher spriteBatcher, Vector2 position, Vector2 size)
+    public virtual object Clone()
     {
-        var frame = this.GetCurrentTexture();
-        if (frame != null)
-        {
-            spriteBatcher.DrawTexture(null, frame.Texture, position, size, frame.TopLeft, frame.BottomRight, this.Color);
-        }
+        return new SpriteBrush(this.Sprite, this.FramesPerSecond, this.Loop, this.Color, this.FrameIndex);
     }
 }

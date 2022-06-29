@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using LifeSim.Engine.Rendering;
+using LifeSim.Utils;
 
 namespace LifeSim.Engine.Resources;
 
@@ -16,6 +17,37 @@ public class Sprite
     /// Gets a list of all frames of the sprite.
     /// </summary>
     public IReadOnlyList<PackedTexture> Frames => this._frames;
+
+    /// <summary>
+    /// Gets whether the sprite is animated.
+    /// </summary>
+    public bool IsAnimated => this._frames.Count > 1;
+
+    private Thickness _nineSliceMargin  = new Thickness(0);
+
+    /// <summary>
+    /// Gets whether the sprite is a 9-slice.
+    /// </summary>
+    public bool IsNineSlice { get; private set; } = false;
+
+    /// <summary>
+    /// Gets or sets the margin to be used when the sprite is drawn as a 9-slice. 
+    /// If the margin is all zero, the sprite will be drawn as a regular sprite.
+    /// </summary>
+    public Thickness NineSliceMargin
+    {
+        get => this._nineSliceMargin;
+        set
+        {
+            this._nineSliceMargin = value;
+            this.IsNineSlice = value.Left != 0 || value.Top != 0 || value.Right != 0 || value.Bottom != 0;
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the scale of the sprite.
+    /// </summary>
+    public float Scale { get; set; } = 1f;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Sprite"/> class.
@@ -41,6 +73,16 @@ public class Sprite
     public Sprite(IEnumerable<PackedTexture> frames)
     {
         this._frames.AddRange(frames);
+
+        // Validate that all frames have the same size
+        var firstFrame = this._frames[0];
+        foreach (var frame in this._frames)
+        {
+            if (frame.Size != firstFrame.Size)
+            {
+                throw new ArgumentException("All frames of a sprite must have the same size.");
+            }
+        }
     }
 
     /// <summary>
@@ -59,6 +101,13 @@ public class Sprite
     public void AddFrame(PackedTexture frame)
     {
         this._frames.Add(frame);
+
+        // Validate that the frame has the same size as the first frame
+        var firstFrame = this._frames[0];
+        if (frame.Size != firstFrame.Size)
+        {
+            throw new ArgumentException("The added frame must have the same size as the first frame.");
+        }
     }
 
     /// <summary>
@@ -74,35 +123,33 @@ public class Sprite
     /// Creates a new sprite from a sprite sheet.
     /// </summary>
     /// <param name="packedTexture">The sprite sheet.</param>
-    /// <param name="frameWidth">The width of each frame in the sprite sheet.</param>
-    /// <param name="frameHeight">The height of each frame in the sprite sheet.</param>
-    /// <param name="maxFrameCount">The maximum number of frames in the sprite sheet.</param>
-    /// <returns>The new sprite.</returns>
-    public static Sprite FromSpriteSheet(PackedTexture packedTexture, int frameWidth, int frameHeight, int maxFrameCount = int.MaxValue)
+    /// <param name="frameCount">The number of frames in the sprite.</param>
+    /// <param name="size">The size of each frame in pixels.</param>
+    /// <param name="offset">The offset of each frame from the top-left corner of the sprite sheet in pixels.</param>
+    /// <param name="nineSliceMargin">The margin to be used when the sprite is drawn as a 9-slice.
+    /// <returns>The sprite.</returns>
+    public static Sprite FromSpriteSheet(PackedTexture packedTexture, int frameCount, Vector2 size, Vector2 offset = default, Thickness nineSliceMargin = default)
     {
         var sprite = new Sprite();
+        sprite.NineSliceMargin = nineSliceMargin;
 
         var atlasTexture = packedTexture.Texture;
         var spriteSheetSize = packedTexture.PixelSize;
         var offsetUv = packedTexture.TopLeft;
 
-        var frameCountX = spriteSheetSize.X / frameWidth;
-        var frameCountY = spriteSheetSize.Y / frameHeight;
 
-        var deltaUv = new Vector2((float)frameWidth / (float)atlasTexture.Width, (float)frameHeight / (float)atlasTexture.Height);
+        var pixelsToUv = new Vector2(1f / (float)atlasTexture.Width, 1f / (float)atlasTexture.Height);
 
-        for (var y = 0; y < frameCountY; y++)
+        int frameCountX = (int)(spriteSheetSize.X / size.X);
+        for (int i = 0; i < frameCount; i++)
         {
-            for (var x = 0; x < frameCountX; x++)
-            {
-                var frameUv = new Vector2(offsetUv.X + x * deltaUv.X, offsetUv.Y + y * deltaUv.Y);
-                sprite.AddFrame(new PackedTexture(atlasTexture, frameUv, frameUv + deltaUv));
-
-                if (sprite.Frames.Count >= maxFrameCount)
-                {
-                    return sprite;
-                }
-            }
+            float x0 = (i % frameCountX) * size.X + offset.X;
+            float y0 = (i / frameCountX) * size.Y + offset.Y;
+            float x1 = x0 + size.X;
+            float y1 = y0 + size.Y;
+            var topLeft = new Vector2(x0, y0) * pixelsToUv + offsetUv;
+            var bottomRight = new Vector2(x1, y1) * pixelsToUv + offsetUv;
+            sprite.AddFrame(new PackedTexture(atlasTexture, topLeft, bottomRight));
         }
 
         return sprite;

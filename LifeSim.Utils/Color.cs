@@ -4,17 +4,39 @@ using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
+// supress IDE0057 (I don't want to use the range operator here)
+#pragma warning disable IDE0057
+
 namespace LifeSim;
 
 [StructLayout(LayoutKind.Sequential)]
 public readonly struct Color
 {
+    /// <summary>
+    /// Gets the red component of the color.
+    /// </summary>
     public readonly byte R;
+
+    /// <summary>
+    /// Gets the green component of the color.
+    /// </summary>
     public readonly byte G;
+
+    /// <summary>
+    /// Gets the blue component of the color.
+    /// </summary>
     public readonly byte B;
+
+    /// <summary>
+    /// Gets the alpha component of the color.
+    /// </summary>
     public readonly byte A;
 
-    public Color(uint packed) : this()
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Color"/> struct.
+    /// </summary>
+    /// <param name="packed">The packed RGBA value as an unsigned integer.</param>
+    public Color(uint packed)
     {
         this.R = (byte)(packed >> 0);
         this.G = (byte)(packed >> 8);
@@ -22,6 +44,13 @@ public readonly struct Color
         this.A = (byte)(packed >> 24);
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Color"/> struct.
+    /// </summary>
+    /// <param name="r">The red component of the color.</param>
+    /// <param name="g">The green component of the color.</param>
+    /// <param name="b">The blue component of the color.</param>
+    /// <param name="a">The alpha component of the color.</param>
     public Color(byte r, byte g, byte b, byte a = 255)
     {
         this.R = r;
@@ -30,22 +59,38 @@ public readonly struct Color
         this.A = a;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Color"/> struct.
+    /// </summary>
+    /// <param name="hexColor">The hex color of the color.</param>
+    /// <exception cref="ArgumentException">Thrown when the color string is invalid.</exception>
     public Color(string hexColor)
     {
+        ReadOnlySpan<char> span = hexColor.AsSpan();
         if (hexColor.StartsWith("#", true, CultureInfo.InvariantCulture))
         {
-            hexColor = hexColor[1..];
+            span = span[1..];
         }
 
-        if (hexColor.Length is not 6 and not 8)
+        if (span.Length is not 6 and not 8)
         {
             throw new ArgumentException("Invalid hex color string.");
         }
 
-        this.R = byte.Parse(hexColor.AsSpan(0, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
-        this.G = byte.Parse(hexColor.AsSpan(2, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
-        this.B = byte.Parse(hexColor.AsSpan(4, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
-        this.A = hexColor.Length == 8 ? byte.Parse(hexColor.AsSpan(6, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture) : (byte)255;
+        this.R = byte.Parse(span.Slice(0, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+        this.G = byte.Parse(span.Slice(2, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+        this.B = byte.Parse(span.Slice(4, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+        this.A = span.Length == 8 ? byte.Parse(span.Slice(6, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture) : (byte)255;
+    }
+
+    /// <summary>
+    /// Creates a new <see cref="Color"/> from the specified hex color string.
+    /// </summary>
+    /// <param name="hexColor">The hex color string.</param>
+    /// <returns>The <see cref="Color"/>.</returns>
+    public static Color FromHex(string hexColor)
+    {
+        return new Color(hexColor);
     }
 
     public static Color FromColorAlpha(Color color, float alpha)

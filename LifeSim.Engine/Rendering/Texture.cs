@@ -60,6 +60,8 @@ public class Texture : ITexture
 
     public Vector2Int Size => new Vector2Int((int)this.Width, (int)this.Height);
 
+    public string Name { get; set; } = string.Empty;
+
     protected void NotifyTextureDirty()
     {
         if (!this._isDirty)

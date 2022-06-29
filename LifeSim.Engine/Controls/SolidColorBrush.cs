@@ -1,3 +1,4 @@
+using System;
 using System.Numerics;
 using LifeSim.Engine.Rendering;
 
@@ -6,7 +7,7 @@ namespace LifeSim.Engine.Controls;
 /// <summary>
 /// Defines a brush for a solid color.
 /// </summary>
-public class SolidColorBrush : IBrush
+public class SolidColorBrush : IBrush, ICloneable
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="SolidColorBrush"/> class.
@@ -15,6 +16,15 @@ public class SolidColorBrush : IBrush
     public SolidColorBrush(Color color)
     {
         this.Color = color;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SolidColorBrush"/> class.
+    /// </summary>
+    /// <param name="hexColor">The hex color of the brush.</param>
+    public SolidColorBrush(string hexColor)
+    {
+        this.Color = Color.FromHex(hexColor);
     }
 
     /// <summary>
@@ -53,5 +63,10 @@ public class SolidColorBrush : IBrush
     public static implicit operator SolidColorBrush(Color color)
     {
         return new SolidColorBrush(color);
+    }
+
+    public virtual object Clone()
+    {
+        return new SolidColorBrush(this.Color);
     }
 }

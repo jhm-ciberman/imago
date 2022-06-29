@@ -54,6 +54,7 @@ public class TexturePage
 
         this.Image = new Image<Rgba32>((int)atlasSize, (int)atlasSize);
         this.Texture = new Texture((uint)this.Image.Width, (uint)this.Image.Height, mipMapLevels, group.IsSrgb);
+        this.Texture.Name = $"Texture Page ({group.Name})";
     }
 
     /// <summary>
