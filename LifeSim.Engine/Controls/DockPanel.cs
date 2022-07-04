@@ -39,9 +39,7 @@ public class DockPanel : ItemsControl
         // Use the "Dock" property to arrange the children.
         // We need to adjust the availableRect in each iteration so we can
         // position the children correctly.
-        Rect availableRect = finalRect;
-        availableRect.Position += this.Padding.TopLeft;
-        availableRect.Size -= this.Padding.Total;
+        Rect availableRect = finalRect.Deflate(this.Padding);
 
         for (var i = 0; i < this.Items.Count; i++)
         {
@@ -97,8 +95,7 @@ public class DockPanel : ItemsControl
         // We need to adjust the availableSize in each iteration so we can
         // measure the children correctly.
         Rect availableRect = new Rect(Vector2.Zero, availableSize);
-        availableRect.Position += this.Padding.TopLeft;
-        availableRect.Size -= this.Padding.Total;
+        availableRect = availableRect.Deflate(this.Padding);
         Vector2 desiredSize = Vector2.Zero;
 
         for (var i = 0; i < this.Items.Count; i++)

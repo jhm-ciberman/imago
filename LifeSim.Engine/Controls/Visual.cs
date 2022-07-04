@@ -15,7 +15,7 @@ public abstract class Visual : ObservableObject
     private float _opacity = 1f;
     private readonly List<Visual> _visualChildren = new List<Visual>();
     private bool _clipToBounds = false;
-    private Style? _style;
+    private IStyle? _style;
 
     /// <summary>
     /// Gets or sets the name of the element.
@@ -73,15 +73,15 @@ public abstract class Visual : ObservableObject
     /// <summary>
     /// Gets or sets the style of the control.
     /// </summary>
-    public Style? Style
+    public IStyle? Style
     {
         get => this._style;
         set
         {
             if (this._style != value)
             {
-                this._style = value ?? StyleManager.GetDefaultStyle(this.GetType());
-                this._style.Apply(this);
+                this._style = value;
+                this._style?.Apply(this);
                 this.OnPropertyChanged(nameof(this.Style));
             }
         }
@@ -123,30 +123,7 @@ public abstract class Visual : ObservableObject
     /// </summary>
     public Visual()
     {
-        this._style = StyleManager.GetDefaultStyle(this.GetType());
-        this._style.Apply(this);
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="Visual"/> class.
-    /// </summary>
-    /// <param name="style"></param>
-    public Visual(Style? style)
-    {
-        this._style = style ?? StyleManager.GetDefaultStyle(this.GetType());
-        this._style.Apply(this);
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="Visual"/> class.
-    /// </summary>
-    /// <param name="name">The name of the element.</param>
-    /// <param name="style">The style of the element.</param>
-    public Visual(string name, Style? style = null)
-    {
-        this._name = name;
-        this._style = style ?? StyleManager.GetDefaultStyle(this.GetType());
-        this._style.Apply(this);
+        //
     }
 
     /// <summary>

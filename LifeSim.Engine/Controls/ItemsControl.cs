@@ -35,6 +35,14 @@ public abstract class ItemsControl : Control
             this.Owner.RemoveVisualChild(oldItem);
             this.Owner.AddVisualChild(item);
         }
+
+        public void AddRange(IEnumerable<Control> items)
+        {
+            foreach (var item in items)
+            {
+                this.Add(item);
+            }
+        }
     }
 
     public ItemCollection Items { get; }

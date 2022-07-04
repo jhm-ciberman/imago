@@ -7,9 +7,9 @@ public partial class SpriteBatch
 {
     public struct Vertex
     {
-        public Vector3 Position { get; }
-        public Vector2 Uv { get; }
-        public uint Color { get; }
+        public Vector3 Position;
+        public Vector2 Uv;
+        public uint Color;
 
         public Vertex(Vector3 position, Vector2 uv, Color color)
         {
@@ -80,6 +80,11 @@ public partial class SpriteBatch
     protected void UpdateColor(ref Color color)
     {
         color = new Color(color.R, color.G, color.B, (byte)(color.A * this.Opacity));
+    }
+
+    protected void UpdateColor(ref uint color)
+    {
+        color = (color & 0x00FFFFFF) | ((uint)((color >> 24) * this.Opacity) << 24);
     }
 
     public void DrawCore(Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, Color color)
@@ -153,6 +158,14 @@ public partial class SpriteBatch
 
     public void DrawCore(ref Vertex topLeft, ref Vertex topRight, ref Vertex bottomLeft, ref Vertex bottomRight)
     {
+        if (this.Opacity < 1f)
+        {
+            this.UpdateColor(ref topLeft.Color);
+            this.UpdateColor(ref topRight.Color);
+            this.UpdateColor(ref bottomLeft.Color);
+            this.UpdateColor(ref bottomRight.Color);
+        }
+
         this.Add(new Item
         {
             TopLeft = topLeft,

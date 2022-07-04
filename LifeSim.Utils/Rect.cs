@@ -1,5 +1,6 @@
 using System;
 using System.Numerics;
+using LifeSim.Utils;
 
 namespace LifeSim;
 
@@ -58,6 +59,16 @@ public struct Rect : IEquatable<Rect>
         this.Y = y;
         this.Width = width;
         this.Height = height;
+    }
+
+    /// <summary>
+    /// Deflates the rectangle by the specified amount.
+    /// </summary>
+    /// <param name="padding">The amount to deflate the rectangle.</param>
+    /// <returns>The deflated rectangle.</returns>
+    public Rect Deflate(Thickness padding)
+    {
+        return new Rect(this.X + padding.Left, this.Y + padding.Top, this.Width - padding.Horizontal, this.Height - padding.Vertical);
     }
 
     /// <summary>

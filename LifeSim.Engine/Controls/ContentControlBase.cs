@@ -8,10 +8,16 @@ namespace LifeSim.Engine.Controls;
 
 public class ContentControlBase<TContent> : Control where TContent : Control
 {
+    private Thickness _padding = new Thickness(0);
+
     /// <summary>
     /// Gets or sets the padding of the content control.
     /// </summary>
-    public Thickness Padding { get; set; } = new Thickness(0);
+    public Thickness Padding
+    {
+        get => this._padding;
+        set => this.SetPropertyAndInvalidateMeasure(ref this._padding, value);
+    }
 
     private TContent? _content;
 
@@ -47,8 +53,9 @@ public class ContentControlBase<TContent> : Control where TContent : Control
     {
         if (this.ContentInternal != null)
         {
+            availableSize -= this.Padding.Total;
             this.ContentInternal.Measure(availableSize);
-            return this.ContentInternal.DesiredSize;
+            return this.ContentInternal.DesiredSize + this.Padding.Total;
         }
         else
         {
@@ -60,12 +67,8 @@ public class ContentControlBase<TContent> : Control where TContent : Control
     {
         if (this.ContentInternal != null)
         {
-            finalRect.X += this.Padding.Left;
-            finalRect.Y += this.Padding.Top;
-            finalRect.Width -= this.Padding.Horizontal;
-            finalRect.Height -= this.Padding.Vertical;
-
-            this.ContentInternal.Arrange(finalRect);
+            Rect contentRect = finalRect.Deflate(this.Padding);
+            this.ContentInternal.Arrange(contentRect);
         }
 
         return finalRect;

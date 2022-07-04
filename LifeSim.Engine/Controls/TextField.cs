@@ -66,7 +66,7 @@ public class TextField : Control
     /// <summary>
     /// Gets or sets the style of the inner text block.
     /// </summary>
-    public Style? TextBlockStyle
+    public IStyle? TextBlockStyle
     {
         get => this.TextBlock.Style;
         set => this.TextBlock.Style = value;
@@ -133,14 +133,7 @@ public class TextField : Control
     public Thickness Padding
     {
         get => this._padding;
-        set
-        {
-            if (this._padding != value)
-            {
-                this._padding = value;
-                this.InvalidateMeasure();
-            }
-        }
+        set => this.SetPropertyAndInvalidateMeasure(ref this._padding, value);
     }
 
     private void InputManager_KeyPressed(object? sender, KeyEvent e)
@@ -223,9 +216,7 @@ public class TextField : Control
 
     protected override Rect ArrangeOverride(Rect finalRect)
     {
-        Rect rect = finalRect;
-        rect.Position += this.Padding.TopLeft;
-        rect.Size -= this.Padding.Total;
+        Rect rect = finalRect.Deflate(this.Padding);
         this.TextBlock.Arrange(rect);
         return finalRect;
     }

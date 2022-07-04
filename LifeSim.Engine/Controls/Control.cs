@@ -85,99 +85,75 @@ public class Control : Visual
     /// </summary>
     public Control() : base() { }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="Control"/> class.
-    /// </summary>
-    /// <param name="style">The style of the control.</param>
-    public Control(Style? style) : base(style) { }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="Control"/> class.
-    /// </summary>
-    /// <param name="name">The name of the control.</param>
-    /// <param name="style">The style of the control.</param>
-    public Control(string name, Style? style = null) : base(name, style) { }
-
     protected override Vector2 MeasureCore(Vector2 availableSize)
     {
         var margin = this.Margin.Total;
         availableSize -= margin;
 
+        Vector2 desiredSize = this.MeasureOverride(availableSize);
+
         if (!float.IsNaN(this.Width))
         {
-            availableSize.X = this.Width;
+            desiredSize.X = this.Width;
         }
 
         if (!float.IsNaN(this.Height))
         {
-            availableSize.Y = this.Height;
+            desiredSize.Y = this.Height;
         }
-
-        Vector2 desiredSize = this.MeasureOverride(availableSize);
-
 
         return desiredSize + margin;
     }
 
     protected override Rect ArrangeCore(Rect finalRect)
     {
-        float marginW = this.Margin.Left + this.Margin.Right;
-        float marginH = this.Margin.Top + this.Margin.Bottom;
-        finalRect.X += this.Margin.Left;
-        finalRect.Y += this.Margin.Top;
+        finalRect = finalRect.Deflate(this.Margin);
         Vector2 availableSize = finalRect.Size;
 
-        if (!float.IsNaN(this.Width))
-        {
-            finalRect.Width = this.Width;
-        }
-        else
-        {
-            finalRect.Width = MathF.Max(0, finalRect.Width - marginW);
-        }
-
-        if (!float.IsNaN(this.Height))
-        {
-            finalRect.Height = this.Height;
-        }
-        else
-        {
-            finalRect.Height = MathF.Max(0, finalRect.Height - marginH);
-        }
-
-        var desiredSize = this.DesiredSize;
+        var desiredSize = this.DesiredSize - this.Margin.Total;
 
         switch (this.HorizontalAlignment)
         {
             case HorizontalAlignment.Center:
                 finalRect.X += (availableSize.X - desiredSize.X) / 2;
+                finalRect.Width = desiredSize.X;
                 break;
             case HorizontalAlignment.Right:
                 finalRect.X += availableSize.X - desiredSize.X;
+                finalRect.Width = desiredSize.X;
                 break;
+            case HorizontalAlignment.Left:
+                finalRect.Width = desiredSize.X;
+                break;
+            case HorizontalAlignment.Stretch:
+                finalRect.Width = availableSize.X;
+                break;
+            default: throw new InvalidOperationException();
         };
 
         switch (this.VerticalAlignment)
         {
             case VerticalAlignment.Center:
                 finalRect.Y += (availableSize.Y - desiredSize.Y) / 2;
+                finalRect.Height = desiredSize.Y;
                 break;
             case VerticalAlignment.Bottom:
                 finalRect.Y += availableSize.Y - desiredSize.Y;
+                finalRect.Height = desiredSize.Y;
                 break;
+            case VerticalAlignment.Top:
+                finalRect.Height = desiredSize.Y;
+                break;
+            case VerticalAlignment.Stretch:
+                finalRect.Height = availableSize.Y;
+                break;
+            default: throw new InvalidOperationException();
         };
 
+        finalRect.Width = !float.IsNaN(this.Width) ? this.Width : MathF.Max(0, finalRect.Width);
+        finalRect.Height = !float.IsNaN(this.Height) ? this.Height : MathF.Max(0, finalRect.Height);
+
         var rectPosition = this.ArrangeOverride(finalRect);
-
-        if (this.HorizontalAlignment == HorizontalAlignment.Stretch)
-        {
-            rectPosition.Width = finalRect.Width;
-        }
-
-        if (this.VerticalAlignment == VerticalAlignment.Stretch)
-        {
-            rectPosition.Height = finalRect.Height;
-        }
 
         return rectPosition;
     }

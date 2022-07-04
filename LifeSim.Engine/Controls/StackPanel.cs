@@ -63,11 +63,7 @@ public class StackPanel : ItemsControl
         // use DesiredSize to calculate the final rect
         // and call Arrange on each child recursively
 
-        Rect innerRect = finalRect;
-        innerRect.X += this.Padding.Left;
-        innerRect.Y += this.Padding.Top;
-        innerRect.Width -= this.Padding.Horizontal;
-        innerRect.Height -= this.Padding.Vertical;
+        Rect innerRect = finalRect.Deflate(this.Padding);
         var x = innerRect.X;
         var y = innerRect.Y;
 
@@ -79,8 +75,6 @@ public class StackPanel : ItemsControl
                 child.Arrange(new Rect(x, y, childDesiredSize.X, innerRect.Height));
                 x += childDesiredSize.X;
             }
-
-            return new Rect(finalRect.X, finalRect.Y, x - finalRect.X + this.Padding.Horizontal, finalRect.Height);
         }
         else
         {
@@ -90,9 +84,9 @@ public class StackPanel : ItemsControl
                 child.Arrange(new Rect(x, y, innerRect.Width, childDesiredSize.Y));
                 y += childDesiredSize.Y;
             }
-
-            return new Rect(finalRect.X, finalRect.Y, finalRect.Width, y - innerRect.Y + this.Padding.Vertical);
         }
+
+        return finalRect;
     }
 
 

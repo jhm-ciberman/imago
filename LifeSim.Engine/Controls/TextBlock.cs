@@ -158,16 +158,6 @@ public class TextBlock : Control
         this.Text = text;
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="TextBlock"/> class.
-    /// </summary>
-    /// <param name="text">The text of the text block.</param>
-    /// <param name="style">The style of the text block.</param>
-    public TextBlock(string text, Style? style) : base(style)
-    {
-        this.Text = text;
-    }
-
     protected Font GetFont()
     {
         if (this._font == null)
