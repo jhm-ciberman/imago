@@ -1,3 +1,4 @@
+using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using LifeSim.Engine.Rendering;
@@ -179,45 +180,13 @@ public class RenderNode3D : Node3D
 
     internal override void DetachFromSceneRecursive()
     {
-        if (this.Scene is null) return;
+        if (this.Scene is null)
+        {
+            throw new InvalidOperationException("Cannot detach from scene if not attached to one.");
+        }
+
         base.DetachFromSceneRecursive();
         this._renderable.Visible = false;
-    }
-
-    /// <summary>
-    /// Tests whether the given ray intersects this node.
-    /// </summary>
-    /// <param name="ray">The ray to test.</param>
-    /// <param name="hitInfo">The hit info if the ray intersects this node.</param>
-    /// <returns>True if the ray intersects this node, false otherwise.</returns>
-    public bool RayCast(Ray ray, out HitInfo hitInfo)
-    {
-        hitInfo = default;
-        var mesh = this.Mesh;
-        if (mesh is null)
-        {
-            return false;
-        }
-
-        // FIXME: If the world matrix is not updated, this will not work
-        Matrix4x4.Invert(this.WorldMatrix, out var invWorld);
-        var localRay = Ray.Transform(ray, invWorld);
-
-        // Fast check for bounding box intersection
-        if (!localRay.Intersects(mesh.BoundingBox))
-        {
-            return false;
-        }
-
-        if (mesh.MeshData.RayCast(localRay, out hitInfo))
-        {
-            hitInfo.Position = Vector3.Transform(hitInfo.Position, this.WorldMatrix);
-            hitInfo.Normal = Vector3.TransformNormal(hitInfo.Normal, this.WorldMatrix);
-            hitInfo.Distance = Vector3.Distance(ray.Origin, hitInfo.Position);
-            return true;
-        }
-
-        return false;
     }
 
     protected override void Dispose(bool disposing)

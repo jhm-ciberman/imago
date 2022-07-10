@@ -336,6 +336,8 @@ internal class Renderable : IDisposable
 
     public void Dispose()
     {
+        this.RenderQueues = RenderQueues.None;
+        this._pipelineDirty = false;
         this._transformDataBlock.Dispose();
         this._instanceDataBlock.Dispose();
     }

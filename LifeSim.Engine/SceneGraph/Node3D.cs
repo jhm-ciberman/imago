@@ -280,15 +280,6 @@ public class Node3D : IDisposable
         }
     }
 
-    public virtual void PrintHierarchyToConsole(string indent = "")
-    {
-        Console.WriteLine($"{indent}{this.Name} (Scale: {this.Scale})");
-        foreach (var child in this._children)
-        {
-            child.PrintHierarchyToConsole($"{indent}  ");
-        }
-    }
-
     protected virtual void Dispose(bool disposing)
     {
         if (!_disposedValue)
@@ -309,5 +300,17 @@ public class Node3D : IDisposable
     {
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
+    }
+
+    public override string ToString()
+    {
+        if (string.IsNullOrEmpty(this.Name))
+        {
+            return this.GetType().Name;
+        }
+        else
+        {
+            return $"{this.GetType().Name}: {this.Name}";
+        }
     }
 }
