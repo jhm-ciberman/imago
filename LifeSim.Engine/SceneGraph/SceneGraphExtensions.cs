@@ -1,6 +1,7 @@
 using System;
 using System.Numerics;
 using LifeSim.Engine.Rendering;
+using LifeSim.Engine.Resources;
 using Veldrid.Utilities;
 
 namespace LifeSim.Engine.SceneGraph;
@@ -152,6 +153,21 @@ public static class SceneGraphExtensions
         });
     }
 
+    /// <summary>
+    /// Sets the specified material to all renderable nodes starting from the specified node.
+    /// </summary>
+    /// <param name="self">The node.</param>
+    /// <param name="material">The material to set.</param>
+    /// <param name="textureST">The texture size and offset.</param>
+    public static void SetMaterial(this Node3D self, Material material, Vector4 textureST)
+    {
+        self.ForEachRecursive<RenderNode3D>((node) =>
+        {
+            node.Material = material;
+            node.TextureST = textureST;
+        });
+    }
+
     private static void PrintHierarchyToConsoleCore(Node3D node, string indent, bool isLast)
     {
         var label = node.ToString();
@@ -209,5 +225,21 @@ public static class SceneGraphExtensions
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// Applies the given <see cref="PackedTexture"/> to all renderable nodes starting from the specified node.
+    /// If a renderable node has no material, it will be ignored.
+    /// </summary>
+    /// <param name="self">The node.</param>
+    /// <param name="packedTexture">The texture to apply.</param>
+    public static void SetPackedTexture(this Node3D self, PackedTexture packedTexture)
+    {
+        self.ForEachRecursive<RenderNode3D>((node) =>
+        {
+            if (node.Material is null) return;
+            node.Material.Texture = packedTexture.Texture;
+            node.TextureST = packedTexture.GetTextureST();
+        });
     }
 }

@@ -15,13 +15,15 @@ public class DirectTexture : ITexture
 
     public uint Height { get; }
 
-    public Veldrid.Texture VeldridTexture { get; }
+    public Veldrid.Texture VeldridTexture { get; private set; }
 
     public Sampler VeldridSampler { get; }
 
     public uint MipLevels { get; }
 
     private readonly GraphicsDevice _gd;
+
+    public event EventHandler? Resized;
 
     public DirectTexture(uint width, uint height, uint mipLevels = 0, bool srgb = true)
     {
@@ -110,5 +112,21 @@ public class DirectTexture : ITexture
             this._gd.SubmitCommands(cl);
             cl.Dispose();
         }
+    }
+
+    public void Resize(uint width, uint height)
+    {
+        this._gd.DisposeWhenIdle(this.VeldridTexture);
+        this.VeldridTexture = this._gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(
+            width, height, this.MipLevels, 1,
+            PixelFormat.R8_G8_B8_A8_UNorm_SRgb,
+            TextureUsage.Sampled | TextureUsage.GenerateMipmaps
+        ));
+        this.Resized?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void Dispose()
+    {
+        this.VeldridTexture.Dispose();
     }
 }

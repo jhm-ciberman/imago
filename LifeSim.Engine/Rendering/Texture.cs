@@ -12,6 +12,7 @@ public class Texture : ITexture
     public delegate void TextureDirtyHandler(Texture texture);
     public static event TextureDirtyHandler? TextureDirty;
 
+    public event EventHandler? Resized;
     public static Texture White { get; private set; } = null!;
     public static Texture Black { get; private set; } = null!;
     public static Texture Transparent { get; private set; } = null!;
@@ -31,7 +32,7 @@ public class Texture : ITexture
     public uint Height { get; protected set; }
     public uint MipLevels { get; protected set; }
 
-    private readonly byte[] _data;
+    private byte[] _data;
 
     private bool _isDirty = false;
 
@@ -53,7 +54,7 @@ public class Texture : ITexture
             pixelFormat, TextureUsage.Sampled | TextureUsage.GenerateMipmaps
         ));
         this.VeldridSampler = gd.PointSampler;
-        this.NotifyTextureDirty();
+        this.OnTextureDirty();
     }
 
     public IntPtr ImGuiBinding => Renderer.Instance.GetOrCreateImGuiBinding(this);
@@ -62,7 +63,7 @@ public class Texture : ITexture
 
     public string Name { get; set; } = string.Empty;
 
-    protected void NotifyTextureDirty()
+    protected void OnTextureDirty()
     {
         if (!this._isDirty)
         {
@@ -80,7 +81,7 @@ public class Texture : ITexture
             this._data[i + 2] = fillColor.B;
             this._data[i + 3] = fillColor.A;
         }
-        this.NotifyTextureDirty();
+        this.OnTextureDirty();
     }
 
     public unsafe void SetDataFromImage(Image<Rgba32> img)
@@ -98,7 +99,7 @@ public class Texture : ITexture
         var dest = new Span<byte>(this._data);
         MemoryMarshal.Cast<Rgba32, byte>(pixels).CopyTo(dest);
 
-        this.NotifyTextureDirty();
+        this.OnTextureDirty();
     }
 
     public unsafe void SetDataFromBytes(int x, int y, int width, int height, byte[] data)
@@ -123,13 +124,22 @@ public class Texture : ITexture
             }
         }
 
-        this.NotifyTextureDirty();
+        this.OnTextureDirty();
     }
 
     public void Update(GraphicsDevice gd, CommandList cl)
     {
         if (!this._isDirty) return;
         this._isDirty = false;
+
+        if (this.Width != this.VeldridTexture.Width || this.Height != this.VeldridTexture.Height)
+        {
+            this.VeldridTexture.Dispose();
+            this.VeldridTexture = gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(
+                this.Width, this.Height, this.MipLevels, 1,
+                PixelFormat.R8_G8_B8_A8_UNorm, TextureUsage.Sampled | TextureUsage.GenerateMipmaps
+            ));
+        }
 
         gd.UpdateTexture(this.VeldridTexture, this._data,
             x: 0, y: 0, z: 0,
@@ -142,8 +152,18 @@ public class Texture : ITexture
         }
     }
 
+    public void Resize(uint width, uint height)
+    {
+        this.Width = width;
+        this.Height = height;
+        this._data = new byte[width * height * 4];
+        this.OnTextureDirty();
+    }
+
     public virtual void Dispose()
     {
         Renderer.Instance.DisposeWhenIdle(this.VeldridTexture);
     }
+
+
 }

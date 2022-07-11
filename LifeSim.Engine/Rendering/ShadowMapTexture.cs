@@ -70,14 +70,22 @@ public class ShadowMapTexture : ITexture, IDisposable
 
     internal void Resize(uint size, uint cascadesCount)
     {
+        this.CascadesCount = cascadesCount;
+        ((ITexture)this).Resize(size, size);
+    }
+
+    void ITexture.Resize(uint width, uint height)
+    {
+        if (width != height)
+        {
+            throw new ArgumentException("Shadow map texture must be square.");
+        }
+
+        this.Size = width;
         this._renderer.DisposeWhenIdle(this.Framebuffers);
         this._renderer.DisposeWhenIdle(this.VeldridTexture);
-
-        this.Size = size;
-        this.CascadesCount = cascadesCount;
-
         var factory = this._renderer.GraphicsDevice.ResourceFactory;
-        this.VeldridTexture = factory.CreateTexture(TextureDescription.Texture2D(this.Size, this.Size, 1, this.CascadesCount, PixelFormat.R32_Float, TextureUsage.DepthStencil | TextureUsage.Sampled));
+        this.VeldridTexture = factory.CreateTexture(TextureDescription.Texture2D(width, height, 1, this.CascadesCount, PixelFormat.R32_Float, TextureUsage.DepthStencil | TextureUsage.Sampled));
 
         this.Framebuffers = new Framebuffer[this.CascadesCount];
 

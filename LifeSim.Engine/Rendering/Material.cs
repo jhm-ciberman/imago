@@ -96,12 +96,14 @@ public abstract class MaterialBase
 
 public class Material : MaterialBase
 {
+    public static Texture DefaultTexture { get; } = Texture.Magenta;
+
     public Shader ForwardShader { get; private set; }
     public Shader ShadowmapShader { get; }
     public ResourceSet ResourceSet { get; internal set; } = null!;
     private readonly BindableResource[] _resources;
     public Technique Definition { get; }
-    private Texture _texture = Texture.Magenta;
+    private Texture? _texture = null;
 
     public Material(Technique definition)
     {
@@ -109,6 +111,8 @@ public class Material : MaterialBase
         this.ForwardShader = definition.ForwardShader;
         this.ShadowmapShader = definition.ShadowMapShader;
         this._resources = new BindableResource[definition.ResourceCount];
+        this._resources[0] = DefaultTexture.VeldridTexture;
+        this._resources[1] = DefaultTexture.VeldridSampler;
     }
 
     protected override void UpdateResourceSet(ResourceFactory factory)
@@ -118,7 +122,7 @@ public class Material : MaterialBase
         this.ResourceSet = factory.CreateResourceSet(new ResourceSetDescription(this.Definition.ResourceLayout, this._resources));
     }
 
-    public Texture Texture
+    public Texture? Texture
     {
         get => this._texture;
         set
@@ -126,7 +130,7 @@ public class Material : MaterialBase
             if (this._texture == value) return;
 
             this._texture = value;
-            this.SetTexture(0, this._texture);
+            this.SetTexture(0, this._texture ?? DefaultTexture);
         }
     }
 

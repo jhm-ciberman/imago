@@ -35,8 +35,8 @@ public class PackedTexture
     /// Creates a new packed texture.
     /// </summary>
     /// <param name="texture">The base texture.</param>
-    /// <param name="topLeft">The coordinate of the top left corner of the packed texture in the base texture.</param>
-    /// <param name="bottomRight">The coordinate of the bottom right corner of the packed texture in the base texture.</param>
+    /// <param name="topLeft">The coordinate of the top left corner of the packed texture in the base texture in texture space.</param>
+    /// <param name="bottomRight">The coordinate of the bottom right corner of the packed texture in the base texture in texture space.</param>
     public PackedTexture(Texture texture, Vector2 topLeft, Vector2 bottomRight)
     {
         this.Texture = texture;
@@ -59,6 +59,12 @@ public class PackedTexture
     /// </summary>
     public Vector2Int PixelBottomRight => new Vector2Int((int)(this.BottomRight.X * this.Texture.Size.X), (int)(this.BottomRight.Y * this.Texture.Size.Y));
 
+    /// <summary>
+    /// Gets a vector containing the size and offset of the packed texture in texture space coordinates.
+    /// The first two components are the size of the texture
+    /// and the last two components are the offset of the texture in the base texture.
+    /// </summary>
+    /// <returns>A vector containing the size and offset of the packed texture in texture space coordinates.</returns>
     public Vector4 GetTextureST()
     {
         Vector2 size = this.Size;

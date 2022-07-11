@@ -45,6 +45,42 @@ public struct Vector2Int : IEquatable<Vector2Int>
         this.Y = (int)y;
     }
 
+    /// <summary>
+    /// Returns a vector whose elements are the maximum of each of the pairs of elements in two specified vectors.
+    /// </summary>
+    /// <param name="value1">The first vector.</param>
+    /// <param name="value2">The second vector.</param>
+    /// <returns>The vector containing the maximum values from both vectors.</returns>
+    public static Vector2Int Max(Vector2Int value1, Vector2Int value2)
+    {
+        return new Vector2Int(Math.Max(value1.X, value2.X), Math.Max(value1.Y, value2.Y));
+    }
+
+    /// <summary>
+    /// Returns a vector whose elements are the minimum of each of the pairs of elements in two specified vectors.
+    /// </summary>
+    /// <param name="value1">The first vector.</param>
+    /// <param name="value2">The second vector.</param>
+    /// <returns>The vector containing the minimum values from both vectors.</returns>
+    public static Vector2Int Min(Vector2Int value1, Vector2Int value2)
+    {
+        return new Vector2Int(Math.Min(value1.X, value2.X), Math.Min(value1.Y, value2.Y));
+    }
+
+    /// <summary>
+    /// Linearly interpolates between two vectors.
+    /// </summary>
+    /// <param name="value1">The first vector.</param>
+    /// <param name="value2">The second vector.</param>
+    /// <param name="t">The interpolation factor.</param>
+    /// <returns>The interpolated vector.</returns>
+    public static Vector2Int Lerp(Vector2Int value1, Vector2Int value2, float t)
+    {
+        return new Vector2Int(
+            (int)Math.Round(MathUtils.Lerp(value1.X, value2.X, t)),
+            (int)Math.Round(MathUtils.Lerp(value1.Y, value2.Y, t)));
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Vector2Int operator +(Vector2Int a, Vector2Int b)
     {
