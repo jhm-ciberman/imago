@@ -73,7 +73,7 @@ public class Animation : IDisposable
     /// </summary>
     /// <param name="targetName">The name of the target.</param>
     /// <returns>An list of all the channels that affect the given target or null if no channels affect the target.</returns>
-    public IReadOnlyList<IChannel>? FindChannels(string targetName)
+    public List<IChannel>? FindChannels(string targetName)
     {
         this._channels.TryGetValue(targetName, out List<IChannel>? list);
         return list;

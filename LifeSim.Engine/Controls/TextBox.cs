@@ -7,10 +7,13 @@ using Veldrid;
 
 namespace LifeSim.Engine.Controls;
 
-public class TextField : Control
+/// <summary>
+/// Represents a text box that can be used to enter text.
+/// </summary>
+public class TextBox : Control
 {
     /// <summary>
-    /// Gets whether the text field is focused.
+    /// Gets whether the text box is focused.
     /// </summary>
     public bool IsFocused { get; private set; } = true;
 
@@ -93,7 +96,7 @@ public class TextField : Control
     private TextBlock? _textBlock = null;
 
     /// <summary>
-    /// Gets or sets the inner text block used by the text field.
+    /// Gets or sets the inner text block used by the text box.
     /// </summary>
     public TextBlock TextBlock
     {
@@ -128,7 +131,7 @@ public class TextField : Control
     private Thickness _padding = new Thickness(0);
 
     /// <summary>
-    /// Gets or sets the padding of the text field.
+    /// Gets or sets the padding of the text box.
     /// </summary>
     public Thickness Padding
     {
