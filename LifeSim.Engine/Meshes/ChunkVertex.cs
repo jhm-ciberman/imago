@@ -1,3 +1,4 @@
+using System;
 using System.Numerics;
 using LifeSim.Engine.Rendering;
 using Veldrid;
@@ -47,6 +48,16 @@ public struct ChunkVertex
         Vector2 uv = Vector2.Lerp(a.TexCoords, b.TexCoords, t);
         Vector2 light = Vector2.Lerp(a.Light, b.Light, t);
         return new ChunkVertex(pos, uv, light);
+    }
+
+    public ChunkVertex Translate(Vector3 v)
+    {
+        return new ChunkVertex(this.Position + v, this.TexCoords, this.Light);
+    }
+
+    public ChunkVertex TranslateWithSunlight(Vector3 v)
+    {
+        return new ChunkVertex(this.Position + v, this.TexCoords, Vector2.One);
     }
 
     private static VertexFormat? _vertexFormat;
