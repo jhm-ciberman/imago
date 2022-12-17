@@ -60,10 +60,7 @@ public class Style<T> : IStyle
     /// <param name="target">The object to apply the style to.</param>
     public void Apply(T target)
     {
-        if (this.BaseStyle != null)
-        {
-            this.BaseStyle.Apply(target!);
-        }
+        this.BaseStyle?.Apply(target!);
 
         this._applyCore(target);
     }

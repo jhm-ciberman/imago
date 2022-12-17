@@ -25,10 +25,7 @@ public abstract class CatalogRef<TObj> where TObj : class, IIdentifiable
     {
         get
         {
-            if (this._element is null)
-            {
-                this._element = this.Resolve(this.Identifier);
-            }
+            this._element ??= this.Resolve(this.Identifier);
 
             return this._element;
         }

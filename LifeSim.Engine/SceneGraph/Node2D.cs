@@ -41,10 +41,7 @@ public class Node2D
         if (node.Parent == this) return;
         if (node == this) return;
 
-        if (node.Parent != null)
-        {
-            node.Parent.Remove(node);
-        }
+        node.Parent?.Remove(node);
 
         node._canvas = this._canvas;
         node.Parent = this;

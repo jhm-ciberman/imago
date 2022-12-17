@@ -9,6 +9,7 @@ namespace LifeSim.Engine.Rendering;
 
 public class Texture : ITexture
 {
+    private static readonly EventArgs _eventArgs = new EventArgs();
     public delegate void TextureDirtyHandler(Texture texture);
     public static event TextureDirtyHandler? TextureDirty;
 
@@ -158,6 +159,7 @@ public class Texture : ITexture
         this.Height = height;
         this._data = new byte[width * height * 4];
         this.OnTextureDirty();
+        this.Resized?.Invoke(this, _eventArgs);
     }
 
     public virtual void Dispose()

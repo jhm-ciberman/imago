@@ -209,10 +209,7 @@ public class Node3D : IDisposable
         if (node.Parent == this || node == this) return;
 
         // If node already has a parent, remove it from that parent
-        if (node.Parent != null)
-        {
-            node.Parent.RemoveChild(node);
-        }
+        node.Parent?.RemoveChild(node);
 
         // Set node's parent to this
         this._children.Add(node);

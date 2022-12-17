@@ -78,10 +78,7 @@ public class ContentControlBase<TContent> : Control where TContent : Control
     {
         base.DrawCore(spriteBatcher);
 
-        if (this.ContentInternal != null)
-        {
-            this.ContentInternal.Draw(spriteBatcher);
-        }
+        this.ContentInternal?.Draw(spriteBatcher);
     }
 
     public override void Update(float deltaTime)

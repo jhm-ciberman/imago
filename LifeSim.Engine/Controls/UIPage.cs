@@ -45,17 +45,11 @@ public class UIPage
         {
             if (this._content != value)
             {
-                if (this._content != null)
-                {
-                    this._content.OnRemovedFromVisualTree(this);
-                }
+                this._content?.OnRemovedFromVisualTree(this);
 
                 this._content = value;
 
-                if (this._content != null)
-                {
-                    this._content.OnAddedToVisualTree(this);
-                }
+                this._content?.OnAddedToVisualTree(this);
             }
         }
     }

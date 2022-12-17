@@ -160,10 +160,7 @@ public class TextBlock : Control
 
     protected Font GetFont()
     {
-        if (this._font == null)
-        {
-            this._font = Font.GetFont(this.FontFamily, this.FontSize);
-        }
+        this._font ??= Font.GetFont(this.FontFamily, this.FontSize);
 
         return this._font;
     }
