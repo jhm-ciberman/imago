@@ -1,10 +1,17 @@
 using System;
-using System.ComponentModel;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using Veldrid.Utilities;
 
 namespace LifeSim.Engine.Rendering;
+
+public struct OffsetVertexData // It's 16 bytes only! 
+{
+    public uint TransformDataOffset { get; set; } // x
+    public uint InstanceDataOffset { get; set; } // y
+    public uint BoneDataOffset { get; set; } // z
+    public uint PickingId { get; set; } // w
+}
 
 /// <summary>
 /// Represents a low-level renderable object in 3D space that can be rendered by the renderer.
@@ -22,15 +29,47 @@ internal class Renderable : IDisposable
     private Matrix4x4 _transform = Matrix4x4.Identity;
     public Vector3 CenterPosition { get; private set; }
     public BoundingBox BoundingBox { get; private set; }
-    private ulong _cachedSortKey;
-    private int _batchingHashKey; // This key is used as an early exit for the batching system.
-    internal Veldrid.ResourceSet TransformResourceSet { get; private set; }
-    internal Veldrid.ResourceSet? InstanceResourceSet { get; private set; } = null;
-    internal Veldrid.ResourceSet? SkeletonResourceSet { get; private set; } = null;
 
-    public OffsetVertexData OffsetVertexData { get; set; }
     private DataBlock _transformDataBlock;
+    private DataBlock _instanceDataBlock;
+
+    /// <summary>
+    /// Gets the batching hash of this renderable. This is used to 
+    /// determine if two renderables can be batched together as an early exit.
+    /// </summary>
+    public int BatchingHash { get; private set; }
+
+    /// <summary>
+    /// Gets the sort key of this renderable. This is used to sort renderables
+    /// by material and mesh.
+    /// </summary>
+    public ulong SortKey { get; private set; }
+
+    /// <summary>
+    /// Gets the resource set for the transform data.
+    /// </summary>
+    public Veldrid.ResourceSet TransformResourceSet { get; private set; }
+
+    /// <summary>
+    /// Gets the resource set for the instance data.
+    /// </summary>
+    public Veldrid.ResourceSet InstanceResourceSet { get; private set; }
+
+    /// <summary>
+    /// Gets the resource set for the skeleton data.
+    /// </summary>
+    public Veldrid.ResourceSet? SkeletonResourceSet { get; private set; } = null;
+
+    /// <summary>
+    /// Gets the data for the "offset" vertex attribute.
+    /// </summary>
+    public OffsetVertexData OffsetVertexData { get; set; }
+
     private RenderQueues _renderQueueFlags = RenderQueues.None;
+
+    /// <summary>
+    /// Gets the render queues that this renderable belongs to.
+    /// </summary>
     internal RenderQueues RenderQueues
     {
         get => this._renderQueueFlags;
@@ -46,6 +85,10 @@ internal class Renderable : IDisposable
     }
 
     private uint _pickingId = 0;
+
+    /// <summary>
+    /// Gets the picking ID of this renderable.
+    /// </summary>
     public uint PickingId
     {
         get => this._pickingId;
@@ -59,29 +102,38 @@ internal class Renderable : IDisposable
         }
     }
 
-    private Mesh? _mesh;
-    private Skeleton? _skeleton;
-    private Material? _material;
-    private bool _visible = true;
-    private bool _transparent = false;
+    /// <summary>
+    /// Gets the forward rendering pipeline for this renderable.
+    /// </summary>
     public Veldrid.Pipeline? ForwardPipeline { get; private set; }
+
+    /// <summary>
+    /// Gets the shadow mapping pipeline for this renderable.
+    /// </summary>
     public Veldrid.Pipeline? ShadowMapPipeline { get; private set; }
 
     private bool _pipelineDirty = false;
 
-    private DataBlock _instanceDataBlock;
-
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Renderable"/> class.
+    /// </summary>
+    /// <param name="renderer">The renderer.</param>
+    /// <param name="instanceDataSize">Size of the instance data.</param>
     public Renderable(Renderer renderer, int instanceDataSize)
     {
-        var storage = renderer.Storage;
         this.PickingId = ++_count;
-        this._transformDataBlock = storage.RequestTransformDataBlock();
+        this._transformDataBlock = renderer.Storage.RequestTransformDataBlock();
         this.TransformResourceSet = this._transformDataBlock.Buffer.ResourceSet;
 
-        this._instanceDataBlock = storage.RequestInstanceDataBlock(instanceDataSize);
+        this._instanceDataBlock = renderer.Storage.RequestInstanceDataBlock(instanceDataSize);
         this.InstanceResourceSet = this._instanceDataBlock.Buffer.ResourceSet;
     }
 
+    private Mesh? _mesh;
+
+    /// <summary>
+    /// Gets or sets the mesh.
+    /// </summary>
     public Mesh? Mesh
     {
         get => this._mesh;
@@ -95,6 +147,12 @@ internal class Renderable : IDisposable
         }
     }
 
+
+    private Material? _material;
+
+    /// <summary>
+    /// Gets or sets the material.
+    /// </summary>
     public Material? Material
     {
         get => this._material;
@@ -108,6 +166,11 @@ internal class Renderable : IDisposable
         }
     }
 
+    private Skeleton? _skeleton;
+
+    /// <summary>
+    /// Gets or sets the skeleton.
+    /// </summary>
     public Skeleton? Skeleton
     {
         get => this._skeleton;
@@ -123,6 +186,9 @@ internal class Renderable : IDisposable
         }
     }
 
+    /// <summary>
+    /// Gets or sets the transform.
+    /// </summary>
     public Matrix4x4 Transform
     {
         get => this._transform;
@@ -136,6 +202,11 @@ internal class Renderable : IDisposable
         }
     }
 
+    private bool _visible = true;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether this <see cref="Renderable"/> is visible.
+    /// </summary>
     public bool Visible
     {
         get => this._visible;
@@ -147,6 +218,11 @@ internal class Renderable : IDisposable
         }
     }
 
+    private bool _transparent = false;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether this <see cref="Renderable"/> uses transparency.
+    /// </summary>
     public bool Transparent
     {
         get => this._transparent;
@@ -160,6 +236,9 @@ internal class Renderable : IDisposable
 
     private ShadowCasting _shadowCastingMode = ShadowCasting.CastShadows;
 
+    /// <summary>
+    /// Gets or sets the shadow casting mode.
+    /// </summary>
     public ShadowCasting ShadowCastingMode
     {
         get => this._shadowCastingMode;
@@ -171,6 +250,9 @@ internal class Renderable : IDisposable
         }
     }
 
+    /// <summary>
+    /// Invalidates the pipeline.
+    /// </summary>
     public void InvalidatePipeline()
     {
         if (this._pipelineDirty) return;
@@ -178,11 +260,20 @@ internal class Renderable : IDisposable
         PipelineDirty?.Invoke(this);
     }
 
+    /// <summary>
+    /// Sets the instance data for this renderable.
+    /// </summary>
+    /// <typeparam name="T">The type of the instance data.</typeparam>
+    /// <param name="data">The instance data.</param>
     public void SetInstanceData<T>(T data) where T : unmanaged
     {
         this._instanceDataBlock.Write(ref data);
     }
 
+    /// <summary>
+    /// Updates the renderable.
+    /// </summary>
+    /// <param name="renderer">The renderer.</param>
     public void Update(Renderer renderer)
     {
         if (this._pipelineDirty)
@@ -196,29 +287,27 @@ internal class Renderable : IDisposable
 
     protected void RecomputeSortKey()
     {
-        if (this._material == null || this._mesh == null) return;
+        if (this.Material == null || this.Mesh == null) return;
 
-        ulong materialHash        = (ulong) (this._material.Id & 0xFFF);
-        ulong meshHash            = (ulong) (this._mesh.Id & 0xFFF);
-        ulong transformBufferHash = (ulong) (this._transformDataBlock.Buffer.Id & 0xFF);
-        ulong instanceBufferHash  = (ulong) (this._instanceDataBlock.Buffer.Id & 0xFF);
-        ulong skekeletonBufferHash = (this._skeleton != null) ? (ulong)(this._skeleton.BufferId & 0xF) : 0;
+        ulong materialHash         = (ulong) (this.Material.GetHashCode() & 0xFFF);
+        ulong meshHash             = (ulong) (this.Mesh.GetHashCode() & 0xFFF);
+        ulong transformBufferHash  = (ulong) (this.TransformResourceSet.GetHashCode() & 0xFFF);
+        ulong instanceBufferHash   = (ulong) (this.InstanceResourceSet.GetHashCode() & 0xFFF);
+        ulong skekeletonBufferHash = (ulong) (this.SkeletonResourceSet?.GetHashCode() ?? 0 & 0xFF);
 
         // The sort key is a 64-bit number that is used to sort renderables.
-        ulong key = (materialHash   << 56) // 8 bits (max: 255)
-                | (transformBufferHash  << 48) // 8 bits (max: 255)
-                | (instanceBufferHash   << 40) // 8 bits (max: 255)
-                | (skekeletonBufferHash << 36) // 4 bits (max: 15)
-                | (meshHash             << 24); // 12 bits (max: 4095)
-
-        this._cachedSortKey = key;
+        this.SortKey = (materialHash << 56)  // 8 bits (max: 255)
+                | (transformBufferHash << 48)  // 8 bits (max: 255)
+                | (instanceBufferHash << 40)  // 8 bits (max: 255)
+                | (skekeletonBufferHash << 36)  // 4 bits (max: 15)
+                | (meshHash << 24); // 12 bits (max: 4095)
 
         // This key is used to fast check if two instances can be batched together. (They must have the same hash)
         // It could happen that the hash is not unique, but it is extremely unlikely that two instances that are 
         // contiguous after sorting the render queue by the sort key, end up having the same hash.
-        this._batchingHashKey = HashCode.Combine(
-            this._mesh.Id,
-            this._material.Id,
+        this.BatchingHash = HashCode.Combine(
+            this.Mesh.Id,
+            this.Material.Id,
             instanceBufferHash,
             skekeletonBufferHash,
             transformBufferHash
@@ -226,18 +315,22 @@ internal class Renderable : IDisposable
     }
 
 
-
+    /// <summary>
+    /// Checks if this renderable can be batched with another renderable.
+    /// </summary>
+    /// <param name="other">The other renderable.</param>
+    /// <returns>True if the renderables can be batched together, false otherwise.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool CanBeBatchedWith(Renderable other)
     {
         // First, fast check using the hash key. If the keys are different, we can early out.
         // If the keys are equal, we need to check the actual data.
-        return this._batchingHashKey == other._batchingHashKey
-            && this._mesh == other._mesh
-            && this._material == other._material
-            && this._skeleton?.Buffer == other._skeleton?.Buffer
-            && this._instanceDataBlock.Buffer == other._instanceDataBlock.Buffer
-            && this._transformDataBlock.Buffer == other._transformDataBlock.Buffer;
+        return this.BatchingHash == other.BatchingHash
+            && this.Mesh == other.Mesh
+            && this.Material == other.Material
+            && this.SkeletonResourceSet == other.SkeletonResourceSet
+            && this.InstanceResourceSet == other.InstanceResourceSet
+            && this.TransformResourceSet == other.TransformResourceSet;
     }
 
     private void RecomputeOffsetVertexData()
@@ -248,7 +341,7 @@ internal class Renderable : IDisposable
         {
             TransformDataOffset = this._transformDataBlock.BlockIndex,
             InstanceDataOffset = this._instanceDataBlock.BlockIndex,
-            BoneDataOffset = this._skeleton?.BoneDataOffset ?? 0,
+            BoneDataOffset = this.Skeleton?.BoneDataOffset ?? 0,
             PickingId = this.PickingId, // this id is used for picking
         };
     }
@@ -275,7 +368,7 @@ internal class Renderable : IDisposable
     {
         float dist = Vector3.DistanceSquared(this.CenterPosition, cameraPosition);
         uint cameraDistance = Math.Min(uint.MaxValue, (uint) (dist * 1000f));
-        return this._cachedSortKey | (cameraDistance & 0xFFFFFF); // 24 bits
+        return this.SortKey | (cameraDistance & 0xFFFFFF); // 24 bits
     }
 
     private void RecomputeRenderQueue()
@@ -303,37 +396,44 @@ internal class Renderable : IDisposable
 
     private void RecomputePipeline(Renderer renderer)
     {
-        if (this._material != null && this._mesh != null && this.RenderQueues != RenderQueues.None)
-        {
-            bool isTransparent = this.RenderQueues.HasFlag(RenderQueues.Transparent);
-            bool isOpaque = this.RenderQueues.HasFlag(RenderQueues.Opaque);
-            bool isShadowcaster = this.RenderQueues.HasFlag(RenderQueues.ShadowCaster);
-
-            var settings = renderer.Settings;
-            RenderFlags flags = RenderFlags.None;
-            if (settings.ForceWireframe) flags |= RenderFlags.Wireframe;
-            if (this.PickingId != 0) flags |= RenderFlags.MousePick;
-            if (isTransparent) flags |= RenderFlags.Transparent;
-            if (settings.EnableFog) flags |= RenderFlags.Fog;
-            if (settings.EnablePixelPerfectShadows) flags |= RenderFlags.PixelPerfactShadows;
-
-            // Update the forward pipeline
-            this.ForwardPipeline = isOpaque || isTransparent
-                ? this._material.GetForwardPipeline(renderer, this._mesh.VertexFormat, flags)
-                : null;
-
-            // Update the shadow map pipeline
-            this.ShadowMapPipeline = isShadowcaster
-                ? this._material.GetShadowmapPipeline(renderer, this._mesh.VertexFormat)
-                : null;
-        }
-        else
+        if (this._material == null || this._mesh == null || this.RenderQueues == RenderQueues.None)
         {
             this.ForwardPipeline = null;
             this.ShadowMapPipeline = null;
+            return;
         }
+
+        bool isTransparent = this.RenderQueues.HasFlag(RenderQueues.Transparent);
+        bool isOpaque = this.RenderQueues.HasFlag(RenderQueues.Opaque);
+        bool isShadowcaster = this.RenderQueues.HasFlag(RenderQueues.ShadowCaster);
+
+        // Update the forward pipeline
+        this.ForwardPipeline = isOpaque || isTransparent
+            ? this._material.GetForwardPipeline(renderer, this._mesh.VertexFormat, this.GetRenderFlags(renderer))
+            : null;
+
+        // Update the shadow map pipeline
+        this.ShadowMapPipeline = isShadowcaster
+            ? this._material.GetShadowmapPipeline(renderer, this._mesh.VertexFormat)
+            : null;
     }
 
+    private RenderFlags GetRenderFlags(Renderer renderer)
+    {
+        var settings = renderer.Settings;
+        RenderFlags flags = RenderFlags.None;
+        if (settings.ForceWireframe) flags |= RenderFlags.Wireframe;
+        if (this.PickingId != 0) flags |= RenderFlags.MousePick;
+        if (this.RenderQueues.HasFlag(RenderQueues.Transparent)) flags |= RenderFlags.Transparent;
+        if (settings.EnableFog) flags |= RenderFlags.Fog;
+        if (settings.EnablePixelPerfectShadows) flags |= RenderFlags.PixelPerfactShadows;
+
+        return flags;
+    }
+
+    /// <summary>
+    /// Disposes the renderable.
+    /// </summary>
     public void Dispose()
     {
         this.RenderQueues = RenderQueues.None;

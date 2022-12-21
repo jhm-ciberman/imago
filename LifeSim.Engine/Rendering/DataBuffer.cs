@@ -9,29 +9,55 @@ internal partial class DataBuffer : IDisposable
 {
     private static int _count = 0;
     private readonly IntPtr _data;
-
-    public int BlocksCount { get; private set; }
-    public int BlockSize { get; private set; }
-    public int SizeInBytes { get; private set; }
-
     private readonly int[] _freeList;
     private int _freeListCount = 0;
     private readonly GraphicsDevice _gd;
     private readonly ResourceLayout _resourceLayout;
-
-    public ResourceSet ResourceSet { get; private set; }
-    public DeviceBuffer DeviceBuffer { get; private set; }
     private bool _dirty = true;
 
+    /// <summary>
+    /// Gets the number of blocks in this buffer.
+    /// </summary>
+    public int BlocksCount { get; private set; }
+
+    /// <summary>
+    /// Gets the size of each block in this buffer.
+    /// </summary>
+    public int BlockSize { get; private set; }
+
+    /// <summary>
+    /// Gets the total size of this buffer in bytes.
+    /// </summary>
+    public int SizeInBytes { get; private set; }
+
+    /// <summary>
+    /// Gets the resource set that can be used to bind this buffer to a shader.
+    /// </summary>
+    public ResourceSet ResourceSet { get; private set; }
+
+    /// <summary>
+    /// Gets the device buffer that is used to store the data.
+    /// </summary>
+    public DeviceBuffer DeviceBuffer { get; private set; }
+
+    /// <summary>
+    /// Gets or sets the name of this buffer.
+    /// </summary>
     public string Name { get => this.DeviceBuffer.Name; set => this.DeviceBuffer.Name = value; }
 
-    public bool IsFull => (this._freeListCount == 0);
+    /// <summary>
+    /// Gets a value indicating whether this buffer is full.
+    /// </summary>
+    public bool IsFull => this._freeListCount == 0;
 
+    /// <summary>
+    /// Gets the ID of this buffer.
+    /// </summary>
     public int Id { get; private set; }
 
     public unsafe DataBuffer(GraphicsDevice gd, int blocksCount, int blockSize, ResourceLayout resourceLayout)
     {
-        this.Id = ++DataBuffer._count;
+        this.Id = ++_count;
         this._gd = gd;
         this.BlockSize = blockSize;
         this.BlocksCount = blocksCount;
@@ -60,6 +86,10 @@ internal partial class DataBuffer : IDisposable
         this._freeListCount = this.BlocksCount;
     }
 
+    /// <summary>
+    /// Uploads the data to the GPU.
+    /// </summary>
+    /// <param name="commandList">The command list to use.</param>
     public void UploadToGPU(CommandList commandList)
     {
         if (!this._dirty) return;
@@ -67,6 +97,11 @@ internal partial class DataBuffer : IDisposable
         this._dirty = false;
     }
 
+    /// <summary>
+    /// Requests a block of data from this buffer.
+    /// </summary>
+    /// <returns>The requested block.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when there are no free blocks left in this buffer.</exception>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public DataBlock RequestBlock()
     {
@@ -79,6 +114,10 @@ internal partial class DataBuffer : IDisposable
         return new DataBlock(this, this._freeList[this._freeListCount]);
     }
 
+    /// <summary>
+    /// Frees a block of data in this buffer.
+    /// </summary>
+    /// <param name="offset">The offset of the block to free.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void FreeBlock(int offset)
     {
@@ -86,6 +125,12 @@ internal partial class DataBuffer : IDisposable
         this._freeListCount++;
     }
 
+    /// <summary>
+    /// Writes a value to the buffer.
+    /// </summary>
+    /// <typeparam name="T">The type of the value to write.</typeparam>
+    /// <param name="offset">The offset to write to.</param>
+    /// <param name="data">The value to write.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Write<T>(int offset, ref T data) where T : unmanaged
     {
@@ -93,6 +138,12 @@ internal partial class DataBuffer : IDisposable
         this._dirty = true;
     }
 
+    /// <summary>
+    /// Writes a value to the buffer.
+    /// </summary>
+    /// <typeparam name="T">The type of the value to write.</typeparam>
+    /// <param name="offset">The offset to write to.</param>
+    /// <param name="data">The value to write.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public unsafe void WriteSpan<T>(int offset, ReadOnlySpan<T> data) where T : unmanaged
     {
@@ -104,12 +155,21 @@ internal partial class DataBuffer : IDisposable
         this._dirty = true;
     }
 
+    /// <summary>
+    /// Reads a value from the buffer.
+    /// </summary>
+    /// <typeparam name="T">The type of the value to read.</typeparam>
+    /// <param name="offset">The offset to read from.</param>
+    /// <returns>The value read.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T Read<T>(int offset) where T : struct
     {
         return Marshal.PtrToStructure<T>(this._data + offset);
     }
 
+    /// <summary>
+    /// Dispose this buffer.
+    /// </summary>
     public void Dispose()
     {
         Marshal.FreeHGlobal(this._data);
