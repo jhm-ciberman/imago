@@ -2,7 +2,7 @@ using System;
 using System.Numerics;
 using LifeSim.Utils;
 
-namespace LifeSim;
+namespace LifeSim.Utils;
 
 /// <summary>
 /// Represents a 2D rectangle.

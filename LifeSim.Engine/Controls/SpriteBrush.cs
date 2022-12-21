@@ -3,6 +3,7 @@ using System.Numerics;
 using LifeSim.Engine.Rendering;
 using LifeSim.Engine.Resources;
 using LifeSim.Engine.SceneGraph;
+using LifeSim.Utils;
 
 namespace LifeSim.Engine.Controls;
 

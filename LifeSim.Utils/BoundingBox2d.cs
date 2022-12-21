@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Numerics;
 
-namespace LifeSim;
+namespace LifeSim.Utils;
 
 /// <summary>
 /// Represents a Bounding box in 2d space.

@@ -1,4 +1,7 @@
 #pragma warning disable IDE1006, IDE0066, IDE0009, CA1822, CA1050
+
+namespace LifeSim.Utils;
+
 // MIT License
 //
 // Copyright(c) 2020 Jordan Peck (jordan.me2@gmail.com)

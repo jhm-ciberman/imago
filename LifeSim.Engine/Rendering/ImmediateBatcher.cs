@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using LifeSim.Engine.Meshes;
+using LifeSim.Utils;
 using Veldrid;
 
 namespace LifeSim.Engine.Rendering;

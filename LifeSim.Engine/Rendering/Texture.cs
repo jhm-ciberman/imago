@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using Veldrid;
+using Vector2Int = LifeSim.Utils.Vector2Int;
 
 namespace LifeSim.Engine.Rendering;
 
@@ -73,7 +74,7 @@ public class Texture : ITexture
         }
     }
 
-    public void Fill(Color fillColor)
+    public void Fill(Utils.Color fillColor)
     {
         for (int i = 0; i < this._data.Length; i += 4)
         {

@@ -2,7 +2,7 @@ using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
-namespace LifeSim;
+namespace LifeSim.Utils;
 
 public static class MathUtils
 {

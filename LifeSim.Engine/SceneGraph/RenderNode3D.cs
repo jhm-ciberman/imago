@@ -2,6 +2,7 @@ using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using LifeSim.Engine.Rendering;
+using LifeSim.Utils;
 using Veldrid.Utilities;
 
 namespace LifeSim.Engine.SceneGraph;

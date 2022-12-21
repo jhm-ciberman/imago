@@ -1,5 +1,6 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
+using LifeSim.Utils;
 
 namespace LifeSim.Engine.Rendering;
 

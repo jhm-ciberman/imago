@@ -1,3 +1,5 @@
+using LifeSim.Utils;
+
 namespace LifeSim.Engine.Rendering;
 
 public class RenderSettings : ObservableObject

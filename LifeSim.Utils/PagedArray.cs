@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace LifeSim;
+namespace LifeSim.Utils;
 
 public class PagedArray<T> : ICollection<T> where T : class
 {

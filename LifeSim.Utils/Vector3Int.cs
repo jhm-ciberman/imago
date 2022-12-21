@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
-namespace LifeSim;
+namespace LifeSim.Utils;
 
 /// <summary>
 /// Represents a 3D vector with integer components.

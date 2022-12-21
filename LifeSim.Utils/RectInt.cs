@@ -1,6 +1,6 @@
 using System;
 
-namespace LifeSim;
+namespace LifeSim.Utils;
 
 public struct RectInt
 {

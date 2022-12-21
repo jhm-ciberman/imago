@@ -1,3 +1,5 @@
+using LifeSim.Utils;
+
 namespace LifeSim.Engine.Resources;
 
 // Based in "A Thousand Ways to Pack the Bin - A Practical Approach to Two-Dimensional Rectangle Bin Packing" (2010)

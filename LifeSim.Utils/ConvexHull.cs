@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
-namespace LifeSim;
+namespace LifeSim.Utils;
 
 public static class ConvexHull
 {

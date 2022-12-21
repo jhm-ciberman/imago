@@ -1,6 +1,6 @@
 using System.Numerics;
 
-namespace LifeSim;
+namespace LifeSim.Utils;
 
 
 /// <summary>
