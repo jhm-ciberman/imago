@@ -1,6 +1,6 @@
 using System;
 
-namespace LifeSim.Utils;
+namespace LifeSim.Support;
 
 /// <summary>
 /// Interface for commands.

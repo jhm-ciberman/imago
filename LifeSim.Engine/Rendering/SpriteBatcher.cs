@@ -7,7 +7,7 @@ using FontStashSharp.Interfaces;
 using LifeSim.Engine.Rendering;
 using LifeSim.Engine.Resources;
 using LifeSim.Engine.SceneGraph;
-using LifeSim.Utils;
+using LifeSim.Support;
 using Veldrid;
 
 namespace LifeSim.Engine.Rendering;

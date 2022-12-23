@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
-namespace LifeSim.Utils;
+namespace LifeSim.Support;
 
 public readonly struct ColorF
 {

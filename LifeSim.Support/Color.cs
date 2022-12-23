@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 // supress IDE0057 (I don't want to use the range operator here)
 #pragma warning disable IDE0057
 
-namespace LifeSim.Utils;
+namespace LifeSim.Support;
 
 [StructLayout(LayoutKind.Sequential)]
 public readonly struct Color

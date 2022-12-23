@@ -2,18 +2,30 @@ using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
-namespace LifeSim.Utils;
+namespace LifeSim.Support;
 
 public static class MathUtils
 {
     private const float K_EPSILON_NORMAL_SQRT = 1e-15f;
 
+    /// <summary>
+    /// Gets the value of pi divided by two.
+    /// </summary>
     public static float HalfPi { get; } = MathF.PI / 2f;
 
+    /// <summary>
+    /// Gets the value of two times pi.
+    /// </summary>
     public static float TwoPi { get; } = MathF.PI * 2f;
 
+    /// <summary>
+    /// Gets the value of pi divided by 180.
+    /// </summary>
     public static float DegToRad { get; } = MathF.PI / 180f;
 
+    /// <summary>
+    /// Gets the value of 180 divided by pi.
+    /// </summary>
     public static float RadToDeg { get; } = 180f / MathF.PI;
 
     /// <summary>
@@ -26,15 +38,6 @@ public static class MathUtils
     public static float Lerp(float a, float b, float t)
     {
         return a + (b - a) * t;
-    }
-
-    public static float MoveTowardsAngle(float current, float target, float maxDelta)
-    {
-        float deltaAngle = DeltaAngle(current, target);
-        if (-maxDelta < deltaAngle && deltaAngle < maxDelta)
-            return target;
-        target = current + deltaAngle;
-        return MoveTowards(current, target, maxDelta);
     }
 
     /// <summary>

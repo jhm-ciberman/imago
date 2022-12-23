@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace LifeSim.Utils;
+namespace LifeSim.Support;
 
 public static class Benchmark
 {

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace LifeSim.Utils;
+namespace LifeSim.Support;
 
 /// <summary>
 /// Represents an object that can notify listeners of changes.

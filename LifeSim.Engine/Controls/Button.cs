@@ -2,7 +2,7 @@ using System;
 using System.Numerics;
 using LifeSim.Engine.Rendering;
 using LifeSim.Engine.Resources;
-using LifeSim.Utils;
+using LifeSim.Support;
 
 namespace LifeSim.Engine.Controls;
 

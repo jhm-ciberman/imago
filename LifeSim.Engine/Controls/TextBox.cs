@@ -2,7 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Numerics;
 using LifeSim.Engine.Rendering;
-using LifeSim.Utils;
+using LifeSim.Support;
 using Veldrid;
 
 namespace LifeSim.Engine.Controls;

@@ -1,4 +1,4 @@
-using LifeSim.Utils;
+using LifeSim.Support;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 

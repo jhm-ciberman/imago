@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace LifeSim.Utils;
+namespace LifeSim.Support;
 
 /// <summary>
 /// Represents a catalog of identifiable objects.

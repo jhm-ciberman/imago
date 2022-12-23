@@ -5,7 +5,7 @@ using System.Numerics;
 using FontStashSharp.Interfaces;
 using LifeSim.Engine.Rendering;
 using LifeSim.Engine.SceneGraph;
-using LifeSim.Utils;
+using LifeSim.Support;
 using Veldrid;
 using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;

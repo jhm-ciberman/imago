@@ -1,7 +1,7 @@
 using System;
 using System.Numerics;
 using LifeSim.Engine.Meshes;
-using LifeSim.Utils;
+using LifeSim.Support;
 using static glTFLoader.Schema.Accessor;
 
 namespace LifeSim.Engine.Gltf;

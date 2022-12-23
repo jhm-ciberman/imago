@@ -1,4 +1,4 @@
-namespace LifeSim.Utils;
+namespace LifeSim.Support;
 
 /// <summary>
 /// Represents a reference to a catalog element. The reference is resolved at runtime in a lazy fashion.

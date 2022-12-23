@@ -1,4 +1,4 @@
-namespace LifeSim.Utils;
+namespace LifeSim.Support;
 
 /// <summary>
 /// Represents an identifiable object.

@@ -2,13 +2,16 @@ using System;
 using System.Diagnostics;
 using System.Numerics;
 
-namespace LifeSim.Utils;
+namespace LifeSim.Support;
 
 /// <summary>
 /// Represents a Bounding box in 2d space.
 /// </summary>
 public struct BoundingBox2d
 {
+    /// <summary>
+    /// Gets an empty bounding box.
+    /// </summary>
     public static BoundingBox2d Empty => new BoundingBox2d(Vector2.Zero, Vector2.Zero);
 
     /// <summary>

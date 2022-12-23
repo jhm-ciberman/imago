@@ -1,5 +1,5 @@
 using System;
-namespace LifeSim.Utils;
+namespace LifeSim.Support;
 
 /// <summary>
 /// Represents a command that can be executed.

@@ -1,6 +1,6 @@
 using System.Numerics;
 
-namespace LifeSim.Utils;
+namespace LifeSim.Support;
 
 /// <summary>
 /// Represents a 2d ray.

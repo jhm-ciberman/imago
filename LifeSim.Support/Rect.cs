@@ -1,8 +1,8 @@
 using System;
 using System.Numerics;
-using LifeSim.Utils;
+using LifeSim.Support;
 
-namespace LifeSim.Utils;
+namespace LifeSim.Support;
 
 /// <summary>
 /// Represents a 2D rectangle.
