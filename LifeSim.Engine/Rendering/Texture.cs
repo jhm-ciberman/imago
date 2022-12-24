@@ -8,18 +8,52 @@ using Vector2Int = LifeSim.Support.Vector2Int;
 
 namespace LifeSim.Engine.Rendering;
 
+/// <summary>
+/// Represents a texture.
+/// </summary>
 public class Texture : ITexture
 {
     private static readonly EventArgs _eventArgs = new EventArgs();
+
+    /// <summary>
+    /// A delegate for when a texture is dirty.
+    /// </summary>
+    /// <param name="texture">The texture that is dirty.</param>
     public delegate void TextureDirtyHandler(Texture texture);
+
+    /// <summary>
+    /// An event that is fired when a texture is dirty.
+    /// </summary>
     public static event TextureDirtyHandler? TextureDirty;
 
+    /// <summary>
+    /// A delegate for when a texture is resized.
+    /// </summary>
     public event EventHandler? Resized;
+
+    /// <summary>
+    /// Gets a small white texture.
+    /// </summary>
     public static Texture White { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets a small black texture.
+    /// </summary>
     public static Texture Black { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets a small transparent texture.
+    /// </summary>
     public static Texture Transparent { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets a small magenta texture.
+    /// </summary>
     public static Texture Magenta { get; private set; } = null!;
 
+    /// <summary>
+    /// Initializes the default textures.
+    /// </summary>
     public static void InitializeDefaultTextures()
     {
         White = new ImageTexture(new Image<Rgba32>(2, 2, new Rgba32(255, 255, 255, 255)));
@@ -28,16 +62,42 @@ public class Texture : ITexture
         Magenta = new ImageTexture(new Image<Rgba32>(2, 2, new Rgba32(255, 0, 255, 255)));
     }
 
+    /// <summary>
+    /// Gets the Veldrid texture object.
+    /// </summary>
     public Veldrid.Texture VeldridTexture { get; protected set; }
+
+    /// <summary>
+    /// Gets the Veldrid sampler object.
+    /// </summary>
     public Sampler VeldridSampler { get; private set; }
+
+    /// <summary>
+    /// Gets the width of the texture.
+    /// </summary>
     public uint Width { get; protected set; }
+
+    /// <summary>
+    /// Gets the height of the texture.
+    /// </summary>
     public uint Height { get; protected set; }
+
+    /// <summary>
+    /// Gets the number of mip levels.
+    /// </summary>
     public uint MipLevels { get; protected set; }
 
     private byte[] _data;
 
     private bool _isDirty = false;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Texture"/> class.
+    /// </summary>
+    /// <param name="width">The width of the texture.</param>
+    /// <param name="height">The height of the texture.</param>
+    /// <param name="mipLevels">The number of mip levels.</param>
+    /// <param name="srgb">Whether to use sRGB.</param>
     public Texture(uint width, uint height, uint mipLevels = 0, bool srgb = true)
     {
         this.Width = width;
@@ -59,12 +119,24 @@ public class Texture : ITexture
         this.OnTextureDirty();
     }
 
+    /// <summary>
+    /// Gets the ImGui binding for this texture.
+    /// </summary>
     public IntPtr ImGuiBinding => Renderer.Instance.GetOrCreateImGuiBinding(this);
 
+    /// <summary>
+    /// Gets the size of the texture.
+    /// </summary>
     public Vector2Int Size => new Vector2Int((int)this.Width, (int)this.Height);
 
+    /// <summary>
+    /// Gets or sets the name of the texture.
+    /// </summary>
     public string Name { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Called when the texture is dirty.
+    /// </summary>
     protected void OnTextureDirty()
     {
         if (!this._isDirty)
@@ -74,6 +146,9 @@ public class Texture : ITexture
         }
     }
 
+    /// <summary>
+    /// Fills the texture with a color.
+    /// </summary>
     public void Fill(Support.Color fillColor)
     {
         for (int i = 0; i < this._data.Length; i += 4)
@@ -86,14 +161,18 @@ public class Texture : ITexture
         this.OnTextureDirty();
     }
 
-    public unsafe void SetDataFromImage(Image<Rgba32> img)
+    /// <summary>
+    /// Sets the texture data from an image.
+    /// </summary>
+    /// <param name="image">The image.</param>
+    public unsafe void SetDataFromImage(Image<Rgba32> image)
     {
-        if (img.Width != this.Width || img.Height != this.Height)
+        if (image.Width != this.Width || image.Height != this.Height)
         {
             throw new ArgumentException("Image size does not match texture size.");
         }
 
-        if (!img.TryGetSinglePixelSpan(out Span<Rgba32> pixels))
+        if (!image.TryGetSinglePixelSpan(out Span<Rgba32> pixels))
         {
             throw new ArgumentException("Image is not in RGBA32 format.");
         }
@@ -104,6 +183,15 @@ public class Texture : ITexture
         this.OnTextureDirty();
     }
 
+    /// <summary>
+    /// Sets the texture data from a byte array of RGBA data.
+    /// </summary>
+    /// <param name="data">The data.</param>
+    /// <param name="x">The x coordinate to start at.</param>
+    /// <param name="y">The y coordinate to start at.</param>
+    /// <param name="width">The width of the data.</param>
+    /// <param name="height">The height of the data.</param>
+    /// <exception cref="ArgumentException">Texture size does not match data size.</exception>
     public unsafe void SetDataFromBytes(int x, int y, int width, int height, byte[] data)
     {
         if (x + width > this.Width || y + height > this.Height)
@@ -129,6 +217,11 @@ public class Texture : ITexture
         this.OnTextureDirty();
     }
 
+    /// <summary>
+    /// Updates the texture on the GPU.
+    /// </summary>
+    /// <param name="gd">The graphics device.</param>
+    /// <param name="cl">The command list.</param>
     public void Update(GraphicsDevice gd, CommandList cl)
     {
         if (!this._isDirty) return;
@@ -154,6 +247,11 @@ public class Texture : ITexture
         }
     }
 
+    /// <summary>
+    /// Resizes the texture.
+    /// </summary>
+    /// <param name="width">The new width.</param>
+    /// <param name="height">The new height.</param>
     public void Resize(uint width, uint height)
     {
         this.Width = width;
@@ -163,10 +261,11 @@ public class Texture : ITexture
         this.Resized?.Invoke(this, _eventArgs);
     }
 
+    /// <summary>
+    /// Disposes the resources used by the texture.
+    /// </summary>
     public virtual void Dispose()
     {
         Renderer.Instance.DisposeWhenIdle(this.VeldridTexture);
     }
-
-
 }

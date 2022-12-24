@@ -9,10 +9,6 @@ namespace LifeSim.Support;
 /// </summary>
 public struct Rect : IEquatable<Rect>
 {
-    public static Rect Empty { get; } = new Rect(0, 0, 0, 0);
-
-    public static Rect Infinite { get; } = new Rect(float.NegativeInfinity, float.NegativeInfinity, float.PositiveInfinity, float.PositiveInfinity);
-
     /// <summary>
     /// The X position of the rectangle.
     /// </summary>

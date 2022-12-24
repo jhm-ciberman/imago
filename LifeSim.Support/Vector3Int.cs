@@ -25,7 +25,14 @@ public struct Vector3Int : IEquatable<Vector3Int>
     /// </summary>
     public int Z;
 
+    /// <summary>
+    /// Gets a vector with all components set to 1.
+    /// </summary>
     public static Vector3Int One => new Vector3Int(1, 1, 1);
+
+    /// <summary>
+    /// Gets a vector with all components set to 0.
+    /// </summary>
     public static Vector3Int Zero => new Vector3Int(0, 0, 0);
 
     /// <summary>

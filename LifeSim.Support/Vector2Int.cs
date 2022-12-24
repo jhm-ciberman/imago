@@ -20,7 +20,14 @@ public struct Vector2Int : IEquatable<Vector2Int>
     /// </summary>
     public int Y;
 
+    /// <summary>
+    /// Gets a vector with both components set to 1.
+    /// </summary>
     public static Vector2Int One => new Vector2Int(1, 1);
+
+    /// <summary>
+    /// Gets a vector with both components set to 0.
+    /// </summary>
     public static Vector2Int Zero => new Vector2Int(0, 0);
 
     /// <summary>
