@@ -122,10 +122,10 @@ internal class Renderable : IDisposable
     public Renderable(Renderer renderer, int instanceDataSize)
     {
         this.PickingId = ++_count;
-        this._transformDataBlock = renderer.Storage.RequestTransformDataBlock();
+        this._transformDataBlock = renderer.RequestTransformDataBlock();
         this.TransformResourceSet = this._transformDataBlock.Buffer.ResourceSet;
 
-        this._instanceDataBlock = renderer.Storage.RequestInstanceDataBlock(instanceDataSize);
+        this._instanceDataBlock = renderer.RequestInstanceDataBlock(instanceDataSize);
         this.InstanceResourceSet = this._instanceDataBlock.Buffer.ResourceSet;
     }
 

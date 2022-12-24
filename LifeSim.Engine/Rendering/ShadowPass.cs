@@ -27,9 +27,9 @@ public partial class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
     private readonly ResourceLayout _resourceLayout;
     private readonly ResourceSet _resourceSet;
     private readonly GraphicsDevice _gd;
+    private readonly Renderer _renderer;
     private readonly DeviceBuffer _shadowmapInfoBuffer;
     private readonly RenderJob _renderJob;
-    private readonly SceneStorage _storage;
 
     private readonly ShadowCascade[] _cascades = new ShadowCascade[4];
     private Matrix4x4 _scalingMatrix;
@@ -38,11 +38,11 @@ public partial class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
 
     private readonly RenderQueue[] _renderQueues;
 
-    public ShadowPass(Renderer renderer, SceneStorage storage)
+    public ShadowPass(Renderer renderer)
     {
+        this._renderer = renderer;
         this._gd = renderer.GraphicsDevice;
         var factory = this._gd.ResourceFactory;
-        this._storage = storage;
 
         this._renderQueues = new RenderQueue[4];
         for (int i = 0; i < this._renderQueues.Length; i++)
@@ -184,14 +184,14 @@ public partial class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
         var resources = new List<ResourceLayout>
         {
             this._resourceLayout,
-            this._storage.TransformResourceLayout,
+            this._renderer.TransformResourceLayout,
             shaderVariant.MaterialResourceLayout,
-            this._storage.InstanceResourceLayout
+            this._renderer.InstanceResourceLayout
         };
 
         if (shaderVariant.VertexFormat.IsSkinned)
         {
-            resources.Add(this._storage.SkeletonResourceLayout);
+            resources.Add(this._renderer.SkeletonResourceLayout);
         }
 
         return resources.ToArray();

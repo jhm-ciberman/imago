@@ -15,6 +15,8 @@ namespace LifeSim.Engine.Rendering;
 
 public partial class Renderer : IDisposable
 {
+    public const int MIN_BUFFER_BLOCKS = 1024;
+
     /// <summary>
     /// Gets the global instance of the renderer.
     /// </summary>
@@ -39,11 +41,6 @@ public partial class Renderer : IDisposable
     /// Gets the shadow map pass of the renderer.
     /// </summary>
     internal IPipelineProvider ShadowMapPass => this._shadowPass;
-
-    /// <summary>
-    /// Gets the <see cref="SceneStorage"/> of the renderer.
-    /// </summary>
-    internal SceneStorage Storage { get; }
 
     /// <summary>
     /// Gets the current Veldrid's GraphicsDevice.
@@ -88,6 +85,20 @@ public partial class Renderer : IDisposable
     private readonly Dictionary<ResourceLayoutDescription, ResourceLayout> _resourceLayoutCache = new();
     private readonly SwapPopList<Renderable> _renderables = new();
 
+    private readonly List<DataBuffer> _instanceDataBuffers = new List<DataBuffer>();
+    private readonly List<DataBuffer> _transformDataBuffers = new List<DataBuffer>();
+    private readonly List<DataBuffer> _skeletonDataBuffers = new List<DataBuffer>();
+
+    private readonly List<Texture> _dirtyTextures = new();
+    private readonly List<MaterialBase> _dirtyMaterials = new();
+    private readonly List<Renderable> _dirtyRenderables = new();
+
+    public ResourceLayout TransformResourceLayout { get; }
+    public ResourceLayout InstanceResourceLayout { get; }
+    public ResourceLayout SkeletonResourceLayout { get; }
+
+    private readonly List<Skeleton> _skeletons = new List<Skeleton>();
+
     /// <summary>
     /// Initializes a new instance of the <see cref="Renderer"/> class.
     /// </summary>
@@ -122,7 +133,24 @@ public partial class Renderer : IDisposable
         this._fullScreenRenderTexture = new SwapchainRenderTexture();
         this.MainRenderTexture = new RenderTexture((uint)window.Width, (uint)window.Height);
 
-        this.Storage = new SceneStorage(this);
+        this.InstanceResourceLayout = this._factory.CreateResourceLayout(new ResourceLayoutDescription(
+            new ResourceLayoutElementDescription("InstanceDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex | ShaderStages.Fragment)
+        ));
+        this.InstanceResourceLayout.Name = "InstanceData Resource Layout";
+
+        this.TransformResourceLayout = this._factory.CreateResourceLayout(new ResourceLayoutDescription(
+            new ResourceLayoutElementDescription("TransformDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
+        ));
+        this.TransformResourceLayout.Name = "TransformData Resource Layout";
+
+        this.SkeletonResourceLayout = this._factory.CreateResourceLayout(new ResourceLayoutDescription(
+            new ResourceLayoutElementDescription("BonesDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
+        ));
+        this.SkeletonResourceLayout.Name = "BonesData Resource Layout";
+
+        Renderable.PipelineDirty += this.OnRenderablePipelineDirty;
+        MaterialBase.MaterialResourceSetDirty += this.OnMaterialResourceSetDirty;
+        Texture.TextureDirty += this.OnTextureDirty;
 
         this.Settings = new RenderSettings(this);
 
@@ -130,12 +158,12 @@ public partial class Renderer : IDisposable
         this._mousePickerPass = new MousePickingPass(this, this.MainRenderTexture);
         this._gizmosPass = new GizmosPass(this, this.MainRenderTexture);
         this._particlesPass = new ParticlesPass(this, this.MainRenderTexture);
-        this._shadowPass = new ShadowPass(this, this.Storage);
-        this._forwardPass = new ForwardPass(this, this.Storage, this.MainRenderTexture, this._shadowPass);
+        this._shadowPass = new ShadowPass(this);
+        this._forwardPass = new ForwardPass(this, this.MainRenderTexture, this._shadowPass);
         this._spritesPass = new SpritesPass(this, this.MainRenderTexture);
         this._skyDomePass = new SkyDomePass(this, this.MainRenderTexture);
-
         this._fullScreenPass = new FullScreenPass(this, this.MainRenderTexture, this._fullScreenRenderTexture);
+
         this._commandList = this._factory.CreateCommandList();
 
         this._fence = this._factory.CreateFence(false);
@@ -170,8 +198,6 @@ public partial class Renderer : IDisposable
         }
     }
 
-    public int SpritePassDrawCallCount => this._spritesPass.DrawCallCount;
-
     public void DisposeWhenIdle(IDisposable disposable)
     {
         lock (this._disposeCollector)
@@ -195,16 +221,6 @@ public partial class Renderer : IDisposable
         return renderable;
     }
 
-    public void SetMousePickingPosition(Vector2 position)
-    {
-        this._mousePickerPass.SetMousePosition(position);
-    }
-
-    public void UpdateImGui(float deltaTime, InputSnapshot inputSnapshot)
-    {
-        this._imGuiPass.Update(deltaTime, inputSnapshot);
-    }
-
     public void Render(Scene scene)
     {
         this.RenderStarted?.Invoke(this, EventArgs.Empty);
@@ -214,31 +230,17 @@ public partial class Renderer : IDisposable
         scene.UpdateSceneDirtyTransforms();
 
         this._commandList.Begin();
-        this.Storage.UpdateBuffers(this._commandList);
-
-        this._commandList.SetFramebuffer(this.MainRenderTexture.Framebuffer);
-
-        if (scene.BackgroundColor != null)
-        {
-            ColorF col = scene.BackgroundColor.Value;
-            this._commandList.ClearColorTarget(0, new RgbaFloat(col.R, col.G, col.B, col.A));
-        }
+        this.UpdateBuffers(this._commandList);
+        this.ClearRenderTarget(this._commandList, scene);
         this._commandList.End();
 
-        for (int i = 0; i < this._jobs.Count; i++)
-        {
-            this._jobs[i].Execute(scene);
-        }
-
+        this.RenderJobs(scene);
 
         this.GraphicsDevice.WaitForIdle();
         this._fence.Reset();
         this.GraphicsDevice.SubmitCommands(this._commandList, this._fence);
 
-        for (int i = 0; i < this._jobs.Count; i++)
-        {
-            this._jobs[i].SubmitCommands(this.GraphicsDevice);
-        }
+        this.SubmitJobs();
 
         this._disposeCollector.DisposeAll();
         this.GraphicsDevice.SwapBuffers();
@@ -246,9 +248,30 @@ public partial class Renderer : IDisposable
         this.RenderEnded?.Invoke(this, EventArgs.Empty);
     }
 
-    public IntPtr GetOrCreateImGuiBinding(Texture texture)
+    private void ClearRenderTarget(CommandList commandList, Scene scene)
     {
-        return this._imGuiPass.GetOrCreateBinding(texture);
+        commandList.SetFramebuffer(this.MainRenderTexture.Framebuffer);
+        if (scene.BackgroundColor != null)
+        {
+            ColorF col = scene.BackgroundColor.Value;
+            commandList.ClearColorTarget(0, new RgbaFloat(col.R, col.G, col.B, col.A));
+        }
+    }
+
+    private void RenderJobs(Scene scene)
+    {
+        for (int i = 0; i < this._jobs.Count; i++)
+        {
+            this._jobs[i].Execute(scene);
+        }
+    }
+
+    private void SubmitJobs()
+    {
+        for (int i = 0; i < this._jobs.Count; i++)
+        {
+            this._jobs[i].SubmitCommands(this.GraphicsDevice);
+        }
     }
 
     public ResourceLayout GetResourceLayout(ResourceLayoutDescription description)
@@ -280,6 +303,177 @@ public partial class Renderer : IDisposable
         this._imGuiPass.Resize(viewportWidth, viewportHeight);
     }
 
+    internal DataBlock RequestTransformDataBlock()
+    {
+        lock (this._transformDataBuffers)
+        {
+            for (int i = 0; i < this._transformDataBuffers.Count; i++)
+            {
+                var buffer = this._transformDataBuffers[i];
+                if (!buffer.IsFull)
+                {
+                    return buffer.RequestBlock();
+                }
+            }
+
+            var newBuffer = new DataBuffer(this.GraphicsDevice, MIN_BUFFER_BLOCKS, 64, this.TransformResourceLayout);
+            newBuffer.Name = "TransformDataBuffer " + this._transformDataBuffers.Count;
+            this._transformDataBuffers.Add(newBuffer);
+            return newBuffer.RequestBlock();
+        }
+    }
+
+    internal DataBlock RequestInstanceDataBlock(int instanceDataBlockSize)
+    {
+        lock (this._instanceDataBuffers)
+        {
+            for (int i = 0; i < this._instanceDataBuffers.Count; i++)
+            {
+                var buffer = this._instanceDataBuffers[i];
+                if (buffer.BlockSize == instanceDataBlockSize && !buffer.IsFull)
+                {
+                    return buffer.RequestBlock();
+                }
+            }
+
+            var newBuffer = new DataBuffer(this.GraphicsDevice, MIN_BUFFER_BLOCKS, instanceDataBlockSize, this.InstanceResourceLayout);
+            newBuffer.Name = "InstanceDataBuffer " + this._instanceDataBuffers.Count;
+            this._instanceDataBuffers.Add(newBuffer);
+            return newBuffer.RequestBlock();
+        }
+    }
+
+    internal void RegisterSkeleton(Skeleton skeleton)
+    {
+        lock (this._skeletons)
+        {
+            this._skeletons.Add(skeleton);
+        }
+    }
+
+    internal void UnregisterSkeleton(Skeleton skeleton)
+    {
+        lock (this._skeletons)
+        {
+            this._skeletons.Remove(skeleton);
+        }
+    }
+
+    internal DataBlock RequestSkeletonDataBlock()
+    {
+        lock (this._skeletonDataBuffers)
+        {
+            for (int i = 0; i < this._skeletonDataBuffers.Count; i++)
+            {
+                var buffer = this._skeletonDataBuffers[i];
+                if (!buffer.IsFull)
+                {
+                    return buffer.RequestBlock();
+                }
+            }
+
+            var newBuffer = new DataBuffer(this.GraphicsDevice, MIN_BUFFER_BLOCKS / Skeleton.MAX_NUMBER_OF_BONES, Skeleton.MAX_NUMBER_OF_BONES * 64, this.SkeletonResourceLayout);
+            newBuffer.Name = "SkeletonDataBuffer " + this._skeletonDataBuffers.Count;
+            this._skeletonDataBuffers.Add(newBuffer);
+            return newBuffer.RequestBlock();
+        }
+    }
+
+    internal void UpdateBuffers(CommandList commandList)
+    {
+        lock (this._instanceDataBuffers)
+        {
+            for (int i = 0; i < this._instanceDataBuffers.Count; i++)
+            {
+                this._instanceDataBuffers[i].UploadToGPU(commandList);
+            }
+        }
+
+        lock (this._transformDataBuffers)
+        {
+            for (int i = 0; i < this._transformDataBuffers.Count; i++)
+            {
+                this._transformDataBuffers[i].UploadToGPU(commandList);
+            }
+        }
+
+        lock (this._skeletons)
+        {
+            foreach (var skeleton in this._skeletons)
+            {
+                skeleton.Update();
+            }
+        }
+
+        lock (this._instanceDataBuffers)
+        {
+            for (int i = 0; i < this._skeletonDataBuffers.Count; i++)
+            {
+                this._skeletonDataBuffers[i].UploadToGPU(commandList);
+            }
+        }
+
+        lock (this._dirtyMaterials)
+        {
+            if (this._dirtyMaterials.Count > 0)
+            {
+                foreach (var material in this._dirtyMaterials)
+                {
+                    material.Update(this._factory);
+                }
+                this._dirtyMaterials.Clear();
+            }
+        }
+
+        lock (this._dirtyTextures)
+        {
+            if (this._dirtyTextures.Count > 0)
+            {
+                foreach (var resource in this._dirtyTextures)
+                {
+                    resource.Update(this.GraphicsDevice, commandList);
+                }
+                this._dirtyTextures.Clear();
+            }
+        }
+
+        lock (this._dirtyRenderables)
+        {
+            if (this._dirtyRenderables.Count > 0)
+            {
+                foreach (var renderable in this._dirtyRenderables)
+                {
+                    renderable.Update(this);
+                }
+                this._dirtyRenderables.Clear();
+            }
+        }
+    }
+
+    private void OnTextureDirty(Texture texture)
+    {
+        lock (this._dirtyTextures)
+        {
+            this._dirtyTextures.Add(texture);
+        }
+    }
+
+    private void OnMaterialResourceSetDirty(MaterialBase material)
+    {
+        lock (this._dirtyMaterials)
+        {
+            this._dirtyMaterials.Add(material);
+        }
+    }
+
+    private void OnRenderablePipelineDirty(Renderable renderable)
+    {
+        lock (this._dirtyRenderables)
+        {
+            this._dirtyRenderables.Add(renderable);
+        }
+    }
+
     /// <summary>
     /// Disposes the renderer.
     /// </summary>
@@ -295,6 +489,26 @@ public partial class Renderer : IDisposable
         foreach (var job in this._jobs)
         {
             job.Dispose();
+        }
+
+        for (int i = 0; i < this._instanceDataBuffers.Count; i++)
+        {
+            this._instanceDataBuffers[i].Dispose();
+        }
+
+        for (int i = 0; i < this._transformDataBuffers.Count; i++)
+        {
+            this._transformDataBuffers[i].Dispose();
+        }
+
+        for (int i = 0; i < this._skeletonDataBuffers.Count; i++)
+        {
+            this._skeletonDataBuffers[i].Dispose();
+        }
+
+        foreach (var skeleton in this._skeletons)
+        {
+            skeleton.Dispose();
         }
     }
 
@@ -317,4 +531,21 @@ public partial class Renderer : IDisposable
     {
         this._forwardPass.RemoveImmediateRenderNode(node);
     }
+
+    public IntPtr GetOrCreateImGuiBinding(Texture texture)
+    {
+        return this._imGuiPass.GetOrCreateBinding(texture);
+    }
+
+    public void SetMousePickingPosition(Vector2 position)
+    {
+        this._mousePickerPass.SetMousePosition(position);
+    }
+
+    public void UpdateImGui(float deltaTime, InputSnapshot inputSnapshot)
+    {
+        this._imGuiPass.Update(deltaTime, inputSnapshot);
+    }
+
+    public int SpritePassDrawCallCount => this._spritesPass.DrawCallCount;
 }

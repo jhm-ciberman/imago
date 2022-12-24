@@ -24,18 +24,19 @@ public class Skeleton : IDisposable
 
     public Matrix4x4 InverseRootTransform { get; set; }
 
-    private readonly SceneStorage _storage;
+    private readonly Renderer _renderer;
+
     private DataBlock _dataBlock;
 
     public Skeleton(IList<Node3D> joints, IList<Matrix4x4> inverseBindMatrices)
     {
-        this._storage = Renderer.Instance.Storage;
+        this._renderer = Renderer.Instance;
         this.Joints = joints;
         this.InverseBindMatrices = inverseBindMatrices;
         this.BonesMatrices = new Matrix4x4[this.Joints.Count];
-        this._dataBlock = this._storage.RequestSkeletonDataBlock();
+        this._dataBlock = this._renderer.RequestSkeletonDataBlock();
         this.ResourceSet = this._dataBlock.Buffer.ResourceSet;
-        this._storage.RegisterSkeleton(this);
+        this._renderer.RegisterSkeleton(this);
     }
 
 
@@ -52,6 +53,6 @@ public class Skeleton : IDisposable
     public void Dispose()
     {
         this._dataBlock.Dispose();
-        this._storage.UnregisterSkeleton(this);
+        this._renderer.UnregisterSkeleton(this);
     }
 }

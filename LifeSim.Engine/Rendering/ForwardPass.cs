@@ -45,7 +45,6 @@ internal class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
     private readonly ResourceLayout _resourceLayout;
     private ResourceSet _resourceSet;
     private readonly IRenderTexture _renderTexture;
-    private readonly SceneStorage _storage;
     private readonly RenderJob _renderJob;
     private readonly RenderQueue _opaqueRenderQueue;
     private readonly RenderQueue _transparentRenderQueue;
@@ -54,12 +53,11 @@ internal class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
 
     private readonly List<ImmediateRenderNode3D> _immediateRenderNodes = new List<ImmediateRenderNode3D>();
 
-    public ForwardPass(Renderer renderer, SceneStorage storage, IRenderTexture mainRenderTexture, ShadowPass shadowPass)
+    public ForwardPass(Renderer renderer, IRenderTexture mainRenderTexture, ShadowPass shadowPass)
     {
         this._renderer = renderer;
         this._gd = renderer.GraphicsDevice;
         var factory = this._gd.ResourceFactory;
-        this._storage = storage;
         this._shadowPass = shadowPass;
 
         this._resourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
@@ -237,14 +235,14 @@ internal class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
         var resources = new List<ResourceLayout>
         {
             this._resourceLayout,
-            this._storage.TransformResourceLayout,
+            this._renderer.TransformResourceLayout,
             shaderVariant.MaterialResourceLayout,
-            this._storage.InstanceResourceLayout
+            this._renderer.InstanceResourceLayout
         };
 
         if (shaderVariant.VertexFormat.IsSkinned)
         {
-            resources.Add(this._storage.SkeletonResourceLayout);
+            resources.Add(this._renderer.SkeletonResourceLayout);
         }
 
         return resources.ToArray();
