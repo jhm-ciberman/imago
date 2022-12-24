@@ -40,7 +40,6 @@ public struct SkinnedVertex
                 new VertexElementDescription("Weights", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float4)
             ));
             _vertexFormat.IsSkinned = true;
-            _vertexFormat.IsSurface = true;
             return _vertexFormat;
         }
     }

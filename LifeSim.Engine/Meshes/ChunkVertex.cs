@@ -73,7 +73,6 @@ public struct ChunkVertex
                 new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
                 new VertexElementDescription("Light", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2)
             ));
-            _vertexFormat.IsSurface = true;
             return _vertexFormat;
         }
     }

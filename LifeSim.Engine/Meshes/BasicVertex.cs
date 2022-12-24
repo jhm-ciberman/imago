@@ -39,7 +39,6 @@ public struct BasicVertex
                 new VertexElementDescription("Normal", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
                 new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2)
             ));
-            _vertexFormat.IsSurface = true;
             return _vertexFormat;
         }
     }
