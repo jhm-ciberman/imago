@@ -27,7 +27,15 @@ internal class Renderable : IDisposable
 
     private static uint _count;
     private Matrix4x4 _transform = Matrix4x4.Identity;
+
+    /// <summary>
+    /// Gets the center position of this renderable.
+    /// </summary>
     public Vector3 CenterPosition { get; private set; }
+
+    /// <summary>
+    /// Gets the bounding box of this renderable.
+    /// </summary>
     public BoundingBox BoundingBox { get; private set; }
 
     private DataBlock _transformDataBlock;
@@ -117,15 +125,15 @@ internal class Renderable : IDisposable
     /// <summary>
     /// Initializes a new instance of the <see cref="Renderable"/> class.
     /// </summary>
-    /// <param name="renderer">The renderer.</param>
-    /// <param name="instanceDataSize">Size of the instance data.</param>
-    public Renderable(Renderer renderer, int instanceDataSize)
+    /// <param name="transformDataBlock">The transform data block.</param>
+    /// <param name="instanceDataBlock">The instance data block.</param>
+    public Renderable(DataBlock transformDataBlock, DataBlock instanceDataBlock)
     {
         this.PickingId = ++_count;
-        this._transformDataBlock = renderer.RequestTransformDataBlock();
+        this._transformDataBlock = transformDataBlock;
         this.TransformResourceSet = this._transformDataBlock.Buffer.ResourceSet;
 
-        this._instanceDataBlock = renderer.RequestInstanceDataBlock(instanceDataSize);
+        this._instanceDataBlock = instanceDataBlock;
         this.InstanceResourceSet = this._instanceDataBlock.Buffer.ResourceSet;
     }
 

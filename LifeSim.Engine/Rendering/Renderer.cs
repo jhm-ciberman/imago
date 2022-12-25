@@ -216,7 +216,9 @@ public partial class Renderer : IDisposable
 
     internal Renderable MakeRenderable(int instanceDataBlockSize)
     {
-        var renderable = new Renderable(this, instanceDataBlockSize);
+        var transformDataBlock = this.RequestTransformDataBlock();
+        var instanceDataBlock = this.RequestInstanceDataBlock(instanceDataBlockSize);
+        var renderable = new Renderable(transformDataBlock, instanceDataBlock);
         this._renderables.Add(renderable);
         return renderable;
     }
@@ -303,7 +305,7 @@ public partial class Renderer : IDisposable
         this._imGuiPass.Resize(viewportWidth, viewportHeight);
     }
 
-    internal DataBlock RequestTransformDataBlock()
+    private DataBlock RequestTransformDataBlock()
     {
         lock (this._transformDataBuffers)
         {
@@ -323,7 +325,7 @@ public partial class Renderer : IDisposable
         }
     }
 
-    internal DataBlock RequestInstanceDataBlock(int instanceDataBlockSize)
+    private DataBlock RequestInstanceDataBlock(int instanceDataBlockSize)
     {
         lock (this._instanceDataBuffers)
         {
