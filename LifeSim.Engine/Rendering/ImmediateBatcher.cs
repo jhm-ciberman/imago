@@ -8,7 +8,9 @@ using Veldrid;
 
 namespace LifeSim.Engine.Rendering;
 
-// Draws a mesh in immediate mode trying to batch as much as possible.
+/// <summary>
+/// This class is used to batch draw calls together in immediate mode.
+/// </summary>
 public class ImmediateBatcher : IPipelineProvider, IDisposable
 {
     private struct PassDataBuffer
@@ -73,6 +75,11 @@ public class ImmediateBatcher : IPipelineProvider, IDisposable
 
     private readonly ITexture _defaultTexture;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ImmediateBatcher"/> class.
+    /// </summary>
+    /// <param name="gd">The graphics device.</param>
+    /// <param name="renderTexture">The target render texture.</param>
     public ImmediateBatcher(GraphicsDevice gd, IRenderTexture renderTexture)
     {
         this._gd = gd;
@@ -115,6 +122,11 @@ public class ImmediateBatcher : IPipelineProvider, IDisposable
         this._defaultTexture = Texture.White;
     }
 
+    /// <summary>
+    /// Begins a new batch.
+    /// </summary>
+    /// <param name="cl">The command list to record the batch to.</param>
+    /// <param name="viewProjectionMatrix">The view projection matrix.</param>
     public void Begin(CommandList cl, Matrix4x4 viewProjectionMatrix)
     {
         this._commandList = cl;
@@ -163,6 +175,15 @@ public class ImmediateBatcher : IPipelineProvider, IDisposable
         }
     }
 
+    /// <summary>
+    /// Draws a batch of vertices in immediate mode.
+    /// </summary>
+    /// <param name="shader">The shader to use. If null, the default shader will be used.</param>
+    /// <param name="texture">The texture to use. If null, the default texture will be used.</param>
+    /// <param name="indices">The indices of the vertices to draw.</param>
+    /// <param name="positions">The positions of the vertices to draw.</param>
+    /// <param name="texCoords">The texture coordinates of the vertices to draw.</param>
+    /// <param name="color">The color to tint the vertices with.</param>
     public void Draw(Shader? shader, ITexture? texture, ushort[] indices, Vector3[] positions, Vector2[] texCoords, Color color)
     {
         Debug.Assert(positions.Length == texCoords.Length, "The number of positions and texture coordinates must be the same.");
@@ -180,6 +201,9 @@ public class ImmediateBatcher : IPipelineProvider, IDisposable
         this._indexCount += indices.Length;
     }
 
+    /// <summary>
+    /// Ends the immediate mode batch and flushes the remaining vertices.
+    /// </summary>
     public void End()
     {
         this.Flush();
