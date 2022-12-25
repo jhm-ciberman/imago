@@ -245,7 +245,7 @@ public partial class Renderer : IDisposable
 
         scene.OnBeforeRender();
         scene.RenderImGui();
-        scene.UpdateSceneDirtyTransforms();
+        scene.UpdateTransforms();
 
         this._commandList.Begin();
         this.UpdateBuffers(this._commandList);
