@@ -36,6 +36,8 @@ public class Scene
 
     private readonly List<Node3D> _transformDirtyList = new List<Node3D>();
 
+    public PickingManger Picking { get; } = new PickingManger();
+
     public Node3D Root { get; }
 
     public Scene()

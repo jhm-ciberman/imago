@@ -24,8 +24,6 @@ internal class Renderable : IDisposable
     internal delegate void PipelineDirtyHandler(Renderable renderable);
     internal static event RenderQueuesChangedHandler? RenderQueuesChanged;
     internal static event PipelineDirtyHandler? PipelineDirty;
-
-    private static uint _count;
     private Matrix4x4 _transform = Matrix4x4.Identity;
 
     /// <summary>
@@ -129,7 +127,6 @@ internal class Renderable : IDisposable
     /// <param name="instanceDataBlock">The instance data block.</param>
     public Renderable(DataBlock transformDataBlock, DataBlock instanceDataBlock)
     {
-        this.PickingId = ++_count;
         this._transformDataBlock = transformDataBlock;
         this.TransformResourceSet = this._transformDataBlock.Buffer.ResourceSet;
 
@@ -431,7 +428,8 @@ internal class Renderable : IDisposable
         var settings = renderer.Settings;
         RenderFlags flags = RenderFlags.None;
         if (settings.ForceWireframe) flags |= RenderFlags.Wireframe;
-        if (this.PickingId != 0) flags |= RenderFlags.MousePick;
+        //if (this.PickingId != 0) flags |= RenderFlags.MousePick;
+        flags |= RenderFlags.MousePick;
         if (this.RenderQueues.HasFlag(RenderQueues.Transparent)) flags |= RenderFlags.Transparent;
         if (settings.EnableFog) flags |= RenderFlags.Fog;
         if (settings.EnablePixelPerfectShadows) flags |= RenderFlags.PixelPerfactShadows;

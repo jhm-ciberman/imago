@@ -12,10 +12,6 @@ public class MousePickingPass : IDisposable, IRenderingPass
     private readonly Veldrid.Texture _pixelTexture;
     internal RenderTexture RenderTexture { get; set; }
 
-    private uint _pickingIdCounter = 0; // 0 is reserved for "no object"
-
-    private readonly Dictionary<uint, RenderNode3D> _pickingIdToRenderNode = new Dictionary<uint, RenderNode3D>();
-
 
     public MousePickingPass(Renderer renderer, RenderTexture renderTexture)
     {
@@ -48,15 +44,6 @@ public class MousePickingPass : IDisposable, IRenderingPass
         this._mousePosition = mousePos;
     }
 
-    public RenderNode3D? SelectedRenderNode
-    {
-        get
-        {
-            if (this.ObjectID == 0) return null;
-            this._pickingIdToRenderNode.TryGetValue(this.ObjectID, out var renderNode);
-            return renderNode;
-        }
-    }
 
     public void Render(CommandList cl, Scene scene)
     {
@@ -80,6 +67,8 @@ public class MousePickingPass : IDisposable, IRenderingPass
         var mappedResource = this._gd.Map<uint>(this._pixelTexture, MapMode.Read);
         this.ObjectID = mappedResource[0, 0];
         this._gd.Unmap(this._pixelTexture);
+
+        scene.Picking.HighlightedPickable = scene.Picking.GetPickable(this.ObjectID);
     }
 
     public void Dispose()
@@ -87,20 +76,5 @@ public class MousePickingPass : IDisposable, IRenderingPass
         this._pixelTexture.Dispose();
     }
 
-    public uint RegisterPickable(RenderNode3D renderNode)
-    {
-        if (this._pickingIdCounter == uint.MaxValue)
-        {
-            throw new InvalidOperationException("Picking ID counter overflow.");
-        }
 
-        var pickingId = ++this._pickingIdCounter;
-        this._pickingIdToRenderNode.Add(pickingId, renderNode);
-        return pickingId;
-    }
-
-    public void UnregisterPickable(uint pickingId)
-    {
-        this._pickingIdToRenderNode.Remove(pickingId);
-    }
 }

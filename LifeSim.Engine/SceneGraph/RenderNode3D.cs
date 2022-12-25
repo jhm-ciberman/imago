@@ -10,7 +10,7 @@ namespace LifeSim.Engine.SceneGraph;
 /// <summary>
 /// A node capable of rendering a mesh with a material.
 /// </summary>
-public class RenderNode3D : Node3D
+public class RenderNode3D : Node3D, IPickable
 {
     // Contiguos layout
     [StructLayout(LayoutKind.Sequential)]
@@ -73,15 +73,7 @@ public class RenderNode3D : Node3D
         {
             if (this._isPickable == value) return;
             this._isPickable = value;
-            if (value)
-            {
-                this._renderable.PickingId = Renderer.Instance.RegisterPickable(this);
-            }
-            else
-            {
-                Renderer.Instance.UnregisterPickable(this._renderable.PickingId);
-                this._renderable.PickingId = 0;
-            }
+            this.UpdateRegistrationWithPickingManager();
         }
     }
 
@@ -153,6 +145,15 @@ public class RenderNode3D : Node3D
         }
     }
 
+    /// <summary>
+    /// Gets or sets the picking id of this node.
+    /// </summary>
+    uint IPickable.PickId
+    {
+        get => this._renderable.PickingId;
+        set => this._renderable.PickingId = value;
+    }
+
     protected bool SetInstanceData<T>(ref T backingField, T value) where T : unmanaged
     {
         if (backingField.Equals(value)) return false;
@@ -176,6 +177,7 @@ public class RenderNode3D : Node3D
     internal override void AttachToSceneRecursive(Scene scene)
     {
         base.AttachToSceneRecursive(scene);
+        this.UpdateRegistrationWithPickingManager();
         this._renderable.Visible = this._visible;
     }
 
@@ -186,8 +188,29 @@ public class RenderNode3D : Node3D
             throw new InvalidOperationException("Cannot detach from scene if not attached to one.");
         }
 
-        base.DetachFromSceneRecursive();
         this._renderable.Visible = false;
+        this.UpdateRegistrationWithPickingManager();
+        base.DetachFromSceneRecursive();
+    }
+
+    private void UpdateRegistrationWithPickingManager()
+    {
+        if (this.Scene is null) return;
+
+        if (this._isPickable)
+        {
+            if (this._renderable.PickingId == 0)
+            {
+                this.Scene.Picking.RegisterPickable(this);
+            }
+        }
+        else
+        {
+            if (this._renderable.PickingId != 0)
+            {
+                this.Scene.Picking.UnregisterPickable(this);
+            }
+        }
     }
 
     protected override void Dispose(bool disposing)

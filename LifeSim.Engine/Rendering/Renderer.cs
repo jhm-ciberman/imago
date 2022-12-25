@@ -67,11 +67,6 @@ public partial class Renderer : IDisposable
     /// </summary>
     public RenderSettings Settings { get; }
 
-    /// <summary>
-    /// Gets the currently selected <see cref="RenderNode3D"/> under the mouse.
-    /// </summary>
-    public RenderNode3D? SelectedRenderNode => this._mousePickerPass.SelectedRenderNode;
-
     private readonly SwapchainRenderTexture _fullScreenRenderTexture;
     private readonly ResourceFactory _factory;
     private readonly FullScreenPass _fullScreenPass;
@@ -518,16 +513,6 @@ public partial class Renderer : IDisposable
         {
             skeleton.Dispose();
         }
-    }
-
-    public uint RegisterPickable(RenderNode3D renderNode)
-    {
-        return this._mousePickerPass.RegisterPickable(renderNode);
-    }
-
-    public void UnregisterPickable(uint pickingId)
-    {
-        this._mousePickerPass.UnregisterPickable(pickingId);
     }
 
     public void AddImmediateRenderNode(ImmediateRenderNode3D node)
