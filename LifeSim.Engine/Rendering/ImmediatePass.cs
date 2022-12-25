@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using LifeSim.Engine.Meshes;
+using LifeSim.Engine.SceneGraph;
 using LifeSim.Support;
 using Veldrid;
 
@@ -11,7 +12,7 @@ namespace LifeSim.Engine.Rendering;
 /// <summary>
 /// This class is used to batch draw calls together in immediate mode.
 /// </summary>
-public class ImmediateBatcher : IPipelineProvider, IDisposable
+public class ImmediatePass : IPipelineProvider, IRenderingPass, IDisposable, IImediateRenderer
 {
     private struct PassDataBuffer
     {
@@ -76,13 +77,13 @@ public class ImmediateBatcher : IPipelineProvider, IDisposable
     private readonly ITexture _defaultTexture;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ImmediateBatcher"/> class.
+    /// Initializes a new instance of the <see cref="ImmediatePass"/> class.
     /// </summary>
-    /// <param name="gd">The graphics device.</param>
+    /// <param name="renderer">The renderer.</param>
     /// <param name="renderTexture">The target render texture.</param>
-    public ImmediateBatcher(GraphicsDevice gd, IRenderTexture renderTexture)
+    public ImmediatePass(Renderer renderer, IRenderTexture renderTexture)
     {
-        this._gd = gd;
+        this._gd = renderer.GraphicsDevice;
         this._renderTexture = renderTexture;
         var factory = this._gd.ResourceFactory;
 
@@ -122,6 +123,21 @@ public class ImmediateBatcher : IPipelineProvider, IDisposable
         this._defaultTexture = Texture.White;
     }
 
+    public void Render(CommandList cl, Scene scene)
+    {
+        if (scene.Camera is null) return;
+        if (scene.ImmediateRenderables.Count == 0) return;
+        if (this._renderTexture is not RenderTexture renderTexture) return;
+
+        cl.SetFramebuffer(renderTexture.ColorOnlyFramebuffer);
+        this.Begin(cl, scene.Camera.ViewProjectionMatrix);
+        foreach (var obj in scene.ImmediateRenderables)
+        {
+            obj.Draw(this);
+        }
+        this.End();
+    }
+
     /// <summary>
     /// Begins a new batch.
     /// </summary>
@@ -139,7 +155,7 @@ public class ImmediateBatcher : IPipelineProvider, IDisposable
         cl.UpdateBuffer(this._passDataBuffer, 0, new PassDataBuffer { ViewProjection = viewProjectionMatrix });
     }
 
-    private void Prepare(Shader shader, ITexture texture, int indexCount, int vertexCount)
+    private void Prepare(int indexCount, int vertexCount)
     {
         if (this._vertexCount + vertexCount > this._maxVertexBatchSize)
         {
@@ -161,13 +177,29 @@ public class ImmediateBatcher : IPipelineProvider, IDisposable
         {
             throw new InvalidOperationException($"The number of provided indices exceeds the maximum batch size. {this._indexCount + indexCount} > {this._maxIndexBatchSize}");
         }
+    }
 
+    /// <summary>
+    /// Sets the shader to use for the next subsequent draw calls.
+    /// </summary>
+    /// <param name="shader">The shader to use or null to use the default shader.</param>
+    public void SetShader(Shader? shader)
+    {
+        shader ??= this._defaultShader;
         if (this._currentBatchShader != shader)
         {
             this.Flush();
             this._currentBatchShader = shader;
         }
+    }
 
+    /// <summary>
+    /// Sets the texture to use for the next subsequent draw calls.
+    /// </summary>
+    /// <param name="texture">The texture to use or null to use the default texture.</param>
+    public void SetTexture(ITexture? texture)
+    {
+        texture ??= this._defaultTexture;
         if (this._currentBatchTexture != texture)
         {
             this.Flush();
@@ -178,17 +210,15 @@ public class ImmediateBatcher : IPipelineProvider, IDisposable
     /// <summary>
     /// Draws a batch of vertices in immediate mode.
     /// </summary>
-    /// <param name="shader">The shader to use. If null, the default shader will be used.</param>
-    /// <param name="texture">The texture to use. If null, the default texture will be used.</param>
     /// <param name="indices">The indices of the vertices to draw.</param>
     /// <param name="positions">The positions of the vertices to draw.</param>
     /// <param name="texCoords">The texture coordinates of the vertices to draw.</param>
     /// <param name="color">The color to tint the vertices with.</param>
-    public void Draw(Shader? shader, ITexture? texture, ushort[] indices, Vector3[] positions, Vector2[] texCoords, Color color)
+    public void DrawVertices(ushort[] indices, Vector3[] positions, Vector2[] texCoords, Color color)
     {
         Debug.Assert(positions.Length == texCoords.Length, "The number of positions and texture coordinates must be the same.");
 
-        this.Prepare(shader ?? this._defaultShader, texture ?? this._defaultTexture, indices.Length, positions.Length);
+        this.Prepare(indices.Length, positions.Length);
 
         Array.Copy(indices, 0, this._indices, this._indexCount, indices.Length);
 
@@ -199,6 +229,67 @@ public class ImmediateBatcher : IPipelineProvider, IDisposable
 
         this._vertexCount += positions.Length;
         this._indexCount += indices.Length;
+    }
+
+    /// <summary>
+    /// Draws a quad in immediate mode. The quad is drawn using two triangles. The vertices should be in counter-clockwise order.
+    /// </summary>
+    /// <param name="v1">The first vertex.</param>
+    /// <param name="v2">The second vertex.</param>
+    /// <param name="v3">The third vertex.</param>
+    /// <param name="v4">The fourth vertex.</param>
+    /// <param name="t1">The first texture coordinate.</param>
+    /// <param name="t2">The second texture coordinate.</param>
+    /// <param name="t3">The third texture coordinate.</param>
+    /// <param name="t4">The fourth texture coordinate.</param>
+    /// <param name="color">The color to tint the quad with.</param>
+    public void DrawQuad(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4, Vector2 t1, Vector2 t2, Vector2 t3, Vector2 t4, Color color)
+    {
+        this.Prepare(6, 4);
+
+        this._vertices[this._vertexCount + 0] = new Vertex(v1, t1, color);
+        this._vertices[this._vertexCount + 1] = new Vertex(v2, t2, color);
+        this._vertices[this._vertexCount + 2] = new Vertex(v3, t3, color);
+        this._vertices[this._vertexCount + 3] = new Vertex(v4, t4, color);
+
+        int i = this._vertexCount;
+        this._indices[this._indexCount + 0] = (ushort)i;
+        this._indices[this._indexCount + 1] = (ushort)(i + 1);
+        this._indices[this._indexCount + 2] = (ushort)(i + 2);
+
+        this._indices[this._indexCount + 3] = (ushort)i;
+        this._indices[this._indexCount + 4] = (ushort)(i + 2);
+        this._indices[this._indexCount + 5] = (ushort)(i + 3);
+
+        this._vertexCount += 4;
+        this._indexCount += 6;
+    }
+
+    /// <summary>
+    /// Draws a triangle in immediate mode. The vertex order is clockwise.
+    /// </summary>
+    /// <param name="v1">The first vertex.</param>
+    /// <param name="v2">The second vertex.</param>
+    /// <param name="v3">The third vertex.</param>
+    /// <param name="t1">The first texture coordinate.</param>
+    /// <param name="t2">The second texture coordinate.</param>
+    /// <param name="t3">The third texture coordinate.</param>
+    /// <param name="color">The color to tint the triangle with.</param>
+    public void DrawTriangle(Vector3 v1, Vector3 v2, Vector3 v3, Vector2 t1, Vector2 t2, Vector2 t3, Color color)
+    {
+        this.Prepare(3, 3);
+
+        this._vertices[this._vertexCount + 0] = new Vertex(v1, t1, color);
+        this._vertices[this._vertexCount + 1] = new Vertex(v2, t2, color);
+        this._vertices[this._vertexCount + 2] = new Vertex(v3, t3, color);
+
+        int i = this._vertexCount;
+        this._indices[this._indexCount + 0] = (ushort)(i + 0);
+        this._indices[this._indexCount + 1] = (ushort)(i + 1);
+        this._indices[this._indexCount + 2] = (ushort)(i + 2);
+
+        this._vertexCount += 3;
+        this._indexCount += 3;
     }
 
     /// <summary>

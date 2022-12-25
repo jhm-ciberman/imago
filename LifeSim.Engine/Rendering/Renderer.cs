@@ -74,6 +74,7 @@ public partial class Renderer : IDisposable
     private readonly GizmosPass _gizmosPass;
     private readonly Fence _fence;
     private readonly ForwardPass _forwardPass;
+    private readonly ImmediatePass _immediatePass;
     private readonly ShadowPass _shadowPass;
     private readonly SpritesPass _spritesPass;
     private readonly ImGuiPass _imGuiPass;
@@ -161,6 +162,7 @@ public partial class Renderer : IDisposable
         this._particlesPass = new ParticlesPass(this, this.MainRenderTexture);
         this._shadowPass = new ShadowPass(this);
         this._forwardPass = new ForwardPass(this, this.MainRenderTexture, this._shadowPass);
+        this._immediatePass = new ImmediatePass(this, this.MainRenderTexture);
         this._spritesPass = new SpritesPass(this, this.MainRenderTexture);
         this._skyDomePass = new SkyDomePass(this, this.MainRenderTexture);
         this._fullScreenPass = new FullScreenPass(this, this.MainRenderTexture, this._fullScreenRenderTexture);
@@ -176,6 +178,7 @@ public partial class Renderer : IDisposable
             new CommandListJob("Forward", this._factory,
                 this._forwardPass),
             new CommandListJob("Extra", this._factory,
+                this._immediatePass,
                 this._skyDomePass,
                 this._mousePickerPass,
                 this._particlesPass,
@@ -529,16 +532,6 @@ public partial class Renderer : IDisposable
         {
             skeleton.Dispose();
         }
-    }
-
-    public void AddImmediateRenderNode(ImmediateRenderNode3D node)
-    {
-        this._forwardPass.AddImmediateRenderNode(node);
-    }
-
-    public void RemoveImmediateRenderNode(ImmediateRenderNode3D node)
-    {
-        this._forwardPass.RemoveImmediateRenderNode(node);
     }
 
     public IntPtr GetOrCreateImGuiBinding(Texture texture)
