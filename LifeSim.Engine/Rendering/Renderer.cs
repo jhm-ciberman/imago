@@ -545,6 +545,4 @@ public partial class Renderer : IDisposable
     {
         return this._imGuiPass.GetOrCreateBinding(texture);
     }
-
-    public int SpritePassDrawCallCount => this._spritesPass.DrawCallCount;
 }
