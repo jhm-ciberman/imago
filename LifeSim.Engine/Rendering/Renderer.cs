@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using FontStashSharp.Interfaces;
 using LifeSim.Engine.Rendering;
 using LifeSim.Engine.SceneGraph;
@@ -214,15 +215,30 @@ public partial class Renderer : IDisposable
         }
     }
 
-    internal Renderable MakeRenderable(int instanceDataBlockSize)
+    internal Renderable MakeRenderable<TInstanceData>() where TInstanceData : unmanaged
     {
         var transformDataBlock = this.RequestTransformDataBlock();
-        var instanceDataBlock = this.RequestInstanceDataBlock(instanceDataBlockSize);
+        var instanceDataBlock = this.RequestInstanceDataBlock(Marshal.SizeOf<TInstanceData>());
         var renderable = new Renderable(transformDataBlock, instanceDataBlock);
         this._renderables.Add(renderable);
         return renderable;
     }
 
+    /// <summary>
+    /// Updates the renderer.
+    /// </summary>
+    /// <param name="deltaTime">The time since the last update in seconds.</param>
+    /// <param name="inputSnapshot">The current input state.</param>
+    public void Update(float deltaTime, InputSnapshot inputSnapshot)
+    {
+        this._imGuiPass.Update(deltaTime, inputSnapshot);
+        this._mousePickerPass.SetMousePosition(inputSnapshot.MousePosition);
+    }
+
+    /// <summary>
+    /// Renders the scene.
+    /// </summary>
+    /// <param name="scene">The scene to render.</param>
     public void Render(Scene scene)
     {
         this.RenderStarted?.Invoke(this, EventArgs.Empty);
@@ -528,16 +544,6 @@ public partial class Renderer : IDisposable
     public IntPtr GetOrCreateImGuiBinding(Texture texture)
     {
         return this._imGuiPass.GetOrCreateBinding(texture);
-    }
-
-    public void SetMousePickingPosition(Vector2 position)
-    {
-        this._mousePickerPass.SetMousePosition(position);
-    }
-
-    public void UpdateImGui(float deltaTime, InputSnapshot inputSnapshot)
-    {
-        this._imGuiPass.Update(deltaTime, inputSnapshot);
     }
 
     public int SpritePassDrawCallCount => this._spritesPass.DrawCallCount;

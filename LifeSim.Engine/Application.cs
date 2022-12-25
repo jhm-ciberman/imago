@@ -147,7 +147,7 @@ public class Application : IDisposable
             {
                 scene.Update((float)this.DeltaTime);
 
-                this._renderer.UpdateImGui((float)this.DeltaTime, this._input.InputSnapshot);
+                this._renderer.Update((float)this.DeltaTime, this._input.InputSnapshot);
 
                 try
                 {
@@ -164,7 +164,6 @@ public class Application : IDisposable
             }
 
             this._input.UpdateFrameInput(); // For next frame
-            this._renderer.SetMousePickingPosition(this._input.MousePosition);
         }
     }
 

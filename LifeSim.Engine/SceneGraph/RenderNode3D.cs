@@ -33,7 +33,7 @@ public class RenderNode3D : Node3D, IPickable
     {
         this._instanceData = new InstanceData();
 
-        this._renderable = Renderer.Instance.MakeRenderable(Marshal.SizeOf<InstanceData>());
+        this._renderable = Renderer.Instance.MakeRenderable<InstanceData>();
         this._renderable.SetInstanceData(this._instanceData);
     }
 
