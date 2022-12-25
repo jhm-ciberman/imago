@@ -533,9 +533,4 @@ public partial class Renderer : IDisposable
             skeleton.Dispose();
         }
     }
-
-    public IntPtr GetOrCreateImGuiBinding(Texture texture)
-    {
-        return this._imGuiPass.GetOrCreateBinding(texture);
-    }
 }

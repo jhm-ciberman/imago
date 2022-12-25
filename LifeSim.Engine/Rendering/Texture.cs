@@ -122,7 +122,7 @@ public class Texture : ITexture
     /// <summary>
     /// Gets the ImGui binding for this texture.
     /// </summary>
-    public IntPtr ImGuiBinding => Renderer.Instance.GetOrCreateImGuiBinding(this);
+    public IntPtr ImGuiBinding => ImGuiPass.Instance.GetOrCreateBinding(this);
 
     /// <summary>
     /// Gets the size of the texture.
