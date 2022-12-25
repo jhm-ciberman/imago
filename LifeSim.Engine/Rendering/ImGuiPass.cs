@@ -20,6 +20,13 @@ public class ImGuiPass : IDisposable, IRenderingPass
         {
             ImGui.GetIO().NativePtr->IniFilename = null;
         }
+
+        renderer.ViewportResized += this.OnViewportResized;
+    }
+
+    private void OnViewportResized(object? sender, ViewportResizedEventArgs e)
+    {
+        this._imguiRenderer.WindowResized((int)e.Width, (int)e.Height);
     }
 
     public void Dispose()
@@ -30,11 +37,6 @@ public class ImGuiPass : IDisposable, IRenderingPass
     public void Update(float deltaTime, InputSnapshot inputSnapshot)
     {
         this._imguiRenderer.Update(deltaTime, inputSnapshot);
-    }
-
-    public void Resize(uint width, uint height)
-    {
-        this._imguiRenderer.WindowResized((int)width, (int)height);
     }
 
     public IntPtr GetOrCreateBinding(Texture texture)

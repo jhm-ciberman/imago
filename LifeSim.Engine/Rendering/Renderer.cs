@@ -33,6 +33,11 @@ public partial class Renderer : IDisposable
     public event EventHandler? RenderEnded;
 
     /// <summary>
+    /// Event that is raised when the viewport is resized.
+    /// </summary>
+    public event EventHandler<ViewportResizedEventArgs>? ViewportResized;
+
+    /// <summary>
     /// Get the forward pass of the renderer.
     /// </summary>
     internal IPipelineProvider ForwardPass => this._forwardPass;
@@ -302,7 +307,8 @@ public partial class Renderer : IDisposable
         this.GraphicsDevice.WaitForIdle();
         this._fullScreenRenderTexture.Resize(width, height);
         this.MainRenderTexture.Resize(viewportWidth, viewportHeight);
-        this._imGuiPass.Resize(viewportWidth, viewportHeight);
+
+        this.ViewportResized?.Invoke(this, new ViewportResizedEventArgs(viewportWidth, viewportHeight));
     }
 
     private DataBlock RequestTransformDataBlock()
