@@ -1,7 +1,7 @@
 using System.Collections.Generic;
+using LifeSim.Engine;
 using LifeSim.Engine.Rendering;
 using LifeSim.Engine.SceneGraph;
-using LifeSim.Engine;
 
 namespace LifeSim.Engine.Gltf;
 
