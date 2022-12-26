@@ -12,6 +12,7 @@ internal enum RenderQueues : byte
     None = 0,
     Opaque = 1 << 0,
     Transparent = 1 << 1,
+    OpaqueOrTransparent = Opaque | Transparent,
     ShadowCaster = 1 << 2,
     All = Opaque | Transparent | ShadowCaster,
 }

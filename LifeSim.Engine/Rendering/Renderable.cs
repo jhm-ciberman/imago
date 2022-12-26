@@ -408,33 +408,34 @@ internal class Renderable : IDisposable
             return;
         }
 
-        bool isTransparent = this.RenderQueues.HasFlag(RenderQueues.Transparent);
-        bool isOpaque = this.RenderQueues.HasFlag(RenderQueues.Opaque);
-        bool isShadowcaster = this.RenderQueues.HasFlag(RenderQueues.ShadowCaster);
-
-        // Update the forward pipeline
-        this.ForwardPipeline = isOpaque || isTransparent
-            ? this._material.GetForwardPipeline(renderer, this._mesh.VertexFormat, this.GetRenderFlags(renderer))
-            : null;
-
-        // Update the shadow map pipeline
-        this.ShadowMapPipeline = isShadowcaster
-            ? this._material.GetShadowmapPipeline(renderer, this._mesh.VertexFormat)
-            : null;
+        this.ForwardPipeline = this.GetForwardPipeline(this._material, renderer);
+        this.ShadowMapPipeline = this.GetShadowmapPipeline(this._material, renderer);
     }
 
-    private RenderFlags GetRenderFlags(Renderer renderer)
+    private Veldrid.Pipeline? GetForwardPipeline(Material material, Renderer renderer)
     {
+        bool isVisible = (this.RenderQueues & RenderQueues.OpaqueOrTransparent) != 0;
+        if (!isVisible) return null;
+
         var settings = renderer.Settings;
         RenderFlags flags = RenderFlags.None;
         if (settings.ForceWireframe) flags |= RenderFlags.Wireframe;
-        //if (this.PickingId != 0) flags |= RenderFlags.MousePick;
         flags |= RenderFlags.MousePick;
         if (this.RenderQueues.HasFlag(RenderQueues.Transparent)) flags |= RenderFlags.Transparent;
         if (settings.EnableFog) flags |= RenderFlags.Fog;
         if (settings.EnablePixelPerfectShadows) flags |= RenderFlags.PixelPerfactShadows;
 
-        return flags;
+        return material.ForwardShader.GetPipeline(renderer.ForwardPass, this._mesh!.VertexFormat, material.RenderFlags | flags);
+    }
+
+    private Veldrid.Pipeline? GetShadowmapPipeline(Material material, Renderer renderer)
+    {
+        bool isShadowcaster = (this.RenderQueues & RenderQueues.ShadowCaster) != 0;
+        if (!isShadowcaster) return null;
+
+        RenderFlags shadowSupportFlags = RenderFlags.AlphaTest;
+        RenderFlags flags = material.RenderFlags & shadowSupportFlags;
+        return material.ShadowmapShader.GetPipeline(renderer.ShadowMapPass, this._mesh!.VertexFormat, flags);
     }
 
     /// <summary>

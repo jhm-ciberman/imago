@@ -16,7 +16,7 @@ public abstract class MaterialBase
 
     private bool _resourceSetDirty = false;
 
-    protected RenderFlags RenderFlags { get; set; } = RenderFlags.DepthTest | RenderFlags.DepthWrite | RenderFlags.ReceiveShadows;
+    public RenderFlags RenderFlags { get; protected set; } = RenderFlags.DepthTest | RenderFlags.DepthWrite | RenderFlags.ReceiveShadows;
 
     public bool DoubleSided { get => this.GetRenderFlag(RenderFlags.DoubleSided); set => this.SetRenderFlag(RenderFlags.DoubleSided, value); }
 
@@ -144,17 +144,5 @@ public class Material : MaterialBase
     public void Dispose()
     {
         this.ResourceSet?.Dispose();
-    }
-
-    public Pipeline GetForwardPipeline(Renderer renderer, VertexFormat vertexFormat, RenderFlags additionalFlags)
-    {
-        return this.ForwardShader.GetPipeline(renderer.ForwardPass, vertexFormat, this.RenderFlags | additionalFlags);
-    }
-
-    public Pipeline GetShadowmapPipeline(Renderer renderer, VertexFormat vertexFormat)
-    {
-        RenderFlags shadowSupportFlags = RenderFlags.AlphaTest;
-        RenderFlags flags = this.RenderFlags & shadowSupportFlags;
-        return this.ShadowmapShader.GetPipeline(renderer.ShadowMapPass, vertexFormat, flags);
     }
 }
