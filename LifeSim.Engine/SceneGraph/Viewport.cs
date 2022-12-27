@@ -1,7 +1,7 @@
 using System;
 using System.Numerics;
 
-namespace LifeSim.Engine.Rendering;
+namespace LifeSim.Engine.SceneGraph;
 
 public class Viewport
 {
@@ -40,9 +40,7 @@ public class Viewport
     public void Resize(uint width, uint height)
     {
         if (this.Width == width && this.Height == height)
-        {
             return;
-        }
         this.Width = width;
         this.Height = height;
         this.Resized?.Invoke(this, EventArgs.Empty);
@@ -71,7 +69,7 @@ public class Viewport
     /// <summary>
     /// Gets the aspect ratio of the viewport.
     /// </summary>
-    public float AspectRatio => (float)this.Width / (float)this.Height;
+    public float AspectRatio => this.Width / (float)this.Height;
 
     /// <summary>
     /// Gets the size of the viewport as a <see cref="Vector2"/>.

@@ -2,7 +2,7 @@ using System;
 using LifeSim.Engine.SceneGraph;
 using Veldrid;
 
-namespace LifeSim.Engine;
+namespace LifeSim.Engine.Rendering;
 
 public interface IRenderingPass : IDisposable
 {

@@ -1,14 +1,14 @@
 using System;
 using System.Diagnostics;
 using System.Runtime;
-using LifeSim.Engine;
+using LifeSim.Engine.Input;
 using LifeSim.Engine.Rendering;
 using LifeSim.Engine.Resources;
 using LifeSim.Engine.SceneGraph;
 using Veldrid;
 using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
-using Viewport = LifeSim.Engine.Rendering.Viewport;
+using Viewport = LifeSim.Engine.SceneGraph.Viewport;
 
 namespace LifeSim.Engine;
 

@@ -1,8 +1,9 @@
 using System;
 using System.Numerics;
+using LifeSim.Engine.Rendering;
 using LifeSim.Support;
 
-namespace LifeSim.Engine.Rendering;
+namespace LifeSim.Engine.SceneGraph;
 
 public class DirectionalLight
 {
@@ -18,9 +19,7 @@ public class DirectionalLight
         set
         {
             if (value == Vector3.Zero)
-            {
                 throw new ArgumentOutOfRangeException(nameof(value), "The light direction cannot be zero.");
-            }
 
             this._direction = Vector3.Normalize(value);
         }

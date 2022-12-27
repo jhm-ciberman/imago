@@ -4,7 +4,7 @@ using System.Numerics;
 using Veldrid;
 using Veldrid.Sdl2;
 
-namespace LifeSim.Engine;
+namespace LifeSim.Engine.Input;
 
 /// <summary>
 /// Captures and manages the mouse and keyboard input.
@@ -81,13 +81,11 @@ public class InputManager
     /// Initializes a new instance of the <see cref="InputManager"/> class.
     /// </summary>
     /// <param name="window">The window to capture input from.</param>
-    /// <exception cref="System.Exception">Thrown if the Input instance has already been created.</exception>
+    /// <exception cref="Exception">Thrown if the Input instance has already been created.</exception>
     public InputManager(Sdl2Window window)
     {
         if (_instance != null)
-        {
-            throw new System.Exception("Input already initialized");
-        }
+            throw new Exception("Input already initialized");
 
         _instance = this;
         this._window = window;
@@ -138,9 +136,7 @@ public class InputManager
         this._typedCharactersThisFrame = this.InputSnapshot.KeyCharPresses;
 
         if (this.TextEntered != null && this._typedCharactersThisFrame.Count > 0)
-        {
             this.TextEntered.Invoke(this, new TextEventArgs(this._typedCharactersThisFrame));
-        }
 
         var newPos = this.InputSnapshot.MousePosition;
         var center = new Vector2(this._window.Width / 2, this._window.Height / 2);

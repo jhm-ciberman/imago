@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using LifeSim.Engine.Controls;
-using LifeSim.Engine.Rendering;
 using LifeSim.Support;
 
 namespace LifeSim.Engine.SceneGraph;
@@ -161,7 +160,7 @@ public class Scene
     /// </summary>
     public virtual void OnBeforeRender()
     {
-        // 
+        //
     }
 
     /// <summary>
@@ -169,7 +168,7 @@ public class Scene
     /// </summary>
     public virtual void RenderImGui()
     {
-        // 
+        //
     }
 
     /// <summary>
