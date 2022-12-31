@@ -5,6 +5,26 @@ namespace LifeSim.Engine.Resources;
 
 public class TexturePacker
 {
+    private static TexturePacker? _instance = null;
+
+    /// <summary>
+    /// Gets or sets the default texture manager.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if the default texture manager is not set.</exception>
+    public static TexturePacker Default
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                throw new InvalidOperationException("Default texture manager is not set.");
+            }
+
+            return _instance;
+        }
+        set => _instance = value;
+    }
+
     /// <summary>
     /// Event that is raised when a new page is added to the packer.
     /// </summary>
@@ -51,6 +71,8 @@ public class TexturePacker
     /// <param name="srgb">Whether the texture pages of the default group should use the SRGB color space.</param>
     public TexturePacker(uint atlasSize, uint tileSize, bool srgb = false)
     {
+        _instance ??= this;
+
         this.AtlasSize = atlasSize;
         this.TileSize = tileSize;
         this.DefaultGroup = new TextureGroup("Default", atlasSize, tileSize, srgb);
