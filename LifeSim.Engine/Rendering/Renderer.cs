@@ -24,16 +24,6 @@ public partial class Renderer : IDisposable
     public static Renderer Instance { get; private set; } = null!;
 
     /// <summary>
-    /// Event that is raised at the start of the rendering of each frame.
-    /// </summary>
-    public event EventHandler? RenderStarted;
-
-    /// <summary>
-    /// Event that is raised at the end of the rendering of each frame.
-    /// </summary>
-    public event EventHandler? RenderEnded;
-
-    /// <summary>
     /// Event that is raised when the viewport is resized.
     /// </summary>
     public event EventHandler<ViewportResizedEventArgs>? ViewportResized;
@@ -244,8 +234,6 @@ public partial class Renderer : IDisposable
     /// <param name="scene">The scene to render.</param>
     public void Render(Scene scene)
     {
-        this.RenderStarted?.Invoke(this, EventArgs.Empty);
-
         scene.OnBeforeRender();
         scene.RenderImGui();
         scene.UpdateTransforms();
@@ -265,8 +253,6 @@ public partial class Renderer : IDisposable
 
         this._disposeCollector.DisposeAll();
         this.GraphicsDevice.SwapBuffers();
-
-        this.RenderEnded?.Invoke(this, EventArgs.Empty);
     }
 
     private void ClearRenderTarget(CommandList commandList, Scene scene)

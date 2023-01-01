@@ -40,8 +40,17 @@ public class Application : IDisposable
 
     public TexturePacker TexturePacker { get; internal set; }
 
-    private bool _running = false;
+    /// <summary>
+    /// Gets whether the application is currently running.
+    /// </summary>
+    public bool IsRunning { get; private set; } = false;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Application"/> class.
+    /// </summary>
+    /// <param name="windowTitle">The title of the window.</param>
+    /// <param name="backend">The graphics backend to use.</param>
+    /// <exception cref="InvalidOperationException">Thrown if an instance of <see cref="Application"/> already exists.</exception>
     public Application(string windowTitle, GraphicsBackend? backend = null)
     {
         if (Current != null)
@@ -60,18 +69,12 @@ public class Application : IDisposable
         this._renderer = new Renderer(this.Window, backend);
 
         this.TexturePacker = new TexturePacker(1024, 32);
-        this._renderer.RenderStarted += this.OnRenderStarted;
 
         this.Window.Resized += this.OnResize;
 
         this.OnResize();
 
         this._input = new InputManager(this.Window);
-    }
-
-    private void OnRenderStarted(object? sender, EventArgs e)
-    {
-        this.TexturePacker.FlushChanges();
     }
 
     private void OnResize()
@@ -125,45 +128,48 @@ public class Application : IDisposable
     /// </summary>
     public void Start()
     {
-        if (this._running) return;
+        if (this.IsRunning) return;
 
-        this._running = true;
+        this.IsRunning = true;
 
         Stopwatch sw = Stopwatch.StartNew();
         double previousElapsed = sw.Elapsed.TotalSeconds;
 
-        while (this.Window.Exists)
+        while (this.IsRunning)
         {
+            this._input.UpdateFrameInput();
+
+            if (!this.Window.Exists)
+            {
+                this.IsRunning = false;
+                break;
+            }
+
             this.ElapsedTime = sw.Elapsed.TotalSeconds;
             this.DeltaTime = this.ElapsedTime - previousElapsed;
             previousElapsed = this.ElapsedTime;
 
             this.FramesPerSecond = 1d / this.DeltaTime;
 
+            this._renderer.Update((float)this.DeltaTime, this._input.InputSnapshot);
+
             this.OnUpdate();
+        }
+    }
 
-            var scene = this.Scene;
-            if (scene != null)
-            {
-                scene.Update((float)this.DeltaTime);
-
-                this._renderer.Update((float)this.DeltaTime, this._input.InputSnapshot);
-
-                try
-                {
-                    this._renderer.Render(scene);
-                }
-                catch (VeldridException e)
-                {
-                    Console.WriteLine(e.Message);
+    protected void Render(Scene scene)
+    {
+        try
+        {
+            this._renderer.Render(scene);
+        }
+        catch (VeldridException e)
+        {
+            Console.WriteLine(e.Message);
 
 #if DEBUG
-                    throw;
+            throw;
 #endif
-                }
-            }
-
-            this._input.UpdateFrameInput(); // For next frame
         }
     }
 
