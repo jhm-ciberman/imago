@@ -4,11 +4,14 @@ using System.Text.RegularExpressions;
 
 namespace LifeSim.Engine.Rendering;
 
-public static class ShaderLoader
+public static partial class ShaderLoader
 {
     private static readonly string _shadersBasePath = "./res/shaders/";
 
-    private static readonly Regex _includeRegex = new Regex("^#include\\s+\"([^\"]+)\"");
+    [GeneratedRegex("^#include\\s+\"([^\"]+)\"")]
+    private static partial Regex IncludeRegex();
+
+    private static readonly Regex _includeRegex = IncludeRegex();
 
     public static string Load(string filename)
     {
@@ -46,9 +49,7 @@ public static class ShaderLoader
     {
         var fullFilePath = Path.Combine(_shadersBasePath, filename);
         if (!File.Exists(fullFilePath))
-        {
             throw new FileNotFoundException($"Could not find shader file {filename}");
-        }
         return fullFilePath;
     }
 }

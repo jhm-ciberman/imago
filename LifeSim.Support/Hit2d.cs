@@ -6,7 +6,7 @@ namespace LifeSim.Support;
 /// <summary>
 /// Represents a collision hit result.
 /// </summary>
-public struct Hit2d
+public readonly struct Hit2d
 {
     /// <summary>
     /// Gets the time of impact. This value ranges from 0 to 1. A value greater than 1 means that the ray has not hit anything.
