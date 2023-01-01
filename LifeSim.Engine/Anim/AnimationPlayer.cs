@@ -4,20 +4,12 @@ using LifeSim.Engine.SceneGraph;
 
 namespace LifeSim.Engine.Anim;
 
+/// <summary>
+/// Provides a way to play animations.
+/// </summary>
 public class AnimationPlayer
 {
-    private record class BoundChannel
-    {
-        public Node3D Target { get; }
-
-        public List<IChannel> Channels { get; }
-
-        public BoundChannel(Node3D target, List<IChannel> channels)
-        {
-            this.Target = target;
-            this.Channels = channels;
-        }
-    }
+    private record class BoundChannel(Node3D Target, List<IChannel> Channels);
 
     private readonly List<BoundChannel> _boundChannels = new();
 
@@ -163,7 +155,7 @@ public class AnimationPlayer
     }
 
     /// <summary>
-    /// Rebinds all channels to the current root. 
+    /// Rebinds all channels to the current root.
     /// This method can be called if some nodes were added or removed or changed their names.
     /// </summary>
     public void Rebind()
