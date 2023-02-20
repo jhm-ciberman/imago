@@ -2,11 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using FontStashSharp;
 using FontStashSharp.Interfaces;
-using LifeSim.Engine.Rendering;
 using LifeSim.Engine.Resources;
-using LifeSim.Engine.SceneGraph;
 using LifeSim.Support;
 using Veldrid;
 

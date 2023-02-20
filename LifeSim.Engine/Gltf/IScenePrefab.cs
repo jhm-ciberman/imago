@@ -1,6 +1,5 @@
 using System;
 using LifeSim.Engine.Resources;
-using LifeSim.Engine.SceneGraph;
 
 namespace LifeSim.Engine.Gltf;
 

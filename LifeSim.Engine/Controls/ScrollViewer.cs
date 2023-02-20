@@ -1,8 +1,6 @@
-using System;
 using System.Numerics;
 using LifeSim.Engine.Input;
 using LifeSim.Engine.Rendering;
-using LifeSim.Engine.SceneGraph;
 using LifeSim.Support;
 
 namespace LifeSim.Engine.Controls;

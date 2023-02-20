@@ -1,5 +1,4 @@
 using System.Diagnostics.Contracts;
-using LifeSim.Engine.Rendering;
 using Veldrid;
 
 namespace LifeSim.Engine.Rendering;

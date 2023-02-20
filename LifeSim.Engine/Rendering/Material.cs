@@ -1,4 +1,3 @@
-using System;
 using Veldrid;
 
 namespace LifeSim.Engine.Rendering;

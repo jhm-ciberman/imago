@@ -1,5 +1,3 @@
-using LifeSim.Engine.Rendering;
-
 namespace LifeSim.Engine.SceneGraph;
 
 /// <summary>

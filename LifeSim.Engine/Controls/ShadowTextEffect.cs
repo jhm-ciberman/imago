@@ -1,6 +1,4 @@
-using System;
 using System.Numerics;
-using FontStashSharp;
 using LifeSim.Engine.Rendering;
 using LifeSim.Support;
 

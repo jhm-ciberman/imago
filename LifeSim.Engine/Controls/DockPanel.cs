@@ -1,6 +1,5 @@
 using System;
 using System.Numerics;
-using LifeSim.Engine.Rendering;
 using LifeSim.Support;
 
 namespace LifeSim.Engine.Controls;

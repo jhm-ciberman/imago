@@ -1,5 +1,4 @@
 using System.Numerics;
-using LifeSim.Support;
 
 namespace LifeSim.Engine.Gltf;
 
