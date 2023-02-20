@@ -4,7 +4,7 @@ using LifeSim.Support;
 
 namespace LifeSim.Engine.Rendering;
 
-public partial class SpriteBatch
+public class SpriteBatch
 {
     public struct Vertex
     {
@@ -104,7 +104,7 @@ public partial class SpriteBatch
     public void DrawCore(Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, Color color, Vector2 scale, float rotation, Vector2 origin, float depth = 0f)
     {
         // Adapted from https://github.com/ThomasMiz/TrippyGL/blob/109eaf483d3289c0214963b7d22bdbd320d243ed/TrippyGL/TextureBatchItem.cs#L90
-        // Thank you! :D 
+        // Thank you! :D
         float sin = MathF.Sin(rotation);
         float cos = MathF.Cos(rotation);
 

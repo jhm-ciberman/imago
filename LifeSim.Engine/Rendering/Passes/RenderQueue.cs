@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using Veldrid.Utilities;
 
-namespace LifeSim.Engine.Rendering;
+namespace LifeSim.Engine.Rendering.Passes;
 
 [Flags]
 internal enum RenderQueues : byte
@@ -55,9 +55,7 @@ internal class RenderQueue : IEnumerable<Renderable>, IReadOnlyList<Renderable>,
         this.FilterFlags = filterFlags;
 
         if (filterFlags == RenderQueues.Opaque || filterFlags == RenderQueues.ShadowCaster)
-        {
             this._comparer = new FrontToBackComparer();
-        }
         else if (filterFlags == RenderQueues.Transparent)
         {
             this._comparer = new BackToFrontComparer();
@@ -75,9 +73,7 @@ internal class RenderQueue : IEnumerable<Renderable>, IReadOnlyList<Renderable>,
         // This event could be called from a different thread. The "_allRenderables" list should be locked.
 
         if ((newFlags & this.FilterFlags) == (oldFlags & this.FilterFlags))
-        {
             return;
-        }
 
         if (newFlags.HasFlag(this.FilterFlags))
         {

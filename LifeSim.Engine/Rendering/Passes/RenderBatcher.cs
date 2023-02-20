@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Veldrid;
 
-namespace LifeSim.Engine.Rendering;
+namespace LifeSim.Engine.Rendering.Passes;
 
 internal class RenderBatcher
 {
@@ -32,9 +32,7 @@ internal class RenderBatcher
         uint instanceCount = 0;
 
         if (this._offsetVertexData.Length < renderables.Count)
-        {
             Array.Resize(ref this._offsetVertexData, (int)(renderables.Count * 1.2f));
-        }
         Renderable prevRenderable = renderables[0];
         for (int i = 0; i < renderables.Count; i++)
         {
@@ -43,9 +41,7 @@ internal class RenderBatcher
 
             // If it's batcheable, add to current batch. If not, finish batch
             if (renderable.CanBeBatchedWith(prevRenderable))
-            {
                 instanceCount++;
-            }
             else
             {
                 this._batches.Add(new RenderBatch(instanceCount, prevRenderable, this._shadowMapPass));
@@ -63,9 +59,7 @@ internal class RenderBatcher
         if (this._offsetsVertexBuffer == null || this._offsetsVertexBuffer.SizeInBytes < requiredSizeInBytes)
         {
             if (this._offsetsVertexBuffer != null)
-            {
                 Renderer.Instance.DisposeWhenIdle(this._offsetsVertexBuffer);
-            }
             this._offsetsVertexBuffer = this._gd.ResourceFactory.CreateBuffer(new BufferDescription(
                 requiredSizeInBytes, BufferUsage.VertexBuffer | BufferUsage.Dynamic
             ));

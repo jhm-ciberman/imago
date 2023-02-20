@@ -1,11 +1,12 @@
 using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using LifeSim.Engine.Rendering.Passes;
 using Veldrid.Utilities;
 
 namespace LifeSim.Engine.Rendering;
 
-public struct OffsetVertexData // It's 16 bytes only! 
+public struct OffsetVertexData // It's 16 bytes only!
 {
     public uint TransformDataOffset { get; set; } // x
     public uint InstanceDataOffset { get; set; } // y
@@ -40,7 +41,7 @@ internal class Renderable : IDisposable
     private DataBlock _instanceDataBlock;
 
     /// <summary>
-    /// Gets the batching hash of this renderable. This is used to 
+    /// Gets the batching hash of this renderable. This is used to
     /// determine if two renderables can be batched together as an early exit.
     /// </summary>
     public int BatchingHash { get; private set; }
@@ -308,7 +309,7 @@ internal class Renderable : IDisposable
                 | (meshHash << 24); // 12 bits (max: 4095)
 
         // This key is used to fast check if two instances can be batched together. (They must have the same hash)
-        // It could happen that the hash is not unique, but it is extremely unlikely that two instances that are 
+        // It could happen that the hash is not unique, but it is extremely unlikely that two instances that are
         // contiguous after sorting the render queue by the sort key, end up having the same hash.
         this.BatchingHash = HashCode.Combine(
             this.Mesh.Id,
