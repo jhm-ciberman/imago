@@ -2,14 +2,14 @@ using System;
 using System.Numerics;
 using LifeSim.Support;
 
-namespace LifeSim.Engine.Rendering;
+namespace LifeSim.Engine.SceneGraph;
 
 public class ShadowMap
 {
     private float _maximumShadowDistance = 50f;
 
     /// <summary>
-    /// Gets or sets the maximum distance that the light will cast shadows. 
+    /// Gets or sets the maximum distance that the light will cast shadows.
     /// The value is measured in world units.
     /// </summary>
     /// <throws cref="ArgumentOutOfRangeException">
@@ -21,9 +21,7 @@ public class ShadowMap
         set
         {
             if (this._maximumShadowDistance < 0)
-            {
                 throw new ArgumentOutOfRangeException(nameof(value), "The maximum shadow distance cannot be negative.");
-            }
 
             this._maximumShadowDistance = value;
         }
@@ -33,9 +31,9 @@ public class ShadowMap
 
     /// <summary>
     /// Gets or sets the split lamda used to calculate the cascade splits.
-    /// A value of zero will make the shadow maps to be distributed evenly and 
-    /// a value of 1 will make the shadow maps to be distributed with a 
-    /// logarithmic distribution. A value between 0 and 1 will 
+    /// A value of zero will make the shadow maps to be distributed evenly and
+    /// a value of 1 will make the shadow maps to be distributed with a
+    /// logarithmic distribution. A value between 0 and 1 will
     /// use a mix of the two methods.
     /// </summary>
     /// <throws cref="ArgumentOutOfRangeException">
@@ -47,9 +45,7 @@ public class ShadowMap
         set
         {
             if (value < 0 || value > 1)
-            {
                 throw new ArgumentOutOfRangeException(nameof(value), "Split lambda must be between 0 and 1.");
-            }
 
             this._splitLambda = value;
         }
@@ -70,9 +66,7 @@ public class ShadowMap
         set
         {
             if (value < 1 || value > 4)
-            {
                 throw new ArgumentOutOfRangeException(nameof(value), "The number of cascades must be between 1 and 4.");
-            }
 
             this._cascadesCount = value;
         }
@@ -97,37 +91,33 @@ public class ShadowMap
         get => this._size;
         set
         {
-            if ((value & (value - 1)) != 0)
-            {
+            if ((value & value - 1) != 0)
                 throw new ArgumentOutOfRangeException(nameof(value), "The shadow map size must be a power of two.");
-            }
 
             if (value == 0)
-            {
                 throw new ArgumentOutOfRangeException(nameof(value), "The shadow map size cannot be zero.");
-            }
 
             this._size = value;
         }
     }
 
     /// <summary>
-    /// Gets or sets the padding added to the back of the shadow map 
+    /// Gets or sets the padding added to the back of the shadow map
     /// when culling the geometry so the geometry that is behind the camera
     /// is rendered.
     /// </summary>
     public float CullingZPadding { get; set; } = 5f;
 
     /// <summary>
-    /// Gets or sets the depth bias used when rendering the shadow map. 
+    /// Gets or sets the depth bias used when rendering the shadow map.
     /// The units are in texels so a value of 0.1f will bias the depth by 0.1 texels.
     /// This way the same value works independent of the shadow map resolution.
     /// </summary>
     public float DepthBias { get; set; } = 5.0f;
 
     /// <summary>
-    /// Gets or sets the normal offset used when rendering the shadow map. 
-    /// The units are in texels so a value of 0.1f will offset the shadowmap coordinates 
+    /// Gets or sets the normal offset used when rendering the shadow map.
+    /// The units are in texels so a value of 0.1f will offset the shadowmap coordinates
     /// in the direction of the normal by 0.1 texels.
     /// This way the same value works independent of the shadow map resolution.
     /// </summary>

@@ -1,10 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.Numerics;
 using LifeSim.Engine.SceneGraph;
 using Veldrid;
 
-namespace LifeSim.Engine.Rendering;
+namespace LifeSim.Engine.Rendering.Passes;
 
 public class MousePickingPass : IDisposable, IRenderingPass
 {

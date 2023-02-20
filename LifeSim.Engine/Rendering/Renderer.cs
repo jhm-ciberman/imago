@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using FontStashSharp.Interfaces;
-using LifeSim.Engine.Rendering;
+using LifeSim.Engine.Rendering.Passes;
 using LifeSim.Engine.SceneGraph;
 using LifeSim.Support;
 using Veldrid;

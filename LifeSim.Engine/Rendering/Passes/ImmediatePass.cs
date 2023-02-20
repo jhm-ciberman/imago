@@ -7,7 +7,7 @@ using LifeSim.Engine.SceneGraph;
 using LifeSim.Support;
 using Veldrid;
 
-namespace LifeSim.Engine.Rendering;
+namespace LifeSim.Engine.Rendering.Passes;
 
 /// <summary>
 /// This class is used to batch draw calls together in immediate mode.
@@ -158,25 +158,17 @@ public class ImmediatePass : IPipelineProvider, IRenderingPass, IDisposable, IIm
     private void Prepare(int indexCount, int vertexCount)
     {
         if (this._vertexCount + vertexCount > this._maxVertexBatchSize)
-        {
             this.Flush();
-        }
 
         if (this._indexCount + indexCount > this._maxIndexBatchSize)
-        {
             this.Flush();
-        }
 
-        // validate buffers overflow 
+        // validate buffers overflow
         if (this._vertexCount + vertexCount > this._maxVertexBatchSize)
-        {
             throw new InvalidOperationException($"The number of provided vertices exceeds the maximum batch size. {this._vertexCount + vertexCount} > {this._maxVertexBatchSize}");
-        }
 
         if (this._indexCount + indexCount > this._maxIndexBatchSize)
-        {
             throw new InvalidOperationException($"The number of provided indices exceeds the maximum batch size. {this._indexCount + indexCount} > {this._maxIndexBatchSize}");
-        }
     }
 
     /// <summary>
@@ -303,9 +295,7 @@ public class ImmediatePass : IPipelineProvider, IRenderingPass, IDisposable, IIm
     private void Flush()
     {
         if (this._vertexCount == 0 || this._indexCount == 0)
-        {
             return;
-        }
 
         this._commandList.UpdateBuffer(this._vertexBuffer, 0, new ReadOnlySpan<Vertex>(this._vertices, 0, this._vertexCount));
         this._commandList.UpdateBuffer(this._indexBuffer, 0, new ReadOnlySpan<ushort>(this._indices, 0, this._indexCount));

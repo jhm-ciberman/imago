@@ -3,7 +3,7 @@ using ImGuiNET;
 using LifeSim.Engine.SceneGraph;
 using Veldrid;
 
-namespace LifeSim.Engine.Rendering;
+namespace LifeSim.Engine.Rendering.Passes;
 
 public class ImGuiPass : IDisposable, IRenderingPass
 {
@@ -19,9 +19,7 @@ public class ImGuiPass : IDisposable, IRenderingPass
     public ImGuiPass(Renderer renderer, IRenderTexture renderTexture)
     {
         if (Instance != null)
-        {
             throw new InvalidOperationException("Only one instance of ImGuiPass can exist at a time.");
-        }
 
         Instance = this;
 

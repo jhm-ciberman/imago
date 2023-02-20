@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using LifeSim.Engine.Rendering;
 using Veldrid;
 
-namespace LifeSim.Engine.Rendering;
+namespace LifeSim.Engine.Rendering.Passes;
 
 internal class RenderJob
 {
@@ -80,7 +79,7 @@ internal class RenderJob
                 Debug.Assert(batch.Mesh.VeldridVertexBuffer.IsDisposed == false);
                 Debug.Assert(batch.Mesh.VeldridIndexBuffer.IsDisposed == false);
                 commandList.SetVertexBuffer(1, batch.Mesh.VeldridVertexBuffer, 0);
-                commandList.SetIndexBuffer(batch.Mesh.VeldridIndexBuffer, Veldrid.IndexFormat.UInt16);
+                commandList.SetIndexBuffer(batch.Mesh.VeldridIndexBuffer, IndexFormat.UInt16);
                 currentMesh = batch.Mesh;
             }
 

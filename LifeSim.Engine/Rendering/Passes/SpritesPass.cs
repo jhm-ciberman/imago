@@ -1,12 +1,8 @@
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Numerics;
-using LifeSim.Engine.Controls;
 using LifeSim.Engine.SceneGraph;
 using Veldrid;
 
-namespace LifeSim.Engine.Rendering;
+namespace LifeSim.Engine.Rendering.Passes;
 
 public class SpritesPass : IDisposable, IPipelineProvider, IRenderingPass
 {

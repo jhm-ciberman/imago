@@ -2,7 +2,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using LifeSim.Support;
 
-namespace LifeSim.Engine.Rendering;
+namespace LifeSim.Engine.Rendering.Passes;
 
 [StructLayout(LayoutKind.Sequential)]
 public struct ParticleRenderData

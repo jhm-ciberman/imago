@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using LifeSim.Engine.SceneGraph;
 using Veldrid;
 
-namespace LifeSim.Engine.Rendering;
+namespace LifeSim.Engine.Rendering.Passes;
 
 public class ParticlesPass : IDisposable, IRenderingPass
 {
@@ -111,9 +110,7 @@ public class ParticlesPass : IDisposable, IRenderingPass
     {
         Camera3D? camera = scene.Camera;
         if (camera == null)
-        {
             return;
-        }
 
         var particleSystems = scene.ParticleSystems;
 
@@ -144,9 +141,7 @@ public class ParticlesPass : IDisposable, IRenderingPass
     {
         if (particles.Count == 0) return;
         if (particles.Count <= PARTICLES_PER_BATCH)
-        {
             this.FlushParticles(cl, particles, 0, particles.Count, texture);
-        }
 
         int batchStartIndex = 0;
         int batchEndIndex;
@@ -186,9 +181,7 @@ public class ParticlesPass : IDisposable, IRenderingPass
     private ResourceSet GetTextureResourceSet(ITexture texture)
     {
         if (this._textures.TryGetValue(texture, out var resourceSet))
-        {
             return resourceSet;
-        }
 
         resourceSet = this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(this._materialResourceLayout, texture.VeldridTexture, texture.VeldridSampler));
         this._textures.Add(texture, resourceSet);

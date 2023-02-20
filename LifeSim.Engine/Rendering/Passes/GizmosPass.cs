@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using LifeSim.Engine.SceneGraph;
 using Veldrid;
 
-namespace LifeSim.Engine.Rendering;
+namespace LifeSim.Engine.Rendering.Passes;
 
 internal class GizmosPass : IDisposable, IRenderingPass
 {
@@ -61,9 +61,7 @@ internal class GizmosPass : IDisposable, IRenderingPass
     {
         Camera3D? camera = scene.Camera;
         if (camera == null || scene.Gizmos.Lines.Count == 0)
-        {
             return;
-        }
 
         cl.SetFramebuffer(this._renderTexture.Framebuffer);
         cl.SetPipeline(this._pipeline);
@@ -83,18 +81,14 @@ internal class GizmosPass : IDisposable, IRenderingPass
             DebugLine line = lines[i];
 
             if (this._verticesCount + 2 >= VERTICES_PER_BATCH)
-            {
                 this.FlushVertices(cl);
-            }
 
             this._vertices[this._verticesCount++] = new Vertex { Position = line.Start, Color = line.Color.ToPackedUInt() };
             this._vertices[this._verticesCount++] = new Vertex { Position = line.End, Color = line.Color.ToPackedUInt() };
         }
 
         if (this._verticesCount > 0)
-        {
             this.FlushVertices(cl);
-        }
     }
 
     private void FlushVertices(CommandList cl)

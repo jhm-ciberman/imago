@@ -1,6 +1,7 @@
 using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using LifeSim.Engine.Rendering.Passes;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using Veldrid;
@@ -122,7 +123,7 @@ public class Texture : ITexture
     /// <summary>
     /// Gets the ImGui binding for this texture.
     /// </summary>
-    public IntPtr ImGuiBinding => ImGuiPass.Instance.GetOrCreateBinding(this);
+    public IntPtr ImGuiBinding => ImGuiPass.Instance.GetOrCreateBinding(this);  // TODO: Texture should not know about ImGuiPass
 
     /// <summary>
     /// Gets the size of the texture.

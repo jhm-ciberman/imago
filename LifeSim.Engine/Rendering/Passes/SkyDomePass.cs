@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using LifeSim.Engine.SceneGraph;
 using Veldrid;
 
-namespace LifeSim.Engine.Rendering;
+namespace LifeSim.Engine.Rendering.Passes;
 
 public class SkyDomePass : IDisposable, IRenderingPass
 {
@@ -119,9 +119,7 @@ public class SkyDomePass : IDisposable, IRenderingPass
         Camera3D? camera = scene.Camera;
 
         if (camera == null)
-        {
             return;
-        }
 
         //this.LutTextureOffset = (this.LutTextureOffset + 0.0005f) % 1f;
 

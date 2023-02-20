@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using LifeSim.Engine.SceneGraph;
@@ -8,9 +7,9 @@ using LifeSim.Support;
 using Veldrid;
 using Veldrid.Utilities;
 
-namespace LifeSim.Engine.Rendering;
+namespace LifeSim.Engine.Rendering.Passes;
 
-public partial class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
+public class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
 {
     [StructLayout(LayoutKind.Sequential)]
     private struct ShadowMapDataBuffer
@@ -75,9 +74,7 @@ public partial class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
     {
         Camera3D? camera = scene.Camera;
         if (camera == null)
-        {
             return;
-        }
 
         ShadowMap shadowMap = scene.MainLight.ShadowMap;
 
@@ -113,9 +110,7 @@ public partial class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
     public Matrix4x4 GetShadowCascadeViewProjectionMatrix(int cascadeIndex)
     {
         if (cascadeIndex < 0 || cascadeIndex >= this.ShadowmapTexture.CascadesCount)
-        {
             return Matrix4x4.Identity;
-        }
 
         return this._cascades[cascadeIndex].ViewProjectionMatrix * this._scalingMatrix;
     }
@@ -124,9 +119,7 @@ public partial class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
     {
         var texture = this.ShadowmapTexture;
         if (shadowMap.Size != texture.Size || shadowMap.CascadesCount != texture.CascadesCount)
-        {
             this.ShadowmapTexture.Resize(shadowMap.Size, shadowMap.CascadesCount);
-        }
     }
 
     public void Dispose()
@@ -190,9 +183,7 @@ public partial class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
         };
 
         if (shaderVariant.VertexFormat.IsSkinned)
-        {
             resources.Add(this._renderer.SkeletonResourceLayout);
-        }
 
         return resources.ToArray();
     }

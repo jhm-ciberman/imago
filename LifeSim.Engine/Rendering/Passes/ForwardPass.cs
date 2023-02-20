@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using LifeSim.Engine.SceneGraph;
@@ -8,7 +7,7 @@ using LifeSim.Support;
 using Veldrid;
 using Veldrid.Utilities;
 
-namespace LifeSim.Engine.Rendering;
+namespace LifeSim.Engine.Rendering.Passes;
 
 internal class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
 {
@@ -100,9 +99,7 @@ internal class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
         Camera3D? camera = scene.Camera;
 
         if (camera == null)
-        {
             return;
-        }
 
         var frustumForCulling = new BoundingFrustum(camera.FrustumCullingCamera.ViewProjectionMatrix);
         this._opaqueRenderQueue.Update(frustumForCulling, camera.Position);
@@ -163,9 +160,7 @@ internal class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
         var outputDescription = this._renderTexture.OutputDescription;
         var scissorTestEnabled = flags.HasFlag(RenderFlags.ScisorTest);
         if (!flags.HasFlag(RenderFlags.MousePick))
-        {
             outputDescription = new OutputDescription(outputDescription.DepthAttachment, outputDescription.ColorAttachments[0]);
-        }
 
         return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
         {
@@ -213,9 +208,7 @@ internal class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
         };
 
         if (shaderVariant.VertexFormat.IsSkinned)
-        {
             resources.Add(this._renderer.SkeletonResourceLayout);
-        }
 
         return resources.ToArray();
     }

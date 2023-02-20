@@ -3,7 +3,7 @@ using System.Numerics;
 using LifeSim.Engine.SceneGraph;
 using Veldrid.Utilities;
 
-namespace LifeSim.Engine.Rendering;
+namespace LifeSim.Engine.Rendering.Passes;
 
 internal class ShadowCascade
 {
