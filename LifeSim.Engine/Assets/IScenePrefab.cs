@@ -1,7 +1,7 @@
 using System;
 using LifeSim.Engine.Resources;
 
-namespace LifeSim.Engine.Gltf;
+namespace LifeSim.Engine.Assets;
 
 public interface IScenePrefab : IInstantiable, IDisposable
 {

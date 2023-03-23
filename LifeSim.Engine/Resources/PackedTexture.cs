@@ -18,7 +18,7 @@ public class PackedTexture
 
     /// <summary>
     /// Gets the coordinate of the top left corner of the packed texture in texture space coordinates.
-    /// </summary>    
+    /// </summary>
     public Vector2 TopLeft { get; }
 
     /// <summary>

@@ -280,7 +280,7 @@ public class Node3D : IDisposable
 
     protected virtual void Dispose(bool disposing)
     {
-        if (!_disposedValue)
+        if (!this._disposedValue)
         {
             if (disposing)
             {
@@ -290,13 +290,13 @@ public class Node3D : IDisposable
                 }
             }
 
-            _disposedValue = true;
+            this._disposedValue = true;
         }
     }
 
     public void Dispose()
     {
-        Dispose(disposing: true);
+        this.Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
 

@@ -31,7 +31,7 @@ public class Sprite
     public bool IsNineSlice { get; private set; } = false;
 
     /// <summary>
-    /// Gets or sets the margin to be used when the sprite is drawn as a 9-slice. 
+    /// Gets or sets the margin to be used when the sprite is drawn as a 9-slice.
     /// If the margin is all zero, the sprite will be drawn as a regular sprite.
     /// </summary>
     public Thickness NineSliceMargin
@@ -124,11 +124,11 @@ public class Sprite
     /// </summary>
     /// <param name="packedTexture">The sprite sheet.</param>
     /// <param name="frameCount">The number of frames in the sprite.</param>
-    /// <param name="size">The size of each frame in pixels.</param>
+    /// <param name="frameSize">The size of each frame in pixels.</param>
     /// <param name="offset">The offset of each frame from the top-left corner of the sprite sheet in pixels.</param>
     /// <param name="nineSliceMargin">The margin to be used when the sprite is drawn as a 9-slice.
     /// <returns>The sprite.</returns>
-    public static Sprite FromSpriteSheet(PackedTexture packedTexture, int frameCount, Vector2 size, Vector2 offset = default, Thickness nineSliceMargin = default)
+    public static Sprite FromSpriteSheet(PackedTexture packedTexture, int frameCount, Vector2 frameSize, Vector2 offset = default, Thickness nineSliceMargin = default)
     {
         var sprite = new Sprite();
         sprite.NineSliceMargin = nineSliceMargin;
@@ -140,13 +140,13 @@ public class Sprite
 
         var pixelsToUv = new Vector2(1f / (float)atlasTexture.Width, 1f / (float)atlasTexture.Height);
 
-        int frameCountX = (int)(spriteSheetSize.X / size.X);
+        int frameCountX = (int)(spriteSheetSize.X / frameSize.X);
         for (int i = 0; i < frameCount; i++)
         {
-            float x0 = (i % frameCountX) * size.X + offset.X;
-            float y0 = (i / frameCountX) * size.Y + offset.Y;
-            float x1 = x0 + size.X;
-            float y1 = y0 + size.Y;
+            float x0 = (i % frameCountX) * frameSize.X + offset.X;
+            float y0 = (i / frameCountX) * frameSize.Y + offset.Y;
+            float x1 = x0 + frameSize.X;
+            float y1 = y0 + frameSize.Y;
             var topLeft = new Vector2(x0, y0) * pixelsToUv + offsetUv;
             var bottomRight = new Vector2(x1, y1) * pixelsToUv + offsetUv;
             sprite.AddFrame(new PackedTexture(atlasTexture, topLeft, bottomRight));

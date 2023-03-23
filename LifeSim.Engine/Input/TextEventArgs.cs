@@ -19,6 +19,6 @@ public class TextEventArgs : EventArgs
     /// <param name="characters">The characters that were typed.</param>
     public TextEventArgs(IReadOnlyList<char> characters)
     {
-        Characters = characters;
+        this.Characters = characters;
     }
 }

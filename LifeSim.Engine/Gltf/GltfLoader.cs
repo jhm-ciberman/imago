@@ -5,6 +5,7 @@ using System.Linq;
 using System.Numerics;
 using glTFLoader;
 using LifeSim.Engine.Anim;
+using LifeSim.Engine.Assets;
 using LifeSim.Engine.Meshes;
 using LifeSim.Engine.Rendering;
 using static glTFLoader.Schema.AnimationChannelTarget;
@@ -16,10 +17,10 @@ public class GltfLoader
 {
     public class GltfAsset
     {
-        public IReadOnlyList<IScenePrefab> Scenes { get; } = Array.Empty<IScenePrefab>();
+        public IReadOnlyList<GltfPrefab> Scenes { get; } = Array.Empty<GltfPrefab>();
         public IReadOnlyList<Animation> Animations { get; } = Array.Empty<Animation>();
 
-        public GltfAsset(IReadOnlyList<IScenePrefab> scenes, IReadOnlyList<Animation> animations)
+        public GltfAsset(IReadOnlyList<GltfPrefab> scenes, IReadOnlyList<Animation> animations)
         {
             this.Scenes = scenes;
             this.Animations = animations;
@@ -47,18 +48,15 @@ public class GltfLoader
             : gltf.Animations.First(a => a.Name == animationName);
     }
 
-    public static IScenePrefab LoadScenePrefab(string path, string? sceneName = null)
+    public static GltfPrefab LoadScenePrefab(string path, string? sceneName = null, string? rootNodeName = null)
     {
-        var gltf = LoadFile(path);
-        return string.IsNullOrEmpty(sceneName)
-            ? gltf.Scenes[0]
-            : gltf.Scenes.First(s => s.Name == sceneName);
+        return new GltfLoader(path).LoadScene(sceneName, rootNodeName);
     }
 
     private readonly string _path;
     private readonly glTFLoader.Schema.Gltf _model;
     private readonly GltfBuffer?[] _buffersCache;
-    private readonly GLTFNode?[] _nodesCache;
+    private readonly GltfNode?[] _nodesCache;
     private readonly Material? _defaultMaterial;
     private readonly Dictionary<int, GltfAccessor> _accessorsCache = new();
 
@@ -67,7 +65,7 @@ public class GltfLoader
         this._path = path;
         this._model = Interface.LoadModel(path);
         this._buffersCache = new GltfBuffer[this._model.Buffers.Length];
-        this._nodesCache = new GLTFNode[this._model.Nodes.Length];
+        this._nodesCache = new GltfNode[this._model.Nodes.Length];
         this._defaultMaterial = defaultMaterial;
     }
 
@@ -77,15 +75,15 @@ public class GltfLoader
         return string.IsNullOrWhiteSpace(data.Name) ? "Node_" + index : data.Name;
     }
 
-    private GLTFNode GetNode(int index)
+    private GltfNode GetNode(int index)
     {
-        GLTFNode? node = this._nodesCache[index];
+        GltfNode? node = this._nodesCache[index];
         if (node != null) return node;
 
         var data = this._model.Nodes[index];
 
         var name = this.GetNodeName(index);
-        node = new GLTFNode(name);
+        node = new GltfNode(name);
 
         if (data.Mesh.HasValue)
         {
@@ -198,7 +196,7 @@ public class GltfLoader
         };
     }
 
-    private Skin GetSkin(int index)
+    private GltfSkinInfo GetSkin(int index)
     {
         var data = this._model.Skins[index];
 
@@ -216,7 +214,7 @@ public class GltfLoader
 
         string? root = data.Skeleton.HasValue ? this.GetNodeName(data.Skeleton.Value) : null;
 
-        return new Skin(matrices, joints, root);
+        return new GltfSkinInfo(matrices, joints, root);
     }
 
     /// <summary>
@@ -225,11 +223,11 @@ public class GltfLoader
     /// <param name="index">The index of the scene to load.</param>
     /// <param name="rootNodeName">The name of the root node of the scene. If null, the whole scene is loaded.</param>
     /// <returns>The scene as a <see cref="IScenePrefab"/>.</returns>
-    public IScenePrefab LoadScene(int index = 0, string? rootNodeName = null)
+    public GltfPrefab LoadScene(int index = 0, string? rootNodeName = null)
     {
         var data = this._model.Scenes[index];
         var name = data.Name ?? "Scene_" + index;
-        var scene = new GltfScene(name);
+        var scene = new GltfPrefab(name);
 
         if (rootNodeName == null)
         {
@@ -252,12 +250,12 @@ public class GltfLoader
     }
 
     /// <summary>
-    /// Loads a scene from the gltf file. 
+    /// Loads a scene from the gltf file.
     /// </summary>
     /// <param name="name">The name of the scene to load.</param>
     /// <param name="rootNodeName">The name of the root node of the scene. If null, the whole scene is loaded.</param>
     /// <returns>The scene as a <see cref="IScenePrefab"/>.</returns>
-    public IScenePrefab LoadScene(string? name, string? rootNodeName = null)
+    public GltfPrefab LoadScene(string? name, string? rootNodeName = null)
     {
         var index = name == null ? 0 : this.FindSceneIndex(name);
         if (index == -1)
@@ -397,7 +395,7 @@ public class GltfLoader
     /// <returns>A <see cref="GltfAsset"/> object containing all resources.</returns>
     public GltfAsset LoadAll()
     {
-        var scenes = new List<IScenePrefab>();
+        var scenes = new List<GltfPrefab>();
         if (this._model.Scenes != null)
         {
             for (int i = 0; i < this._model.Scenes.Length; i++)

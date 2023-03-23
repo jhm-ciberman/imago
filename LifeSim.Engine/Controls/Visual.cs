@@ -143,7 +143,7 @@ public abstract class Visual : ObservableObject
 
         if (this.ClipToBounds)
         {
-            spriteBatcher.PushScissorRectangle(GetBounds() * this.Root!.Zoom);
+            spriteBatcher.PushScissorRectangle(this.GetBounds() * this.Root!.Zoom);
             this.DrawCore(spriteBatcher);
             spriteBatcher.PopScissorRectangle();
         }

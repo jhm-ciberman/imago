@@ -34,11 +34,13 @@ dotnet_diagnostic.IDE0005.severity = suggestion # Unnecessary using directive
 
 dotnet_style_require_accessibility_modifiers = always
 dotnet_style_object_initializer = false
-dotnet_style_qualification_for_field = true
-dotnet_style_qualification_for_property = true
-dotnet_style_qualification_for_method = true
-dotnet_style_qualification_for_event = true
 csharp_style_prefer_index_operator = false
+
+# Use "this." for field, property, method, and event accessors
+dotnet_style_qualification_for_field = true:suggestion
+dotnet_style_qualification_for_property = true:suggestion
+dotnet_style_qualification_for_method = true:suggestion
+dotnet_style_qualification_for_event = true:suggestion
 
 # private_fields
 dotnet_naming_symbols.private_fields.applicable_kinds           = field
