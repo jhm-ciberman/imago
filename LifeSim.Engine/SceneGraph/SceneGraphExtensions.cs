@@ -80,8 +80,6 @@ public static class SceneGraphExtensions
         return null;
     }
 
-    // path is a relative path to a node (example: "Armature/Hips/Spine1/Spine2/Head")
-
     /// <summary>
     /// Finds the node with the specified path. The path is a relative path to a node (example: "Armature/Hips/Spine1/Spine2/Head").
     /// </summary>
