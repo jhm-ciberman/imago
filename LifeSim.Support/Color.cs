@@ -66,21 +66,7 @@ public readonly struct Color
     /// <exception cref="ArgumentException">Thrown when the color string is invalid.</exception>
     public Color(string hexColor)
     {
-        ReadOnlySpan<char> span = hexColor.AsSpan();
-        if (hexColor.StartsWith("#", true, CultureInfo.InvariantCulture))
-        {
-            span = span[1..];
-        }
-
-        if (span.Length is not 6 and not 8)
-        {
-            throw new ArgumentException("Invalid hex color string.");
-        }
-
-        this.R = byte.Parse(span.Slice(0, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
-        this.G = byte.Parse(span.Slice(2, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
-        this.B = byte.Parse(span.Slice(4, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
-        this.A = span.Length == 8 ? byte.Parse(span.Slice(6, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture) : (byte)255;
+        this = FromHex(hexColor);
     }
 
     /// <summary>
@@ -90,7 +76,65 @@ public readonly struct Color
     /// <returns>The <see cref="Color"/>.</returns>
     public static Color FromHex(string hexColor)
     {
-        return new Color(hexColor);
+        if (TryParse(hexColor, out Color color))
+        {
+            return color;
+        }
+
+        throw new ArgumentException("Invalid hex color string.");
+    }
+
+    public static bool TryParse(ReadOnlySpan<char> hexColor, out Color color)
+    {
+        ReadOnlySpan<char> span = hexColor;
+        if (hexColor.StartsWith("#"))
+        {
+            span = span[1..];
+        }
+
+        if (span.Length is 6 or 8)
+        {
+            // parse components
+            var ci = CultureInfo.InvariantCulture;
+            var hn = NumberStyles.HexNumber;
+            if (byte.TryParse(span[0..2], hn, ci, out byte r) &&
+                byte.TryParse(span[2..4], hn, ci, out byte g) &&
+                byte.TryParse(span[4..6], hn, ci, out byte b))
+            {
+                byte a = 255;
+                if (span.Length == 8)
+                {
+                    if (!byte.TryParse(span[6..8], hn, ci, out a))
+                    {
+                        color = default;
+                        return false;
+                    }
+                }
+
+                color = new Color(r, g, b, a);
+                return true;
+            }
+
+            color = default;
+            return false;
+        }
+
+
+        // Short syntax supported, e.g. #FFF or #FFFF
+        if (span.Length is 3 or 4)
+        {
+            var sr = span[0];
+            var sg = span[1];
+            var sb = span[2];
+            var sa = span.Length == 4 ? span[3] : 'F';
+            if (TryParse($"#{sr}{sr}{sg}{sg}{sb}{sb}{sa}{sa}", out color)) // Yes it allocates, but whatever
+            {
+                return true;
+            }
+        }
+
+        color = default;
+        return false;
     }
 
     public static Color FromColorAlpha(Color color, float alpha)
@@ -102,6 +146,16 @@ public readonly struct Color
     public uint ToPackedUInt()
     {
         return (uint)((this.A << 24) | (this.B << 16) | (this.G << 8) | (this.R << 0));
+    }
+
+    public override string ToString()
+    {
+        if (this.A == 255)
+        {
+            return $"#{this.R:X2}{this.G:X2}{this.B:X2}";
+        }
+
+        return $"#{this.R:X2}{this.G:X2}{this.B:X2}{this.A:X2}";
     }
 
     public static Color White => new Color(255, 255, 255, 255);
