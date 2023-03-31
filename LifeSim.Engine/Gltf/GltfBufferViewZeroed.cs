@@ -4,6 +4,12 @@ namespace LifeSim.Engine.Gltf;
 
 internal class GltfBufferViewZeroed : IGltfBufferView
 {
+    public static GltfBufferViewZeroed Instance { get; } = new GltfBufferViewZeroed();
+
+    private GltfBufferViewZeroed()
+    {
+        // Use the static Instance property instead.
+    }
 
     public Vector2[] ReadVector2Array(int offset, int count)
     {

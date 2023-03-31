@@ -15,18 +15,6 @@ namespace LifeSim.Engine.Gltf;
 
 public class GltfLoader
 {
-    public class GltfAsset
-    {
-        public IReadOnlyList<GltfPrefab> Scenes { get; } = Array.Empty<GltfPrefab>();
-        public IReadOnlyList<Animation> Animations { get; } = Array.Empty<Animation>();
-
-        public GltfAsset(IReadOnlyList<GltfPrefab> scenes, IReadOnlyList<Animation> animations)
-        {
-            this.Scenes = scenes;
-            this.Animations = animations;
-        }
-    }
-
     private static readonly Dictionary<string, GltfAsset> _cache = new Dictionary<string, GltfAsset>();
 
     public static GltfAsset LoadFile(string path)
@@ -140,7 +128,7 @@ public class GltfLoader
     /// Loads all animations from the glTF file.
     /// </summary>
     /// <returns>An array of animations.</returns>
-    public Animation[] LoadAnimations()
+    private Animation[] LoadAnimations()
     {
         Animation[] animations = new Animation[this._model.Animations.Length];
         for (int i = 0; i < this._model.Animations.Length; i++)
@@ -203,7 +191,7 @@ public class GltfLoader
         int? matricesIndex = data.InverseBindMatrices;
 
         Matrix4x4[] matrices = matricesIndex == null
-            ? new GltfBufferViewZeroed().ReadMatrix4x4Array(0, data.Joints.Length)
+            ? GltfBufferViewZeroed.Instance.ReadMatrix4x4Array(0, data.Joints.Length)
             : this.GetAccessor(matricesIndex.Value).AsMatrix4x4();
 
         string[] joints = new string[data.Joints.Length];
@@ -368,7 +356,7 @@ public class GltfLoader
 
     private IGltfBufferView GetBufferView(int? index)
     {
-        if (!index.HasValue) return new GltfBufferViewZeroed();
+        if (!index.HasValue) return GltfBufferViewZeroed.Instance;
 
         var data = this._model.BufferViews[index.Value];
         var buffer = this.GetBuffer(data.Buffer);
