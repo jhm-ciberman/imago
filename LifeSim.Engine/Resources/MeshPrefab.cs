@@ -1,12 +1,12 @@
 using LifeSim.Engine.Rendering;
 using LifeSim.Engine.SceneGraph;
 
-namespace LifeSim.Engine.Assets;
+namespace LifeSim.Engine.Resources;
 
 /// <summary>
-/// A <see cref="Prefab"> for a single mesh.
+/// A <see cref="WrapingPrefab"> for a single mesh.
 /// </summary>
-public class MeshPrefab : Prefab
+public class MeshPrefab : IInstantiable
 {
     private readonly Mesh _mesh;
 
@@ -19,7 +19,7 @@ public class MeshPrefab : Prefab
         this._mesh = mesh;
     }
 
-    protected override Node3D InstantiateCore()
+    public Node3D Instantiate()
     {
         return new RenderNode3D(this._mesh);
     }

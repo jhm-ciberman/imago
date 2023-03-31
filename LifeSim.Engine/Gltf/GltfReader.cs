@@ -30,7 +30,6 @@ public class GltfReader
         this._nodesCache = new GltfNode[this._model.Nodes.Length];
     }
 
-
     /// <summary>
     /// Loads all resources from the gltf file.
     /// </summary>
