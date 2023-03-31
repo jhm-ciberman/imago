@@ -14,7 +14,7 @@ public class GltfLoader
         if (!_cache.TryGetValue(path, out GltfAsset? asset))
         {
             var reader = new GltfReader(path);
-            asset = reader.LoadAll();
+            asset = reader.Load();
             _cache.Add(path, asset);
         }
 

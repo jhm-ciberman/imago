@@ -16,16 +16,64 @@ public class GltfReader
     private readonly glTFLoader.Schema.Gltf _model;
     private readonly GltfBuffer?[] _buffersCache;
     private readonly GltfNode?[] _nodesCache;
-    private readonly Material? _defaultMaterial;
     private readonly Dictionary<int, GltfAccessor> _accessorsCache = new();
 
-    public GltfReader(string path, Material? defaultMaterial = null)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GltfReader"/> class.
+    /// </summary>
+    /// <param name="path">The path to the gltf file.</param>
+    public GltfReader(string path)
     {
         this._path = path;
-        this._model = glTFLoader.Interface.LoadModel(path);
+        this._model = Interface.LoadModel(path);
         this._buffersCache = new GltfBuffer[this._model.Buffers.Length];
         this._nodesCache = new GltfNode[this._model.Nodes.Length];
-        this._defaultMaterial = defaultMaterial;
+    }
+
+
+    /// <summary>
+    /// Loads all resources from the gltf file.
+    /// </summary>
+    /// <returns>A <see cref="GltfAsset"/> object containing all resources.</returns>
+    public GltfAsset Load()
+    {
+        var scenes = this.LoadScenes();
+        var animations = this.LoadAnimations();
+        return new GltfAsset(scenes, animations);
+    }
+
+    /// <summary>
+    /// Loads all scenes from the gltf file.
+    /// </summary>
+    /// <returns>A list of <see cref="GltfNode"/> objects of the root nodes of the scenes.</returns>
+    public IReadOnlyList<GltfNode> LoadScenes()
+    {
+        var scenes = new List<GltfNode>();
+        if (this._model.Scenes != null)
+        {
+            for (int i = 0; i < this._model.Scenes.Length; i++)
+            {
+                scenes.Add(this.LoadScene(i));
+            }
+        }
+        return scenes;
+    }
+
+    /// <summary>
+    /// Loads all animations from the gltf file.
+    /// </summary>
+    /// <returns>A list of <see cref="Animation"/> objects.</returns>
+    public IReadOnlyList<Animation> LoadAnimations()
+    {
+        var animations = new List<Animation>();
+        if (this._model.Animations != null)
+        {
+            for (int i = 0; i < this._model.Animations.Length; i++)
+            {
+                animations.Add(this.LoadAnimation(i));
+            }
+        }
+        return animations;
     }
 
     private string GetNodeName(int index)
@@ -46,7 +94,6 @@ public class GltfReader
 
         if (data.Mesh.HasValue)
         {
-            node.Material = this._defaultMaterial;
             node.Mesh = this.GetMesh(data.Mesh.Value);
             if (data.Skin.HasValue)
             {
@@ -83,8 +130,6 @@ public class GltfReader
         return node;
     }
 
-
-
     private static Matrix4x4 ToMatrix(float[] m)
     {
         return new Matrix4x4(
@@ -95,12 +140,7 @@ public class GltfReader
         );
     }
 
-    /// <summary>
-    /// Loads an animation from the glTF file. By default, the first animation is loaded.
-    /// </summary>
-    /// <param name="index">The index of the animation in the glTF file.</param>
-    /// <returns>The animation.</returns>
-    private Animation LoadAnimation(int index = 0)
+    private Animation LoadAnimation(int index)
     {
         var animationData = this._model.Animations[index];
         List<IChannel> list = new List<IChannel>();
@@ -162,12 +202,7 @@ public class GltfReader
         return new GltfSkinInfo(matrices, joints, root);
     }
 
-    /// <summary>
-    /// Loads a scene from the gltf file. By default, the first scene is loaded.
-    /// </summary>
-    /// <param name="index">The index of the scene to load.</param>
-    /// <returns>The scene as a <see cref="IScenePrefab"/>.</returns>
-    private GltfNode LoadScene(int index = 0)
+    private GltfNode LoadScene(int index)
     {
         var data = this._model.Scenes[index];
         var scene = new GltfNode(data.Name ?? "Scene_" + index);
@@ -264,9 +299,6 @@ public class GltfReader
         return new GltfBufferView(buffer, data.ByteOffset, data.ByteStride);
     }
 
-
-
-
     private static ushort[] MakeFakeIndices(int count)
     {
         var arr = new ushort[count];
@@ -277,29 +309,4 @@ public class GltfReader
         return arr;
     }
 
-    /// <summary>
-    /// Loads all resources from the gltf file.
-    /// </summary>
-    /// <returns>A <see cref="GltfAsset"/> object containing all resources.</returns>
-    public GltfAsset LoadAll()
-    {
-        var scenes = new List<GltfNode>();
-        if (this._model.Scenes != null)
-        {
-            for (int i = 0; i < this._model.Scenes.Length; i++)
-            {
-                scenes.Add(this.LoadScene(i));
-            }
-        }
-        var animations = new List<Animation>();
-
-        if (this._model.Animations != null)
-        {
-            for (int i = 0; i < this._model.Animations.Length; i++)
-            {
-                animations.Add(this.LoadAnimation(i));
-            }
-        }
-        return new GltfAsset(scenes, animations);
-    }
 }
