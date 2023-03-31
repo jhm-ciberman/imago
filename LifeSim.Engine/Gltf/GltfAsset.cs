@@ -14,4 +14,8 @@ public class GltfAsset
         this.Scenes = scenes;
         this.Animations = animations;
     }
+
+    public GltfPrefab Scene => this.Scenes[0];
+
+    public Animation Animation => this.Animations[0];
 }

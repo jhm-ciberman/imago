@@ -125,25 +125,11 @@ public class GltfLoader
     }
 
     /// <summary>
-    /// Loads all animations from the glTF file.
-    /// </summary>
-    /// <returns>An array of animations.</returns>
-    private Animation[] LoadAnimations()
-    {
-        Animation[] animations = new Animation[this._model.Animations.Length];
-        for (int i = 0; i < this._model.Animations.Length; i++)
-        {
-            animations[i] = this.LoadAnimation(i);
-        }
-        return animations;
-    }
-
-    /// <summary>
     /// Loads an animation from the glTF file. By default, the first animation is loaded.
     /// </summary>
     /// <param name="index">The index of the animation in the glTF file.</param>
     /// <returns>The animation.</returns>
-    public Animation LoadAnimation(int index)
+    private Animation LoadAnimation(int index = 0)
     {
         var animationData = this._model.Animations[index];
         List<IChannel> list = new List<IChannel>();
@@ -211,7 +197,7 @@ public class GltfLoader
     /// <param name="index">The index of the scene to load.</param>
     /// <param name="rootNodeName">The name of the root node of the scene. If null, the whole scene is loaded.</param>
     /// <returns>The scene as a <see cref="IScenePrefab"/>.</returns>
-    public GltfPrefab LoadScene(int index = 0, string? rootNodeName = null)
+    private GltfPrefab LoadScene(int index = 0, string? rootNodeName = null)
     {
         var data = this._model.Scenes[index];
         var name = data.Name ?? "Scene_" + index;
@@ -243,7 +229,7 @@ public class GltfLoader
     /// <param name="name">The name of the scene to load.</param>
     /// <param name="rootNodeName">The name of the root node of the scene. If null, the whole scene is loaded.</param>
     /// <returns>The scene as a <see cref="IScenePrefab"/>.</returns>
-    public GltfPrefab LoadScene(string? name, string? rootNodeName = null)
+    private GltfPrefab LoadScene(string? name, string? rootNodeName = null)
     {
         var index = name == null ? 0 : this.FindSceneIndex(name);
         if (index == -1)
@@ -381,7 +367,7 @@ public class GltfLoader
     /// Loads all resources from the gltf file.
     /// </summary>
     /// <returns>A <see cref="GltfAsset"/> object containing all resources.</returns>
-    public GltfAsset LoadAll()
+    private GltfAsset LoadAll()
     {
         var scenes = new List<GltfPrefab>();
         if (this._model.Scenes != null)
