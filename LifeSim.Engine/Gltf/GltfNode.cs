@@ -1,15 +1,17 @@
 using System.Collections.Generic;
 using System.Numerics;
 using LifeSim.Engine.Rendering;
+using LifeSim.Engine.Resources;
+using LifeSim.Engine.SceneGraph;
 
 namespace LifeSim.Engine.Gltf;
 
-internal class GltfNode
+public class GltfNode : IInstantiable
 {
-    public string Name { get; set; }
-    public Vector3 Position { get; set; }
-    public Quaternion Rotation { get; set; }
-    public Vector3 Scale { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public Vector3 Position { get; set; } = Vector3.Zero;
+    public Quaternion Rotation { get; set; } = Quaternion.Identity;
+    public Vector3 Scale { get; set; } = Vector3.One;
 
     public Mesh? Mesh { get; set; } = null;
     public GltfSkinInfo? Skin { get; set; } = null;
@@ -28,5 +30,31 @@ internal class GltfNode
     {
         node.Parent = this;
         this._children.Add(node);
+    }
+
+    public GltfNode? FindNodeByName(string name)
+    {
+        // TODO: This is a naive implementation. It should be replaced with a more efficient one.
+        // Like a dictionary or something.
+        if (this.Name == name)
+        {
+            return this;
+        }
+
+        foreach (GltfNode? child in this._children)
+        {
+            GltfNode? result = child.FindNodeByName(name);
+            if (result != null)
+            {
+                return result;
+            }
+        }
+
+        return null;
+    }
+
+    public Node3D Instantiate()
+    {
+        return new GltfSceneInstantiator(this).Instantiate();
     }
 }

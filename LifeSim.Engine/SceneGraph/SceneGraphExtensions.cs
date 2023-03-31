@@ -166,16 +166,17 @@ public static class SceneGraphExtensions
         });
     }
 
-    private static void PrintHierarchyToConsoleCore(Node3D node, string indent, bool isLast)
+    private static void PrintHierarchyToConsoleCore(Node3D node, string indent, bool isLast, Func<Node3D, string>? toString = null)
     {
         var label = node.ToString();
         var c = indent.Length == 0 ? '─' : (isLast ? '└' : '├');
-        Console.WriteLine($"{indent}{c}╴{label}");
+        string extra = toString?.Invoke(node) ?? "";
+        Console.WriteLine($"{indent}{c}╴{label} {extra}");
         for (var i = 0; i < node.Children.Count; i++)
         {
             var child = node.Children[i];
             var isLastChild = i == node.Children.Count - 1;
-            PrintHierarchyToConsoleCore(child, indent + (isLast ? "  " : "│ "), isLastChild);
+            PrintHierarchyToConsoleCore(child, indent + (isLast ? "  " : "│ "), isLastChild, toString);
         }
     }
 
@@ -183,9 +184,9 @@ public static class SceneGraphExtensions
     /// Prints the hierarchy of the specified node to the console.
     /// </summary>
     /// <param name="self">The node.</param>
-    public static void PrintHierarchyToConsole(this Node3D self)
+    public static void PrintHierarchyToConsole(this Node3D self, Func<Node3D, string>? toString = null)
     {
-        PrintHierarchyToConsoleCore(self, "", true);
+        PrintHierarchyToConsoleCore(self, "", true, toString);
     }
 
     /// <summary>
