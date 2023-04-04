@@ -43,13 +43,13 @@ public class SkyDomePass : IDisposable, IRenderingPass
     // The horizontal axis of the lut is for each hour of the day (left = 0hs, right = 24hs)
     // The vertical axis is for the vertical position of the sky dome (top = top of the sphere, bottom = middle of the sphere)
     // That way we can have different gradients for different times of the day.
-    private readonly Texture _lutTexture;
+    private readonly ITexture _lutTexture;
 
     private readonly Sampler _sampler;
 
     public float LutTextureOffset { get; set; } = 0.38f;
 
-    public SkyDomePass(Renderer renderer, IRenderTexture renderTexture)
+    public SkyDomePass(Renderer renderer, IRenderTexture renderTexture, ITexture lutTexture)
     {
         this._gd = renderer.GraphicsDevice;
         var factory = this._gd.ResourceFactory;
@@ -86,7 +86,7 @@ public class SkyDomePass : IDisposable, IRenderingPass
         var shaders = ShaderCompiler.CompileShaders(this._gd, _vertexCode, _fragmentCode);
         this._pipeline = this.MakePipeline(new ShaderSetDescription(new[] { vertexFormat }, shaders));
 
-        this._lutTexture = new ImageTexture("./res/skydome_lut.png", srgb: false);
+        this._lutTexture = lutTexture;
 
         this._sampler = factory.CreateSampler(new SamplerDescription(
             SamplerAddressMode.Clamp, SamplerAddressMode.Clamp, SamplerAddressMode.Clamp,
