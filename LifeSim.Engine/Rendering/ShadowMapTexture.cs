@@ -41,7 +41,6 @@ public class ShadowMapTexture : ITexture, IDisposable
         this.ShadowSampler = gd.ResourceFactory.CreateSampler(new SamplerDescription(
             SamplerAddressMode.Border, SamplerAddressMode.Border, SamplerAddressMode.Border,
             SamplerFilter.MinLinear_MagLinear_MipPoint,
-            //null, 
             ComparisonKind.Greater,
             0, 0, 0, 0, SamplerBorderColor.OpaqueWhite
         ));

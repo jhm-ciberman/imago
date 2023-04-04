@@ -409,16 +409,15 @@ internal class Renderable : IDisposable
             return;
         }
 
-        this.ForwardPipeline = this.GetForwardPipeline(this._material, renderer);
-        this.ShadowMapPipeline = this.GetShadowmapPipeline(this._material, renderer);
+        this.ForwardPipeline = this.GetForwardPipeline(this._material, renderer.Settings);
+        this.ShadowMapPipeline = this.GetShadowmapPipeline(this._material);
     }
 
-    private Veldrid.Pipeline? GetForwardPipeline(Material material, Renderer renderer)
+    private Veldrid.Pipeline? GetForwardPipeline(Material material, RenderSettings settings)
     {
         bool isVisible = (this.RenderQueues & RenderQueues.OpaqueOrTransparent) != 0;
         if (!isVisible) return null;
 
-        var settings = renderer.Settings;
         RenderFlags flags = RenderFlags.None;
         if (settings.ForceWireframe) flags |= RenderFlags.Wireframe;
         flags |= RenderFlags.MousePick;
@@ -426,17 +425,17 @@ internal class Renderable : IDisposable
         if (settings.EnableFog) flags |= RenderFlags.Fog;
         if (settings.EnablePixelPerfectShadows) flags |= RenderFlags.PixelPerfactShadows;
 
-        return material.ForwardShader.GetPipeline(renderer.ForwardPass, this._mesh!.VertexFormat, material.RenderFlags | flags);
+        return material.ForwardShader.GetPipeline(this._mesh!.VertexFormat, material.RenderFlags | flags);
     }
 
-    private Veldrid.Pipeline? GetShadowmapPipeline(Material material, Renderer renderer)
+    private Veldrid.Pipeline? GetShadowmapPipeline(Material material)
     {
         bool isShadowcaster = (this.RenderQueues & RenderQueues.ShadowCaster) != 0;
         if (!isShadowcaster) return null;
 
         RenderFlags shadowSupportFlags = RenderFlags.AlphaTest;
         RenderFlags flags = material.RenderFlags & shadowSupportFlags;
-        return material.ShadowmapShader.GetPipeline(renderer.ShadowMapPass, this._mesh!.VertexFormat, flags);
+        return material.ShadowMapShader.GetPipeline(this._mesh!.VertexFormat, flags);
     }
 
     /// <summary>

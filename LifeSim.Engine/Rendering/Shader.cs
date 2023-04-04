@@ -6,13 +6,6 @@ namespace LifeSim.Engine.Rendering;
 
 public class Shader : IDisposable
 {
-    private static int _count = 0;
-
-    /// <summary>
-    /// Gets the unique ID of this shader.
-    /// </summary>
-    public int Id { get; set; }
-
     /// <summary>
     /// Gets the source vertex shader code.
     /// </summary>
@@ -39,17 +32,19 @@ public class Shader : IDisposable
     private readonly List<ShaderVariant> _variants = new List<ShaderVariant>();
     private readonly GraphicsDevice _gd;
 
+    private readonly IPipelineProvider _pass;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="Shader"/> class.
     /// </summary>
+    /// <param name="pass">The pass to use.</param>
     /// <param name="vertexCode">The source vertex shader code.</param>
     /// <param name="fragmentCode">The source fragment shader code.</param>
     /// <param name="textures">The names of the textures used by this shader.</param>
     /// <param name="suportedRenderFlags">The <see cref="RenderFlags"/> supported by this shader.</param>
-    public Shader(string vertexCode, string fragmentCode, string[]? textures = null, RenderFlags suportedRenderFlags = RenderFlags.None)
+    public Shader(IPipelineProvider pass, string vertexCode, string fragmentCode, string[]? textures = null, RenderFlags suportedRenderFlags = RenderFlags.None)
     {
-        this.Id = ++Shader._count;
-
+        this._pass = pass;
         this.VertexCode = vertexCode;
         this.FragmentCode = fragmentCode;
         this.SupportedRenderFlags = suportedRenderFlags;
@@ -80,7 +75,7 @@ public class Shader : IDisposable
     /// <param name="vertexFormat">The vertex format to use.</param>
     /// <param name="flags">The render flags to use.</param>
     /// <returns>The veldrid pipeline.</returns>
-    internal Pipeline GetPipeline(IPipelineProvider pass, VertexFormat vertexFormat, RenderFlags flags)
+    internal Pipeline GetPipeline(VertexFormat vertexFormat, RenderFlags flags)
     {
         lock (this._pipelines)
         {
@@ -91,7 +86,7 @@ public class Shader : IDisposable
             }
 
             ShaderVariant shaderVariant = this.GetShaderVariant(vertexFormat, flags);
-            var pipeline = pass.MakePipeline(shaderVariant, flags);
+            var pipeline = this._pass.MakePipeline(shaderVariant, flags);
             this._pipelines.Add(new CachedPipeline(vertexFormat, pipeline, flags));
 
             return pipeline;
@@ -157,11 +152,9 @@ public class Shader : IDisposable
             pipeline.Pipeline.Dispose();
         }
     }
-
-
 }
 
-internal class ShaderVariant : IDisposable
+public class ShaderVariant : IDisposable
 {
     public Shader Shader { get; }
 

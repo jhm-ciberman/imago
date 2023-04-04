@@ -37,6 +37,8 @@ public class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
 
     private readonly RenderQueue[] _renderQueues;
 
+    public Shader DefaultShader { get; }
+
     public ShadowPass(Renderer renderer)
     {
         this._renderer = renderer;
@@ -68,6 +70,12 @@ public class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
         {
             this._cascades[i] = new ShadowCascade();
         }
+
+
+        RenderFlags supportedShadowMapFlags = RenderFlags.AlphaTest;
+        var shadowmapVertex = ShaderLoader.Load("shadowmap.vert.glsl");
+        var shadowmapFragment = ShaderLoader.Load("shadowmap.frag.glsl");
+        this.DefaultShader = new Shader(this, shadowmapVertex, shadowmapFragment, new[] { "Surface" }, supportedShadowMapFlags);
     }
 
     public void Render(CommandList commandList, Scene scene)

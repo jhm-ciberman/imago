@@ -49,6 +49,8 @@ internal class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
     private readonly RenderQueue _transparentRenderQueue;
     private readonly ShadowPass _shadowPass;
 
+    public Shader DefaultShader { get; }
+
     public ForwardPass(Renderer renderer, IRenderTexture mainRenderTexture, ShadowPass shadowPass)
     {
         this._renderer = renderer;
@@ -76,6 +78,11 @@ internal class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
         this._transparentRenderQueue = new RenderQueue(RenderQueues.Transparent);
 
         this._shadowPass.ShadowmapTexture.Resized += this.Shadowmap_Resized;
+
+        RenderFlags supportedForwardFlags = RenderFlags.MousePick | RenderFlags.AlphaTest | RenderFlags.ReceiveShadows | RenderFlags.Fog | RenderFlags.PixelPerfactShadows;
+        var baseVertex = ShaderLoader.Load("base.vert.glsl");
+        var baseFragment = ShaderLoader.Load("base.frag.glsl");
+        this.DefaultShader = new Shader(this, baseVertex, baseFragment, new[] { "Surface" }, supportedForwardFlags);
     }
 
     private void Shadowmap_Resized(object? sender, EventArgs e)

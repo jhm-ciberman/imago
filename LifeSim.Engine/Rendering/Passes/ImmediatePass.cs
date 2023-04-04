@@ -116,7 +116,7 @@ public class ImmediatePass : IPipelineProvider, IRenderingPass, IDisposable, IIm
                 new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
                 new VertexElementDescription("Color", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Byte4_Norm)));
 
-        this._defaultShader = new Shader(_vertexShader, _fragmentShader, new[] { "Main" });
+        this._defaultShader = new Shader(this, _vertexShader, _fragmentShader, new[] { "Main" });
 
         this._resourceSetCache = new ResourceSetCache(factory);
 
@@ -306,7 +306,7 @@ public class ImmediatePass : IPipelineProvider, IRenderingPass, IDisposable, IIm
         if (this._currentBatchShader != this._currentShaderInUse)
         {
             this._currentShaderInUse = this._currentBatchShader;
-            var pipeline = this._currentShaderInUse.GetPipeline(this, this._vertexFormat, RenderFlags.None);
+            var pipeline = this._currentShaderInUse.GetPipeline(this._vertexFormat, RenderFlags.None);
             this._commandList.SetPipeline(pipeline);
         }
 

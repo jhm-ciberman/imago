@@ -27,16 +27,6 @@ public partial class Renderer : IDisposable
     public event EventHandler<ViewportResizedEventArgs>? ViewportResized;
 
     /// <summary>
-    /// Get the forward pass of the renderer.
-    /// </summary>
-    internal IPipelineProvider ForwardPass => this._forwardPass;
-
-    /// <summary>
-    /// Gets the shadow map pass of the renderer.
-    /// </summary>
-    internal IPipelineProvider ShadowMapPass => this._shadowPass;
-
-    /// <summary>
     /// Gets the current Veldrid's GraphicsDevice.
     /// </summary>
     internal GraphicsDevice GraphicsDevice { get; }
@@ -45,6 +35,11 @@ public partial class Renderer : IDisposable
     /// Gets the main render texture.
     /// </summary>
     public RenderTexture MainRenderTexture { get; }
+
+    /// <summary>
+    /// Gets the full screen render texture.
+    /// </summary>
+    internal SwapchainRenderTexture FullScreenRenderTexture => this._fullScreenRenderTexture;
 
     /// <summary>
     /// Gets the current backend used by the renderer.
@@ -58,19 +53,9 @@ public partial class Renderer : IDisposable
 
     private readonly SwapchainRenderTexture _fullScreenRenderTexture;
     private readonly ResourceFactory _factory;
-    private readonly FullScreenPass _fullScreenPass;
-    private readonly GizmosPass _gizmosPass;
     private readonly Fence _fence;
-    private readonly ForwardPass _forwardPass;
-    private readonly ImmediatePass _immediatePass;
-    private readonly ShadowPass _shadowPass;
-    private readonly SpritesPass _spritesPass;
-    private readonly ImGuiPass _imGuiPass;
-    private readonly MousePickingPass _mousePickerPass;
-    private readonly ParticlesPass _particlesPass;
-    private readonly SkyDomePass _skyDomePass;
     private readonly CommandList _commandList;
-    private readonly List<CommandListJob> _jobs;
+    private readonly List<CommandListJob> _jobs = new();
     private readonly DisposeCollector _disposeCollector;
     private readonly Dictionary<ResourceLayoutDescription, ResourceLayout> _resourceLayoutCache = new();
     private readonly SwapPopList<Renderable> _renderables = new();
@@ -88,6 +73,17 @@ public partial class Renderer : IDisposable
     public ResourceLayout SkeletonResourceLayout { get; }
 
     private readonly List<Skeleton> _skeletons = new List<Skeleton>();
+
+    private readonly FullScreenPass _fullScreenPass;
+    private readonly GizmosPass _gizmosPass;
+    private readonly ForwardPass _forwardPass;
+    private readonly ImmediatePass _immediatePass;
+    private readonly ShadowPass _shadowPass;
+    private readonly SpritesPass _spritesPass;
+    private readonly ImGuiPass _imGuiPass;
+    private readonly MousePickingPass _mousePickerPass;
+    private readonly ParticlesPass _particlesPass;
+    private readonly SkyDomePass _skyDomePass;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Renderer"/> class.
@@ -153,32 +149,80 @@ public partial class Renderer : IDisposable
         this._immediatePass = new ImmediatePass(this, this.MainRenderTexture);
         this._spritesPass = new SpritesPass(this, this.MainRenderTexture);
         this._skyDomePass = new SkyDomePass(this, this.MainRenderTexture);
-        this._fullScreenPass = new FullScreenPass(this, this.MainRenderTexture, this._fullScreenRenderTexture);
+        this._fullScreenPass = new FullScreenPass(this, this.MainRenderTexture, this.FullScreenRenderTexture);
 
         this._commandList = this._factory.CreateCommandList();
 
         this._fence = this._factory.CreateFence(false);
 
-        this._jobs = new List<CommandListJob>
-        {
-            new CommandListJob("Shadows", this._factory,
-                this._shadowPass),
-            new CommandListJob("Forward", this._factory,
-                this._forwardPass),
-            new CommandListJob("Extra", this._factory,
-                this._immediatePass,
-                this._skyDomePass,
-                this._mousePickerPass,
-                this._particlesPass,
-                this._gizmosPass,
-                this._spritesPass,
-                this._imGuiPass),
-            new CommandListJob("Present", this._factory,
-                this._fullScreenPass),
-        };
+
+        this._jobs.Add(new CommandListJob("Shadows", this._factory, this._shadowPass));
+        this._jobs.Add(new CommandListJob("Forward", this._factory, this._forwardPass));
+        this._jobs.Add(new CommandListJob("Extra", this._factory,
+            this._immediatePass,
+            this._skyDomePass,
+            this._mousePickerPass,
+            this._particlesPass,
+            this._gizmosPass,
+            this._spritesPass,
+            this._imGuiPass));
+        this._jobs.Add(new CommandListJob("Present", this._factory, this._fullScreenPass));
+
 
         this.Settings.PropertyChanged += this.Settings_PropertyChanged;
         Texture.InitializeDefaultTextures();
+    }
+
+    private class CommandListJob : IDisposable
+    {
+        public CommandList CommandList { get; }
+        public string Name { get; }
+        public Fence Fence { get; }
+        public IRenderingPass[] Passes { get; }
+
+        public CommandListJob(string name, ResourceFactory factory, params IRenderingPass[] passes)
+        {
+            this.Name = name;
+            this.CommandList = factory.CreateCommandList();
+            this.Fence = factory.CreateFence(signaled: false);
+            this.Passes = passes;
+        }
+
+        public void Execute(Scene scene)
+        {
+            this.CommandList.Begin();
+            foreach (var pass in this.Passes)
+            {
+                pass.Render(this.CommandList, scene);
+            }
+            this.CommandList.End();
+        }
+
+        public void SubmitCommands(GraphicsDevice gd)
+        {
+            gd.SubmitCommands(this.CommandList, this.Fence);
+        }
+
+        public void Dispose()
+        {
+            this.CommandList.Dispose();
+        }
+    }
+
+    /// <summary>
+    /// Updates the renderer.
+    /// </summary>
+    /// <param name="deltaTime">The time since the last update in seconds.</param>
+    /// <param name="inputSnapshot">The current input state.</param>
+    public void Update(float deltaTime, InputSnapshot inputSnapshot)
+    {
+        this._imGuiPass.Update(deltaTime, inputSnapshot);
+        this._mousePickerPass.SetMousePosition(inputSnapshot.MousePosition);
+    }
+
+    public Material MakeMaterial()
+    {
+        return new Material(this._forwardPass.DefaultShader, this._shadowPass.DefaultShader);
     }
 
     private void Settings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -213,17 +257,6 @@ public partial class Renderer : IDisposable
         var renderable = new Renderable(transformDataBlock, instanceDataBlock);
         this._renderables.Add(renderable);
         return renderable;
-    }
-
-    /// <summary>
-    /// Updates the renderer.
-    /// </summary>
-    /// <param name="deltaTime">The time since the last update in seconds.</param>
-    /// <param name="inputSnapshot">The current input state.</param>
-    public void Update(float deltaTime, InputSnapshot inputSnapshot)
-    {
-        this._imGuiPass.Update(deltaTime, inputSnapshot);
-        this._mousePickerPass.SetMousePosition(inputSnapshot.MousePosition);
     }
 
     /// <summary>
@@ -516,5 +549,17 @@ public partial class Renderer : IDisposable
         {
             skeleton.Dispose();
         }
+
+        // Passes
+        this._imGuiPass.Dispose();
+        this._mousePickerPass.Dispose();
+        this._gizmosPass.Dispose();
+        this._particlesPass.Dispose();
+        this._shadowPass.Dispose();
+        this._forwardPass.Dispose();
+        this._immediatePass.Dispose();
+        this._spritesPass.Dispose();
+        this._skyDomePass.Dispose();
+        this._fullScreenPass.Dispose();
     }
 }

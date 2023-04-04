@@ -1,3 +1,4 @@
+using System;
 using Veldrid;
 
 namespace LifeSim.Engine.Rendering;
@@ -98,18 +99,22 @@ public class Material : MaterialBase
     public static Texture DefaultTexture { get; } = Texture.Magenta;
 
     public Shader ForwardShader { get; private set; }
-    public Shader ShadowmapShader { get; }
+    public Shader ShadowMapShader { get; }
     public ResourceSet ResourceSet { get; internal set; } = null!;
     private readonly BindableResource[] _resources;
-    public Technique Definition { get; }
     private Texture? _texture = null;
 
-    public Material(Technique definition)
+    public Material(Shader forwardShader, Shader shadowMapShader)
     {
-        this.Definition = definition;
-        this.ForwardShader = definition.ForwardShader;
-        this.ShadowmapShader = definition.ShadowMapShader;
-        this._resources = new BindableResource[definition.ResourceCount];
+        if (forwardShader.MaterialResourceLayout != shadowMapShader.MaterialResourceLayout)
+        {
+            throw new ArgumentException("Forward and shadowmap shaders must use the same resource layout.");
+        }
+
+        this.ForwardShader = forwardShader;
+        this.ShadowMapShader = shadowMapShader;
+
+        this._resources = new BindableResource[forwardShader.Textures.Length * 2];
         this._resources[0] = DefaultTexture.VeldridTexture;
         this._resources[1] = DefaultTexture.VeldridSampler;
     }
@@ -118,7 +123,7 @@ public class Material : MaterialBase
     {
         this.ResourceSet?.Dispose();
 
-        this.ResourceSet = factory.CreateResourceSet(new ResourceSetDescription(this.Definition.ResourceLayout, this._resources));
+        this.ResourceSet = factory.CreateResourceSet(new ResourceSetDescription(this.ForwardShader.MaterialResourceLayout, this._resources));
     }
 
     public Texture? Texture
