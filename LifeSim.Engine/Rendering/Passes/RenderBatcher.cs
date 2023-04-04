@@ -59,7 +59,7 @@ internal class RenderBatcher
         {
             if (this._offsetsVertexBuffer != null)
             {
-                Renderer.Instance.DisposeWhenIdle(this._offsetsVertexBuffer);
+                this._gd.DisposeWhenIdle(this._offsetsVertexBuffer);
             }
 
             this._offsetsVertexBuffer = this._gd.ResourceFactory.CreateBuffer(new BufferDescription(

@@ -15,7 +15,7 @@ public class SpritesPass : IDisposable, IPipelineProvider, IRenderingPass
     public SpritesPass(Renderer renderer, IRenderTexture renderTexture)
     {
         this._gd = renderer.GraphicsDevice;
-        this._defaultShader = new Shader(this, _vertexShader, _fragmentShader, new[] { "Main" });
+        this._defaultShader = new Shader(renderer, this, _vertexShader, _fragmentShader, new[] { "Main" });
 
         this._renderTexture = renderTexture;
 

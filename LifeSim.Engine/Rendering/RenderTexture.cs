@@ -29,9 +29,12 @@ public class RenderTexture : IRenderTexture
 
     private readonly GraphicsDevice _gd;
 
-    internal RenderTexture(uint width, uint height)
+    private readonly Renderer _renderer;
+
+    internal RenderTexture(Renderer renderer, uint width, uint height)
     {
-        this._gd = Renderer.Instance.GraphicsDevice;
+        this._renderer = renderer;
+        this._gd = renderer.GraphicsDevice;
         this.DepthTexture = this.CreateDepthTexture(width, height);
         this.VeldridTexture = this.CreateColorTexture(width, height);
         this.PickingTexture = this.CreatePickingIDTexture(width, height);
@@ -86,11 +89,11 @@ public class RenderTexture : IRenderTexture
 
     public void Resize(uint width, uint height)
     {
-        Renderer.Instance.DisposeWhenIdle(this.DepthTexture);
-        Renderer.Instance.DisposeWhenIdle(this.VeldridTexture);
-        Renderer.Instance.DisposeWhenIdle(this.PickingTexture);
-        Renderer.Instance.DisposeWhenIdle(this.Framebuffer);
-        Renderer.Instance.DisposeWhenIdle(this.ColorOnlyFramebuffer);
+        this._renderer.DisposeWhenIdle(this.DepthTexture);
+        this._renderer.DisposeWhenIdle(this.VeldridTexture);
+        this._renderer.DisposeWhenIdle(this.PickingTexture);
+        this._renderer.DisposeWhenIdle(this.Framebuffer);
+        this._renderer.DisposeWhenIdle(this.ColorOnlyFramebuffer);
         this.DepthTexture = this.CreateDepthTexture(width, height);
         this.VeldridTexture = this.CreateColorTexture(width, height);
         this.PickingTexture = this.CreatePickingIDTexture(width, height);

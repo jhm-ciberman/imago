@@ -117,7 +117,7 @@ public partial class Renderer : IDisposable
         this._factory = this.GraphicsDevice.ResourceFactory;
 
         this._fullScreenRenderTexture = new SwapchainRenderTexture();
-        this.MainRenderTexture = new RenderTexture((uint)window.Width, (uint)window.Height);
+        this.MainRenderTexture = new RenderTexture(this, (uint)window.Width, (uint)window.Height);
 
         this.InstanceResourceLayout = this._factory.CreateResourceLayout(new ResourceLayoutDescription(
             new ResourceLayoutElementDescription("InstanceDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex | ShaderStages.Fragment)

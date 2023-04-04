@@ -25,9 +25,9 @@ public class DirectTexture : ITexture
 
     public event EventHandler? Resized;
 
-    public DirectTexture(uint width, uint height, uint mipLevels = 0, bool srgb = true)
+    public DirectTexture(GraphicsDevice gd, uint width, uint height, uint mipLevels = 0, bool srgb = true)
     {
-        this._gd = Renderer.Instance.GraphicsDevice;
+        this._gd = gd;
         this.Width = width;
         this.Height = height;
         this.MipLevels = (mipLevels == 0)

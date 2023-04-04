@@ -116,7 +116,7 @@ public class ImmediatePass : IPipelineProvider, IRenderingPass, IDisposable, IIm
                 new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
                 new VertexElementDescription("Color", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Byte4_Norm)));
 
-        this._defaultShader = new Shader(this, _vertexShader, _fragmentShader, new[] { "Main" });
+        this._defaultShader = new Shader(renderer, this, _vertexShader, _fragmentShader, new[] { "Main" });
 
         this._resourceSetCache = new ResourceSetCache(factory);
 

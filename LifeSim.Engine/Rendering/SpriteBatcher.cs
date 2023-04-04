@@ -105,6 +105,8 @@ public class SpriteBatcher : IFontStashRenderer2, IDisposable
         this._passResourceSet = factory.CreateResourceSet(new ResourceSetDescription(this.PassResourceLayout, this._matrixBuffer));
 
         this._resourceSetCache = new ResourceSetCache(factory);
+
+        this._textureManager = new FontStashTextureManager(this._gd);
     }
 
 
@@ -251,7 +253,9 @@ public class SpriteBatcher : IFontStashRenderer2, IDisposable
         font.FontBase.DrawText(this, text, position, color);
     }
 
-    ITexture2DManager IFontStashRenderer2.TextureManager { get; } = new FontStashTextureManager();
+    private readonly ITexture2DManager _textureManager;
+
+    ITexture2DManager IFontStashRenderer2.TextureManager => this._textureManager;
 
     void IFontStashRenderer2.DrawQuad(object texture, ref VertexPositionColorTexture topLeft, ref VertexPositionColorTexture topRight, ref VertexPositionColorTexture bottomLeft, ref VertexPositionColorTexture bottomRight)
     {
@@ -345,9 +349,16 @@ public class SpriteBatcher : IFontStashRenderer2, IDisposable
 
     private class FontStashTextureManager : ITexture2DManager
     {
+        private readonly GraphicsDevice _gd;
+
+        public FontStashTextureManager(GraphicsDevice gd)
+        {
+            this._gd = gd;
+        }
+
         object ITexture2DManager.CreateTexture(int width, int height)
         {
-            return new DirectTexture((uint)width, (uint)height);
+            return new DirectTexture(this._gd, (uint)width, (uint)height);
         }
 
         void ITexture2DManager.SetTextureData(object texture, System.Drawing.Rectangle bounds, byte[] data)

@@ -34,25 +34,29 @@ public class Shader : IDisposable
 
     private readonly IPipelineProvider _pass;
 
+    private readonly Renderer _renderer;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="Shader"/> class.
     /// </summary>
+    /// <
     /// <param name="pass">The pass to use.</param>
     /// <param name="vertexCode">The source vertex shader code.</param>
     /// <param name="fragmentCode">The source fragment shader code.</param>
     /// <param name="textures">The names of the textures used by this shader.</param>
     /// <param name="suportedRenderFlags">The <see cref="RenderFlags"/> supported by this shader.</param>
-    public Shader(IPipelineProvider pass, string vertexCode, string fragmentCode, string[]? textures = null, RenderFlags suportedRenderFlags = RenderFlags.None)
+    public Shader(Renderer renderer, IPipelineProvider pass, string vertexCode, string fragmentCode, string[]? textures = null, RenderFlags suportedRenderFlags = RenderFlags.None)
     {
+        this._renderer = renderer;
         this._pass = pass;
         this.VertexCode = vertexCode;
         this.FragmentCode = fragmentCode;
         this.SupportedRenderFlags = suportedRenderFlags;
 
-        this._gd = Renderer.Instance.GraphicsDevice;
+        this._gd = this._renderer.GraphicsDevice;
 
         this.Textures = textures ?? Array.Empty<string>();
-        this.MaterialResourceLayout = Renderer.Instance.GetResourceLayout(this.MakeResourceLayoutDescription());
+        this.MaterialResourceLayout = this._renderer.GetResourceLayout(this.MakeResourceLayoutDescription());
     }
 
     private ResourceLayoutDescription MakeResourceLayoutDescription()
