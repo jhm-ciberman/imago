@@ -355,4 +355,32 @@ public class GizmosLayer
             angle += step;
         }
     }
+
+    /// <summary>
+    /// Draws a cilinder at the given position, aligned in the XZ plane.
+    /// </summary>
+    /// <param name="position">The position of the base of the cilinder.</param>
+    /// <param name="radius">The radius of the cilinder.</param>
+    /// <param name="height">The height of the cilinder.</param>
+    /// <param name="color">The color of the cilinder.</param>
+    /// <param name="segments">The amount of segments the cilinder will be divided into.</param>
+    /// <param name="lifeTime">The amount of time the cilinder will be visible. A value of 0 means that the cilinder will be drawn until the next frame.</param>
+    /// <param name="drawInFront">Whether the cilinder should be drawn in front other objects or using depth.</param>
+    public void DrawCilinderXZ(Vector3 position, float radius, float height, Color color, int segments = 32, float lifeTime = 0, bool drawInFront = false)
+    {
+        var step = MathF.PI * 2 / segments;
+        var angle = 0f;
+
+        for (int i = 0; i < segments; i++)
+        {
+            var p1 = position + new Vector3(MathF.Cos(angle), 0, MathF.Sin(angle)) * radius;
+            var p2 = position + new Vector3(MathF.Cos(angle + step), 0, MathF.Sin(angle + step)) * radius;
+
+            this.DrawLine(p1, p2, color, lifeTime, drawInFront);
+            this.DrawLine(p1 + new Vector3(0, height, 0), p2 + new Vector3(0, height, 0), color, lifeTime, drawInFront);
+            this.DrawLine(p1, p1 + new Vector3(0, height, 0), color, lifeTime, drawInFront);
+
+            angle += step;
+        }
+    }
 }
