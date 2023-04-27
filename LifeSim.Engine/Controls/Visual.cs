@@ -268,7 +268,7 @@ public abstract class Visual : ObservableObject
         if (this.Root != null)
         {
             child.OnAddedToVisualTree(this.Root);
-            child.InvalidateMeasure();
+            this.InvalidateMeasure();
         }
     }
 
