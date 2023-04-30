@@ -85,22 +85,10 @@ public partial class Renderer : IDisposable
     private readonly ParticlesPass _particlesPass;
     private readonly SkyDomePass _skyDomePass;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="Renderer"/> class.
-    /// </summary>
-    /// <param name="window">The window to render to.</param>
-    /// <param name="graphicsBackend">The graphics backend to use.</param>
-    /// <exception cref="InvalidOperationException">Thrown if the renderer is already initialized.</exception>
-    public Renderer(Sdl2Window window, GraphicsBackend? graphicsBackend = null)
+
+    public static GraphicsDeviceOptions GetGraphicsDeviceOptions()
     {
-        if (Instance != null)
-        {
-            throw new InvalidOperationException("Only one instance of Renderer can be created.");
-        }
-
-        Instance = this;
-
-        GraphicsDeviceOptions options = new GraphicsDeviceOptions(
+        return new GraphicsDeviceOptions(
             debug: false,
             swapchainDepthFormat: null, //PixelFormat.R16_UNorm,
             syncToVerticalBlank: true,
@@ -109,15 +97,49 @@ public partial class Renderer : IDisposable
             preferStandardClipSpaceYDirection: true,
             swapchainSrgbFormat: false
         );
+    }
 
-        var gd = VeldridStartup.CreateGraphicsDevice(window, options, graphicsBackend ?? VeldridStartup.GetPlatformDefaultBackend());
+    public static GraphicsDevice CreateGraphicsDevice(Sdl2Window window, GraphicsBackend? graphicsBackend = null)
+    {
+        GraphicsDeviceOptions options = GetGraphicsDeviceOptions();
+
+        return VeldridStartup.CreateGraphicsDevice(window, options, graphicsBackend ?? VeldridStartup.GetPlatformDefaultBackend());
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Renderer"/> class.
+    /// </summary>
+    /// <param name="window">The window to render to.</param>
+    /// <param name="graphicsBackend">The graphics backend to use.</param>
+    /// <exception cref="InvalidOperationException">Thrown if the renderer is already initialized.</exception>
+    public Renderer(Sdl2Window window, GraphicsBackend? graphicsBackend = null)
+        : this(CreateGraphicsDevice(window, graphicsBackend)) { }
+
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Renderer"/> class.
+    /// </summary>
+    /// <param name="gd">The graphics device to use.</param>
+    /// <param name="swapchain">The swapchain to use.</param>
+    /// <exception cref="InvalidOperationException">Thrown if the renderer is already initialized.</exception>
+    public Renderer(GraphicsDevice gd, Swapchain? swapchain = null)
+    {
+        if (Instance != null)
+        {
+            throw new InvalidOperationException("Only one instance of Renderer can be created.");
+        }
+
+        Instance = this;
+
         this.GraphicsDevice = gd;
+        swapchain ??= this.GraphicsDevice.MainSwapchain;
 
         this._disposeCollector = new DisposeCollector();
         this._factory = this.GraphicsDevice.ResourceFactory;
 
-        this._fullScreenRenderTexture = new SwapchainRenderTexture();
-        this.MainRenderTexture = new RenderTexture(this, (uint)window.Width, (uint)window.Height);
+        this._fullScreenRenderTexture = new SwapchainRenderTexture(gd, swapchain);
+
+        this.MainRenderTexture = new RenderTexture(this, swapchain.Framebuffer.Width, swapchain.Framebuffer.Height);
 
         this.InstanceResourceLayout = this._factory.CreateResourceLayout(new ResourceLayoutDescription(
             new ResourceLayoutElementDescription("InstanceDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex | ShaderStages.Fragment)
@@ -285,7 +307,11 @@ public partial class Renderer : IDisposable
         this.SubmitJobs();
 
         this._disposeCollector.DisposeAll();
-        this.GraphicsDevice.SwapBuffers();
+
+        if (this.GraphicsDevice.MainSwapchain != null)
+        {
+            this.GraphicsDevice.SwapBuffers();
+        }
     }
 
     private void ClearRenderTarget(CommandList commandList, Scene scene)
