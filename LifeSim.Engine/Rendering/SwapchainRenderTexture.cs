@@ -18,16 +18,14 @@ internal class SwapchainRenderTexture : IRenderTexture, ITexture
 
     public uint Height => this.Framebuffer.Height;
 
-    public Sampler VeldridSampler => this._gd.LinearSampler;
+    public Sampler VeldridSampler { get; }
 
     private readonly Swapchain _swapchain;
 
-    private readonly GraphicsDevice _gd;
-
-    internal SwapchainRenderTexture()
+    internal SwapchainRenderTexture(GraphicsDevice gd, Swapchain swapchain)
     {
-        this._gd = Renderer.Instance.GraphicsDevice;
-        this._swapchain = this._gd.MainSwapchain;
+        this.VeldridSampler = gd.LinearSampler;
+        this._swapchain = swapchain;
     }
 
     public void Resize(uint width, uint height)
