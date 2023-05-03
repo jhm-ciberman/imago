@@ -110,4 +110,54 @@ public struct BoundingBox2d
         return true;
     }
 
+    public override string ToString()
+    {
+        return $"Min: {this.Min}, Max: {this.Max}";
+    }
+
+
+    public BoundingBox2d Rotate90(Vector2 pivot)
+    {
+        var newSize = new Vector2(this.Size.Y, this.Size.X);
+        var centerOffset = this.Center - pivot;
+        var newCenterOffset = new Vector2(centerOffset.Y, -centerOffset.X);
+        var newCenter = pivot + newCenterOffset;
+        var newMin = newCenter - newSize / 2;
+        var newMax = newCenter + newSize / 2;
+        return new BoundingBox2d(newMin, newMax);
+    }
+
+    public BoundingBox2d Rotate180(Vector2 pivot)
+    {
+        var newSize = this.Size;
+        var centerOffset = this.Center - pivot;
+        var newCenterOffset = -centerOffset;
+        var newCenter = pivot + newCenterOffset;
+        var newMin = newCenter - newSize / 2;
+        var newMax = newCenter + newSize / 2;
+        return new BoundingBox2d(newMin, newMax);
+    }
+
+    public BoundingBox2d Rotate270(Vector2 pivot)
+    {
+        var newSize = new Vector2(this.Size.Y, this.Size.X);
+        var centerOffset = this.Center - pivot;
+        var newCenterOffset = new Vector2(-centerOffset.Y, centerOffset.X);
+        var newCenter = pivot + newCenterOffset;
+        var newMin = newCenter - newSize / 2;
+        var newMax = newCenter + newSize / 2;
+        return new BoundingBox2d(newMin, newMax);
+    }
+
+    public BoundingBox2d Rotate(int degrees, Vector2 pivot)
+    {
+        return degrees switch
+        {
+            0 => this,
+            90 => this.Rotate90(pivot),
+            180 => this.Rotate180(pivot),
+            270 => this.Rotate270(pivot),
+            _ => throw new ArgumentException("Degrees must be 0, 90, 180, or 270.", nameof(degrees)),
+        };
+    }
 }
