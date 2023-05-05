@@ -38,9 +38,7 @@ public static class SceneGraphExtensions
     /// <exception cref="InvalidOperationException">No node with the specified name was not found.</exception>
     public static T FindChildOrFail<T>(this Node3D self, string name) where T : Node3D
     {
-        var found = self.FindChild<T>(name);
-        if (found == null) throw new InvalidOperationException($"Child with name '{name}' not found.");
-        return found;
+        return self.FindChild<T>(name) ?? throw new InvalidOperationException($"Child with name '{name}' not found.");
     }
 
     /// <summary>
@@ -113,9 +111,7 @@ public static class SceneGraphExtensions
     /// <exception cref="InvalidOperationException">No node with the specified path was not found.</exception>
     public static T FindPathOrFail<T>(this Node3D self, string path) where T : Node3D
     {
-        var found = self.FindPath<T>(path);
-        if (found == null) throw new InvalidOperationException($"Path '{path}' not found.");
-        return found;
+        return self.FindPath<T>(path) ?? throw new InvalidOperationException($"Path '{path}' not found.");
     }
 
 
