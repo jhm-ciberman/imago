@@ -1,23 +1,17 @@
 using System.Collections.Generic;
-using LifeSim.Engine.Controls;
 using LifeSim.Support;
 
 namespace LifeSim.Engine.SceneGraph;
 
-public class Scene
+public class Stage3D
 {
     private class RootNode : Node3D
     {
-        public RootNode(Scene scene)
+        public RootNode(Stage3D scene)
         {
             this.Scene = scene;
         }
     }
-
-    /// <summary>
-    /// Gets or sets the background color of the scene.
-    /// </summary>
-    public Color? BackgroundColor { get; set; } = Color.CoolGray;
 
     /// <summary>
     /// Gets or sets the main light of the scene.
@@ -38,16 +32,6 @@ public class Scene
     /// Gets or sets the camera used to render the scene.
     /// </summary>
     public Camera3D? Camera { get; set; } = null;
-
-    /// <summary>
-    /// Gets the canvas layers used to render UI elements.
-    /// </summary>
-    public IReadOnlyList<CanvasLayer> CanvasLayers => this._canvasLayers;
-
-    /// <summary>
-    /// Gets or sets the UI page to render UI elements.
-    /// </summary>
-    public UIPage? UIPage { get; set; } = null;
 
     /// <summary>
     /// Gets the particle systems used to render particles.
@@ -81,7 +65,7 @@ public class Scene
 
     private readonly List<IParticleSystem> _particleSystems = new List<IParticleSystem>();
 
-    private readonly List<CanvasLayer> _canvasLayers = new List<CanvasLayer>();
+    private readonly List<Stage2D> _canvasLayers = new List<Stage2D>();
 
     private readonly List<Node3D> _transformDirtyList = new List<Node3D>();
 
@@ -93,9 +77,9 @@ public class Scene
     public IReadOnlyList<IImmediateRenderable> ImmediateRenderables => this._immediateRenderables;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Scene"/> class.
+    /// Initializes a new instance of the <see cref="Stage3D"/> class.
     /// </summary>
-    public Scene()
+    public Stage3D()
     {
         this.Root = new RootNode(this);
     }
@@ -116,24 +100,6 @@ public class Scene
     public void RemoveParticleSystem(IParticleSystem particleSystem)
     {
         this._particleSystems.Remove(particleSystem);
-    }
-
-    /// <summary>
-    /// Adds a canvas layer to the scene.
-    /// </summary>
-    /// <param name="canvasLayer">The canvas layer to add.</param>
-    public void AddCanvasLayer(CanvasLayer canvasLayer)
-    {
-        this._canvasLayers.Add(canvasLayer);
-    }
-
-    /// <summary>
-    /// Removes a canvas layer from the scene.
-    /// </summary>
-    /// <param name="canvasLayer">The canvas layer to remove.</param>
-    public void RemoveCanvasLayer(CanvasLayer canvasLayer)
-    {
-        this._canvasLayers.Remove(canvasLayer);
     }
 
     /// <summary>
@@ -176,7 +142,7 @@ public class Scene
     /// <param name="deltaTime">The time since the last update in seconds.</param>
     public virtual void Update(float deltaTime)
     {
-        this.UIPage?.Update(deltaTime);
+        // Override in derived classes
     }
 
     /// <summary>

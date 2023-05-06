@@ -10,7 +10,7 @@ public abstract class Visual : ObservableObject
 {
     private string _name = string.Empty;
     private Visibility _visibility = Visibility.Visible;
-    private UIPage? _root;
+    private StageUI? _root;
     private float _opacity = 1f;
     private readonly List<Visual> _visualChildren = new List<Visual>();
     private bool _clipToBounds = false;
@@ -39,7 +39,7 @@ public abstract class Visual : ObservableObject
     /// Gets the root of the control.
     /// </summary>
 
-    public UIPage? Root
+    public StageUI? Root
     {
         get => this._root;
         private set => this.SetProperty(ref this._root, value);
@@ -205,7 +205,7 @@ public abstract class Visual : ObservableObject
 
     protected abstract Rect ArrangeCore(Rect finalRect);
 
-    public virtual void OnAddedToVisualTree(UIPage page)
+    public virtual void OnAddedToVisualTree(StageUI page)
     {
         if (this.Root != null)
         {
@@ -221,7 +221,7 @@ public abstract class Visual : ObservableObject
         }
     }
 
-    public virtual void OnRemovedFromVisualTree(UIPage page)
+    public virtual void OnRemovedFromVisualTree(StageUI page)
     {
         if (this.Root != page)
         {

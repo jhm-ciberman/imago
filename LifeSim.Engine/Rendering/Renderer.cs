@@ -212,12 +212,12 @@ public partial class Renderer : IDisposable
             this.Passes = passes;
         }
 
-        public void Execute(Scene scene)
+        public void Execute(Scene stage)
         {
             this.CommandList.Begin();
             foreach (var pass in this.Passes)
             {
-                pass.Render(this.CommandList, scene);
+                pass.Render(this.CommandList, stage);
             }
             this.CommandList.End();
         }
@@ -287,18 +287,21 @@ public partial class Renderer : IDisposable
     /// Renders the scene.
     /// </summary>
     /// <param name="scene">The scene to render.</param>
-    public void Render(Scene scene)
+    public void Render(Scene stage)
     {
-        scene.OnBeforeRender();
-        scene.RenderImGui();
-        scene.UpdateTransforms();
+        stage.OnBeforeRender();
+        stage.RenderImGui();
+        stage.UpdateTransforms();
 
         this._commandList.Begin();
         this.UpdateBuffers(this._commandList);
-        this.ClearRenderTarget(this._commandList, scene);
+        this.ClearRenderTarget(this._commandList, stage);
         this._commandList.End();
 
-        this.RenderJobs(scene);
+        for (int i = 0; i < this._jobs.Count; i++)
+        {
+            this._jobs[i].Execute(stage);
+        }
 
         this.GraphicsDevice.WaitForIdle();
         this._fence.Reset();
@@ -314,21 +317,13 @@ public partial class Renderer : IDisposable
         }
     }
 
-    private void ClearRenderTarget(CommandList commandList, Scene scene)
+    private void ClearRenderTarget(CommandList commandList, Scene stage)
     {
         commandList.SetFramebuffer(this.MainRenderTexture.Framebuffer);
-        if (scene.BackgroundColor != null)
+        if (stage.ClearColor != null)
         {
-            ColorF col = scene.BackgroundColor.Value;
+            ColorF col = stage.ClearColor.Value;
             commandList.ClearColorTarget(0, new RgbaFloat(col.R, col.G, col.B, col.A));
-        }
-    }
-
-    private void RenderJobs(Scene scene)
-    {
-        for (int i = 0; i < this._jobs.Count; i++)
-        {
-            this._jobs[i].Execute(scene);
         }
     }
 

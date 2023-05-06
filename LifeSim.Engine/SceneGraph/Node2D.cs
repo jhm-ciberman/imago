@@ -7,7 +7,7 @@ public class Node2D
 {
     public string Name { get; set; } = string.Empty;
 
-    private CanvasLayer? _canvas = null;
+    private Stage2D? _canvas = null;
 
     public Node2D? Parent { get; private set; } = null;
 

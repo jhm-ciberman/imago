@@ -59,9 +59,13 @@ internal class GizmosPass : IDisposable, IRenderingPass
 
     public void Render(CommandList cl, Scene scene)
     {
-        Camera3D? camera = scene.Camera;
-        if (camera == null || scene.Gizmos.Lines.Count == 0)
-            return;
+        var stage = scene.Stage3D;
+        if (stage == null) return;
+
+        var camera = stage.Camera;
+        if (camera == null) return;
+
+        if (stage.Gizmos.Lines.Count == 0) return;
 
         cl.SetFramebuffer(this._renderTexture.Framebuffer);
         cl.SetPipeline(this._pipeline);
@@ -69,7 +73,7 @@ internal class GizmosPass : IDisposable, IRenderingPass
         var viewProjectionMatrix = camera.ViewProjectionMatrix;
         cl.UpdateBuffer(this._viewProjectionBuffer, 0, ref viewProjectionMatrix);
 
-        this.RenderLinesVertices(cl, scene.Gizmos.Lines);
+        this.RenderLinesVertices(cl, stage.Gizmos.Lines);
     }
 
     private void RenderLinesVertices(CommandList cl, IReadOnlyList<DebugLine> lines)

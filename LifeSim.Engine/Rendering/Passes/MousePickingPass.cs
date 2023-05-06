@@ -46,6 +46,9 @@ public class MousePickingPass : IDisposable, IRenderingPass
 
     public void Render(CommandList cl, Scene scene)
     {
+        var stage = scene.Stage3D;
+        if (stage == null) return;
+
         var mousePos = this._mousePosition;
         if (this.MouseIsInside(mousePos))
         {
@@ -67,7 +70,7 @@ public class MousePickingPass : IDisposable, IRenderingPass
         this.ObjectID = mappedResource[0, 0];
         this._gd.Unmap(this._pixelTexture);
 
-        scene.Picking.HighlightedPickable = scene.Picking.GetPickable(this.ObjectID);
+        stage.Picking.HighlightedPickable = stage.Picking.GetPickable(this.ObjectID);
     }
 
     public void Dispose()

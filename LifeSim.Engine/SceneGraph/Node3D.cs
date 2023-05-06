@@ -85,7 +85,7 @@ public class Node3D : IDisposable
     /// <summary>
     /// Gets the scene this node is in or null if it is not in a scene.
     /// </summary>
-    public Scene? Scene { get; protected set; } = null;
+    public Stage3D? Scene { get; protected set; } = null;
 
     private Matrix4x4 _localMatrix = Matrix4x4.Identity;
     private Matrix4x4 _worldMatrix = Matrix4x4.Identity;
@@ -252,7 +252,7 @@ public class Node3D : IDisposable
         node.Dispose();
     }
 
-    internal virtual void AttachToSceneRecursive(Scene scene)
+    internal virtual void AttachToSceneRecursive(Stage3D scene)
     {
         if (this.Scene != null) return;
 

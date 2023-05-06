@@ -173,7 +173,7 @@ public class RenderNode3D : Node3D, IPickable
         this._renderable.Transform = this.WorldMatrix;
     }
 
-    internal override void AttachToSceneRecursive(Scene scene)
+    internal override void AttachToSceneRecursive(Stage3D scene)
     {
         base.AttachToSceneRecursive(scene);
         this.UpdateRegistrationWithPickingManager();

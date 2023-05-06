@@ -108,11 +108,13 @@ public class ParticlesPass : IDisposable, IRenderingPass
 
     public void Render(CommandList cl, Scene scene)
     {
-        Camera3D? camera = scene.Camera;
-        if (camera == null)
-            return;
+        var stage = scene.Stage3D;
+        if (stage == null) return;
 
-        var particleSystems = scene.ParticleSystems;
+        var camera = stage.Camera;
+        if (camera == null) return;
+
+        var particleSystems = stage.ParticleSystems;
 
         this._currentTexture = null;
 

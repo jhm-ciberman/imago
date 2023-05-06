@@ -103,10 +103,11 @@ internal class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
 
     public void Render(CommandList cl, Scene scene)
     {
-        Camera3D? camera = scene.Camera;
+        var stage = scene.Stage3D;
+        if (stage == null) return;
 
-        if (camera == null)
-            return;
+        var camera = stage.Camera;
+        if (camera == null) return;
 
         var frustumForCulling = new BoundingFrustum(camera.FrustumCullingCamera.ViewProjectionMatrix);
         this._opaqueRenderQueue.Update(frustumForCulling, camera.Position);
@@ -122,7 +123,7 @@ internal class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
             cl.ClearDepthStencil(1f);
         }
 
-        var mainLightDirection = Vector3.Normalize(scene.MainLight.Direction);
+        var mainLightDirection = Vector3.Normalize(stage.MainLight.Direction);
 
         CameraDataBuffer cameraInfo = new CameraDataBuffer();
         cameraInfo.ViewProjectionMatrix = camera.ViewProjectionMatrix;
@@ -132,13 +133,13 @@ internal class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
         cameraInfo.ShadowMapMatrix3 = this._shadowPass.GetShadowCascadeViewProjectionMatrix(3);
 
         LightInfo lightInfo = new LightInfo();
-        lightInfo.AmbientColor = scene.AmbientColor;
-        lightInfo.MainLightColor = scene.MainLight.Color;
-        lightInfo.ShadowColor = scene.MainLight.ShadowMap.Color;
+        lightInfo.AmbientColor = stage.AmbientColor;
+        lightInfo.MainLightColor = stage.MainLight.Color;
+        lightInfo.ShadowColor = stage.MainLight.ShadowMap.Color;
         lightInfo.MainLightDirection = mainLightDirection;
-        lightInfo.FogColor = scene.FogColor;
-        lightInfo.FogStart = scene.FogStart; // / (camera.FarPlane - camera.NearPlane);
-        lightInfo.FogEnd = scene.FogEnd; // / (camera.FarPlane - camera.NearPlane);
+        lightInfo.FogColor = stage.FogColor;
+        lightInfo.FogStart = stage.FogStart; // / (camera.FarPlane - camera.NearPlane);
+        lightInfo.FogEnd = stage.FogEnd; // / (camera.FarPlane - camera.NearPlane);
         lightInfo.ShadowMapDistances = this._shadowPass.GetShadowCascadeDistances();
 
         cl.UpdateBuffer(this._camera3DInfoBuffer, 0, ref cameraInfo);

@@ -5,7 +5,7 @@ using LifeSim.Support;
 
 namespace LifeSim.Engine.SceneGraph;
 
-public class CanvasLayer
+public class Stage2D
 {
     public Viewport Viewport { get; }
     private readonly SwapPopList<ICanvasItem> _items = new SwapPopList<ICanvasItem>();
@@ -16,7 +16,7 @@ public class CanvasLayer
 
     public Matrix4x4 ViewProjectionMatrix => Matrix4x4.CreateOrthographicOffCenter(0, this.Viewport.Width, this.Viewport.Height, 0, -10f, 100f);
 
-    public CanvasLayer(Viewport viewport)
+    public Stage2D(Viewport viewport)
     {
         this.Viewport = viewport;
     }

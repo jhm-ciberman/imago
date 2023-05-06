@@ -7,7 +7,7 @@ using LifeSim.Support;
 
 namespace LifeSim.Engine.Controls;
 
-public class UIPage
+public class StageUI
 {
     public Viewport Viewport { get; }
 
@@ -29,7 +29,7 @@ public class UIPage
         }
     }
 
-    public UIPage(Viewport viewport)
+    public StageUI(Viewport viewport)
     {
         this.Viewport = viewport;
         this.Viewport.Resized += this.Viewport_Resized;

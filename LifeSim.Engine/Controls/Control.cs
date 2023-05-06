@@ -187,7 +187,7 @@ public class Control : Visual
     }
 
 
-    public override void OnAddedToVisualTree(UIPage page)
+    public override void OnAddedToVisualTree(StageUI page)
     {
         base.OnAddedToVisualTree(page);
 
@@ -197,7 +197,7 @@ public class Control : Visual
         }
     }
 
-    public override void OnRemovedFromVisualTree(UIPage page)
+    public override void OnRemovedFromVisualTree(StageUI page)
     {
         base.OnRemovedFromVisualTree(page);
 

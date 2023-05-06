@@ -125,13 +125,19 @@ public class ImmediatePass : IPipelineProvider, IRenderingPass, IDisposable, IIm
 
     public void Render(CommandList cl, Scene scene)
     {
-        if (scene.Camera is null) return;
-        if (scene.ImmediateRenderables.Count == 0) return;
+        var stage = scene.Stage3D;
+        if (stage == null) return;
+
+        var camera = stage.Camera;
+        if (camera == null) return;
+
+        if (stage.ImmediateRenderables.Count == 0) return;
+
         if (this._renderTexture is not RenderTexture renderTexture) return;
 
         cl.SetFramebuffer(renderTexture.ColorOnlyFramebuffer);
-        this.Begin(cl, scene.Camera.ViewProjectionMatrix);
-        foreach (var obj in scene.ImmediateRenderables)
+        this.Begin(cl, camera.ViewProjectionMatrix);
+        foreach (var obj in stage.ImmediateRenderables)
         {
             obj.Draw(this);
         }

@@ -116,10 +116,11 @@ public class SkyDomePass : IDisposable, IRenderingPass
 
     public void Render(CommandList cl, Scene scene)
     {
-        Camera3D? camera = scene.Camera;
+        var stage = scene.Stage3D;
+        if (stage == null) return;
 
-        if (camera == null)
-            return;
+        var camera = stage.Camera;
+        if (camera == null) return;
 
         //this.LutTextureOffset = (this.LutTextureOffset + 0.0005f) % 1f;
 

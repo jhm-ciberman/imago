@@ -80,17 +80,19 @@ public class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
 
     public void Render(CommandList commandList, Scene scene)
     {
-        Camera3D? camera = scene.Camera;
-        if (camera == null)
-            return;
+        var stage = scene.Stage3D;
+        if (stage == null) return;
 
-        ShadowMap shadowMap = scene.MainLight.ShadowMap;
+        var camera = stage.Camera;
+        if (camera == null) return;
+
+        ShadowMap shadowMap = stage.MainLight.ShadowMap;
 
         this.UpdateSplitDistances(camera, shadowMap);
 
         this.UpdateShadowMap(shadowMap);
 
-        var mainLightDirection = scene.MainLight.Direction;
+        var mainLightDirection = stage.MainLight.Direction;
 
         for (int i = 0; i < shadowMap.CascadesCount; i++)
         {

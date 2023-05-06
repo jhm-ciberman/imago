@@ -246,7 +246,7 @@ public class TextBox : Control
         }
     }
 
-    public override void OnAddedToVisualTree(UIPage page)
+    public override void OnAddedToVisualTree(StageUI page)
     {
         base.OnAddedToVisualTree(page);
 
@@ -257,7 +257,7 @@ public class TextBox : Control
         InputManager.Current.TextEntered += this.InputManager_TextEntered;
     }
 
-    public override void OnRemovedFromVisualTree(UIPage page)
+    public override void OnRemovedFromVisualTree(StageUI page)
     {
         base.OnRemovedFromVisualTree(page);
 
