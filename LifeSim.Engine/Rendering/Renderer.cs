@@ -295,6 +295,9 @@ public partial class Renderer : IDisposable
 
         this._commandList.Begin();
         this.UpdateBuffers(this._commandList);
+
+        this._commandList.SetFramebuffer(this.MainRenderTexture.Framebuffer);
+
         this.ClearRenderTarget(this._commandList, stage);
         this._commandList.End();
 
@@ -319,7 +322,7 @@ public partial class Renderer : IDisposable
 
     private void ClearRenderTarget(CommandList commandList, Scene stage)
     {
-        commandList.SetFramebuffer(this.MainRenderTexture.Framebuffer);
+
         if (stage.ClearColor != null)
         {
             ColorF col = stage.ClearColor.Value;

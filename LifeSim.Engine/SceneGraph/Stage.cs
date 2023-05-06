@@ -26,7 +26,7 @@ public class Scene
     public virtual void OnBeforeRender()
     {
         this.Stage3D?.OnBeforeRender();
-        //this.Scene2D?.OnBeforeRender(); // Not implemented
+        //this.Stage2D?.OnBeforeRender(); // Not implemented
     }
 
     public virtual void RenderImGui()
@@ -37,13 +37,13 @@ public class Scene
     public void UpdateTransforms()
     {
         this.Stage3D?.UpdateTransforms();
-        //this.Scene2D?.UpdateTransforms(); // Not implemented
+        this.Stage2D?.UpdateTransforms();
     }
 
     public virtual void Update(float deltaTime)
     {
         this.Stage3D?.Update(deltaTime);
-        //this.Scene2D?.Update(deltaTime); // Not implemented
+        //this.Stage2D?.Update(deltaTime); // Not implemented
         this.StageUI?.Update(deltaTime);
     }
 }

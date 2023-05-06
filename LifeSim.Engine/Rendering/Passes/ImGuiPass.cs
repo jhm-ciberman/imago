@@ -56,6 +56,7 @@ public class ImGuiPass : IDisposable, IRenderingPass
 
     public void Render(CommandList cl, Scene scene)
     {
+        cl.SetFramebuffer(this._renderTexture.Framebuffer);
         this._imguiRenderer.Render(this._gd, cl);
     }
 }

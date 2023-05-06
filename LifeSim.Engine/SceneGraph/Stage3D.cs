@@ -65,8 +65,6 @@ public class Stage3D
 
     private readonly List<IParticleSystem> _particleSystems = new List<IParticleSystem>();
 
-    private readonly List<Stage2D> _canvasLayers = new List<Stage2D>();
-
     private readonly List<Node3D> _transformDirtyList = new List<Node3D>();
 
     private readonly List<IImmediateRenderable> _immediateRenderables = new List<IImmediateRenderable>();
@@ -150,11 +148,6 @@ public class Stage3D
     /// </summary>
     public void UpdateTransforms()
     {
-        for (int i = 0; i < this._canvasLayers.Count; i++)
-        {
-            this._canvasLayers[i].UpdateTransforms();
-        }
-
         if (this._transformDirtyList.Count == 0) return;
 
         for (int i = 0; i < this._transformDirtyList.Count; i++)
