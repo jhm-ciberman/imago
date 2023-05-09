@@ -15,6 +15,11 @@ public class Control : Visual
     private float _width = float.NaN;
     private float _height = float.NaN;
 
+    private float _left = float.NaN;
+    private float _top = float.NaN;
+    private float _right = float.NaN;
+    private float _bottom = float.NaN;
+
     /// <summary>
     /// Gets or sets the margin of the control.
     /// </summary>
@@ -78,7 +83,43 @@ public class Control : Visual
         set => this.SetPropertyAndInvalidateMeasure(ref this._height, value);
     }
 
+    // left, top, right, bottom
 
+    /// <summary>
+    /// Gets or sets the left position of the control. This is only relevant when positioning the control inside a <see cref="Canvas"/>.
+    /// </summary>
+    public float Left
+    {
+        get => this._left;
+        set => this.SetPropertyAndInvalidateArrange(ref this._left, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the top position of the control. This is only relevant when positioning the control inside a <see cref="Canvas"/>.
+    /// </summary>
+    public float Top
+    {
+        get => this._top;
+        set => this.SetPropertyAndInvalidateArrange(ref this._top, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the right position of the control. This is only relevant when positioning the control inside a <see cref="Canvas"/>.
+    /// </summary>
+    public float Right
+    {
+        get => this._right;
+        set => this.SetPropertyAndInvalidateArrange(ref this._right, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the bottom position of the control. This is only relevant when positioning the control inside a <see cref="Canvas"/>.
+    /// </summary>
+    public float Bottom
+    {
+        get => this._bottom;
+        set => this.SetPropertyAndInvalidateArrange(ref this._bottom, value);
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Control"/> class.
