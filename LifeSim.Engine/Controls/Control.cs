@@ -151,7 +151,7 @@ public class Control : Visual
         finalRect = finalRect.Deflate(this.Margin);
         Vector2 availableSize = finalRect.Size;
 
-        var desiredSize = this.DesiredSize - this.Margin.Total;
+        Vector2 desiredSize = this.DesiredSize - this.Margin.Total;
 
         switch (this.HorizontalAlignment)
         {
@@ -194,9 +194,7 @@ public class Control : Visual
         finalRect.Width = !float.IsNaN(this.Width) ? this.Width : MathF.Max(0, finalRect.Width);
         finalRect.Height = !float.IsNaN(this.Height) ? this.Height : MathF.Max(0, finalRect.Height);
 
-        var rectPosition = this.ArrangeOverride(finalRect);
-
-        return rectPosition;
+        return this.ArrangeOverride(finalRect);
     }
 
     protected override Rect GetBounds()

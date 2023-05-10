@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Numerics;
 using LifeSim.Engine.Rendering;
 using LifeSim.Engine.SceneGraph;
@@ -56,18 +57,24 @@ public class StageUI
         }
     }
 
+    public TimeSpan MeasureArrangeTime { get; private set; }
 
+    private readonly Stopwatch _measureArrangeStopwatch = new Stopwatch();
 
     internal void Draw(SpriteBatcher spriteBatcher)
     {
         if (this._content is null) return;
 
+        this._measureArrangeStopwatch.Restart();
         if (!this._content.IsArrangeValid || !this._content.IsMeasureValid)
         {
+
             Vector2 size = this.Viewport.Size / this.Zoom;
             this._content.Measure(size);
             this._content.Arrange(new Rect(0, 0, size.X, size.Y));
         }
+
+        this.MeasureArrangeTime = this._measureArrangeStopwatch.Elapsed;
 
         this._content.Draw(spriteBatcher);
     }

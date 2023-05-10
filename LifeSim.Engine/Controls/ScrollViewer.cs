@@ -199,10 +199,23 @@ public class ScrollViewer : ContentControl
 
     private void OnScrollChanged()
     {
+        if (this.Content == null)
+        {
+            this.ScrollOffset = Vector2.Zero;
+            this.ScrollBarThumb.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        if (this.ScrollDirection == ScrollDirection.None)
+        {
+            this.ScrollBarThumb.Visibility = Visibility.Collapsed;
+            return;
+        }
+
         var thumb = this.ScrollBarThumb;
         Vector2 scrollableSize = this.ScrollableSize;
-        float scrollableSizeInAxis = this.ScrollDirection == ScrollDirection.Horizontal ? scrollableSize.X : scrollableSize.Y;
-        if (this.Content != null && scrollableSizeInAxis > 0 && this.ScrollDirection != ScrollDirection.None)
+        float scrollableLength = this.ScrollDirection == ScrollDirection.Horizontal ? scrollableSize.X : scrollableSize.Y;
+        if (scrollableLength > 0 && this.ScrollDirection != ScrollDirection.None)
         {
             this.ScrollOffset = Vector2.Min(Vector2.Max(Vector2.Zero, this.ScrollOffset), scrollableSize);
             thumb.Visibility = Visibility.Visible;
@@ -225,7 +238,7 @@ public class ScrollViewer : ContentControl
         }
         else
         {
-            this.ScrollOffset = Vector2.Zero;
+            //this.ScrollOffset = Vector2.Zero;
             thumb.Visibility = Visibility.Collapsed;
         }
     }
