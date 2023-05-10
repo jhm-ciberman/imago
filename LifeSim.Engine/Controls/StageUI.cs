@@ -48,11 +48,11 @@ public class StageUI
         {
             if (this._content != value)
             {
-                this._content?.OnRemovedFromVisualTree(this);
+                this._content?.OnRemovedFromStage(this);
 
                 this._content = value;
 
-                this._content?.OnAddedToVisualTree(this);
+                this._content?.OnAddedToStage(this);
             }
         }
     }

@@ -10,7 +10,7 @@ public abstract class Visual : ObservableObject
 {
     private string _name = string.Empty;
     private Visibility _visibility = Visibility.Visible;
-    private StageUI? _root;
+    private StageUI? _stage;
     private float _opacity = 1f;
     private readonly List<Visual> _visualChildren = new List<Visual>();
     private bool _clipToBounds = false;
@@ -36,13 +36,13 @@ public abstract class Visual : ObservableObject
     }
 
     /// <summary>
-    /// Gets the root of the control.
+    /// Gets the stage the control is added to, or null if the control is not added yet to a stage.
     /// </summary>
 
-    public StageUI? Root
+    public StageUI? Stage
     {
-        get => this._root;
-        private set => this.SetProperty(ref this._root, value);
+        get => this._stage;
+        private set => this.SetProperty(ref this._stage, value);
     }
 
 
@@ -143,7 +143,7 @@ public abstract class Visual : ObservableObject
 
         if (this.ClipToBounds)
         {
-            spriteBatcher.PushScissorRectangle(this.GetBounds() * this.Root!.Zoom);
+            spriteBatcher.PushScissorRectangle(this.GetBounds() * this.Stage!.Zoom);
             this.DrawCore(spriteBatcher);
             spriteBatcher.PopScissorRectangle();
         }
@@ -205,33 +205,33 @@ public abstract class Visual : ObservableObject
 
     protected abstract Rect ArrangeCore(Rect finalRect);
 
-    public virtual void OnAddedToVisualTree(StageUI page)
+    public virtual void OnAddedToStage(StageUI stage)
     {
-        if (this.Root != null)
+        if (this.Stage != null)
         {
             throw new InvalidOperationException("The control is already added to a page.");
         }
 
         this.IsArrangeValid = false;
         this.IsMeasureValid = false;
-        this.Root = page;
+        this.Stage = stage;
         foreach (var child in this.VisualChildren)
         {
-            child.OnAddedToVisualTree(page);
+            child.OnAddedToStage(stage);
         }
     }
 
-    public virtual void OnRemovedFromVisualTree(StageUI page)
+    public virtual void OnRemovedFromStage(StageUI stage)
     {
-        if (this.Root != page)
+        if (this.Stage != stage)
         {
             throw new InvalidOperationException("The control is not added to the specified page.");
         }
 
-        this.Root = null;
+        this.Stage = null;
         foreach (var child in this.VisualChildren)
         {
-            child.OnRemovedFromVisualTree(page);
+            child.OnRemovedFromStage(stage);
         }
     }
 
@@ -265,9 +265,9 @@ public abstract class Visual : ObservableObject
     {
         this._visualChildren.Add(child);
         child.Parent = this;
-        if (this.Root != null)
+        if (this.Stage != null)
         {
-            child.OnAddedToVisualTree(this.Root);
+            child.OnAddedToStage(this.Stage);
             this.InvalidateMeasure();
         }
     }
@@ -275,9 +275,9 @@ public abstract class Visual : ObservableObject
     protected virtual void RemoveVisualChild(Visual child)
     {
         this._visualChildren.Remove(child);
-        if (this.Root != null)
+        if (this.Stage != null)
         {
-            child.OnRemovedFromVisualTree(this.Root);
+            child.OnRemovedFromStage(this.Stage);
             this.InvalidateMeasure();
         }
     }

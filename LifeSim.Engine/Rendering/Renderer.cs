@@ -212,12 +212,12 @@ public partial class Renderer : IDisposable
             this.Passes = passes;
         }
 
-        public void Execute(Scene stage)
+        public void Execute(Scene scene)
         {
             this.CommandList.Begin();
             foreach (var pass in this.Passes)
             {
-                pass.Render(this.CommandList, stage);
+                pass.Render(this.CommandList, scene);
             }
             this.CommandList.End();
         }
@@ -287,23 +287,23 @@ public partial class Renderer : IDisposable
     /// Renders the scene.
     /// </summary>
     /// <param name="scene">The scene to render.</param>
-    public void Render(Scene stage)
+    public void Render(Scene scene)
     {
-        stage.OnBeforeRender();
-        stage.RenderImGui();
-        stage.UpdateTransforms();
+        scene.OnBeforeRender();
+        scene.RenderImGui();
+        scene.UpdateTransforms();
 
         this._commandList.Begin();
         this.UpdateBuffers(this._commandList);
 
         this._commandList.SetFramebuffer(this.MainRenderTexture.Framebuffer);
 
-        ClearRenderTarget(this._commandList, stage);
+        ClearRenderTarget(this._commandList, scene);
         this._commandList.End();
 
         for (int i = 0; i < this._jobs.Count; i++)
         {
-            this._jobs[i].Execute(stage);
+            this._jobs[i].Execute(scene);
         }
 
         this.GraphicsDevice.WaitForIdle();
@@ -320,11 +320,11 @@ public partial class Renderer : IDisposable
         }
     }
 
-    private static void ClearRenderTarget(CommandList commandList, Scene stage)
+    private static void ClearRenderTarget(CommandList commandList, Scene scene)
     {
-        if (stage.ClearColor != null)
+        if (scene.ClearColor != null)
         {
-            ColorF col = stage.ClearColor.Value;
+            ColorF col = scene.ClearColor.Value;
             commandList.ClearColorTarget(0, new RgbaFloat(col.R, col.G, col.B, col.A));
         }
     }

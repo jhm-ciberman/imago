@@ -7,9 +7,9 @@ public class Stage3D
 {
     private class RootNode : Node3D
     {
-        public RootNode(Stage3D scene)
+        public RootNode(Stage3D stage)
         {
-            this.Scene = scene;
+            this.Stage = stage;
         }
     }
 

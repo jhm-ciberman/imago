@@ -152,11 +152,11 @@ public class Button : ContentControl
 
     public override void Update(float deltaTime)
     {
-        if (this.Root == null) return;
+        if (this.Stage == null) return;
 
         this.Content?.Update(deltaTime);
 
-        Vector2 mousePosition = InputManager.Current.MousePosition / this.Root.Zoom;
+        Vector2 mousePosition = InputManager.Current.MousePosition / this.Stage.Zoom;
         Rect bounds = new Rect(this.Position, this.ActualSize);
 
         if (bounds.Contains(mousePosition))

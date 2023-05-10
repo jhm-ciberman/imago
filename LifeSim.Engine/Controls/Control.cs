@@ -226,23 +226,23 @@ public class Control : Visual
     }
 
 
-    public override void OnAddedToVisualTree(StageUI page)
+    public override void OnAddedToStage(StageUI stage)
     {
-        base.OnAddedToVisualTree(page);
+        base.OnAddedToStage(stage);
 
         if (this.Background is IAnimatedBrush animatedBrush)
         {
-            page.AddAnimatedBrush(animatedBrush);
+            stage.AddAnimatedBrush(animatedBrush);
         }
     }
 
-    public override void OnRemovedFromVisualTree(StageUI page)
+    public override void OnRemovedFromStage(StageUI stage)
     {
-        base.OnRemovedFromVisualTree(page);
+        base.OnRemovedFromStage(stage);
 
         if (this.Background is IAnimatedBrush animatedBrush)
         {
-            page.RemoveAnimatedBrush(animatedBrush);
+            stage.RemoveAnimatedBrush(animatedBrush);
         }
     }
 
@@ -250,16 +250,16 @@ public class Control : Visual
     {
         if (this._background == brush) return;
 
-        if (this.Root != null && this._background is IAnimatedBrush animatedBrush)
+        if (this.Stage != null && this._background is IAnimatedBrush animatedBrush)
         {
-            this.Root.RemoveAnimatedBrush(animatedBrush);
+            this.Stage.RemoveAnimatedBrush(animatedBrush);
         }
 
         this._background = brush;
 
-        if (this.Root != null && this._background is IAnimatedBrush animatedBrush2)
+        if (this.Stage != null && this._background is IAnimatedBrush animatedBrush2)
         {
-            this.Root.AddAnimatedBrush(animatedBrush2);
+            this.Stage.AddAnimatedBrush(animatedBrush2);
         }
     }
 }

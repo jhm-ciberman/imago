@@ -33,12 +33,12 @@ public class Stage2D
         this.RemoveNodeRecursive(node);
     }
 
-    public void AddCanvasItem(ICanvasItem canvasItem)
+    internal void AddCanvasItem(ICanvasItem canvasItem)
     {
         this._items.Add(canvasItem);
     }
 
-    public void RemoveCanvasItem(ICanvasItem canvasItem)
+    internal void RemoveCanvasItem(ICanvasItem canvasItem)
     {
         this._items.Remove(canvasItem);
     }

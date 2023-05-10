@@ -157,11 +157,11 @@ public class Application : IDisposable
         }
     }
 
-    protected void Render(Scene stage)
+    protected void Render(Scene scene)
     {
         try
         {
-            this._renderer.Render(stage);
+            this._renderer.Render(scene);
         }
         catch (VeldridException e)
         {

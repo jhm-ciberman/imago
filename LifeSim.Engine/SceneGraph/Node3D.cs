@@ -85,7 +85,7 @@ public class Node3D : IDisposable
     /// <summary>
     /// Gets the scene this node is in or null if it is not in a scene.
     /// </summary>
-    public Stage3D? Scene { get; protected set; } = null;
+    public Stage3D? Stage { get; protected set; } = null;
 
     private Matrix4x4 _localMatrix = Matrix4x4.Identity;
     private Matrix4x4 _worldMatrix = Matrix4x4.Identity;
@@ -123,7 +123,7 @@ public class Node3D : IDisposable
     {
         if (this.LocalTransformIsDirty) return;
         this._dirtyFlags |= DirtyFlags.LocalMatrix | DirtyFlags.WorldMatrix;
-        this.Scene?.NotifyTransformDirty(this);
+        this.Stage?.NotifyTransformDirty(this);
 
         foreach (var child in this._children)
         {
@@ -136,7 +136,7 @@ public class Node3D : IDisposable
     {
         if (this.WorldTransformIsDirty) return;
         this._dirtyFlags |= DirtyFlags.WorldMatrix;
-        this.Scene?.NotifyTransformDirty(this);
+        this.Stage?.NotifyTransformDirty(this);
 
         foreach (var child in this._children)
         {
@@ -218,9 +218,9 @@ public class Node3D : IDisposable
         node.Parent = this;
 
         // If the current node has a scene, add the node to the scene
-        if (this.Scene != null)
+        if (this.Stage != null)
         {
-            node.AttachToSceneRecursive(this.Scene);
+            node.AttachToStageRecursive(this.Stage);
         }
     }
 
@@ -236,9 +236,9 @@ public class Node3D : IDisposable
 
         node.Parent = null;
 
-        if (node.Scene != null)
+        if (node.Stage != null)
         {
-            node.DetachFromSceneRecursive();
+            node.DetachFromStageRecursive();
         }
     }
 
@@ -252,29 +252,29 @@ public class Node3D : IDisposable
         node.Dispose();
     }
 
-    internal virtual void AttachToSceneRecursive(Stage3D scene)
+    internal virtual void AttachToStageRecursive(Stage3D stage)
     {
-        if (this.Scene != null) return;
+        if (this.Stage != null) return;
 
-        this.Scene = scene;
-        this.Scene.NotifyTransformDirty(this);
+        this.Stage = stage;
+        this.Stage.NotifyTransformDirty(this);
 
         foreach (var child in this._children)
         {
-            child.AttachToSceneRecursive(scene);
+            child.AttachToStageRecursive(stage);
         }
     }
 
-    internal virtual void DetachFromSceneRecursive()
+    internal virtual void DetachFromStageRecursive()
     {
-        if (this.Scene == null) return;
+        if (this.Stage == null) return;
 
-        this.Scene.NotifyTransformNotDirty(this);
-        this.Scene = null;
+        this.Stage.NotifyTransformNotDirty(this);
+        this.Stage = null;
 
         foreach (var child in this._children)
         {
-            child.DetachFromSceneRecursive();
+            child.DetachFromStageRecursive();
         }
     }
 

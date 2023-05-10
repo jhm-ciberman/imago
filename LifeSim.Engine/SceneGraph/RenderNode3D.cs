@@ -88,7 +88,7 @@ public class RenderNode3D : Node3D, IPickable
         {
             if (this._visible == value) return;
             this._visible = value;
-            this._renderable.Visible = value && this.Scene != null;
+            this._renderable.Visible = value && this.Stage != null;
         }
 
     }
@@ -173,41 +173,41 @@ public class RenderNode3D : Node3D, IPickable
         this._renderable.Transform = this.WorldMatrix;
     }
 
-    internal override void AttachToSceneRecursive(Stage3D scene)
+    internal override void AttachToStageRecursive(Stage3D stage)
     {
-        base.AttachToSceneRecursive(scene);
+        base.AttachToStageRecursive(stage);
         this.UpdateRegistrationWithPickingManager();
         this._renderable.Visible = this._visible;
     }
 
-    internal override void DetachFromSceneRecursive()
+    internal override void DetachFromStageRecursive()
     {
-        if (this.Scene is null)
+        if (this.Stage is null)
         {
             throw new InvalidOperationException("Cannot detach from scene if not attached to one.");
         }
 
         this._renderable.Visible = false;
         this.UpdateRegistrationWithPickingManager();
-        base.DetachFromSceneRecursive();
+        base.DetachFromStageRecursive();
     }
 
     private void UpdateRegistrationWithPickingManager()
     {
-        if (this.Scene is null) return;
+        if (this.Stage is null) return;
 
         if (this._isPickable)
         {
             if (this._renderable.PickingId == 0)
             {
-                this.Scene.Picking.RegisterPickable(this);
+                this.Stage.Picking.RegisterPickable(this);
             }
         }
         else
         {
             if (this._renderable.PickingId != 0)
             {
-                this.Scene.Picking.UnregisterPickable(this);
+                this.Stage.Picking.UnregisterPickable(this);
             }
         }
     }

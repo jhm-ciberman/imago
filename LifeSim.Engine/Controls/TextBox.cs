@@ -246,9 +246,9 @@ public class TextBox : Control
         }
     }
 
-    public override void OnAddedToVisualTree(StageUI page)
+    public override void OnAddedToStage(StageUI stage)
     {
-        base.OnAddedToVisualTree(page);
+        base.OnAddedToStage(stage);
 
         this.IsFocused = true;
         this.CaretIndex = this.Text.Length;
@@ -257,9 +257,9 @@ public class TextBox : Control
         InputManager.Current.TextEntered += this.InputManager_TextEntered;
     }
 
-    public override void OnRemovedFromVisualTree(StageUI page)
+    public override void OnRemovedFromStage(StageUI stage)
     {
-        base.OnRemovedFromVisualTree(page);
+        base.OnRemovedFromStage(stage);
 
         InputManager.Current.KeyPressed -= this.InputManager_KeyPressed;
         InputManager.Current.TextEntered -= this.InputManager_TextEntered;
