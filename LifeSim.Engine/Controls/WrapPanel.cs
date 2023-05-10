@@ -28,7 +28,7 @@ public class WrapPanel : ItemsControl
         set => this.SetPropertyAndInvalidateMeasure(ref this._padding, value);
     }
 
-    protected override Vector2 MeasureCore(Vector2 availableSize)
+    protected override Vector2 MeasureOverride(Vector2 availableSize)
     {
         Vector2 minRequiredSize = Vector2.Zero;
         Vector2 currentLineSize = Vector2.Zero;
@@ -82,7 +82,7 @@ public class WrapPanel : ItemsControl
         return minRequiredSize + this.Padding.Total;
     }
 
-    protected override Rect ArrangeCore(Rect finalRect)
+    protected override Rect ArrangeOverride(Rect finalRect)
     {
         Rect originalRect = finalRect;
         finalRect = finalRect.Deflate(this.Padding);

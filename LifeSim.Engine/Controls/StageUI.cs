@@ -101,9 +101,15 @@ public class StageUI
         this._animatedBrushes.Remove(animatedBrush);
     }
 
-    public T? GetElementByName<T>(string name) where T : Visual
+    public T? Find<T>(string name) where T : Visual
     {
         if (this.Content == null) return null;
-        return this.Content.GetElementByName<T>(name);
+        return this.Content.Find<T>(name);
+    }
+
+    public T FindOrFail<T>(string name) where T : Visual
+    {
+        if (this.Content == null) throw new InvalidOperationException("Content is null");
+        return this.Content.FindOrFail<T>(name);
     }
 }

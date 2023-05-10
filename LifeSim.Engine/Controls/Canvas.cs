@@ -37,7 +37,7 @@ public class Canvas : ItemsControl
             }
             else
             {
-                childRect.X = 0;
+                childRect.X = (finalRect.Width - child.DesiredSize.X) / 2.0f;
             }
 
             if (!float.IsNaN(top))
@@ -50,7 +50,7 @@ public class Canvas : ItemsControl
             }
             else
             {
-                childRect.Y = 0;
+                childRect.Y = (finalRect.Height - child.DesiredSize.Y) / 2.0f;
             }
 
             childRect.Position += finalRect.Position;

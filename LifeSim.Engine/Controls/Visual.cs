@@ -241,7 +241,7 @@ public abstract class Visual : ObservableObject
     /// <typeparam name="T">The type of the control to find.</typeparam>
     /// <param name="name">The name of the control to find.</param>
     /// <returns>The control if found, otherwise null.</returns>
-    public T? GetElementByName<T>(string name) where T : Visual
+    public T? Find<T>(string name) where T : Visual
     {
         if (this.Name == name)
         {
@@ -250,7 +250,7 @@ public abstract class Visual : ObservableObject
 
         foreach (var child in this.VisualChildren)
         {
-            var result = child.GetElementByName<T>(name);
+            var result = child.Find<T>(name);
 
             if (result != null)
             {
@@ -259,6 +259,18 @@ public abstract class Visual : ObservableObject
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Finds a child control of the specified type by its name recursively. Throws an exception if the control could not be found.
+    /// </summary>
+    /// <typeparam name="T">The type of the control to find.</typeparam>
+    /// <param name="name">The name of the control to find.</param>
+    /// <returns>The found control.</returns>
+    /// <exception cref="InvalidOperationException">Thrown if the control could not be found.</exception>
+    public T FindOrFail<T>(string name) where T : Visual
+    {
+        return this.Find<T>(name) ?? throw new InvalidOperationException($"Could not find control with name '{name}'.");
     }
 
     protected virtual void AddVisualChild(Visual child)
