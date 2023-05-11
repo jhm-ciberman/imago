@@ -131,17 +131,14 @@ public class Control : Visual
         var margin = this.Margin.Total;
         availableSize -= margin;
 
+
+        if (!float.IsNaN(this.Width)) availableSize.X = this.Width;
+        if (!float.IsNaN(this.Height)) availableSize.Y = this.Height;
+
         Vector2 desiredSize = this.MeasureOverride(availableSize);
 
-        if (!float.IsNaN(this.Width))
-        {
-            desiredSize.X = this.Width;
-        }
-
-        if (!float.IsNaN(this.Height))
-        {
-            desiredSize.Y = this.Height;
-        }
+        if (!float.IsNaN(this.Width)) desiredSize.X = this.Width;
+        if (!float.IsNaN(this.Height)) desiredSize.Y = this.Height;
 
         return desiredSize + margin;
     }

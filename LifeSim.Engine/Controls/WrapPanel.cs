@@ -40,7 +40,7 @@ public class WrapPanel : ItemsControl
             {
                 child.Measure(availableSize);
                 var childSize = child.DesiredSize;
-                if (currentLineSize.X + childSize.X > availableSize.X)
+                if (currentLineSize.X + childSize.X > availableSize.X) // Wrap to next row
                 {
                     minRequiredSize.X = Math.Max(minRequiredSize.X, currentLineSize.X);
                     minRequiredSize.Y += currentLineSize.Y;
@@ -62,7 +62,7 @@ public class WrapPanel : ItemsControl
             {
                 child.Measure(availableSize);
                 var childSize = child.DesiredSize;
-                if (currentLineSize.Y + childSize.Y > availableSize.Y)
+                if (currentLineSize.Y + childSize.Y > availableSize.Y) // Wrap to next column
                 {
                     minRequiredSize.X += currentLineSize.X;
                     minRequiredSize.Y = Math.Max(minRequiredSize.Y, currentLineSize.Y);
