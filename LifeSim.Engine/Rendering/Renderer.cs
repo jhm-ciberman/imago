@@ -543,48 +543,60 @@ public partial class Renderer : IDisposable
     /// </summary>
     public void Dispose()
     {
-        this.GraphicsDevice.WaitForIdle();
-        this._fullScreenRenderTexture.Dispose();
-        this.MainRenderTexture.Dispose();
-        this._commandList.Dispose();
-        this._fence.Dispose();
-        this.GraphicsDevice.Dispose();
-
-        foreach (var job in this._jobs)
+        try
         {
-            job.Dispose();
-        }
+            this.GraphicsDevice.WaitForIdle();
+            this._fullScreenRenderTexture.Dispose();
+            this.MainRenderTexture.Dispose();
+            this._commandList.Dispose();
+            this._fence.Dispose();
+            this.GraphicsDevice.Dispose();
 
-        for (int i = 0; i < this._instanceDataBuffers.Count; i++)
+            foreach (var job in this._jobs)
+            {
+                job.Dispose();
+            }
+
+            for (int i = 0; i < this._instanceDataBuffers.Count; i++)
+            {
+                this._instanceDataBuffers[i].Dispose();
+            }
+
+            for (int i = 0; i < this._transformDataBuffers.Count; i++)
+            {
+                this._transformDataBuffers[i].Dispose();
+            }
+
+            for (int i = 0; i < this._skeletonDataBuffers.Count; i++)
+            {
+                this._skeletonDataBuffers[i].Dispose();
+            }
+
+            foreach (var skeleton in this._skeletons)
+            {
+                skeleton.Dispose();
+            }
+
+            // Passes
+            this._imGuiPass.Dispose();
+            this._mousePickerPass.Dispose();
+            this._gizmosPass.Dispose();
+            this._particlesPass.Dispose();
+            this._shadowPass.Dispose();
+            this._forwardPass.Dispose();
+            this._immediatePass.Dispose();
+            this._spritesPass.Dispose();
+            this._skyDomePass.Dispose();
+            this._fullScreenPass.Dispose();
+        }
+        catch (Exception e)
         {
-            this._instanceDataBuffers[i].Dispose();
+            Console.WriteLine("Error disposing renderer:");
+            Console.WriteLine(e);
         }
-
-        for (int i = 0; i < this._transformDataBuffers.Count; i++)
+        finally
         {
-            this._transformDataBuffers[i].Dispose();
+            Instance = null!;
         }
-
-        for (int i = 0; i < this._skeletonDataBuffers.Count; i++)
-        {
-            this._skeletonDataBuffers[i].Dispose();
-        }
-
-        foreach (var skeleton in this._skeletons)
-        {
-            skeleton.Dispose();
-        }
-
-        // Passes
-        this._imGuiPass.Dispose();
-        this._mousePickerPass.Dispose();
-        this._gizmosPass.Dispose();
-        this._particlesPass.Dispose();
-        this._shadowPass.Dispose();
-        this._forwardPass.Dispose();
-        this._immediatePass.Dispose();
-        this._spritesPass.Dispose();
-        this._skyDomePass.Dispose();
-        this._fullScreenPass.Dispose();
     }
 }
