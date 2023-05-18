@@ -550,7 +550,6 @@ public partial class Renderer : IDisposable
             this.MainRenderTexture.Dispose();
             this._commandList.Dispose();
             this._fence.Dispose();
-            this.GraphicsDevice.Dispose();
 
             foreach (var job in this._jobs)
             {
@@ -572,7 +571,7 @@ public partial class Renderer : IDisposable
                 this._skeletonDataBuffers[i].Dispose();
             }
 
-            foreach (var skeleton in this._skeletons)
+            foreach (var skeleton in this._skeletons.ToArray())
             {
                 skeleton.Dispose();
             }
@@ -588,6 +587,10 @@ public partial class Renderer : IDisposable
             this._spritesPass.Dispose();
             this._skyDomePass.Dispose();
             this._fullScreenPass.Dispose();
+
+            // The last thing to dispose is the graphics device.
+            // Otherwise AccessViolationException is thrown.
+            this.GraphicsDevice.Dispose();
         }
         catch (Exception e)
         {
