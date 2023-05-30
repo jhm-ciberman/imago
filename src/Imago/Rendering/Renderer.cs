@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Runtime.InteropServices;
 using Imago.Rendering.Passes;
 using Imago.SceneGraph;
+using Imago.Support;
 using Support;
 using Veldrid;
 using Veldrid.Sdl2;

@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using Imago.Rendering.Passes;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
+using Color = global::Support.Color;
 using Veldrid;
 using Vector2Int = Support.Vector2Int;
 
@@ -150,7 +151,7 @@ public class Texture : ITexture
     /// <summary>
     /// Fills the texture with a color.
     /// </summary>
-    public void Fill(Support.Color fillColor)
+    public void Fill(Color fillColor)
     {
         for (int i = 0; i < this._data.Length; i += 4)
         {

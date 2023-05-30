@@ -1,4 +1,5 @@
 using Support;
+using Support.ComponentModel;
 
 namespace Imago.Controls;
 

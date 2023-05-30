@@ -2,6 +2,7 @@ using System;
 using System.Numerics;
 using Imago.Rendering;
 using Imago.Resources;
+using Imago.Support;
 using Veldrid.Utilities;
 
 namespace Imago.SceneGraph;

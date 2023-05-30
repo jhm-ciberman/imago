@@ -1,36 +1,6 @@
 using System;
-namespace Support;
 
-/// <summary>
-/// Represents a command that can be executed.
-/// </summary>
-public interface IRelayCommand : ICommand
-{
-    /// <summary>
-    /// Raises the CanExecuteChanged event.
-    /// </summary>
-    void OnCanExecuteChanged();
-}
-
-/// <summary>
-/// Represents a command that can be executed and receives a parameter of type T.
-/// </summary>
-/// <typeparam name="T">The type of the command parameter.</typeparam>
-public interface IRelayCommand<T> : IRelayCommand, ICommand
-{
-    /// <summary>
-    /// Executes the command.
-    /// </summary>
-    /// <param name="parameter">The parameter.</param>
-    void Execute(T parameter);
-
-    /// <summary>
-    /// Determines whether this command can execute.
-    /// </summary>
-    /// <param name="parameter">The parameter.</param>
-    /// <returns>True if the command can execute, otherwise false.</returns>
-    bool CanExecute(T parameter);
-}
+namespace Support.ComponentModel;
 
 /// <summary>
 /// This class is used to create commands that can be executed.
@@ -63,9 +33,7 @@ public class RelayCommand : ICommand, IRelayCommand
     public void Execute(object? parameter)
     {
         if (this.CanExecute(parameter))
-        {
             this._command.Invoke();
-        }
     }
 
     /// <summary>
@@ -76,9 +44,7 @@ public class RelayCommand : ICommand, IRelayCommand
     public bool CanExecute(object? parameter)
     {
         if (this._canExecute == null)
-        {
             return true;
-        }
 
         return this._canExecute.Invoke();
     }
@@ -124,9 +90,7 @@ public class RelayCommand<T> : ICommand, IRelayCommand, IRelayCommand<T>
     public void Execute(object? parameter)
     {
         if (parameter is not T t)
-        {
             throw new ArgumentException($"The parameter must be of type {typeof(T).Name}.");
-        }
 
         this.Execute(t);
     }
@@ -138,9 +102,7 @@ public class RelayCommand<T> : ICommand, IRelayCommand, IRelayCommand<T>
     public void Execute(T parameter)
     {
         if (this.CanExecute(parameter))
-        {
             this._command.Invoke(parameter);
-        }
     }
 
     /// <summary>
@@ -151,14 +113,10 @@ public class RelayCommand<T> : ICommand, IRelayCommand, IRelayCommand<T>
     public bool CanExecute(object? parameter)
     {
         if (this._canExecute == null)
-        {
             return true;
-        }
 
         if (parameter is not T t)
-        {
             throw new ArgumentException($"The parameter must be of type {typeof(T).Name}.");
-        }
 
         return this._canExecute.Invoke(t);
     }
@@ -171,9 +129,7 @@ public class RelayCommand<T> : ICommand, IRelayCommand, IRelayCommand<T>
     public bool CanExecute(T parameter)
     {
         if (this._canExecute == null)
-        {
             return true;
-        }
 
         return this._canExecute.Invoke(parameter);
     }

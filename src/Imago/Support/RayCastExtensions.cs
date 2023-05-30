@@ -3,7 +3,7 @@ using System.Numerics;
 using Imago.Meshes;
 using Veldrid.Utilities;
 
-namespace Imago;
+namespace Imago.Support;
 
 public struct HitInfo
 {

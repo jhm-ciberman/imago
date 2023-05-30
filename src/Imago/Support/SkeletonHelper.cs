@@ -1,7 +1,7 @@
 using Imago.SceneGraph;
 using Support;
 
-namespace Imago;
+namespace Imago.Support;
 
 public static class SkeletonHelper
 {

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Imago.Meshes;
+using Imago.Support;
 using Support;
 using Veldrid.Utilities;
 

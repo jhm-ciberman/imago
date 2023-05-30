@@ -1,4 +1,4 @@
-using Support;
+using Support.ComponentModel;
 
 namespace Imago.Rendering;
 

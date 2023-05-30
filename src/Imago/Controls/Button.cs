@@ -3,6 +3,7 @@ using System.Numerics;
 using Imago.Input;
 using Imago.Rendering;
 using Support;
+using Support.ComponentModel;
 
 namespace Imago.Controls;
 

@@ -3,6 +3,7 @@ using System.Buffers;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using Imago.Rendering;
+using Imago.Support;
 using Veldrid;
 
 namespace Imago.Meshes;

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using Support;
+using Imago.Support;
 
 namespace Imago.SceneGraph;
 

@@ -1,6 +1,6 @@
 using System;
 
-namespace Support;
+namespace Support.ComponentModel;
 
 /// <summary>
 /// Interface for commands.

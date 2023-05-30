@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace Support;
+namespace Support.ComponentModel;
 
 /// <summary>
 /// Represents an object that can notify listeners of changes.
@@ -21,9 +21,7 @@ public class ObservableObject : INotifyPropertyChanged
     protected void OnPropertyChanged(string propertyName)
     {
         if (this.PropertyChanged != null)
-        {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
     }
 
     /// <summary>
@@ -37,9 +35,7 @@ public class ObservableObject : INotifyPropertyChanged
     protected bool SetProperty<T>(ref T backingField, T value, [CallerMemberName] string propertyName = "")
     {
         if (EqualityComparer<T>.Default.Equals(backingField, value))
-        {
             return false;
-        }
 
         backingField = value;
         this.OnPropertyChanged(propertyName);
