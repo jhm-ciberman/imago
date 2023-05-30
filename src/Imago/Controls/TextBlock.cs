@@ -1,0 +1,224 @@
+using System;
+using System.Numerics;
+using Imago.Rendering;
+using Support;
+
+namespace Imago.Controls;
+
+
+public class TextBlock : Control
+{
+    protected string _text = string.Empty;
+    private ITextEffect? _textEffect;
+    protected int _fontSize = 12;
+    protected string? _fontFamily = null;
+    protected Font? _font = null;
+    protected Color _foreground = Color.Black;
+    private float _lineHeight = float.NaN;
+    private int _textLineCount = 0;
+
+    /// <summary>
+    /// Gets or sets the text of the text block.
+    /// </summary>
+    public string Text
+    {
+        get => this._text;
+        set
+        {
+            if (this._text != value)
+            {
+                this._text = value;
+                this._textLineCount = GetLineCount(value);
+                this.InvalidateMeasure();
+                this.OnPropertyChanged(nameof(this.Text));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the foreground color of the text block.
+    /// </summary>
+    public Color Foreground
+    {
+        get => this._foreground;
+        set => this.SetProperty(ref this._foreground, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the font family of the text block.
+    /// </summary>
+    public string? FontFamily
+    {
+        get => this._fontFamily;
+        set
+        {
+            if (this.SetPropertyAndInvalidateMeasure(ref this._fontFamily, value))
+            {
+                this._actualLineHeight = float.NaN;
+                this._font = null;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the font size of the text block.
+    /// </summary>
+    public int FontSize
+    {
+        get => this._fontSize;
+        set
+        {
+            if (this.SetPropertyAndInvalidateMeasure(ref this._fontSize, value))
+            {
+                this._actualLineHeight = float.NaN;
+                this._font = null;
+            }
+        }
+    }
+
+    private float _actualLineHeight = float.NaN;
+
+    private float _lineSpacing = 0f;
+
+    /// <summary>
+    /// Gets the actual height of each line of text.
+    /// </summary>
+    public float ActualLineHeight
+    {
+        get
+        {
+            if (float.IsNaN(this._actualLineHeight))
+            {
+                this._actualLineHeight = float.IsNaN(this._lineHeight)
+                    ? this.GetFont().LineHeight
+                    : this._lineHeight;
+                this._lineSpacing = this._actualLineHeight - this.FontSize;
+            }
+
+            return this._actualLineHeight;
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the line height of the text block. A value of float.NaN indicates that the line height should be determined automatically.
+    /// </summary>
+    public float LineHeight
+    {
+        get => this._lineHeight;
+        set
+        {
+            if (this._lineHeight != value)
+            {
+                this._lineHeight = value;
+                this._actualLineHeight = float.NaN;
+                this.InvalidateMeasure();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the text effect of the text block.
+    /// </summary>
+    public ITextEffect? TextEffect
+    {
+        get => this._textEffect;
+        set
+        {
+            if (this.SetPropertyAndInvalidateMeasure(ref this._textEffect, value))
+            {
+                this._font = null;
+                this._actualLineHeight = float.NaN;
+            }
+        }
+    }
+
+    private void TextEffect_FontChanged(object? sender, EventArgs e)
+    {
+        // The font of the text effect has changed, so we need to invalidate the measure and the cached font.
+        this._font = null;
+        this._actualLineHeight = float.NaN;
+        this.InvalidateMeasure();
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TextBlock"/> class.
+    /// </summary>
+    public TextBlock()
+    {
+        //
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TextBlock"/> class.
+    /// </summary>
+    /// <param name="text">The text of the text block.</param>
+    public TextBlock(string text)
+    {
+        this.Text = text;
+    }
+
+    protected Font GetFont()
+    {
+        this._font ??= Font.GetFont(this.FontFamily, this.FontSize);
+
+        return this._font;
+    }
+
+    protected override Vector2 MeasureOverride(Vector2 availableSize)
+    {
+        if (this.Text == string.Empty)
+        {
+            return Vector2.Zero;
+        }
+
+        var font = this.GetFont();
+        var size = font.FontBase.MeasureString(this.Text);
+        return new Vector2(size.X, this.ActualLineHeight * this._textLineCount);
+    }
+
+    protected override void DrawCore(SpriteBatcher spriteBatcher)
+    {
+        base.DrawCore(spriteBatcher);
+
+        if (this.Text == string.Empty)
+        {
+            return;
+        }
+
+        var font = this.GetFont();
+        var offset = new Vector2(0f, MathF.Ceiling(this._lineSpacing / 2f));
+        if (this._textEffect == null)
+        {
+            spriteBatcher.DrawText(font, this.Text, this.Position + offset, this.Foreground);
+        }
+        else
+        {
+            this._textEffect.Draw(spriteBatcher, this.Text, font, this.Position + offset, this.Foreground);
+        }
+    }
+
+    internal Vector2 MeasureString(int charNumber)
+    {
+        ReadOnlySpan<char> span = this.Text.AsSpan(0, charNumber);
+        var size = this.GetFont().FontBase.MeasureString(span.ToString());
+        return size;
+    }
+
+    private static int GetLineCount(ReadOnlySpan<char> value)
+    {
+        if (value.IsEmpty)
+        {
+            return 0;
+        }
+
+        var lineCount = 1;
+        for (var i = 0; i < value.Length; i++)
+        {
+            if (value[i] == '\n')
+            {
+                lineCount++;
+            }
+        }
+        return lineCount;
+    }
+}

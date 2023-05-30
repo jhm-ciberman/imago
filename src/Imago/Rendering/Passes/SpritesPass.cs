@@ -1,0 +1,141 @@
+using System;
+using Imago.Controls;
+using Imago.SceneGraph;
+using Veldrid;
+
+namespace Imago.Rendering.Passes;
+
+public class SpritesPass : IDisposable, IPipelineProvider, IRenderingPass
+{
+    private readonly IRenderTexture _renderTexture;
+    private readonly GraphicsDevice _gd;
+    private readonly Shader _defaultShader;
+
+    private readonly SpriteBatcher _spriteBatcher;
+
+    public SpritesPass(Renderer renderer, IRenderTexture renderTexture)
+    {
+        this._gd = renderer.GraphicsDevice;
+        this._defaultShader = new Shader(renderer, this, _vertexShader, _fragmentShader, new[] { "Main" });
+
+        this._renderTexture = renderTexture;
+
+        this._spriteBatcher = new SpriteBatcher(this._gd, this._defaultShader);
+    }
+
+    public void Dispose()
+    {
+        this._spriteBatcher.Dispose();
+    }
+
+    Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant, RenderFlags flags)
+    {
+        var scissorTestEnabled = flags.HasFlag(RenderFlags.ScisorTest);
+        return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
+        {
+            DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
+            PrimitiveTopology = PrimitiveTopology.TriangleList,
+            ShaderSet = shaderVariant.ShaderSetDescription,
+            BlendState = BlendStateDescription.SingleAlphaBlend,
+            RasterizerState = new RasterizerStateDescription(
+                FaceCullMode.Back,
+                PolygonFillMode.Solid,
+                FrontFace.CounterClockwise,
+                depthClipEnabled: true,
+                scissorTestEnabled
+            ),
+            Outputs = this._renderTexture.OutputDescription,
+            ResourceLayouts = new ResourceLayout[]
+            {
+                this._spriteBatcher.PassResourceLayout,
+                shaderVariant.MaterialResourceLayout,
+            },
+        });
+    }
+
+    public void Render(CommandList cl, Scene scene)
+    {
+        if (scene.Stage2D == null && scene.StageUI == null) return;
+
+        this.DrawCallCount = 0;
+
+        cl.SetFramebuffer(this._renderTexture.Framebuffer);
+        cl.ClearDepthStencil(1f);
+
+        if (scene.Stage2D != null)
+        {
+            this.RenderStage2D(cl, scene.Stage2D);
+            this.DrawCallCount += this._spriteBatcher.DrawCallCount;
+        }
+
+        if (scene.StageUI != null)
+        {
+            this.RenderStageUI(cl, scene.StageUI);
+            this.DrawCallCount += this._spriteBatcher.DrawCallCount;
+        }
+    }
+
+    private void RenderStage2D(CommandList cl, Stage2D stage)
+    {
+        if (stage == null) return;
+
+        this._spriteBatcher.Begin(cl, stage.ViewProjectionMatrix);
+
+        for (int j = 0; j < stage.Items.Count; j++)
+        {
+            stage.Items[j].Render(this._spriteBatcher);
+        }
+
+        this._spriteBatcher.End();
+    }
+
+    private void RenderStageUI(CommandList cl, StageUI stage)
+    {
+        if (stage == null) return;
+
+        this._spriteBatcher.Begin(cl, stage.ViewProjectionMatrix);
+        stage.Draw(this._spriteBatcher);
+        this._spriteBatcher.End();
+
+    }
+
+    public int DrawCallCount { get; private set; }
+
+    private static readonly string _fragmentShader = @"
+        #version 450
+        layout(location = 0) in vec2 fsin_TexCoords;
+        layout(location = 1) in vec4 fsin_Color;
+
+        layout(set = 1, binding = 0) uniform texture2D MainTexture;
+        layout(set = 1, binding = 1) uniform sampler MainSampler;
+
+        layout(location = 0) out vec4 fsout_color;
+
+        void main()
+        {
+            vec4 textureColor = texture(sampler2D(MainTexture, MainSampler), fsin_TexCoords);
+            fsout_color = textureColor * fsin_Color;
+        }
+    ";
+
+    private static readonly string _vertexShader = @"
+        #version 450
+        layout(set = 0, binding = 0, std140) uniform CameraDataBuffer {
+            mat4 ViewProjection;
+        };
+
+        layout(location = 0) in vec3 Position;
+        layout(location = 1) in vec2 TextureCoords;
+        layout(location = 2) in vec4 Color;
+
+        layout(location = 0) out vec2 fsin_TexCoords;
+        layout(location = 1) out vec4 fsin_Color;
+
+        void main()
+        {
+            gl_Position = ViewProjection * vec4(Position, 1);
+            fsin_TexCoords = TextureCoords;
+            fsin_Color = Color;
+        }
+    ";
+}
