@@ -1,6 +1,6 @@
 using System.Numerics;
 
-namespace Imago.Anim;
+namespace Imago.Motion;
 
 public class Vector3Sampler : SamplerBase<Vector3>
 {

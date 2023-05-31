@@ -1,6 +1,6 @@
 using Imago.SceneGraph;
 
-namespace Imago.Anim;
+namespace Imago.Motion;
 
 public abstract class ChannelBase<T> : IChannel where T : struct
 {

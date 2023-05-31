@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
 using glTFLoader;
-using Imago.Anim;
+using Imago.Motion;
 using Imago.Meshes;
 using Imago.Rendering;
 using static glTFLoader.Schema.AnimationChannelTarget;

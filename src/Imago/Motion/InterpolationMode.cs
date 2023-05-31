@@ -1,4 +1,4 @@
-namespace Imago.Anim;
+namespace Imago.Motion;
 
 /// <summary>
 /// Represents the interpolation mode of an animation.

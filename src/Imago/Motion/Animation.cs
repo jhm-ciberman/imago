@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Imago.Anim;
+namespace Imago.Motion;
 
 /// <summary>
 /// Represents an animation.
