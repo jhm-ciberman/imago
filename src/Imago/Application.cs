@@ -4,7 +4,6 @@ using System.Runtime;
 using Imago.Input;
 using Imago.Rendering;
 using Imago.SceneGraph;
-using Imago.TexturePacking;
 using Veldrid;
 using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
@@ -18,11 +17,6 @@ public class Application : IDisposable
     /// Gets the instance of the <see cref="Application"/>.
     /// </summary>
     public static Application Instance { get; private set; } = null!;
-
-    /// <summary>
-    /// Gets the <see cref="TexturePacker"/>.
-    /// </summary>
-    public TexturePacker TexturePacker { get; internal set; }
 
     /// <summary>
     /// Gets the <see cref="Viewport"/>.
@@ -73,8 +67,6 @@ public class Application : IDisposable
         this.Viewport = new Viewport((uint)this.Window.Width, (uint)this.Window.Height);
 
         this._renderer = new Renderer(this.Window, backend);
-
-        this.TexturePacker = new TexturePacker();
 
         this.Window.Resized += this.OnResize;
 
