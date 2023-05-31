@@ -7,13 +7,13 @@ using Veldrid;
 
 namespace Imago.Meshes;
 
-public class ChunkMeshData : BasicMeshData
+public class TerrainMeshData : BasicMeshData
 {
     public Vector2[] Lights { get; set; }
 
-    public override VertexFormat VertexFormat => ChunkVertex.VertexFormat;
+    public override VertexFormat VertexFormat => TerrainVertex.VertexFormat;
 
-    public ChunkMeshData(ushort[] indices, Vector3[] positions, Vector3[]? normals, Vector2[] texCoords, Vector2[] lights)
+    public TerrainMeshData(ushort[] indices, Vector3[] positions, Vector3[]? normals, Vector2[] texCoords, Vector2[] lights)
         : base(indices, positions, normals, texCoords)
     {
         this.Lights = lights;
@@ -33,7 +33,7 @@ public class ChunkMeshData : BasicMeshData
     {
         this.Validate();
 
-        ChunkVertex[] vertices = ArrayPool<ChunkVertex>.Shared.Rent(this.Positions.Length);
+        TerrainVertex[] vertices = ArrayPool<TerrainVertex>.Shared.Rent(this.Positions.Length);
         for (var i = 0; i < this.Positions.Length; i++)
         {
             vertices[i].Position = this.Positions[i];
@@ -42,11 +42,11 @@ public class ChunkMeshData : BasicMeshData
             vertices[i].Light = this.Lights[i];
         }
 
-        uint sizeInBytes = (uint)(this.Positions.Length * Unsafe.SizeOf<ChunkVertex>());
+        uint sizeInBytes = (uint)(this.Positions.Length * Unsafe.SizeOf<TerrainVertex>());
         DeviceBuffer vertexBuffer = gd.ResourceFactory.CreateBuffer(new BufferDescription(sizeInBytes, BufferUsage.VertexBuffer));
-        gd.UpdateBuffer(vertexBuffer, (uint)0, new ReadOnlySpan<ChunkVertex>(vertices, 0, this.Positions.Length));
+        gd.UpdateBuffer(vertexBuffer, (uint)0, new ReadOnlySpan<TerrainVertex>(vertices, 0, this.Positions.Length));
 
-        ArrayPool<ChunkVertex>.Shared.Return(vertices);
+        ArrayPool<TerrainVertex>.Shared.Return(vertices);
         return vertexBuffer;
     }
 }
