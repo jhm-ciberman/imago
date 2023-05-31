@@ -15,54 +15,60 @@ namespace Imago;
 public class Application : IDisposable
 {
     /// <summary>
-    /// Gets the current <see cref="Application"/> instance.
+    /// Gets the instance of the <see cref="Application"/>.
     /// </summary>
-    public static Application Current { get; private set; } = null!;
+    public static Application Instance { get; private set; } = null!;
 
     /// <summary>
-    /// Gets the <see cref="Viewport"/> used by the <see cref="Application"/>.
+    /// Gets the <see cref="TexturePacker"/>.
+    /// </summary>
+    public TexturePacker TexturePacker { get; internal set; }
+
+    /// <summary>
+    /// Gets the <see cref="Viewport"/>.
     /// </summary>
     public Viewport Viewport { get; }
 
     /// <summary>
-    /// Gets the <see cref="Sdl2Window"/> used by the <see cref="Application"/>.
+    /// Gets the <see cref="Sdl2Window"/>.
     /// </summary>
     public Sdl2Window Window { get; }
-
-    private readonly InputManager _input;
-
-    private readonly Renderer _renderer;
 
     /// <summary>
     /// Gets or sets the current <see cref="Scene"/>.
     /// </summary>
-    public Scene? Scene { get; set; } = null;
-
-    public TexturePacker TexturePacker { get; internal set; }
+    public Scene? Scene
+    {
+        get => this._renderer.Scene;
+        set => this._renderer.Scene = value;
+    }
 
     /// <summary>
     /// Gets whether the application is currently running.
     /// </summary>
     public bool IsRunning { get; private set; } = false;
 
+    private readonly InputManager _input;
+
+    private readonly Renderer _renderer;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="Application"/> class.
     /// </summary>
-    /// <param name="windowTitle">The title of the window.</param>
     /// <param name="backend">The graphics backend to use.</param>
     /// <exception cref="InvalidOperationException">Thrown if an instance of <see cref="Application"/> already exists.</exception>
-    public Application(string windowTitle, GraphicsBackend? backend = null)
+    public Application(GraphicsBackend? backend = null)
     {
-        if (Current != null)
+        if (Instance != null)
         {
-            throw new InvalidOperationException("Only one instance of App can be created.");
+            throw new InvalidOperationException("Only one instance of Application can exist.");
         }
 
-        Current = this;
+        Instance = this;
 
         GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
 
-        WindowCreateInfo windowCI = new WindowCreateInfo(100, 100, 1024, 600, WindowState.Normal, windowTitle);
+        WindowCreateInfo windowCI = new WindowCreateInfo(100, 100, 1024, 600, WindowState.Normal, "Imago");
         this.Window = VeldridStartup.CreateWindow(ref windowCI);
         this.Viewport = new Viewport((uint)this.Window.Width, (uint)this.Window.Height);
 
@@ -116,17 +122,7 @@ public class Application : IDisposable
     /// <summary>
     /// Starts the application.
     /// </summary>
-    /// <param name="scene">The initial scene to start with.</param>
-    public void Start(Scene scene)
-    {
-        this.Scene = scene;
-        this.Start();
-    }
-
-    /// <summary>
-    /// Starts the application.
-    /// </summary>
-    public void Start()
+    public void Run()
     {
         if (this.IsRunning) return;
 
@@ -154,22 +150,8 @@ public class Application : IDisposable
             this._renderer.Update((float)this.DeltaTime, this._input.InputSnapshot);
 
             this.OnUpdate();
-        }
-    }
 
-    protected void Render(Scene scene)
-    {
-        try
-        {
-            this._renderer.Render(scene);
-        }
-        catch (VeldridException e)
-        {
-            Console.WriteLine(e.Message);
-
-#if DEBUG
-            throw;
-#endif
+            this._renderer.Render();
         }
     }
 

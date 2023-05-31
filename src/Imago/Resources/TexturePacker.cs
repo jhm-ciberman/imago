@@ -31,6 +31,13 @@ public class TexturePacker
     public event EventHandler<TexturePage>? PageAdded;
 
     /// <summary>
+    /// Event raised when a flush is requested.
+    /// </summary>
+    public event EventHandler? FlushRequested;
+
+    private bool _flushRequested = false;
+
+    /// <summary>
     /// Gets a list of all the pages in the texture manager.
     /// </summary>
     public IEnumerable<TexturePage> Pages
@@ -77,12 +84,21 @@ public class TexturePacker
         this.TileSize = tileSize;
         this.DefaultGroup = new TextureGroup("Default", atlasSize, tileSize, srgb);
         this.DefaultGroup.PageAdded += this.OnPageAdded;
+        this.DefaultGroup.FlushRequested += this.OnFlushRequested;
         this._groups.Add(this.DefaultGroup.Name, this.DefaultGroup);
     }
 
     private void OnPageAdded(object? sender, TexturePage e)
     {
         this.PageAdded?.Invoke(this, e);
+    }
+
+    private void OnFlushRequested(object? sender, EventArgs e)
+    {
+        if (this._flushRequested) return;
+
+        this._flushRequested = true;
+        this.FlushRequested?.Invoke(this, EventArgs.Empty);
     }
 
     /// <summary>
@@ -132,6 +148,9 @@ public class TexturePacker
     /// </summary>
     public void FlushChanges()
     {
+        if (!this._flushRequested) return;
+        this._flushRequested = false;
+
         foreach (var group in this._groups.Values)
         {
             group.FlushChanges();
@@ -151,6 +170,7 @@ public class TexturePacker
         }
 
         group.PageAdded += this.OnPageAdded;
+        group.FlushRequested += this.OnFlushRequested;
         this._groups.Add(group.Name, group);
     }
 }

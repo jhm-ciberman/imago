@@ -121,7 +121,7 @@ public partial class Renderer : IDisposable
     /// Initializes a new instance of the <see cref="Renderer"/> class.
     /// </summary>
     /// <param name="gd">The graphics device to use.</param>
-    /// <param name="swapchain">The swapchain to use.</param>
+    /// <param name="swapchain">The swapchain to use. If null, the main swapchain of the graphics device is used.</param>
     /// <exception cref="InvalidOperationException">Thrown if the renderer is already initialized.</exception>
     public Renderer(GraphicsDevice gd, Swapchain? swapchain = null)
     {
@@ -285,39 +285,58 @@ public partial class Renderer : IDisposable
     }
 
     /// <summary>
+    /// Gets or sets the current scene.
+    /// </summary>
+    public Scene? Scene { get; set; } = null;
+
+    /// <summary>
     /// Renders the scene.
     /// </summary>
     /// <param name="scene">The scene to render.</param>
-    public void Render(Scene scene)
+    public void Render()
     {
-        scene.OnBeforeRender();
-        scene.RenderImGui();
-        scene.UpdateTransforms();
+        var scene = this.Scene;
+        if (scene == null) return;
 
-        this._commandList.Begin();
-        this.UpdateBuffers(this._commandList);
-
-        this._commandList.SetFramebuffer(this.MainRenderTexture.Framebuffer);
-
-        ClearRenderTarget(this._commandList, scene);
-        this._commandList.End();
-
-        for (int i = 0; i < this._jobs.Count; i++)
+        try
         {
-            this._jobs[i].Execute(scene);
+            scene.OnBeforeRender();
+            scene.RenderImGui();
+            scene.UpdateTransforms();
+
+            this._commandList.Begin();
+            this.UpdateBuffers(this._commandList);
+
+            this._commandList.SetFramebuffer(this.MainRenderTexture.Framebuffer);
+
+            ClearRenderTarget(this._commandList, scene);
+            this._commandList.End();
+
+            for (int i = 0; i < this._jobs.Count; i++)
+            {
+                this._jobs[i].Execute(scene);
+            }
+
+            this.GraphicsDevice.WaitForIdle();
+            this._fence.Reset();
+            this.GraphicsDevice.SubmitCommands(this._commandList, this._fence);
+
+            this.SubmitJobs();
+
+            this._disposeCollector.DisposeAll();
+
+            if (this.GraphicsDevice.MainSwapchain != null)
+            {
+                this.GraphicsDevice.SwapBuffers();
+            }
         }
-
-        this.GraphicsDevice.WaitForIdle();
-        this._fence.Reset();
-        this.GraphicsDevice.SubmitCommands(this._commandList, this._fence);
-
-        this.SubmitJobs();
-
-        this._disposeCollector.DisposeAll();
-
-        if (this.GraphicsDevice.MainSwapchain != null)
+        catch (VeldridException e)
         {
-            this.GraphicsDevice.SwapBuffers();
+            Console.WriteLine(e.Message);
+
+#if DEBUG
+            throw;
+#endif
         }
     }
 

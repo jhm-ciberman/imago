@@ -19,6 +19,11 @@ public class TextureGroup
     public event EventHandler<TexturePage>? PageAdded;
 
     /// <summary>
+    /// Event raised when a flush is requested.
+    /// </summary>
+    public event EventHandler? FlushRequested;
+
+    /// <summary>
     /// Gets the name of the group.
     /// </summary>
     public string Name { get; } = string.Empty;
@@ -40,6 +45,8 @@ public class TextureGroup
     public bool IsSrgb { get; } = false;
 
     private readonly List<TexturePage> _pages = new(1);
+
+    private bool _flushRequested = false;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TextureGroup"/> class.
@@ -71,6 +78,7 @@ public class TextureGroup
         {
             if (currentPage.TryPack(unpackedTexture, out packedTexture))
             {
+                this.RequestFlush();
                 return packedTexture;
             }
         }
@@ -81,12 +89,22 @@ public class TextureGroup
         this.PageAdded?.Invoke(this, page);
         if (page.TryPack(unpackedTexture, out packedTexture))
         {
+            this.RequestFlush();
             return packedTexture;
         }
 
         // If the request cannot fit even in the newly empty page, then it's a fatal error
         // probably because the request is too big.
         throw new InvalidOperationException("Cannot pack texture in any texture page");
+    }
+
+    protected void RequestFlush()
+    {
+        if (!this._flushRequested)
+        {
+            this._flushRequested = true;
+            this.FlushRequested?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     /// <summary>
@@ -99,6 +117,9 @@ public class TextureGroup
     /// </summary>
     public void FlushChanges()
     {
+        if (!this._flushRequested) return;
+        this._flushRequested = false;
+
         foreach (var currentPage in this._pages)
         {
             currentPage.Apply();
