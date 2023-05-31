@@ -2,7 +2,7 @@ using System.Numerics;
 using Imago.Rendering;
 using Support;
 
-namespace Imago.Resources;
+namespace Imago.TexturePacking;
 
 /// <summary>
 /// A packed texture is a texture that is packed into a single texture. The class

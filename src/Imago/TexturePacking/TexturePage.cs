@@ -6,7 +6,7 @@ using Support;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
-namespace Imago.Resources;
+namespace Imago.TexturePacking;
 
 /// <summary>
 /// The TexturePage class is a texture atlas. It is used to pack textures into a single texture.
@@ -104,9 +104,7 @@ public class TexturePage
         }
 
         if (this._tileSize != 0)
-        {
             coords *= this._tileSize;
-        }
 
         operation.Draw(this.Image, coords);
         this.IsDirty = true;

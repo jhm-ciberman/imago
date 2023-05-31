@@ -4,7 +4,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 
-namespace Imago.Resources;
+namespace Imago.TexturePacking;
 
 public class TextureDrawOperation : IDrawOperation, IDisposable
 {

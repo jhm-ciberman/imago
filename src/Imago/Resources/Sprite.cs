@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Imago.Rendering;
+using Imago.TexturePacking;
 using Support;
 
 namespace Imago.Resources;

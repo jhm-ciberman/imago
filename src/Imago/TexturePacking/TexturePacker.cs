@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Imago.Resources;
+namespace Imago.TexturePacking;
 
 public class TexturePacker
 {
@@ -16,9 +16,7 @@ public class TexturePacker
         get
         {
             if (_instance == null)
-            {
                 throw new InvalidOperationException("Default texture manager is not set.");
-            }
 
             return _instance;
         }
@@ -91,9 +89,7 @@ public class TexturePacker
     public TextureGroup FindGroup(string name)
     {
         if (this._groups.TryGetValue(name, out var group))
-        {
             return group;
-        }
 
         throw new ArgumentException($"Group '{name}' does not exist.");
     }
@@ -110,9 +106,7 @@ public class TexturePacker
         if (groupName is null)
         {
             if (this.DefaultGroup is null)
-            {
                 throw new InvalidOperationException("No default group is set.");
-            }
 
             return this.DefaultGroup.Pack(unpackedTexture);
         }
@@ -155,9 +149,7 @@ public class TexturePacker
     public void AddGroup(TextureGroup group)
     {
         if (this._groups.ContainsKey(group.Name))
-        {
             throw new ArgumentException($"Group '{group.Name}' already exists.");
-        }
 
         group.PageAdded += this.OnPageAdded;
         group.FlushRequested += this.OnFlushRequested;

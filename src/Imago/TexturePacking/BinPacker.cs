@@ -1,7 +1,7 @@
 using Imago.Support;
 using Support;
 
-namespace Imago.Resources;
+namespace Imago.TexturePacking;
 
 // Based in "A Thousand Ways to Pack the Bin - A Practical Approach to Two-Dimensional Rectangle Bin Packing" (2010)
 // It uses a GUILLOTINE-MINAS-BAF heuristic (Guillotine algorithm, Min area split, Best Area fit)
@@ -91,9 +91,7 @@ public class BinPacker
         {
             this._freeList[nodeIndex] = right;
             if (bottom.Area != 0)
-            {
                 this._freeList.Add(bottom);
-            }
         }
         else if (bottom.Area != 0)
         {

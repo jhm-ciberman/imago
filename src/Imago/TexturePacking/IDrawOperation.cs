@@ -2,7 +2,7 @@ using Support;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
-namespace Imago.Resources;
+namespace Imago.TexturePacking;
 
 public interface IDrawOperation
 {

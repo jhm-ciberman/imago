@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Imago.Resources;
+namespace Imago.TexturePacking;
 
 /// <summary>
 /// A texture group is a container for one or more <see cref="TexturePage"/>s. Each texture group
