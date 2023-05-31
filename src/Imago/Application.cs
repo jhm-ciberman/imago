@@ -74,7 +74,7 @@ public class Application : IDisposable
 
         this._renderer = new Renderer(this.Window, backend);
 
-        this.TexturePacker = new TexturePacker(1024, 32);
+        this.TexturePacker = new TexturePacker();
 
         this.Window.Resized += this.OnResize;
 

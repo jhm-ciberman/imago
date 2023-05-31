@@ -55,37 +55,18 @@ public class TexturePacker
     }
 
     /// <summary>
-    /// Gets the size of each page in the texture manager in pixels.
-    /// </summary>
-    public uint AtlasSize { get; }
-
-    /// <summary>
-    /// Gets the size of each tile in the texture manager in pixels.
-    public uint TileSize { get; }
-
-    /// <summary>
     /// Gets or sets the default group.
     /// </summary>
-    public TextureGroup DefaultGroup { get; set; }
+    public TextureGroup? DefaultGroup { get; set; } = null;
 
     private readonly Dictionary<string, TextureGroup> _groups = new(1, StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TexturePacker"/> class.
     /// </summary>
-    /// <param name="atlasSize">The atlas size of the default group.</param>
-    /// <param name="tileSize">The size of each tile in the texture pages of the default group.</param>
-    /// <param name="srgb">Whether the texture pages of the default group should use the SRGB color space.</param>
-    public TexturePacker(uint atlasSize, uint tileSize, bool srgb = false)
+    public TexturePacker()
     {
         _instance ??= this;
-
-        this.AtlasSize = atlasSize;
-        this.TileSize = tileSize;
-        this.DefaultGroup = new TextureGroup("Default", atlasSize, tileSize, srgb);
-        this.DefaultGroup.PageAdded += this.OnPageAdded;
-        this.DefaultGroup.FlushRequested += this.OnFlushRequested;
-        this._groups.Add(this.DefaultGroup.Name, this.DefaultGroup);
     }
 
     private void OnPageAdded(object? sender, TexturePage e)
@@ -109,12 +90,12 @@ public class TexturePacker
     /// <exception cref="ArgumentException">Thrown if the group does not exist.</exception>
     public TextureGroup FindGroup(string name)
     {
-        if (!this._groups.TryGetValue(name, out var group))
+        if (this._groups.TryGetValue(name, out var group))
         {
-            throw new ArgumentException($"Group '{name}' does not exist.");
+            return group;
         }
 
-        return group;
+        throw new ArgumentException($"Group '{name}' does not exist.");
     }
 
     /// <summary>
@@ -126,8 +107,17 @@ public class TexturePacker
     /// <exception cref="InvalidOperationException">Thrown when the texture is already packed or it's too big to be packed in any page.</exception>
     public PackedTexture Pack(IDrawOperation unpackedTexture, string? groupName = null)
     {
-        var group = groupName is null ? this.DefaultGroup : this.FindGroup(groupName);
-        return group.Pack(unpackedTexture);
+        if (groupName is null)
+        {
+            if (this.DefaultGroup is null)
+            {
+                throw new InvalidOperationException("No default group is set.");
+            }
+
+            return this.DefaultGroup.Pack(unpackedTexture);
+        }
+
+        return this.FindGroup(groupName).Pack(unpackedTexture);
     }
 
     /// <summary>
@@ -172,5 +162,7 @@ public class TexturePacker
         group.PageAdded += this.OnPageAdded;
         group.FlushRequested += this.OnFlushRequested;
         this._groups.Add(group.Name, group);
+
+        this.DefaultGroup ??= group;
     }
 }
