@@ -11,7 +11,7 @@ public class TexturePacker
     /// Gets or sets the default texture manager.
     /// </summary>
     /// <exception cref="InvalidOperationException">Thrown if the default texture manager is not set.</exception>
-    public static TexturePacker Default
+    public static TexturePacker Instance
     {
         get
         {
