@@ -13,7 +13,7 @@ using Veldrid.Utilities;
 
 namespace Imago.Rendering;
 
-public partial class Renderer : IDisposable
+public class Renderer : IDisposable
 {
     public const int MIN_BUFFER_BLOCKS = 1024;
 

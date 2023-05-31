@@ -5,7 +5,7 @@ using Veldrid;
 
 namespace Imago.Rendering;
 
-internal partial class DataBuffer : IDisposable
+internal class DataBuffer : IDisposable
 {
     private static int _count = 0;
     private readonly IntPtr _data;
