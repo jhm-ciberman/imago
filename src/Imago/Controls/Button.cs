@@ -1,5 +1,6 @@
 using System;
 using System.Numerics;
+using Imago.Controls.Drawing;
 using Imago.Input;
 using Imago.Rendering;
 using Support;
@@ -92,6 +93,10 @@ public class Button : ContentControl
     /// Parameter that is passed to the command.
     /// </summary>
     public object? CommandParameter { get; set; } = null;
+
+    /// <summary>
+    /// Gets or sets the background brush of the button.
+    /// </summary>
 
     protected void UpdateBackgroundBrush()
     {

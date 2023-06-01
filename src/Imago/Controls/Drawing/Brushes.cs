@@ -1,6 +1,6 @@
 using Support;
 
-namespace Imago.Controls;
+namespace Imago.Controls.Drawing;
 
 /// <summary>
 /// A static class with predefined brushes.

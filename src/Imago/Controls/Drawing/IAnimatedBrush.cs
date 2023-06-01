@@ -1,6 +1,6 @@
 using System;
 
-namespace Imago.Controls;
+namespace Imago.Controls.Drawing;
 
 /// <summary>
 /// A brush that is animated.

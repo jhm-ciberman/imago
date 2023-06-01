@@ -3,7 +3,7 @@ using System.Numerics;
 using Imago.Rendering;
 using Support;
 
-namespace Imago.Controls;
+namespace Imago.Controls.Drawing;
 
 /// <summary>
 /// Defines a brush for a solid color.

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
+using Imago.Controls.Drawing;
 using Imago.Rendering;
 using Imago.SceneGraph;
 using Support;

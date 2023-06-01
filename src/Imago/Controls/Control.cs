@@ -1,5 +1,6 @@
 using System;
 using System.Numerics;
+using Imago.Controls.Drawing;
 using Imago.Rendering;
 using Support;
 

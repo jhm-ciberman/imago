@@ -9,7 +9,7 @@ namespace Imago.TexturePacking;
 /// contains a reference to the base texture and the coordinates of the texture in
 /// the base texture.
 /// </summary>
-public class PackedTexture
+public class PackedTexture : ITextureRegion
 {
     /// <summary>
     /// Gets the base texture.

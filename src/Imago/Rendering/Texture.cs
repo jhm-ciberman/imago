@@ -13,7 +13,7 @@ namespace Imago.Rendering;
 /// <summary>
 /// Represents a texture.
 /// </summary>
-public class Texture : ITexture
+public class Texture : ITexture, ITextureRegion, IDisposable
 {
     private static readonly EventArgs _eventArgs = new EventArgs();
 
@@ -270,4 +270,9 @@ public class Texture : ITexture
     {
         Renderer.Instance.DisposeWhenIdle(this.VeldridTexture);
     }
+
+    // ITextureRegion implementation for the whole texture
+    Texture ITextureRegion.Texture => this;
+    Vector2 ITextureRegion.TopLeft => Vector2.Zero;
+    Vector2 ITextureRegion.BottomRight => Vector2.One;
 }

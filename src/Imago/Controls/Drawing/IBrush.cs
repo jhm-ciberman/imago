@@ -1,7 +1,7 @@
 using System.Numerics;
 using Imago.Rendering;
 
-namespace Imago.Controls;
+namespace Imago.Controls.Drawing;
 
 /// <summary>
 /// This interface provides the functionality to fill a rectangle with a brush.

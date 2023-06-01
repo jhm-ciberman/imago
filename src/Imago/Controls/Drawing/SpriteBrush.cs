@@ -3,7 +3,7 @@ using Imago.Rendering;
 using Imago.Resources;
 using Support;
 
-namespace Imago.Controls;
+namespace Imago.Controls.Drawing;
 
 /// <summary>
 /// Defines a brush for an animated sprite.
@@ -36,7 +36,7 @@ public class SpriteBrush : IAnimatedBrush
     public int FrameIndex
     {
         get => (int)this._frameIndex;
-        set => this.SetFrame((int)value);
+        set => this.SetFrame(value);
     }
 
     /// <summary>
@@ -123,9 +123,7 @@ public class SpriteBrush : IAnimatedBrush
             this._frameIndex += this.FramesPerSecond * deltaTime;
 
             if (this.Loop)
-            {
                 this._frameIndex %= this.Sprite.Frames.Count;
-            }
             else
             {
                 this._frameIndex = MathUtils.Clamp(this._frameIndex, 0, this.Sprite.Frames.Count - 1);
@@ -141,9 +139,7 @@ public class SpriteBrush : IAnimatedBrush
         var frame = this.Sprite.Frames[frameIndex];
         var sprite = this.Sprite;
         if (sprite.IsNineSlice)
-        {
             spriteBatcher.DrawNinePatch(null, frame, position, size, sprite.NineSliceMargin, this.Color, sprite.Scale);
-        }
         else
         {
             spriteBatcher.DrawTexture(null, frame.Texture, position, size, frame.TopLeft, frame.BottomRight, this.Color);
