@@ -11,13 +11,13 @@ public class TextureDrawOperation : IDrawOperation, IDisposable
     /// <inheritdoc />
     public Vector2Int Size { get; }
 
-    private readonly Image<Rgba32> _image;
+    private readonly Image _image;
 
     /// <summary>
     /// Creates a new <see cref="TextureDrawOperation"/> from the given <see cref="Image{Rgba32}"/>.
     /// </summary>
     /// <param name="image">The image to draw.</param>
-    public TextureDrawOperation(Image<Rgba32> image)
+    public TextureDrawOperation(Image image)
     {
         this._image = image;
         this.Size = new Vector2Int(image.Width, image.Height);
