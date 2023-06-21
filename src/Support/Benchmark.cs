@@ -24,7 +24,7 @@ public static class Benchmark
 
         sw.Stop();
 
-        _loggerFunction("\"" + taskName + "\" took " + sw.ElapsedMilliseconds + " milliseconds");
+        _loggerFunction($"\"{taskName}\" took {sw.ElapsedMilliseconds} milliseconds");
 
         return value;
     }
@@ -37,7 +37,7 @@ public static class Benchmark
 
         sw.Stop();
 
-        _loggerFunction("\"" + taskName + "\" took " + sw.ElapsedMilliseconds + " milliseconds");
+        _loggerFunction($"\"{taskName}\" took {sw.ElapsedMilliseconds} milliseconds");
     }
 
 
