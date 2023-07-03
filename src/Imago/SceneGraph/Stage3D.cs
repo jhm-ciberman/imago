@@ -140,14 +140,6 @@ public class Stage3D
     /// <param name="deltaTime">The time since the last update in seconds.</param>
     public virtual void Update(float deltaTime)
     {
-        // Override in derived classes
-    }
-
-    /// <summary>
-    /// Updates the transforms of the scene.
-    /// </summary>
-    public void UpdateTransforms()
-    {
         if (this._transformDirtyList.Count == 0) return;
 
         for (int i = 0; i < this._transformDirtyList.Count; i++)

@@ -67,7 +67,7 @@ public class Stage2D
         }
     }
 
-    public void UpdateTransforms()
+    public virtual void Update(float deltaTime)
     {
         foreach (var child in this._root.Children)
         {

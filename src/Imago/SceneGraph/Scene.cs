@@ -34,16 +34,10 @@ public class Scene
         // Virtual method
     }
 
-    public void UpdateTransforms()
-    {
-        this.Stage3D?.UpdateTransforms();
-        this.Stage2D?.UpdateTransforms();
-    }
-
     public virtual void Update(float deltaTime)
     {
         this.Stage3D?.Update(deltaTime);
-        //this.Stage2D?.Update(deltaTime); // Not implemented
+        this.Stage2D?.Update(deltaTime);
         this.StageUI?.Update(deltaTime);
     }
 }

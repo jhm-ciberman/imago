@@ -302,7 +302,6 @@ public class Renderer : IDisposable
         {
             scene.OnBeforeRender();
             scene.RenderImGui();
-            scene.UpdateTransforms();
 
             this._commandList.Begin();
             this.UpdateBuffers(this._commandList);
