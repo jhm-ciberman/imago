@@ -1,10 +1,24 @@
 using System;
+using System.Collections.Generic;
 using System.Numerics;
+using System.Text;
 using Imago.Rendering;
 using Support;
 
 namespace Imago.Controls;
 
+public enum TextWrap
+{
+    /// <summary>
+    /// The text is not wrapped.
+    /// </summary>
+    NoWrap,
+
+    /// <summary>
+    /// The text is wrapped at the nearest word boundary.
+    /// </summary>
+    Wrap,
+}
 
 public class TextBlock : Control
 {
@@ -16,7 +30,9 @@ public class TextBlock : Control
     protected Color _foreground = Color.Black;
     private float _lineHeight = float.NaN;
     private int _textLineCount = 0;
-    private string[] _textLines = Array.Empty<string>();
+    private readonly List<string> _textLines = new();
+    private bool _textLinesDirty = true;
+    private TextWrap _textWrap = TextWrap.NoWrap;
 
     /// <summary>
     /// Gets or sets the text of the text block.
@@ -57,6 +73,8 @@ public class TextBlock : Control
             {
                 this._actualLineHeight = float.NaN;
                 this._font = null;
+                this._textLinesDirty = true;
+                this.InvalidateMeasure();
             }
         }
     }
@@ -73,6 +91,8 @@ public class TextBlock : Control
             {
                 this._actualLineHeight = float.NaN;
                 this._font = null;
+                this._textLinesDirty = true;
+                this.InvalidateMeasure();
             }
         }
     }
@@ -112,6 +132,24 @@ public class TextBlock : Control
             {
                 this._lineHeight = value;
                 this._actualLineHeight = float.NaN;
+                this._textLinesDirty = true;
+                this.InvalidateMeasure();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the text wrap of the text block.
+    /// </summary>
+    public TextWrap TextWrap
+    {
+        get => this._textWrap;
+        set
+        {
+            if (this._textWrap != value)
+            {
+                this._textWrap = value;
+                this._textLinesDirty = true;
                 this.InvalidateMeasure();
             }
         }
@@ -172,6 +210,11 @@ public class TextBlock : Control
             return Vector2.Zero;
         }
 
+        if (this._textLinesDirty)
+        {
+            this.RecomputeTextLines(availableSize);
+        }
+
         var font = this.GetFont();
         var size = font.FontBase.MeasureString(this.Text);
         return new Vector2(size.X, this.ActualLineHeight * this._textLineCount);
@@ -181,27 +224,41 @@ public class TextBlock : Control
     {
         base.DrawCore(spriteBatcher);
 
-        if (this.Text == string.Empty)
-        {
-            return;
-        }
-
         var font = this.GetFont();
         var offset = new Vector2(0f, MathF.Ceiling(this._lineSpacing / 2f));
-        if (this._textEffect == null)
+        for (var i = 0; i < this._textLines.Count; i++)
         {
-            spriteBatcher.DrawText(font, this.Text, this.Position + offset, this.Foreground);
-        }
-        else
-        {
-            this._textEffect.Draw(spriteBatcher, this.Text, font, this.Position + offset, this.Foreground);
+            Vector2 position = this.Position + offset + new Vector2(0f, i * this.ActualLineHeight);
+            if (this._textEffect == null)
+            {
+                spriteBatcher.DrawText(font, this._textLines[i], position, this.Foreground);
+            }
+            else
+            {
+                this._textEffect.Draw(spriteBatcher, this._textLines[i], font, position, this.Foreground);
+            }
         }
     }
 
     internal Vector2 MeasureString(int charNumber)
     {
-        ReadOnlySpan<char> span = this.Text.AsSpan(0, charNumber);
-        var size = this.GetFont().FontBase.MeasureString(span.ToString());
+        if (this.Text == string.Empty)
+        {
+            return Vector2.Zero;
+        }
+
+        if (this._textLinesDirty)
+        {
+            this.RecomputeTextLines(this.ActualSize);
+        }
+
+        var size = Vector2.Zero;
+        for (var i = 0; i < this._textLines.Count; i++)
+        {
+            var span = this._textLines[i].AsSpan(0, charNumber);
+            size.X = Math.Max(size.X, this.GetFont().FontBase.MeasureString(span.ToString()).X);
+        }
+
         return size;
     }
 
@@ -221,5 +278,52 @@ public class TextBlock : Control
             }
         }
         return lineCount;
+    }
+
+    // We need to split the text into lines accounting the line breaks and the width of the text block.
+    private void RecomputeTextLines(Vector2 availableSize)
+    {
+        if (this.Text == string.Empty)
+        {
+            this._textLines.Clear();
+            this._textLineCount = 0;
+            return;
+        }
+
+        var font = this.GetFont();
+        var maxWidth = availableSize.X;
+        var textLines = this._textLines;
+
+        switch (this.TextWrap)
+        {
+            case TextWrap.NoWrap:
+                textLines.Add(this.Text);
+                break;
+
+            case TextWrap.Wrap:
+                var words = this.Text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                var currentLine = string.Empty;
+                foreach (var word in words)
+                {
+                    var wordWidth = font.FontBase.MeasureString(word).X;
+                    if (font.FontBase.MeasureString(currentLine + word).X <= maxWidth)
+                    {
+                        currentLine += word + " ";
+                    }
+                    else
+                    {
+                        textLines.Add(currentLine.TrimEnd());
+                        currentLine = word + " ";
+                    }
+                }
+                textLines.Add(currentLine.TrimEnd());
+                break;
+
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+
+        this._textLineCount = this._textLines.Count;
+        this._textLinesDirty = false;
     }
 }
