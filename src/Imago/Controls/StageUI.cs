@@ -80,7 +80,7 @@ public class StageUI
         this._content.Draw(spriteBatcher);
     }
 
-    internal void Update(float deltaTime)
+    public virtual void Update(float deltaTime)
     {
         if (this._content is null) return;
 

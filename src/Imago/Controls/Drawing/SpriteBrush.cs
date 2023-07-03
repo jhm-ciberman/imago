@@ -100,6 +100,11 @@ public class SpriteBrush : IAnimatedBrush
         this.SetFrame(frameIndex);
     }
 
+    public static SpriteBrush Frame(Sprite sprite, int frame)
+    {
+        return new SpriteBrush(sprite, 0, false, Color.White, frame);
+    }
+
     private void SetFrame(int frameIndex)
     {
         if (this._frameIndex != frameIndex)

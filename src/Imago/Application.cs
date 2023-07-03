@@ -13,6 +13,10 @@ namespace Imago;
 
 public class Application : IDisposable
 {
+    public event EventHandler<SceneChangedEventArgs>? SceneChanged;
+
+    public record class SceneChangedEventArgs(Scene? OldScene, Scene? NewScene);
+
     /// <summary>
     /// Gets the instance of the <see cref="Application"/>.
     /// </summary>
@@ -34,7 +38,15 @@ public class Application : IDisposable
     public Scene? Scene
     {
         get => this._renderer.Scene;
-        set => this._renderer.Scene = value;
+        set
+        {
+            if (this._renderer.Scene != value)
+            {
+                var oldScene = this._renderer.Scene;
+                this._renderer.Scene = value;
+                this.SceneChanged?.Invoke(this, new SceneChangedEventArgs(oldScene, value));
+            }
+        }
     }
 
     /// <summary>
