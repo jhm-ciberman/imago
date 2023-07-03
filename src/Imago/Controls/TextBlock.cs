@@ -16,6 +16,7 @@ public class TextBlock : Control
     protected Color _foreground = Color.Black;
     private float _lineHeight = float.NaN;
     private int _textLineCount = 0;
+    private string[] _textLines = Array.Empty<string>();
 
     /// <summary>
     /// Gets or sets the text of the text block.
