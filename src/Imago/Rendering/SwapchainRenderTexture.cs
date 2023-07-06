@@ -5,7 +5,9 @@ namespace Imago.Rendering;
 
 internal class SwapchainRenderTexture : IRenderTexture, ITexture
 {
-    /// <inheritdoc />
+    /// <summary>
+    /// Occurs when the render texture is resized.
+    /// </summary>
     public event EventHandler? Resized;
 
     public Framebuffer Framebuffer => this._swapchain.Framebuffer;

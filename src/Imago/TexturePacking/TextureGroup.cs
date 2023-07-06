@@ -14,12 +14,12 @@ namespace Imago.TexturePacking;
 public class TextureGroup
 {
     /// <summary>
-    /// Event that is raised when a new page is added to the group.
+    /// Occurs when a new page is added to the group.
     /// </summary>
     public event EventHandler<TexturePage>? PageAdded;
 
     /// <summary>
-    /// Event raised when a flush is requested.
+    /// Occurs when the group needs to flush the pending changes to the atlas.
     /// </summary>
     public event EventHandler? FlushRequested;
 

@@ -23,6 +23,9 @@ public class DirectTexture : ITexture
 
     private readonly GraphicsDevice _gd;
 
+    /// <summary>
+    /// Occurs when the texture is resized.
+    /// </summary>
     public event EventHandler? Resized;
 
     public DirectTexture(GraphicsDevice gd, uint width, uint height, uint mipLevels = 0, bool srgb = true)

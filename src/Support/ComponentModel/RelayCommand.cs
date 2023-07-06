@@ -8,7 +8,7 @@ namespace Support.ComponentModel;
 public class RelayCommand : ICommand, IRelayCommand
 {
     /// <summary>
-    /// Raised whener the CanExecute of the command changes.
+    /// Occurs when the CanExecute of the command changes.
     /// </summary>
     public event EventHandler? CanExecuteChanged;
 
@@ -65,7 +65,7 @@ public class RelayCommand : ICommand, IRelayCommand
 public class RelayCommand<T> : ICommand, IRelayCommand, IRelayCommand<T>
 {
     /// <summary>
-    /// Raised whener the CanExecute of the command changes.
+    /// Occurs when the CanExecute of the command changes.
     /// </summary>
     public event EventHandler? CanExecuteChanged;
 

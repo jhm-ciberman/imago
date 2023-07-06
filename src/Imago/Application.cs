@@ -13,6 +13,9 @@ namespace Imago;
 
 public class Application : IDisposable
 {
+    /// <summary>
+    /// Occurs when the current <see cref="Scene"/> changes.
+    /// </summary>
     public event EventHandler<SceneChangedEventArgs>? SceneChanged;
 
     public record class SceneChangedEventArgs(Scene? OldScene, Scene? NewScene);

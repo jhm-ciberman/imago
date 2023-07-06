@@ -7,6 +7,10 @@ public abstract class MaterialBase
 {
     public delegate void MaterialResourceSetDirtyHandler(MaterialBase material);
     public delegate void MaterialStateChangedHandler(MaterialBase material);
+
+    /// <summary>
+    /// Occurs when the material's pipeline needs to be rebuilt.
+    /// </summary>
     public event MaterialStateChangedHandler? PipelineDirty;
     public static event MaterialResourceSetDirtyHandler? MaterialResourceSetDirty;
 

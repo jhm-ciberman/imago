@@ -29,7 +29,7 @@ public class Texture : ITexture, ITextureRegion, IDisposable
     public static event TextureDirtyHandler? TextureDirty;
 
     /// <summary>
-    /// A delegate for when a texture is resized.
+    /// Occurs when the texture is resized.
     /// </summary>
     public event EventHandler? Resized;
 

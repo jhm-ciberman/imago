@@ -10,7 +10,7 @@ namespace Support.ComponentModel;
 public class ObservableObject : INotifyPropertyChanged
 {
     /// <summary>
-    /// Event raised when a property value changes.
+    /// Occurs when a property value has changed.
     /// </summary>
     public event PropertyChangedEventHandler? PropertyChanged;
 

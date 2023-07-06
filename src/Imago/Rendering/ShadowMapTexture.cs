@@ -6,7 +6,7 @@ namespace Imago.Rendering;
 public class ShadowMapTexture : ITexture, IDisposable
 {
     /// <summary>
-    /// Event raised when the texture is resized.
+    /// Occurs when the texture is resized.
     /// </summary>
     public event EventHandler? Resized;
 

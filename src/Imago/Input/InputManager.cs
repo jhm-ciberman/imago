@@ -23,27 +23,27 @@ public class InputManager
     }
 
     /// <summary>
-    /// Event that is raised when a key is pressed.
+    /// Occurs when a key is pressed.
     /// </summary>
     public event EventHandler<KeyEvent>? KeyPressed;
 
     /// <summary>
-    /// Event that is raised when a key is released.
+    /// Occurs when a key is released.
     /// </summary>
     public event EventHandler<KeyEvent>? KeyReleased;
 
     /// <summary>
-    /// Event that is raised when a mouse button is pressed.
+    /// Occurs when a mouse button is pressed.
     /// </summary>
     public event EventHandler<MouseEvent>? MouseButtonPressed;
 
     /// <summary>
-    /// Event that is raised when a mouse button is released.
+    /// Occurs when a mouse button is released.
     /// </summary>
     public event EventHandler<MouseEvent>? MouseButtonReleased;
 
     /// <summary>
-    /// Event that is raised when one or more characters are typed.
+    /// Occurs when one or more characters are typed.
     /// </summary>
     public event EventHandler<TextEventArgs>? TextEntered;
 

@@ -6,7 +6,7 @@ namespace Imago.Rendering;
 public class RenderTexture : IRenderTexture
 {
     /// <summary>
-    /// Raised when the render texture is resized.
+    /// Occurs when the render texture is resized.
     /// </summary>
     public event EventHandler? Resized;
 

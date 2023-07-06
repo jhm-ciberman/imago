@@ -6,7 +6,7 @@ namespace Imago.SceneGraph;
 public class Viewport
 {
     /// <summary>
-    /// Raised when the viewport is resized.
+    /// Occurs when the viewport is resized.
     /// </summary>
     public event EventHandler? Resized;
 

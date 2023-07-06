@@ -23,7 +23,7 @@ public class Renderer : IDisposable
     public static Renderer Instance { get; private set; } = null!;
 
     /// <summary>
-    /// Event that is raised when the viewport is resized.
+    /// Occurs when the viewport is resized.
     /// </summary>
     public event EventHandler<ViewportResizedEventArgs>? ViewportResized;
 
