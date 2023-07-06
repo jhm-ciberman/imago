@@ -1,13 +1,64 @@
 using System;
 using System.Numerics;
 using Imago.Controls.Drawing;
+using Imago.Input;
 using Imago.Rendering;
 using Support;
+using Veldrid;
 
 namespace Imago.Controls;
 
+public class MouseButtonEventArgs : EventArgs
+{
+    public MouseButton Button { get; }
+    public Vector2 Position { get; }
+
+    public MouseButtonEventArgs(MouseButton button, Vector2 position)
+    {
+        this.Button = button;
+        this.Position = position;
+    }
+}
+
+public class MouseWheelEventArgs : EventArgs
+{
+    public float Delta { get; }
+    public Vector2 Position { get; }
+
+    public MouseWheelEventArgs(float delta, Vector2 position)
+    {
+        this.Delta = delta;
+        this.Position = position;
+    }
+}
+
 public class Control : Visual
 {
+    /// <summary>
+    /// Occurs when the mouse enters the bounds of the control.
+    /// </summary>
+    public EventHandler? MouseEnter;
+
+    /// <summary>
+    /// Occurs when the mouse leaves the bounds of the control.
+    /// </summary>
+    public EventHandler? MouseLeave;
+
+    /// <summary>
+    /// Occurs when a mouse button is pressed down on the control.
+    /// </summary>
+    public EventHandler<MouseButtonEventArgs>? MouseDown;
+
+    /// <summary>
+    /// Occurs when a mouse button is released on the control.
+    /// </summary>
+    public EventHandler<MouseButtonEventArgs>? MouseUp;
+
+    /// <summary>
+    /// Occurs when the mouse wheel is scrolled while the mouse is over the control.
+    /// </summary>
+    public EventHandler<MouseWheelEventArgs>? MouseWheel;
+
     private Thickness _margin = new Thickness(0);
     private HorizontalAlignment _horizontalAlignment = HorizontalAlignment.Left;
     private VerticalAlignment _verticalAlignment = VerticalAlignment.Top;
@@ -205,7 +256,87 @@ public class Control : Visual
     /// </summary>
     public virtual void Update(float deltaTime)
     {
-        // Do nothing. This should be overridden by subclasses.
+        if (this.Stage == null) return;
+
+        var bounds = this.GetBounds();
+        var mousePosition = InputManager.Current.MousePosition / this.Stage.Zoom;
+        this.IsMouseOver = bounds.Contains(mousePosition);
+
+        if (this.IsMouseOver)
+        {
+            this.CheckMouseButtonEvents(MouseButton.Left, mousePosition);
+            this.CheckMouseButtonEvents(MouseButton.Right, mousePosition);
+            this.CheckMouseButtonEvents(MouseButton.Middle, mousePosition);
+
+            float delta = InputManager.Current.MouseWheelDelta;
+
+            if (delta != 0)
+            {
+                this.OnMouseWheel(delta, mousePosition);
+            }
+        }
+    }
+
+    private void CheckMouseButtonEvents(MouseButton button, Vector2 mousePosition)
+    {
+        if (InputManager.Current.GetMouseButtonDown(button))
+        {
+            this.OnMouseDown(button, mousePosition);
+        }
+        else if (InputManager.Current.GetMouseButtonUp(button))
+        {
+            this.OnMouseUp(button, mousePosition);
+        }
+    }
+
+    protected virtual void OnMouseDown(MouseButton button, Vector2 mousePosition)
+    {
+        this.MouseDown?.Invoke(this, new MouseButtonEventArgs(button, mousePosition));
+    }
+
+    protected virtual void OnMouseUp(MouseButton button, Vector2 mousePosition)
+    {
+        this.MouseUp?.Invoke(this, new MouseButtonEventArgs(button, mousePosition));
+    }
+
+    protected virtual void OnMouseWheel(float delta, Vector2 mousePosition)
+    {
+        this.MouseWheel?.Invoke(this, new MouseWheelEventArgs(delta, mousePosition));
+    }
+
+    protected virtual void OnMouseEnter()
+    {
+        this.MouseEnter?.Invoke(this, EventArgs.Empty);
+    }
+
+    protected virtual void OnMouseLeave()
+    {
+        this.MouseLeave?.Invoke(this, EventArgs.Empty);
+    }
+
+    private bool _isMouseOver = false;
+
+    /// <summary>
+    /// Gets a value indicating whether the mouse is currently over the control.
+    /// </summary>
+    public bool IsMouseOver
+    {
+        get => this._isMouseOver;
+        private set
+        {
+            if (this._isMouseOver == value) return;
+
+            this._isMouseOver = value;
+
+            if (value)
+            {
+                this.OnMouseEnter();
+            }
+            else
+            {
+                this.OnMouseLeave();
+            }
+        }
     }
 
     protected virtual Rect ArrangeOverride(Rect finalRect)

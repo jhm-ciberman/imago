@@ -1,54 +1,18 @@
 using System;
 using System.Numerics;
 using Imago.Controls.Drawing;
-using Imago.Input;
 using Imago.Rendering;
-using Support;
 using Support.ComponentModel;
+using Veldrid;
 
 namespace Imago.Controls;
 
 public class Button : ContentControl
 {
     /// <summary>
-    /// Event that is raised when the button is clicked.
+    /// Occurs when the button is clicked.
     /// </summary>
     public event EventHandler? Click;
-
-    /// <summary>
-    /// Event that is raised when the mouse enters the button.
-    /// </summary>
-    public event EventHandler? MouseEnter;
-
-    /// <summary>
-    /// Event that is raised when the mouse leaves the button.
-    /// </summary>
-    public event EventHandler? MouseLeave;
-
-    private bool _isMouseOver = false;
-
-    /// <summary>
-    /// Gets whether the mouse is currently over the button.
-    /// </summary>
-    public bool IsMouseOver
-    {
-        get => this._isMouseOver;
-        protected set
-        {
-            if (this._isMouseOver != value)
-            {
-                this._isMouseOver = value;
-                if (this._isMouseOver)
-                {
-                    this.MouseEnter?.Invoke(this, EventArgs.Empty);
-                }
-                else
-                {
-                    this.MouseLeave?.Invoke(this, EventArgs.Empty);
-                }
-            }
-        }
-    }
 
     private bool _isPressed = false;
 
@@ -162,32 +126,29 @@ public class Button : ContentControl
 
         this.Content?.Update(deltaTime);
 
-        Vector2 mousePosition = InputManager.Current.MousePosition / this.Stage.Zoom;
-        Rect bounds = new Rect(this.Position, this.ActualSize);
-
-        if (bounds.Contains(mousePosition))
-        {
-            this.IsMouseOver = true;
-
-            if (InputManager.Current.GetMouseButtonDown(Veldrid.MouseButton.Left))
-            {
-                this.IsPressed = true;
-            }
-        }
-        else
-        {
-            this.IsMouseOver = false;
-            this.IsPressed = false;
-        }
-
-        if (this.IsPressed && InputManager.Current.GetMouseButtonUp(Veldrid.MouseButton.Left))
-        {
-            this.IsPressed = false;
-        }
-
         this.UpdateBackgroundBrush();
 
         base.Update(deltaTime);
+    }
+
+    protected override void OnMouseDown(MouseButton button, Vector2 position)
+    {
+        base.OnMouseDown(button, position);
+
+        if (button == MouseButton.Left)
+        {
+            this.IsPressed = true;
+        }
+    }
+
+    protected override void OnMouseUp(MouseButton button, Vector2 position)
+    {
+        base.OnMouseUp(button, position);
+
+        if (button == MouseButton.Left)
+        {
+            this.IsPressed = false;
+        }
     }
 
     /// <summary>

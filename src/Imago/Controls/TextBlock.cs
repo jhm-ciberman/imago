@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using System.Text;
 using Imago.Rendering;
 using Support;
 
@@ -320,7 +319,7 @@ public class TextBlock : Control
                 break;
 
             default:
-                throw new ArgumentOutOfRangeException();
+                throw new NotSupportedException();
         }
 
         this._textLineCount = this._textLines.Count;
