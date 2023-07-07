@@ -103,7 +103,7 @@ public class ScrollViewer : ContentControl
             Width = 5,
             Height = 5,
             Margin = new Thickness(5),
-            Background = new SolidColorBrush(Color.Green),
+            Background = new ColorBackground(Color.Green),
         };
         return this._scrollBarThumb;
     }

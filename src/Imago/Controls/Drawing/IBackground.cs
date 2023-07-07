@@ -4,10 +4,9 @@ using Imago.Rendering;
 namespace Imago.Controls.Drawing;
 
 /// <summary>
-/// This interface provides the functionality to fill a rectangle with a brush.
-/// A brush can be a texture, a color or a sprite.
+/// This interface provides the functionality to fill a background rectangle.
 /// </summary>
-public interface IBrush
+public interface IBackground
 {
     void DrawRectangle(SpriteBatcher spriteBatcher, Vector2 position, Vector2 size);
 }

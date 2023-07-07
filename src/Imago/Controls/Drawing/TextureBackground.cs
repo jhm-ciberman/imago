@@ -8,7 +8,7 @@ namespace Imago.Controls.Drawing;
 /// <summary>
 /// Defines a brush for a texture.
 /// </summary>
-public class TextureBrush : IBrush
+public class TextureBrush : IBackground
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="TextureBrush"/> class.

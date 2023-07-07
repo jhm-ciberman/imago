@@ -67,7 +67,7 @@ public class Button : ContentControl
         var background = this.Background;
         if (background == null) return;
 
-        if (background is SpriteBrush spriteBrush)
+        if (background is SpriteBackground spriteBrush)
         {
             if (spriteBrush.Sprite == null) return;
             if (this.IsEnabled)
@@ -90,7 +90,7 @@ public class Button : ContentControl
                 spriteBrush.FrameIndex = 3;
             }
         }
-        else if (background is SolidColorBrush solidColor)
+        else if (background is ColorBackground solidColor)
         {
             // Change opacity
             if (this.IsEnabled)

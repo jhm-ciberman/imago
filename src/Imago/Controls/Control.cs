@@ -63,7 +63,7 @@ public class Control : Visual
     private HorizontalAlignment _horizontalAlignment = HorizontalAlignment.Left;
     private VerticalAlignment _verticalAlignment = VerticalAlignment.Top;
     private Dock _dock = Dock.Left;
-    private IBrush? _background = null;
+    private IBackground? _background = null;
     private float _width = float.NaN;
     private float _height = float.NaN;
 
@@ -111,10 +111,10 @@ public class Control : Visual
     /// <summary>
     /// Gets or sets the background brush of the control.
     /// </summary>
-    public IBrush? Background
+    public IBackground? Background
     {
         get => this._background;
-        set => this.SetBrushImpl(value);
+        set => this.SetProperty(ref this._background, value);
     }
 
     /// <summary>
@@ -352,43 +352,5 @@ public class Control : Visual
     protected override void DrawCore(SpriteBatcher spriteBatcher)
     {
         this.Background?.DrawRectangle(spriteBatcher, this.Position, this.ActualSize);
-    }
-
-
-    public override void OnAddedToStage(StageUI stage)
-    {
-        base.OnAddedToStage(stage);
-
-        if (this.Background is IAnimatedBrush animatedBrush)
-        {
-            stage.AddAnimatedBrush(animatedBrush);
-        }
-    }
-
-    public override void OnRemovedFromStage(StageUI stage)
-    {
-        base.OnRemovedFromStage(stage);
-
-        if (this.Background is IAnimatedBrush animatedBrush)
-        {
-            stage.RemoveAnimatedBrush(animatedBrush);
-        }
-    }
-
-    protected void SetBrushImpl(IBrush? brush)
-    {
-        if (this._background == brush) return;
-
-        if (this.Stage != null && this._background is IAnimatedBrush animatedBrush)
-        {
-            this.Stage.RemoveAnimatedBrush(animatedBrush);
-        }
-
-        this._background = brush;
-
-        if (this.Stage != null && this._background is IAnimatedBrush animatedBrush2)
-        {
-            this.Stage.AddAnimatedBrush(animatedBrush2);
-        }
     }
 }

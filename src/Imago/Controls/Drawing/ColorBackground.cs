@@ -8,32 +8,32 @@ namespace Imago.Controls.Drawing;
 /// <summary>
 /// Defines a brush for a solid color.
 /// </summary>
-public class SolidColorBrush : IBrush, ICloneable
+public class ColorBackground : IBackground, ICloneable
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="SolidColorBrush"/> class.
+    /// Initializes a new instance of the <see cref="ColorBackground"/> class.
     /// </summary>
     /// <param name="color">The color of the brush.</param>
-    public SolidColorBrush(Color color)
+    public ColorBackground(Color color)
     {
         this.Color = color;
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="SolidColorBrush"/> class.
+    /// Initializes a new instance of the <see cref="ColorBackground"/> class.
     /// </summary>
     /// <param name="hexColor">The hex color of the brush.</param>
-    public SolidColorBrush(string hexColor)
+    public ColorBackground(string hexColor)
     {
         this.Color = Color.FromHex(hexColor);
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="SolidColorBrush"/> class.
+    /// Initializes a new instance of the <see cref="ColorBackground"/> class.
     /// </summary>
     /// <param name="color">The color of the brush.</param>
     /// <param name="opacity">The opacity of the brush.</param>
-    public SolidColorBrush(Color color, float opacity)
+    public ColorBackground(Color color, float opacity)
     {
         this.Color = color;
         this.Opacity = opacity;
@@ -61,13 +61,13 @@ public class SolidColorBrush : IBrush, ICloneable
         spriteBatcher.DrawRectangle(position, size, this.Color);
     }
 
-    public static implicit operator SolidColorBrush(Color color)
+    public static implicit operator ColorBackground(Color color)
     {
-        return new SolidColorBrush(color);
+        return new ColorBackground(color);
     }
 
     public virtual object Clone()
     {
-        return new SolidColorBrush(this.Color);
+        return new ColorBackground(this.Color);
     }
 }

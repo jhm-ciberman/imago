@@ -3,107 +3,107 @@ using Support;
 namespace Imago.Controls.Drawing;
 
 /// <summary>
-/// A static class with predefined brushes.
+/// A static class with predefined backgrounds.
 /// </summary>
-public static class Brushes
+public static class Backgrounds
 {
     /// <summary>
     /// Gets a brush that paints the entire area with the color white.
     /// </summary>
-    public static IBrush White { get; } = new SolidColorBrush(Color.White);
+    public static IBackground White { get; } = new ColorBackground(Color.White);
 
     /// <summary>
     /// Gets a brush that paints the entire area with the color gray.
     /// </summary>
-    public static IBrush Gray { get; } = new SolidColorBrush(Color.Gray);
+    public static IBackground Gray { get; } = new ColorBackground(Color.Gray);
 
     /// <summary>
     /// Gets a brush that paints the entire area with the color light gray.
     /// </summary>
-    public static IBrush LightGray { get; } = new SolidColorBrush(Color.LightGray);
+    public static IBackground LightGray { get; } = new ColorBackground(Color.LightGray);
 
     /// <summary>
     /// Gets a brush that paints the entire area with the color dark gray.
     /// </summary>
-    public static IBrush DarkGray { get; } = new SolidColorBrush(Color.DarkGray);
+    public static IBackground DarkGray { get; } = new ColorBackground(Color.DarkGray);
 
     /// <summary>
     /// Gets a brush that paints the entire area with the color cool gray.
     /// </summary>
-    public static IBrush CoolGray { get; } = new SolidColorBrush(Color.CoolGray);
+    public static IBackground CoolGray { get; } = new ColorBackground(Color.CoolGray);
 
     /// <summary>
     /// Gets a brush that paints the entire area with the color black.
     /// </summary>
-    public static IBrush Black { get; } = new SolidColorBrush(Color.Black);
+    public static IBackground Black { get; } = new ColorBackground(Color.Black);
 
     /// <summary>
     /// Gets a brush that paints the entire area with the color red.
     /// </summary>
-    public static IBrush Red { get; } = new SolidColorBrush(Color.Red);
+    public static IBackground Red { get; } = new ColorBackground(Color.Red);
 
     /// <summary>
     /// Gets a brush that paints the entire area with the color green.
     /// </summary>
-    public static IBrush Green { get; } = new SolidColorBrush(Color.Green);
+    public static IBackground Green { get; } = new ColorBackground(Color.Green);
 
     /// <summary>
     /// Gets a brush that paints the entire area with the color blue.
     /// </summary>
-    public static IBrush Blue { get; } = new SolidColorBrush(Color.Blue);
+    public static IBackground Blue { get; } = new ColorBackground(Color.Blue);
 
     /// <summary>
     /// Gets a brush that paints the entire area with the color yellow.
     /// </summary>
-    public static IBrush Yellow { get; } = new SolidColorBrush(Color.Yellow);
+    public static IBackground Yellow { get; } = new ColorBackground(Color.Yellow);
 
     /// <summary>
     /// Gets a brush that paints the entire area with the color cyan.
     /// </summary>
-    public static IBrush Cyan { get; } = new SolidColorBrush(Color.Cyan);
+    public static IBackground Cyan { get; } = new ColorBackground(Color.Cyan);
 
     /// <summary>
     /// Gets a brush that paints the entire area with the color magenta.
     /// </summary>
-    public static IBrush Magenta { get; } = new SolidColorBrush(Color.Magenta);
+    public static IBackground Magenta { get; } = new ColorBackground(Color.Magenta);
 
     /// <summary>
     /// Gets a brush that paints the entire area with the color transparent.
     /// </summary>
-    public static IBrush Transparent { get; } = new SolidColorBrush(Color.Transparent);
+    public static IBackground Transparent { get; } = new ColorBackground(Color.Transparent);
 
     /// <summary>
     /// Gets a brush that paints the entire area with the color orange.
     /// </summary>
-    public static IBrush Orange { get; } = new SolidColorBrush(Color.Orange);
+    public static IBackground Orange { get; } = new ColorBackground(Color.Orange);
 
     /// <summary>
     /// Gets a brush that paints the entire area with the color purple.
     /// </summary>
-    public static IBrush Purple { get; } = new SolidColorBrush(Color.Purple);
+    public static IBackground Purple { get; } = new ColorBackground(Color.Purple);
 
     /// <summary>
     /// Gets a brush that paints the entire area with the color brown.
     /// </summary>
-    public static IBrush Brown { get; } = new SolidColorBrush(Color.Brown);
+    public static IBackground Brown { get; } = new ColorBackground(Color.Brown);
 
     /// <summary>
     /// Gets a brush that paints the entire area with the color pink.
     /// </summary>
-    public static IBrush Pink { get; } = new SolidColorBrush(Color.Pink);
+    public static IBackground Pink { get; } = new ColorBackground(Color.Pink);
 
     /// <summary>
     /// Gets a brush that paints the entire area with the color indigo.
     /// </summary>
-    public static IBrush Indigo { get; } = new SolidColorBrush(Color.Indigo);
+    public static IBackground Indigo { get; } = new ColorBackground(Color.Indigo);
 
     /// <summary>
     /// Gets a brush that paints the entire area with the color violet.
     /// </summary>
-    public static IBrush Violet { get; } = new SolidColorBrush(Color.Violet);
+    public static IBackground Violet { get; } = new ColorBackground(Color.Violet);
 
     /// <summary>
     /// Gets a brush that paints the entire area with the color ghost white.
     /// </summary>
-    public static IBrush GhostWhite { get; } = new SolidColorBrush(Color.GhostWhite);
+    public static IBackground GhostWhite { get; } = new ColorBackground(Color.GhostWhite);
 }
