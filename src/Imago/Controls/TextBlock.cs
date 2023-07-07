@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Text;
 using Imago.Rendering;
 using Support;
 
@@ -282,40 +283,21 @@ public class TextBlock : Control
     // We need to split the text into lines accounting the line breaks and the width of the text block.
     private void RecomputeTextLines(Vector2 availableSize)
     {
+        this._textLines.Clear();
         if (this.Text == string.Empty)
         {
-            this._textLines.Clear();
             this._textLineCount = 0;
             return;
         }
 
-        var font = this.GetFont();
-        var maxWidth = availableSize.X;
-        var textLines = this._textLines;
-
         switch (this.TextWrap)
         {
             case TextWrap.NoWrap:
-                textLines.Add(this.Text);
+                this.ApplyNoWrap();
                 break;
 
             case TextWrap.Wrap:
-                var words = this.Text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                var currentLine = string.Empty;
-                foreach (var word in words)
-                {
-                    var wordWidth = font.FontBase.MeasureString(word).X;
-                    if (font.FontBase.MeasureString(currentLine + word).X <= maxWidth)
-                    {
-                        currentLine += word + " ";
-                    }
-                    else
-                    {
-                        textLines.Add(currentLine.TrimEnd());
-                        currentLine = word + " ";
-                    }
-                }
-                textLines.Add(currentLine.TrimEnd());
+                this.ApplyWrap(availableSize.X);
                 break;
 
             default:
@@ -324,5 +306,76 @@ public class TextBlock : Control
 
         this._textLineCount = this._textLines.Count;
         this._textLinesDirty = false;
+    }
+
+    private readonly StringBuilder _sb = new();
+
+    private void ApplyNoWrap()
+    {
+        var lineStart = 0;
+        for (var i = 0; i < this.Text.Length; i++)
+        {
+            if (this.Text[i] == '\n')
+            {
+                this._textLines.Add(this.Text.AsSpan(lineStart, i - lineStart).ToString());
+                lineStart = i + 1;
+            }
+        }
+
+        if (lineStart < this.Text.Length)
+        {
+            this._textLines.Add(this.Text.AsSpan(lineStart).ToString());
+        }
+    }
+
+
+
+    private void ApplyWrap(float maxWidth)
+    {
+        var sb = this._sb;
+        var font = this.GetFont();
+        var lineStart = 0;
+        var lineLength = 0;
+        var lastSpace = -1;
+        for (var i = 0; i < this.Text.Length; i++)
+        {
+            char c = this.Text[i];
+            if (c == '\n')
+            {
+                this._textLines.Add(this.Text.AsSpan(lineStart, lineLength).ToString());
+                lineStart = i + 1;
+                lineLength = 0;
+                lastSpace = -1;
+            }
+            else if (c == ' ')
+            {
+                lastSpace = i;
+            }
+
+            lineLength++;
+            sb.Clear();
+            sb.Append(this.Text.AsSpan(lineStart, lineLength));
+            if (font.FontBase.MeasureString(sb).X > maxWidth)
+            {
+                if (lastSpace != -1)
+                {
+                    this._textLines.Add(this.Text.AsSpan(lineStart, lastSpace - lineStart).ToString());
+                    lineStart = lastSpace + 1;
+                    lineLength = i - lastSpace;
+                    lastSpace = -1;
+                }
+                else
+                {
+                    this._textLines.Add(this.Text.AsSpan(lineStart, lineLength - 1).ToString());
+                    lineStart = i;
+                    lineLength = 1;
+                }
+            }
+        }
+
+        if (lineStart < this.Text.Length)
+        {
+            this._textLines.Add(this.Text.AsSpan(lineStart).ToString());
+        }
     }
 }
