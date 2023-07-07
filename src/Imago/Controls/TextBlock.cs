@@ -29,7 +29,6 @@ public class TextBlock : Control
     protected Font? _font = null;
     protected Color _foreground = Color.Black;
     private float _lineHeight = float.NaN;
-    private int _textLineCount = 0;
     private readonly List<string> _textLines = new();
     private bool _textLinesDirty = true;
     private TextWrap _textWrap = TextWrap.NoWrap;
@@ -45,7 +44,7 @@ public class TextBlock : Control
             if (this._text != value)
             {
                 this._text = value;
-                this._textLineCount = GetLineCount(value);
+                this._textLinesDirty = true;
                 this.InvalidateMeasure();
                 this.OnPropertyChanged(nameof(this.Text));
             }
@@ -217,7 +216,7 @@ public class TextBlock : Control
 
         var font = this.GetFont();
         var size = font.FontBase.MeasureString(this.Text);
-        return new Vector2(size.X, this.ActualLineHeight * this._textLineCount);
+        return new Vector2(size.X, this.ActualLineHeight * this._textLines.Count);
     }
 
     protected override void DrawCore(SpriteBatcher spriteBatcher)
@@ -262,31 +261,12 @@ public class TextBlock : Control
         return size;
     }
 
-    private static int GetLineCount(ReadOnlySpan<char> value)
-    {
-        if (value.IsEmpty)
-        {
-            return 0;
-        }
-
-        var lineCount = 1;
-        for (var i = 0; i < value.Length; i++)
-        {
-            if (value[i] == '\n')
-            {
-                lineCount++;
-            }
-        }
-        return lineCount;
-    }
-
     // We need to split the text into lines accounting the line breaks and the width of the text block.
     private void RecomputeTextLines(Vector2 availableSize)
     {
         this._textLines.Clear();
         if (this.Text == string.Empty)
         {
-            this._textLineCount = 0;
             return;
         }
 
@@ -304,7 +284,6 @@ public class TextBlock : Control
                 throw new NotSupportedException();
         }
 
-        this._textLineCount = this._textLines.Count;
         this._textLinesDirty = false;
     }
 
