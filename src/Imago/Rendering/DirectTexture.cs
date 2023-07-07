@@ -34,7 +34,7 @@ public class DirectTexture : ITexture
         this.Width = width;
         this.Height = height;
         this.MipLevels = (mipLevels == 0)
-            ? (uint)BitOperations.Log2(Math.Min(width, height))
+            ? (uint)Math.Max(1, BitOperations.Log2(Math.Min(width, height)))
             : mipLevels;
 
         this.VeldridTexture = this._gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(

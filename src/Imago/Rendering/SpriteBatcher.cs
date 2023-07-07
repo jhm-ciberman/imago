@@ -250,7 +250,11 @@ public class SpriteBatcher : IFontStashRenderer2, IDisposable
 
     public void DrawText(Font font, string text, Vector2 position, Color color)
     {
-        font.FontBase.DrawText(this, text, position, color);
+        // public float DrawText(IFontStashRenderer2 renderer, string text, Vector2 position, FSColor color, Vector2? scale = null, float rotation = 0, Vector2 origin = default(Vector2), float layerDepth = 0, float characterSpacing = 0, float lineSpacing = 0, TextStyle textStyle = TextStyle.None, FontSystemEffect effect = FontSystemEffect.None, int effectAmount = 0);
+
+        var fsColor = new FontStashSharp.FSColor(color.R, color.G, color.B, color.A);
+        var style = FontStashSharp.TextStyle.None;
+        font.FontBase.DrawText(this, text, position, fsColor, Vector2.One, 0, Vector2.Zero, 0, 0, 0, style, font.Effect, font.EffectAmount);
     }
 
     private readonly ITexture2DManager _textureManager;
@@ -259,10 +263,10 @@ public class SpriteBatcher : IFontStashRenderer2, IDisposable
 
     void IFontStashRenderer2.DrawQuad(object texture, ref VertexPositionColorTexture topLeft, ref VertexPositionColorTexture topRight, ref VertexPositionColorTexture bottomLeft, ref VertexPositionColorTexture bottomRight)
     {
-        var v1 = new SpriteBatch.Vertex(topLeft.Position, topLeft.TextureCoordinate, topLeft.Color);
-        var v2 = new SpriteBatch.Vertex(topRight.Position, topRight.TextureCoordinate, topRight.Color);
-        var v3 = new SpriteBatch.Vertex(bottomLeft.Position, bottomLeft.TextureCoordinate, bottomLeft.Color);
-        var v4 = new SpriteBatch.Vertex(bottomRight.Position, bottomRight.TextureCoordinate, bottomRight.Color);
+        var v1 = new SpriteBatch.Vertex(topLeft.Position, topLeft.TextureCoordinate, topLeft.Color.PackedValue);
+        var v2 = new SpriteBatch.Vertex(topRight.Position, topRight.TextureCoordinate, topRight.Color.PackedValue);
+        var v3 = new SpriteBatch.Vertex(bottomLeft.Position, bottomLeft.TextureCoordinate, bottomLeft.Color.PackedValue);
+        var v4 = new SpriteBatch.Vertex(bottomRight.Position, bottomRight.TextureCoordinate, bottomRight.Color.PackedValue);
         this.DrawQuad((ITexture)texture, ref v1, ref v2, ref v3, ref v4);
     }
 

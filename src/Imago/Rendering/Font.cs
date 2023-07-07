@@ -9,7 +9,7 @@ public class Font
 {
     private static readonly Dictionary<string, byte[][]> _fontSources = new();
 
-    private record struct FontKey(string FontFamily, int Size, FontSystemEffect Effect, int EffectAmount);
+    private record struct FontKey(string FontFamily, float Size, FontSystemEffect Effect, int EffectAmount);
 
     private record struct FontSystemKey(string FontFamily, FontSystemEffect Effect, int EffectAmount);
 
@@ -83,7 +83,7 @@ public class Font
     /// <param name="size">The size of the font.</param>
     /// <param name="blurAmount">The blur amount of the font.</param>
     /// <returns>The font.</returns>
-    public static Font GetBlurredFont(string? fontFamily, int fontSize, int blur)
+    public static Font GetBlurredFont(string? fontFamily, float fontSize, int blur)
     {
         return (blur == 0)
             ? GetFontCore(fontFamily, fontSize, FontSystemEffect.None, 0)
@@ -115,7 +115,7 @@ public class Font
         return GetFontCore(fontFamily, fontSize, FontSystemEffect.None, 0);
     }
 
-    private static Font GetFontCore(string? fontFamily, int size, FontSystemEffect effect, int effectAmount)
+    private static Font GetFontCore(string? fontFamily, float size, FontSystemEffect effect, int effectAmount)
     {
         var key = new FontKey(fontFamily ?? DefaultFontFamily, size, effect, effectAmount);
         if (!_fonts.TryGetValue(key, out var font))
@@ -136,7 +136,7 @@ public class Font
     /// <summary>
     /// Gets the font size.
     /// </summary>
-    public int FontSize => this.FontBase.FontSize;
+    public float FontSize => this.FontBase.FontSize;
 
     /// <summary>
     /// Gets the line height.
@@ -148,7 +148,11 @@ public class Font
     /// </summary>
     internal SpriteFontBase FontBase { get; }
 
-    private Font(string fontFamily, int fontSize, FontSystemEffect effect, int effectAmount)
+    public FontSystemEffect Effect { get; }
+
+    public int EffectAmount { get; }
+
+    private Font(string fontFamily, float fontSize, FontSystemEffect effect, int effectAmount)
     {
         this.FontFamily = fontFamily;
 
@@ -166,10 +170,10 @@ public class Font
             throw new ArgumentException($"Font {fontFamily} not loaded.");
         }
 
+        this.Effect = effect;
+        this.EffectAmount = effectAmount;
         fontSystem = new FontSystem(new FontSystemSettings
         {
-            Effect = effect,
-            EffectAmount = effectAmount,
             PremultiplyAlpha = false,
         });
         var dataArr = _fontSources[fontFamily];
