@@ -24,7 +24,7 @@ public class TextBlock : Control
 {
     protected string _text = string.Empty;
     private ITextEffect? _textEffect;
-    protected int _fontSize = 12;
+    protected float _fontSize = 12f;
     protected string? _fontFamily = null;
     protected Font? _font = null;
     protected Color _foreground = Color.Black;
@@ -81,7 +81,7 @@ public class TextBlock : Control
     /// <summary>
     /// Gets or sets the font size of the text block.
     /// </summary>
-    public int FontSize
+    public float FontSize
     {
         get => this._fontSize;
         set

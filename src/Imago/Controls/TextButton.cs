@@ -67,7 +67,7 @@ public class TextButton : Button
     /// <summary>
     /// Gets or sets the font size of the text block.
     /// </summary>
-    public int FontSize
+    public float FontSize
     {
         get => this._textBlock.FontSize;
         set => this._textBlock.FontSize = value;

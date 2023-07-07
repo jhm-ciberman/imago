@@ -110,7 +110,7 @@ public class Font
     /// <param name="fontFamily">The name of the font family.</param>
     /// <param name="size">The size of the font.</param>
     /// <returns>The font.</returns>
-    public static Font GetFont(string? fontFamily, int fontSize)
+    public static Font GetFont(string? fontFamily, float fontSize)
     {
         return GetFontCore(fontFamily, fontSize, FontSystemEffect.None, 0);
     }
