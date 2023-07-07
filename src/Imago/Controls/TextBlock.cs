@@ -308,8 +308,6 @@ public class TextBlock : Control
         this._textLinesDirty = false;
     }
 
-    private readonly StringBuilder _sb = new();
-
     private void ApplyNoWrap()
     {
         var lineStart = 0;
@@ -328,11 +326,9 @@ public class TextBlock : Control
         }
     }
 
-
-
     private void ApplyWrap(float maxWidth)
     {
-        var sb = this._sb;
+        var sb = new StringBuilder(); // FontBase.MeasureString do not support ReadOnlySpan<char>, so we use this ugly StringBuilder to allocate a little less memory.
         var font = this.GetFont();
         var lineStart = 0;
         var lineLength = 0;
