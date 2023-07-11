@@ -358,7 +358,7 @@ public abstract class Visual : ObservableObject
         this.IsMeasureValid = false;
         this.IsArrangeValid = false;
 
-        this.Parent?.ForceMeasure();
+        this.Parent?.InvalidateMeasure();
     }
 
     protected internal void InvalidateArrange()
@@ -384,6 +384,6 @@ public abstract class Visual : ObservableObject
 
         this.IsArrangeValid = false;
 
-        this.Parent?.ForceArrange();
+        this.Parent?.InvalidateArrange();
     }
 }
