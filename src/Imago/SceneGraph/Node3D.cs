@@ -201,6 +201,18 @@ public class Node3D : IDisposable
     }
 
     /// <summary>
+    /// Gets the world position of this node.
+    /// </summary>
+    public Vector3 WorldPosition
+    {
+        get
+        {
+            var mat = this.WorldMatrix;
+            return new Vector3(mat.M41, mat.M42, mat.M43);
+        }
+    }
+
+    /// <summary>
     /// Adds a child node to this node.
     /// </summary>
     /// <param name="node">The node to add.</param>
