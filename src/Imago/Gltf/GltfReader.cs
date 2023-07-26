@@ -7,6 +7,7 @@ using Imago.Meshes;
 using Imago.Rendering;
 using static glTFLoader.Schema.AnimationChannelTarget;
 using static glTFLoader.Schema.AnimationSampler;
+using System;
 
 namespace Imago.Gltf;
 
@@ -26,8 +27,8 @@ public class GltfReader
     {
         this._path = path;
         this._model = Interface.LoadModel(path);
-        this._buffersCache = new GltfBuffer[this._model.Buffers.Length];
-        this._nodesCache = new GltfNode[this._model.Nodes.Length];
+        this._buffersCache = new GltfBuffer[this._model.Buffers?.Length ?? 0];
+        this._nodesCache = new GltfNode[this._model.Nodes?.Length ?? 0];
     }
 
     /// <summary>
@@ -206,7 +207,7 @@ public class GltfReader
         var data = this._model.Scenes[index];
         var scene = new GltfNode(data.Name ?? "Scene_" + index);
 
-        foreach (var node in data.Nodes)
+        foreach (var node in data.Nodes ?? Array.Empty<int>())
         {
             scene.Add(this.GetNode(node));
         }

@@ -163,17 +163,16 @@ public static class SceneGraphExtensions
         });
     }
 
-    private static void PrintHierarchyToConsoleCore(Node3D node, string indent, bool isLast, Func<Node3D, string>? toString = null)
+    private static void PrintHierarchyToConsoleCore(Node3D node, string indent, bool isLast, string? format = null)
     {
-        var label = node.ToString();
+        var label = node.ToString(format);
         var c = indent.Length == 0 ? '─' : (isLast ? '└' : '├');
-        string extra = toString?.Invoke(node) ?? "";
-        Console.WriteLine($"{indent}{c}╴{label} {extra}");
+        Console.WriteLine($"{indent}{c}╴{label}");
         for (var i = 0; i < node.Children.Count; i++)
         {
             var child = node.Children[i];
             var isLastChild = i == node.Children.Count - 1;
-            PrintHierarchyToConsoleCore(child, indent + (isLast ? "  " : "│ "), isLastChild, toString);
+            PrintHierarchyToConsoleCore(child, indent + (isLast ? "  " : "│ "), isLastChild, format);
         }
     }
 
@@ -181,9 +180,9 @@ public static class SceneGraphExtensions
     /// Prints the hierarchy of the specified node to the console.
     /// </summary>
     /// <param name="self">The node.</param>
-    public static void PrintHierarchyToConsole(this Node3D self, Func<Node3D, string>? toString = null)
+    public static void PrintHierarchyToConsole(this Node3D self, string? format = null)
     {
-        PrintHierarchyToConsoleCore(self, "", true, toString);
+        PrintHierarchyToConsoleCore(self, "", true, format);
     }
 
     /// <summary>

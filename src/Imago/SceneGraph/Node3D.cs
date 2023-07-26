@@ -6,7 +6,7 @@ using Imago.Support;
 
 namespace Imago.SceneGraph;
 
-public class Node3D : IDisposable
+public class Node3D : IDisposable, IFormattable
 {
     [Flags]
     private enum DirtyFlags : byte
@@ -312,6 +312,7 @@ public class Node3D : IDisposable
         GC.SuppressFinalize(this);
     }
 
+    /*
     public override string ToString()
     {
         if (string.IsNullOrEmpty(this.Name))
@@ -322,5 +323,55 @@ public class Node3D : IDisposable
         {
             return $"{this.GetType().Name}: {this.Name}";
         }
+    }*/
+
+    /// <summary>
+    /// Returns a string representation of this node.
+    /// </summary>
+    /// <param name="format">The format string.</param>
+    /// <param name="formatProvider">The format provider.</param>
+    /// <returns>A string representation of this node.</returns>
+    /// <remarks>
+    /// Available formats:
+    /// "G": General (same as "N")
+    /// "N": Name
+    /// "P": Position
+    /// "R": Rotation
+    /// "S": Scale
+    /// Can be combined, e.g. "NPRS" for name, position, rotation and scale
+    /// </remarks>
+    public string ToString(string? format = null, IFormatProvider? formatProvider = null)
+    {
+        if (string.IsNullOrEmpty(format))
+        {
+            format = "G";
+        }
+
+        var sb = new System.Text.StringBuilder();
+
+        foreach (var c in format)
+        {
+            switch (c)
+            {
+                case 'G': // General
+                case 'N':
+                    sb.Append(this.Name);
+                    break;
+                case 'P':
+                    sb.Append(this.Position);
+                    break;
+                case 'R':
+                    sb.Append(this.Rotation);
+                    break;
+                case 'S':
+                    sb.Append(this.Scale);
+                    break;
+                default:
+                    sb.Append(c); // Unknown format character, just append it
+                    break;
+            }
+        }
+
+        return sb.ToString();
     }
 }
