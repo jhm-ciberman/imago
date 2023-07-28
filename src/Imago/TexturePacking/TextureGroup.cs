@@ -98,6 +98,17 @@ public class TextureGroup
         throw new InvalidOperationException("Cannot pack texture in any texture page");
     }
 
+    /// <summary>
+    /// Packs the specified texture and returns a packed texture.
+    /// </summary>
+    /// <param name="sourcePath">The path to the texture to pack.</param>
+    /// <returns>The packed texture.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when the texture is already packed or it's too big to be packed in any page.</exception>
+    public PackedTexture Pack(string sourcePath)
+    {
+        return this.Pack(new TextureDrawOperation(sourcePath));
+    }
+
     protected void RequestFlush()
     {
         if (!this._flushRequested)
