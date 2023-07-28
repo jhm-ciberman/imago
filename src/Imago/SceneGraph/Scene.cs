@@ -6,9 +6,6 @@ namespace Imago.SceneGraph;
 public class Scene
 {
     public Stage3D? Stage3D { get; set; } = null;
-
-    public Stage2D? Stage2D { get; set; } = null;
-
     public StageUI? StageUI { get; set; } = null;
 
 
@@ -26,7 +23,6 @@ public class Scene
     public virtual void OnBeforeRender()
     {
         this.Stage3D?.OnBeforeRender();
-        //this.Stage2D?.OnBeforeRender(); // Not implemented
     }
 
     public virtual void RenderImGui()
@@ -37,7 +33,6 @@ public class Scene
     public virtual void Update(float deltaTime)
     {
         this.Stage3D?.Update(deltaTime);
-        this.Stage2D?.Update(deltaTime);
         this.StageUI?.Update(deltaTime);
     }
 }

@@ -1,5 +1,4 @@
 using System;
-using Imago.Controls;
 using Imago.SceneGraph;
 using Veldrid;
 
@@ -55,48 +54,18 @@ public class SpritesPass : IDisposable, IPipelineProvider, IRenderingPass
 
     public void Render(CommandList cl, Scene scene)
     {
-        if (scene.Stage2D == null && scene.StageUI == null) return;
+        if (scene.StageUI == null) return;
 
         this.DrawCallCount = 0;
 
         cl.SetFramebuffer(this._renderTexture.Framebuffer);
         cl.ClearDepthStencil(1f);
 
-        if (scene.Stage2D != null)
-        {
-            this.RenderStage2D(cl, scene.Stage2D);
-            this.DrawCallCount += this._spriteBatcher.DrawCallCount;
-        }
-
-        if (scene.StageUI != null)
-        {
-            this.RenderStageUI(cl, scene.StageUI);
-            this.DrawCallCount += this._spriteBatcher.DrawCallCount;
-        }
-    }
-
-    private void RenderStage2D(CommandList cl, Stage2D stage)
-    {
-        if (stage == null) return;
-
-        this._spriteBatcher.Begin(cl, stage.ViewProjectionMatrix);
-
-        for (int j = 0; j < stage.Items.Count; j++)
-        {
-            stage.Items[j].Render(this._spriteBatcher);
-        }
-
-        this._spriteBatcher.End();
-    }
-
-    private void RenderStageUI(CommandList cl, StageUI stage)
-    {
-        if (stage == null) return;
-
-        this._spriteBatcher.Begin(cl, stage.ViewProjectionMatrix);
-        stage.Draw(this._spriteBatcher);
+        this._spriteBatcher.Begin(cl, scene.StageUI.ViewProjectionMatrix);
+        scene.StageUI.Draw(this._spriteBatcher);
         this._spriteBatcher.End();
 
+        this.DrawCallCount += this._spriteBatcher.DrawCallCount;
     }
 
     public int DrawCallCount { get; private set; }
