@@ -11,8 +11,5 @@
         <TieredCompilationQuickJit>true</TieredCompilationQuickJit>
         <TieredCompilationQuickJitForLoops>false</TieredCompilationQuickJitForLoops>
         <Disabletransitiveprojectreferences>true</Disabletransitiveprojectreferences>
-        <RestoreAdditionalProjectSources>
-            https://www.myget.org/F/mellinoe/api/v3/index.json
-        </RestoreAdditionalProjectSources>
     </PropertyGroup>
 </Project>
