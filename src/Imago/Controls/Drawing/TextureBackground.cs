@@ -8,13 +8,13 @@ namespace Imago.Controls.Drawing;
 /// <summary>
 /// Defines a brush for a texture.
 /// </summary>
-public class TextureBrush : IBackground
+public class TextureBackground : IBackground
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="TextureBrush"/> class.
+    /// Initializes a new instance of the <see cref="TextureBackground"/> class.
     /// </summary>
     /// <param name="texture">The texture of the brush.</param>
-    public TextureBrush(ITextureRegion texture)
+    public TextureBackground(ITextureRegion texture)
     {
         this.Texture = texture;
     }
@@ -37,13 +37,13 @@ public class TextureBrush : IBackground
         }
     }
 
-    public static implicit operator TextureBrush(Texture texture)
+    public static implicit operator TextureBackground(Texture texture)
     {
-        return new TextureBrush(texture);
+        return new TextureBackground(texture);
     }
 
-    public static implicit operator TextureBrush(PackedTexture texture)
+    public static implicit operator TextureBackground(PackedTexture texture)
     {
-        return new TextureBrush(texture);
+        return new TextureBackground(texture);
     }
 }
