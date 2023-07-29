@@ -133,6 +133,8 @@ internal class Renderable : IDisposable
 
         this._instanceDataBlock = instanceDataBlock;
         this.InstanceResourceSet = this._instanceDataBlock.Buffer.ResourceSet;
+
+        this.RecomputeOffsetVertexData();
     }
 
     private Mesh? _mesh;
@@ -167,7 +169,6 @@ internal class Renderable : IDisposable
             if (this._material == value) return;
             this._material = value;
 
-            this.RecomputeOffsetVertexData();
             this.InvalidatePipeline();
         }
     }
