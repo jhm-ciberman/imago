@@ -66,7 +66,7 @@ public class Renderer : IDisposable
     private readonly List<DataBuffer> _skeletonDataBuffers = new List<DataBuffer>();
 
     private readonly List<Texture> _dirtyTextures = new();
-    private readonly List<MaterialBase> _dirtyMaterials = new();
+    private readonly List<Material> _dirtyMaterials = new();
     private readonly List<Renderable> _dirtyRenderables = new();
 
     public ResourceLayout TransformResourceLayout { get; }
@@ -158,7 +158,7 @@ public class Renderer : IDisposable
         this.SkeletonResourceLayout.Name = "BonesData Resource Layout";
 
         Renderable.PipelineDirty += this.OnRenderablePipelineDirty;
-        MaterialBase.MaterialResourceSetDirty += this.OnMaterialResourceSetDirty;
+        Material.MaterialResourceSetDirty += this.OnMaterialResourceSetDirty;
         Texture.TextureDirty += this.OnTextureDirty;
 
         this.Settings = new RenderSettings(this);
@@ -195,7 +195,6 @@ public class Renderer : IDisposable
 
 
         this.Settings.PropertyChanged += this.Settings_PropertyChanged;
-        Texture.InitializeDefaultTextures();
     }
 
     private class CommandListJob : IDisposable
@@ -541,7 +540,7 @@ public class Renderer : IDisposable
         }
     }
 
-    private void OnMaterialResourceSetDirty(MaterialBase material)
+    private void OnMaterialResourceSetDirty(Material material)
     {
         lock (this._dirtyMaterials)
         {

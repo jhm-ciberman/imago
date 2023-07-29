@@ -15,8 +15,6 @@ namespace Imago.Rendering;
 /// </summary>
 public class Texture : ITexture, ITextureRegion, IDisposable
 {
-    private static readonly EventArgs _eventArgs = new EventArgs();
-
     /// <summary>
     /// A delegate for when a texture is dirty.
     /// </summary>
@@ -33,36 +31,6 @@ public class Texture : ITexture, ITextureRegion, IDisposable
     /// </summary>
     public event EventHandler? Resized;
 
-    /// <summary>
-    /// Gets a small white texture.
-    /// </summary>
-    public static Texture White { get; private set; } = null!;
-
-    /// <summary>
-    /// Gets a small black texture.
-    /// </summary>
-    public static Texture Black { get; private set; } = null!;
-
-    /// <summary>
-    /// Gets a small transparent texture.
-    /// </summary>
-    public static Texture Transparent { get; private set; } = null!;
-
-    /// <summary>
-    /// Gets a small magenta texture.
-    /// </summary>
-    public static Texture Magenta { get; private set; } = null!;
-
-    /// <summary>
-    /// Initializes the default textures.
-    /// </summary>
-    public static void InitializeDefaultTextures()
-    {
-        White = new ImageTexture(new Image<Rgba32>(2, 2, new Rgba32(255, 255, 255, 255)));
-        Black = new ImageTexture(new Image<Rgba32>(2, 2, new Rgba32(0, 0, 0, 255)));
-        Transparent = new ImageTexture(new Image<Rgba32>(2, 2, new Rgba32(0, 0, 0, 0)));
-        Magenta = new ImageTexture(new Image<Rgba32>(2, 2, new Rgba32(255, 0, 255, 255)));
-    }
 
     /// <summary>
     /// Gets the Veldrid texture object.
@@ -260,7 +228,7 @@ public class Texture : ITexture, ITextureRegion, IDisposable
         this.Height = height;
         this._data = new byte[width * height * 4];
         this.OnTextureDirty();
-        this.Resized?.Invoke(this, _eventArgs);
+        this.Resized?.Invoke(this, EventArgs.Empty);
     }
 
     /// <summary>

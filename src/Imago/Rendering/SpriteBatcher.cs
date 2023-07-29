@@ -278,7 +278,7 @@ public class SpriteBatcher : IFontStashRenderer2, IDisposable
 
     public void DrawRectangle(Vector2 position, Vector2 size, Color color)
     {
-        this.DrawTexture(this._defaultShader, Texture.White, position, size, Vector2.Zero, Vector2.One, color);
+        this.DrawTexture(this._defaultShader, Textures.White, position, size, Vector2.Zero, Vector2.One, color);
     }
 
     public void PushScissorRectangle(Rect rect)

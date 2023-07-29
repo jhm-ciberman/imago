@@ -120,7 +120,7 @@ public class ImmediatePass : IPipelineProvider, IRenderingPass, IDisposable, IIm
 
         this._resourceSetCache = new ResourceSetCache(factory);
 
-        this._defaultTexture = Texture.White;
+        this._defaultTexture = Textures.White;
     }
 
     public void Render(CommandList cl, Scene scene)

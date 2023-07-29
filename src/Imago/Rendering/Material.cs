@@ -3,10 +3,10 @@ using Veldrid;
 
 namespace Imago.Rendering;
 
-public abstract class MaterialBase
+public class Material
 {
-    public delegate void MaterialResourceSetDirtyHandler(MaterialBase material);
-    public delegate void MaterialStateChangedHandler(MaterialBase material);
+    public delegate void MaterialResourceSetDirtyHandler(Material material);
+    public delegate void MaterialStateChangedHandler(Material material);
 
     /// <summary>
     /// Occurs when the material's pipeline needs to be rebuilt.
@@ -22,6 +22,34 @@ public abstract class MaterialBase
 
     public RenderFlags RenderFlags { get; protected set; } = RenderFlags.DepthTest | RenderFlags.DepthWrite | RenderFlags.ReceiveShadows;
 
+
+    public static Texture DefaultTexture { get; } = Textures.Magenta;
+
+    public Shader ForwardShader { get; private set; }
+    public Shader ShadowMapShader { get; }
+    public ResourceSet ResourceSet { get; internal set; } = null!;
+    private readonly BindableResource[] _resources;
+    private Texture? _texture = null;
+
+    public Material(Shader forwardShader, Shader shadowMapShader)
+    {
+        this.Id = ++_count;
+
+        if (forwardShader.MaterialResourceLayout != shadowMapShader.MaterialResourceLayout)
+        {
+            throw new ArgumentException("Forward and shadowmap shaders must use the same resource layout.");
+        }
+
+        this.ForwardShader = forwardShader;
+        this.ShadowMapShader = shadowMapShader;
+
+        this._resources = new BindableResource[forwardShader.Textures.Length * 2];
+        this._resources[0] = DefaultTexture.VeldridTexture;
+        this._resources[1] = DefaultTexture.VeldridSampler;
+
+        this.NotifyResourcesDirty();
+    }
+
     public bool DoubleSided { get => this.GetRenderFlag(RenderFlags.DoubleSided); set => this.SetRenderFlag(RenderFlags.DoubleSided, value); }
 
     public bool Wireframe { get => this.GetRenderFlag(RenderFlags.Wireframe); set => this.SetRenderFlag(RenderFlags.Wireframe, value); }
@@ -34,18 +62,15 @@ public abstract class MaterialBase
 
     public bool Transparent { get => this.GetRenderFlag(RenderFlags.Transparent); set => this.SetRenderFlag(RenderFlags.Transparent, value); }
 
-    public MaterialBase()
-    {
-        this.Id = ++Material._count;
-        this.NotifyResourcesDirty();
-    }
 
     public void Update(ResourceFactory factory)
     {
         if (!this._resourceSetDirty) return;
         this._resourceSetDirty = false;
 
-        this.UpdateResourceSet(factory);
+        this.ResourceSet?.Dispose();
+
+        this.ResourceSet = factory.CreateResourceSet(new ResourceSetDescription(this.ForwardShader.MaterialResourceLayout, this._resources));
     }
 
     protected void NotifyResourcesDirty()
@@ -93,41 +118,6 @@ public abstract class MaterialBase
     protected bool GetRenderFlag(RenderFlags flag)
     {
         return (this.RenderFlags & flag) == flag;
-    }
-
-    protected abstract void UpdateResourceSet(ResourceFactory factory);
-}
-
-public class Material : MaterialBase
-{
-    public static Texture DefaultTexture { get; } = Texture.Magenta;
-
-    public Shader ForwardShader { get; private set; }
-    public Shader ShadowMapShader { get; }
-    public ResourceSet ResourceSet { get; internal set; } = null!;
-    private readonly BindableResource[] _resources;
-    private Texture? _texture = null;
-
-    public Material(Shader forwardShader, Shader shadowMapShader)
-    {
-        if (forwardShader.MaterialResourceLayout != shadowMapShader.MaterialResourceLayout)
-        {
-            throw new ArgumentException("Forward and shadowmap shaders must use the same resource layout.");
-        }
-
-        this.ForwardShader = forwardShader;
-        this.ShadowMapShader = shadowMapShader;
-
-        this._resources = new BindableResource[forwardShader.Textures.Length * 2];
-        this._resources[0] = DefaultTexture.VeldridTexture;
-        this._resources[1] = DefaultTexture.VeldridSampler;
-    }
-
-    protected override void UpdateResourceSet(ResourceFactory factory)
-    {
-        this.ResourceSet?.Dispose();
-
-        this.ResourceSet = factory.CreateResourceSet(new ResourceSetDescription(this.ForwardShader.MaterialResourceLayout, this._resources));
     }
 
     public Texture? Texture
