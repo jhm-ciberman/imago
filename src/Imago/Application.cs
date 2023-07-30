@@ -142,12 +142,6 @@ public class Application : IDisposable
         {
             this._input.UpdateFrameInput();
 
-            if (!this.Window.Exists)
-            {
-                this.IsRunning = false;
-                break;
-            }
-
             this.ElapsedTime = sw.Elapsed.TotalSeconds;
             this.DeltaTime = this.ElapsedTime - previousElapsed;
             previousElapsed = this.ElapsedTime;
@@ -157,6 +151,12 @@ public class Application : IDisposable
             this._renderer.Update((float)this.DeltaTime, this._input.InputSnapshot);
 
             this.OnUpdate();
+
+            if (!this.Window.Exists)
+            {
+                this.IsRunning = false;
+                break;
+            }
 
             this._renderer.Render();
         }
