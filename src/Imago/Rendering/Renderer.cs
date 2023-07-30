@@ -92,7 +92,7 @@ public class Renderer : IDisposable
         return new GraphicsDeviceOptions(
             debug: false,
             swapchainDepthFormat: null, //PixelFormat.R16_UNorm,
-            syncToVerticalBlank: true,
+            syncToVerticalBlank: false,
             resourceBindingModel: ResourceBindingModel.Improved,
             preferDepthRangeZeroToOne: true,
             preferStandardClipSpaceYDirection: true,
