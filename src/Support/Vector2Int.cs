@@ -31,6 +31,16 @@ public struct Vector2Int : IEquatable<Vector2Int>
     public static Vector2Int Zero => new Vector2Int(0, 0);
 
     /// <summary>
+    /// Gets a vector with the X component set to 1 and the Y component set to 0.
+    /// </summary>
+    public static Vector2Int UnitX => new Vector2Int(1, 0);
+
+    /// <summary>
+    /// Gets a vector with the X component set to 0 and the Y component set to 1.
+    /// </summary>
+    public static Vector2Int UnitY => new Vector2Int(0, 1);
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="Vector2Int"/> struct.
     /// </summary>
     /// <param name="x">The X component of the vector.</param>
@@ -134,6 +144,12 @@ public struct Vector2Int : IEquatable<Vector2Int>
     public static Vector2Int operator /(Vector2Int a, uint b)
     {
         return new Vector2Int(a.X / (int)b, a.Y / (int)b);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Vector2Int operator -(Vector2Int a)
+    {
+        return new Vector2Int(-a.X, -a.Y);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
