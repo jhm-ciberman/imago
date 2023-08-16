@@ -14,6 +14,11 @@ public static class MathUtils
     public static float HalfPi { get; } = MathF.PI / 2f;
 
     /// <summary>
+    /// Gets the value of pi divided by four.
+    /// </summary>
+    public static float QuarterPi { get; } = MathF.PI / 4f;
+
+    /// <summary>
     /// Gets the value of two times pi.
     /// </summary>
     public static float TwoPi { get; } = MathF.PI * 2f;
@@ -112,10 +117,10 @@ public static class MathUtils
 
 
     /// <summary>
-    /// Returns the angle in radians between -Pi and Pi.
+    /// Returns the angle in radians between 0 and 2*Pi.
     /// </summary>
     /// <param name="2f">The angle in radians.</param>
-    /// <returns>The angle in the range -Pi to Pi.</returns>
+    /// <returns>The angle in the range [0, 2*Pi).</returns>
     public static float WrapAngle(float value)
     {
         value %= MathF.PI * 2f;
