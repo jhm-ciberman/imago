@@ -29,6 +29,8 @@ public class Tween<T> : ITween where T : struct
 
     public T EndValue { get; }
 
+    public float FrameTime { get; private set; } = 0f;
+
     public Tween(float duration, T startValue, T endValue, Action<T> setter, InterpolationFunction<T> interpolation, EasingFunction? easing = null)
     {
         this.Duration = duration;
@@ -48,6 +50,24 @@ public class Tween<T> : ITween where T : struct
     public ITween WithEasing(EasingFunction easing)
     {
         this._easing = easing;
+        return this;
+    }
+
+    public ITween WithFps(float fps)
+    {
+        this.FrameTime = 1f / fps;
+        return this;
+    }
+
+    public ITween WithFrameTime(float frameTime)
+    {
+        this.FrameTime = frameTime;
+        return this;
+    }
+
+    public ITween WithFrameCount(int frameCount)
+    {
+        this.FrameTime = this.Duration / frameCount;
         return this;
     }
 
@@ -81,7 +101,16 @@ public class Tween<T> : ITween where T : struct
             return false;
         }
 
-        float t = this._easing(this.Progress);
+        // We need to update the value. We want to floor the current time to the nearest frame time.
+
+        float currentTime = this.CurrentTime;
+
+        if (this.FrameTime > 0f)
+        {
+            currentTime = (float)Math.Floor(currentTime / this.FrameTime) * this.FrameTime;
+        }
+
+        float t = this._easing(currentTime / this.Duration);
         T value = this._interpolation(this.StartValue, this.EndValue, t);
         this._setter(value);
         return true;
@@ -105,6 +134,12 @@ public interface ITween
     ITween AddDelay(float delay);
 
     ITween WithEasing(EasingFunction easing);
+
+    ITween WithFps(float fps);
+
+    ITween WithFrameTime(float frameTime);
+
+    ITween WithFrameCount(int frameCount);
 }
 
 
