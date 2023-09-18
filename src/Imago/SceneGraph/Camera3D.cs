@@ -5,20 +5,36 @@ using Veldrid.Utilities;
 
 namespace Imago.SceneGraph;
 
-public class Camera3D
+public abstract class Camera
 {
+    private Matrix4x4 _viewMatrix;
+    private Vector3 _position = Vector3.Zero;
+    private Quaternion _rotation  = Quaternion.Identity;
+    protected bool _viewMatrixIsDirty = true;
+    protected bool _projectionMatrixIsDirty = true;
+    private float _nearPlane = 0.1f;
+    private float _farPlane = 300f;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Camera"/> class.
+    /// </summary>
+    /// <param name="viewport">The viewport.</param>
+    public Camera(Viewport viewport)
+    {
+        this.Viewport = viewport;
+        this.FrustumCullingCamera = this;
+    }
+
     /// <summary>
     /// Gets or sets the clear color of the camera.
     /// </summary>
     public ColorF? ClearColor { get; set; } = new ColorF(0.84f, 0.84f, 0.86f, 1.0f);
 
-    private bool _viewMatrixIsDirty = true;
-    private bool _projectionMatrixIsDirty = true;
-    private Matrix4x4 _viewMatrix;
-    private Matrix4x4 _projectionMatrix;
 
-
-    private Vector3 _position = Vector3.Zero;
+    /// <summary>
+    /// Gets or sets the camera that will be used to apply frustum culling. By default, this is the camera itself.
+    /// </summary>
+    public Camera FrustumCullingCamera { get; set; }
 
     /// <summary>
     /// Gets or sets the position of the camera.
@@ -36,7 +52,6 @@ public class Camera3D
         }
     }
 
-    private Quaternion _rotation  = Quaternion.Identity;
 
     /// <summary>
     /// Gets or sets the rotation of the camera.
@@ -50,80 +65,6 @@ public class Camera3D
             {
                 this._rotation = value;
                 this._viewMatrixIsDirty = true;
-            }
-        }
-    }
-
-    private float _fieldOfView = 60 * System.MathF.PI / 180f;
-
-    /// <summary>
-    /// Gets or sets the field of view of the camera.
-    /// </summary>
-    public float FieldOfView
-    {
-        get => this._fieldOfView;
-        set
-        {
-            if (value < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(value), "Field of view must be greater than 0.");
-            }
-
-            if (value > MathF.PI)
-            {
-                throw new ArgumentOutOfRangeException(nameof(value), "Field of view must be less than 180 degrees.");
-            }
-
-            if (this._fieldOfView != value)
-            {
-                this._fieldOfView = value;
-                this._projectionMatrixIsDirty = true;
-            }
-        }
-    }
-
-    private float _nearPlane = 0.1f;
-
-    /// <summary>
-    /// Gets or sets the near plane of the camera.
-    /// </summary>
-    public float NearPlane
-    {
-        get => this._nearPlane;
-        set
-        {
-            if (value < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(value), "Near plane must be greater than 0.");
-            }
-
-            if (this._nearPlane != value)
-            {
-                this._nearPlane = value;
-                this._projectionMatrixIsDirty = true;
-            }
-        }
-    }
-
-    private float _farPlane = 300f;
-
-    /// <summary>
-    /// Gets or sets the far plane of the camera.
-    /// </summary>
-    public float FarPlane
-    {
-        get => this._farPlane;
-        set
-        {
-            if (value < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(value), "Far plane must be greater than 0.");
-            }
-
-            if (this._farPlane != value)
-            {
-                this._farPlane = value;
-                this._projectionMatrixIsDirty = true;
             }
         }
     }
@@ -154,39 +95,6 @@ public class Camera3D
     }
 
     /// <summary>
-    /// Gets or sets the camera that will be used to apply frustum culling. By default, this is the camera itself.
-    /// </summary>
-    public Camera3D FrustumCullingCamera { get; set; }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="Camera3D"/> class.
-    /// </summary>
-    /// <param name="viewport">The viewport.</param>
-    public Camera3D(Viewport viewport)
-    {
-        this.Viewport = viewport;
-        this.FrustumCullingCamera = this;
-    }
-
-    /// <summary>
-    /// Gets the projection matrix for the camera.
-    /// </summary>
-    public Matrix4x4 ProjectionMatrix
-    {
-        get
-        {
-            if (this._projectionMatrixIsDirty)
-            {
-                this._projectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(this._fieldOfView, this.Viewport.AspectRatio, this._nearPlane, this._farPlane);
-                this._projectionMatrixIsDirty = false;
-            }
-
-            return this._projectionMatrix;
-        }
-    }
-
-
-    /// <summary>
     /// Gets the view matrix for the camera.
     /// </summary>
     public Matrix4x4 ViewMatrix
@@ -205,6 +113,44 @@ public class Camera3D
         }
     }
 
+    /// <summary>
+    /// Gets or sets the near plane of the camera.
+    /// </summary>
+    public float NearPlane
+    {
+        get => this._nearPlane;
+        set
+        {
+            if (this._nearPlane != value)
+            {
+                this._nearPlane = value;
+                this._projectionMatrixIsDirty = true;
+            }
+        }
+    }
+
+
+
+    /// <summary>
+    /// Gets or sets the far plane of the camera.
+    /// </summary>
+    public float FarPlane
+    {
+        get => this._farPlane;
+        set
+        {
+            if (this._farPlane != value)
+            {
+                this._farPlane = value;
+                this._projectionMatrixIsDirty = true;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets the projection matrix for the camera.
+    /// </summary>
+    public abstract Matrix4x4 ProjectionMatrix { get; }
 
     /// <summary>
     /// Gets the view projection matrix.
@@ -274,5 +220,124 @@ public class Camera3D
         Vector3 farPoint = this.Unproject(new Vector3(point.X, point.Y, 1));
         var ray = new Ray(nearPoint, Vector3.Normalize(farPoint - nearPoint));
         return ray;
+    }
+
+    /// <summary>
+    /// Returns the view projection matrix for a shadow cascade with the specified near and far planes.
+    /// </summary>
+    /// <param name="near">The near plane.</param>
+    /// <param name="far">The far plane.</param>
+    /// <returns>The view projection matrix.</returns>
+    public abstract Matrix4x4 GetShadowCascadeViewProjectionMatrix(float near, float far);
+}
+
+public class PerspectiveCamera : Camera
+{
+    private Matrix4x4 _projectionMatrix;
+    private float _fieldOfView = 60 * System.MathF.PI / 180f;
+
+    public PerspectiveCamera(Viewport viewport) : base(viewport)
+    {
+    }
+
+    /// <summary>
+    /// Gets or sets the field of view of the camera.
+    /// </summary>
+    public float FieldOfView
+    {
+        get => this._fieldOfView;
+        set
+        {
+            if (value < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value), "Field of view must be greater than 0.");
+            }
+
+            if (value > MathF.PI)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value), "Field of view must be less than 2 pi radians.");
+            }
+
+            if (this._fieldOfView != value)
+            {
+                this._fieldOfView = value;
+                this._projectionMatrixIsDirty = true;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets the projection matrix for the camera.
+    /// </summary>
+    public override Matrix4x4 ProjectionMatrix
+    {
+        get
+        {
+            if (this._projectionMatrixIsDirty)
+            {
+                this._projectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(this._fieldOfView, this.Viewport.AspectRatio, this.NearPlane, this.FarPlane);
+                this._projectionMatrixIsDirty = false;
+            }
+
+            return this._projectionMatrix;
+        }
+    }
+
+    public override Matrix4x4 GetShadowCascadeViewProjectionMatrix(float near, float far)
+    {
+        return Matrix4x4.CreatePerspectiveFieldOfView(this.FieldOfView, this.Viewport.AspectRatio, near, far);
+    }
+}
+
+public class OrthographicCamera : Camera
+{
+    private Matrix4x4 _projectionMatrix;
+    private float _width = 10f;
+
+    public OrthographicCamera(Viewport viewport) : base(viewport)
+    {
+    }
+
+    /// <summary>
+    /// Gets or sets the width of the camera.
+    /// </summary>
+    public float Width
+    {
+        get => this._width;
+        set
+        {
+            if (value < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value), "Width must be greater than 0.");
+            }
+
+            if (this._width != value)
+            {
+                this._width = value;
+                this._projectionMatrixIsDirty = true;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets the projection matrix for the camera.
+    /// </summary>
+    public override Matrix4x4 ProjectionMatrix
+    {
+        get
+        {
+            if (this._projectionMatrixIsDirty)
+            {
+                this._projectionMatrix = Matrix4x4.CreateOrthographic(this._width, this._width / this.Viewport.AspectRatio, this.NearPlane, this.FarPlane);
+                this._projectionMatrixIsDirty = false;
+            }
+
+            return this._projectionMatrix;
+        }
+    }
+
+    public override Matrix4x4 GetShadowCascadeViewProjectionMatrix(float near, float far)
+    {
+        return Matrix4x4.CreateOrthographic(this.Width, this.Width / this.Viewport.AspectRatio, near, far);
     }
 }

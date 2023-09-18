@@ -31,7 +31,7 @@ public class Stage3D
     /// <summary>
     /// Gets or sets the camera used to render the scene.
     /// </summary>
-    public Camera3D? Camera { get; set; } = null;
+    public Camera? Camera { get; set; } = null;
 
     /// <summary>
     /// Gets the particle systems used to render particles.

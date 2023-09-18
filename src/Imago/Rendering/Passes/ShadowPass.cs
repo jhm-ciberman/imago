@@ -198,7 +198,7 @@ public class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
         return resources.ToArray();
     }
 
-    public void UpdateSplitDistances(Camera3D camera, ShadowMap shadowMap)
+    public void UpdateSplitDistances(Camera camera, ShadowMap shadowMap)
     {
         // Lerp between uniform and logarithmic split distances.
         // https://developer.nvidia.com/gpugems/gpugems3/part-ii-light-and-shadows/chapter-10-parallel-split-shadow-maps-programmable-gpus
