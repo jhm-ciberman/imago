@@ -75,4 +75,15 @@ public class PackedTexture : ITextureRegion
     {
         return $"{this.Texture.Name} {this.TopLeft} {this.BottomRight}";
     }
+
+    /// <summary>
+    /// Gets a sub texture of this packed texture.
+    /// </summary>
+    /// <param name="topLeft">The top left corner of the sub texture in texture space coordinates.</param>
+    /// <param name="bottomRight">The bottom right corner of the sub texture in texture space coordinates.</param>
+    /// <returns></returns>
+    public PackedTexture SubTexture(Vector2 topLeft, Vector2 bottomRight)
+    {
+        return new PackedTexture(this.Texture, this.TopLeft + topLeft * this.Size, this.TopLeft + bottomRight * this.Size);
+    }
 }
