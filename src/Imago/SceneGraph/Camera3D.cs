@@ -19,9 +19,9 @@ public abstract class Camera
     /// Initializes a new instance of the <see cref="Camera"/> class.
     /// </summary>
     /// <param name="viewport">The viewport.</param>
-    public Camera(Viewport viewport)
+    public Camera(Viewport? viewport = null)
     {
-        this.Viewport = viewport;
+        this.Viewport = viewport ?? Application.Instance.Viewport;
         this.FrustumCullingCamera = this;
     }
 
@@ -236,7 +236,7 @@ public class PerspectiveCamera : Camera
     private Matrix4x4 _projectionMatrix;
     private float _fieldOfView = 60 * System.MathF.PI / 180f;
 
-    public PerspectiveCamera(Viewport viewport) : base(viewport)
+    public PerspectiveCamera(Viewport? viewport = null) : base(viewport)
     {
     }
 
@@ -294,7 +294,7 @@ public class OrthographicCamera : Camera
     private Matrix4x4 _projectionMatrix;
     private float _width = 10f;
 
-    public OrthographicCamera(Viewport viewport) : base(viewport)
+    public OrthographicCamera(Viewport? viewport = null) : base(viewport)
     {
     }
 
