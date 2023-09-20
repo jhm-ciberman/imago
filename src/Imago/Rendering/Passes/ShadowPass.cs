@@ -90,7 +90,7 @@ public class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
 
         this.UpdateSplitDistances(camera, shadowMap, out int cascadesCount);
 
-        this.UpdateShadowMap(shadowMap);
+        this.UpdateShadowMap(shadowMap, cascadesCount);
 
         var mainLightDirection = stage.MainLight.Direction;
 
@@ -125,11 +125,11 @@ public class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
         return this._cascades[cascadeIndex].ViewProjectionMatrix * this._scalingMatrix;
     }
 
-    private void UpdateShadowMap(ShadowMap shadowMap)
+    private void UpdateShadowMap(ShadowMap shadowMap, int cascadesCount)
     {
         var texture = this.ShadowmapTexture;
-        if (shadowMap.Size != texture.Size || shadowMap.CascadesCount != texture.CascadesCount)
-            this.ShadowmapTexture.Resize(shadowMap.Size, shadowMap.CascadesCount);
+        if (shadowMap.Size != texture.Size || cascadesCount != texture.CascadesCount)
+            this.ShadowmapTexture.Resize(shadowMap.Size, (uint)cascadesCount);
     }
 
     public void Dispose()
@@ -216,8 +216,6 @@ public class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
         far = MathF.Max(far, near + 0.01f);
 
         cascadesCount = Math.Min(camera.MaxShadowCascades, (int)shadowMap.CascadesCount);
-
-        Console.WriteLine($"Shadowmap near: {near}, far: {far}, cascades: {cascadesCount}");
 
         this._splitDistances[0] = near;
         this._splitDistances[cascadesCount] = far;
