@@ -108,6 +108,7 @@ public class Canvas : ItemsControl
             }
         }
 
+
         return desiredSize;
     }
 }

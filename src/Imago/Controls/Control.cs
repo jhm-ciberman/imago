@@ -87,7 +87,7 @@ public class Control : Visual
     public HorizontalAlignment HorizontalAlignment
     {
         get => this._horizontalAlignment;
-        set => this.SetPropertyAndInvalidateArrange(ref this._horizontalAlignment, value);
+        set => this.SetPropertyAndInvalidateMeasure(ref this._horizontalAlignment, value);
     }
 
     /// <summary>
@@ -96,7 +96,7 @@ public class Control : Visual
     public VerticalAlignment VerticalAlignment
     {
         get => this._verticalAlignment;
-        set => this.SetPropertyAndInvalidateArrange(ref this._verticalAlignment, value);
+        set => this.SetPropertyAndInvalidateMeasure(ref this._verticalAlignment, value);
     }
 
     /// <summary>
@@ -143,7 +143,7 @@ public class Control : Visual
     public float Left
     {
         get => this._left;
-        set => this.SetPropertyAndInvalidateArrange(ref this._left, value);
+        set => this.SetPropertyAndInvalidateMeasure(ref this._left, value);
     }
 
     /// <summary>
@@ -152,7 +152,7 @@ public class Control : Visual
     public float Top
     {
         get => this._top;
-        set => this.SetPropertyAndInvalidateArrange(ref this._top, value);
+        set => this.SetPropertyAndInvalidateMeasure(ref this._top, value);
     }
 
     /// <summary>
@@ -161,7 +161,7 @@ public class Control : Visual
     public float Right
     {
         get => this._right;
-        set => this.SetPropertyAndInvalidateArrange(ref this._right, value);
+        set => this.SetPropertyAndInvalidateMeasure(ref this._right, value);
     }
 
     /// <summary>
@@ -170,7 +170,7 @@ public class Control : Visual
     public float Bottom
     {
         get => this._bottom;
-        set => this.SetPropertyAndInvalidateArrange(ref this._bottom, value);
+        set => this.SetPropertyAndInvalidateMeasure(ref this._bottom, value);
     }
 
     /// <summary>
@@ -189,8 +189,15 @@ public class Control : Visual
 
         Vector2 desiredSize = this.MeasureOverride(availableSize);
 
-        if (!float.IsNaN(this.Width)) desiredSize.X = this.Width;
-        if (!float.IsNaN(this.Height)) desiredSize.Y = this.Height;
+        if (!float.IsNaN(this.Width))
+        {
+            desiredSize.X = this.Width;
+        }
+
+        if (!float.IsNaN(this.Height))
+        {
+            desiredSize.Y = this.Height;
+        }
 
         return desiredSize + margin;
     }
