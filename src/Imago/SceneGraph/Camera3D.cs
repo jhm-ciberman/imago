@@ -229,6 +229,11 @@ public abstract class Camera
     /// <param name="far">The far plane.</param>
     /// <returns>The view projection matrix.</returns>
     public abstract Matrix4x4 GetShadowCascadeViewProjectionMatrix(float near, float far);
+
+    /// <summary>
+    /// Gets the maximum number of shadow cascades supported by the camera.
+    /// </summary>
+    public virtual int MaxShadowCascades => int.MaxValue;
 }
 
 public class PerspectiveCamera : Camera
@@ -287,12 +292,14 @@ public class PerspectiveCamera : Camera
     {
         return Matrix4x4.CreatePerspectiveFieldOfView(this.FieldOfView, this.Viewport.AspectRatio, near, far);
     }
+
+
 }
 
 public class OrthographicCamera : Camera
 {
     private Matrix4x4 _projectionMatrix;
-    private float _width = 10f;
+    private float _size = 10f;
 
     public OrthographicCamera(Viewport? viewport = null) : base(viewport)
     {
@@ -301,9 +308,9 @@ public class OrthographicCamera : Camera
     /// <summary>
     /// Gets or sets the width of the camera.
     /// </summary>
-    public float Width
+    public float Size
     {
-        get => this._width;
+        get => this._size;
         set
         {
             if (value < 0)
@@ -311,9 +318,9 @@ public class OrthographicCamera : Camera
                 throw new ArgumentOutOfRangeException(nameof(value), "Width must be greater than 0.");
             }
 
-            if (this._width != value)
+            if (this._size != value)
             {
-                this._width = value;
+                this._size = value;
                 this._projectionMatrixIsDirty = true;
             }
         }
@@ -328,7 +335,7 @@ public class OrthographicCamera : Camera
         {
             if (this._projectionMatrixIsDirty)
             {
-                this._projectionMatrix = Matrix4x4.CreateOrthographic(this._width, this._width / this.Viewport.AspectRatio, this.NearPlane, this.FarPlane);
+                this._projectionMatrix = Matrix4x4.CreateOrthographic(this.Size * this.Viewport.AspectRatio, this.Size, this.NearPlane, this.FarPlane);
                 this._projectionMatrixIsDirty = false;
             }
 
@@ -338,6 +345,8 @@ public class OrthographicCamera : Camera
 
     public override Matrix4x4 GetShadowCascadeViewProjectionMatrix(float near, float far)
     {
-        return Matrix4x4.CreateOrthographic(this.Width, this.Width / this.Viewport.AspectRatio, near, far);
+        return Matrix4x4.CreateOrthographic(this.Size / this.Viewport.AspectRatio, this.Size, near, far);
     }
+
+    public override int MaxShadowCascades => 1;
 }

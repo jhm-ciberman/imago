@@ -88,13 +88,13 @@ public class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
 
         ShadowMap shadowMap = stage.MainLight.ShadowMap;
 
-        this.UpdateSplitDistances(camera, shadowMap);
+        this.UpdateSplitDistances(camera, shadowMap, out int cascadesCount);
 
         this.UpdateShadowMap(shadowMap);
 
         var mainLightDirection = stage.MainLight.Direction;
 
-        for (int i = 0; i < shadowMap.CascadesCount; i++)
+        for (int i = 0; i < cascadesCount; i++)
         {
             commandList.SetFramebuffer(this.ShadowmapTexture.Framebuffers[i]);
             commandList.ClearDepthStencil(1f);
@@ -198,23 +198,33 @@ public class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
         return resources.ToArray();
     }
 
-    public void UpdateSplitDistances(Camera camera, ShadowMap shadowMap)
+    public void UpdateSplitDistances(Camera camera, ShadowMap shadowMap, out int cascadesCount)
     {
         // Lerp between uniform and logarithmic split distances.
         // https://developer.nvidia.com/gpugems/gpugems3/part-ii-light-and-shadows/chapter-10-parallel-split-shadow-maps-programmable-gpus
 
         float near = camera.NearPlane;
-        float far = MathF.Min(camera.FarPlane, camera.NearPlane + shadowMap.MaximumShadowsDistance);
+        float far = camera.FarPlane;
+
+        if (near < 0.01f)
+        {
+            far -= near;
+            near = 0.01f;
+        }
+
+        far = MathF.Min(far, near + shadowMap.MaximumShadowsDistance);
         far = MathF.Max(far, near + 0.01f);
 
-        uint count = shadowMap.CascadesCount;
+        cascadesCount = Math.Min(camera.MaxShadowCascades, (int)shadowMap.CascadesCount);
+
+        Console.WriteLine($"Shadowmap near: {near}, far: {far}, cascades: {cascadesCount}");
 
         this._splitDistances[0] = near;
-        this._splitDistances[count] = far;
+        this._splitDistances[cascadesCount] = far;
 
-        for (int i = 1; i < count; i++)
+        for (int i = 1; i < cascadesCount; i++)
         {
-            float t = (float)i / count;
+            float t = (float)i / cascadesCount;
             float uniformDistance = near + (far - near) * t;
             float logarithmicDistance = near * MathF.Pow(far / near, t);
             this._splitDistances[i] = MathUtils.Lerp(logarithmicDistance, uniformDistance, shadowMap.SplitLambda);
