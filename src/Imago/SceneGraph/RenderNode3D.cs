@@ -48,17 +48,29 @@ public class RenderNode3D : Node3D, IPickable
     /// <summary>
     /// Gets or sets the mesh to render.
     /// </summary>
-    public Mesh? Mesh { get => this._renderable.Mesh; set => this._renderable.Mesh = value; }
+    public Mesh? Mesh
+    {
+        get => this._renderable.Mesh;
+        set => this._renderable.Mesh = value;
+    }
 
     /// <summary>
     /// Gets or sets the material to use.
     /// </summary>
-    public Material? Material { get => this._renderable.Material; set => this._renderable.Material = value; }
+    public Material? Material
+    {
+        get => this._renderable.Material;
+        set => this._renderable.Material = value;
+    }
 
     /// <summary>
     /// Gets or sets the skeleton to use.
     /// </summary>
-    public Skeleton? Skeleton { get => this._renderable.Skeleton; set => this._renderable.Skeleton = value; }
+    public Skeleton? Skeleton
+    {
+        get => this._renderable.Skeleton;
+        set => this._renderable.Skeleton = value;
+    }
 
     private bool _isPickable = false;
 
