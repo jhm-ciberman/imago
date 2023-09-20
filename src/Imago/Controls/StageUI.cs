@@ -27,6 +27,11 @@ public class StageUI
         }
     }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether each control should be snapped to pixels.
+    /// </summary>
+    public bool SnapToPixels { get; set; } = true;
+
     public StageUI(Viewport viewport)
     {
         this.Viewport = viewport;

@@ -200,8 +200,21 @@ public abstract class Visual : ObservableObject
         }
 
         finalRect = this.ArrangeCore(finalRect);
-        this.Position = finalRect.Position;
-        this.ActualSize = finalRect.Size;
+
+        // snap to pixels
+        var position = finalRect.Position;
+        var size = finalRect.Size;
+
+        if (this.Stage!.SnapToPixels)
+        {
+            position.X = (float)Math.Round(position.X);
+            position.Y = (float)Math.Round(position.Y);
+            size.X = (float)Math.Round(size.X);
+            size.Y = (float)Math.Round(size.Y);
+        }
+
+        this.Position = position;
+        this.ActualSize = size;
     }
 
     protected abstract Rect ArrangeCore(Rect finalRect);
