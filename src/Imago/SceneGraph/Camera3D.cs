@@ -308,7 +308,7 @@ public class OrthographicCamera : Camera
     /// <summary>
     /// Gets or sets the width of the camera.
     /// </summary>
-    public float Size
+    public float Width
     {
         get => this._size;
         set
@@ -327,6 +327,15 @@ public class OrthographicCamera : Camera
     }
 
     /// <summary>
+    /// Gets or sets the height of the camera.
+    /// </summary>
+    public float Height
+    {
+        get => this._size / this.Viewport.AspectRatio;
+        set => this.Width = value * this.Viewport.AspectRatio;
+    }
+
+    /// <summary>
     /// Gets the projection matrix for the camera.
     /// </summary>
     public override Matrix4x4 ProjectionMatrix
@@ -335,7 +344,7 @@ public class OrthographicCamera : Camera
         {
             if (this._projectionMatrixIsDirty)
             {
-                this._projectionMatrix = Matrix4x4.CreateOrthographic(this.Size * this.Viewport.AspectRatio, this.Size, this.NearPlane, this.FarPlane);
+                this._projectionMatrix = Matrix4x4.CreateOrthographic(this.Width * this.Viewport.AspectRatio, this.Width, this.NearPlane, this.FarPlane);
                 this._projectionMatrixIsDirty = false;
             }
 
@@ -345,7 +354,7 @@ public class OrthographicCamera : Camera
 
     public override Matrix4x4 GetShadowCascadeViewProjectionMatrix(float near, float far)
     {
-        return Matrix4x4.CreateOrthographic(this.Size / this.Viewport.AspectRatio, this.Size, near, far);
+        return Matrix4x4.CreateOrthographic(this.Width / this.Viewport.AspectRatio, this.Width, near, far);
     }
 
     public override int MaxShadowCascades => 1;
