@@ -86,13 +86,12 @@ public class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
         var camera = stage.Camera;
         if (camera == null) return;
 
-        ShadowMap shadowMap = stage.MainLight.ShadowMap;
+        var mainLight = stage.Environment.MainLight;
+        var shadowMap = mainLight.ShadowMap;
 
         this.UpdateSplitDistances(camera, shadowMap, out int cascadesCount);
 
         this.UpdateShadowMap(shadowMap, cascadesCount);
-
-        var mainLightDirection = stage.MainLight.Direction;
 
         for (int i = 0; i < cascadesCount; i++)
         {
@@ -102,7 +101,7 @@ public class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
             float near = this._splitDistances[i];
             float far = this._splitDistances[i + 1];
 
-            this._cascades[i].UpdateCascadeMatrix(i, camera, mainLightDirection, near, far, shadowMap);
+            this._cascades[i].UpdateCascadeMatrix(i, camera, mainLight.Direction, near, far, shadowMap);
 
             BoundingFrustum shadowFrustum = new BoundingFrustum(this._cascades[i].ViewProjectionMatrix);
             this._renderQueues[i].Update(shadowFrustum, camera.Position);
@@ -110,7 +109,7 @@ public class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
             ShadowMapDataBuffer data = new ShadowMapDataBuffer();
             data.ShadowMapMatrix = this._cascades[i].ViewProjectionMatrix;
             data.ShadowBias = new Vector2(this._cascades[i].DepthBias, this._cascades[i].NormalOffset);
-            data.LightDirection = mainLightDirection;
+            data.LightDirection = mainLight.Direction;
 
             commandList.UpdateBuffer(this._shadowmapInfoBuffer, 0, data);
             this._renderJob.DrawRenderList(commandList, this._resourceSet, this._renderQueues[i]);

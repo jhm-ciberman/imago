@@ -123,7 +123,6 @@ internal class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
             cl.ClearDepthStencil(1f);
         }
 
-        var mainLightDirection = Vector3.Normalize(stage.MainLight.Direction);
 
         CameraDataBuffer cameraInfo = new CameraDataBuffer();
         cameraInfo.ViewProjectionMatrix = camera.ViewProjectionMatrix;
@@ -132,14 +131,16 @@ internal class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
         cameraInfo.ShadowMapMatrix2 = this._shadowPass.GetShadowCascadeViewProjectionMatrix(2);
         cameraInfo.ShadowMapMatrix3 = this._shadowPass.GetShadowCascadeViewProjectionMatrix(3);
 
+        var env = stage.Environment;
+
         LightInfo lightInfo = new LightInfo();
-        lightInfo.AmbientColor = stage.AmbientColor;
-        lightInfo.MainLightColor = stage.MainLight.Color;
-        lightInfo.ShadowColor = stage.MainLight.ShadowMap.Color;
-        lightInfo.MainLightDirection = mainLightDirection;
-        lightInfo.FogColor = stage.FogColor;
-        lightInfo.FogStart = stage.FogStart; // / (camera.FarPlane - camera.NearPlane);
-        lightInfo.FogEnd = stage.FogEnd; // / (camera.FarPlane - camera.NearPlane);
+        lightInfo.AmbientColor = env.AmbientColor;
+        lightInfo.MainLightColor = env.MainLight.Color;
+        lightInfo.ShadowColor = env.MainLight.ShadowMap.Color;
+        lightInfo.MainLightDirection = Vector3.Normalize(env.MainLight.Direction);
+        lightInfo.FogColor = env.FogColor;
+        lightInfo.FogStart = env.FogStart; // / (camera.FarPlane - camera.NearPlane);
+        lightInfo.FogEnd = env.FogEnd; // / (camera.FarPlane - camera.NearPlane);
         lightInfo.ShadowMapDistances = this._shadowPass.GetShadowCascadeDistances();
 
         cl.UpdateBuffer(this._camera3DInfoBuffer, 0, ref cameraInfo);

@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Support;
 
 namespace Imago.SceneGraph;
 
@@ -14,14 +13,9 @@ public class Stage3D
     }
 
     /// <summary>
-    /// Gets or sets the main light of the scene.
+    /// Gets or sets the environment of the scene.
     /// </summary>
-    public DirectionalLight MainLight { get; set; } = new DirectionalLight();
-
-    /// <summary>
-    /// Gets or sets the ambient color of the scene.
-    /// </summary>
-    public ColorF AmbientColor { get; set; } = new ColorF(.2f, .2f, .2f, 100f / 255f);
+    public SceneEnvironment Environment { get; set; } = new SceneEnvironment();
 
     /// <summary>
     /// Gets the gizmos layer used to render gizmos.
@@ -38,20 +32,6 @@ public class Stage3D
     /// </summary>
     public IReadOnlyList<IParticleSystem> ParticleSystems => this._particleSystems;
 
-    /// <summary>
-    /// Gets or sets the fog color.
-    /// </summary>
-    public ColorF FogColor { get; set; } = new ColorF("#6d6b4e");
-
-    /// <summary>
-    /// Gets or sets the start distance of the fog.
-    /// </summary>
-    public float FogStart { get; set; } = 50f;
-
-    /// <summary>
-    /// Gets or sets the end distance of the fog.
-    /// </summary>
-    public float FogEnd { get; set; } = 300f;
 
     /// <summary>
     /// Gets the picking manager used to pick objects.
