@@ -137,7 +137,7 @@ internal class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
         lightInfo.AmbientColor = env.AmbientColor;
         lightInfo.MainLightColor = env.MainLight.Color;
         lightInfo.ShadowColor = env.MainLight.ShadowMap.Color;
-        lightInfo.MainLightDirection = Vector3.Normalize(env.MainLight.Direction);
+        lightInfo.MainLightDirection = env.MainLight.Direction;
         lightInfo.FogColor = env.FogColor;
         lightInfo.FogStart = env.FogStart; // / (camera.FarPlane - camera.NearPlane);
         lightInfo.FogEnd = env.FogEnd; // / (camera.FarPlane - camera.NearPlane);
