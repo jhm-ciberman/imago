@@ -52,17 +52,18 @@ public class SpritesPass : IDisposable, IPipelineProvider, IRenderingPass
         });
     }
 
-    public void Render(CommandList cl, Scene scene)
+    public void Render(CommandList cl, Stage stage)
     {
-        if (scene.StageUI == null) return;
+        var gui = stage.Scene.Gui;
+        if (gui == null) return;
 
         this.DrawCallCount = 0;
 
         cl.SetFramebuffer(this._renderTexture.Framebuffer);
         cl.ClearDepthStencil(1f);
 
-        this._spriteBatcher.Begin(cl, scene.StageUI.ViewProjectionMatrix);
-        scene.StageUI.Draw(this._spriteBatcher);
+        this._spriteBatcher.Begin(cl, gui.ViewProjectionMatrix);
+        gui.Draw(this._spriteBatcher);
         this._spriteBatcher.End();
 
         this.DrawCallCount += this._spriteBatcher.DrawCallCount;

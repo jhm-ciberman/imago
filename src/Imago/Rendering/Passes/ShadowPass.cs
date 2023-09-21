@@ -78,15 +78,13 @@ public class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
         this.DefaultShader = new Shader(renderer, this, shadowmapVertex, shadowmapFragment, new[] { "Surface" }, supportedShadowMapFlags);
     }
 
-    public void Render(CommandList commandList, Scene scene)
+    public void Render(CommandList commandList, Stage stage)
     {
-        var stage = scene.Stage3D;
-        if (stage == null) return;
-
-        var camera = stage.Camera;
+        var scene = stage.Scene;
+        var camera = scene.Camera;
         if (camera == null) return;
 
-        var mainLight = stage.Environment.MainLight;
+        var mainLight = scene.Environment.MainLight;
         var shadowMap = mainLight.ShadowMap;
 
         this.UpdateSplitDistances(camera, shadowMap, out int cascadesCount);

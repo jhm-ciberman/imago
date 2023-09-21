@@ -101,13 +101,13 @@ internal class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
         ));
     }
 
-    public void Render(CommandList cl, Scene scene)
+    public void Render(CommandList cl, Stage stage)
     {
-        var stage = scene.Stage3D;
-        if (stage == null) return;
-
-        var camera = stage.Camera;
+        var scene = stage.Scene;
+        var camera = scene.Camera;
         if (camera == null) return;
+
+        var env = scene.Environment;
 
         var frustumForCulling = new BoundingFrustum(camera.FrustumCullingCamera.ViewProjectionMatrix);
         this._opaqueRenderQueue.Update(frustumForCulling, camera.Position);
@@ -130,8 +130,6 @@ internal class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
         cameraInfo.ShadowMapMatrix1 = this._shadowPass.GetShadowCascadeViewProjectionMatrix(1);
         cameraInfo.ShadowMapMatrix2 = this._shadowPass.GetShadowCascadeViewProjectionMatrix(2);
         cameraInfo.ShadowMapMatrix3 = this._shadowPass.GetShadowCascadeViewProjectionMatrix(3);
-
-        var env = stage.Environment;
 
         LightInfo lightInfo = new LightInfo();
         lightInfo.AmbientColor = env.AmbientColor;

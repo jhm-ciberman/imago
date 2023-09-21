@@ -246,9 +246,9 @@ public class TextBox : Control
         }
     }
 
-    public override void OnAddedToStage(StageUI stage)
+    public override void OnAddedToStage(GuiLayer guiLayer)
     {
-        base.OnAddedToStage(stage);
+        base.OnAddedToStage(guiLayer);
 
         this.IsFocused = true;
         this.CaretIndex = this.Text.Length;
@@ -257,7 +257,7 @@ public class TextBox : Control
         InputManager.Current.TextEntered += this.InputManager_TextEntered;
     }
 
-    public override void OnRemovedFromStage(StageUI stage)
+    public override void OnRemovedFromStage(GuiLayer stage)
     {
         base.OnRemovedFromStage(stage);
 

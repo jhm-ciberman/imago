@@ -14,13 +14,6 @@ namespace Imago;
 public class Application : IDisposable
 {
     /// <summary>
-    /// Occurs when the current <see cref="Scene"/> changes.
-    /// </summary>
-    public event EventHandler<SceneChangedEventArgs>? SceneChanged;
-
-    public record class SceneChangedEventArgs(Scene? OldScene, Scene? NewScene);
-
-    /// <summary>
     /// Gets the instance of the <see cref="Application"/>.
     /// </summary>
     public static Application Instance { get; private set; } = null!;
@@ -36,21 +29,9 @@ public class Application : IDisposable
     public Sdl2Window Window { get; }
 
     /// <summary>
-    /// Gets or sets the current <see cref="Scene"/>.
+    /// Gets the main stage.
     /// </summary>
-    public Scene? Scene
-    {
-        get => this._renderer.Scene;
-        set
-        {
-            if (this._renderer.Scene != value)
-            {
-                var oldScene = this._renderer.Scene;
-                this._renderer.Scene = value;
-                this.SceneChanged?.Invoke(this, new SceneChangedEventArgs(oldScene, value));
-            }
-        }
-    }
+    public Stage Stage { get; } = new Stage();
 
     /// <summary>
     /// Gets whether the application is currently running.
@@ -121,10 +102,17 @@ public class Application : IDisposable
     /// </summary>
     public double FramesPerSecond { get; private set; }
 
-    protected virtual void OnUpdate()
+    protected virtual void Update()
     {
         // This can be overridden by derived classes.
     }
+
+    public void ChangeScene(Scene scene)
+    {
+        this.Stage.ChangeScene(scene);
+    }
+
+    public Scene Scene => this.Stage.Scene;
 
     /// <summary>
     /// Starts the application.
@@ -150,7 +138,9 @@ public class Application : IDisposable
 
             this._renderer.Update((float)this.DeltaTime, this._input.InputSnapshot);
 
-            this.OnUpdate();
+            this.Update();
+
+            this.Stage.Update((float)this.DeltaTime);
 
             if (!this.Window.Exists)
             {
@@ -158,7 +148,7 @@ public class Application : IDisposable
                 break;
             }
 
-            this._renderer.Render();
+            this._renderer.Render(this.Stage);
         }
     }
 

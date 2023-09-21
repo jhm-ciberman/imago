@@ -1,13 +1,12 @@
+using System.Collections.Generic;
 using Imago.Controls;
 using Support;
 
 namespace Imago.SceneGraph;
 
-public class Scene
+public class Scene : Node3D
 {
-    public Stage3D? Stage3D { get; set; } = null;
-    public StageUI? StageUI { get; set; } = null;
-
+    public GuiLayer? Gui { get; set; } = null;
 
     /// <summary>
     /// Gets or sets the clear color of the stage. If null, the stage will not be cleared
@@ -15,14 +14,27 @@ public class Scene
     /// </summary>
     public Color? ClearColor { get; set; } = Color.Black;
 
+    /// <summary>
+    /// Gets or sets the camera used to render the scene.
+    /// </summary>
+    public Camera? Camera { get; set; } = null;
+
+    /// <summary>
+    /// Gets or sets the environment of the scene.
+    /// </summary>
+    public SceneEnvironment Environment { get; set; } = new SceneEnvironment();
+
     public Scene()
     {
         //
     }
 
-    public virtual void OnBeforeRender()
+    /// <summary>
+    /// Called before the scene is rendered.
+    /// </summary>
+    public virtual void PrepareForRender()
     {
-        this.Stage3D?.OnBeforeRender();
+        //
     }
 
     public virtual void RenderImGui()
@@ -32,7 +44,56 @@ public class Scene
 
     public virtual void Update(float deltaTime)
     {
-        this.Stage3D?.Update(deltaTime);
-        this.StageUI?.Update(deltaTime);
+        this.Gui?.Update(deltaTime);
+    }
+
+    private readonly List<IParticleSystem> _particleSystems = new List<IParticleSystem>();
+
+    /// <summary>
+    /// Gets the particle systems used to render particles.
+    /// </summary>
+    public IReadOnlyList<IParticleSystem> ParticleSystems => this._particleSystems;
+
+    /// <summary>
+    /// Adds a particle system to the scene.
+    /// </summary>
+    /// <param name="particleSystem">The particle system to add.</param>
+    public void AddParticleSystem(IParticleSystem particleSystem)
+    {
+        this._particleSystems.Add(particleSystem);
+    }
+
+    /// <summary>
+    /// Removes a particle system from the scene.
+    /// </summary>
+    /// <param name="particleSystem">The particle system to remove.</param>
+    public void RemoveParticleSystem(IParticleSystem particleSystem)
+    {
+        this._particleSystems.Remove(particleSystem);
+    }
+
+    private readonly List<IImmediateRenderable> _immediateRenderables = new List<IImmediateRenderable>();
+
+    /// <summary>
+    /// Gets the immediate renderables used to render objects immediately.
+    /// </summary>
+    public IReadOnlyList<IImmediateRenderable> ImmediateRenderables => this._immediateRenderables;
+
+    /// <summary>
+    /// Adds an immediate renderable to the scene.
+    /// </summary>
+    /// <param name="immediateRenderable">The immediate renderable to add.</param>
+    public void AddImmediateRenderable(IImmediateRenderable immediateRenderable)
+    {
+        this._immediateRenderables.Add(immediateRenderable);
+    }
+
+    /// <summary>
+    /// Removes an immediate renderable from the scene.
+    /// </summary>
+    /// <param name="immediateRenderable">The immediate renderable to remove.</param>
+    public void RemoveImmediateRenderable(IImmediateRenderable immediateRenderable)
+    {
+        this._immediateRenderables.Remove(immediateRenderable);
     }
 }

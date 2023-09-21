@@ -6,5 +6,5 @@ namespace Imago.Rendering;
 
 public interface IRenderingPass : IDisposable
 {
-    void Render(CommandList cl, Scene scene);
+    void Render(CommandList cl, Stage stage);
 }

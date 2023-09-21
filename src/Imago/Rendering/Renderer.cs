@@ -212,12 +212,12 @@ public class Renderer : IDisposable
             this.Passes = passes;
         }
 
-        public void Execute(Scene scene)
+        public void Execute(Stage stage)
         {
             this.CommandList.Begin();
             foreach (var pass in this.Passes)
             {
-                pass.Render(this.CommandList, scene);
+                pass.Render(this.CommandList, stage);
             }
             this.CommandList.End();
         }
@@ -284,35 +284,26 @@ public class Renderer : IDisposable
     }
 
     /// <summary>
-    /// Gets or sets the current scene.
-    /// </summary>
-    public Scene? Scene { get; set; } = null;
-
-    /// <summary>
     /// Renders the scene.
     /// </summary>
-    /// <param name="scene">The scene to render.</param>
-    public void Render()
+    /// <param name="stage">The stage to render.</param>
+    public void Render(Stage stage)
     {
-        var scene = this.Scene;
-        if (scene == null) return;
-
         try
         {
-            scene.OnBeforeRender();
-            scene.RenderImGui();
+            stage.PrepareForRender();
 
             this._commandList.Begin();
             this.UpdateBuffers(this._commandList);
 
             this._commandList.SetFramebuffer(this.MainRenderTexture.Framebuffer);
 
-            ClearRenderTarget(this._commandList, scene);
+            ClearRenderTarget(this._commandList, stage.Scene);
             this._commandList.End();
 
             for (int i = 0; i < this._jobs.Count; i++)
             {
-                this._jobs[i].Execute(scene);
+                this._jobs[i].Execute(stage);
             }
 
             this.GraphicsDevice.WaitForIdle();

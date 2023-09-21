@@ -65,7 +65,7 @@ internal class FullScreenPass : IDisposable, IRenderingPass
         this._resourceLayout.Dispose();
     }
 
-    public void Render(CommandList cl, Scene scene)
+    public void Render(CommandList cl, Stage stage)
     {
         cl.SetFramebuffer(this._destinationTexture.Framebuffer);
         cl.SetPipeline(this._pipeline);

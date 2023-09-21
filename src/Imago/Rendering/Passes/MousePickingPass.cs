@@ -44,11 +44,8 @@ public class MousePickingPass : IDisposable, IRenderingPass
     }
 
 
-    public void Render(CommandList cl, Scene scene)
+    public void Render(CommandList cl, Stage stage)
     {
-        var stage = scene.Stage3D;
-        if (stage == null) return;
-
         var mousePos = this._mousePosition;
         if (this.MouseIsInside(mousePos))
         {

@@ -11,7 +11,7 @@ public abstract class Visual : ObservableObject
 {
     private string _name = string.Empty;
     private Visibility _visibility = Visibility.Visible;
-    private StageUI? _stage;
+    private GuiLayer? _stage;
     private float _opacity = 1f;
     private readonly List<Visual> _visualChildren = new List<Visual>();
     private bool _clipToBounds = false;
@@ -40,7 +40,7 @@ public abstract class Visual : ObservableObject
     /// Gets the stage the control is added to, or null if the control is not added yet to a stage.
     /// </summary>
 
-    public StageUI? Stage
+    public GuiLayer? Stage
     {
         get => this._stage;
         private set => this.SetProperty(ref this._stage, value);
@@ -219,7 +219,7 @@ public abstract class Visual : ObservableObject
 
     protected abstract Rect ArrangeCore(Rect finalRect);
 
-    public virtual void OnAddedToStage(StageUI stage)
+    public virtual void OnAddedToStage(GuiLayer stage)
     {
         if (this.Stage != null)
         {
@@ -235,7 +235,7 @@ public abstract class Visual : ObservableObject
         }
     }
 
-    public virtual void OnRemovedFromStage(StageUI stage)
+    public virtual void OnRemovedFromStage(GuiLayer stage)
     {
         if (this.Stage != stage)
         {

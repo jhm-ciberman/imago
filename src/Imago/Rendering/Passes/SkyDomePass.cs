@@ -114,12 +114,10 @@ public class SkyDomePass : IDisposable, IRenderingPass
         this._vertexBuffer.Dispose();
     }
 
-    public void Render(CommandList cl, Scene scene)
+    public void Render(CommandList cl, Stage stage)
     {
-        var stage = scene.Stage3D;
-        if (stage == null) return;
-
-        var camera = stage.Camera;
+        var scene = stage.Scene;
+        var camera = scene.Camera;
         if (camera == null) return;
 
         //this.LutTextureOffset = (this.LutTextureOffset + 0.0005f) % 1f;

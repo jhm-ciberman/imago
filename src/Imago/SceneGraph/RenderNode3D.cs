@@ -185,14 +185,14 @@ public class RenderNode3D : Node3D, IPickable
         this._renderable.Transform = this.WorldMatrix;
     }
 
-    internal override void AttachToStageRecursive(Stage3D stage)
+    internal override void AttachToStage(Stage stage)
     {
-        base.AttachToStageRecursive(stage);
+        base.AttachToStage(stage);
         this.UpdateRegistrationWithPickingManager();
         this._renderable.Visible = this._visible;
     }
 
-    internal override void DetachFromStageRecursive()
+    internal override void DetachFromStage()
     {
         if (this.Stage is null)
         {
@@ -201,7 +201,7 @@ public class RenderNode3D : Node3D, IPickable
 
         this._renderable.Visible = false;
         this.UpdateRegistrationWithPickingManager();
-        base.DetachFromStageRecursive();
+        base.DetachFromStage();
     }
 
     private void UpdateRegistrationWithPickingManager()

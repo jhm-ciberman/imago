@@ -85,7 +85,7 @@ public class Node3D : IDisposable, IFormattable
     /// <summary>
     /// Gets the scene this node is in or null if it is not in a scene.
     /// </summary>
-    public Stage3D? Stage { get; protected set; } = null;
+    public Stage? Stage { get; protected set; } = null;
 
     private Matrix4x4 _localMatrix = Matrix4x4.Identity;
     private Matrix4x4 _worldMatrix = Matrix4x4.Identity;
@@ -218,10 +218,13 @@ public class Node3D : IDisposable, IFormattable
     /// <param name="node">The node to add.</param>
     public void AddChild(Node3D node)
     {
-        // Prevent adding self as child
-        if (node.Parent == this || node == this) return;
+        // Already a child
+        if (node.Parent == this) return;
 
-        // If node already has a parent, remove it from that parent
+        // Prevent adding self as child
+        if (node == this) throw new ArgumentException("Cannot add self as child", nameof(node));
+
+        // Remove from old parent
         node.Parent?.RemoveChild(node);
 
         // Set node's parent to this
@@ -229,10 +232,10 @@ public class Node3D : IDisposable, IFormattable
 
         node.Parent = this;
 
-        // If the current node has a scene, add the node to the scene
+        // If the current node has a stage, add the node to the stage
         if (this.Stage != null)
         {
-            node.AttachToStageRecursive(this.Stage);
+            node.AttachToStage(this.Stage);
         }
     }
 
@@ -242,7 +245,7 @@ public class Node3D : IDisposable, IFormattable
     /// <param name="node">The node to remove.</param>
     public void RemoveChild(Node3D node)
     {
-        if (node.Parent != this) return;
+        if (node.Parent != this) throw new ArgumentException("Node is not a child of this node.", nameof(node));
 
         this._children.Remove(node);
 
@@ -250,7 +253,7 @@ public class Node3D : IDisposable, IFormattable
 
         if (node.Stage != null)
         {
-            node.DetachFromStageRecursive();
+            node.DetachFromStage();
         }
     }
 
@@ -264,20 +267,30 @@ public class Node3D : IDisposable, IFormattable
         node.Dispose();
     }
 
-    internal virtual void AttachToStageRecursive(Stage3D stage)
+    /// <summary>
+    /// Attaches this node to the given stage.
+    /// </summary>
+    /// <param name="stage">The stage to attach to.</param>
+    internal virtual void AttachToStage(Stage stage)
     {
-        if (this.Stage != null) return;
+        if (this.Stage != null)
+        {
+            throw new InvalidOperationException("Cannot attach to stage if already attached to one. Please detach first.");
+        }
 
         this.Stage = stage;
         this.Stage.NotifyTransformDirty(this);
 
         foreach (var child in this._children)
         {
-            child.AttachToStageRecursive(stage);
+            child.AttachToStage(stage);
         }
     }
 
-    internal virtual void DetachFromStageRecursive()
+    /// <summary>
+    /// Detaches this node from the current stage.
+    /// </summary>
+    internal virtual void DetachFromStage()
     {
         if (this.Stage == null) return;
 
@@ -286,7 +299,7 @@ public class Node3D : IDisposable, IFormattable
 
         foreach (var child in this._children)
         {
-            child.DetachFromStageRecursive();
+            child.DetachFromStage();
         }
     }
 
@@ -312,19 +325,6 @@ public class Node3D : IDisposable, IFormattable
         GC.SuppressFinalize(this);
     }
 
-    /*
-    public override string ToString()
-    {
-        if (string.IsNullOrEmpty(this.Name))
-        {
-            return this.GetType().Name;
-        }
-        else
-        {
-            return $"{this.GetType().Name}: {this.Name}";
-        }
-    }*/
-
     /// <summary>
     /// Returns a string representation of this node.
     /// </summary>
@@ -344,7 +344,7 @@ public class Node3D : IDisposable, IFormattable
     {
         if (string.IsNullOrEmpty(format))
         {
-            format = "G";
+            return this.Name;
         }
 
         var sb = new System.Text.StringBuilder();

@@ -7,7 +7,7 @@ using Support;
 
 namespace Imago.Controls;
 
-public class StageUI
+public class GuiLayer
 {
     public Viewport Viewport { get; }
 
@@ -32,7 +32,7 @@ public class StageUI
     /// </summary>
     public bool SnapToPixels { get; set; } = true;
 
-    public StageUI(Viewport viewport)
+    public GuiLayer(Viewport viewport)
     {
         this.Viewport = viewport;
         this.Viewport.Resized += this.Viewport_Resized;
