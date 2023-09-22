@@ -1,5 +1,6 @@
 using System;
 using System.Numerics;
+using Imago.Rendering.Materials;
 using Support;
 
 namespace Imago.Rendering;

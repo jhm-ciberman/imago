@@ -2,6 +2,7 @@ using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Imago.Rendering;
+using Imago.Rendering.Materials;
 using Support;
 
 namespace Imago.SceneGraph;

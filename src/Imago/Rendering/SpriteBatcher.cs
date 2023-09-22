@@ -6,6 +6,7 @@ using FontStashSharp.Interfaces;
 using Imago.TexturePacking;
 using Support;
 using Veldrid;
+using Shader = Imago.Rendering.Materials.Shader;
 
 namespace Imago.Rendering;
 

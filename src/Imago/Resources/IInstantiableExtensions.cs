@@ -1,5 +1,5 @@
 using System.Numerics;
-using Imago.Rendering;
+using Imago.Rendering.Materials;
 using Imago.SceneGraph;
 
 namespace Imago.Resources;

@@ -1,6 +1,6 @@
 using System;
 using System.Numerics;
-using Imago.Rendering;
+using Imago.Rendering.Materials;
 using Imago.Support;
 using Imago.TexturePacking;
 using Veldrid.Utilities;

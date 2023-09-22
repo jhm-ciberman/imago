@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using Imago.Rendering.Materials;
 using Imago.SceneGraph;
 using Veldrid;
 

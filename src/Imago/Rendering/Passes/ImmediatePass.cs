@@ -3,9 +3,11 @@ using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using Imago.Meshes;
+using Imago.Rendering.Materials;
 using Imago.SceneGraph;
 using Support;
 using Veldrid;
+using Shader = Imago.Rendering.Materials.Shader;
 
 namespace Imago.Rendering.Passes;
 

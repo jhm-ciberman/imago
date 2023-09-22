@@ -1,6 +1,8 @@
 using System;
+using Imago.Rendering.Materials;
 using Imago.SceneGraph;
 using Veldrid;
+using Shader = Imago.Rendering.Materials.Shader;
 
 namespace Imago.Rendering.Passes;
 

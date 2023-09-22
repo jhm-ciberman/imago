@@ -1,6 +1,7 @@
 using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using Imago.Rendering.Materials;
 using Imago.Rendering.Passes;
 using Veldrid.Utilities;
 

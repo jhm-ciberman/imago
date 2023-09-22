@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Veldrid;
+using Shader = Imago.Rendering.Materials.Shader;
 
 namespace Imago.Rendering;
 

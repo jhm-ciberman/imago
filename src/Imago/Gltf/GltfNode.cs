@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Numerics;
 using Imago.Rendering;
+using Imago.Rendering.Materials;
 using Imago.Resources;
 using Imago.SceneGraph;
 

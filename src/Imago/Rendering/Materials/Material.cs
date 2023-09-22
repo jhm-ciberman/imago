@@ -1,7 +1,7 @@
 using System;
 using Veldrid;
 
-namespace Imago.Rendering;
+namespace Imago.Rendering.Materials;
 
 public class Material
 {
@@ -36,9 +36,7 @@ public class Material
         this.Id = ++_count;
 
         if (forwardShader.MaterialResourceLayout != shadowMapShader.MaterialResourceLayout)
-        {
             throw new ArgumentException("Forward and shadowmap shaders must use the same resource layout.");
-        }
 
         this.ForwardShader = forwardShader;
         this.ShadowMapShader = shadowMapShader;

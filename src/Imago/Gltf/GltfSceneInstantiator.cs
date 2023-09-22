@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Imago.Rendering;
+using Imago.Rendering.Materials;
 using Imago.SceneGraph;
 
 namespace Imago.Gltf;

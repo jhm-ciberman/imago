@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Veldrid;
 using Veldrid.SPIRV;
 
-namespace Imago.Rendering;
+namespace Imago.Rendering.Materials;
 
 public static class ShaderCompiler
 {

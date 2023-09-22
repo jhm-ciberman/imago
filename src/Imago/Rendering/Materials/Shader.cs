@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Veldrid;
 
-namespace Imago.Rendering;
+namespace Imago.Rendering.Materials;
 
 public class Shader : IDisposable
 {

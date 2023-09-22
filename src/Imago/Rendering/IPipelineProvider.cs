@@ -1,3 +1,5 @@
+using Imago.Rendering.Materials;
+
 namespace Imago.Rendering;
 
 public interface IPipelineProvider
