@@ -3,7 +3,7 @@ using System.Numerics;
 using Imago.SceneGraph;
 using Veldrid.Utilities;
 
-namespace Imago.Rendering.Passes;
+namespace Imago.Rendering.Forward;
 
 internal class ShadowCascade
 {

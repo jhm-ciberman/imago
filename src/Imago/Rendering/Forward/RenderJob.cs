@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Veldrid;
 
-namespace Imago.Rendering.Passes;
+namespace Imago.Rendering.Forward;
 
 internal class RenderJob
 {

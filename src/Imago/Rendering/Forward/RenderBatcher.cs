@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Veldrid;
 
-namespace Imago.Rendering.Passes;
+namespace Imago.Rendering.Forward;
 
 internal class RenderBatcher
 {
@@ -58,9 +58,7 @@ internal class RenderBatcher
         if (this._offsetsVertexBuffer == null || this._offsetsVertexBuffer.SizeInBytes < requiredSizeInBytes)
         {
             if (this._offsetsVertexBuffer != null)
-            {
                 this._gd.DisposeWhenIdle(this._offsetsVertexBuffer);
-            }
 
             this._offsetsVertexBuffer = this._gd.ResourceFactory.CreateBuffer(new BufferDescription(
                 requiredSizeInBytes, BufferUsage.VertexBuffer | BufferUsage.Dynamic

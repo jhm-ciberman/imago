@@ -9,7 +9,7 @@ using Veldrid;
 using Veldrid.Utilities;
 using Shader = Imago.Rendering.Materials.Shader;
 
-namespace Imago.Rendering.Passes;
+namespace Imago.Rendering.Forward;
 
 internal class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
 {

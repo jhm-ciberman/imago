@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using Veldrid.Utilities;
 
-namespace Imago.Rendering.Passes;
+namespace Imago.Rendering.Forward;
 
 [Flags]
 internal enum RenderQueues : byte

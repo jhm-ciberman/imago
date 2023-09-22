@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace Imago.Rendering;
+namespace Imago.Rendering.Forward;
 
 internal struct DataBlock : IDisposable
 {
@@ -29,13 +29,13 @@ internal struct DataBlock : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Write<T>(ref T data) where T : unmanaged
     {
-        this.Buffer.Write<T>(this.Offset, ref data);
+        this.Buffer.Write(this.Offset, ref data);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void WriteSpan<T>(ReadOnlySpan<T> data) where T : unmanaged
     {
-        this.Buffer.WriteSpan<T>(this.Offset, data);
+        this.Buffer.WriteSpan(this.Offset, data);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

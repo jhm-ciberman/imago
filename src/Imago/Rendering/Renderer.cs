@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
+using Imago.Rendering.Forward;
 using Imago.Rendering.Materials;
 using Imago.Rendering.Passes;
 using Imago.SceneGraph;

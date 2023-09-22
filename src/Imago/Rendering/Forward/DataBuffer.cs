@@ -3,12 +3,12 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Veldrid;
 
-namespace Imago.Rendering;
+namespace Imago.Rendering.Forward;
 
 internal class DataBuffer : IDisposable
 {
     private static int _count = 0;
-    private readonly IntPtr _data;
+    private readonly nint _data;
     private readonly int[] _freeList;
     private int _freeListCount = 0;
     private readonly GraphicsDevice _gd;
@@ -62,7 +62,7 @@ internal class DataBuffer : IDisposable
         this.BlockSize = blockSize;
         this.BlocksCount = blocksCount;
         this.SizeInBytes = this.BlocksCount * this.BlockSize;
-        this._data = Marshal.AllocHGlobal((int)this.SizeInBytes);
+        this._data = Marshal.AllocHGlobal(this.SizeInBytes);
         fixed (void* dataPtr = &this._data)
         {
             Unsafe.InitBlockUnaligned((byte*)this._data, 0, (uint)this.SizeInBytes);
@@ -106,9 +106,7 @@ internal class DataBuffer : IDisposable
     public DataBlock RequestBlock()
     {
         if (this._freeListCount == 0)
-        {
             throw new InvalidOperationException($"No free blocks left in buffer {this.Name}. This should never happen.");
-        }
 
         this._freeListCount--;
         return new DataBlock(this, this._freeList[this._freeListCount]);

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using Imago.Rendering.Forward;
 using Imago.SceneGraph;
 
 namespace Imago.Rendering;
@@ -12,10 +13,6 @@ public class Skeleton : IDisposable
     public IList<Matrix4x4> InverseBindMatrices { get; }
 
     public Veldrid.ResourceSet ResourceSet { get; }
-
-    public int BufferId => this._dataBlock.Buffer.Id;
-
-    internal DataBuffer Buffer => this._dataBlock.Buffer;
 
     public uint BoneDataOffset => this._dataBlock.BlockIndex * MAX_NUMBER_OF_BONES;
 

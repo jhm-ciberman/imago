@@ -1,7 +1,7 @@
 using System.Diagnostics.Contracts;
 using Veldrid;
 
-namespace Imago.Rendering;
+namespace Imago.Rendering.Forward;
 
 internal readonly struct RenderBatch
 {
