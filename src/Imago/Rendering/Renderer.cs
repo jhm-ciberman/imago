@@ -478,7 +478,7 @@ public class Renderer : IDisposable
             }
         }
 
-        lock (this._instanceDataBuffers)
+        lock (this._skeletonDataBuffers)
         {
             for (int i = 0; i < this._skeletonDataBuffers.Count; i++)
             {
