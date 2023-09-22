@@ -101,13 +101,30 @@ public class ParticlesPass : IDisposable
         };
 
         var shaders = ShaderCompiler.CompileShaders(this._gd, _vertexShader, _fragmentShader);
-        var shaderSet = new ShaderSetDescription(vertexLayouts, shaders);
-        this._pipeline = this.MakePipeline(shaderSet, this._materialResourceLayout);
+
+        this._pipeline = this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
+        {
+            DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
+            PrimitiveTopology = PrimitiveTopology.TriangleStrip,
+            ShaderSet = new ShaderSetDescription(vertexLayouts, shaders),
+            BlendState = BlendStateDescription.SingleAlphaBlend,
+            RasterizerState = new RasterizerStateDescription(
+                FaceCullMode.None,
+                PolygonFillMode.Solid,
+                FrontFace.Clockwise,
+                depthClipEnabled: true,
+                scissorTestEnabled: false
+            ),
+            Outputs = this._renderTexture.OutputDescription,
+            ResourceLayouts = new ResourceLayout[]
+            {
+                this._passResourceLayout,
+                this._materialResourceLayout,
+            },
+        });
     }
 
-
-
-    public void Render(CommandList cl, Stage stage)
+    public void Render(CommandList cl, Stage stage, RenderTexture renderTexture)
     {
         var scene = stage.Scene;
         var camera = scene.Camera;
@@ -117,7 +134,7 @@ public class ParticlesPass : IDisposable
 
         this._currentTexture = null;
 
-        cl.SetFramebuffer(this._renderTexture.Framebuffer);
+        cl.SetFramebuffer(renderTexture.Framebuffer);
         cl.SetPipeline(this._pipeline);
         cl.SetGraphicsResourceSet(0, this._passResourceSet);
 
@@ -187,31 +204,6 @@ public class ParticlesPass : IDisposable
         resourceSet = this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(this._materialResourceLayout, texture.VeldridTexture, texture.VeldridSampler));
         this._textures.Add(texture, resourceSet);
         return resourceSet;
-    }
-
-    private Pipeline MakePipeline(ShaderSetDescription shaderSetDescription, ResourceLayout materialResourceLayout)
-    {
-        var rasterizerState = new RasterizerStateDescription(
-            FaceCullMode.None,
-            PolygonFillMode.Solid,
-            FrontFace.Clockwise,
-            depthClipEnabled: true,
-            scissorTestEnabled: false
-        );
-
-        return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
-        {
-            DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
-            PrimitiveTopology = PrimitiveTopology.TriangleStrip,
-            ShaderSet = shaderSetDescription,
-            BlendState = BlendStateDescription.SingleAlphaBlend,
-            RasterizerState = rasterizerState,
-            Outputs = this._renderTexture.OutputDescription,
-            ResourceLayouts = new ResourceLayout[] {
-                    this._passResourceLayout,
-                    materialResourceLayout,
-                },
-        });
     }
 
     public void Dispose()

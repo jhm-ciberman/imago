@@ -54,14 +54,14 @@ public class SpritesPass : IDisposable, IPipelineProvider
         });
     }
 
-    public void Render(CommandList cl, Stage stage)
+    public void Render(CommandList cl, Stage stage, RenderTexture renderTexture)
     {
         var gui = stage.Scene.Gui;
         if (gui == null) return;
 
         this.DrawCallCount = 0;
 
-        cl.SetFramebuffer(this._renderTexture.Framebuffer);
+        cl.SetFramebuffer(renderTexture.Framebuffer);
         cl.ClearDepthStencil(1f);
 
         this._spriteBatcher.Begin(cl, gui.ViewProjectionMatrix);

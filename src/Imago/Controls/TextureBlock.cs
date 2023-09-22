@@ -12,13 +12,13 @@ public class TextureBlock : Control
         //
     }
 
-    public TextureBlock(Texture texture, Vector2 size) : base()
+    public TextureBlock(ITexture texture, Vector2 size) : base()
     {
         this.Texture = texture;
         this.Size = size;
     }
 
-    public TextureBlock(Texture texture)
+    public TextureBlock(ITexture texture)
     {
         this.Texture = texture;
         this.Size = new Vector2(texture.Width, texture.Height);
@@ -35,7 +35,7 @@ public class TextureBlock : Control
         this.Size = size;
     }
 
-    public Texture? Texture { get; set; }
+    public ITexture? Texture { get; set; }
 
     public Shader? Shader { get; set; }
 

@@ -125,15 +125,13 @@ public class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
         this._defaultTexture = Textures.White;
     }
 
-    public void Render(CommandList cl, Stage stage)
+    public void Render(CommandList cl, Stage stage, RenderTexture renderTexture)
     {
         var scene = stage.Scene;
         var camera = scene.Camera;
         if (camera == null) return;
 
         if (scene.ImmediateRenderables.Count == 0) return;
-
-        if (this._renderTexture is not RenderTexture renderTexture) return;
 
         cl.SetFramebuffer(renderTexture.ColorOnlyFramebuffer);
         this.Begin(cl, camera.ViewProjectionMatrix);

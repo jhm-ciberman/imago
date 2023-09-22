@@ -53,8 +53,10 @@ public class SkyDomePass : IDisposable
     public SkyDomePass(Renderer renderer, IRenderTexture renderTexture, ITexture lutTexture)
     {
         this._gd = renderer.GraphicsDevice;
-        var factory = this._gd.ResourceFactory;
+        this._lutTexture = lutTexture;
         this._renderTexture = renderTexture;
+
+        var factory = this._gd.ResourceFactory;
 
         int subdivisions = 40;
 
@@ -85,9 +87,24 @@ public class SkyDomePass : IDisposable
             (uint)Marshal.SizeOf<PassData>(), BufferUsage.UniformBuffer));
 
         var shaders = ShaderCompiler.CompileShaders(this._gd, _vertexCode, _fragmentCode);
-        this._pipeline = this.MakePipeline(new ShaderSetDescription(new[] { vertexFormat }, shaders));
+        this._pipeline = this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
+        {
+            DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
+            PrimitiveTopology = PrimitiveTopology.TriangleList,
+            ShaderSet = new ShaderSetDescription(new[] { vertexFormat }, shaders),
+            BlendState = BlendStateDescription.SingleOverrideBlend,
+            RasterizerState = new RasterizerStateDescription(
+                FaceCullMode.Front,
+                PolygonFillMode.Solid,
+                FrontFace.Clockwise,
+                depthClipEnabled: true,
+                scissorTestEnabled: false
+            ),
+            Outputs = this._renderTexture.OutputDescription,
+            ResourceLayouts = new ResourceLayout[] { this._resourceLayout },
+        });
 
-        this._lutTexture = lutTexture;
+
 
         this._sampler = factory.CreateSampler(new SamplerDescription(
             SamplerAddressMode.Clamp, SamplerAddressMode.Clamp, SamplerAddressMode.Clamp,
@@ -115,7 +132,7 @@ public class SkyDomePass : IDisposable
         this._vertexBuffer.Dispose();
     }
 
-    public void Render(CommandList cl, Stage stage)
+    public void Render(CommandList cl, Stage stage, RenderTexture renderTexture)
     {
         var scene = stage.Scene;
         var camera = scene.Camera;
@@ -130,7 +147,7 @@ public class SkyDomePass : IDisposable
             LutTextureOffset = new Vector2(this.LutTextureOffset, 0.75f / 24f),
         };
 
-        cl.SetFramebuffer(this._renderTexture.Framebuffer);
+        cl.SetFramebuffer(renderTexture.Framebuffer);
         cl.SetFullViewports();
         cl.SetPipeline(this._pipeline);
 
@@ -142,29 +159,6 @@ public class SkyDomePass : IDisposable
         cl.UpdateBuffer(this._passDataBuffer, 0, ref passData);
 
         cl.DrawIndexed((uint)this._indexCount, 1, 0, 0, 0);
-    }
-
-
-    private Pipeline MakePipeline(ShaderSetDescription shaderSetDescription)
-    {
-        var rasterizerState = new RasterizerStateDescription(
-            FaceCullMode.Front,
-            PolygonFillMode.Solid,
-            FrontFace.Clockwise,
-            depthClipEnabled: true,
-            scissorTestEnabled: false
-        );
-
-        return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
-        {
-            DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
-            PrimitiveTopology = PrimitiveTopology.TriangleList,
-            ShaderSet = shaderSetDescription,
-            BlendState = BlendStateDescription.SingleOverrideBlend,
-            RasterizerState = rasterizerState,
-            Outputs = this._renderTexture.OutputDescription,
-            ResourceLayouts = new ResourceLayout[] { this._resourceLayout },
-        });
     }
 
     private static (Vertex[] Vertices, ushort[] Indices) MakeSphereMesh(int subdivisions)

@@ -55,10 +55,28 @@ internal class GizmosPass : IDisposable
         );
 
         var shaders = ShaderCompiler.CompileShaders(this._gd, this._vertex, this._fragment);
-        this._pipeline = this.MakePipeline(new ShaderSetDescription(new[] { vertexLayout }, shaders));
+        this._pipeline = this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
+        {
+            DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
+            PrimitiveTopology = PrimitiveTopology.LineList,
+            ShaderSet = new ShaderSetDescription(new[] { vertexLayout }, shaders),
+            BlendState = BlendStateDescription.SingleAlphaBlend,
+            RasterizerState = new RasterizerStateDescription(
+                FaceCullMode.None,
+                PolygonFillMode.Wireframe,
+                FrontFace.Clockwise,
+                depthClipEnabled: true,
+                scissorTestEnabled: false
+            ),
+            Outputs = this._renderTexture.OutputDescription,
+            ResourceLayouts = new ResourceLayout[]
+            {
+                this._passResourceLayout,
+            },
+        });
     }
 
-    public void Render(CommandList cl, Stage stage)
+    public void Render(CommandList cl, Stage stage, RenderTexture renderTexture)
     {
         var scene = stage.Scene;
         var camera = scene.Camera;
@@ -66,7 +84,7 @@ internal class GizmosPass : IDisposable
 
         if (stage.Gizmos.Lines.Count == 0) return;
 
-        cl.SetFramebuffer(this._renderTexture.Framebuffer);
+        cl.SetFramebuffer(renderTexture.Framebuffer);
         cl.SetPipeline(this._pipeline);
 
         var viewProjectionMatrix = camera.ViewProjectionMatrix;
@@ -101,31 +119,6 @@ internal class GizmosPass : IDisposable
         cl.SetGraphicsResourceSet(0, this._passResourceSet);
         cl.Draw((uint)this._verticesCount);
         this._verticesCount = 0;
-    }
-
-    private Pipeline MakePipeline(ShaderSetDescription shaderSetDescription)
-    {
-        var rasterizerState = new RasterizerStateDescription(
-            FaceCullMode.None,
-            PolygonFillMode.Wireframe,
-            FrontFace.Clockwise,
-            depthClipEnabled: true,
-            scissorTestEnabled: false
-        );
-
-        return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
-        {
-            DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
-            PrimitiveTopology = PrimitiveTopology.LineList,
-            ShaderSet = shaderSetDescription,
-            BlendState = BlendStateDescription.SingleAlphaBlend,
-            RasterizerState = rasterizerState,
-            Outputs = this._renderTexture.OutputDescription,
-            ResourceLayouts = new ResourceLayout[]
-            {
-                this._passResourceLayout,
-            },
-        });
     }
 
     public void Dispose()

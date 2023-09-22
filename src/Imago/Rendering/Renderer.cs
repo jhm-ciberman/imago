@@ -233,42 +233,19 @@ public class Renderer : IDisposable
     }
 
     /// <summary>
-    /// Renders the scene.
+    /// Renders the scene to the screen.
     /// </summary>
     /// <param name="stage">The stage to render.</param>
     public void Render(Stage stage)
     {
-        stage.PrepareForRender();
         try
         {
-
-            var cl = this._commandList;
-
-            cl.Begin();
-            this.UpdateBuffers(cl);
-
-            this._shadowPass.Render(cl, stage);
-
-            cl.SetFramebuffer(this.MainRenderTexture.Framebuffer);
-            ClearRenderTarget(cl, stage.Scene);
-
-
-            this._forwardPass.Render(cl, stage);
-            this._immediatePass.Render(cl, stage);
-            this._skyDomePass.Render(cl, stage);
-            this._mousePickerPass.Render(cl, stage);
-            this._particlesPass.Render(cl, stage);
-            this._gizmosPass.Render(cl, stage);
-            this._spritesPass.Render(cl, stage);
-            this._imGuiPass.Render(cl, stage);
-            this._fullScreenPass.Render(cl, stage);
-            cl.End();
+            this.RenderCore(this._commandList, stage, this.MainRenderTexture);
 
             this.GraphicsDevice.WaitForIdle();
             this._fence.Reset();
 
-            this.GraphicsDevice.SubmitCommands(cl, this._fence);
-
+            this.GraphicsDevice.SubmitCommands(this._commandList, this._fence);
 
             this._disposeCollector.DisposeAll();
 
@@ -287,12 +264,64 @@ public class Renderer : IDisposable
         }
     }
 
-    private static void ClearRenderTarget(CommandList commandList, Scene scene)
+
+    /// <summary>
+    /// Renders the scene to the given render texture.
+    /// </summary>
+    /// <param name="stage">The stage to render.</param>
+    /// <param name="renderTexture">The render texture to render to.</param>
+    public void RenderToOffScreenTexture(Stage stage, RenderTexture renderTexture)
     {
-        if (scene.ClearColor != null)
+        this.RenderCore(this._commandList, stage, renderTexture);
+
+        this.GraphicsDevice.SubmitCommands(this._commandList, this._fence);
+    }
+
+
+    private void RenderCore(CommandList cl, Stage stage, RenderTexture renderTexture)
+    {
+        stage.PrepareForRender();
+
+        cl.Begin();
+        this.UpdateBuffers(cl);
+
+        this._shadowPass.Render(cl, stage);
+
+        cl.SetFramebuffer(renderTexture.Framebuffer);
+        ClearRenderTarget(cl, stage.Scene);
+
+        this._forwardPass.Render(cl, stage, renderTexture);
+        this._immediatePass.Render(cl, stage, renderTexture);
+        this._skyDomePass.Render(cl, stage, renderTexture);
+        this._mousePickerPass.Render(cl, stage);
+        this._particlesPass.Render(cl, stage, renderTexture);
+        this._gizmosPass.Render(cl, stage, renderTexture);
+        this._spritesPass.Render(cl, stage, renderTexture);
+
+        this._imGuiPass.Render(cl, renderTexture);
+
+        if (renderTexture == this.MainRenderTexture)
         {
-            ColorF col = scene.ClearColor.Value;
-            commandList.ClearColorTarget(0, new RgbaFloat(col.R, col.G, col.B, col.A));
+            this._fullScreenPass.Render(cl);
+        }
+
+        cl.End();
+    }
+
+    private void HandleException(VeldridException e)
+    {
+
+    }
+
+    private static void ClearRenderTarget(CommandList cl, Scene scene)
+    {
+        ColorF? clearColor = scene.Camera?.ClearColor ?? scene.ClearColor;
+        if (clearColor != null)
+        {
+            var col = clearColor.Value;
+            cl.ClearColorTarget(0, new RgbaFloat(col.R, col.G, col.B, col.A));
+            cl.ClearColorTarget(1, RgbaFloat.Black);
+            cl.ClearDepthStencil(1f);
         }
     }
 

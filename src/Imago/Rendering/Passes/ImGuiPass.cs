@@ -54,9 +54,9 @@ public class ImGuiPass : IDisposable
         return this._imguiRenderer.GetOrCreateImGuiBinding(this._gd.ResourceFactory, texture.VeldridTexture);
     }
 
-    public void Render(CommandList cl, Stage stage)
+    public void Render(CommandList cl, RenderTexture renderTexture)
     {
-        cl.SetFramebuffer(this._renderTexture.Framebuffer);
+        cl.SetFramebuffer(renderTexture.Framebuffer);
         this._imguiRenderer.Render(this._gd, cl);
     }
 }

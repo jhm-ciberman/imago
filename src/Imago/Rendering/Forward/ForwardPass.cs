@@ -103,7 +103,7 @@ internal class ForwardPass : IDisposable, IPipelineProvider
         ));
     }
 
-    public void Render(CommandList cl, Stage stage)
+    public void Render(CommandList cl, Stage stage, RenderTexture renderTexture)
     {
         var scene = stage.Scene;
         var camera = scene.Camera;
@@ -115,16 +115,7 @@ internal class ForwardPass : IDisposable, IPipelineProvider
         this._opaqueRenderQueue.Update(frustumForCulling, camera.Position);
         this._transparentRenderQueue.Update(frustumForCulling, camera.Position);
 
-        cl.SetFramebuffer(this._renderTexture.Framebuffer);
-
-        if (camera.ClearColor != null)
-        {
-            ColorF clearColor = camera.ClearColor.Value;
-            cl.ClearColorTarget(0, new RgbaFloat(clearColor.R, clearColor.G, clearColor.B, clearColor.A));
-            cl.ClearColorTarget(1, RgbaFloat.Black);
-            cl.ClearDepthStencil(1f);
-        }
-
+        cl.SetFramebuffer(renderTexture.Framebuffer);
 
         CameraDataBuffer cameraInfo = new CameraDataBuffer();
         cameraInfo.ViewProjectionMatrix = camera.ViewProjectionMatrix;

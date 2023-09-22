@@ -80,7 +80,7 @@ public class ShadowPass : IDisposable, IPipelineProvider
         this.DefaultShader = new Shader(renderer, this, shadowmapVertex, shadowmapFragment, new[] { "Surface" }, supportedShadowMapFlags);
     }
 
-    public void Render(CommandList commandList, Stage stage)
+    public void Render(CommandList cl, Stage stage)
     {
         var scene = stage.Scene;
         var camera = scene.Camera;
@@ -95,8 +95,8 @@ public class ShadowPass : IDisposable, IPipelineProvider
 
         for (int i = 0; i < cascadesCount; i++)
         {
-            commandList.SetFramebuffer(this.ShadowmapTexture.Framebuffers[i]);
-            commandList.ClearDepthStencil(1f);
+            cl.SetFramebuffer(this.ShadowmapTexture.Framebuffers[i]);
+            cl.ClearDepthStencil(1f);
 
             float near = this._splitDistances[i];
             float far = this._splitDistances[i + 1];
@@ -111,8 +111,8 @@ public class ShadowPass : IDisposable, IPipelineProvider
             data.ShadowBias = new Vector2(this._cascades[i].DepthBias, this._cascades[i].NormalOffset);
             data.LightDirection = mainLight.Direction;
 
-            commandList.UpdateBuffer(this._shadowmapInfoBuffer, 0, data);
-            this._renderJob.DrawRenderList(commandList, this._resourceSet, this._renderQueues[i]);
+            cl.UpdateBuffer(this._shadowmapInfoBuffer, 0, data);
+            this._renderJob.DrawRenderList(cl, this._resourceSet, this._renderQueues[i]);
         }
     }
 

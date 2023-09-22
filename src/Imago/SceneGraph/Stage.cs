@@ -42,6 +42,16 @@ public class Stage
     /// </summary>
     public Scene Scene { get; private set; } = _emptyScene;
 
+    private readonly List<Node3D> _transformDirtyList = new List<Node3D>();
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Stage"/> class.
+    /// </summary>
+    public Stage()
+    {
+        //
+    }
+
     /// <summary>
     /// Changes the current scene.
     /// </summary>
@@ -57,32 +67,13 @@ public class Stage
         this.SceneChanged?.Invoke(this, new SceneChangedEventArgs(old, this.Scene));
     }
 
-
-    public virtual void PrepareForRender()
+    /// <summary>
+    /// Prepares the stage for rendering. This method should be called before rendering a new frame.
+    /// </summary>
+    public void PrepareForRender()
     {
         this.Scene.PrepareForRender();
         this.Scene.RenderImGui();
-    }
-
-    private readonly List<Node3D> _transformDirtyList = new List<Node3D>();
-
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="Stage"/> class.
-    /// </summary>
-    public Stage()
-    {
-        //
-    }
-
-    /// <summary>
-    /// Updates the scene.
-    /// </summary>
-    /// <param name="deltaTime">The time since the last update in seconds.</param>
-    public virtual void Update(float deltaTime)
-    {
-        this.Gizmos.Update(deltaTime);
-        this.Scene.Update(deltaTime);
 
         if (this._transformDirtyList.Count == 0) return;
 
@@ -104,6 +95,16 @@ public class Stage
         }
 
         this._transformDirtyList.Clear();
+    }
+
+    /// <summary>
+    /// Updates the scene.
+    /// </summary>
+    /// <param name="deltaTime">The time since the last update in seconds.</param>
+    public virtual void Update(float deltaTime)
+    {
+        this.Gizmos.Update(deltaTime);
+        this.Scene.Update(deltaTime);
     }
 
     /// <summary>

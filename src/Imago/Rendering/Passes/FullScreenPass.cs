@@ -40,8 +40,17 @@ internal class FullScreenPass : IDisposable
         ));
 
         var shaders = ShaderCompiler.CompileShaders(this._gd, _vertexCode, _fragmentCode);
-        var shaderSet = new ShaderSetDescription(new[] { vertexLayouts }, shaders);
-        this._pipeline = this.MakePipeline(shaderSet, this._resourceLayout);
+
+        this._pipeline = this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription
+        {
+            DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
+            PrimitiveTopology = PrimitiveTopology.TriangleList,
+            ShaderSet = new ShaderSetDescription(new[] { vertexLayouts }, shaders),
+            BlendState = BlendStateDescription.SingleOverrideBlend,
+            RasterizerState = RasterizerStateDescription.CullNone,
+            Outputs = this._destinationTexture.OutputDescription,
+            ResourceLayouts = new ResourceLayout[] { this._resourceLayout },
+        });
 
         this._vertexBuffer = factory.CreateBuffer(new BufferDescription(16 * 6, BufferUsage.VertexBuffer));
         (float top, float bottom) = this._gd.IsUvOriginTopLeft ? (1f, 0f) : (0f, 1f);
@@ -66,7 +75,7 @@ internal class FullScreenPass : IDisposable
         this._resourceLayout.Dispose();
     }
 
-    public void Render(CommandList cl, Stage stage)
+    public void Render(CommandList cl)
     {
         cl.SetFramebuffer(this._destinationTexture.Framebuffer);
         cl.SetPipeline(this._pipeline);
@@ -80,20 +89,6 @@ internal class FullScreenPass : IDisposable
         this._resourceSet?.Dispose();
         this._resourceSet = this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(
             this._resourceLayout, this._sourceTexture.VeldridTexture, this._gd.LinearSampler));
-    }
-
-    private Pipeline MakePipeline(ShaderSetDescription shaderSetDescription, ResourceLayout resourceLayout)
-    {
-        return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription
-        {
-            DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
-            PrimitiveTopology = PrimitiveTopology.TriangleList,
-            ShaderSet = shaderSetDescription,
-            BlendState = BlendStateDescription.SingleOverrideBlend,
-            RasterizerState = RasterizerStateDescription.CullNone,
-            Outputs = this._destinationTexture.OutputDescription,
-            ResourceLayouts = new ResourceLayout[] { resourceLayout },
-        });
     }
 
     private static readonly string _vertexCode = @"#version 450
