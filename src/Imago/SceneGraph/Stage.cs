@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Imago.Rendering.Forward;
 
 namespace Imago.SceneGraph;
 
@@ -44,12 +45,21 @@ public class Stage
 
     private readonly List<Node3D> _transformDirtyList = new List<Node3D>();
 
+    internal RenderQueue OpaqueRenderQueue { get; } = new RenderQueue(RenderQueues.Opaque);
+
+    internal RenderQueue TransparentRenderQueue { get; } = new RenderQueue(RenderQueues.Transparent);
+
+    internal RenderQueue[] ShadowCasterRenderQueues { get; } = new RenderQueue[4];
+
     /// <summary>
     /// Initializes a new instance of the <see cref="Stage"/> class.
     /// </summary>
     public Stage()
     {
-        //
+        for (int i = 0; i < this.ShadowCasterRenderQueues.Length; i++)
+        {
+            this.ShadowCasterRenderQueues[i] = new RenderQueue(RenderQueues.ShadowCaster);
+        }
     }
 
     /// <summary>

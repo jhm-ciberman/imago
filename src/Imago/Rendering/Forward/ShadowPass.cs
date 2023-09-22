@@ -36,9 +36,6 @@ public class ShadowPass : IDisposable, IPipelineProvider
     private Matrix4x4 _scalingMatrix;
 
     private readonly float[] _splitDistances = new float[5]; // 4 splits + 1 for far plane
-
-    private readonly RenderQueue[] _renderQueues;
-
     public Shader DefaultShader { get; }
 
     public ShadowPass(Renderer renderer)
@@ -46,12 +43,6 @@ public class ShadowPass : IDisposable, IPipelineProvider
         this._renderer = renderer;
         this._gd = renderer.GraphicsDevice;
         var factory = this._gd.ResourceFactory;
-
-        this._renderQueues = new RenderQueue[4];
-        for (int i = 0; i < this._renderQueues.Length; i++)
-        {
-            this._renderQueues[i] = new RenderQueue(RenderQueues.ShadowCaster);
-        }
 
         this._resourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
             new ResourceLayoutElementDescription("ShadowMapDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
@@ -104,7 +95,9 @@ public class ShadowPass : IDisposable, IPipelineProvider
             this._cascades[i].UpdateCascadeMatrix(i, camera, mainLight.Direction, near, far, shadowMap);
 
             BoundingFrustum shadowFrustum = new BoundingFrustum(this._cascades[i].ViewProjectionMatrix);
-            this._renderQueues[i].Update(shadowFrustum, camera.Position);
+
+            var renderQueue = stage.ShadowCasterRenderQueues[i];
+            renderQueue.Update(shadowFrustum, camera.Position);
 
             ShadowMapDataBuffer data = new ShadowMapDataBuffer();
             data.ShadowMapMatrix = this._cascades[i].ViewProjectionMatrix;
@@ -112,7 +105,7 @@ public class ShadowPass : IDisposable, IPipelineProvider
             data.LightDirection = mainLight.Direction;
 
             cl.UpdateBuffer(this._shadowmapInfoBuffer, 0, data);
-            this._renderJob.DrawRenderList(cl, this._resourceSet, this._renderQueues[i]);
+            this._renderJob.DrawRenderList(cl, this._resourceSet, renderQueue);
         }
     }
 

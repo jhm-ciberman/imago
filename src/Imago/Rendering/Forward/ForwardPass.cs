@@ -47,8 +47,6 @@ internal class ForwardPass : IDisposable, IPipelineProvider
     private ResourceSet _resourceSet;
     private readonly IRenderTexture _renderTexture;
     private readonly RenderJob _renderJob;
-    private readonly RenderQueue _opaqueRenderQueue;
-    private readonly RenderQueue _transparentRenderQueue;
     private readonly ShadowPass _shadowPass;
 
     public Shader DefaultShader { get; }
@@ -75,9 +73,6 @@ internal class ForwardPass : IDisposable, IPipelineProvider
         this._renderTexture = mainRenderTexture;
 
         this._renderJob = new RenderJob(this._gd, false);
-
-        this._opaqueRenderQueue = new RenderQueue(RenderQueues.Opaque);
-        this._transparentRenderQueue = new RenderQueue(RenderQueues.Transparent);
 
         this._shadowPass.ShadowmapTexture.Resized += this.Shadowmap_Resized;
 
@@ -112,8 +107,8 @@ internal class ForwardPass : IDisposable, IPipelineProvider
         var env = scene.Environment;
 
         var frustumForCulling = new BoundingFrustum(camera.FrustumCullingCamera.ViewProjectionMatrix);
-        this._opaqueRenderQueue.Update(frustumForCulling, camera.Position);
-        this._transparentRenderQueue.Update(frustumForCulling, camera.Position);
+        stage.OpaqueRenderQueue.Update(frustumForCulling, camera.Position);
+        stage.TransparentRenderQueue.Update(frustumForCulling, camera.Position);
 
         cl.SetFramebuffer(renderTexture.Framebuffer);
 
@@ -137,9 +132,9 @@ internal class ForwardPass : IDisposable, IPipelineProvider
         cl.UpdateBuffer(this._camera3DInfoBuffer, 0, ref cameraInfo);
         cl.UpdateBuffer(this._lightInfoBuffer, 0, ref lightInfo);
 
-        this._renderJob.DrawRenderList(cl, this._resourceSet, this._opaqueRenderQueue);
+        this._renderJob.DrawRenderList(cl, this._resourceSet, stage.OpaqueRenderQueue);
 
-        this._renderJob.DrawRenderList(cl, this._resourceSet, this._transparentRenderQueue);
+        this._renderJob.DrawRenderList(cl, this._resourceSet, stage.TransparentRenderQueue);
     }
 
     public void Dispose()
