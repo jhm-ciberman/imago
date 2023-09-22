@@ -1,6 +1,5 @@
 using System;
 using ImGuiNET;
-using Imago.SceneGraph;
 using Veldrid;
 
 namespace Imago.Rendering.Passes;

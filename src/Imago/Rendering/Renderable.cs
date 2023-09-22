@@ -3,6 +3,7 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using Imago.Rendering.Forward;
 using Imago.Rendering.Materials;
+using Imago.SceneGraph;
 using Veldrid.Utilities;
 
 namespace Imago.Rendering;
@@ -22,8 +23,6 @@ public struct OffsetVertexData // It's 16 bytes only!
 /// </summary>
 internal class Renderable : IDisposable
 {
-    internal delegate void RenderQueuesChangedHandler(Renderable renderable, RenderQueues oldFlags, RenderQueues newFlags);
-    internal static event RenderQueuesChangedHandler? RenderQueuesChanged;
     private Matrix4x4 _transform = Matrix4x4.Identity;
 
     /// <summary>
@@ -85,7 +84,7 @@ internal class Renderable : IDisposable
             {
                 var oldFlags = this._renderQueueFlags;
                 this._renderQueueFlags = value;
-                RenderQueuesChanged?.Invoke(this, oldFlags, value);
+                this._stage?.NotifyRenderableRenderQueueChanged(this, oldFlags, value);
             }
         }
     }
@@ -120,7 +119,7 @@ internal class Renderable : IDisposable
 
     private bool _pipelineDirty = false;
 
-    private readonly Renderer _renderer;
+
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Renderable"/> class.
@@ -129,7 +128,6 @@ internal class Renderable : IDisposable
     /// <param name="instanceDataBlock">The instance data block.</param>
     public Renderable(DataBlock transformDataBlock, DataBlock instanceDataBlock)
     {
-        this._renderer = Renderer.Instance;
         this._transformDataBlock = transformDataBlock;
         this.TransformResourceSet = this._transformDataBlock.Buffer.ResourceSet;
 
@@ -137,6 +135,34 @@ internal class Renderable : IDisposable
         this.InstanceResourceSet = this._instanceDataBlock.Buffer.ResourceSet;
 
         this.RecomputeOffsetVertexData();
+    }
+
+    private Stage? _stage = null;
+
+    /// <summary>
+    /// Gets or sets the stage in which this renderable is.
+    /// </summary>
+    public Stage? Stage
+    {
+        get => this._stage;
+        set
+        {
+            if (this._stage == value) return;
+
+            if (this._stage != null)
+            {
+                this._stage.NotifyRenderablePipelineDirty(this);
+                this._stage.NotifyRenderableRenderQueueChanged(this, this._renderQueueFlags, RenderQueues.None);
+            }
+
+            this._stage = value;
+
+            if (this._stage != null)
+            {
+                this._stage.NotifyRenderablePipelineDirty(this);
+                this._stage.NotifyRenderableRenderQueueChanged(this, RenderQueues.None, this._renderQueueFlags);
+            }
+        }
     }
 
     private Mesh? _mesh;
@@ -267,7 +293,7 @@ internal class Renderable : IDisposable
         if (this._pipelineDirty) return;
 
         this._pipelineDirty = true;
-        this._renderer.NotifyRenderablePipelineDirty(this);
+        this._stage?.NotifyRenderablePipelineDirty(this);
     }
 
     /// <summary>

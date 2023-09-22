@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Imago.Rendering;
 using Imago.Rendering.Forward;
 
 namespace Imago.SceneGraph;
@@ -51,6 +52,9 @@ public class Stage
 
     internal RenderQueue[] ShadowCasterRenderQueues { get; } = new RenderQueue[4];
 
+    private readonly List<Renderable> _dirtyRenderables = new();
+
+
     /// <summary>
     /// Initializes a new instance of the <see cref="Stage"/> class.
     /// </summary>
@@ -88,30 +92,40 @@ public class Stage
         this.Scene.PrepareForRender();
         this.Scene.RenderImGui();
 
-        if (this._transformDirtyList.Count == 0) return;
-
-        for (int i = 0; i < this._transformDirtyList.Count; i++)
+        if (this._transformDirtyList.Count > 0)
         {
-            Node3D node = this._transformDirtyList[i];
-            if (!node.LocalTransformIsDirty) continue;
-
-            // Search for the top dirty node
-            Node3D topDirty = node;
-            while (true)
+            for (int i = 0; i < this._transformDirtyList.Count; i++)
             {
-                if (node.LocalTransformIsDirty) topDirty = node;
-                if (node.Parent == null) break;
-                node = node.Parent;
+                Node3D node = this._transformDirtyList[i];
+                if (!node.LocalTransformIsDirty) continue;
+
+                // Search for the top dirty node
+                Node3D topDirty = node;
+                while (true)
+                {
+                    if (node.LocalTransformIsDirty) topDirty = node;
+                    if (node.Parent == null) break;
+                    node = node.Parent;
+                }
+
+                topDirty.UpdateTransform();
             }
 
-            topDirty.UpdateTransform();
+            this._transformDirtyList.Clear();
         }
 
-        this._transformDirtyList.Clear();
+        if (this._dirtyRenderables.Count > 0)
+        {
+            foreach (var renderable in this._dirtyRenderables)
+            {
+                renderable.Update(Renderer.Instance);
+            }
+            this._dirtyRenderables.Clear();
+        }
     }
 
     /// <summary>
-    /// Updates the scene.
+    /// Updates the stage.
     /// </summary>
     /// <param name="deltaTime">The time since the last update in seconds.</param>
     public virtual void Update(float deltaTime)
@@ -121,7 +135,7 @@ public class Stage
     }
 
     /// <summary>
-    /// Notifies the scene that the transform of the specified node is not dirty.
+    /// Notifies the stage that the transform of the specified node is not dirty.
     /// </summary>
     /// <param name="node">The node.</param>
     internal void NotifyTransformNotDirty(Node3D node)
@@ -130,11 +144,38 @@ public class Stage
     }
 
     /// <summary>
-    /// Notifies the scene that the transform of the specified node is dirty.
+    /// Notifies the stage that the transform of the specified node is dirty.
     /// </summary>
     /// <param name="node">The node.</param>
     internal void NotifyTransformDirty(Node3D node)
     {
         this._transformDirtyList.Add(node);
+    }
+
+    /// <summary>
+    /// Notifies the stage that the renderable pipeline of the specified renderable is dirty.
+    /// </summary>
+    /// <param name="renderable">The renderable.</param>
+    internal void NotifyRenderablePipelineDirty(Renderable renderable)
+    {
+        this._dirtyRenderables.Add(renderable);
+    }
+
+    /// <summary>
+    /// Notifies the stage that the renderable queue render flags of the specified renderable have changed.
+    /// </summary>
+    /// <param name="renderable">The renderable.</param>
+    /// <param name="oldQueuesFlags">The old render flags.</param>
+    /// <param name="newQueuesFlags">The new render flags.</param>
+    internal void NotifyRenderableRenderQueueChanged(Renderable renderable, RenderQueues oldQueuesFlags, RenderQueues newQueuesFlags)
+    {
+        this.OpaqueRenderQueue.UpdateRenderableRenderFlags(renderable, oldQueuesFlags, newQueuesFlags);
+        this.TransparentRenderQueue.UpdateRenderableRenderFlags(renderable, oldQueuesFlags, newQueuesFlags);
+
+        var queues = this.ShadowCasterRenderQueues;
+        for (int i = 0; i < queues.Length; i++)
+        {
+            queues[i].UpdateRenderableRenderFlags(renderable, oldQueuesFlags, newQueuesFlags);
+        }
     }
 }

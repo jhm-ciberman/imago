@@ -58,11 +58,9 @@ internal class RenderQueue : IEnumerable<Renderable>, IReadOnlyList<Renderable>,
             RenderQueues.Transparent => new BackToFrontComparer(),
             _ => throw new ArgumentException("Invalid filter flags."),
         };
-
-        Renderable.RenderQueuesChanged += this.OnRenderQueueFlagsChanged;
     }
 
-    private void OnRenderQueueFlagsChanged(Renderable renderable, RenderQueues oldFlags, RenderQueues newFlags)
+    public void UpdateRenderableRenderFlags(Renderable renderable, RenderQueues oldFlags, RenderQueues newFlags)
     {
         // This event could be called from a different thread. The "_allRenderables" list should be locked.
 

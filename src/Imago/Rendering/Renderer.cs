@@ -70,7 +70,6 @@ public class Renderer : IDisposable
 
     private readonly List<Texture> _dirtyTextures = new();
     private readonly List<Material> _dirtyMaterials = new();
-    private readonly List<Renderable> _dirtyRenderables = new();
 
     public ResourceLayout TransformResourceLayout { get; }
     public ResourceLayout InstanceResourceLayout { get; }
@@ -308,11 +307,6 @@ public class Renderer : IDisposable
         cl.End();
     }
 
-    private void HandleException(VeldridException e)
-    {
-
-    }
-
     private static void ClearRenderTarget(CommandList cl, Scene scene)
     {
         ColorF? clearColor = scene.Camera?.ClearColor ?? scene.ClearColor;
@@ -470,15 +464,6 @@ public class Renderer : IDisposable
             }
             this._dirtyTextures.Clear();
         }
-
-        if (this._dirtyRenderables.Count > 0)
-        {
-            foreach (var renderable in this._dirtyRenderables)
-            {
-                renderable.Update(this);
-            }
-            this._dirtyRenderables.Clear();
-        }
     }
 
     internal void NotifyTextureDirty(Texture texture)
@@ -494,14 +479,6 @@ public class Renderer : IDisposable
         lock (this._dirtyMaterials)
         {
             this._dirtyMaterials.Add(material);
-        }
-    }
-
-    internal void NotifyRenderablePipelineDirty(Renderable renderable)
-    {
-        lock (this._dirtyRenderables)
-        {
-            this._dirtyRenderables.Add(renderable);
         }
     }
 

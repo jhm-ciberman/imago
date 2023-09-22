@@ -191,6 +191,7 @@ public class RenderNode3D : Node3D, IPickable
         base.AttachToStage(stage);
         this.UpdateRegistrationWithPickingManager();
         this._renderable.Visible = this._visible;
+        this._renderable.Stage = stage;
     }
 
     internal override void DetachFromStage()
@@ -201,6 +202,7 @@ public class RenderNode3D : Node3D, IPickable
         }
 
         this._renderable.Visible = false;
+        this._renderable.Stage = null;
         this.UpdateRegistrationWithPickingManager();
         base.DetachFromStage();
     }
