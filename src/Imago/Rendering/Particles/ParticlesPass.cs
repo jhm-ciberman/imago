@@ -6,7 +6,7 @@ using Imago.Rendering.Materials;
 using Imago.SceneGraph;
 using Veldrid;
 
-namespace Imago.Rendering.Passes;
+namespace Imago.Rendering.Particles;
 
 public class ParticlesPass : IDisposable, IRenderingPass
 {

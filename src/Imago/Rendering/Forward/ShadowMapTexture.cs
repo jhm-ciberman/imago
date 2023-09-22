@@ -1,7 +1,7 @@
 using System;
 using Veldrid;
 
-namespace Imago.Rendering;
+namespace Imago.Rendering.Forward;
 
 public class ShadowMapTexture : ITexture, IDisposable
 {
@@ -76,9 +76,7 @@ public class ShadowMapTexture : ITexture, IDisposable
     void ITexture.Resize(uint width, uint height)
     {
         if (width != height)
-        {
             throw new ArgumentException("Shadow map texture must be square.");
-        }
 
         this.Size = width;
         this._renderer.DisposeWhenIdle(this.Framebuffers);

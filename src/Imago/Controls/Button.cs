@@ -1,7 +1,7 @@
 using System;
 using System.Numerics;
 using Imago.Controls.Drawing;
-using Imago.Rendering;
+using Imago.Rendering.Sprites;
 using Support.ComponentModel;
 using Veldrid;
 

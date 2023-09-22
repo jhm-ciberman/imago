@@ -1,5 +1,5 @@
 using System.Numerics;
-using Imago.Rendering;
+using Imago.Rendering.Sprites;
 
 namespace Imago.Controls.Drawing;
 

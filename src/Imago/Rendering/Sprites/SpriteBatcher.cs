@@ -8,7 +8,7 @@ using Support;
 using Veldrid;
 using Shader = Imago.Rendering.Materials.Shader;
 
-namespace Imago.Rendering;
+namespace Imago.Rendering.Sprites;
 
 public class SpriteBatcher : IFontStashRenderer2, IDisposable
 {
@@ -69,10 +69,10 @@ public class SpriteBatcher : IFontStashRenderer2, IDisposable
         var factory = gd.ResourceFactory;
 
         var vertexBufferSize = (uint) (Marshal.SizeOf<SpriteBatch.Item>() * 4 * this._capacity);
-        this.VertexBuffer = factory.CreateBuffer(new BufferDescription((uint)vertexBufferSize, BufferUsage.VertexBuffer | BufferUsage.Dynamic));
+        this.VertexBuffer = factory.CreateBuffer(new BufferDescription(vertexBufferSize, BufferUsage.VertexBuffer | BufferUsage.Dynamic));
 
         var indexBufferSize = (uint) (sizeof(ushort) * 6 * this._capacity);
-        this._indexBuffer = factory.CreateBuffer(new BufferDescription((uint)indexBufferSize, BufferUsage.IndexBuffer));
+        this._indexBuffer = factory.CreateBuffer(new BufferDescription(indexBufferSize, BufferUsage.IndexBuffer));
         ushort[] indices = new ushort[this._capacity * 6];
 
 
@@ -117,9 +117,7 @@ public class SpriteBatcher : IFontStashRenderer2, IDisposable
         if (this._batch.Shader == shader && this._batch.Texture == texture)
         {
             if (this._batch.Count + requiredQuads > this._batch.Items.Length)
-            {
                 this.FlushBatch();
-            }
             return;
         }
 
@@ -178,17 +176,15 @@ public class SpriteBatcher : IFontStashRenderer2, IDisposable
         var sizeTotal = texture.PixelSize;
         var uvExtTL = texture.TopLeft;
         var uvExtBR = texture.BottomRight;
-        var uvIntTL = uvExtTL + (sizeTL / sizeTotal * texture.Size);
-        var uvIntBR = uvExtBR - (sizeBR / sizeTotal * texture.Size);
+        var uvIntTL = uvExtTL + sizeTL / sizeTotal * texture.Size;
+        var uvIntBR = uvExtBR - sizeBR / sizeTotal * texture.Size;
 
         // Scale if the size is smaller (after calculating UVs)
         var minimumRequiredSize = (sizeTL + sizeBR) * scale;
         if (minimumRequiredSize.X > 0 && minimumRequiredSize.Y > 0)
         {
             if (size.X < minimumRequiredSize.X || size.Y < minimumRequiredSize.Y)
-            {
                 scale *= MathF.Min(size.X, size.Y) / MathF.Min(minimumRequiredSize.X, minimumRequiredSize.Y);
-            }
         }
 
         sizeTL *= scale;
@@ -200,9 +196,7 @@ public class SpriteBatcher : IFontStashRenderer2, IDisposable
         this.Prepare(shader ?? this._defaultShader, texture.Texture, 9);
 
         if (sizeSegmentCenter.X > 0 && sizeSegmentCenter.Y > 0)
-        {
             this._batch.DrawCore(position + sizeTL, sizeSegmentCenter, uvIntTL, uvIntBR, color);
-        }
 
         var posTL = new Vector2(0f, 0f);
         var posTR = new Vector2(size.X - sizeTL.X, 0f);

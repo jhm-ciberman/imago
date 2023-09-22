@@ -2,7 +2,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using Support;
 
-namespace Imago.Rendering.Passes;
+namespace Imago.Rendering.Particles;
 
 [StructLayout(LayoutKind.Sequential)]
 public struct ParticleRenderData

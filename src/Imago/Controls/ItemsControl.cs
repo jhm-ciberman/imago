@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Imago.Rendering;
+using Imago.Rendering.Sprites;
 
 namespace Imago.Controls;
 

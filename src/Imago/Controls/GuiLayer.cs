@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Numerics;
-using Imago.Rendering;
+using Imago.Rendering.Sprites;
 using Imago.SceneGraph;
 using Support;
 

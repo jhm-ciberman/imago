@@ -3,7 +3,7 @@ using System.Numerics;
 using Imago.Rendering.Materials;
 using Support;
 
-namespace Imago.Rendering;
+namespace Imago.Rendering.Sprites;
 
 public class SpriteBatch
 {
@@ -62,9 +62,7 @@ public class SpriteBatch
     public void Add(Item item)
     {
         if (this.IsFull)
-        {
             throw new InvalidOperationException("The sprite batch is full.");
-        }
 
         this.Items[this.Count++] = item;
     }
@@ -86,7 +84,7 @@ public class SpriteBatch
 
     protected void UpdateColor(ref uint color)
     {
-        color = (color & 0x00FFFFFF) | ((uint)((color >> 24) * this.Opacity) << 24);
+        color = color & 0x00FFFFFF | (uint)((color >> 24) * this.Opacity) << 24;
     }
 
     public void DrawCore(Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, Color color)
