@@ -6,7 +6,7 @@ using Veldrid;
 
 namespace Imago.Rendering.Passes;
 
-internal class FullScreenPass : IDisposable, IRenderingPass
+internal class FullScreenPass : IDisposable
 {
     private ResourceSet? _resourceSet;
 

@@ -11,7 +11,7 @@ using Shader = Imago.Rendering.Materials.Shader;
 
 namespace Imago.Rendering.Forward;
 
-internal class ForwardPass : IDisposable, IPipelineProvider, IRenderingPass
+internal class ForwardPass : IDisposable, IPipelineProvider
 {
     [StructLayout(LayoutKind.Sequential)]
     private struct CameraDataBuffer

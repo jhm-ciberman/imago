@@ -8,7 +8,7 @@ using Veldrid;
 
 namespace Imago.Rendering.Passes;
 
-internal class GizmosPass : IDisposable, IRenderingPass
+internal class GizmosPass : IDisposable
 {
     private const int VERTICES_PER_BATCH = 1000;
 

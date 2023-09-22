@@ -11,7 +11,7 @@ using Shader = Imago.Rendering.Materials.Shader;
 
 namespace Imago.Rendering.Forward;
 
-public class ShadowPass : IDisposable, IPipelineProvider, IRenderingPass
+public class ShadowPass : IDisposable, IPipelineProvider
 {
     [StructLayout(LayoutKind.Sequential)]
     private struct ShadowMapDataBuffer

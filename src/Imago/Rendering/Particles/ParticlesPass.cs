@@ -8,7 +8,7 @@ using Veldrid;
 
 namespace Imago.Rendering.Particles;
 
-public class ParticlesPass : IDisposable, IRenderingPass
+public class ParticlesPass : IDisposable
 {
     private const int PARTICLES_PER_BATCH = 1000;
 

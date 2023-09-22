@@ -8,7 +8,7 @@ using Veldrid;
 
 namespace Imago.Rendering.Passes;
 
-public class SkyDomePass : IDisposable, IRenderingPass
+public class SkyDomePass : IDisposable
 {
     private struct Vertex
     {

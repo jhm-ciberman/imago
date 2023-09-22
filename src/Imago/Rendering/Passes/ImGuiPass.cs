@@ -5,7 +5,7 @@ using Veldrid;
 
 namespace Imago.Rendering.Passes;
 
-public class ImGuiPass : IDisposable, IRenderingPass
+public class ImGuiPass : IDisposable
 {
     /// <summary>
     /// Gets the instance of the ImGuiPass.

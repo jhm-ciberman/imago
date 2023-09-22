@@ -60,7 +60,6 @@ public class Renderer : IDisposable
     private readonly ResourceFactory _factory;
     private readonly Fence _fence;
     private readonly CommandList _commandList;
-    private readonly List<CommandListJob> _jobs = new();
     private readonly DisposeCollector _disposeCollector;
     private readonly Dictionary<ResourceLayoutDescription, ResourceLayout> _resourceLayoutCache = new();
     private readonly SwapPopList<Renderable> _renderables = new();
@@ -180,57 +179,7 @@ public class Renderer : IDisposable
 
         this._fence = this._factory.CreateFence(false);
 
-
-        this._jobs.Add(new CommandListJob("Shadows", this._factory, this._shadowPass));
-        this._jobs.Add(new CommandListJob("Forward", this._factory, this._forwardPass));
-        this._jobs.Add(new CommandListJob("Extra", this._factory,
-            this._immediatePass,
-            this._skyDomePass,
-            this._mousePickerPass,
-            this._particlesPass,
-            this._gizmosPass,
-            this._spritesPass,
-            this._imGuiPass));
-        this._jobs.Add(new CommandListJob("Present", this._factory, this._fullScreenPass));
-
-
         this.Settings.PropertyChanged += this.Settings_PropertyChanged;
-    }
-
-    private class CommandListJob : IDisposable
-    {
-        public CommandList CommandList { get; }
-        public string Name { get; }
-        public Fence Fence { get; }
-        public IRenderingPass[] Passes { get; }
-
-        public CommandListJob(string name, ResourceFactory factory, params IRenderingPass[] passes)
-        {
-            this.Name = name;
-            this.CommandList = factory.CreateCommandList();
-            this.Fence = factory.CreateFence(signaled: false);
-            this.Passes = passes;
-        }
-
-        public void Execute(Stage stage)
-        {
-            this.CommandList.Begin();
-            foreach (var pass in this.Passes)
-            {
-                pass.Render(this.CommandList, stage);
-            }
-            this.CommandList.End();
-        }
-
-        public void SubmitCommands(GraphicsDevice gd)
-        {
-            gd.SubmitCommands(this.CommandList, this.Fence);
-        }
-
-        public void Dispose()
-        {
-            this.CommandList.Dispose();
-        }
     }
 
     /// <summary>
@@ -289,28 +238,37 @@ public class Renderer : IDisposable
     /// <param name="stage">The stage to render.</param>
     public void Render(Stage stage)
     {
+        stage.PrepareForRender();
         try
         {
-            stage.PrepareForRender();
 
-            this._commandList.Begin();
-            this.UpdateBuffers(this._commandList);
+            var cl = this._commandList;
 
-            this._commandList.SetFramebuffer(this.MainRenderTexture.Framebuffer);
+            cl.Begin();
+            this.UpdateBuffers(cl);
 
-            ClearRenderTarget(this._commandList, stage.Scene);
-            this._commandList.End();
+            this._shadowPass.Render(cl, stage);
 
-            for (int i = 0; i < this._jobs.Count; i++)
-            {
-                this._jobs[i].Execute(stage);
-            }
+            cl.SetFramebuffer(this.MainRenderTexture.Framebuffer);
+            ClearRenderTarget(cl, stage.Scene);
+
+
+            this._forwardPass.Render(cl, stage);
+            this._immediatePass.Render(cl, stage);
+            this._skyDomePass.Render(cl, stage);
+            this._mousePickerPass.Render(cl, stage);
+            this._particlesPass.Render(cl, stage);
+            this._gizmosPass.Render(cl, stage);
+            this._spritesPass.Render(cl, stage);
+            this._imGuiPass.Render(cl, stage);
+            this._fullScreenPass.Render(cl, stage);
+            cl.End();
 
             this.GraphicsDevice.WaitForIdle();
             this._fence.Reset();
-            this.GraphicsDevice.SubmitCommands(this._commandList, this._fence);
 
-            this.SubmitJobs();
+            this.GraphicsDevice.SubmitCommands(cl, this._fence);
+
 
             this._disposeCollector.DisposeAll();
 
@@ -335,14 +293,6 @@ public class Renderer : IDisposable
         {
             ColorF col = scene.ClearColor.Value;
             commandList.ClearColorTarget(0, new RgbaFloat(col.R, col.G, col.B, col.A));
-        }
-    }
-
-    private void SubmitJobs()
-    {
-        for (int i = 0; i < this._jobs.Count; i++)
-        {
-            this._jobs[i].SubmitCommands(this.GraphicsDevice);
         }
     }
 
@@ -454,72 +404,51 @@ public class Renderer : IDisposable
 
     internal void UpdateBuffers(CommandList commandList)
     {
-        lock (this._instanceDataBuffers)
+        for (int i = 0; i < this._instanceDataBuffers.Count; i++)
         {
-            for (int i = 0; i < this._instanceDataBuffers.Count; i++)
-            {
-                this._instanceDataBuffers[i].UploadToGPU(commandList);
-            }
+            this._instanceDataBuffers[i].UploadToGPU(commandList);
         }
 
-        lock (this._transformDataBuffers)
+        for (int i = 0; i < this._transformDataBuffers.Count; i++)
         {
-            for (int i = 0; i < this._transformDataBuffers.Count; i++)
-            {
-                this._transformDataBuffers[i].UploadToGPU(commandList);
-            }
+            this._transformDataBuffers[i].UploadToGPU(commandList);
         }
 
-        lock (this._skeletons)
+        foreach (var skeleton in this._skeletons)
         {
-            foreach (var skeleton in this._skeletons)
-            {
-                skeleton.Update();
-            }
+            skeleton.Update();
         }
 
-        lock (this._skeletonDataBuffers)
+        for (int i = 0; i < this._skeletonDataBuffers.Count; i++)
         {
-            for (int i = 0; i < this._skeletonDataBuffers.Count; i++)
-            {
-                this._skeletonDataBuffers[i].UploadToGPU(commandList);
-            }
+            this._skeletonDataBuffers[i].UploadToGPU(commandList);
         }
 
-        lock (this._dirtyMaterials)
+        if (this._dirtyMaterials.Count > 0)
         {
-            if (this._dirtyMaterials.Count > 0)
+            foreach (var material in this._dirtyMaterials)
             {
-                foreach (var material in this._dirtyMaterials)
-                {
-                    material.Update(this._factory);
-                }
-                this._dirtyMaterials.Clear();
+                material.Update(this._factory);
             }
+            this._dirtyMaterials.Clear();
         }
 
-        lock (this._dirtyTextures)
+        if (this._dirtyTextures.Count > 0)
         {
-            if (this._dirtyTextures.Count > 0)
+            foreach (var resource in this._dirtyTextures)
             {
-                foreach (var resource in this._dirtyTextures)
-                {
-                    resource.Update(this.GraphicsDevice, commandList);
-                }
-                this._dirtyTextures.Clear();
+                resource.Update(this.GraphicsDevice, commandList);
             }
+            this._dirtyTextures.Clear();
         }
 
-        lock (this._dirtyRenderables)
+        if (this._dirtyRenderables.Count > 0)
         {
-            if (this._dirtyRenderables.Count > 0)
+            foreach (var renderable in this._dirtyRenderables)
             {
-                foreach (var renderable in this._dirtyRenderables)
-                {
-                    renderable.Update(this);
-                }
-                this._dirtyRenderables.Clear();
+                renderable.Update(this);
             }
+            this._dirtyRenderables.Clear();
         }
     }
 
@@ -559,11 +488,6 @@ public class Renderer : IDisposable
             this.MainRenderTexture.Dispose();
             this._commandList.Dispose();
             this._fence.Dispose();
-
-            foreach (var job in this._jobs)
-            {
-                job.Dispose();
-            }
 
             for (int i = 0; i < this._instanceDataBuffers.Count; i++)
             {

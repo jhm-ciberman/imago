@@ -6,7 +6,7 @@ using Shader = Imago.Rendering.Materials.Shader;
 
 namespace Imago.Rendering.Sprites;
 
-public class SpritesPass : IDisposable, IPipelineProvider, IRenderingPass
+public class SpritesPass : IDisposable, IPipelineProvider
 {
     private readonly IRenderTexture _renderTexture;
     private readonly GraphicsDevice _gd;

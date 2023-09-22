@@ -5,7 +5,7 @@ using Veldrid;
 
 namespace Imago.Rendering.Passes;
 
-public class MousePickingPass : IDisposable, IRenderingPass
+public class MousePickingPass : IDisposable
 {
     private readonly GraphicsDevice _gd;
     private readonly Veldrid.Texture _pixelTexture;

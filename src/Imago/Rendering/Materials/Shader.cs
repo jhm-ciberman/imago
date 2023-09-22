@@ -39,7 +39,7 @@ public class Shader : IDisposable
     /// <summary>
     /// Initializes a new instance of the <see cref="Shader"/> class.
     /// </summary>
-    /// <
+    /// <param name="renderer">The renderer.</param>
     /// <param name="pass">The pass to use.</param>
     /// <param name="vertexCode">The source vertex shader code.</param>
     /// <param name="fragmentCode">The source fragment shader code.</param>

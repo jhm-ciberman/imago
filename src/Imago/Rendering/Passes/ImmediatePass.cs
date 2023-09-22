@@ -14,7 +14,7 @@ namespace Imago.Rendering.Passes;
 /// <summary>
 /// This class is used to batch draw calls together in immediate mode.
 /// </summary>
-public class ImmediatePass : IPipelineProvider, IRenderingPass, IDisposable, IImediateRenderer
+public class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
 {
     private struct PassDataBuffer
     {
