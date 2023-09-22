@@ -162,7 +162,6 @@ public class Renderer : IDisposable
         this.SkeletonResourceLayout.Name = "BonesData Resource Layout";
 
         Renderable.PipelineDirty += this.OnRenderablePipelineDirty;
-        Material.MaterialResourceSetDirty += this.OnMaterialResourceSetDirty;
 
         this.Settings = new RenderSettings(this);
 
@@ -534,7 +533,7 @@ public class Renderer : IDisposable
         }
     }
 
-    private void OnMaterialResourceSetDirty(Material material)
+    internal void NotifyMaterialResourcesDirty(Material material)
     {
         lock (this._dirtyMaterials)
         {

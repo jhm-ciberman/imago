@@ -5,15 +5,6 @@ namespace Imago.Rendering.Materials;
 
 public class Material
 {
-    public delegate void MaterialResourceSetDirtyHandler(Material material);
-    public delegate void MaterialStateChangedHandler(Material material);
-
-    /// <summary>
-    /// Occurs when the material's pipeline needs to be rebuilt.
-    /// </summary>
-    public event MaterialStateChangedHandler? PipelineDirty;
-    public static event MaterialResourceSetDirtyHandler? MaterialResourceSetDirty;
-
     private static int _count = 0;
 
     public int Id { get; private set; }
@@ -31,8 +22,11 @@ public class Material
     private readonly BindableResource[] _resources;
     private Texture? _texture = null;
 
+    private readonly Renderer _renderer;
+
     public Material(Shader forwardShader, Shader shadowMapShader)
     {
+        this._renderer = Renderer.Instance;
         this.Id = ++_count;
 
         if (forwardShader.MaterialResourceLayout != shadowMapShader.MaterialResourceLayout)
@@ -73,11 +67,10 @@ public class Material
 
     protected void NotifyResourcesDirty()
     {
-        if (!this._resourceSetDirty)
-        {
-            this._resourceSetDirty = true;
-            MaterialResourceSetDirty?.Invoke(this);
-        }
+        if (this._resourceSetDirty) return;
+
+        this._resourceSetDirty = true;
+        this._renderer.NotifyMaterialResourcesDirty(this);
     }
 
     protected bool SetProperty<T>(ref T backingField, T newValue)
@@ -90,25 +83,18 @@ public class Material
         return true;
     }
 
-    protected void NotifyPipelineDirty()
-    {
-        this.PipelineDirty?.Invoke(this);
-    }
-
     protected bool SetRenderFlag(RenderFlags flags, bool value)
     {
         if (value)
         {
             if ((this.RenderFlags & flags) == flags) return false;
             this.RenderFlags |= flags;
-            this.NotifyPipelineDirty();
             return true;
         }
         else
         {
             if ((this.RenderFlags & flags) == 0) return false;
             this.RenderFlags &= ~flags;
-            this.NotifyPipelineDirty();
             return true;
         }
     }
