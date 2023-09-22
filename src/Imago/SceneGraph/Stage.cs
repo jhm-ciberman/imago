@@ -66,10 +66,13 @@ public class Stage
     /// Changes the current scene.
     /// </summary>
     /// <param name="scene">The new scene.</param>
-    public void ChangeScene(Scene? scene)
+    /// <param name="disposeOld">if set to <c>true</c> the old scene will be disposed.</param>
+    public void ChangeScene(Scene? scene, bool disposeOld = true)
     {
         var old = this.Scene;
         old.DetachFromStage();
+
+        if (disposeOld && old != _emptyScene) old.Dispose();
 
         this.Scene = scene ?? _emptyScene;
         this.Scene.AttachToStage(this);

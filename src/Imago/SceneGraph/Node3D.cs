@@ -225,7 +225,7 @@ public class Node3D : IDisposable, IFormattable
         if (node == this) throw new ArgumentException("Cannot add self as child", nameof(node));
 
         // Remove from old parent
-        node.Parent?.RemoveChild(node);
+        node.Parent?.RemoveChild(node, dispose: false);
 
         // Set node's parent to this
         this._children.Add(node);
@@ -243,7 +243,8 @@ public class Node3D : IDisposable, IFormattable
     /// Removes a child node from this node.
     /// </summary>
     /// <param name="node">The node to remove.</param>
-    public void RemoveChild(Node3D node)
+    /// <param name="dispose">if set to <c>true</c> the node will be disposed.</param>
+    public void RemoveChild(Node3D node, bool dispose = true)
     {
         if (node.Parent != this) throw new ArgumentException("Node is not a child of this node.", nameof(node));
 
@@ -254,6 +255,11 @@ public class Node3D : IDisposable, IFormattable
         if (node.Stage != null)
         {
             node.DetachFromStage();
+        }
+
+        if (dispose)
+        {
+            node.Dispose();
         }
     }
 
