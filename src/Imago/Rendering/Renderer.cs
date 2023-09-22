@@ -163,7 +163,6 @@ public class Renderer : IDisposable
 
         Renderable.PipelineDirty += this.OnRenderablePipelineDirty;
         Material.MaterialResourceSetDirty += this.OnMaterialResourceSetDirty;
-        Texture.TextureDirty += this.OnTextureDirty;
 
         this.Settings = new RenderSettings(this);
 
@@ -527,7 +526,7 @@ public class Renderer : IDisposable
         }
     }
 
-    private void OnTextureDirty(Texture texture)
+    internal void NotifyTextureDirty(Texture texture)
     {
         lock (this._dirtyTextures)
         {

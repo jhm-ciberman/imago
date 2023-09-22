@@ -16,21 +16,9 @@ namespace Imago.Rendering;
 public class Texture : ITexture, ITextureRegion, IDisposable
 {
     /// <summary>
-    /// A delegate for when a texture is dirty.
-    /// </summary>
-    /// <param name="texture">The texture that is dirty.</param>
-    public delegate void TextureDirtyHandler(Texture texture);
-
-    /// <summary>
-    /// An event that is fired when a texture is dirty.
-    /// </summary>
-    public static event TextureDirtyHandler? TextureDirty;
-
-    /// <summary>
     /// Occurs when the texture is resized.
     /// </summary>
     public event EventHandler? Resized;
-
 
     /// <summary>
     /// Gets the Veldrid texture object.
@@ -61,6 +49,8 @@ public class Texture : ITexture, ITextureRegion, IDisposable
 
     private bool _isDirty = false;
 
+    private readonly Renderer _renderer;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="Texture"/> class.
     /// </summary>
@@ -70,6 +60,7 @@ public class Texture : ITexture, ITextureRegion, IDisposable
     /// <param name="srgb">Whether to use sRGB.</param>
     public Texture(uint width, uint height, uint mipLevels = 0, bool srgb = true)
     {
+        this._renderer = Renderer.Instance;
         this.Width = width;
         this.Height = height;
 
@@ -80,7 +71,7 @@ public class Texture : ITexture, ITextureRegion, IDisposable
         this._data = new byte[width * height * 4];
         PixelFormat pixelFormat = srgb ? PixelFormat.R8_G8_B8_A8_UNorm_SRgb : PixelFormat.R8_G8_B8_A8_UNorm;
 
-        var gd = Renderer.Instance.GraphicsDevice;
+        var gd = this._renderer.GraphicsDevice;
         this.VeldridTexture = gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(
             this.Width, this.Height, this.MipLevels, 1,
             pixelFormat, TextureUsage.Sampled | TextureUsage.GenerateMipmaps
@@ -109,11 +100,10 @@ public class Texture : ITexture, ITextureRegion, IDisposable
     /// </summary>
     protected void OnTextureDirty()
     {
-        if (!this._isDirty)
-        {
-            this._isDirty = true;
-            TextureDirty?.Invoke(this);
-        }
+        if (this._isDirty) return;
+
+        this._isDirty = true;
+        this._renderer.NotifyTextureDirty(this);
     }
 
     /// <summary>
