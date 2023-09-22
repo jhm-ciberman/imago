@@ -161,8 +161,6 @@ public class Renderer : IDisposable
         ));
         this.SkeletonResourceLayout.Name = "BonesData Resource Layout";
 
-        Renderable.PipelineDirty += this.OnRenderablePipelineDirty;
-
         this.Settings = new RenderSettings(this);
 
         var skyDomeLut = new ImageTexture("./res/skydome_lut.png", srgb: false);
@@ -541,7 +539,7 @@ public class Renderer : IDisposable
         }
     }
 
-    private void OnRenderablePipelineDirty(Renderable renderable)
+    internal void NotifyRenderablePipelineDirty(Renderable renderable)
     {
         lock (this._dirtyRenderables)
         {

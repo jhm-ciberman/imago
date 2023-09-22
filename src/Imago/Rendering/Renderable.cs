@@ -23,9 +23,7 @@ public struct OffsetVertexData // It's 16 bytes only!
 internal class Renderable : IDisposable
 {
     internal delegate void RenderQueuesChangedHandler(Renderable renderable, RenderQueues oldFlags, RenderQueues newFlags);
-    internal delegate void PipelineDirtyHandler(Renderable renderable);
     internal static event RenderQueuesChangedHandler? RenderQueuesChanged;
-    internal static event PipelineDirtyHandler? PipelineDirty;
     private Matrix4x4 _transform = Matrix4x4.Identity;
 
     /// <summary>
@@ -122,6 +120,8 @@ internal class Renderable : IDisposable
 
     private bool _pipelineDirty = false;
 
+    private readonly Renderer _renderer;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="Renderable"/> class.
     /// </summary>
@@ -129,6 +129,7 @@ internal class Renderable : IDisposable
     /// <param name="instanceDataBlock">The instance data block.</param>
     public Renderable(DataBlock transformDataBlock, DataBlock instanceDataBlock)
     {
+        this._renderer = Renderer.Instance;
         this._transformDataBlock = transformDataBlock;
         this.TransformResourceSet = this._transformDataBlock.Buffer.ResourceSet;
 
@@ -264,8 +265,9 @@ internal class Renderable : IDisposable
     public void InvalidatePipeline()
     {
         if (this._pipelineDirty) return;
+
         this._pipelineDirty = true;
-        PipelineDirty?.Invoke(this);
+        this._renderer.NotifyRenderablePipelineDirty(this);
     }
 
     /// <summary>
