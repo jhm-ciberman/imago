@@ -26,7 +26,7 @@ public class GizmosLayer
 
     public GizmosLayer()
     {
-        Default = this;
+        Default ??= this;
     }
 
 

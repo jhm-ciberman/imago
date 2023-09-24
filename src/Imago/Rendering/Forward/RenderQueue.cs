@@ -19,28 +19,15 @@ internal enum RenderQueues : byte
 
 internal class RenderQueue : IEnumerable<Renderable>, IReadOnlyList<Renderable>, IReadOnlyCollection<Renderable>
 {
-    private class FrontToBackComparer : IComparer<RenderIndex>
-    {
-        public int Compare(RenderIndex x, RenderIndex y)
-        {
-            return x.Key.CompareTo(y.Key);
-        }
-    }
-
-    private class BackToFrontComparer : IComparer<RenderIndex>
-    {
-        public int Compare(RenderIndex x, RenderIndex y)
-        {
-            return y.Key.CompareTo(x.Key);
-        }
-    }
+    private static readonly Comparison<RenderIndex> _frontToBack = (x, y) => x.Key.CompareTo(y.Key);
+    private static readonly Comparison<RenderIndex> _backToFront = (x, y) => y.Key.CompareTo(x.Key);
 
     private readonly List<Renderable> _allRenderables = new List<Renderable>();
     private readonly Dictionary<Renderable, int> _renderableToIndex = new Dictionary<Renderable, int>();
     private readonly List<RenderIndex> _culledIndices = new List<RenderIndex>();
     private readonly List<Renderable> _culledItems = new List<Renderable>();
 
-    private readonly IComparer<RenderIndex> _comparer;
+    private readonly Comparison<RenderIndex> _comparer;
 
     public int Count => this._culledIndices.Count;
 
@@ -54,8 +41,8 @@ internal class RenderQueue : IEnumerable<Renderable>, IReadOnlyList<Renderable>,
 
         this._comparer = filterFlags switch
         {
-            RenderQueues.Opaque or RenderQueues.ShadowCaster => new FrontToBackComparer(),
-            RenderQueues.Transparent => new BackToFrontComparer(),
+            RenderQueues.Opaque or RenderQueues.ShadowCaster => _frontToBack,
+            RenderQueues.Transparent => _backToFront,
             _ => throw new ArgumentException("Invalid filter flags."),
         };
     }
