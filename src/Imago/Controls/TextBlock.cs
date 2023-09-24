@@ -306,9 +306,12 @@ public class TextBlock : Control
         }
     }
 
+    // FontBase.MeasureString do not support ReadOnlySpan<char>, so we use this ugly StringBuilder to allocate a little less memory.
+    private static readonly StringBuilder _measureStringBuilder = new();
+
     private void ApplyWrap(float maxWidth)
     {
-        var sb = new StringBuilder(); // FontBase.MeasureString do not support ReadOnlySpan<char>, so we use this ugly StringBuilder to allocate a little less memory.
+        var sb = _measureStringBuilder;
         var font = this.GetFont();
         var lineStart = 0;
         var lineLength = 0;
