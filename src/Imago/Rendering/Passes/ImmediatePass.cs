@@ -131,14 +131,18 @@ public class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
         var camera = scene.Camera;
         if (camera == null) return;
 
-        if (scene.ImmediateRenderables.Count == 0) return;
+        var renderables = scene.ImmediateRenderables;
+        if (renderables.Count == 0) return;
 
         cl.SetFramebuffer(renderTexture.ColorOnlyFramebuffer);
+
         this.Begin(cl, camera.ViewProjectionMatrix);
-        foreach (var obj in scene.ImmediateRenderables)
+
+        for (var i = 0; i < renderables.Count; i++)
         {
-            obj.Draw(this);
+            renderables[i].Draw(this);
         }
+
         this.End();
     }
 

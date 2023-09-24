@@ -20,8 +20,9 @@ public static class SceneGraphExtensions
     {
         if (self is T tNode && self.Name == name) return tNode;
 
-        foreach (var child in self.Children)
+        for (var i = 0; i < self.Children.Count; i++)
         {
+            var child = self.Children[i];
             var found = child.FindChild<T>(name);
             if (found != null) return found;
         }
@@ -52,8 +53,9 @@ public static class SceneGraphExtensions
     /// <returns>The node with the specified name or null if no node with the specified name was found.</returns>
     public static T? GetDirectChildByName<T>(this Node3D self, string name) where T : Node3D
     {
-        foreach (var child in self.Children)
+        for (var i = 0; i < self.Children.Count; i++)
         {
+            var child = self.Children[i];
             if (child.Name == name && child is T tChild)
             {
                 return tChild;
@@ -71,7 +73,8 @@ public static class SceneGraphExtensions
     /// <returns>The node with the specified name or null if no node with the specified name was found.</returns>
     public static Node3D? GetDirectChildByName(this Node3D self, string name)
     {
-        foreach (var child in self.Children)
+        var children = (SwapPopList<Node3D>)self.Children; // Prevents allocation of IEnumerable
+        foreach (var child in children)
         {
             if (child.Name == name) return child;
         }
@@ -129,9 +132,10 @@ public static class SceneGraphExtensions
         {
             action(node);
         }
-        foreach (var child in self.Children)
+
+        for (var i = 0; i < self.Children.Count; i++)
         {
-            child.ForEachRecursive(action);
+            self.Children[i].ForEachRecursive(action);
         }
     }
 

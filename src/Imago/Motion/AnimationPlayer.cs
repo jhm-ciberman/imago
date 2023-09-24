@@ -173,8 +173,9 @@ public class AnimationPlayer
                 dict[node.Name] = node;
             }
 
-            foreach (var child in node.Children)
+            for (var i = 0; i < node.Children.Count; i++)
             {
+                var child = node.Children[i];
                 UpdateDict(dict, child);
             }
         }

@@ -9,8 +9,9 @@ public static class SkeletonHelper
     {
         var position = rootNode.WorldMatrix.Translation;
 
-        foreach (var node in rootNode.Children)
+        for (var i = 0; i < rootNode.Children.Count; i++)
         {
+            var node = rootNode.Children[i];
             var childPosition = node.WorldMatrix.Translation;
             GizmosLayer.Default.DrawLine(position, childPosition, Color.Red);
 

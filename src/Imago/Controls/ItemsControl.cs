@@ -43,6 +43,13 @@ public abstract class ItemsControl : Control
                 this.Add(item);
             }
         }
+
+        public new List<Control>.Enumerator GetEnumerator()
+        {
+            // This override is to prevent the use of the base GetEnumerator method which allocates a new enumerator.
+            // The List<T>.Enumerator is a struct and does not allocate.
+            return ((List<Control>)this.Items).GetEnumerator();
+        }
     }
 
     public ItemCollection Items { get; }
@@ -56,17 +63,17 @@ public abstract class ItemsControl : Control
     {
         base.DrawCore(spriteBatcher);
 
-        foreach (var child in this.Items)
+        for (var i = 0; i < this.Items.Count; i++)
         {
-            child.Draw(spriteBatcher);
+            this.Items[i].Draw(spriteBatcher);
         }
     }
 
     public override void Update(float deltaTime)
     {
-        foreach (var child in this.Items)
+        for (var i = 0; i < this.Items.Count; i++)
         {
-            child.Update(deltaTime);
+            this.Items[i].Update(deltaTime);
         }
 
         base.Update(deltaTime);

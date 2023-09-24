@@ -10,6 +10,9 @@ namespace Imago.Support;
 /// By comparison, the default implementation of System.Collections.Generic.List`T` removes in O(n).
 /// This is made by swapping the last element with the element to be removed.
 /// </summary>
+/// <remarks>
+/// This class asumes that the order of the elements is not important. Also it asumes the IEnumerable interface is not used concurrently.
+/// </remarks>
 /// <typeparam name="T">The type of the elements in the list.</typeparam>
 public class SwapPopList<T> : IList<T>, ICollection<T>, IReadOnlyList<T>, IEnumerable<T>
 {
@@ -102,13 +105,19 @@ public class SwapPopList<T> : IList<T>, ICollection<T>, IReadOnlyList<T>, IEnume
         this._list.Sort(comparison);
     }
 
-    public IEnumerator<T> GetEnumerator()
+    public List<T>.Enumerator GetEnumerator()
     {
+        // This is a struct, so it's not boxed
         return this._list.GetEnumerator();
+    }
+
+    IEnumerator<T> IEnumerable<T>.GetEnumerator()
+    {
+        return this.GetEnumerator();
     }
 
     IEnumerator IEnumerable.GetEnumerator()
     {
-        return this._list.GetEnumerator();
+        return ((IEnumerable<T>)this).GetEnumerator();
     }
 }
