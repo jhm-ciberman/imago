@@ -208,10 +208,7 @@ public class Renderer : IDisposable
 
     public void DisposeWhenIdle(IDisposable disposable)
     {
-        lock (this._disposeCollector)
-        {
-            this._disposeCollector.Add(disposable);
-        }
+        this._disposeCollector.Add(disposable);
     }
 
     public void DisposeWhenIdle(IDisposable[] disposables)
@@ -321,15 +318,12 @@ public class Renderer : IDisposable
 
     public ResourceLayout GetResourceLayout(ResourceLayoutDescription description)
     {
-        lock (this._resourceLayoutCache)
+        if (!this._resourceLayoutCache.TryGetValue(description, out ResourceLayout? layout))
         {
-            if (!this._resourceLayoutCache.TryGetValue(description, out ResourceLayout? layout))
-            {
-                layout = this._factory.CreateResourceLayout(description);
-                this._resourceLayoutCache.Add(description, layout);
-            }
-            return layout;
+            layout = this._factory.CreateResourceLayout(description);
+            this._resourceLayoutCache.Add(description, layout);
         }
+        return layout;
     }
 
     /// <summary>
@@ -351,78 +345,63 @@ public class Renderer : IDisposable
 
     private DataBlock RequestTransformDataBlock()
     {
-        lock (this._transformDataBuffers)
+        for (int i = 0; i < this._transformDataBuffers.Count; i++)
         {
-            for (int i = 0; i < this._transformDataBuffers.Count; i++)
+            var buffer = this._transformDataBuffers[i];
+            if (!buffer.IsFull)
             {
-                var buffer = this._transformDataBuffers[i];
-                if (!buffer.IsFull)
-                {
-                    return buffer.RequestBlock();
-                }
+                return buffer.RequestBlock();
             }
-
-            var newBuffer = new DataBuffer(this.GraphicsDevice, MIN_BUFFER_BLOCKS, 64, this.TransformResourceLayout);
-            newBuffer.Name = "TransformDataBuffer " + this._transformDataBuffers.Count;
-            this._transformDataBuffers.Add(newBuffer);
-            return newBuffer.RequestBlock();
         }
+
+        var newBuffer = new DataBuffer(this.GraphicsDevice, MIN_BUFFER_BLOCKS, 64, this.TransformResourceLayout);
+        newBuffer.Name = "TransformDataBuffer " + this._transformDataBuffers.Count;
+        this._transformDataBuffers.Add(newBuffer);
+        return newBuffer.RequestBlock();
     }
 
     private DataBlock RequestInstanceDataBlock(int instanceDataBlockSize)
     {
-        lock (this._instanceDataBuffers)
+        for (int i = 0; i < this._instanceDataBuffers.Count; i++)
         {
-            for (int i = 0; i < this._instanceDataBuffers.Count; i++)
+            var buffer = this._instanceDataBuffers[i];
+            if (buffer.BlockSize == instanceDataBlockSize && !buffer.IsFull)
             {
-                var buffer = this._instanceDataBuffers[i];
-                if (buffer.BlockSize == instanceDataBlockSize && !buffer.IsFull)
-                {
-                    return buffer.RequestBlock();
-                }
+                return buffer.RequestBlock();
             }
-
-            var newBuffer = new DataBuffer(this.GraphicsDevice, MIN_BUFFER_BLOCKS, instanceDataBlockSize, this.InstanceResourceLayout);
-            newBuffer.Name = "InstanceDataBuffer " + this._instanceDataBuffers.Count;
-            this._instanceDataBuffers.Add(newBuffer);
-            return newBuffer.RequestBlock();
         }
+
+        var newBuffer = new DataBuffer(this.GraphicsDevice, MIN_BUFFER_BLOCKS, instanceDataBlockSize, this.InstanceResourceLayout);
+        newBuffer.Name = "InstanceDataBuffer " + this._instanceDataBuffers.Count;
+        this._instanceDataBuffers.Add(newBuffer);
+        return newBuffer.RequestBlock();
     }
 
     internal void RegisterSkeleton(Skeleton skeleton)
     {
-        lock (this._skeletons)
-        {
-            this._skeletons.Add(skeleton);
-        }
+        this._skeletons.Add(skeleton);
     }
 
     internal void UnregisterSkeleton(Skeleton skeleton)
     {
-        lock (this._skeletons)
-        {
-            this._skeletons.Remove(skeleton);
-        }
+        this._skeletons.Remove(skeleton);
     }
 
     internal DataBlock RequestSkeletonDataBlock()
     {
-        lock (this._skeletonDataBuffers)
+        for (int i = 0; i < this._skeletonDataBuffers.Count; i++)
         {
-            for (int i = 0; i < this._skeletonDataBuffers.Count; i++)
+            var buffer = this._skeletonDataBuffers[i];
+            if (!buffer.IsFull)
             {
-                var buffer = this._skeletonDataBuffers[i];
-                if (!buffer.IsFull)
-                {
-                    return buffer.RequestBlock();
-                }
+                return buffer.RequestBlock();
             }
-
-            var newBuffer = new DataBuffer(this.GraphicsDevice, MIN_BUFFER_BLOCKS / Skeleton.MAX_NUMBER_OF_BONES, Skeleton.MAX_NUMBER_OF_BONES * 64, this.SkeletonResourceLayout);
-            newBuffer.Name = "SkeletonDataBuffer " + this._skeletonDataBuffers.Count;
-            this._skeletonDataBuffers.Add(newBuffer);
-            return newBuffer.RequestBlock();
         }
+
+        var newBuffer = new DataBuffer(this.GraphicsDevice, MIN_BUFFER_BLOCKS / Skeleton.MAX_NUMBER_OF_BONES, Skeleton.MAX_NUMBER_OF_BONES * 64, this.SkeletonResourceLayout);
+        newBuffer.Name = "SkeletonDataBuffer " + this._skeletonDataBuffers.Count;
+        this._skeletonDataBuffers.Add(newBuffer);
+        return newBuffer.RequestBlock();
     }
 
     internal void UpdateBuffers(CommandList commandList)
@@ -468,18 +447,13 @@ public class Renderer : IDisposable
 
     internal void NotifyTextureDirty(Texture texture)
     {
-        lock (this._dirtyTextures)
-        {
-            this._dirtyTextures.Add(texture);
-        }
+        this._dirtyTextures.Add(texture);
     }
 
     internal void NotifyMaterialResourcesDirty(Material material)
     {
-        lock (this._dirtyMaterials)
-        {
-            this._dirtyMaterials.Add(material);
-        }
+
+        this._dirtyMaterials.Add(material);
     }
 
     /// <summary>

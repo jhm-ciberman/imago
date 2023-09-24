@@ -49,60 +49,49 @@ internal class RenderQueue : IEnumerable<Renderable>, IReadOnlyList<Renderable>,
 
     public void UpdateRenderableRenderFlags(Renderable renderable, RenderQueues oldFlags, RenderQueues newFlags)
     {
-        // This event could be called from a different thread. The "_allRenderables" list should be locked.
-
         if ((newFlags & this.FilterFlags) == (oldFlags & this.FilterFlags))
             return;
 
         if (newFlags.HasFlag(this.FilterFlags))
         {
-            lock (this._allRenderables)
-            {
-                this._renderableToIndex.Add(renderable, this._allRenderables.Count);
-                this._allRenderables.Add(renderable);
-            }
+            this._renderableToIndex.Add(renderable, this._allRenderables.Count);
+            this._allRenderables.Add(renderable);
         }
         else if (oldFlags.HasFlag(this.FilterFlags))
         {
-            lock (this._allRenderables)
+            if (this._renderableToIndex.TryGetValue(renderable, out int index))
             {
-                if (this._renderableToIndex.TryGetValue(renderable, out int index))
-                {
-                    // Swap pop algorithm to remove in O(1) time.
-                    var lastIndex = this._allRenderables.Count - 1;
-                    var lastRenderable = this._allRenderables[lastIndex];
-                    this._allRenderables[index] = lastRenderable;
-                    this._renderableToIndex[lastRenderable] = index;
-                    this._allRenderables.RemoveAt(lastIndex);
-                    this._renderableToIndex.Remove(renderable);
-                }
+                // Swap pop algorithm to remove in O(1) time.
+                var lastIndex = this._allRenderables.Count - 1;
+                var lastRenderable = this._allRenderables[lastIndex];
+                this._allRenderables[index] = lastRenderable;
+                this._renderableToIndex[lastRenderable] = index;
+                this._allRenderables.RemoveAt(lastIndex);
+                this._renderableToIndex.Remove(renderable);
             }
         }
     }
 
     public void Update(BoundingFrustum cameraFrustum, Vector3 cameraPosition)
     {
-        lock (this._allRenderables)
+        this._culledIndices.Clear();
+        this._culledItems.Clear();
+        var renderables = this._allRenderables;
+        for (int i = 0; i < renderables.Count; i++)
         {
-            this._culledIndices.Clear();
-            this._culledItems.Clear();
-            var renderables = this._allRenderables;
-            for (int i = 0; i < renderables.Count; i++)
+            Renderable renderable = renderables[i];
+
+            if (!renderable.RenderQueues.HasFlag(this.FilterFlags)) continue;
+
+            if (cameraFrustum.Contains(renderable.BoundingBox) != ContainmentType.Disjoint)
             {
-                Renderable renderable = renderables[i];
-
-                if (!renderable.RenderQueues.HasFlag(this.FilterFlags)) continue;
-
-                if (cameraFrustum.Contains(renderable.BoundingBox) != ContainmentType.Disjoint)
-                {
-                    ulong key = renderable.GetSortKey(cameraPosition);
-                    this._culledIndices.Add(new RenderIndex(key, this._culledItems.Count));
-                    this._culledItems.Add(renderable);
-                }
+                ulong key = renderable.GetSortKey(cameraPosition);
+                this._culledIndices.Add(new RenderIndex(key, this._culledItems.Count));
+                this._culledItems.Add(renderable);
             }
-
-            this._culledIndices.Sort(this._comparer);
         }
+
+        this._culledIndices.Sort(this._comparer);
     }
 
     public IEnumerator<Renderable> GetEnumerator()

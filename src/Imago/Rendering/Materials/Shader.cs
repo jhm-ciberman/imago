@@ -81,41 +81,35 @@ public class Shader : IDisposable
     /// <returns>The veldrid pipeline.</returns>
     internal Pipeline GetPipeline(VertexFormat vertexFormat, RenderFlags flags)
     {
-        lock (this._pipelines)
+        for (int i = 0; i < this._pipelines.Count; i++)
         {
-            for (int i = 0; i < this._pipelines.Count; i++)
-            {
-                if (this._pipelines[i].VertexFormat == vertexFormat && this._pipelines[i].Flags == flags)
-                    return this._pipelines[i].Pipeline;
-            }
-
-            ShaderVariant shaderVariant = this.GetShaderVariant(vertexFormat, flags);
-            var pipeline = this._pass.MakePipeline(shaderVariant, flags);
-            this._pipelines.Add(new CachedPipeline(vertexFormat, pipeline, flags));
-
-            return pipeline;
+            if (this._pipelines[i].VertexFormat == vertexFormat && this._pipelines[i].Flags == flags)
+                return this._pipelines[i].Pipeline;
         }
+
+        ShaderVariant shaderVariant = this.GetShaderVariant(vertexFormat, flags);
+        var pipeline = this._pass.MakePipeline(shaderVariant, flags);
+        this._pipelines.Add(new CachedPipeline(vertexFormat, pipeline, flags));
+
+        return pipeline;
     }
 
     private ShaderVariant GetShaderVariant(VertexFormat vertexFormat, RenderFlags flags)
     {
         flags &= this.SupportedRenderFlags;
 
-        lock (this._variants)
+        for (int i = 0; i < this._variants.Count; i++)
         {
-            for (int i = 0; i < this._variants.Count; i++)
-            {
-                if (this._variants[i].VertexFormat == vertexFormat && this._variants[i].Flags == flags)
-                    return this._variants[i];
-            }
-
-            var macros = vertexFormat.GetMacroDefinitions();
-            AddFlagsMacros(macros, flags);
-            var shaders = ShaderCompiler.CompileShaders(this._gd, this.VertexCode, this.FragmentCode, macros);
-            var variant = new ShaderVariant(this, vertexFormat, shaders, flags);
-            this._variants.Add(variant);
-            return variant;
+            if (this._variants[i].VertexFormat == vertexFormat && this._variants[i].Flags == flags)
+                return this._variants[i];
         }
+
+        var macros = vertexFormat.GetMacroDefinitions();
+        AddFlagsMacros(macros, flags);
+        var shaders = ShaderCompiler.CompileShaders(this._gd, this.VertexCode, this.FragmentCode, macros);
+        var variant = new ShaderVariant(this, vertexFormat, shaders, flags);
+        this._variants.Add(variant);
+        return variant;
     }
 
     private static readonly Dictionary<RenderFlags, string> _renderFlagMacros = new Dictionary<RenderFlags, string>
