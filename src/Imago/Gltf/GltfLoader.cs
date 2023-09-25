@@ -26,7 +26,7 @@ public class GltfLoader
         var gltf = LoadFile(path);
         return string.IsNullOrEmpty(animationName)
             ? gltf.Animations[0]
-            : gltf.Animations.First(a => a.Name == animationName);
+            : gltf.Animations.FirstOrDefault(a => a.Name == animationName) ?? throw new Exception($"Could not find animation with name {animationName}");
     }
 
     public static GltfNode LoadScenePrefab(string path, string? sceneName = null, string? rootNodeName = null)
