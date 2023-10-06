@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Imago.Motion;
+using Imago.Rendering;
 
 namespace Imago.Gltf;
 
@@ -41,5 +42,22 @@ public class GltfLoader
             : scene.FindNodeByName(rootNodeName) ?? throw new Exception($"Could not find node with name {rootNodeName}");
     }
 
+    public static Mesh[] LoadMeshes(string path, string? sceneName = null, string? rootNodeName = null)
+    {
+        var gltf = LoadFile(path);
+        var scene = string.IsNullOrEmpty(sceneName)
+            ? gltf.Scene
+            : gltf.Scenes.First(s => s.Name == sceneName);
 
+        var node = string.IsNullOrEmpty(rootNodeName)
+            ? scene
+            : scene.FindNodeByName(rootNodeName) ?? throw new Exception($"Could not find node with name {rootNodeName}");
+
+        return node.Meshes;
+    }
+
+    public static Mesh LoadMesh(string path, string? sceneName = null, string? rootNodeName = null, int index = 0)
+    {
+        return LoadMeshes(path, sceneName, rootNodeName)[index];
+    }
 }

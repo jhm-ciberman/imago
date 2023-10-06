@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Imago.Rendering;
@@ -14,7 +15,7 @@ public class GltfNode : IInstantiable
     public Quaternion Rotation { get; set; } = Quaternion.Identity;
     public Vector3 Scale { get; set; } = Vector3.One;
 
-    public Mesh? Mesh { get; set; } = null;
+    public Mesh[] Meshes { get; set; } = Array.Empty<Mesh>();
     public GltfSkinInfo? Skin { get; set; } = null;
     public Material? Material { get; set; } = null;
     public GltfNode? Parent { get; set; } = null;

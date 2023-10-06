@@ -86,16 +86,8 @@ public class TexturePage
         }
 
         uint w, h;
-        if (this._tileSize == 0)
-        {
-            w = (uint)operation.Size.X;
-            h = (uint)operation.Size.Y;
-        }
-        else
-        {
-            w = (uint)MathF.Ceiling(operation.Size.X / (float)this._tileSize);
-            h = (uint)MathF.Ceiling(operation.Size.Y / (float)this._tileSize);
-        }
+        w = (uint)MathF.Ceiling(operation.Size.X / (float)this._tileSize);
+        h = (uint)MathF.Ceiling(operation.Size.Y / (float)this._tileSize);
 
         if (!this._binPacker.TryFit(w, h, out Vector2Int coords))
         {
@@ -103,8 +95,7 @@ public class TexturePage
             return false;
         }
 
-        if (this._tileSize != 0)
-            coords *= this._tileSize;
+        coords *= this._tileSize;
 
         operation.Draw(this.Image, coords);
         this.IsDirty = true;
@@ -128,5 +119,54 @@ public class TexturePage
         x |= x >> 8;
         x |= x >> 16;
         return x + 1;
+    }
+
+    /// <summary>
+    /// Releases the specified packed texture from the atlas and makes the space available for other textures.
+    /// </summary>
+    /// <param name="packedTexture">The packed texture to release.</param>
+    /// <remarks>
+    /// This method does not validate that the packed texture was actually packed in this atlas. It is the responsibility
+    /// of the caller to ensure that the packed texture was actually packed in this atlas.
+    /// </remarks>
+    public void Release(PackedTexture packedTexture)
+    {
+        var size = packedTexture.PixelSize;
+        var coords = packedTexture.PixelTopLeft / this._tileSize;
+
+        var x = (int)MathF.Floor(coords.X);
+        var y = (int)MathF.Floor(coords.Y);
+        var w = (int)MathF.Ceiling(size.X / this._tileSize);
+        var h = (int)MathF.Ceiling(size.Y / this._tileSize);
+
+        this._binPacker.Release(new Vector2Int(x, y), new Vector2Int(w, h));
+    }
+
+
+    /// <summary>
+    /// Redraws the texture contained in the specified packed texture. This is useful when you want to update the texture
+    /// without having to release and repack it.
+    /// </summary>
+    /// <remarks>
+    /// This method does not validate that the packed texture was actually packed in this atlas. It is the responsibility
+    /// of the caller to ensure that the packed texture was actually packed in this atlas.
+    /// </remarks>
+    /// <param name="packedTexture">The packed texture to redraw.</param>
+    /// <param name="operation">The operation that will be used to redraw the texture.</param>
+    /// <throws cref="InvalidOperationException">Thrown when the packed texture has not enough size to contain the operation.</throws>
+    public void Redraw(PackedTexture packedTexture, IDrawOperation operation)
+    {
+        var availableSize = packedTexture.PixelSize;
+        availableSize.X = (int)MathF.Ceiling(availableSize.X / this._tileSize);
+        availableSize.Y = (int)MathF.Ceiling(availableSize.Y / this._tileSize);
+
+        Vector2Int requiredMinSize = operation.Size / this._tileSize;
+        if (requiredMinSize.X > availableSize.X || requiredMinSize.Y > availableSize.Y)
+        {
+            throw new InvalidOperationException("The packed texture has not enough size to contain the operation.");
+        }
+
+        operation.Draw(this.Image, packedTexture.PixelTopLeft);
+        this.IsDirty = true;
     }
 }

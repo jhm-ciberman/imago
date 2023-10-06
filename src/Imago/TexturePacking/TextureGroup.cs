@@ -35,9 +35,9 @@ public class TextureGroup
 
     /// <summary>
     /// Gets the tile size. This is the size in pixels of each tile in the atlas. This can be used to prevent MipMap levels
-    /// from bleeding into each other. A size of 0 means that the texture will not be tiled.
+    /// from bleeding into each other.
     /// </summary>
-    public uint TileSize { get; } = 0;
+    public uint TileSize { get; } = 1;
 
     /// <summary>
     /// Gets whether the texture pages of this group should use the SRGB color space.
@@ -45,6 +45,8 @@ public class TextureGroup
     public bool IsSrgb { get; } = false;
 
     private readonly List<TexturePage> _pages = new(1);
+
+    private readonly Dictionary<PackedTexture, TexturePage> _packedTexturesPages = new();
 
     private bool _flushRequested = false;
 
@@ -78,6 +80,7 @@ public class TextureGroup
         {
             if (currentPage.TryPack(unpackedTexture, out packedTexture))
             {
+                this._packedTexturesPages.Add(packedTexture, currentPage);
                 this.RequestFlush();
                 return packedTexture;
             }
@@ -89,6 +92,7 @@ public class TextureGroup
         this.PageAdded?.Invoke(this, page);
         if (page.TryPack(unpackedTexture, out packedTexture))
         {
+            this._packedTexturesPages.Add(packedTexture, page);
             this.RequestFlush();
             return packedTexture;
         }
@@ -135,5 +139,43 @@ public class TextureGroup
         {
             currentPage.Apply();
         }
+    }
+
+    /// <summary>
+    /// Releases the specified packed texture.
+    /// </summary>
+    /// <param name="packedTexture">The packed texture to release.</param>
+    /// <exception cref="InvalidOperationException">Thrown when the texture is not found in any page.</exception>
+    public void Release(PackedTexture packedTexture)
+    {
+        if (!this._packedTexturesPages.TryGetValue(packedTexture, out var page))
+        {
+            throw new InvalidOperationException("Texture not found in any page.");
+        }
+
+        page.Release(packedTexture);
+        this._packedTexturesPages.Remove(packedTexture);
+
+        // No need to flush changes. We will keep the old texture pixels 
+        // in the atlas until it's overwritten by a new texture.
+    }
+
+
+    /// <summary>
+    /// Redraws the texture contained in the specified packed texture. This is useful when you want to update the texture
+    /// without having to release and repack it.
+    /// </summary>
+    /// <param name="packedTexture">The packed texture to redraw.</param>
+    /// <param name="drawOperation">The draw operation to use.</param>
+    /// <exception cref="InvalidOperationException">Thrown when the texture is not found in any page.</exception>
+    public void Redraw(PackedTexture packedTexture, IDrawOperation drawOperation)
+    {
+        if (!this._packedTexturesPages.TryGetValue(packedTexture, out var page))
+        {
+            throw new InvalidOperationException("Texture not found in any page.");
+        }
+
+        page.Redraw(packedTexture, drawOperation);
+        this.RequestFlush();
     }
 }

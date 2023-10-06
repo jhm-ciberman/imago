@@ -94,7 +94,8 @@ public class GltfReader
 
         if (data.Mesh.HasValue)
         {
-            node.Mesh = this.GetMesh(data.Mesh.Value);
+            node.Meshes = this.GetMeshes(data.Mesh.Value);
+
             if (data.Skin.HasValue)
             {
                 node.Skin = this.GetSkin(data.Skin.Value);
@@ -215,9 +216,21 @@ public class GltfReader
         return scene;
     }
 
-    private IMeshData GetPrimitive(int index)
+    private Mesh[] GetMeshes(int index)
     {
-        var data = this._model.Meshes[index].Primitives[0];
+        var mesh = this._model.Meshes[index];
+        var primitives = new Mesh[mesh.Primitives.Length];
+
+        for (int i = 0; i < primitives.Length; i++)
+        {
+            primitives[i] = new Mesh(this.GetPrimitiveData(mesh.Primitives[i]));
+        }
+
+        return primitives;
+    }
+
+    private IMeshData GetPrimitiveData(glTFLoader.Schema.MeshPrimitive data)
+    {
         var indicesAccessor = data.Indices.HasValue ? this.GetAccessor(data.Indices.Value) : null;
         var attributes = data.Attributes;
 
@@ -258,12 +271,6 @@ public class GltfReader
         }
         return null;
     }
-
-    private Mesh GetMesh(int index)
-    {
-        return new Mesh(this.GetPrimitive(index));
-    }
-
 
     private GltfAccessor GetAccessor(int index)
     {

@@ -131,6 +131,18 @@ public class BinPacker
         return minWastedIndex;
     }
 
+    /// <summary>
+    /// Releases a rectangle from the bin.
+    /// </summary>
+    /// <param name="width">The width of the rectangle.</param>
+    /// <param name="height">The height of the rectangle.</param>
+    /// <param name="coords">The coordinates of the rectangle.</param>
+    public void Release(Vector2Int coords, Vector2Int size)
+    {
+        this._freeArea += (uint)(size.X * size.Y);
+        this._freeList.Add(new Node((uint)coords.X, (uint)coords.Y, (uint)size.X, (uint)size.Y));
+    }
+
     private struct Node
     {
         public uint X;

@@ -40,9 +40,27 @@ internal class GltfSceneInstantiator
             return node3d;
         }
 
-        Node3D node = (gltfNode.Mesh != null)
-            ? this.CreateRenderNode(gltfNode.Mesh, gltfNode.Material, gltfNode.Skin)
-            : new Node3D();
+        var meshes = gltfNode.Meshes;
+        Node3D node;
+
+        if (meshes.Length == 0)
+        {
+            node = new Node3D();
+        }
+        else if (meshes.Length == 1)
+        {
+            node = this.CreateRenderNode(meshes[0], gltfNode.Material, gltfNode.Skin);
+        }
+        else // Multi primitive mesh. Our engine do not support this so we create a node for each primitive. KISS.
+        {
+            node = new Node3D();
+            for (var i = 0; i < meshes.Length; i++)
+            {
+                var childNode = this.CreateRenderNode(meshes[i], gltfNode.Material, gltfNode.Skin);
+                childNode.Name = $"{gltfNode.Name}_{i}";
+                node.AddChild(childNode);
+            }
+        }
 
         this._nodesCache[gltfNode] = node;
         node.Name = gltfNode.Name;
