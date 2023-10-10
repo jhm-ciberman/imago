@@ -182,6 +182,18 @@ public class ScrollViewer : ContentControl
         }
     }
 
+    public override void OnAddedToStage(GuiLayer stage)
+    {
+        base.OnAddedToStage(stage);
+        this.ScrollBarThumb.OnAddedToStage(stage);
+    }
+
+    public override void OnRemovedFromStage(GuiLayer stage)
+    {
+        base.OnRemovedFromStage(stage);
+        this.ScrollBarThumb.OnRemovedFromStage(stage);
+    }
+
     /// <summary>
     /// Gets the scrollable size of the scroll viewer. This is the size of the scroll viewer minus the size of the scroll viewer's content.
     /// </summary>
