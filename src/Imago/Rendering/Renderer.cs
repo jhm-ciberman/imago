@@ -60,6 +60,7 @@ public class Renderer : IDisposable
     private readonly ResourceFactory _factory;
     private readonly Fence _fence;
     private readonly CommandList _commandList;
+    private readonly CommandList _fullScreenCommandList;
     private readonly DisposeCollector _disposeCollector;
     private readonly Dictionary<ResourceLayoutDescription, ResourceLayout> _resourceLayoutCache = new();
     private readonly SwapPopList<Renderable> _renderables = new();
@@ -176,6 +177,8 @@ public class Renderer : IDisposable
 
         this._commandList = this._factory.CreateCommandList();
 
+        this._fullScreenCommandList = this._factory.CreateCommandList();
+
         this._fence = this._factory.CreateFence(false);
 
         this.Settings.PropertyChanged += this.Settings_PropertyChanged;
@@ -243,6 +246,14 @@ public class Renderer : IDisposable
 
             this.GraphicsDevice.SubmitCommands(this._commandList, this._fence);
 
+            var cl = this._fullScreenCommandList;
+            cl.Begin();
+            this._fullScreenPass.Render(cl);
+            cl.End();
+
+            this.GraphicsDevice.SubmitCommands(cl, null);
+
+
             this._disposeCollector.DisposeAll();
 
             if (this.GraphicsDevice.MainSwapchain != null)
@@ -255,7 +266,7 @@ public class Renderer : IDisposable
             Console.WriteLine(e.Message);
 
 #if DEBUG
-            throw;
+            //throw;
 #endif
         }
     }
@@ -295,11 +306,6 @@ public class Renderer : IDisposable
         this._spritesPass.Render(cl, stage, renderTexture);
 
         this._imGuiPass.Render(cl, renderTexture);
-
-        if (renderTexture == this.MainRenderTexture)
-        {
-            this._fullScreenPass.Render(cl);
-        }
 
         cl.End();
     }
