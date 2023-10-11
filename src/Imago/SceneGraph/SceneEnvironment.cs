@@ -28,4 +28,14 @@ public class SceneEnvironment
     /// Gets or sets the end distance of the fog.
     /// </summary>
     public float FogEnd { get; set; } = 300f;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the sky dome is enabled.
+    /// </summary>
+    public bool SkyDomeEnabled { get; set; } = false;
+
+    /// <summary>
+    /// Gets or sets the progress of the day as a value between 0 and 1.
+    /// </summary>
+    public float SkyDomeDayProgress { get; set; } = 0.38f;
 }

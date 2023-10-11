@@ -162,8 +162,6 @@ public class Renderer : IDisposable
 
         this.Settings = new RenderSettings(this);
 
-        var skyDomeLut = new ImageTexture("./res/skydome_lut.png", srgb: false);
-
         this._imGuiPass = new ImGuiPass(this, this.MainRenderTexture);
         this._mousePickerPass = new MousePickingPass(this, this.MainRenderTexture);
         this._gizmosPass = new GizmosPass(this, this.MainRenderTexture);
@@ -172,7 +170,7 @@ public class Renderer : IDisposable
         this._forwardPass = new ForwardPass(this, this.MainRenderTexture, this._shadowPass);
         this._immediatePass = new ImmediatePass(this, this.MainRenderTexture);
         this._spritesPass = new SpritesPass(this, this.MainRenderTexture);
-        this._skyDomePass = new SkyDomePass(this, this.MainRenderTexture, skyDomeLut);
+        this._skyDomePass = new SkyDomePass(this, this.MainRenderTexture);
         this._fullScreenPass = new FullScreenPass(this, this.MainRenderTexture, this.FullScreenRenderTexture);
 
         this._commandList = this._factory.CreateCommandList();

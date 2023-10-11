@@ -48,12 +48,10 @@ public class SkyDomePass : IDisposable
 
     private readonly Sampler _sampler;
 
-    public float LutTextureOffset { get; set; } = 0.38f;
-
-    public SkyDomePass(Renderer renderer, IRenderTexture renderTexture, ITexture lutTexture)
+    public SkyDomePass(Renderer renderer, IRenderTexture renderTexture)
     {
         this._gd = renderer.GraphicsDevice;
-        this._lutTexture = lutTexture;
+        this._lutTexture = new ImageTexture("./res/skydome_lut.png", srgb: false);
         this._renderTexture = renderTexture;
 
         var factory = this._gd.ResourceFactory;
@@ -138,13 +136,15 @@ public class SkyDomePass : IDisposable
         var camera = scene.Camera;
         if (camera == null) return;
 
-        //this.LutTextureOffset = (this.LutTextureOffset + 0.0005f) % 1f;
+        if (!scene.Environment.SkyDomeEnabled) return;
+
+        var xOffset = scene.Environment.SkyDomeDayProgress % 1f;
 
         var passData = new PassData
         {
             ViewProjectionMatrix = camera.ViewProjectionMatrix,
             ModelMatrix = Matrix4x4.CreateScale(camera.FarPlane - 0.1f) * Matrix4x4.CreateTranslation(camera.Position),
-            LutTextureOffset = new Vector2(this.LutTextureOffset, 0.75f / 24f),
+            LutTextureOffset = new Vector2(xOffset, 0.75f / 24f),
         };
 
         cl.SetFramebuffer(renderTexture.Framebuffer);
