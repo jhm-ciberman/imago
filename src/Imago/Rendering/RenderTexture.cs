@@ -3,6 +3,12 @@ using Veldrid;
 
 namespace Imago.Rendering;
 
+public enum TextureInterpolation
+{
+    Nearest,
+    Linear,
+};
+
 public class RenderTexture : IRenderTexture
 {
     /// <summary>
@@ -100,6 +106,27 @@ public class RenderTexture : IRenderTexture
         this.Framebuffer = this.CreateFramebuffer();
         this.ColorOnlyFramebuffer = this.CreateColorOnlyFramebuffer();
         this.Resized?.Invoke(this, EventArgs.Empty);
+    }
+    
+    private TextureInterpolation _interpolation = TextureInterpolation.Linear;
+
+    /// <summary>
+    /// Gets or sets the texture interpolation mode.
+    /// </summary>
+    public TextureInterpolation Interpolation
+    {
+        get => this._interpolation;
+        set
+        {
+            if (this._interpolation == value) return;
+            this._interpolation = value;
+            this.VeldridSampler = this._interpolation switch
+            {
+                TextureInterpolation.Nearest => this._gd.PointSampler,
+                TextureInterpolation.Linear => this._gd.LinearSampler,
+                _ => throw new NotImplementedException(),
+            };
+        }
     }
 
     public void Dispose()

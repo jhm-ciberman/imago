@@ -1,5 +1,6 @@
 using System;
 using System.Numerics;
+using Veldrid.Utilities;
 
 namespace Imago.SceneGraph;
 

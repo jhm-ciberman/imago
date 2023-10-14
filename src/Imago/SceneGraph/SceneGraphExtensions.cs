@@ -241,4 +241,30 @@ public static class SceneGraphExtensions
             node.TextureST = packedTexture.GetTextureST();
         });
     }
+
+    /// <summary>
+    /// Computes the bounding box of the node and all its children.
+    /// </summary>
+    /// <param name="self">The node.</param>
+    /// <returns>The bounding box of the node and all its children, or null if the node has no mesh.</returns>
+    public static BoundingBox? GetBoundingBox(this Node3D self)
+    {
+        BoundingBox bbox;
+        BoundingBox? result = null;
+        self.ForEachRecursive<RenderNode3D>((node) =>
+        {
+            if (node.Mesh is null) return;
+
+            if (result is null)
+            {
+                result = BoundingBox.Transform(node.Mesh.BoundingBox, node.WorldMatrix);
+                return;
+            }
+
+            bbox = BoundingBox.Transform(node.Mesh.BoundingBox, node.WorldMatrix);
+            result = BoundingBox.Combine(result.Value, bbox);
+        });
+
+        return result;
+    }
 }

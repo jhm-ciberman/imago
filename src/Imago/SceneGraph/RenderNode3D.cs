@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using Imago.Rendering;
 using Imago.Rendering.Materials;
 using Support;
+using Veldrid.Utilities;
 
 namespace Imago.SceneGraph;
 

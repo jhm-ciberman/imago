@@ -66,7 +66,7 @@ public class TextureBlock : Control
 
         if (this.Texture != null)
         {
-            spriteBatcher.DrawTexture(this.Shader, this.Texture, this.Position, this.DesiredSize);
+            spriteBatcher.DrawTexture(this.Shader, this.Texture, this.Position, this.ActualSize);
         }
     }
 }

@@ -50,6 +50,14 @@ public class GizmosLayer
     }
 
     /// <summary>
+    /// Clears all gizmos.
+    /// </summary>
+    public void Clear()
+    {
+        this._lines.Clear();
+    }
+
+    /// <summary>
     /// Draws a line from start to end with the given color.
     /// </summary>
     /// <param name="start">The start point of the line.</param>
@@ -383,5 +391,26 @@ public class GizmosLayer
 
             angle += step;
         }
+    }
+
+    /// <summary>
+    /// Draws the axes at the given position and rotation. The X axis is red, the Y axis is green and the Z axis is blue.
+    /// </summary>
+    /// <param name="position">The position of the axes.</param>
+    /// <param name="rotation">The rotation of the axes.</param>
+    /// <param name="size">The size of the axes.</param>
+    /// <param name="lifeTime">The amount of time the axes will be visible. A value of 0 means that the axes will be drawn until the next frame.</param>
+    /// <param name="drawInFront">Whether the axes should be drawn in front other objects or using depth.</param>
+    public void DrawAxes(Vector3 position, Quaternion? rotation = null, float size = 1f, float lifeTime = 0, bool drawInFront = false)
+    {
+        var r = rotation ?? Quaternion.Identity;
+
+        var x = Vector3.Transform(new Vector3(size, 0, 0), r);
+        var y = Vector3.Transform(new Vector3(0, size, 0), r);
+        var z = Vector3.Transform(new Vector3(0, 0, size), r);
+
+        this.DrawLine(position, position + x, Color.Red, lifeTime, drawInFront);
+        this.DrawLine(position, position + y, Color.Green, lifeTime, drawInFront);
+        this.DrawLine(position, position + z, Color.Blue, lifeTime, drawInFront);
     }
 }
