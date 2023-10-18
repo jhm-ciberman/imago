@@ -154,6 +154,8 @@ public class Application : IDisposable
 
     public void Dispose()
     {
+        this.IsRunning = false;
+        this._input.Dispose();
         this._renderer.Dispose();
         this.Window.Close();
     }

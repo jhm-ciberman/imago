@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using Support;
 using Veldrid;
 using Veldrid.Sdl2;
 
@@ -9,7 +10,7 @@ namespace Imago.Input;
 /// <summary>
 /// Captures and manages the mouse and keyboard input.
 /// </summary>
-public class InputManager
+public class InputManager : IDisposable
 {
     private static InputManager _instance = null!;
 
@@ -75,8 +76,6 @@ public class InputManager
 
     private Vector2 _mousePosition;
 
-    private Vector2 _mouseDelta;
-
     /// <summary>
     /// Initializes a new instance of the <see cref="InputManager"/> class.
     /// </summary>
@@ -90,6 +89,20 @@ public class InputManager
         _instance = this;
         this._window = window;
         this.InputSnapshot = window.PumpEvents();
+        this._window.MouseMove += this.Window_MouseMove;
+    }
+
+    public void Dispose()
+    {
+        this._window.MouseMove -= this.Window_MouseMove;
+    }
+
+    private void Window_MouseMove(MouseMoveEventArgs args)
+    {
+        // Why using this event instead of InputSnapshot.MousePosition?
+        // Well, there is a bug in which InputSnapshot.MousePosition is updated 2 frames after the mouse is moved with this._window.SetMousePosition().
+        // I don't know if it's a bug in Veldrid or if I'm doing something wrong, but this event is a workaround and it works. ¯\_(ツ)_/¯
+        this._mousePosition = args.MousePosition;
     }
 
     /// <summary>
@@ -97,7 +110,10 @@ public class InputManager
     /// </summary>
     public void UpdateFrameInput()
     {
-        this.InputSnapshot = this._window.PumpEvents(); //For next frame
+        this.InputSnapshot = this._window.PumpEvents();
+
+        this.MouseWheelDelta = this.InputSnapshot.WheelDelta;
+
         this._newKeysThisFrame.Clear();
         this._releasedKeysThisFrame.Clear();
         this._newMouseButtonsThisFrame.Clear();
@@ -137,35 +153,35 @@ public class InputManager
 
         if (this.TextEntered != null && this._typedCharactersThisFrame.Count > 0)
             this.TextEntered.Invoke(this, new TextEventArgs(this._typedCharactersThisFrame));
-
-        var newPos = this.InputSnapshot.MousePosition;
-        var center = new Vector2(this._window.Width / 2, this._window.Height / 2);
-        this._mouseDelta = newPos - center;
-        this._mousePosition = newPos;
-
-        this.MouseWheelDelta = this.InputSnapshot.WheelDelta;
     }
 
     /// <summary>
-    /// Moves the mouse cursor to the center of the screen.
+    /// Gets the size of the display used for capturing input.
     /// </summary>
-    public void MoveMouseToCenter()
+    public Vector2Int DisplaySize => new(this._window.Width, this._window.Height);
+
+    /// <summary>
+    /// Moves the mouse cursor to the specified position.
+    /// </summary>
+    /// <param name="position">The new position of the mouse cursor.</param>
+    public void MoveMouseTo(Vector2 position)
     {
-        var center = new Vector2(this._window.Width / 2, this._window.Height / 2);
-        this._window.SetMousePosition(center);
-        this._mouseDelta = new Vector2(0, 0);
-        this._mousePosition = center;
+        position.X = (int)position.X;
+        position.Y = (int)position.Y;
+
+        if (position != this.DisplaySize / 2)
+        {
+            Console.WriteLine($"Moving mouse to {position}");
+        }
+
+        this._window.SetMousePosition(position);
+        this._mousePosition = position;
     }
 
     /// <summary>
     /// Gets the current mouse position.
     /// </summary>
     public Vector2 MousePosition => this._mousePosition;
-
-    /// <summary>
-    /// Gets the mouse delta since the last frame.
-    /// </summary>
-    public Vector2 MouseDelta => this._mouseDelta;
 
     /// <summary>
     /// Gets or sets whether the mouse is currently visible.
@@ -175,7 +191,6 @@ public class InputManager
         get => this._window.CursorVisible;
         set => this._window.CursorVisible = value;
     }
-
 
     /// <summary>
     /// Gets whether the specified key is currently pressed.
