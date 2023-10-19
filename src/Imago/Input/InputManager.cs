@@ -168,12 +168,6 @@ public class InputManager : IDisposable
     {
         position.X = (int)position.X;
         position.Y = (int)position.Y;
-
-        if (position != this.DisplaySize / 2)
-        {
-            Console.WriteLine($"Moving mouse to {position}");
-        }
-
         this._window.SetMousePosition(position);
         this._mousePosition = position;
     }
