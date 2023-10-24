@@ -76,7 +76,7 @@ internal class ForwardPass : IDisposable, IPipelineProvider
 
         this._shadowPass.ShadowmapTexture.Resized += this.Shadowmap_Resized;
 
-        RenderFlags supportedForwardFlags = RenderFlags.MousePick | RenderFlags.AlphaTest | RenderFlags.ReceiveShadows | RenderFlags.Fog | RenderFlags.PixelPerfactShadows;
+        RenderFlags supportedForwardFlags = RenderFlags.AlphaTest | RenderFlags.ReceiveShadows | RenderFlags.Fog | RenderFlags.PixelPerfactShadows | RenderFlags.ColorWrite;
         var baseVertex = ShaderLoader.Load("base.vert.glsl");
         var baseFragment = ShaderLoader.Load("base.frag.glsl");
         this.DefaultShader = new Shader(renderer, this, baseVertex, baseFragment, new[] { "Surface" }, supportedForwardFlags);
@@ -154,8 +154,6 @@ internal class ForwardPass : IDisposable, IPipelineProvider
         var fillMode = flags.HasFlag(RenderFlags.Wireframe) ? PolygonFillMode.Wireframe : PolygonFillMode.Solid;
         var outputDescription = this._renderTexture.OutputDescription;
         var scissorTestEnabled = flags.HasFlag(RenderFlags.ScisorTest);
-        if (!flags.HasFlag(RenderFlags.MousePick))
-            outputDescription = new OutputDescription(outputDescription.DepthAttachment, outputDescription.ColorAttachments[0]);
 
         return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
         {

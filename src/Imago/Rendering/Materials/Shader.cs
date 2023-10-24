@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Veldrid;
 
 namespace Imago.Rendering.Materials;
@@ -120,10 +121,10 @@ public class Shader : IDisposable
         [RenderFlags.AlphaTest] = "ENABLE_ALPHA_TEST",
         [RenderFlags.DepthTest] = "ENABLE_DEPTH_TEST",
         [RenderFlags.DepthWrite] = "ENABLE_DEPTH_WRITE",
-        [RenderFlags.MousePick] = "ENABLE_MOUSE_PICK",
         [RenderFlags.ReceiveShadows] = "ENABLE_RECEIVE_SHADOWS",
         [RenderFlags.Fog] = "ENABLE_FOG",
         [RenderFlags.PixelPerfactShadows] = "ENABLE_PIXEL_PERFECT_SHADOWS",
+        [RenderFlags.ColorWrite] = "ENABLE_COLOR_WRITE",
     };
 
     private static void AddFlagsMacros(List<Veldrid.SPIRV.MacroDefinition> macros, RenderFlags flags)

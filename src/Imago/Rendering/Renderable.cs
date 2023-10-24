@@ -450,7 +450,6 @@ internal class Renderable : IDisposable
 
         RenderFlags flags = RenderFlags.None;
         if (settings.ForceWireframe) flags |= RenderFlags.Wireframe;
-        flags |= RenderFlags.MousePick;
         if (this.RenderQueues.HasFlag(RenderQueues.Transparent)) flags |= RenderFlags.Transparent;
         if (settings.EnableFog) flags |= RenderFlags.Fog;
         if (settings.EnablePixelPerfectShadows) flags |= RenderFlags.PixelPerfactShadows;

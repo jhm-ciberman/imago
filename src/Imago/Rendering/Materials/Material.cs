@@ -11,7 +11,7 @@ public class Material
 
     private bool _resourceSetDirty = false;
 
-    public RenderFlags RenderFlags { get; protected set; } = RenderFlags.DepthTest | RenderFlags.DepthWrite | RenderFlags.ReceiveShadows;
+    public RenderFlags RenderFlags { get; protected set; } = RenderFlags.DepthTest | RenderFlags.DepthWrite | RenderFlags.ReceiveShadows | RenderFlags.ColorWrite;
 
 
     public static Texture DefaultTexture { get; } = Textures.Magenta;
@@ -53,6 +53,10 @@ public class Material
     public bool AlphaTest { get => this.GetRenderFlag(RenderFlags.AlphaTest); set => this.SetRenderFlag(RenderFlags.AlphaTest, value); }
 
     public bool Transparent { get => this.GetRenderFlag(RenderFlags.Transparent); set => this.SetRenderFlag(RenderFlags.Transparent, value); }
+
+    public bool ColorWrite { get => this.GetRenderFlag(RenderFlags.ColorWrite); set => this.SetRenderFlag(RenderFlags.ColorWrite, value); }
+
+    public bool ReceiveShadows { get => this.GetRenderFlag(RenderFlags.ReceiveShadows); set => this.SetRenderFlag(RenderFlags.ReceiveShadows, value); }
 
 
     public void Update(ResourceFactory factory)
