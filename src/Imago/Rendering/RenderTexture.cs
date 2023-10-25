@@ -18,7 +18,7 @@ public class RenderTexture : IRenderTexture
 
     public Framebuffer Framebuffer { get; private set; }
 
-    public Framebuffer ColorOnlyFramebuffer { get; private set; }
+    public Framebuffer PickingFramebuffer { get; private set; }
 
     public Veldrid.Texture VeldridTexture { get; private set; }
 
@@ -27,6 +27,8 @@ public class RenderTexture : IRenderTexture
     public Veldrid.Texture PickingTexture { get; private set; }
 
     public OutputDescription OutputDescription => this.Framebuffer.OutputDescription;
+
+    public OutputDescription PickingOutputDescription => this.PickingFramebuffer.OutputDescription;
 
     public uint Width => this.Framebuffer.Width;
     public uint Height => this.Framebuffer.Height;
@@ -45,7 +47,7 @@ public class RenderTexture : IRenderTexture
         this.VeldridTexture = this.CreateColorTexture(width, height);
         this.PickingTexture = this.CreatePickingIDTexture(width, height);
         this.Framebuffer = this.CreateFramebuffer();
-        this.ColorOnlyFramebuffer = this.CreateColorOnlyFramebuffer();
+        this.PickingFramebuffer = this.CreatePickingFramebuffer();
         this.VeldridSampler = this._gd.LinearSampler;
     }
 
@@ -82,16 +84,17 @@ public class RenderTexture : IRenderTexture
     private Framebuffer CreateFramebuffer()
     {
         return this._gd.ResourceFactory.CreateFramebuffer(new FramebufferDescription(
-            this.DepthTexture, this.VeldridTexture, this.PickingTexture
-        ));
-    }
-
-    private Framebuffer CreateColorOnlyFramebuffer()
-    {
-        return this._gd.ResourceFactory.CreateFramebuffer(new FramebufferDescription(
             this.DepthTexture, this.VeldridTexture
         ));
     }
+
+    private Framebuffer CreatePickingFramebuffer()
+    {
+        return this._gd.ResourceFactory.CreateFramebuffer(new FramebufferDescription(
+            this.DepthTexture, this.PickingTexture
+        ));
+    }
+
 
     public void Resize(uint width, uint height)
     {
@@ -99,15 +102,15 @@ public class RenderTexture : IRenderTexture
         this._renderer.DisposeWhenIdle(this.VeldridTexture);
         this._renderer.DisposeWhenIdle(this.PickingTexture);
         this._renderer.DisposeWhenIdle(this.Framebuffer);
-        this._renderer.DisposeWhenIdle(this.ColorOnlyFramebuffer);
+        this._renderer.DisposeWhenIdle(this.PickingFramebuffer);
         this.DepthTexture = this.CreateDepthTexture(width, height);
         this.VeldridTexture = this.CreateColorTexture(width, height);
         this.PickingTexture = this.CreatePickingIDTexture(width, height);
         this.Framebuffer = this.CreateFramebuffer();
-        this.ColorOnlyFramebuffer = this.CreateColorOnlyFramebuffer();
+        this.PickingFramebuffer = this.CreatePickingFramebuffer();
         this.Resized?.Invoke(this, EventArgs.Empty);
     }
-    
+
     private TextureInterpolation _interpolation = TextureInterpolation.Linear;
 
     /// <summary>
@@ -135,6 +138,6 @@ public class RenderTexture : IRenderTexture
         this.VeldridTexture?.Dispose();
         this.PickingTexture?.Dispose();
         this.Framebuffer?.Dispose();
-        this.ColorOnlyFramebuffer?.Dispose();
+        this.PickingFramebuffer?.Dispose();
     }
 }

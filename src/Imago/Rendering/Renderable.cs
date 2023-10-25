@@ -117,6 +117,11 @@ internal class Renderable : IDisposable
     /// </summary>
     public Veldrid.Pipeline? ShadowMapPipeline { get; private set; }
 
+    /// <summary>
+    /// Gets the picking pipeline for this renderable.
+    /// </summary>
+    public Veldrid.Pipeline? PickingPipeline { get; private set; }
+
     private bool _pipelineDirty = false;
 
 
@@ -427,6 +432,11 @@ internal class Renderable : IDisposable
             flags |= RenderQueues.ShadowCaster;
         }
 
+        if (this.PickingId != 0)
+        {
+            flags |= RenderQueues.Picking;
+        }
+
         this.RenderQueues = flags;
     }
 
@@ -436,11 +446,13 @@ internal class Renderable : IDisposable
         {
             this.ForwardPipeline = null;
             this.ShadowMapPipeline = null;
+            this.PickingPipeline = null;
             return;
         }
 
         this.ForwardPipeline = this.GetForwardPipeline(this._material, renderer.Settings);
         this.ShadowMapPipeline = this.GetShadowmapPipeline(this._material);
+        this.PickingPipeline = this.GetPickingPipeline(this._material);
     }
 
     private Veldrid.Pipeline? GetForwardPipeline(Material material, RenderSettings settings)
@@ -465,6 +477,14 @@ internal class Renderable : IDisposable
         RenderFlags shadowSupportFlags = RenderFlags.AlphaTest;
         RenderFlags flags = material.RenderFlags & shadowSupportFlags;
         return material.ShadowMapShader.GetPipeline(this._mesh!.VertexFormat, flags);
+    }
+
+    private Veldrid.Pipeline? GetPickingPipeline(Material material)
+    {
+        bool isPicking = (this.RenderQueues & RenderQueues.Picking) != 0;
+        if (!isPicking) return null;
+
+        return material.PickingShader.GetPipeline(this._mesh!.VertexFormat, material.RenderFlags);
     }
 
     /// <summary>

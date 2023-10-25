@@ -13,22 +13,20 @@ internal readonly struct RenderBatch
     public readonly ResourceSet InstanceResourceSet { get; }
     public readonly ResourceSet? SkeletonResourceSet { get; }
 
-    public RenderBatch(uint instanceCount, Renderable renderable, bool shadowmapPass)
+    public RenderBatch(uint instanceCount, Renderable renderable, RenderBatchPassType pass)
     {
-        Contract.Assume(renderable.Mesh != null);
-        Contract.Assume(renderable.Material != null);
-
         this.InstanceCount = instanceCount;
-        this.Mesh = renderable.Mesh;
+        this.Mesh = renderable.Mesh!;
         this.TransformResourceSet = renderable.TransformResourceSet;
-        this.MaterialResourceSet = renderable.Material.ResourceSet;
+        this.MaterialResourceSet = renderable.Material!.ResourceSet;
         this.InstanceResourceSet = renderable.InstanceResourceSet;
         this.SkeletonResourceSet = renderable.SkeletonResourceSet;
-        this.Pipeline = shadowmapPass ? renderable.ShadowMapPipeline! : renderable.ForwardPipeline!;
-
-        Contract.Assert(this.TransformResourceSet != null);
-        Contract.Assert(this.MaterialResourceSet != null);
-        Contract.Assert(this.InstanceResourceSet != null);
-        Contract.Assert(this.Pipeline != null);
+        this.Pipeline = pass switch
+        {
+            RenderBatchPassType.Forward => renderable.ForwardPipeline!,
+            RenderBatchPassType.ShadowMap => renderable.ShadowMapPipeline!,
+            RenderBatchPassType.Picking => renderable.PickingPipeline!,
+            _ => throw new System.NotImplementedException()
+        };
     }
 }

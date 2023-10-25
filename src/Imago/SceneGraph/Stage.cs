@@ -46,6 +46,8 @@ public class Stage
 
     private readonly List<Node3D> _transformDirtyList = new List<Node3D>();
 
+    internal RenderQueue PickingRenderQueue { get; } = new RenderQueue(RenderQueues.Picking);
+
     internal RenderQueue OpaqueRenderQueue { get; } = new RenderQueue(RenderQueues.Opaque);
 
     internal RenderQueue TransparentRenderQueue { get; } = new RenderQueue(RenderQueues.Transparent);
@@ -171,6 +173,7 @@ public class Stage
     {
         this.OpaqueRenderQueue.UpdateRenderableRenderFlags(renderable, oldQueuesFlags, newQueuesFlags);
         this.TransparentRenderQueue.UpdateRenderableRenderFlags(renderable, oldQueuesFlags, newQueuesFlags);
+        this.PickingRenderQueue.UpdateRenderableRenderFlags(renderable, oldQueuesFlags, newQueuesFlags);
 
         var queues = this.ShadowCasterRenderQueues;
         for (int i = 0; i < queues.Length; i++)

@@ -16,15 +16,16 @@ public class Material
 
     public static Texture DefaultTexture { get; } = Textures.Magenta;
 
-    public Shader ForwardShader { get; private set; }
+    public Shader ForwardShader { get; }
     public Shader ShadowMapShader { get; }
+    public Shader PickingShader { get; }
     public ResourceSet ResourceSet { get; internal set; } = null!;
     private readonly BindableResource[] _resources;
     private Texture? _texture = null;
 
     private readonly Renderer _renderer;
 
-    public Material(Shader forwardShader, Shader shadowMapShader)
+    public Material(Shader forwardShader, Shader shadowMapShader, Shader pickingShader)
     {
         this._renderer = Renderer.Instance;
         this.Id = ++_count;
@@ -34,6 +35,7 @@ public class Material
 
         this.ForwardShader = forwardShader;
         this.ShadowMapShader = shadowMapShader;
+        this.PickingShader = pickingShader;
 
         this._resources = new BindableResource[forwardShader.Textures.Length * 2];
         this._resources[0] = DefaultTexture.VeldridTexture;

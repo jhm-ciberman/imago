@@ -14,7 +14,8 @@ internal enum RenderQueues : byte
     Transparent = 1 << 1,
     OpaqueOrTransparent = Opaque | Transparent,
     ShadowCaster = 1 << 2,
-    All = Opaque | Transparent | ShadowCaster,
+    Picking = 1 << 3,
+    All = Opaque | Transparent | ShadowCaster | Picking,
 }
 
 internal class RenderQueue : IEnumerable<Renderable>, IReadOnlyList<Renderable>, IReadOnlyCollection<Renderable>
@@ -41,7 +42,7 @@ internal class RenderQueue : IEnumerable<Renderable>, IReadOnlyList<Renderable>,
 
         this._comparer = filterFlags switch
         {
-            RenderQueues.Opaque or RenderQueues.ShadowCaster => _frontToBack,
+            RenderQueues.Opaque or RenderQueues.ShadowCaster or RenderQueues.Picking => _frontToBack,
             RenderQueues.Transparent => _backToFront,
             _ => throw new ArgumentException("Invalid filter flags."),
         };

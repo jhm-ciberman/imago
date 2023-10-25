@@ -134,7 +134,7 @@ public class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
         var renderables = scene.ImmediateRenderables;
         if (renderables.Count == 0) return;
 
-        cl.SetFramebuffer(renderTexture.ColorOnlyFramebuffer);
+        cl.SetFramebuffer(renderTexture.Framebuffer);
 
         this.Begin(cl, camera.ViewProjectionMatrix);
 
@@ -347,7 +347,7 @@ public class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
                 depthClipEnabled: true,
                 scissorTestEnabled: false
             ),
-            Outputs = ((RenderTexture)this._renderTexture).ColorOnlyFramebuffer.OutputDescription,
+            Outputs = ((RenderTexture)this._renderTexture).Framebuffer.OutputDescription,
             ResourceLayouts = new ResourceLayout[]
             {
                 this._passResourceLayout,

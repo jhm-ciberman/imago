@@ -13,9 +13,9 @@ internal class RenderJob
     private const uint BINDING_SKELETON = 4;
     private readonly RenderBatcher _batcher;
 
-    public RenderJob(GraphicsDevice gd, bool shadowmapPass)
+    public RenderJob(GraphicsDevice gd, RenderBatchPassType pass)
     {
-        this._batcher = new RenderBatcher(gd, shadowmapPass);
+        this._batcher = new RenderBatcher(gd, pass);
     }
 
     public void DrawRenderList(CommandList commandList, ResourceSet passResourceSet, IReadOnlyList<Renderable> renderItems)

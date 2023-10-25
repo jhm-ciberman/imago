@@ -4,6 +4,13 @@ using Veldrid;
 
 namespace Imago.Rendering.Forward;
 
+internal enum RenderBatchPassType
+{
+    Forward,
+    ShadowMap,
+    Picking
+}
+
 internal class RenderBatcher
 {
     private DeviceBuffer? _offsetsVertexBuffer = null;
@@ -13,12 +20,12 @@ internal class RenderBatcher
     public IReadOnlyList<RenderBatch> Batches => this._batches;
 
     private readonly GraphicsDevice _gd;
-    private readonly bool _shadowMapPass;
+    private readonly RenderBatchPassType _pass;
 
-    public RenderBatcher(GraphicsDevice gd, bool shadowMapPass)
+    public RenderBatcher(GraphicsDevice gd, RenderBatchPassType pass)
     {
         this._gd = gd;
-        this._shadowMapPass = shadowMapPass;
+        this._pass = pass;
         this._offsetVertexData = new OffsetVertexData[1024];
         this._batches = new List<RenderBatch>(1024);
     }
@@ -43,13 +50,13 @@ internal class RenderBatcher
                 instanceCount++;
             else
             {
-                this._batches.Add(new RenderBatch(instanceCount, prevRenderable, this._shadowMapPass));
+                this._batches.Add(new RenderBatch(instanceCount, prevRenderable, this._pass));
                 prevRenderable = renderable;
                 instanceCount = 1;
             }
         }
 
-        this._batches.Add(new RenderBatch(instanceCount, prevRenderable, this._shadowMapPass));
+        this._batches.Add(new RenderBatch(instanceCount, prevRenderable, this._pass));
     }
 
     public DeviceBuffer GetVertexOffsetBuffer(CommandList commandList)

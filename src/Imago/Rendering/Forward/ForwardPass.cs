@@ -72,7 +72,7 @@ internal class ForwardPass : IDisposable, IPipelineProvider
 
         this._renderTexture = mainRenderTexture;
 
-        this._renderJob = new RenderJob(this._gd, false);
+        this._renderJob = new RenderJob(this._gd, RenderBatchPassType.Forward);
 
         this._shadowPass.ShadowmapTexture.Resized += this.Shadowmap_Resized;
 
@@ -162,11 +162,7 @@ internal class ForwardPass : IDisposable, IPipelineProvider
             ),
             PrimitiveTopology = PrimitiveTopology.TriangleList,
             ShaderSet = new ShaderSetDescription(GetVertexLayout(shaderVariant.VertexFormat), shaderVariant.VeldridShaders),
-            BlendState = new BlendStateDescription(
-                RgbaFloat.Black,
-                blendDescription,
-                BlendAttachmentDescription.Disabled
-            ),
+            BlendState = new BlendStateDescription(RgbaFloat.Black, blendDescription),
             RasterizerState = new RasterizerStateDescription(
                 cullMode,
                 fillMode,

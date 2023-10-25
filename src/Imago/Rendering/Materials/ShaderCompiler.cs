@@ -87,10 +87,10 @@ public static class ShaderCompiler
                     if (i == lineNumber)
                         exceptionStr += new string(' ', lineNumberStr.Length) + "^^^^ ERROR HERE ^^^^\n";
                 }
+                Console.WriteLine(sourceText);
                 throw new Exception(exceptionStr);
             }
 
-            Console.WriteLine(sourceText);
             throw e;
         }
     }

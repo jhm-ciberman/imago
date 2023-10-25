@@ -195,7 +195,7 @@ public class Renderer : IDisposable
 
     public Material MakeMaterial()
     {
-        return new Material(this._forwardPass.DefaultShader, this._shadowPass.DefaultShader);
+        return new Material(this._forwardPass.DefaultShader, this._shadowPass.DefaultShader, this._mousePickerPass.DefaultShader);
     }
 
     private void Settings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -298,7 +298,7 @@ public class Renderer : IDisposable
         this._forwardPass.Render(cl, stage, renderTexture);
         this._immediatePass.Render(cl, stage, renderTexture);
         this._skyDomePass.Render(cl, stage, renderTexture);
-        this._mousePickerPass.Render(cl, stage);
+        this._mousePickerPass.Render(cl, stage, renderTexture);
         this._particlesPass.Render(cl, stage, renderTexture);
         this._gizmosPass.Render(cl, stage, renderTexture);
         this._spritesPass.Render(cl, stage, renderTexture);
@@ -315,7 +315,6 @@ public class Renderer : IDisposable
         {
             var col = clearColor.Value;
             cl.ClearColorTarget(0, new RgbaFloat(col.R, col.G, col.B, col.A));
-            cl.ClearColorTarget(1, RgbaFloat.Black);
             cl.ClearDepthStencil(1f);
         }
     }
