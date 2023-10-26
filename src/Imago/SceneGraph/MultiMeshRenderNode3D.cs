@@ -43,7 +43,7 @@ public class MultiMeshRenderNode3D : Node3D
 
     public bool AutoDisposeMeshes { get; set; } = true;
 
-    public bool AutoDisposeMaterials { get; set; } = true;
+    public bool AutoDisposeMaterials { get; set; } = false;
 
     public IReadOnlyList<RenderNode3D> ChildRenderNodes => this._renderNodes;
 
@@ -78,10 +78,11 @@ public class MultiMeshRenderNode3D : Node3D
             for (int i = neededCount; i < actualCount; i++)
             {
                 var node = this._renderNodes[i];
-                this._renderNodes.RemoveAt(i);
                 this.RemoveChild(node, dispose: false);
                 this.DisposeRenderNode(node);
             }
+
+            this._renderNodes.RemoveRange(neededCount, actualCount - neededCount);
         }
 
         this._renderNodes.TrimExcess();
