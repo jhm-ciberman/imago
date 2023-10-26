@@ -194,6 +194,17 @@ public class RenderNode3D : Node3D, IPickable
         }
     }
 
+    /// <summary>
+    /// Sets the mesh render info. This is a convenience method to set the mesh, material and texture ST at once.
+    /// </summary>
+    /// <param name="renderInfo">The render info to set.</param>
+    public void SetMeshRenderInfo(MeshRenderInfo renderInfo)
+    {
+        this.Mesh = renderInfo.Mesh;
+        this.Material = renderInfo.Material;
+        this.TextureST = renderInfo.TextureST;
+    }
+
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);

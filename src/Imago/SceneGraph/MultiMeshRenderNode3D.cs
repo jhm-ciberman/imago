@@ -7,17 +7,28 @@ public class MultiMeshRenderNode3D : Node3D
 {
     private readonly List<RenderNode3D> _renderNodes = new List<RenderNode3D>();
 
-    private MaterialMesh[] _meshes = System.Array.Empty<MaterialMesh>();
+    private MeshRenderInfo[] _meshes = System.Array.Empty<MeshRenderInfo>();
 
+    /// <summary>
+    /// Creates an instance of the <see cref="MultiMeshRenderNode3D"/> class.
+    /// </summary>
     public MultiMeshRenderNode3D()
     {
     }
 
+    /// <summary>
+    /// Creates a new render node. Override this method to use a different type of render node.
+    /// </summary>
+    /// <returns>The created render node.</returns>
     protected virtual RenderNode3D CreateRenderNode()
     {
-        return new RenderNode3D(); // Override to use a different type of render node.
+        return new RenderNode3D();
     }
 
+    /// <summary>
+    /// Disposes a render node. Override this method to dispose the render node in a different way.
+    /// </summary>
+    /// <param name="node">The render node to dispose.</param>
     protected virtual void DisposeRenderNode(RenderNode3D node)
     {
         if (this.AutoDisposeMeshes)
@@ -35,19 +46,36 @@ public class MultiMeshRenderNode3D : Node3D
         node.Dispose();
     }
 
-    public MaterialMesh[] Meshes
+    /// <summary>
+    /// Gets or sets the meshes to render.
+    /// </summary>
+    /// <remarks>
+    /// To update the meshes, set this property to a new array of meshes. If you change the
+    /// contents of the array, you must also set this property to the same array again to trigger
+    /// an update of the render nodes.
+    /// </remarks>
+    public MeshRenderInfo[] Meshes
     {
         get => this._meshes;
         set => this.SetMeshes(value);
     }
 
+    /// <summary>
+    /// Gets or sets whether the meshes should be disposed when the node is disposed.
+    /// </summary>
     public bool AutoDisposeMeshes { get; set; } = true;
 
+    /// <summary>
+    /// Gets or sets whether the materials should be disposed when the node is disposed.
+    /// </summary>
     public bool AutoDisposeMaterials { get; set; } = false;
 
+    /// <summary>
+    /// Gets the list of render nodes.
+    /// </summary>
     public IReadOnlyList<RenderNode3D> ChildRenderNodes => this._renderNodes;
 
-    private void SetMeshes(MaterialMesh[] meshes)
+    private void SetMeshes(MeshRenderInfo[] meshes)
     {
         this._meshes = meshes;
 
@@ -88,7 +116,7 @@ public class MultiMeshRenderNode3D : Node3D
         this._renderNodes.TrimExcess();
     }
 
-    override protected void Dispose(bool disposing)
+    protected override void Dispose(bool disposing)
     {
         if (disposing)
         {
