@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Runtime.InteropServices;
 using Imago.Rendering.Forward;
 using Imago.Rendering.Materials;
 using Imago.Rendering.Particles;
@@ -220,11 +219,9 @@ public class Renderer : IDisposable
         }
     }
 
-    internal Renderable MakeRenderable<TInstanceData>() where TInstanceData : unmanaged
+    internal Renderable MakeRenderable()
     {
-        var transformDataBlock = this.RequestTransformDataBlock();
-        var instanceDataBlock = this.RequestInstanceDataBlock(Marshal.SizeOf<TInstanceData>());
-        var renderable = new Renderable(transformDataBlock, instanceDataBlock);
+        var renderable = new Renderable(this);
         this._renderables.Add(renderable);
         return renderable;
     }
@@ -346,7 +343,7 @@ public class Renderer : IDisposable
         this.ViewportResized?.Invoke(this, new ViewportResizedEventArgs(viewportWidth, viewportHeight));
     }
 
-    private DataBlock RequestTransformDataBlock()
+    internal DataBlock RequestTransformDataBlock()
     {
         for (int i = 0; i < this._transformDataBuffers.Count; i++)
         {
@@ -363,7 +360,7 @@ public class Renderer : IDisposable
         return newBuffer.RequestBlock();
     }
 
-    private DataBlock RequestInstanceDataBlock(int instanceDataBlockSize)
+    internal DataBlock RequestInstanceDataBlock(int instanceDataBlockSize)
     {
         for (int i = 0; i < this._instanceDataBuffers.Count; i++)
         {

@@ -1,6 +1,7 @@
 using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Imago.Rendering.Forward;
 using Imago.Rendering.Materials;
 using Imago.SceneGraph;
@@ -23,7 +24,19 @@ public struct OffsetVertexData // It's 16 bytes only!
 /// </summary>
 internal class Renderable : IDisposable
 {
+    // Contiguos layout
+    [StructLayout(LayoutKind.Sequential)]
+    private struct InstanceData
+    {
+        public InstanceData() { }
+        public Vector4 AlbedoColor = new Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+        public Vector4 TextureST = new Vector4(1.0f, 1.0f, 0.0f, 0.0f);
+        public Vector4 HighlightColor = new Vector4(1.0f, 1.0f, 1.0f, 0.0f);
+    }
+
     private Matrix4x4 _transform = Matrix4x4.Identity;
+
+    private InstanceData _instanceData = new InstanceData();
 
     /// <summary>
     /// Gets the center position of this renderable.
@@ -129,10 +142,12 @@ internal class Renderable : IDisposable
     /// <summary>
     /// Initializes a new instance of the <see cref="Renderable"/> class.
     /// </summary>
-    /// <param name="transformDataBlock">The transform data block.</param>
-    /// <param name="instanceDataBlock">The instance data block.</param>
-    public Renderable(DataBlock transformDataBlock, DataBlock instanceDataBlock)
+    /// <param name="renderer">The renderer.</param>
+    public Renderable(Renderer renderer)
     {
+        var transformDataBlock = renderer.RequestTransformDataBlock();
+        var instanceDataBlock = renderer.RequestInstanceDataBlock(Marshal.SizeOf<InstanceData>());
+
         this._transformDataBlock = transformDataBlock;
         this.TransformResourceSet = this._transformDataBlock.Buffer.ResourceSet;
 
@@ -140,6 +155,8 @@ internal class Renderable : IDisposable
         this.InstanceResourceSet = this._instanceDataBlock.Buffer.ResourceSet;
 
         this.RecomputeOffsetVertexData();
+
+        this._instanceDataBlock.Write(ref this._instanceData);
     }
 
     private Stage? _stage = null;
@@ -302,13 +319,53 @@ internal class Renderable : IDisposable
     }
 
     /// <summary>
-    /// Sets the instance data for this renderable.
+    /// Gets or sets the albedo color.
     /// </summary>
-    /// <typeparam name="T">The type of the instance data.</typeparam>
-    /// <param name="data">The instance data.</param>
-    public void SetInstanceData<T>(T data) where T : unmanaged
+    public Vector4 AlbedoColor
     {
-        this._instanceDataBlock.Write(ref data);
+        get => this._instanceData.AlbedoColor;
+        set => this.SetInstanceData(ref this._instanceData.AlbedoColor, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the texture ST.
+    /// </summary>
+    public Vector4 TextureST
+    {
+        get => this._instanceData.TextureST;
+        set => this.SetInstanceData(ref this._instanceData.TextureST, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the highlight color.
+    /// </summary>
+    public Vector4 HighlightColor
+    {
+        get => this._instanceData.HighlightColor;
+        set => this.SetInstanceData(ref this._instanceData.HighlightColor, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the opacity.
+    /// </summary>
+    public float Opacity
+    {
+        get => this._instanceData.AlbedoColor.W;
+        set
+        {
+            if (this.SetInstanceData(ref this._instanceData.AlbedoColor.W, value))
+            {
+                this.Transparent = value < 1.0f;
+            }
+        }
+    }
+
+    protected bool SetInstanceData<T>(ref T backingField, T value) where T : unmanaged
+    {
+        if (backingField.Equals(value)) return false;
+        backingField = value;
+        this._instanceDataBlock.Write(ref this._instanceData);
+        return true;
     }
 
     /// <summary>

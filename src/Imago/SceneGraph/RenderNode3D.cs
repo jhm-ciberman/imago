@@ -13,29 +13,14 @@ namespace Imago.SceneGraph;
 /// </summary>
 public class RenderNode3D : Node3D, IPickable
 {
-    // Contiguos layout
-    [StructLayout(LayoutKind.Sequential)]
-    private struct InstanceData
-    {
-        public InstanceData() { }
-        public Vector4 AlbedoColor = new Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-        public Vector4 TextureST = new Vector4(1.0f, 1.0f, 0.0f, 0.0f);
-        public Vector4 HightlightColor = new Vector4(1.0f, 1.0f, 1.0f, 0.0f);
-    }
-
     private readonly Renderable _renderable;
-
-    private InstanceData _instanceData;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RenderNode3D"/> class.
     /// </summary>
     public RenderNode3D()
     {
-        this._instanceData = new InstanceData();
-
-        this._renderable = Renderer.Instance.MakeRenderable<InstanceData>();
-        this._renderable.SetInstanceData(this._instanceData);
+        this._renderable = Renderer.Instance.MakeRenderable();
     }
 
     /// <summary>
@@ -121,8 +106,8 @@ public class RenderNode3D : Node3D, IPickable
     /// </summary>
     public ColorF AlbedoColor
     {
-        get => this._instanceData.AlbedoColor;
-        set => this.SetInstanceData(ref this._instanceData.AlbedoColor, value);
+        get => this._renderable.AlbedoColor;
+        set => this._renderable.AlbedoColor = value;
     }
 
     /// <summary>
@@ -130,17 +115,17 @@ public class RenderNode3D : Node3D, IPickable
     /// </summary>
     public Vector4 TextureST
     {
-        get => this._instanceData.TextureST;
-        set => this.SetInstanceData(ref this._instanceData.TextureST, value);
+        get => this._renderable.TextureST;
+        set => this._renderable.TextureST = value;
     }
 
     /// <summary>
     /// Gets or sets the highlight color of this node.
     /// </summary>
-    public ColorF HightlightColor
+    public ColorF HighlightColor
     {
-        get => this._instanceData.HightlightColor;
-        set => this.SetInstanceData(ref this._instanceData.HightlightColor, value);
+        get => this._renderable.HighlightColor;
+        set => this._renderable.HighlightColor = value;
     }
 
     /// <summary>
@@ -148,14 +133,8 @@ public class RenderNode3D : Node3D, IPickable
     /// </summary>
     public float Opacity
     {
-        get => this._instanceData.AlbedoColor.W;
-        set
-        {
-            if (this.SetInstanceData(ref this._instanceData.AlbedoColor.W, value))
-            {
-                this._renderable.Transparent = value < 1.0f;
-            }
-        }
+        get => this._renderable.Opacity;
+        set => this._renderable.Opacity = value;
     }
 
     /// <summary>
@@ -165,19 +144,6 @@ public class RenderNode3D : Node3D, IPickable
     {
         get => this._renderable.PickingId;
         set => this._renderable.PickingId = value;
-    }
-
-    protected bool SetInstanceData<T>(ref T backingField, T value) where T : unmanaged
-    {
-        if (backingField.Equals(value)) return false;
-        backingField = value;
-        this.OnInstanceDataDirty();
-        return true;
-    }
-
-    private void OnInstanceDataDirty()
-    {
-        this._renderable.SetInstanceData(this._instanceData);
     }
 
     public override void UpdateTransform(ref Matrix4x4 parentMatrix)
