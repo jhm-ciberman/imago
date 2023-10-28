@@ -129,6 +129,12 @@ public struct Vector2Int : IEquatable<Vector2Int>
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Vector2Int operator *(int a, Vector2Int b)
+    {
+        return new Vector2Int(a * b.X, a * b.Y);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Vector2Int operator /(Vector2Int a, int b)
     {
         return new Vector2Int(a.X / b, a.Y / b);

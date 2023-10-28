@@ -47,16 +47,53 @@ public class Button : ContentControl
     /// Gets or sets whether the button is enabled.
     /// </summary>
     public bool IsEnabled { get; set; } = true;
+    private ICommand? _command = null;
+    private object? _commandParameter = null;
 
     /// <summary>
     /// Command that is executed when the button is clicked.
     /// </summary>
-    public ICommand? Command { get; set; } = null;
+    public ICommand? Command
+    {
+        get => this._command;
+        set
+        {
+            if (this._command == value) return;
+
+            if (this._command != null)
+            {
+                this._command.CanExecuteChanged -= this.OnCommandCanExecuteChanged;
+            }
+
+            this._command = value;
+            this.IsEnabled = this.Command?.CanExecute(this.CommandParameter) ?? true;
+
+            if (this._command != null)
+            {
+                this._command.CanExecuteChanged += this.OnCommandCanExecuteChanged;
+            }
+        }
+    }
+
+    protected virtual void OnCommandCanExecuteChanged(object? sender, EventArgs e)
+    {
+        this.IsEnabled = this.Command?.CanExecute(this.CommandParameter) ?? true;
+    }
 
     /// <summary>
     /// Parameter that is passed to the command.
     /// </summary>
-    public object? CommandParameter { get; set; } = null;
+    public object? CommandParameter
+    {
+        get => this._commandParameter;
+        set
+        {
+            if (this._commandParameter == value) return;
+
+            this._commandParameter = value;
+            this.IsEnabled = this.Command?.CanExecute(this.CommandParameter) ?? true;
+        }
+    }
 
     /// <summary>
     /// Gets or sets the background brush of the button.

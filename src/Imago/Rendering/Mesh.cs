@@ -58,6 +58,11 @@ public class Mesh : IDisposable
     /// <param name="meshData">The <see cref="MeshData"/> that was used to create the mesh.</param>
     public Mesh(IMeshData meshData)
     {
+        if (meshData.Indices.Length == 0)
+        {
+            throw new ArgumentException("The mesh data must contain at least one index.", nameof(meshData));
+        }
+
         var gd = Renderer.Instance.GraphicsDevice;
         this.Id = ++_count;
         this.VertexFormat = meshData.VertexFormat;
