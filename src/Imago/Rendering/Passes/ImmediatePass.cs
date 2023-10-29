@@ -131,7 +131,7 @@ public class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
         var camera = scene.Camera;
         if (camera == null) return;
 
-        var renderables = scene.ImmediateRenderables;
+        var renderables = stage.ImmediateRenderables;
         if (renderables.Count == 0) return;
 
         cl.SetFramebuffer(renderTexture.Framebuffer);
@@ -140,7 +140,7 @@ public class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
 
         for (var i = 0; i < renderables.Count; i++)
         {
-            renderables[i].Draw(this);
+            renderables[i].Render(this);
         }
 
         this.End();

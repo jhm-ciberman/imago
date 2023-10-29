@@ -55,7 +55,7 @@ public class Stage
     internal RenderQueue[] ShadowCasterRenderQueues { get; } = new RenderQueue[4];
 
     private readonly List<Renderable> _dirtyRenderables = new();
-
+    private readonly List<ImmediateRenderable3D> _immediateRenderables = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Stage"/> class.
@@ -180,5 +180,28 @@ public class Stage
         {
             queues[i].UpdateRenderableRenderFlags(renderable, oldQueuesFlags, newQueuesFlags);
         }
+    }
+
+    /// <summary>
+    /// Gets the immediate renderables used to render objects immediately.
+    /// </summary>
+    public IReadOnlyList<ImmediateRenderable3D> ImmediateRenderables => this._immediateRenderables;
+
+    /// <summary>
+    /// Adds an immediate renderable to the scene.
+    /// </summary>
+    /// <param name="immediateRenderable">The immediate renderable to add.</param>
+    public void AddImmediateRenderable(ImmediateRenderable3D immediateRenderable)
+    {
+        this._immediateRenderables.Add(immediateRenderable);
+    }
+
+    /// <summary>
+    /// Removes an immediate renderable from the scene.
+    /// </summary>
+    /// <param name="immediateRenderable">The immediate renderable to remove.</param>
+    public void RemoveImmediateRenderable(ImmediateRenderable3D immediateRenderable)
+    {
+        this._immediateRenderables.Remove(immediateRenderable);
     }
 }

@@ -36,6 +36,12 @@ public abstract class ItemsControl : Control
             this.Owner.AddVisualChild(item);
         }
 
+        public void Replace(Control oldItem, Control newItem)
+        {
+            var index = this.IndexOf(oldItem);
+            this[index] = newItem;
+        }
+
         public void AddRange(IEnumerable<Control> items)
         {
             foreach (var item in items)

@@ -71,29 +71,4 @@ public class Scene : Node3D
     {
         this._particleSystems.Remove(particleSystem);
     }
-
-    private readonly List<IImmediateRenderable> _immediateRenderables = new List<IImmediateRenderable>();
-
-    /// <summary>
-    /// Gets the immediate renderables used to render objects immediately.
-    /// </summary>
-    public IReadOnlyList<IImmediateRenderable> ImmediateRenderables => this._immediateRenderables;
-
-    /// <summary>
-    /// Adds an immediate renderable to the scene.
-    /// </summary>
-    /// <param name="immediateRenderable">The immediate renderable to add.</param>
-    public void AddImmediateRenderable(IImmediateRenderable immediateRenderable)
-    {
-        this._immediateRenderables.Add(immediateRenderable);
-    }
-
-    /// <summary>
-    /// Removes an immediate renderable from the scene.
-    /// </summary>
-    /// <param name="immediateRenderable">The immediate renderable to remove.</param>
-    public void RemoveImmediateRenderable(IImmediateRenderable immediateRenderable)
-    {
-        this._immediateRenderables.Remove(immediateRenderable);
-    }
 }
