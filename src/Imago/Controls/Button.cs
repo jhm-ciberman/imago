@@ -24,19 +24,18 @@ public class Button : ContentControl
         get => this._isPressed;
         protected set
         {
-            if (this._isPressed != value)
-            {
-                this._isPressed = value;
-                if (!this._isPressed && this.IsMouseOver)
-                {
-                    this.Click?.Invoke(this, EventArgs.Empty);
+            if (this._isPressed == value) return;
 
-                    if (this.Command != null)
+            this._isPressed = value;
+            if (!this._isPressed && this.IsMouseOver)
+            {
+                this.Click?.Invoke(this, EventArgs.Empty);
+
+                if (this.Command != null)
+                {
+                    if (this.Command.CanExecute(this.CommandParameter))
                     {
-                        if (this.Command.CanExecute(this.CommandParameter))
-                        {
-                            this.Command.Execute(this.CommandParameter);
-                        }
+                        this.Command.Execute(this.CommandParameter);
                     }
                 }
             }
@@ -98,7 +97,6 @@ public class Button : ContentControl
     /// <summary>
     /// Gets or sets the background brush of the button.
     /// </summary>
-
     protected void UpdateBackgroundBrush()
     {
         var background = this.Background;
