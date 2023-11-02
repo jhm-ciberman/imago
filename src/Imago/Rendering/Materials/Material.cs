@@ -14,7 +14,7 @@ public class Material
     public RenderFlags RenderFlags { get; protected set; } = RenderFlags.DepthTest | RenderFlags.DepthWrite | RenderFlags.ReceiveShadows | RenderFlags.ColorWrite;
 
 
-    public static Texture DefaultTexture { get; } = Textures.Magenta;
+    public static Texture DefaultTexture { get; } = Texture.Magenta;
 
     public Shader ForwardShader { get; }
     public Shader ShadowMapShader { get; }
