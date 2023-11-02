@@ -5,7 +5,7 @@ using Imago.Rendering.Textures;
 using Imago.TexturePacking;
 using Support;
 
-namespace Imago.Resources;
+namespace Imago;
 
 /// <summary>
 /// A sprite is a container for one or more PackedTextures. The sprite can be animated.
@@ -80,9 +80,7 @@ public class Sprite
         foreach (var frame in this._frames)
         {
             if (frame.Size != firstFrame.Size)
-            {
                 throw new ArgumentException("All frames of a sprite must have the same size.");
-            }
         }
     }
 
@@ -106,9 +104,7 @@ public class Sprite
         // Validate that the frame has the same size as the first frame
         var firstFrame = this._frames[0];
         if (frame.Size != firstFrame.Size)
-        {
             throw new ArgumentException("The added frame must have the same size as the first frame.");
-        }
     }
 
     /// <summary>
@@ -139,13 +135,13 @@ public class Sprite
         var offsetUv = packedTexture.TopLeft;
 
 
-        var pixelsToUv = new Vector2(1f / (float)atlasTexture.Width, 1f / (float)atlasTexture.Height);
+        var pixelsToUv = new Vector2(1f / atlasTexture.Width, 1f / atlasTexture.Height);
 
         int frameCountX = (int)(spriteSheetSize.X / frameSize.X);
         for (int i = 0; i < frameCount; i++)
         {
-            float x0 = (i % frameCountX) * frameSize.X + offset.X;
-            float y0 = (i / frameCountX) * frameSize.Y + offset.Y;
+            float x0 = i % frameCountX * frameSize.X + offset.X;
+            float y0 = i / frameCountX * frameSize.Y + offset.Y;
             float x1 = x0 + frameSize.X;
             float y1 = y0 + frameSize.Y;
             var topLeft = new Vector2(x0, y0) * pixelsToUv + offsetUv;

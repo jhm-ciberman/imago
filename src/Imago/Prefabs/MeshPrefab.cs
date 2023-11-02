@@ -1,7 +1,7 @@
 using Imago.Rendering.Meshes;
 using Imago.SceneGraph;
 
-namespace Imago.Resources;
+namespace Imago.Prefabs;
 
 /// <summary>
 /// A <see cref="WrapingPrefab"> for a single mesh.

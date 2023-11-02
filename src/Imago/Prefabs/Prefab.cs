@@ -1,7 +1,7 @@
 using System.Numerics;
 using Imago.SceneGraph;
 
-namespace Imago.Resources;
+namespace Imago.Prefabs;
 
 public class WrapingPrefab : IInstantiable
 {

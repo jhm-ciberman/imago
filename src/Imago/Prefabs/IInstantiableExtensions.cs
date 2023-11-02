@@ -2,7 +2,7 @@ using System.Numerics;
 using Imago.Rendering.Materials;
 using Imago.SceneGraph;
 
-namespace Imago.Resources;
+namespace Imago.Prefabs;
 
 public static class IInstantiableExtensions
 {

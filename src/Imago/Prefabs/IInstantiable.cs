@@ -1,6 +1,6 @@
 using Imago.SceneGraph;
 
-namespace Imago.Resources;
+namespace Imago.Prefabs;
 
 /// <summary>
 /// Interface for resources that can be instantiated.
