@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using Imago.Rendering;
 using Veldrid;
 
-namespace Imago.Meshes;
+namespace Imago.Rendering.Meshes;
 
 [StructLayout(LayoutKind.Sequential)]
 public struct BasicVertex

@@ -1,4 +1,4 @@
-using Imago.Rendering;
+using Imago.Rendering.Meshes;
 using Imago.SceneGraph;
 
 namespace Imago.Resources;

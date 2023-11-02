@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using Imago.Rendering;
 using Veldrid;
 
-namespace Imago.Meshes;
+namespace Imago.Rendering.Meshes;
 
 public class BasicMeshData : BaseMeshData
 {
@@ -21,9 +21,7 @@ public class BasicMeshData : BaseMeshData
         this.TexCoords = texCoords ?? new Vector2[positions.Length];
 
         if (normals == null)
-        {
             this.RecomputeNormals();
-        }
     }
 
     protected override void Validate()
@@ -31,14 +29,10 @@ public class BasicMeshData : BaseMeshData
         base.Validate();
 
         if (this.Normals.Length != this.Positions.Length)
-        {
             throw new ArgumentException("The number of normals must match the number of positions.");
-        }
 
         if (this.TexCoords.Length != this.Positions.Length)
-        {
             throw new ArgumentException("The number of texture coordinates must match the number of positions.");
-        }
     }
 
     public override DeviceBuffer CreateVertexBuffer(GraphicsDevice gd)
@@ -53,8 +47,8 @@ public class BasicMeshData : BaseMeshData
             vertices[i].TexCoord = this.TexCoords[i];
         }
         uint sizeInBytes = (uint)(this.Positions.Length * Unsafe.SizeOf<BasicVertex>());
-        DeviceBuffer vertexBuffer = gd.ResourceFactory.CreateBuffer(new BufferDescription((uint)sizeInBytes, BufferUsage.VertexBuffer));
-        gd.UpdateBuffer(vertexBuffer, (uint)0, new ReadOnlySpan<BasicVertex>(vertices, 0, this.Positions.Length));
+        DeviceBuffer vertexBuffer = gd.ResourceFactory.CreateBuffer(new BufferDescription(sizeInBytes, BufferUsage.VertexBuffer));
+        gd.UpdateBuffer(vertexBuffer, 0, new ReadOnlySpan<BasicVertex>(vertices, 0, this.Positions.Length));
 
         ArrayPool<BasicVertex>.Shared.Return(vertices);
         return vertexBuffer;
@@ -81,7 +75,7 @@ public class BasicMeshData : BaseMeshData
             Vector3 p2 = this.Positions[index2];
             Vector3 p3 = this.Positions[index3];
 
-            Vector3 normal = Vector3.Cross((p3 - p2), (p1 - p2));
+            Vector3 normal = Vector3.Cross(p3 - p2, p1 - p2);
 
             normal = Vector3.Normalize(normal);
 

@@ -6,7 +6,7 @@ using Imago.Rendering;
 using Imago.Support;
 using Veldrid;
 
-namespace Imago.Meshes;
+namespace Imago.Rendering.Meshes;
 
 public class SkinnedMeshData : BasicMeshData
 {
@@ -38,8 +38,8 @@ public class SkinnedMeshData : BasicMeshData
         }
 
         uint sizeInBytes = (uint)(this.Positions.Length * Unsafe.SizeOf<SkinnedVertex>());
-        DeviceBuffer vertexBuffer = gd.ResourceFactory.CreateBuffer(new BufferDescription((uint)sizeInBytes, BufferUsage.VertexBuffer));
-        gd.UpdateBuffer(vertexBuffer, (uint)0, new ReadOnlySpan<SkinnedVertex>(vertices, 0, this.Positions.Length));
+        DeviceBuffer vertexBuffer = gd.ResourceFactory.CreateBuffer(new BufferDescription(sizeInBytes, BufferUsage.VertexBuffer));
+        gd.UpdateBuffer(vertexBuffer, 0, new ReadOnlySpan<SkinnedVertex>(vertices, 0, this.Positions.Length));
 
         ArrayPool<SkinnedVertex>.Shared.Return(vertices);
         return vertexBuffer;

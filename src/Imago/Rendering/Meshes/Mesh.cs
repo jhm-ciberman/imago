@@ -1,9 +1,9 @@
 using System;
-using Imago.Meshes;
+using Imago.Rendering;
 using Veldrid;
 using Veldrid.Utilities;
 
-namespace Imago.Rendering;
+namespace Imago.Rendering.Meshes;
 
 /// <summary>
 /// Represents a mesh that can be rendered by the <see cref="Renderer"/>.
@@ -59,9 +59,7 @@ public class Mesh : IDisposable
     public Mesh(IMeshData meshData)
     {
         if (meshData.Indices.Length == 0)
-        {
             throw new ArgumentException("The mesh data must contain at least one index.", nameof(meshData));
-        }
 
         var gd = Renderer.Instance.GraphicsDevice;
         this.Id = ++_count;

@@ -3,7 +3,7 @@ using System.Numerics;
 using Imago.Rendering;
 using Veldrid;
 
-namespace Imago.Meshes;
+namespace Imago.Rendering.Meshes;
 
 public abstract class BaseMeshData : IMeshData
 {
@@ -17,9 +17,7 @@ public abstract class BaseMeshData : IMeshData
         this.Positions = vertices;
 
         if (this.Indices.Length % 3 != 0)
-        {
             throw new ArgumentException("The number of indices must be a multiple of 3.");
-        }
     }
 
     public abstract VertexFormat VertexFormat { get; }
@@ -49,9 +47,7 @@ public abstract class BaseMeshData : IMeshData
     protected virtual void Validate()
     {
         if (this.Indices.Length % 3 != 0)
-        {
             throw new ArgumentException("The number of indices must be a multiple of 3.");
-        }
     }
 
     /// <inheritdoc />
@@ -61,7 +57,7 @@ public abstract class BaseMeshData : IMeshData
     public DeviceBuffer CreateIndexBuffer(GraphicsDevice gd)
     {
         DeviceBuffer indexBuffer = gd.ResourceFactory.CreateBuffer(new BufferDescription((uint) (sizeof(ushort) * this.Indices.Length), BufferUsage.IndexBuffer));
-        gd.UpdateBuffer<ushort>(indexBuffer, 0, this.Indices);
+        gd.UpdateBuffer(indexBuffer, 0, this.Indices);
         return indexBuffer;
     }
 }

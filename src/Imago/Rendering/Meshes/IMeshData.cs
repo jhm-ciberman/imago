@@ -3,7 +3,7 @@ using Imago.Rendering;
 using Veldrid;
 using Veldrid.Utilities;
 
-namespace Imago.Meshes;
+namespace Imago.Rendering.Meshes;
 
 /// <summary>
 /// An object describing generic mesh data. This can be used to construct a <see cref="VertexBuffer"/> and

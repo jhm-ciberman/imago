@@ -3,6 +3,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using Imago.Rendering;
 using Imago.Rendering.Materials;
+using Imago.Rendering.Meshes;
 using Support;
 using Veldrid.Utilities;
 

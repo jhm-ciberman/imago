@@ -2,7 +2,7 @@ using System.Numerics;
 using Imago.Rendering;
 using Veldrid;
 
-namespace Imago.Meshes;
+namespace Imago.Rendering.Meshes;
 
 public struct TerrainVertex
 {

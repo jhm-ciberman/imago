@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Imago.Rendering.Meshes;
 using Veldrid;
 
 namespace Imago.Rendering.Forward;

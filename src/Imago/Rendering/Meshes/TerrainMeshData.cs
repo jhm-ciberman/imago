@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using Imago.Rendering;
 using Veldrid;
 
-namespace Imago.Meshes;
+namespace Imago.Rendering.Meshes;
 
 public class TerrainMeshData : BasicMeshData
 {
@@ -24,9 +24,7 @@ public class TerrainMeshData : BasicMeshData
         base.Validate();
 
         if (this.Lights.Length != this.Positions.Length)
-        {
             throw new ArgumentException("The number of lights vertices must match the number of positions.");
-        }
     }
 
     public override DeviceBuffer CreateVertexBuffer(GraphicsDevice gd)
@@ -44,7 +42,7 @@ public class TerrainMeshData : BasicMeshData
 
         uint sizeInBytes = (uint)(this.Positions.Length * Unsafe.SizeOf<TerrainVertex>());
         DeviceBuffer vertexBuffer = gd.ResourceFactory.CreateBuffer(new BufferDescription(sizeInBytes, BufferUsage.VertexBuffer));
-        gd.UpdateBuffer(vertexBuffer, (uint)0, new ReadOnlySpan<TerrainVertex>(vertices, 0, this.Positions.Length));
+        gd.UpdateBuffer(vertexBuffer, 0, new ReadOnlySpan<TerrainVertex>(vertices, 0, this.Positions.Length));
 
         ArrayPool<TerrainVertex>.Shared.Return(vertices);
         return vertexBuffer;

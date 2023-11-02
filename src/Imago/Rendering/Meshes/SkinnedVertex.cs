@@ -4,7 +4,7 @@ using Imago.Rendering;
 using Imago.Support;
 using Veldrid;
 
-namespace Imago.Meshes;
+namespace Imago.Rendering.Meshes;
 
 [StructLayout(LayoutKind.Sequential)]
 public struct SkinnedVertex

@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Imago.Rendering.Forward;
 using Imago.Rendering.Materials;
+using Imago.Rendering.Meshes;
 using Imago.SceneGraph;
 using Veldrid.Utilities;
 

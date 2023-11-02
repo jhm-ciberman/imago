@@ -1,13 +1,12 @@
+using System;
+using Imago.Rendering.Meshes;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
 using glTFLoader;
 using Imago.Motion;
-using Imago.Meshes;
-using Imago.Rendering;
 using static glTFLoader.Schema.AnimationChannelTarget;
 using static glTFLoader.Schema.AnimationSampler;
-using System;
 
 namespace Imago.Gltf;
 
