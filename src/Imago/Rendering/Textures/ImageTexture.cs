@@ -1,7 +1,7 @@
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
-namespace Imago.Rendering;
+namespace Imago.Rendering.Textures;
 
 public class ImageTexture : Texture
 {

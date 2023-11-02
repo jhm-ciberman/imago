@@ -4,11 +4,12 @@ using System.Runtime.InteropServices;
 using Imago.Rendering.Passes;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using Color = global::Support.Color;
+using Color = Support.Color;
 using Veldrid;
 using Vector2Int = Support.Vector2Int;
+using Texture = Imago.Rendering.Textures.Texture;
 
-namespace Imago.Rendering;
+namespace Imago.Rendering.Textures;
 
 /// <summary>
 /// Represents a texture.
@@ -90,7 +91,7 @@ public class Texture : ITexture, ITextureRegion, IDisposable
         this.Width = width;
         this.Height = height;
 
-        this.MipLevels = (mipLevels == 0)
+        this.MipLevels = mipLevels == 0
             ? (uint)BitOperations.Log2(Math.Min(width, height))
             : mipLevels;
 
@@ -109,7 +110,7 @@ public class Texture : ITexture, ITextureRegion, IDisposable
     /// <summary>
     /// Gets the ImGui binding for this texture.
     /// </summary>
-    public IntPtr ImGuiBinding => ImGuiPass.Instance.GetOrCreateBinding(this);  // TODO: Texture should not know about ImGuiPass
+    public nint ImGuiBinding => ImGuiPass.Instance.GetOrCreateBinding(this);  // TODO: Texture should not know about ImGuiPass
 
     /// <summary>
     /// Gets the size of the texture.
@@ -154,14 +155,10 @@ public class Texture : ITexture, ITextureRegion, IDisposable
     public unsafe void SetDataFromImage(Image<Rgba32> image)
     {
         if (image.Width != this.Width || image.Height != this.Height)
-        {
             throw new ArgumentException("Image size does not match texture size.");
-        }
 
         if (!image.TryGetSinglePixelSpan(out Span<Rgba32> pixels))
-        {
             throw new ArgumentException("Image is not in RGBA32 format.");
-        }
 
         var dest = new Span<byte>(this._data);
         MemoryMarshal.Cast<Rgba32, byte>(pixels).CopyTo(dest);
@@ -181,14 +178,10 @@ public class Texture : ITexture, ITextureRegion, IDisposable
     public unsafe void SetDataFromBytes(int x, int y, int width, int height, byte[] data)
     {
         if (x + width > this.Width || y + height > this.Height)
-        {
             throw new ArgumentException("Texture size does not match data size.");
-        }
 
         if (x == 0 && y == 0 && width == this.Width && height == this.Height)
-        {
             data.CopyTo(this._data, 0);
-        }
         else
         {
             // Copy each row of data into the correct place in the texture
@@ -224,13 +217,11 @@ public class Texture : ITexture, ITextureRegion, IDisposable
 
         gd.UpdateTexture(this.VeldridTexture, this._data,
             x: 0, y: 0, z: 0,
-            width: (uint)this.Width, height: (uint)this.Height, depth: 1,
+            width: this.Width, height: this.Height, depth: 1,
             arrayLayer: 0, mipLevel: 0);
 
         if (this.MipLevels > 1)
-        {
             cl.GenerateMipmaps(this.VeldridTexture);
-        }
     }
 
     /// <summary>

@@ -1,6 +1,6 @@
 using System.Numerics;
-using Imago.Rendering;
 using Imago.Rendering.Sprites;
+using Imago.Rendering.Textures;
 using Imago.TexturePacking;
 using Support;
 

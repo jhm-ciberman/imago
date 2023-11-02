@@ -1,7 +1,7 @@
 using System;
 using Veldrid;
 
-namespace Imago.Rendering;
+namespace Imago.Rendering.Textures;
 
 internal class SwapchainRenderTexture : IRenderTexture, ITexture
 {

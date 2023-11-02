@@ -1,6 +1,8 @@
 using System;
+using Imago.Rendering.Textures;
 using ImGuiNET;
 using Veldrid;
+using Texture = Imago.Rendering.Textures.Texture;
 
 namespace Imago.Rendering.Passes;
 

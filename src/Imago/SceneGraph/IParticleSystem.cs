@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Numerics;
-using Imago.Rendering;
 using Imago.Rendering.Particles;
+using Imago.Rendering.Textures;
 
 namespace Imago.SceneGraph;
 

@@ -1,10 +1,10 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
-using Imago.Rendering;
 using Support;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
+using Imago.Rendering.Textures;
 
 namespace Imago.TexturePacking;
 

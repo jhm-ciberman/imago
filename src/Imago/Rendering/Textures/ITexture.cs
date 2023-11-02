@@ -1,6 +1,6 @@
 using System;
 
-namespace Imago.Rendering;
+namespace Imago.Rendering.Textures;
 
 public interface ITexture : IDisposable
 {

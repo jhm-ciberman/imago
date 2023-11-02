@@ -1,7 +1,7 @@
 using System.Numerics;
-using Imago.Rendering;
 using Imago.Rendering.Materials;
 using Imago.Rendering.Sprites;
+using Imago.Rendering.Textures;
 
 namespace Imago.Controls;
 

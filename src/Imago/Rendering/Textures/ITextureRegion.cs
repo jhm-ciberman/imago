@@ -1,6 +1,6 @@
 using System.Numerics;
 
-namespace Imago.Rendering;
+namespace Imago.Rendering.Textures;
 
 /// <summary>
 /// Represents a texure region in a texture atlas.

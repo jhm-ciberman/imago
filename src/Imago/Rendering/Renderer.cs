@@ -6,6 +6,7 @@ using Imago.Rendering.Materials;
 using Imago.Rendering.Particles;
 using Imago.Rendering.Passes;
 using Imago.Rendering.Sprites;
+using Imago.Rendering.Textures;
 using Imago.SceneGraph;
 using Imago.Support;
 using Support;
@@ -14,6 +15,7 @@ using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
 using Veldrid.Utilities;
 using Viewport = Imago.SceneGraph.Viewport;
+using Texture = Imago.Rendering.Textures.Texture;
 
 namespace Imago.Rendering;
 

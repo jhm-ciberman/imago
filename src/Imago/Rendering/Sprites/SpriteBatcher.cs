@@ -4,10 +4,12 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using FontStashSharp.Interfaces;
 using Imago.Rendering.Meshes;
+using Imago.Rendering.Textures;
 using Imago.TexturePacking;
 using Support;
 using Veldrid;
 using Shader = Imago.Rendering.Materials.Shader;
+using Texture = Imago.Rendering.Textures.Texture;
 
 namespace Imago.Rendering.Sprites;
 

@@ -1,5 +1,5 @@
 using System.Numerics;
-using Imago.Rendering;
+using Imago.Rendering.Textures;
 using Support;
 
 namespace Imago.TexturePacking;

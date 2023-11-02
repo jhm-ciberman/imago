@@ -1,4 +1,5 @@
 using System;
+using Imago.Rendering.Textures;
 using Veldrid;
 
 namespace Imago.Rendering.Forward;

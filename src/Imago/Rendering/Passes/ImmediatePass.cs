@@ -4,10 +4,12 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using Imago.Rendering.Materials;
 using Imago.Rendering.Meshes;
+using Imago.Rendering.Textures;
 using Imago.SceneGraph;
 using Support;
 using Veldrid;
 using Shader = Imago.Rendering.Materials.Shader;
+using Texture = Imago.Rendering.Textures.Texture;
 
 namespace Imago.Rendering.Passes;
 
