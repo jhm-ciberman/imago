@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Veldrid;
 using Veldrid.SPIRV;
 
-namespace Imago.Rendering;
+namespace Imago.Rendering.Meshes;
 
 /// <summary>
 /// Represents a vertex format.

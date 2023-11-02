@@ -1,5 +1,4 @@
 using System;
-using Imago.Rendering;
 using Veldrid;
 using Veldrid.Utilities;
 

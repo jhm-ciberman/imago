@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using FontStashSharp.Interfaces;
+using Imago.Rendering.Meshes;
 using Imago.TexturePacking;
 using Support;
 using Veldrid;

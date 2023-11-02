@@ -19,6 +19,28 @@ public struct OffsetVertexData // It's 16 bytes only!
 }
 
 /// <summary>
+/// Determines the mode the object will use to cast shadows.
+/// </summary>
+public enum ShadowCasting
+{
+    /// <summary>
+    /// The object will cast shadows. This is the default mode.
+    /// </summary>
+    CastShadows,
+
+    /// <summary>
+    /// The object will not cast shadows.
+    /// </summary>
+    NoShadows,
+
+    /// <summary>
+    /// The object will only cast shadows and the object itself will not be visible.
+    /// </summary>
+    OnlyShadows,
+}
+
+
+/// <summary>
 /// Represents a low-level renderable object in 3D space that can be rendered by the renderer.
 /// This object contains the information about the mesh, material, and skeleton to use when rendering
 /// as well as the transform and information for culling and batching.
