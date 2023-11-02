@@ -12,6 +12,9 @@ internal enum RenderBatchPassType
     Picking
 }
 
+/// <summary>
+/// The RenderBatcher class is responsible for batching and rendering a list of <see cref="Renderable"/> objects.
+/// </summary>
 internal class RenderBatcher
 {
     private const uint BINDING_PASS = 0;
@@ -23,12 +26,14 @@ internal class RenderBatcher
     private DeviceBuffer? _offsetsVertexBuffer = null;
     private OffsetVertexData[] _offsetVertexData;
     private readonly List<RenderBatch> _batches;
-
-    public IReadOnlyList<RenderBatch> Batches => this._batches;
-
     private readonly GraphicsDevice _gd;
     private readonly RenderBatchPassType _pass;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RenderBatcher"/> class.
+    /// </summary>
+    /// <param name="gd">The <see cref="GraphicsDevice"/> to use for rendering.</param>
+    /// <param name="pass">The <see cref="RenderBatchPassType"/> of the render pass.</param>
     public RenderBatcher(GraphicsDevice gd, RenderBatchPassType pass)
     {
         this._gd = gd;
@@ -37,6 +42,12 @@ internal class RenderBatcher
         this._batches = new List<RenderBatch>(1024);
     }
 
+    /// <summary>
+    /// Draws a list of <see cref="Renderable"/> objects using the specified <see cref="CommandList"/> and <see cref="ResourceSet"/>.
+    /// </summary>
+    /// <param name="commandList">The <see cref="CommandList"/> to use for rendering.</param>
+    /// <param name="passResourceSet">The <see cref="ResourceSet"/> to use for the render pass.</param>
+    /// <param name="renderItems">The list of <see cref="Renderable"/> objects to render.</param>
     public void DrawRenderList(CommandList commandList, ResourceSet passResourceSet, IReadOnlyList<Renderable> renderItems)
     {
         this.PrepareBatches(renderItems);
