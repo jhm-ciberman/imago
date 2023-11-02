@@ -18,6 +18,11 @@ internal enum RenderQueues : byte
     All = Opaque | Transparent | ShadowCaster | Picking,
 }
 
+/// <summary>
+/// Represents a queue of renderable objects, sorted by their distance from the camera.
+/// This class is used to efficiently manage and sort the rendering of objects in a scene.
+/// The objects are sorted based on their distance from the camera, and can be filtered based on their render flags.
+/// </summary>
 internal class RenderQueue : IEnumerable<Renderable>, IReadOnlyList<Renderable>, IReadOnlyCollection<Renderable>
 {
     private static readonly Comparison<RenderIndex> _frontToBack = (x, y) => x.Key.CompareTo(y.Key);
@@ -27,15 +32,30 @@ internal class RenderQueue : IEnumerable<Renderable>, IReadOnlyList<Renderable>,
     private readonly Dictionary<Renderable, int> _renderableToIndex = new Dictionary<Renderable, int>();
     private readonly List<RenderIndex> _culledIndices = new List<RenderIndex>();
     private readonly List<Renderable> _culledItems = new List<Renderable>();
-
     private readonly Comparison<RenderIndex> _comparer;
 
+    /// <summary>
+    /// Gets the number of <see cref="Renderable"/> objects in this <see cref="RenderQueue"/>.
+    /// </summary>
     public int Count => this._culledIndices.Count;
 
+    /// <summary>
+    /// Gets the <see cref="Renderable"/> at the specified index.
+    /// </summary>
+    /// <param name="index">The index of the <see cref="Renderable"/> to get.</param>
+    /// <returns>The <see cref="Renderable"/> at the specified index.</returns>
     public Renderable this[int index] => this._culledItems[this._culledIndices[index].Index];
 
+    /// <summary>
+    /// Gets or sets the <see cref="RenderQueues"/> that this <see cref="RenderQueue"/> will filter.
+    /// </summary>
     public RenderQueues FilterFlags { get; set; }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RenderQueue"/> class.
+    /// </summary>
+    /// <param name="filterFlags">The <see cref="RenderQueues"/> that this <see cref="RenderQueue"/> will filter.</param>
+    /// <exception cref="ArgumentException">Thrown when an invalid <see cref="RenderQueues"/> value is specified.</exception>
     public RenderQueue(RenderQueues filterFlags)
     {
         this.FilterFlags = filterFlags;
@@ -48,6 +68,16 @@ internal class RenderQueue : IEnumerable<Renderable>, IReadOnlyList<Renderable>,
         };
     }
 
+
+    /// <summary>
+    /// Updates the render flags of a given renderable and adds or removes it from the render queue accordingly.
+    /// </summary>
+    /// <param name="renderable">The renderable to update.</param>
+    /// <param name="oldFlags">The old render flags of the renderable.</param>
+    /// <param name="newFlags">The new render flags of the renderable.</param>
+    /// <remarks>
+    /// This method should be called when the renderable render flags change.
+    /// </remarks>
     public void UpdateRenderableRenderFlags(Renderable renderable, RenderQueues oldFlags, RenderQueues newFlags)
     {
         if ((newFlags & this.FilterFlags) == (oldFlags & this.FilterFlags))
@@ -73,6 +103,11 @@ internal class RenderQueue : IEnumerable<Renderable>, IReadOnlyList<Renderable>,
         }
     }
 
+    /// <summary>
+    /// Updates the render queue by culling renderables outside of the camera frustum and sorting the remaining items by their sort key.
+    /// </summary>
+    /// <param name="cameraFrustum">The bounding frustum of the camera.</param>
+    /// <param name="cameraPosition">The position of the camera.</param>
     public void Update(BoundingFrustum cameraFrustum, Vector3 cameraPosition)
     {
         this._culledIndices.Clear();
