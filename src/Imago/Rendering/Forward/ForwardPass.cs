@@ -46,7 +46,7 @@ internal class ForwardPass : IDisposable, IPipelineProvider
     private readonly ResourceLayout _resourceLayout;
     private ResourceSet _resourceSet;
     private readonly IRenderTexture _renderTexture;
-    private readonly RenderJob _renderJob;
+    private readonly RenderBatcher _renderBatcher;
     private readonly ShadowPass _shadowPass;
 
     public Shader DefaultShader { get; }
@@ -72,7 +72,7 @@ internal class ForwardPass : IDisposable, IPipelineProvider
 
         this._renderTexture = mainRenderTexture;
 
-        this._renderJob = new RenderJob(this._gd, RenderBatchPassType.Forward);
+        this._renderBatcher = new RenderBatcher(this._gd, RenderBatchPassType.Forward);
 
         this._shadowPass.ShadowmapTexture.Resized += this.Shadowmap_Resized;
 
@@ -132,9 +132,9 @@ internal class ForwardPass : IDisposable, IPipelineProvider
         cl.UpdateBuffer(this._camera3DInfoBuffer, 0, ref cameraInfo);
         cl.UpdateBuffer(this._lightInfoBuffer, 0, ref lightInfo);
 
-        this._renderJob.DrawRenderList(cl, this._resourceSet, stage.OpaqueRenderQueue);
+        this._renderBatcher.DrawRenderList(cl, this._resourceSet, stage.OpaqueRenderQueue);
 
-        this._renderJob.DrawRenderList(cl, this._resourceSet, stage.TransparentRenderQueue);
+        this._renderBatcher.DrawRenderList(cl, this._resourceSet, stage.TransparentRenderQueue);
     }
 
     public void Dispose()

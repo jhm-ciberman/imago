@@ -24,7 +24,7 @@ public class MousePickingPass : IDisposable, IPipelineProvider
     private readonly ResourceLayout _resourceLayout;
     private ResourceSet _resourceSet;
     private readonly RenderTexture _renderTexture;
-    private readonly RenderJob _renderJob;
+    private readonly RenderBatcher _renderBatcher;
     private readonly Veldrid.Texture _pixelTexture;
     private Vector2 _mousePosition;
 
@@ -46,7 +46,7 @@ public class MousePickingPass : IDisposable, IPipelineProvider
 
         this._renderTexture = mainRenderTexture;
 
-        this._renderJob = new RenderJob(this._gd, RenderBatchPassType.Picking);
+        this._renderBatcher = new RenderBatcher(this._gd, RenderBatchPassType.Picking);
 
         RenderFlags supportedForwardFlags = RenderFlags.AlphaTest | RenderFlags.ReceiveShadows | RenderFlags.Fog | RenderFlags.PixelPerfactShadows | RenderFlags.ColorWrite;
         var baseVertex = ShaderLoader.Load("picking.vert.glsl");
@@ -84,7 +84,7 @@ public class MousePickingPass : IDisposable, IPipelineProvider
 
         cl.UpdateBuffer(this._camera3DInfoBuffer, 0, ref cameraInfo);
 
-        this._renderJob.DrawRenderList(cl, this._resourceSet, stage.PickingRenderQueue);
+        this._renderBatcher.DrawRenderList(cl, this._resourceSet, stage.PickingRenderQueue);
     }
 
     private bool MouseIsInside(Vector2 mousePos)

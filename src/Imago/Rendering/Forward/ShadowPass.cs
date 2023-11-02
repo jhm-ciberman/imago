@@ -30,7 +30,7 @@ public class ShadowPass : IDisposable, IPipelineProvider
     private readonly GraphicsDevice _gd;
     private readonly Renderer _renderer;
     private readonly DeviceBuffer _shadowmapInfoBuffer;
-    private readonly RenderJob _renderJob;
+    private readonly RenderBatcher _renderBatcher;
 
     private readonly ShadowCascade[] _cascades = new ShadowCascade[4];
     private Matrix4x4 _scalingMatrix;
@@ -54,7 +54,7 @@ public class ShadowPass : IDisposable, IPipelineProvider
 
         this._resourceSet = factory.CreateResourceSet(new ResourceSetDescription(this._resourceLayout, this._shadowmapInfoBuffer));
 
-        this._renderJob = new RenderJob(this._gd, RenderBatchPassType.ShadowMap);
+        this._renderBatcher = new RenderBatcher(this._gd, RenderBatchPassType.ShadowMap);
 
         float verticalFlip = this._gd.IsUvOriginTopLeft ? -1.0f : 1.0f;
         this._scalingMatrix = Matrix4x4.CreateScale(.5f, .5f * verticalFlip, 1f) * Matrix4x4.CreateTranslation(0.5f, 0.5f, 0f);
@@ -105,7 +105,7 @@ public class ShadowPass : IDisposable, IPipelineProvider
             data.LightDirection = mainLight.Direction;
 
             cl.UpdateBuffer(this._shadowmapInfoBuffer, 0, data);
-            this._renderJob.DrawRenderList(cl, this._resourceSet, renderQueue);
+            this._renderBatcher.DrawRenderList(cl, this._resourceSet, renderQueue);
         }
     }
 

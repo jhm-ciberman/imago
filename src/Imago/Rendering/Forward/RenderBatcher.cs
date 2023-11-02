@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Veldrid;
 
 namespace Imago.Rendering.Forward;
@@ -13,6 +14,12 @@ internal enum RenderBatchPassType
 
 internal class RenderBatcher
 {
+    private const uint BINDING_PASS = 0;
+    private const uint BINDING_TRANSFORM = 1;
+    private const uint BINDING_MATERIAL = 2;
+    private const uint BINDING_INSTANCE = 3;
+    private const uint BINDING_SKELETON = 4;
+
     private DeviceBuffer? _offsetsVertexBuffer = null;
     private OffsetVertexData[] _offsetVertexData;
     private readonly List<RenderBatch> _batches;
@@ -30,7 +37,83 @@ internal class RenderBatcher
         this._batches = new List<RenderBatch>(1024);
     }
 
-    public void PrepareBatches(IReadOnlyList<Renderable> renderables)
+    public void DrawRenderList(CommandList commandList, ResourceSet passResourceSet, IReadOnlyList<Renderable> renderItems)
+    {
+        this.PrepareBatches(renderItems);
+
+        DeviceBuffer offsetsVertexBuffer = this.GetVertexOffsetBuffer(commandList);
+
+        Pipeline? currentPipeline = null;
+        Mesh? currentMesh = null;
+        ResourceSet? currentMaterialRS = null;
+        ResourceSet? currentTransformRS = null;
+        ResourceSet? currentInstanceRS = null;
+        ResourceSet? currentSkeletonRS = null;
+
+        uint instanceIndex = 0;
+
+        var batches = this._batches;
+
+        commandList.SetVertexBuffer(0, offsetsVertexBuffer, 0);
+
+
+        for (int batchIndex = 0; batchIndex < batches.Count; batchIndex++)
+        {
+            RenderBatch batch = batches[batchIndex];
+
+            if (currentPipeline != batch.Pipeline)
+            {
+                commandList.SetPipeline(batch.Pipeline);
+                commandList.SetGraphicsResourceSet(BINDING_PASS, passResourceSet);
+                currentPipeline = batch.Pipeline;
+                currentTransformRS = null;
+                currentMaterialRS = null;
+                currentInstanceRS = null;
+                currentSkeletonRS = null;
+            }
+            if (currentTransformRS != batch.TransformResourceSet)
+            {
+                currentTransformRS = batch.TransformResourceSet;
+                commandList.SetGraphicsResourceSet(BINDING_TRANSFORM, batch.TransformResourceSet);
+            }
+            if (currentMaterialRS != batch.MaterialResourceSet)
+            {
+                currentMaterialRS = batch.MaterialResourceSet;
+                commandList.SetGraphicsResourceSet(BINDING_MATERIAL, batch.MaterialResourceSet);
+            }
+            if (currentInstanceRS != batch.InstanceResourceSet)
+            {
+                currentInstanceRS = batch.InstanceResourceSet;
+                commandList.SetGraphicsResourceSet(BINDING_INSTANCE, batch.InstanceResourceSet);
+            }
+            if (batch.SkeletonResourceSet != null && currentSkeletonRS != batch.SkeletonResourceSet)
+            {
+                currentSkeletonRS = batch.SkeletonResourceSet;
+                commandList.SetGraphicsResourceSet(BINDING_SKELETON, batch.SkeletonResourceSet);
+            }
+
+            if (currentMesh != batch.Mesh)
+            {
+                Debug.Assert(batch.Mesh.VeldridVertexBuffer.IsDisposed == false);
+                Debug.Assert(batch.Mesh.VeldridIndexBuffer.IsDisposed == false);
+                commandList.SetVertexBuffer(1, batch.Mesh.VeldridVertexBuffer, 0);
+                commandList.SetIndexBuffer(batch.Mesh.VeldridIndexBuffer, IndexFormat.UInt16);
+                currentMesh = batch.Mesh;
+            }
+
+            commandList.DrawIndexed(
+                indexCount: batch.Mesh.IndexCount,
+                instanceCount: batch.InstanceCount,
+                indexStart: 0,
+                vertexOffset: 0,
+                instanceStart: instanceIndex
+            );
+
+            instanceIndex += batch.InstanceCount;
+        }
+    }
+
+    private void PrepareBatches(IReadOnlyList<Renderable> renderables)
     {
         this._batches.Clear();
         if (renderables.Count == 0) return;
@@ -59,7 +142,7 @@ internal class RenderBatcher
         this._batches.Add(new RenderBatch(instanceCount, prevRenderable, this._pass));
     }
 
-    public DeviceBuffer GetVertexOffsetBuffer(CommandList commandList)
+    private DeviceBuffer GetVertexOffsetBuffer(CommandList commandList)
     {
         uint requiredSizeInBytes = (uint) (this._offsetVertexData.Length * 16);
         if (this._offsetsVertexBuffer == null || this._offsetsVertexBuffer.SizeInBytes < requiredSizeInBytes)
