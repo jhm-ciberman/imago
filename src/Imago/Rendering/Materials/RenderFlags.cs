@@ -1,6 +1,6 @@
 using System;
 
-namespace Imago.Rendering;
+namespace Imago.Rendering.Materials;
 
 /// <summary>
 /// <see cref="RenderFlags"/> is a bitmask that is used to specify the features that should

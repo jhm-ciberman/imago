@@ -6,6 +6,11 @@ using Shader = Imago.Rendering.Materials.Shader;
 
 namespace Imago.Rendering;
 
+/// <summary>
+/// A cache for resource sets used in rendering. This class provides a way to reuse resource sets
+/// that have already been created, which can improve performance by reducing the number of
+/// resource set allocations and deallocations.
+/// </summary>
 internal class ResourceSetCache : IDisposable
 {
     private record struct Key(ITexture Texture, Shader Shader);
@@ -14,6 +19,10 @@ internal class ResourceSetCache : IDisposable
 
     private readonly ResourceFactory _factory;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ResourceSetCache"/> class.
+    /// </summary>
+    /// <param name="factory">The resource factory.</param>
     public ResourceSetCache(ResourceFactory factory)
     {
         this._factory = factory;
