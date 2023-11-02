@@ -5,6 +5,9 @@ using Veldrid;
 
 namespace Imago.Rendering.Forward;
 
+/// <summary>
+/// Represents a buffer of data that can be uploaded to the GPU and used in shaders.
+/// </summary>
 internal class DataBuffer : IDisposable
 {
     private static int _count = 0;
