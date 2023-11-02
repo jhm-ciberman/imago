@@ -13,6 +13,7 @@ using Veldrid;
 using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
 using Veldrid.Utilities;
+using Viewport = Imago.SceneGraph.Viewport;
 
 namespace Imago.Rendering;
 
@@ -54,6 +55,11 @@ public class Renderer : IDisposable
     /// Gets the <see cref="RenderSettings"/> used by the renderer.
     /// </summary>
     public RenderSettings Settings { get; }
+
+    /// <summary>
+    /// Gets the main Viewport.
+    /// </summary>
+    public Viewport Viewport { get; }
 
     private readonly SwapchainRenderTexture _fullScreenRenderTexture;
     private readonly ResourceFactory _factory;
@@ -136,6 +142,8 @@ public class Renderer : IDisposable
 
         this.GraphicsDevice = gd;
         swapchain ??= this.GraphicsDevice.MainSwapchain;
+
+        this.Viewport = new Viewport(swapchain.Framebuffer.Width, swapchain.Framebuffer.Height);
 
         this._disposeCollector = new DisposeCollector();
         this._factory = this.GraphicsDevice.ResourceFactory;

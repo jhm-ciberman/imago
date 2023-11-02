@@ -1,5 +1,6 @@
 using System;
 using System.Numerics;
+using Imago.Rendering;
 using Support;
 using Veldrid.Utilities;
 
@@ -21,7 +22,7 @@ public abstract class Camera
     /// <param name="viewport">The viewport.</param>
     public Camera(Viewport? viewport = null)
     {
-        this.Viewport = viewport ?? Application.Instance.Viewport;
+        this.Viewport = viewport ?? Renderer.Instance.Viewport;
         this.FrustumCullingCamera = this;
     }
 

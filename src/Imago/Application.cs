@@ -21,7 +21,7 @@ public class Application : IDisposable
     /// <summary>
     /// Gets the <see cref="Viewport"/>.
     /// </summary>
-    public Viewport Viewport { get; }
+    public Viewport Viewport => this._renderer.Viewport;
 
     /// <summary>
     /// Gets the <see cref="Sdl2Window"/>.
@@ -60,7 +60,6 @@ public class Application : IDisposable
 
         WindowCreateInfo windowCI = new WindowCreateInfo(100, 100, 1024, 600, WindowState.Normal, "Imago");
         this.Window = VeldridStartup.CreateWindow(ref windowCI);
-        this.Viewport = new Viewport((uint)this.Window.Width, (uint)this.Window.Height);
 
         this._renderer = new Renderer(this.Window, backend);
 
