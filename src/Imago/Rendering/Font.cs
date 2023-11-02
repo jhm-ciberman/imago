@@ -146,7 +146,7 @@ public class Font
     /// <summary>
     /// Gets the internal font base used by the render system.
     /// </summary>
-    internal SpriteFontBase FontBase { get; }
+    public SpriteFontBase FontBase { get; } // TODO: make internal
 
     public FontSystemEffect Effect { get; }
 

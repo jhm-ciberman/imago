@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup Condition="'$(CompileConfig)' == 'RELEASE'">
+        <PublishSingleFile>true</PublishSingleFile>
+        <DebugSymbols>false</DebugSymbols>
+    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="../Imago/Imago.csproj" />
+        <ProjectReference Include="../Support/Support.csproj" />
+    </ItemGroup>
+</Project>

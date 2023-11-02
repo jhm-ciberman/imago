@@ -1,12 +1,13 @@
+using System;
 using System.Collections.Generic;
-using Imago.Controls;
+using System.Linq;
 using Support;
 
 namespace Imago.SceneGraph;
 
 public class Scene : Node3D
 {
-    public GuiLayer? Gui { get; set; } = null;
+    private readonly List<ILayer2D> _layers2D = new();
 
     /// <summary>
     /// Gets or sets the clear color of the stage. If null, the stage will not be cleared
@@ -44,7 +45,10 @@ public class Scene : Node3D
 
     public virtual void Update(float deltaTime)
     {
-        this.Gui?.Update(deltaTime);
+        foreach (var layer in this._layers2D)
+        {
+            layer.Update(deltaTime);
+        }
     }
 
     private readonly List<IParticleSystem> _particleSystems = new List<IParticleSystem>();
@@ -71,4 +75,37 @@ public class Scene : Node3D
     {
         this._particleSystems.Remove(particleSystem);
     }
+
+    /// <summary>
+    /// Adds a 2D layer to the scene.
+    /// </summary>
+    /// <param name="layer">The layer to add.</param>
+    public void AddLayer(ILayer2D layer)
+    {
+        this._layers2D.Add(layer);
+    }
+
+    /// <summary>
+    /// Removes a 2D layer from the scene.
+    /// </summary>
+    /// <param name="layer">The layer to remove.</param>
+    public void RemoveLayer(ILayer2D layer)
+    {
+        this._layers2D.Remove(layer);
+    }
+
+    /// <summary>
+    /// Gets the first layer of the specified type.
+    /// </summary>
+    /// <typeparam name="T">The type of the layer.</typeparam>
+    /// <returns>The layer or null if no layer of the specified type exists.</returns>
+    public T? GetLayer<T>()
+    {
+        return this._layers2D.OfType<T>().FirstOrDefault();
+    }
+
+    /// <summary>
+    /// Gets the 2D layers of the scene.
+    /// </summary>
+    public IReadOnlyList<ILayer2D> Layers2D => this._layers2D;
 }

@@ -1,13 +1,14 @@
 using System;
 using System.Diagnostics;
 using System.Numerics;
+using Imago.Rendering;
 using Imago.Rendering.Sprites;
 using Imago.SceneGraph;
 using Support;
 
 namespace Imago.Controls;
 
-public class GuiLayer
+public class GuiLayer : ILayer2D
 {
     public Viewport Viewport { get; }
 
@@ -32,9 +33,9 @@ public class GuiLayer
     /// </summary>
     public bool SnapToPixels { get; set; } = true;
 
-    public GuiLayer(Viewport viewport)
+    public GuiLayer(Viewport? viewport = null)
     {
-        this.Viewport = viewport;
+        this.Viewport = viewport ?? Renderer.Instance.Viewport;
         this.Viewport.Resized += this.Viewport_Resized;
     }
 
@@ -63,7 +64,7 @@ public class GuiLayer
 
     private readonly Stopwatch _measureArrangeStopwatch = new Stopwatch();
 
-    internal void Draw(SpriteBatcher spriteBatcher)
+    public void Draw(SpriteBatcher spriteBatcher)
     {
         if (this._content is null) return;
 

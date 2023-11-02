@@ -56,19 +56,23 @@ public class SpritesPass : IDisposable, IPipelineProvider
 
     public void Render(CommandList cl, Stage stage, RenderTexture renderTexture)
     {
-        var gui = stage.Scene.Gui;
-        if (gui == null) return;
+        var layers = stage.Scene.Layers2D;
+        if (layers.Count == 0) return;
 
         this.DrawCallCount = 0;
 
-        cl.SetFramebuffer(renderTexture.Framebuffer);
-        cl.ClearDepthStencil(1f);
+        for (int i = 0; i < layers.Count; i++)
+        {
+            var layer = layers[i];
+            cl.SetFramebuffer(renderTexture.Framebuffer);
+            cl.ClearDepthStencil(1f);
 
-        this._spriteBatcher.Begin(cl, gui.ViewProjectionMatrix);
-        gui.Draw(this._spriteBatcher);
-        this._spriteBatcher.End();
+            this._spriteBatcher.Begin(cl, layer.ViewProjectionMatrix);
+            layer.Draw(this._spriteBatcher);
+            this._spriteBatcher.End();
 
-        this.DrawCallCount += this._spriteBatcher.DrawCallCount;
+            this.DrawCallCount += this._spriteBatcher.DrawCallCount;
+        }
     }
 
     public int DrawCallCount { get; private set; }

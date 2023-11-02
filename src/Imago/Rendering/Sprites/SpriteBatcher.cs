@@ -47,14 +47,14 @@ public class SpriteBatcher : IFontStashRenderer2, IDisposable
 
     public int DrawCallCount { get; private set; } = 0;
 
-    internal void PushOpacity(float opacity)
+    public void PushOpacity(float opacity)
     {
         opacity *= this._opacityStack.Peek();
         this._opacityStack.Push(opacity);
         this._batch.Opacity = opacity;
     }
 
-    internal void PopOpacity()
+    public void PopOpacity()
     {
         this._opacityStack.Pop();
         this._batch.Opacity = this._opacityStack.Peek();
