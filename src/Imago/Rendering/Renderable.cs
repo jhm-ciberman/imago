@@ -494,22 +494,25 @@ internal class Renderable : IDisposable
 
     private void RecomputeRenderQueue()
     {
-        RenderQueues flags = RenderQueues.None;
-
-        if (this.Material is null || this.Mesh is null || this.Visible == false)
+        if (this.Material is null || this.Mesh is null)
         {
-            this.RenderQueues = flags;
+            this.RenderQueues = RenderQueues.None;
             return;
         }
 
-        if (this.ShadowCastingMode != ShadowCasting.OnlyShadows)
-        {
-            flags |= this.Material.Transparent || this._transparent ? RenderQueues.Transparent : RenderQueues.Opaque;
-        }
+        RenderQueues flags = RenderQueues.None;
 
-        if (this.ShadowCastingMode != ShadowCasting.NoShadows)
+        if (this.Visible)
         {
-            flags |= RenderQueues.ShadowCaster;
+            if (this.ShadowCastingMode != ShadowCasting.OnlyShadows)
+            {
+                flags |= this.Material.Transparent || this._transparent ? RenderQueues.Transparent : RenderQueues.Opaque;
+            }
+
+            if (this.ShadowCastingMode != ShadowCasting.NoShadows)
+            {
+                flags |= RenderQueues.ShadowCaster;
+            }
         }
 
         if (this.PickingId != 0)
