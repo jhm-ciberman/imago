@@ -133,6 +133,7 @@ public class Stage
     public virtual void Update(float deltaTime)
     {
         this.Gizmos.Update(deltaTime);
+        this.Picking.Update();
         this.Scene.Update(deltaTime);
     }
 

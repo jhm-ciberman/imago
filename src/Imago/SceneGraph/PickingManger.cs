@@ -1,7 +1,17 @@
 using System;
 using System.Collections.Generic;
+using System.Numerics;
+using Imago.Input;
+using Imago.Support;
 
 namespace Imago.SceneGraph;
+
+public interface IPickableView
+{
+    void MouseEnter(HitInfo hitInfo);
+    void MouseMove(HitInfo hitInfo);
+    void MouseLeave();
+}
 
 /// <summary>
 /// This class is responsible for managing a list of pickable objects and assigning them unique IDs.
@@ -10,6 +20,12 @@ public class PickingManger
 {
     private readonly Dictionary<uint, IPickable> _pickables = new Dictionary<uint, IPickable>();
     private uint _nextId = 1;
+    private IPickableView? _current = null;
+
+    /// <summary>
+    /// Gets or sets the currently highlighted pickable object.
+    /// </summary>
+    public IPickable? HighlightedPickable { get; set; }
 
     /// <summary>
     /// Adds a pickable object to the list of pickable objects.
@@ -58,7 +74,52 @@ public class PickingManger
     }
 
     /// <summary>
-    /// Gets or sets the currently highlighted pickable object.
+    /// Updates the picking.
     /// </summary>
-    public IPickable? HighlightedPickable { get; set; }
+    public void Update()
+    {
+        var pickableView = this.GetPickableView(out var hitInfo);
+
+        if (this._current == pickableView)
+        {
+            this._current?.MouseMove(hitInfo);
+        }
+        else
+        {
+            this._current?.MouseLeave();
+            this._current = pickableView;
+            this._current?.MouseEnter(hitInfo);
+        }
+    }
+
+    /// <summary>
+    /// Returns the pickable view that is currently under the mouse cursor.
+    /// </summary>
+    /// <param name="hitInfo">The hit info that was used to find the pickable.</param>
+    /// <returns>The pickable view that is currently under the mouse cursor.</returns>
+    private IPickableView? GetPickableView(out HitInfo hitInfo)
+    {
+        hitInfo = default;
+        var camera = Application.Instance.Scene.Camera;
+        if (camera == null) return null;
+
+        if (this.HighlightedPickable is not RenderNode3D selectedRenderNode)
+            return null;
+
+        Vector2 viewPortPoint = InputManager.Current.MousePosition / camera.Viewport.Size;
+        var ray = camera.ViewportRay(viewPortPoint);
+        if (!selectedRenderNode.RayCast(ray, out hitInfo))
+            return null;
+
+        Node3D? node = selectedRenderNode;
+        while (node != null) // Traverse the scene graph to find the selected object.
+        {
+            if (node is IPickableView pickableView)
+                return pickableView;
+
+            node = node.Parent; // Go up in the scene graph.
+        }
+
+        return null;
+    }
 }
