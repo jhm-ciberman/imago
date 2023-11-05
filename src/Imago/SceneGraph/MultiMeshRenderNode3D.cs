@@ -75,6 +75,24 @@ public class MultiMeshRenderNode3D : Node3D
     /// </summary>
     public IReadOnlyList<RenderNode3D> ChildRenderNodes => this._renderNodes;
 
+    private bool _isPickable = false;
+
+    /// <summary>
+    /// Gets or sets whether the node is pickable.
+    /// </summary>
+    public bool IsPickable
+    {
+        get => this._isPickable;
+        set
+        {
+            this._isPickable = value;
+            foreach (var node in this._renderNodes)
+            {
+                node.IsPickable = value;
+            }
+        }
+    }
+
     private void SetMeshes(MeshRenderInfo[] meshes)
     {
         this._meshes = meshes;
@@ -128,5 +146,4 @@ public class MultiMeshRenderNode3D : Node3D
 
         base.Dispose(disposing);
     }
-
 }
