@@ -97,10 +97,10 @@ public class Renderer : IDisposable
     private readonly SkyDomePass _skyDomePass;
 
 
-    public static GraphicsDeviceOptions GetGraphicsDeviceOptions()
+    public static GraphicsDeviceOptions GetGraphicsDeviceOptions(bool debug = false)
     {
         return new GraphicsDeviceOptions(
-            debug: false,
+            debug: debug,
             swapchainDepthFormat: null, //PixelFormat.R16_UNorm,
             syncToVerticalBlank: false,
             resourceBindingModel: ResourceBindingModel.Improved,
@@ -110,9 +110,9 @@ public class Renderer : IDisposable
         );
     }
 
-    public static GraphicsDevice CreateGraphicsDevice(Sdl2Window window, GraphicsBackend? graphicsBackend = null)
+    public static GraphicsDevice CreateGraphicsDevice(Sdl2Window window, GraphicsBackend? graphicsBackend = null, bool debug = false)
     {
-        GraphicsDeviceOptions options = GetGraphicsDeviceOptions();
+        GraphicsDeviceOptions options = GetGraphicsDeviceOptions(debug);
 
         return VeldridStartup.CreateGraphicsDevice(window, options, graphicsBackend ?? VeldridStartup.GetPlatformDefaultBackend());
     }
@@ -122,9 +122,10 @@ public class Renderer : IDisposable
     /// </summary>
     /// <param name="window">The window to render to.</param>
     /// <param name="graphicsBackend">The graphics backend to use.</param>
+    /// <param name="debug">Whether to enable debug mode in the graphics device.</param>
     /// <exception cref="InvalidOperationException">Thrown if the renderer is already initialized.</exception>
-    public Renderer(Sdl2Window window, GraphicsBackend? graphicsBackend = null)
-        : this(CreateGraphicsDevice(window, graphicsBackend)) { }
+    public Renderer(Sdl2Window window, GraphicsBackend? graphicsBackend = null, bool debug = false)
+        : this(CreateGraphicsDevice(window, graphicsBackend, debug)) { }
 
 
     /// <summary>

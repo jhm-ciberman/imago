@@ -152,7 +152,7 @@ public class MousePickingPass : IDisposable, IPipelineProvider
             ),
             PrimitiveTopology = PrimitiveTopology.TriangleList,
             ShaderSet = new ShaderSetDescription(GetVertexLayout(shaderVariant.VertexFormat), shaderVariant.VeldridShaders),
-            BlendState = new BlendStateDescription(RgbaFloat.Black, BlendAttachmentDescription.OverrideBlend),
+            BlendState = new BlendStateDescription(RgbaFloat.Black, BlendAttachmentDescription.Disabled),
             RasterizerState = new RasterizerStateDescription(
                 cullMode,
                 fillMode,

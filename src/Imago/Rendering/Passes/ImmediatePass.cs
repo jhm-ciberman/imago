@@ -337,11 +337,7 @@ public class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
             DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
             PrimitiveTopology = PrimitiveTopology.TriangleList,
             ShaderSet = shaderVariant.ShaderSetDescription,
-            BlendState = new BlendStateDescription(
-                RgbaFloat.Black,
-                BlendAttachmentDescription.OverrideBlend,
-                BlendAttachmentDescription.Disabled
-            ),
+            BlendState = new BlendStateDescription(RgbaFloat.Black, BlendAttachmentDescription.OverrideBlend),
             RasterizerState = new RasterizerStateDescription(
                 FaceCullMode.Back,
                 PolygonFillMode.Solid,
