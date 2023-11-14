@@ -7,7 +7,7 @@ namespace Imago.SceneGraph;
 public class OrthographicCamera : Camera
 {
     private Matrix4x4 _projectionMatrix;
-    private float _size = 10f;
+    private float _width = 10f;
 
     public OrthographicCamera(Viewport? viewport = null) : base(viewport)
     {
@@ -18,7 +18,7 @@ public class OrthographicCamera : Camera
     /// </summary>
     public float Width
     {
-        get => this._size;
+        get => this._width;
         set
         {
             if (value < 0)
@@ -26,9 +26,9 @@ public class OrthographicCamera : Camera
                 throw new ArgumentOutOfRangeException(nameof(value), "Width must be greater than 0.");
             }
 
-            if (this._size != value)
+            if (this._width != value)
             {
-                this._size = value;
+                this._width = value;
                 this._projectionMatrixIsDirty = true;
             }
         }
@@ -39,7 +39,7 @@ public class OrthographicCamera : Camera
     /// </summary>
     public float Height
     {
-        get => this._size / this.Viewport.AspectRatio;
+        get => this._width / this.Viewport.AspectRatio;
         set => this.Width = value * this.Viewport.AspectRatio;
     }
 
@@ -52,7 +52,7 @@ public class OrthographicCamera : Camera
         {
             if (this._projectionMatrixIsDirty)
             {
-                this._projectionMatrix = Matrix4x4.CreateOrthographic(this.Width * this.Viewport.AspectRatio, this.Width, this.NearPlane, this.FarPlane);
+                this._projectionMatrix = Matrix4x4.CreateOrthographic(this.Width, this.Height, this.NearPlane, this.FarPlane);
                 this._projectionMatrixIsDirty = false;
             }
 
@@ -62,7 +62,7 @@ public class OrthographicCamera : Camera
 
     public override Matrix4x4 GetShadowCascadeViewProjectionMatrix(float near, float far)
     {
-        return Matrix4x4.CreateOrthographic(this.Width / this.Viewport.AspectRatio, this.Width, near, far);
+        return Matrix4x4.CreateOrthographic(this.Width, this.Height, near, far);
     }
 
     public override int MaxShadowCascades => 1;

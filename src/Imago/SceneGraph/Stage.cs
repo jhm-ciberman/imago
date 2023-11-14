@@ -54,6 +54,7 @@ public class Stage
 
     internal RenderQueue[] ShadowCasterRenderQueues { get; } = new RenderQueue[4];
 
+    private readonly List<Renderable> _renderables = new();
     private readonly List<Renderable> _dirtyRenderables = new();
     private readonly List<ImmediateRenderable3D> _immediateRenderables = new();
 
@@ -161,6 +162,7 @@ public class Stage
     /// <param name="renderable">The renderable.</param>
     internal void NotifyRenderablePipelineDirty(Renderable renderable)
     {
+        Console.WriteLine("Pipeline dirty");
         this._dirtyRenderables.Add(renderable);
     }
 
@@ -204,5 +206,39 @@ public class Stage
     public void RemoveImmediateRenderable(ImmediateRenderable3D immediateRenderable)
     {
         this._immediateRenderables.Remove(immediateRenderable);
+    }
+
+    internal void AddRenderable(Renderable renderable)
+    {
+        this._renderables.Add(renderable);
+        this.NotifyRenderablePipelineDirty(renderable);
+        this.NotifyRenderableRenderQueueChanged(renderable, RenderQueues.None, renderable.RenderQueues);
+    }
+
+    internal void RemoveRenderable(Renderable renderable)
+    {
+        this._renderables.Remove(renderable);
+        this.NotifyRenderablePipelineDirty(renderable);
+        this.NotifyRenderableRenderQueueChanged(renderable, renderable.RenderQueues, RenderQueues.None);
+    }
+
+    private Veldrid.TextureSampleCount _multiSampleCount = Veldrid.TextureSampleCount.Count1;
+
+    /// <summary>
+    /// Gets or sets the multi sample count used for rendering.
+    /// </summary>
+    public Veldrid.TextureSampleCount MultiSampleCount
+    {
+        get => this._multiSampleCount;
+        set
+        {
+            if (this._multiSampleCount == value) return;
+            this._multiSampleCount = value;
+
+            foreach (var renderable in this._renderables)
+            {
+                renderable.InvalidatePipeline();
+            }
+        }
     }
 }

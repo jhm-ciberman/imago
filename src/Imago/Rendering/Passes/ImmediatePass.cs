@@ -330,7 +330,7 @@ public class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
         this._indexCount = 0;
     }
 
-    Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant, RenderFlags flags)
+    Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant, RenderFlags flags, TextureSampleCount sampleCount)
     {
         return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
         {

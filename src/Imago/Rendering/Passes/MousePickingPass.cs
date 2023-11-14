@@ -92,7 +92,7 @@ public class MousePickingPass : IDisposable, IPipelineProvider
     private bool MouseIsInside(Vector2 mousePos)
     {
         if (mousePos.X < 0 || mousePos.Y < 0) return false;
-        var texture = this._renderTexture.PickingTexture;
+        var texture = this._renderTexture.PickingColorTexture;
         if (mousePos.X >= texture.Width || mousePos.Y >= texture.Height) return false;
         return true;
     }
@@ -111,10 +111,10 @@ public class MousePickingPass : IDisposable, IPipelineProvider
             uint x = (uint) mousePos.X;
             uint y = this._gd.IsUvOriginTopLeft
                 ? (uint) mousePos.Y
-                : (uint) (this._renderTexture.PickingTexture.Height - 1 - mousePos.Y);
+                : (uint) (this._renderTexture.PickingColorTexture.Height - 1 - mousePos.Y);
 
             cl.CopyTexture(
-                source: this._renderTexture.PickingTexture,
+                source: this._renderTexture.PickingColorTexture,
                 srcX: x, srcY: y, srcZ: 0, srcMipLevel: 0, srcBaseArrayLayer: 0,
                 destination: this._pixelTexture,
                 dstX: 0, dstY: 0, dstZ: 0, dstMipLevel: 0, dstBaseArrayLayer: 0,
@@ -137,7 +137,7 @@ public class MousePickingPass : IDisposable, IPipelineProvider
         this._pixelTexture.Dispose();
     }
 
-    Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant, RenderFlags flags)
+    Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant, RenderFlags flags, TextureSampleCount sampleCount)
     {
         var cullMode = flags.HasFlag(RenderFlags.DoubleSided) ? FaceCullMode.None : FaceCullMode.Back;
         var depthTestEnabled = flags.HasFlag(RenderFlags.DepthTest);

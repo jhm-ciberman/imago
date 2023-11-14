@@ -28,7 +28,7 @@ public class Shader : IDisposable
     /// </summary>
     public RenderFlags SupportedRenderFlags { get; } = RenderFlags.None;
 
-    private record struct CachedPipeline(VertexFormat VertexFormat, Pipeline Pipeline, RenderFlags Flags);
+    private record struct CachedPipeline(VertexFormat VertexFormat, Pipeline Pipeline, RenderFlags Flags, TextureSampleCount SampleCount);
     private readonly List<CachedPipeline> _pipelines = new List<CachedPipeline>();
     public ResourceLayout MaterialResourceLayout { get; }
     private readonly List<ShaderVariant> _variants = new List<ShaderVariant>();
@@ -80,18 +80,23 @@ public class Shader : IDisposable
     /// <param name="pass">The pass to use.</param>
     /// <param name="vertexFormat">The vertex format to use.</param>
     /// <param name="flags">The render flags to use.</param>
+    /// <param name="sampleCount">The sample count to use.</param>
     /// <returns>The veldrid pipeline.</returns>
-    internal Pipeline GetPipeline(VertexFormat vertexFormat, RenderFlags flags)
+    internal Pipeline GetPipeline(VertexFormat vertexFormat, RenderFlags flags, TextureSampleCount sampleCount = TextureSampleCount.Count1)
     {
         for (int i = 0; i < this._pipelines.Count; i++)
         {
-            if (this._pipelines[i].VertexFormat == vertexFormat && this._pipelines[i].Flags == flags)
+            if (this._pipelines[i].VertexFormat == vertexFormat
+            && this._pipelines[i].Flags == flags
+            && this._pipelines[i].SampleCount == sampleCount)
+            {
                 return this._pipelines[i].Pipeline;
+            }
         }
 
         ShaderVariant shaderVariant = this.GetShaderVariant(vertexFormat, flags);
-        var pipeline = this._pass.MakePipeline(shaderVariant, flags);
-        this._pipelines.Add(new CachedPipeline(vertexFormat, pipeline, flags));
+        var pipeline = this._pass.MakePipeline(shaderVariant, flags, sampleCount);
+        this._pipelines.Add(new CachedPipeline(vertexFormat, pipeline, flags, sampleCount));
 
         return pipeline;
     }

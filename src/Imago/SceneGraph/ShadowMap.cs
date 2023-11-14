@@ -50,7 +50,7 @@ public class ShadowMap
         }
     }
 
-    private uint _cascadesCount = 4;
+    private uint _cascadesCount = 1;
 
     /// <summary>
     /// Gets or sets the number of cascades used by the light. The number must be between 1 and 4.

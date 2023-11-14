@@ -194,19 +194,11 @@ internal class Renderable : IDisposable
         {
             if (this._stage == value) return;
 
-            if (this._stage != null)
-            {
-                this._stage.NotifyRenderablePipelineDirty(this);
-                this._stage.NotifyRenderableRenderQueueChanged(this, this._renderQueueFlags, RenderQueues.None);
-            }
+            this._stage?.RemoveRenderable(this);
 
             this._stage = value;
 
-            if (this._stage != null)
-            {
-                this._stage.NotifyRenderablePipelineDirty(this);
-                this._stage.NotifyRenderableRenderQueueChanged(this, RenderQueues.None, this._renderQueueFlags);
-            }
+            this._stage?.AddRenderable(this);
         }
     }
 
@@ -549,7 +541,7 @@ internal class Renderable : IDisposable
         if (settings.EnableFog) flags |= RenderFlags.Fog;
         if (settings.EnablePixelPerfectShadows) flags |= RenderFlags.PixelPerfactShadows;
 
-        return material.ForwardShader.GetPipeline(this._mesh!.VertexFormat, material.RenderFlags | flags);
+        return material.ForwardShader.GetPipeline(this._mesh!.VertexFormat, material.RenderFlags | flags, this.Stage!.MultiSampleCount);
     }
 
     private Veldrid.Pipeline? GetShadowmapPipeline(Material material)

@@ -139,7 +139,7 @@ public class ShadowPass : IDisposable, IPipelineProvider
         return new Vector4(cascade.DepthBias, cascade.NormalOffset, 0.0f, 0.0f);
     }
 
-    Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant, RenderFlags flags)
+    Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant, RenderFlags flags, TextureSampleCount sampleCount)
     {
         return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
         {

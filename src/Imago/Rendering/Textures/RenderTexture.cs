@@ -16,98 +16,116 @@ public class RenderTexture : IRenderTexture
     /// </summary>
     public event EventHandler? Resized;
 
-    public Framebuffer Framebuffer { get; private set; }
 
-    public Framebuffer PickingFramebuffer { get; private set; }
+    Veldrid.Texture ITexture.VeldridTexture => this.ForwardColorTexture;
 
-    public Veldrid.Texture VeldridTexture { get; private set; }
-
-    public Veldrid.Texture DepthTexture { get; private set; }
-
-    public Veldrid.Texture PickingTexture { get; private set; }
+    public Veldrid.Texture ForwardColorTexture { get; private set; } = null!;
+    public Veldrid.Texture ForwardDepthTexture { get; private set; } = null!;
+    public Veldrid.Texture PickingColorTexture { get; private set; } = null!;
+    public Veldrid.Texture PickingDepthTexture { get; private set; } = null!;
+    public Framebuffer Framebuffer { get; private set; } = null!;
+    public Framebuffer PickingFramebuffer { get; private set; } = null!;
 
     public OutputDescription OutputDescription => this.Framebuffer.OutputDescription;
 
     public OutputDescription PickingOutputDescription => this.PickingFramebuffer.OutputDescription;
 
-    public uint Width => this.Framebuffer.Width;
-    public uint Height => this.Framebuffer.Height;
+    public uint Width { get; private set; }
+    public uint Height { get; private set; }
 
     public Sampler VeldridSampler { get; private set; }
+    public TextureSampleCount SampleCount { get; private set; }
 
     private readonly GraphicsDevice _gd;
 
     private readonly Renderer _renderer;
 
-    public RenderTexture(Renderer renderer, uint width, uint height)
+    public RenderTexture(Renderer renderer, uint width, uint height, TextureSampleCount sampleCount = TextureSampleCount.Count1)
     {
         this._renderer = renderer;
+        this.SampleCount = sampleCount;
         this._gd = renderer.GraphicsDevice;
-        this.DepthTexture = this.CreateDepthTexture(width, height);
-        this.VeldridTexture = this.CreateColorTexture(width, height);
-        this.PickingTexture = this.CreatePickingIDTexture(width, height);
-        this.Framebuffer = this.CreateFramebuffer();
-        this.PickingFramebuffer = this.CreatePickingFramebuffer();
+        this.Width = width;
+        this.Height = height;
+
+        this.RecreateResources();
+
         this.VeldridSampler = this._gd.LinearSampler;
     }
 
-    private Veldrid.Texture CreateDepthTexture(uint width, uint height)
+    private void RecreateResources()
     {
-        return this._gd.ResourceFactory.CreateTexture(new TextureDescription(
-            width, height, depth: 1, mipLevels: 1, arrayLayers: 1,
-            PixelFormat.D32_Float_S8_UInt,
-            TextureUsage.DepthStencil | TextureUsage.Sampled,
-            TextureType.Texture2D
-        ));
-    }
-
-    private Veldrid.Texture CreateColorTexture(uint width, uint height)
-    {
-        return this._gd.ResourceFactory.CreateTexture(new TextureDescription(
-            width, height, depth: 1, mipLevels: 1, arrayLayers: 1,
+        this.ForwardColorTexture = this._gd.ResourceFactory.CreateTexture(new TextureDescription(
+            this.Width, this.Height, depth: 1, mipLevels: 1, arrayLayers: 1,
             PixelFormat.R8_G8_B8_A8_UNorm,
             TextureUsage.RenderTarget | TextureUsage.Sampled,
-            TextureType.Texture2D
+            TextureType.Texture2D,
+            this.SampleCount
         ));
-    }
 
-    private Veldrid.Texture CreatePickingIDTexture(uint width, uint height)
-    {
-        return this._gd.ResourceFactory.CreateTexture(new TextureDescription(
-            width, height, depth: 1, mipLevels: 1, arrayLayers: 1,
+        this.ForwardDepthTexture = this._gd.ResourceFactory.CreateTexture(new TextureDescription(
+            this.Width, this.Height, depth: 1, mipLevels: 1, arrayLayers: 1,
+            PixelFormat.D32_Float_S8_UInt,
+            TextureUsage.DepthStencil | TextureUsage.Sampled,
+            TextureType.Texture2D,
+            this.SampleCount
+        ));
+
+        this.PickingColorTexture = this._gd.ResourceFactory.CreateTexture(new TextureDescription(
+            this.Width, this.Height, depth: 1, mipLevels: 1, arrayLayers: 1,
             PixelFormat.R32_UInt,
             TextureUsage.RenderTarget | TextureUsage.Sampled,
-            TextureType.Texture2D
+            TextureType.Texture2D,
+            TextureSampleCount.Count1
         ));
+
+        this.PickingDepthTexture = (this.SampleCount == TextureSampleCount.Count1)
+            ? this.ForwardDepthTexture // We can share the depth texture if we don't need multisampling
+            : this._gd.ResourceFactory.CreateTexture(new TextureDescription(
+                this.Width, this.Height, depth: 1, mipLevels: 1, arrayLayers: 1,
+                PixelFormat.D32_Float_S8_UInt,
+                TextureUsage.DepthStencil | TextureUsage.Sampled,
+                TextureType.Texture2D,
+                TextureSampleCount.Count1
+            ));
+
+        this.Framebuffer = this.CreateFramebuffer();
+        this.PickingFramebuffer = this.CreatePickingFramebuffer();
     }
 
     private Framebuffer CreateFramebuffer()
     {
         return this._gd.ResourceFactory.CreateFramebuffer(new FramebufferDescription(
-            this.DepthTexture, this.VeldridTexture
+            this.ForwardDepthTexture, this.ForwardColorTexture
         ));
     }
 
     private Framebuffer CreatePickingFramebuffer()
     {
         return this._gd.ResourceFactory.CreateFramebuffer(new FramebufferDescription(
-            this.DepthTexture, this.PickingTexture
+            this.PickingDepthTexture, this.PickingColorTexture
         ));
+    }
+
+    private void DisposeResources()
+    {
+        this._renderer.DisposeWhenIdle(this.ForwardColorTexture);
+        this._renderer.DisposeWhenIdle(this.ForwardDepthTexture);
+        this._renderer.DisposeWhenIdle(this.PickingColorTexture);
+        this._renderer.DisposeWhenIdle(this.PickingDepthTexture);
+        this._renderer.DisposeWhenIdle(this.Framebuffer);
+        this._renderer.DisposeWhenIdle(this.PickingFramebuffer);
     }
 
 
     public void Resize(uint width, uint height)
     {
-        this._renderer.DisposeWhenIdle(this.DepthTexture);
-        this._renderer.DisposeWhenIdle(this.VeldridTexture);
-        this._renderer.DisposeWhenIdle(this.PickingTexture);
-        this._renderer.DisposeWhenIdle(this.Framebuffer);
-        this._renderer.DisposeWhenIdle(this.PickingFramebuffer);
-        this.DepthTexture = this.CreateDepthTexture(width, height);
-        this.VeldridTexture = this.CreateColorTexture(width, height);
-        this.PickingTexture = this.CreatePickingIDTexture(width, height);
-        this.Framebuffer = this.CreateFramebuffer();
-        this.PickingFramebuffer = this.CreatePickingFramebuffer();
+        this.Width = width;
+        this.Height = height;
+
+        this.DisposeResources();
+        this.RecreateResources();
+
         this.Resized?.Invoke(this, EventArgs.Empty);
     }
 
@@ -134,10 +152,6 @@ public class RenderTexture : IRenderTexture
 
     public void Dispose()
     {
-        this.DepthTexture?.Dispose();
-        this.VeldridTexture?.Dispose();
-        this.PickingTexture?.Dispose();
-        this.Framebuffer?.Dispose();
-        this.PickingFramebuffer?.Dispose();
+        this.DisposeResources();
     }
 }

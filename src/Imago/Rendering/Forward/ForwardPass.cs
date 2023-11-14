@@ -147,15 +147,20 @@ internal class ForwardPass : IDisposable, IPipelineProvider
         this._lightInfoBuffer.Dispose();
     }
 
-    Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant, RenderFlags flags)
+    Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant, RenderFlags flags, TextureSampleCount sampleCount)
     {
         var blendDescription = flags.HasFlag(RenderFlags.Transparent) ? BlendAttachmentDescription.AlphaBlend : BlendAttachmentDescription.OverrideBlend;
         var cullMode = flags.HasFlag(RenderFlags.DoubleSided) ? FaceCullMode.None : FaceCullMode.Back;
         var depthTestEnabled = flags.HasFlag(RenderFlags.DepthTest);
         var depthWriteEnabled = flags.HasFlag(RenderFlags.DepthWrite);
         var fillMode = flags.HasFlag(RenderFlags.Wireframe) ? PolygonFillMode.Wireframe : PolygonFillMode.Solid;
-        var outputDescription = this._renderTexture.OutputDescription;
         var scissorTestEnabled = flags.HasFlag(RenderFlags.ScisorTest);
+
+        var outputDescription = new OutputDescription( // WARNING: This should be changed in RenderTexture if changes
+            new OutputAttachmentDescription(PixelFormat.D32_Float_S8_UInt),
+            new [] { new OutputAttachmentDescription(PixelFormat.R8_G8_B8_A8_UNorm) },
+            sampleCount
+        );
 
         return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
         {

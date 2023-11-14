@@ -30,7 +30,7 @@ public class SpritesPass : IDisposable, IPipelineProvider
         this._spriteBatcher.Dispose();
     }
 
-    Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant, RenderFlags flags)
+    Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant, RenderFlags flags, TextureSampleCount sampleCount)
     {
         var scissorTestEnabled = flags.HasFlag(RenderFlags.ScisorTest);
         return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()

@@ -100,7 +100,7 @@ public class Renderer : IDisposable
     public static GraphicsDeviceOptions GetGraphicsDeviceOptions(bool debug = false)
     {
         return new GraphicsDeviceOptions(
-            debug: debug,
+            debug: true, //debug,
             swapchainDepthFormat: null, //PixelFormat.R16_UNorm,
             syncToVerticalBlank: false,
             resourceBindingModel: ResourceBindingModel.Improved,
@@ -190,6 +190,8 @@ public class Renderer : IDisposable
         this._fence = this._factory.CreateFence(false);
 
         this.Settings.PropertyChanged += this.Settings_PropertyChanged;
+
+        TextureSampleCount supported = this.GraphicsDevice.GetSampleCountLimit(PixelFormat.R8_G8_B8_A8_UNorm, depthFormat: false);
     }
 
     /// <summary>
@@ -245,14 +247,17 @@ public class Renderer : IDisposable
     {
         try
         {
-            this.RenderCore(this._commandList, stage, this.MainRenderTexture);
+            var cl = this._commandList;
+            cl.Begin();
+            this.RenderCore(cl, stage, this.MainRenderTexture);
+            cl.End();
 
             this.GraphicsDevice.WaitForIdle();
             this._fence.Reset();
 
-            this.GraphicsDevice.SubmitCommands(this._commandList, this._fence);
+            this.GraphicsDevice.SubmitCommands(cl, this._fence);
 
-            var cl = this._fullScreenCommandList;
+            cl = this._fullScreenCommandList;
             cl.Begin();
             this._fullScreenPass.Render(cl);
             cl.End();
@@ -279,23 +284,61 @@ public class Renderer : IDisposable
 
 
     /// <summary>
-    /// Renders the scene to the given render texture.
+    /// Renders the scene to the given render texture. If the render texture is multisampled, the result can be resolved to the given texture.
     /// </summary>
     /// <param name="stage">The stage to render.</param>
     /// <param name="renderTexture">The render texture to render to.</param>
-    public void RenderToOffScreenTexture(Stage stage, RenderTexture renderTexture)
+    /// <param name="resolvedTexture">The texture to resolve to. If null, the render texture is not resolved.</param>
+    public void RenderToOffScreenTexture(Stage stage, RenderTexture renderTexture, Texture? resolvedTexture = null)
     {
-        this.RenderCore(this._commandList, stage, renderTexture);
+        var cl = this._commandList;
 
-        this.GraphicsDevice.SubmitCommands(this._commandList, this._fence);
+        cl.Begin();
+
+        this.RenderCore(cl, stage, renderTexture);
+
+        //if (renderTexture.SampleCount != TextureSampleCount.Count1 && resolvedTexture != null)
+        //{
+        //    cl.ResolveTexture(renderTexture.ForwardColorTexture, resolvedTexture!.VeldridTexture);
+        //}
+
+        cl.End();
+
+        this.GraphicsDevice.SubmitCommands(cl);
+    }
+
+    public void ResolveTexture(RenderTexture renderTexture, Texture resolvedTexture)
+    {
+
+        var cl = this._commandList;
+
+        cl.Begin();
+
+        if (renderTexture.SampleCount == TextureSampleCount.Count1)
+        {
+            // Nothing to resolve, just copy the texture.
+            cl.CopyTexture(renderTexture.ForwardColorTexture, resolvedTexture.VeldridTexture);
+        }
+        else
+        {
+            cl.ResolveTexture(renderTexture.ForwardColorTexture, resolvedTexture.VeldridTexture);
+        }
+
+        cl.End();
+
+        this.GraphicsDevice.SubmitCommands(cl);
     }
 
 
     private void RenderCore(CommandList cl, Stage stage, RenderTexture renderTexture)
     {
+        if (stage.MultiSampleCount != renderTexture.SampleCount)
+        {
+            stage.MultiSampleCount = renderTexture.SampleCount; // It's a hack to invalidate the pipeline of all renderables, but whatever.
+        }
+
         stage.PrepareForRender();
 
-        cl.Begin();
         this.UpdateBuffers(cl);
 
         this._shadowPass.Render(cl, stage);
@@ -312,8 +355,6 @@ public class Renderer : IDisposable
         this._spritesPass.Render(cl, stage, renderTexture);
 
         this._imGuiPass.Render(cl, renderTexture);
-
-        cl.End();
     }
 
     private static void ClearRenderTarget(CommandList cl, Scene scene)
