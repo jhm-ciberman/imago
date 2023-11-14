@@ -21,6 +21,5 @@ public enum RenderFlags : short
     PixelPerfactShadows = 1 << 8,
     ScisorTest = 1 << 9,
     ColorWrite = 1 << 10,
-    MultiSample2x = 1 << 11,
-    MultiSample4x = 1 << 12,
+    ShadowCascades = 1 << 11,
 }

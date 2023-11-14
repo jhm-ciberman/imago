@@ -54,11 +54,6 @@ public class Renderer : IDisposable
     public GraphicsBackend BackendType => this.GraphicsDevice.BackendType;
 
     /// <summary>
-    /// Gets the <see cref="RenderSettings"/> used by the renderer.
-    /// </summary>
-    public RenderSettings Settings { get; }
-
-    /// <summary>
     /// Gets the main Viewport.
     /// </summary>
     public Viewport Viewport { get; }
@@ -170,8 +165,6 @@ public class Renderer : IDisposable
         ));
         this.SkeletonResourceLayout.Name = "BonesData Resource Layout";
 
-        this.Settings = new RenderSettings(this);
-
         this._imGuiPass = new ImGuiPass(this, this.MainRenderTexture);
         this._mousePickerPass = new MousePickingPass(this, this.MainRenderTexture);
         this._gizmosPass = new GizmosPass(this, this.MainRenderTexture);
@@ -188,10 +181,6 @@ public class Renderer : IDisposable
         this._fullScreenCommandList = this._factory.CreateCommandList();
 
         this._fence = this._factory.CreateFence(false);
-
-        this.Settings.PropertyChanged += this.Settings_PropertyChanged;
-
-        TextureSampleCount supported = this.GraphicsDevice.GetSampleCountLimit(PixelFormat.R8_G8_B8_A8_UNorm, depthFormat: false);
     }
 
     /// <summary>
@@ -208,15 +197,6 @@ public class Renderer : IDisposable
     public Material MakeMaterial()
     {
         return new Material(this._forwardPass.DefaultShader, this._shadowPass.DefaultShader, this._mousePickerPass.DefaultShader);
-    }
-
-    private void Settings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        // Force recreation of pipeline for all renderables.
-        foreach (var renderable in this._renderables)
-        {
-            renderable.InvalidatePipeline();
-        }
     }
 
     public void DisposeWhenIdle(IDisposable disposable)
@@ -539,6 +519,11 @@ public class Renderer : IDisposable
             foreach (var skeleton in this._skeletons.ToArray())
             {
                 skeleton.Dispose();
+            }
+
+            for (int i = 0; i < this._renderables.Count; i++)
+            {
+                this._renderables[i].Dispose();
             }
 
             // Passes

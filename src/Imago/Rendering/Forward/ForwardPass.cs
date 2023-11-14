@@ -78,7 +78,7 @@ internal class ForwardPass : IDisposable, IPipelineProvider
 
         this._shadowPass.ShadowmapTexture.Resized += this.Shadowmap_Resized;
 
-        RenderFlags supportedForwardFlags = RenderFlags.AlphaTest | RenderFlags.ReceiveShadows | RenderFlags.Fog | RenderFlags.PixelPerfactShadows | RenderFlags.ColorWrite;
+        RenderFlags supportedForwardFlags = RenderFlags.AlphaTest | RenderFlags.ReceiveShadows | RenderFlags.Fog | RenderFlags.PixelPerfactShadows | RenderFlags.ColorWrite | RenderFlags.ShadowCascades;
         var baseVertex = ShaderLoader.Load("base.vert.glsl");
         var baseFragment = ShaderLoader.Load("base.frag.glsl");
         this.DefaultShader = new Shader(renderer, this, baseVertex, baseFragment, new[] { "Surface" }, supportedForwardFlags);
@@ -129,7 +129,7 @@ internal class ForwardPass : IDisposable, IPipelineProvider
         lightInfo.FogColor = env.FogColor;
         lightInfo.FogStart = env.FogStart; // / (camera.FarPlane - camera.NearPlane);
         lightInfo.FogEnd = env.FogEnd; // / (camera.FarPlane - camera.NearPlane);
-        lightInfo.ShadowMapDistances = this._shadowPass.GetShadowCascadeDistances();
+        lightInfo.ShadowMapDistances = GetShadowCascadeDistances(env.MainLight.ShadowMap);
 
         cl.UpdateBuffer(this._camera3DInfoBuffer, 0, ref cameraInfo);
         cl.UpdateBuffer(this._lightInfoBuffer, 0, ref lightInfo);
@@ -137,6 +137,11 @@ internal class ForwardPass : IDisposable, IPipelineProvider
         this._renderBatcher.DrawRenderList(cl, this._resourceSet, stage.OpaqueRenderQueue);
 
         this._renderBatcher.DrawRenderList(cl, this._resourceSet, stage.TransparentRenderQueue);
+    }
+
+    internal static Vector4 GetShadowCascadeDistances(ShadowMap shadowMap)
+    {
+        return new Vector4(shadowMap.SplitDistances[1], shadowMap.SplitDistances[2], shadowMap.SplitDistances[3], shadowMap.SplitDistances[4]);
     }
 
     public void Dispose()

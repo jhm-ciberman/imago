@@ -35,8 +35,6 @@ public class ShadowPass : IDisposable, IPipelineProvider
 
     private readonly ShadowCascade[] _cascades = new ShadowCascade[4];
     private Matrix4x4 _scalingMatrix;
-
-    private readonly float[] _splitDistances = new float[5]; // 4 splits + 1 for far plane
     public Shader DefaultShader { get; }
 
     public ShadowPass(Renderer renderer)
@@ -81,7 +79,7 @@ public class ShadowPass : IDisposable, IPipelineProvider
         var mainLight = scene.Environment.MainLight;
         var shadowMap = mainLight.ShadowMap;
 
-        this.UpdateSplitDistances(camera, shadowMap, out int cascadesCount);
+        int cascadesCount = stage.CascadesCount;
 
         this.UpdateShadowMap(shadowMap, cascadesCount);
 
@@ -90,8 +88,8 @@ public class ShadowPass : IDisposable, IPipelineProvider
             cl.SetFramebuffer(this.ShadowmapTexture.Framebuffers[i]);
             cl.ClearDepthStencil(1f);
 
-            float near = this._splitDistances[i];
-            float far = this._splitDistances[i + 1];
+            float near = shadowMap.SplitDistances[i];
+            float far = shadowMap.SplitDistances[i + 1];
 
             this._cascades[i].UpdateCascadeMatrix(i, camera, mainLight.Direction, near, far, shadowMap);
 
@@ -170,11 +168,6 @@ public class ShadowPass : IDisposable, IPipelineProvider
         return list.ToArray();
     }
 
-    internal Vector4 GetShadowCascadeDistances()
-    {
-        return new Vector4(this._splitDistances[1], this._splitDistances[2], this._splitDistances[3], this._splitDistances[4]);
-    }
-
     private ResourceLayout[] GetResourceLayouts(ShaderVariant shaderVariant)
     {
         var resources = new List<ResourceLayout>
@@ -189,36 +182,5 @@ public class ShadowPass : IDisposable, IPipelineProvider
             resources.Add(this._renderer.SkeletonResourceLayout);
 
         return resources.ToArray();
-    }
-
-    public void UpdateSplitDistances(Camera camera, ShadowMap shadowMap, out int cascadesCount)
-    {
-        // Lerp between uniform and logarithmic split distances.
-        // https://developer.nvidia.com/gpugems/gpugems3/part-ii-light-and-shadows/chapter-10-parallel-split-shadow-maps-programmable-gpus
-
-        float near = camera.NearPlane;
-        float far = camera.FarPlane;
-
-        if (near < 0.01f)
-        {
-            far -= near;
-            near = 0.01f;
-        }
-
-        far = MathF.Min(far, near + shadowMap.MaximumShadowsDistance);
-        far = MathF.Max(far, near + 0.01f);
-
-        cascadesCount = Math.Min(camera.MaxShadowCascades, (int)shadowMap.CascadesCount);
-
-        this._splitDistances[0] = near;
-        this._splitDistances[cascadesCount] = far;
-
-        for (int i = 1; i < cascadesCount; i++)
-        {
-            float t = (float)i / cascadesCount;
-            float uniformDistance = near + (far - near) * t;
-            float logarithmicDistance = near * MathF.Pow(far / near, t);
-            this._splitDistances[i] = MathUtils.Lerp(logarithmicDistance, uniformDistance, shadowMap.SplitLambda);
-        }
     }
 }

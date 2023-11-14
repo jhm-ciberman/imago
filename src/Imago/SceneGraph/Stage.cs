@@ -58,6 +58,8 @@ public class Stage
     private readonly List<Renderable> _dirtyRenderables = new();
     private readonly List<ImmediateRenderable3D> _immediateRenderables = new();
 
+    private bool _invalidateRendererPipelines = false;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="Stage"/> class.
     /// </summary>
@@ -92,8 +94,26 @@ public class Stage
     /// </summary>
     public void PrepareForRender()
     {
-        this.Scene.PrepareForRender();
         this.Scene.RenderImGui();
+
+        var camera = this.Scene.Camera;
+        if (camera == null) return;
+
+        this.Scene.PrepareForRender();
+
+        var shadowMap = this.Scene.Environment.MainLight.ShadowMap;
+        shadowMap.UpdateSplitDistances(camera, out int cascadesCount);
+        this.CascadesCount = cascadesCount;
+
+        if (this._invalidateRendererPipelines)
+        {
+            this._invalidateRendererPipelines = false;
+
+            for (int i = 0; i < this._renderables.Count; i++)
+            {
+                this._renderables[i].InvalidatePipeline();
+            }
+        }
 
         if (this._transformDirtyList.Count > 0)
         {
@@ -121,7 +141,7 @@ public class Stage
         {
             foreach (var renderable in this._dirtyRenderables)
             {
-                renderable.Update(Renderer.Instance);
+                renderable.Update(Renderer.Instance, this);
             }
             this._dirtyRenderables.Clear();
         }
@@ -230,15 +250,59 @@ public class Stage
     public Veldrid.TextureSampleCount MultiSampleCount
     {
         get => this._multiSampleCount;
-        set
-        {
-            if (this._multiSampleCount == value) return;
-            this._multiSampleCount = value;
+        set => this.SetProperty(ref this._multiSampleCount, value);
+    }
 
-            foreach (var renderable in this._renderables)
-            {
-                renderable.InvalidatePipeline();
-            }
-        }
+    private bool _forceWireframe = false;
+
+    /// <summary>
+    /// Gets or sets whether to force wireframe rendering.
+    /// </summary>
+    public bool ForceWireframe
+    {
+        get => this._forceWireframe;
+        set => this.SetProperty(ref this._forceWireframe, value);
+    }
+
+    private bool _enableFog = true;
+
+    /// <summary>
+    /// Gets or sets whether to enable fog.
+    /// </summary>
+    public bool EnableFog
+    {
+        get => this._enableFog;
+        set => this.SetProperty(ref this._enableFog, value);
+    }
+
+    private bool _enablePixelPerfectShadows = true;
+
+    /// <summary>
+    /// Gets or sets whether to enable pixel perfect shadows.
+    /// </summary>
+    public bool EnablePixelPerfectShadows
+    {
+        get => this._enablePixelPerfectShadows;
+        set => this.SetProperty(ref this._enablePixelPerfectShadows, value);
+    }
+
+    private int _cascadesCount = 4;
+
+    /// <summary>
+    /// Gets or sets the number of shadow cascades used for rendering.
+    /// </summary>
+    public int CascadesCount
+    {
+        get => this._cascadesCount;
+        set => this.SetProperty(ref this._cascadesCount, value);
+    }
+
+    private bool SetProperty<T>(ref T field, T value)
+    {
+        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+
+        field = value;
+        this._invalidateRendererPipelines = true;
+        return true;
     }
 }

@@ -50,7 +50,7 @@ public class ShadowMap
         }
     }
 
-    private uint _cascadesCount = 1;
+    private uint _cascadesCount = 4;
 
     /// <summary>
     /// Gets or sets the number of cascades used by the light. The number must be between 1 and 4.
@@ -126,4 +126,40 @@ public class ShadowMap
     /// Gets or set the shadow color.
     /// </summary>
     public ColorF Color { get; set; } = new ColorF(0.0f, 0.0f, 0.0f, .8f);
+
+    /// <summary>
+    /// Gets the split distances used to calculate the cascades in the last frame.
+    /// </summary>
+    public float[] SplitDistances { get; } = new float[5]; // 4 splits + 1 for far plane
+
+    public void UpdateSplitDistances(Camera camera, out int cascadesCount)
+    {
+        // Lerp between uniform and logarithmic split distances.
+        // https://developer.nvidia.com/gpugems/gpugems3/part-ii-light-and-shadows/chapter-10-parallel-split-shadow-maps-programmable-gpus
+
+        float near = camera.NearPlane;
+        float far = camera.FarPlane;
+
+        if (near < 0.01f)
+        {
+            far -= near;
+            near = 0.01f;
+        }
+
+        far = MathF.Min(far, near + this.MaximumShadowsDistance);
+        far = MathF.Max(far, near + 0.01f);
+
+        cascadesCount = Math.Min(camera.MaxShadowCascades, (int)this.CascadesCount);
+
+        this.SplitDistances[0] = near;
+        this.SplitDistances[cascadesCount] = far;
+
+        for (int i = 1; i < cascadesCount; i++)
+        {
+            float t = (float)i / cascadesCount;
+            float uniformDistance = near + (far - near) * t;
+            float logarithmicDistance = near * MathF.Pow(far / near, t);
+            this.SplitDistances[i] = MathUtils.Lerp(logarithmicDistance, uniformDistance, this.SplitLambda);
+        }
+    }
 }

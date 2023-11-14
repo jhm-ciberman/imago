@@ -387,14 +387,15 @@ internal class Renderable : IDisposable
     /// Updates the renderable.
     /// </summary>
     /// <param name="renderer">The renderer.</param>
-    public void Update(Renderer renderer)
+    /// <param name="stage">The stage.</param>
+    public void Update(Renderer renderer, Stage stage)
     {
         if (this._pipelineDirty)
         {
             this._pipelineDirty = false;
             this.RecomputeSortKey();
             this.RecomputeRenderQueue();
-            this.RecomputePipeline(renderer);
+            this.RecomputePipeline(renderer, stage);
         }
     }
 
@@ -515,7 +516,7 @@ internal class Renderable : IDisposable
         this.RenderQueues = flags;
     }
 
-    private void RecomputePipeline(Renderer renderer)
+    private void RecomputePipeline(Renderer renderer, Stage stage)
     {
         if (this._material == null || this._mesh == null || this.RenderQueues == RenderQueues.None)
         {
@@ -525,21 +526,22 @@ internal class Renderable : IDisposable
             return;
         }
 
-        this.ForwardPipeline = this.GetForwardPipeline(this._material, renderer.Settings);
+        this.ForwardPipeline = this.GetForwardPipeline(this._material, stage);
         this.ShadowMapPipeline = this.GetShadowmapPipeline(this._material);
         this.PickingPipeline = this.GetPickingPipeline(this._material);
     }
 
-    private Veldrid.Pipeline? GetForwardPipeline(Material material, RenderSettings settings)
+    private Veldrid.Pipeline? GetForwardPipeline(Material material, Stage stage)
     {
         bool isVisible = (this.RenderQueues & RenderQueues.OpaqueOrTransparent) != 0;
         if (!isVisible) return null;
 
         RenderFlags flags = RenderFlags.None;
-        if (settings.ForceWireframe) flags |= RenderFlags.Wireframe;
+        if (stage.ForceWireframe) flags |= RenderFlags.Wireframe;
         if (this.RenderQueues.HasFlag(RenderQueues.Transparent)) flags |= RenderFlags.Transparent;
-        if (settings.EnableFog) flags |= RenderFlags.Fog;
-        if (settings.EnablePixelPerfectShadows) flags |= RenderFlags.PixelPerfactShadows;
+        if (stage.EnableFog) flags |= RenderFlags.Fog;
+        if (stage.EnablePixelPerfectShadows) flags |= RenderFlags.PixelPerfactShadows;
+        if (stage.CascadesCount > 1) flags |= RenderFlags.ShadowCascades;
 
         return material.ForwardShader.GetPipeline(this._mesh!.VertexFormat, material.RenderFlags | flags, this.Stage!.MultiSampleCount);
     }
