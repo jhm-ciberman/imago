@@ -182,7 +182,6 @@ public class Stage
     /// <param name="renderable">The renderable.</param>
     internal void NotifyRenderablePipelineDirty(Renderable renderable)
     {
-        Console.WriteLine("Pipeline dirty");
         this._dirtyRenderables.Add(renderable);
     }
 
