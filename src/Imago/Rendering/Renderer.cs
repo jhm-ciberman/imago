@@ -225,42 +225,28 @@ public class Renderer : IDisposable
     /// <param name="stage">The stage to render.</param>
     public void Render(Stage stage)
     {
-        try
+        var cl = this._commandList;
+        cl.Begin();
+        this.RenderCore(cl, stage, this.MainRenderTexture);
+        cl.End();
+
+        this.GraphicsDevice.WaitForIdle();
+        this._fence.Reset();
+
+        this.GraphicsDevice.SubmitCommands(cl, this._fence);
+
+        cl = this._fullScreenCommandList;
+        cl.Begin();
+        this._fullScreenPass.Render(cl);
+        cl.End();
+
+        this.GraphicsDevice.SubmitCommands(cl, null);
+
+        this._disposeCollector.DisposeAll();
+
+        if (this.GraphicsDevice.MainSwapchain != null)
         {
-            //this.GraphicsDevice.WaitForIdle();
-            var cl = this._commandList;
-            cl.Begin();
-            this.RenderCore(cl, stage, this.MainRenderTexture);
-            cl.End();
-
-            this.GraphicsDevice.WaitForIdle();
-            this._fence.Reset();
-
-            this.GraphicsDevice.SubmitCommands(cl, this._fence);
-
-
-            cl = this._fullScreenCommandList;
-            cl.Begin();
-            this._fullScreenPass.Render(cl);
-            cl.End();
-
-            this.GraphicsDevice.SubmitCommands(cl, null);
-
-
-            this._disposeCollector.DisposeAll();
-
-            if (this.GraphicsDevice.MainSwapchain != null)
-            {
-                this.GraphicsDevice.SwapBuffers();
-            }
-        }
-        catch (VeldridException e)
-        {
-            Console.WriteLine(e.Message);
-
-#if DEBUG
-            //throw;
-#endif
+            this.GraphicsDevice.SwapBuffers();
         }
     }
 
