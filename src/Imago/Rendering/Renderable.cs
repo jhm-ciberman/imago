@@ -62,6 +62,11 @@ internal class Renderable : IDisposable
     private InstanceData _instanceData = new InstanceData();
 
     /// <summary>
+    /// Gets a value indicating whether this renderable is disposed.
+    /// </summary>
+    public bool IsDisposed => !this._transformDataBlock.IsValid; // We don't store a disposed flag, just check if the data block is valid.
+
+    /// <summary>
     /// Gets the center position of this renderable.
     /// </summary>
     public Vector3 CenterPosition { get; private set; }
@@ -377,6 +382,8 @@ internal class Renderable : IDisposable
 
     protected bool SetInstanceData<T>(ref T backingField, T value) where T : unmanaged
     {
+        ObjectDisposedException.ThrowIf(this.IsDisposed, this);
+
         if (backingField.Equals(value)) return false;
         backingField = value;
         this._instanceDataBlock.Write(ref this._instanceData);
