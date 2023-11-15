@@ -227,6 +227,7 @@ public class Renderer : IDisposable
     {
         try
         {
+            //this.GraphicsDevice.WaitForIdle();
             var cl = this._commandList;
             cl.Begin();
             this.RenderCore(cl, stage, this.MainRenderTexture);
@@ -236,6 +237,7 @@ public class Renderer : IDisposable
             this._fence.Reset();
 
             this.GraphicsDevice.SubmitCommands(cl, this._fence);
+
 
             cl = this._fullScreenCommandList;
             cl.Begin();
@@ -283,6 +285,8 @@ public class Renderer : IDisposable
         //}
 
         cl.End();
+
+        this.GraphicsDevice.WaitForIdle();
 
         this.GraphicsDevice.SubmitCommands(cl);
     }

@@ -109,7 +109,7 @@ public class DirectTexture : ITexture
 
     public void Resize(uint width, uint height)
     {
-        this._gd.DisposeWhenIdle(this.VeldridTexture);
+        Renderer.Instance.DisposeWhenIdle(this.VeldridTexture);
         this.VeldridTexture = this._gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(
             width, height, this.MipLevels, 1,
             PixelFormat.R8_G8_B8_A8_UNorm_SRgb,
