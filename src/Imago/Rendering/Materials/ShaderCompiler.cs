@@ -19,10 +19,11 @@ public static class ShaderCompiler
 
     private static bool IsDebug(GraphicsBackend backendType)
     {
+        return true; // I don't know wh but if I deactivate debug mode, the Vulkan validation layer complains about an invalid shader bytecode
 #if DEBUG
-        return true;
+        //return true;
 #else
-        return backendType == GraphicsBackend.OpenGL || backendType == GraphicsBackend.OpenGLES;
+        //return backendType == GraphicsBackend.OpenGL || backendType == GraphicsBackend.OpenGLES;
 #endif
     }
 
