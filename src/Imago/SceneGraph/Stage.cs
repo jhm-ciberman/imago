@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using Imago.Rendering;
-using Imago.Rendering.Forward;
+using Imago.Graphics;
+using Imago.Graphics.Forward;
 using Imago.SceneGraph.Nodes;
 
 namespace Imago.SceneGraph;

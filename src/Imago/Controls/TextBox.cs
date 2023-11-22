@@ -2,7 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Numerics;
 using Imago.Input;
-using Imago.Rendering.Sprites;
+using Imago.Graphics.Sprites;
 using Support;
 using Veldrid;
 

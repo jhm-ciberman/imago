@@ -1,6 +1,6 @@
 using System;
 using System.Numerics;
-using Imago.Rendering.Materials;
+using Imago.Graphics.Materials;
 using Imago.SceneGraph.Nodes;
 using Imago.Support;
 using Imago.TexturePacking;

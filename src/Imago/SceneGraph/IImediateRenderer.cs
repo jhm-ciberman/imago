@@ -1,6 +1,6 @@
 using System.Numerics;
-using Imago.Rendering.Materials;
-using Imago.Rendering.Textures;
+using Imago.Graphics.Materials;
+using Imago.Graphics.Textures;
 using Support;
 
 namespace Imago.SceneGraph;

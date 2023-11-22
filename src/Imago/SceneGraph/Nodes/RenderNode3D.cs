@@ -1,8 +1,8 @@
 using System;
 using System.Numerics;
-using Imago.Rendering;
-using Imago.Rendering.Materials;
-using Imago.Rendering.Meshes;
+using Imago.Graphics;
+using Imago.Graphics.Materials;
+using Imago.Graphics.Meshes;
 using Support;
 
 namespace Imago.SceneGraph.Nodes;

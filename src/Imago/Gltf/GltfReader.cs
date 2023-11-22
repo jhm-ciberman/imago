@@ -1,5 +1,5 @@
 using System;
-using Imago.Rendering.Meshes;
+using Imago.Graphics.Meshes;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;

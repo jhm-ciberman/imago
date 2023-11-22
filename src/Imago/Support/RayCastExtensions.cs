@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Numerics;
-using Imago.Rendering.Meshes;
+using Imago.Graphics.Meshes;
 using Veldrid.Utilities;
 
 namespace Imago.Support;

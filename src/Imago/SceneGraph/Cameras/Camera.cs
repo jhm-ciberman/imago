@@ -1,6 +1,6 @@
 using System;
 using System.Numerics;
-using Imago.Rendering;
+using Imago.Graphics;
 using Support;
 using Veldrid.Utilities;
 

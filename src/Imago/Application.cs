@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Runtime;
 using Imago.Input;
-using Imago.Rendering;
+using Imago.Graphics;
 using Imago.SceneGraph;
 using Veldrid;
 using Veldrid.Sdl2;

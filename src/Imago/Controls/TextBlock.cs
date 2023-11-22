@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
-using Imago.Rendering;
-using Imago.Rendering.Sprites;
+using Imago.Graphics;
+using Imago.Graphics.Sprites;
 using Support;
 
 namespace Imago.Controls;

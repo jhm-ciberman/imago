@@ -1,6 +1,6 @@
 using System.Numerics;
-using Imago.Rendering.Materials;
-using Imago.Rendering.Meshes;
+using Imago.Graphics.Materials;
+using Imago.Graphics.Meshes;
 
 namespace Imago.SceneGraph.Nodes;
 

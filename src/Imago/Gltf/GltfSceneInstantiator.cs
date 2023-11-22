@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Imago.Rendering;
-using Imago.Rendering.Materials;
-using Imago.Rendering.Meshes;
+using Imago.Graphics;
+using Imago.Graphics.Materials;
+using Imago.Graphics.Meshes;
 using Imago.SceneGraph;
 using Imago.SceneGraph.Nodes;
 

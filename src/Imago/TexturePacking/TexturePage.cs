@@ -4,7 +4,7 @@ using System.Numerics;
 using Support;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using Imago.Rendering.Textures;
+using Imago.Graphics.Textures;
 
 namespace Imago.TexturePacking;
 

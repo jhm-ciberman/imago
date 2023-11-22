@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Imago.Animations;
-using Imago.Rendering.Meshes;
+using Imago.Graphics.Meshes;
 
 namespace Imago.Gltf;
 
