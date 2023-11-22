@@ -1,3 +1,4 @@
+using Imago.SceneGraph.Lighting;
 using Support;
 
 namespace Imago.SceneGraph;

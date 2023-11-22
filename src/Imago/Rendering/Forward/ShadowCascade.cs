@@ -1,7 +1,7 @@
 using System;
 using System.Numerics;
-using Imago.SceneGraph;
 using Imago.SceneGraph.Cameras;
+using Imago.SceneGraph.Lighting;
 using Veldrid.Utilities;
 
 namespace Imago.Rendering.Forward;

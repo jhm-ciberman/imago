@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using Imago.Rendering.Materials;
 using Imago.Rendering.Meshes;
 using Imago.SceneGraph;
+using Imago.SceneGraph.Lighting;
 using Veldrid;
 using Veldrid.Utilities;
 using Shader = Imago.Rendering.Materials.Shader;

@@ -6,6 +6,7 @@ using Imago.Rendering.Materials;
 using Imago.Rendering.Meshes;
 using Imago.Rendering.Textures;
 using Imago.SceneGraph;
+using Imago.SceneGraph.Lighting;
 using Support;
 using Veldrid;
 using Veldrid.Utilities;

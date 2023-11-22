@@ -2,7 +2,7 @@ using System.Numerics;
 using Imago.Rendering.Materials;
 using Imago.Rendering.Meshes;
 
-namespace Imago.SceneGraph;
+namespace Imago.SceneGraph.Nodes;
 
 public class MeshRenderInfo
 {

@@ -2,7 +2,7 @@ using System;
 using Imago.SceneGraph.Cameras;
 using Support;
 
-namespace Imago.SceneGraph;
+namespace Imago.SceneGraph.Lighting;
 
 public class ShadowMap
 {

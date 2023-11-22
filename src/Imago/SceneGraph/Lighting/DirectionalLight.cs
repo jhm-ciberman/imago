@@ -2,7 +2,7 @@ using System;
 using System.Numerics;
 using Support;
 
-namespace Imago.SceneGraph;
+namespace Imago.SceneGraph.Lighting;
 
 public class DirectionalLight
 {
