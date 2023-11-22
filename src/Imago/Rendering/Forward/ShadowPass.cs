@@ -5,14 +5,13 @@ using System.Runtime.InteropServices;
 using Imago.Rendering.Materials;
 using Imago.Rendering.Meshes;
 using Imago.SceneGraph;
-using Support;
 using Veldrid;
 using Veldrid.Utilities;
 using Shader = Imago.Rendering.Materials.Shader;
 
 namespace Imago.Rendering.Forward;
 
-public class ShadowPass : IDisposable, IPipelineProvider
+internal class ShadowPass : IDisposable, IPipelineProvider
 {
     [StructLayout(LayoutKind.Sequential)]
     private struct ShadowMapDataBuffer
