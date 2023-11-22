@@ -1,13 +1,11 @@
 using System;
 using System.Numerics;
-using System.Runtime.InteropServices;
 using Imago.Rendering;
 using Imago.Rendering.Materials;
 using Imago.Rendering.Meshes;
 using Support;
-using Veldrid.Utilities;
 
-namespace Imago.SceneGraph;
+namespace Imago.SceneGraph.Nodes;
 
 /// <summary>
 /// A node capable of rendering a mesh with a material.
@@ -165,9 +163,7 @@ public class RenderNode3D : Node3D, IPickable
     internal override void DetachFromStage()
     {
         if (this.Stage is null)
-        {
             throw new InvalidOperationException("Cannot detach from scene if not attached to one.");
-        }
 
         this._renderable.Visible = false;
         this._renderable.Stage = null;
@@ -182,16 +178,12 @@ public class RenderNode3D : Node3D, IPickable
         if (this._isPickable)
         {
             if (this._renderable.PickingId == 0)
-            {
                 this.Stage.Picking.RegisterPickable(this);
-            }
         }
         else
         {
             if (this._renderable.PickingId != 0)
-            {
                 this.Stage.Picking.UnregisterPickable(this);
-            }
         }
     }
 

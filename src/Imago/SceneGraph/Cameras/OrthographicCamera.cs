@@ -1,8 +1,7 @@
 using System;
 using System.Numerics;
-using Veldrid.Utilities;
 
-namespace Imago.SceneGraph;
+namespace Imago.SceneGraph.Cameras;
 
 public class OrthographicCamera : Camera
 {
@@ -22,9 +21,7 @@ public class OrthographicCamera : Camera
         set
         {
             if (value < 0)
-            {
                 throw new ArgumentOutOfRangeException(nameof(value), "Width must be greater than 0.");
-            }
 
             if (this._width != value)
             {

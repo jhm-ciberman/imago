@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using Imago.Rendering.Materials;
 using Imago.Rendering.Meshes;
-using Imago.SceneGraph;
+using Imago.SceneGraph.Nodes;
 using Imago.SceneGraph.Prefabs;
 
 namespace Imago.Gltf;

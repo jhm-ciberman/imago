@@ -4,6 +4,7 @@ using Imago.Rendering;
 using Imago.Rendering.Materials;
 using Imago.Rendering.Meshes;
 using Imago.SceneGraph;
+using Imago.SceneGraph.Nodes;
 
 namespace Imago.Gltf;
 

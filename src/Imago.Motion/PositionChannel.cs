@@ -1,5 +1,5 @@
 using System.Numerics;
-using Imago.SceneGraph;
+using Imago.SceneGraph.Nodes;
 
 namespace Imago.Motion;
 

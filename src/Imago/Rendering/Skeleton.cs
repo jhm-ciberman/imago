@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Imago.Rendering.Forward;
-using Imago.SceneGraph;
+using Imago.SceneGraph.Nodes;
 
 namespace Imago.Rendering;
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Imago.Input;
+using Imago.SceneGraph.Nodes;
 using Imago.Support;
 
 namespace Imago.SceneGraph;

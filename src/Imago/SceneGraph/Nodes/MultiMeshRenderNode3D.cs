@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Imago.SceneGraph;
+namespace Imago.SceneGraph.Nodes;
 
 
 public class MultiMeshRenderNode3D : Node3D

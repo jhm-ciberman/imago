@@ -1,3 +1,5 @@
+using Imago.SceneGraph.Nodes;
+
 namespace Imago.SceneGraph.Prefabs;
 
 /// <summary>

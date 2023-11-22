@@ -1,4 +1,5 @@
 using Imago.SceneGraph;
+using Imago.SceneGraph.Nodes;
 using Support;
 
 namespace Imago.Support;

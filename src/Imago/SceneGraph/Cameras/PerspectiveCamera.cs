@@ -1,12 +1,12 @@
 using System;
 using System.Numerics;
 
-namespace Imago.SceneGraph;
+namespace Imago.SceneGraph.Cameras;
 
 public class PerspectiveCamera : Camera
 {
     private Matrix4x4 _projectionMatrix;
-    private float _fieldOfView = 60 * System.MathF.PI / 180f;
+    private float _fieldOfView = 60 * MathF.PI / 180f;
 
     public PerspectiveCamera(Viewport? viewport = null) : base(viewport)
     {
@@ -21,14 +21,10 @@ public class PerspectiveCamera : Camera
         set
         {
             if (value < 0)
-            {
                 throw new ArgumentOutOfRangeException(nameof(value), "Field of view must be greater than 0.");
-            }
 
             if (value > MathF.PI)
-            {
                 throw new ArgumentOutOfRangeException(nameof(value), "Field of view must be less than 2 pi radians.");
-            }
 
             if (this._fieldOfView != value)
             {

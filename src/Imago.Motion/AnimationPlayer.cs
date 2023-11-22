@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Imago.SceneGraph;
+using Imago.SceneGraph.Nodes;
 
 namespace Imago.Motion;
 

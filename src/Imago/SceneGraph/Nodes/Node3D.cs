@@ -4,7 +4,7 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using Imago.Support;
 
-namespace Imago.SceneGraph;
+namespace Imago.SceneGraph.Nodes;
 
 public class Node3D : IDisposable, IFormattable
 {
@@ -181,7 +181,7 @@ public class Node3D : IDisposable, IFormattable
     /// </summary>
     public void UpdateTransform()
     {
-        Matrix4x4 mat = (this.Parent == null) ? Matrix4x4.Identity : this.Parent.WorldMatrix;
+        Matrix4x4 mat = this.Parent == null ? Matrix4x4.Identity : this.Parent.WorldMatrix;
         this.UpdateTransform(ref mat);
     }
 
@@ -193,9 +193,7 @@ public class Node3D : IDisposable, IFormattable
         get
         {
             if (this.WorldTransformIsDirty)
-            {
                 this.UpdateTransform();
-            }
             return ref this._worldMatrix;
         }
     }
@@ -234,9 +232,7 @@ public class Node3D : IDisposable, IFormattable
 
         // If the current node has a stage, add the node to the stage
         if (this.Stage != null)
-        {
             node.AttachToStage(this.Stage);
-        }
     }
 
     /// <summary>
@@ -253,14 +249,10 @@ public class Node3D : IDisposable, IFormattable
         node.Parent = null;
 
         if (node.Stage != null)
-        {
             node.DetachFromStage();
-        }
 
         if (dispose)
-        {
             node.Dispose();
-        }
     }
 
     /// <summary>
@@ -280,9 +272,7 @@ public class Node3D : IDisposable, IFormattable
     internal virtual void AttachToStage(Stage stage)
     {
         if (this.Stage != null)
-        {
             throw new InvalidOperationException("Cannot attach to stage if already attached to one. Please detach first.");
-        }
 
         this.Stage = stage;
         this.Stage.NotifyTransformDirty(this);
@@ -349,9 +339,7 @@ public class Node3D : IDisposable, IFormattable
     public string ToString(string? format = null, IFormatProvider? formatProvider = null)
     {
         if (string.IsNullOrEmpty(format))
-        {
             return this.Name;
-        }
 
         var sb = new System.Text.StringBuilder();
 

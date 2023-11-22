@@ -4,7 +4,7 @@ using Imago.Rendering;
 using Support;
 using Veldrid.Utilities;
 
-namespace Imago.SceneGraph;
+namespace Imago.SceneGraph.Cameras;
 
 public abstract class Camera
 {

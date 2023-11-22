@@ -1,4 +1,5 @@
 using System.Numerics;
+using Imago.SceneGraph.Nodes;
 
 namespace Imago.SceneGraph.Prefabs;
 
