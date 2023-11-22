@@ -1,8 +1,7 @@
 using System.Numerics;
 using Imago.Rendering.Materials;
-using Imago.SceneGraph;
 
-namespace Imago.Prefabs;
+namespace Imago.SceneGraph.Prefabs;
 
 public static class IInstantiableExtensions
 {

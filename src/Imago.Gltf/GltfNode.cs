@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using Imago.Prefabs;
 using Imago.Rendering.Materials;
 using Imago.Rendering.Meshes;
 using Imago.SceneGraph;
+using Imago.SceneGraph.Prefabs;
 
 namespace Imago.Gltf;
 

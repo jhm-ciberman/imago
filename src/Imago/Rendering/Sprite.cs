@@ -5,7 +5,7 @@ using Imago.Rendering.Textures;
 using Imago.TexturePacking;
 using Support;
 
-namespace Imago;
+namespace Imago.Rendering;
 
 /// <summary>
 /// A sprite is a container for one or more PackedTextures. The sprite can be animated.

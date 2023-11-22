@@ -2,7 +2,7 @@ using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
 
-namespace Imago.Support;
+namespace Imago.Numerics;
 
 /// <summary>
 /// A 4-component vector of unsigned shorts.

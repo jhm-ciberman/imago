@@ -1,6 +1,6 @@
 using System;
 using System.Numerics;
-using Imago.Support;
+using Imago.Numerics;
 using static glTFLoader.Schema.Accessor;
 
 namespace Imago.Gltf;
