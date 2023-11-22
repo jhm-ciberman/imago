@@ -1,5 +1,6 @@
 using System;
 using System.Numerics;
+using Imago.Graphics.Rendering;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using Veldrid;

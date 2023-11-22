@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Imago.Graphics.Meshes;
+using Imago.Graphics.Rendering;
 using Veldrid;
 
 namespace Imago.Graphics.Materials;

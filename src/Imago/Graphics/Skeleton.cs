@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using Imago.Graphics.Buffers;
+using Imago.Graphics.Rendering;
 using Imago.SceneGraph.Nodes;
 
 namespace Imago.Graphics;

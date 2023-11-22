@@ -2,7 +2,7 @@ using System;
 using Imago.Graphics.Textures;
 using Veldrid;
 
-namespace Imago.Graphics.Forward;
+namespace Imago.Graphics.Rendering;
 
 public class ShadowMapTexture : ITexture, IDisposable
 {

@@ -4,7 +4,7 @@ using Imago.Graphics.Textures;
 using Veldrid;
 using Shader = Imago.Graphics.Materials.Shader;
 
-namespace Imago.Graphics;
+namespace Imago.Graphics.Rendering;
 
 /// <summary>
 /// A cache for resource sets used in rendering. This class provides a way to reuse resource sets
@@ -38,9 +38,7 @@ internal class ResourceSetCache : IDisposable
     {
         var key = new Key(texture, shader);
         if (this._cachedResourceSets.TryGetValue(key, out var resourceSet))
-        {
             return resourceSet;
-        }
 
         resourceSet = this._factory.CreateResourceSet(new ResourceSetDescription(
             shader.MaterialResourceLayout, texture.VeldridTexture, texture.VeldridSampler));

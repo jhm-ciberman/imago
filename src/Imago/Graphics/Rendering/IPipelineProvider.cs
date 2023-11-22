@@ -1,7 +1,7 @@
 using Imago.Graphics.Materials;
 using Veldrid;
 
-namespace Imago.Graphics;
+namespace Imago.Graphics.Rendering;
 
 public interface IPipelineProvider
 {

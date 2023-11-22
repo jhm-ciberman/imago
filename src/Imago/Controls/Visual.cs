@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using Imago.Graphics.Sprites;
+using Imago.Graphics.Rendering;
 using Support;
 using Support.ComponentModel;
 

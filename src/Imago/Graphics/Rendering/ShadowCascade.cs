@@ -4,7 +4,7 @@ using Imago.SceneGraph.Cameras;
 using Imago.SceneGraph.Lighting;
 using Veldrid.Utilities;
 
-namespace Imago.Graphics.Forward;
+namespace Imago.Graphics.Rendering;
 
 internal class ShadowCascade
 {

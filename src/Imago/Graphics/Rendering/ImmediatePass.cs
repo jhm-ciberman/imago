@@ -11,7 +11,7 @@ using Veldrid;
 using Shader = Imago.Graphics.Materials.Shader;
 using Texture = Imago.Graphics.Textures.Texture;
 
-namespace Imago.Graphics.Passes;
+namespace Imago.Graphics.Rendering;
 
 /// <summary>
 /// This class is used to batch draw calls together in immediate mode.

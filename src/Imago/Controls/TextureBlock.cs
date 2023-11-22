@@ -1,6 +1,6 @@
 using System.Numerics;
 using Imago.Graphics.Materials;
-using Imago.Graphics.Sprites;
+using Imago.Graphics.Rendering;
 using Imago.Graphics.Textures;
 
 namespace Imago.Controls;

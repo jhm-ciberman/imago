@@ -2,14 +2,12 @@ using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using Imago.Graphics.Buffers;
-using Imago.Graphics.Forward;
 using Imago.Graphics.Materials;
 using Imago.Graphics.Meshes;
 using Imago.SceneGraph;
 using Veldrid.Utilities;
 
-namespace Imago.Graphics;
+namespace Imago.Graphics.Rendering;
 
 public struct OffsetVertexData // It's 16 bytes only!
 {
@@ -375,9 +373,7 @@ internal class Renderable : IDisposable
         set
         {
             if (this.SetInstanceData(ref this._instanceData.AlbedoColor.W, value))
-            {
                 this.Transparent = value < 1.0f;
-            }
         }
     }
 
@@ -418,11 +414,11 @@ internal class Renderable : IDisposable
         ulong skekeletonBufferHash = (ulong) (this.SkeletonResourceSet?.GetHashCode() ?? 0 & 0xFF);
 
         // The sort key is a 64-bit number that is used to sort renderables.
-        this.SortKey = (materialHash << 56)  // 8 bits (max: 255)
-                | (transformBufferHash << 48)  // 8 bits (max: 255)
-                | (instanceBufferHash << 40)  // 8 bits (max: 255)
-                | (skekeletonBufferHash << 36)  // 4 bits (max: 15)
-                | (meshHash << 24); // 12 bits (max: 4095)
+        this.SortKey = materialHash << 56  // 8 bits (max: 255)
+                | transformBufferHash << 48  // 8 bits (max: 255)
+                | instanceBufferHash << 40  // 8 bits (max: 255)
+                | skekeletonBufferHash << 36  // 4 bits (max: 15)
+                | meshHash << 24; // 12 bits (max: 4095)
 
         // This key is used to fast check if two instances can be batched together. (They must have the same hash)
         // It could happen that the hash is not unique, but it is extremely unlikely that two instances that are
@@ -490,7 +486,7 @@ internal class Renderable : IDisposable
     {
         float dist = Vector3.DistanceSquared(this.CenterPosition, cameraPosition);
         uint cameraDistance = Math.Min(uint.MaxValue, (uint) (dist * 1000f));
-        return this.SortKey | (cameraDistance & 0xFFFFFF); // 24 bits
+        return this.SortKey | cameraDistance & 0xFFFFFF; // 24 bits
     }
 
     private void RecomputeRenderQueue()
@@ -506,20 +502,14 @@ internal class Renderable : IDisposable
         if (this.Visible)
         {
             if (this.ShadowCastingMode != ShadowCasting.OnlyShadows)
-            {
                 flags |= this.Material.Transparent || this._transparent ? RenderQueues.Transparent : RenderQueues.Opaque;
-            }
 
             if (this.ShadowCastingMode != ShadowCasting.NoShadows)
-            {
                 flags |= RenderQueues.ShadowCaster;
-            }
         }
 
         if (this.PickingId != 0)
-        {
             flags |= RenderQueues.Picking;
-        }
 
         this.RenderQueues = flags;
     }

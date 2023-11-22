@@ -1,11 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using Imago.Graphics.Forward;
 using Imago.Graphics.Materials;
-using Imago.Graphics.Particles;
-using Imago.Graphics.Passes;
-using Imago.Graphics.Sprites;
 using Imago.Graphics.Textures;
 using Imago.SceneGraph;
 using Imago.Support;
@@ -16,9 +11,8 @@ using Veldrid.StartupUtilities;
 using Veldrid.Utilities;
 using Viewport = Imago.SceneGraph.Viewport;
 using Texture = Imago.Graphics.Textures.Texture;
-using Imago.Graphics.Buffers;
 
-namespace Imago.Graphics;
+namespace Imago.Graphics.Rendering;
 
 public class Renderer : IDisposable
 {
@@ -133,9 +127,7 @@ public class Renderer : IDisposable
     public Renderer(GraphicsDevice gd, Swapchain? swapchain = null)
     {
         if (Instance != null)
-        {
             throw new InvalidOperationException("Only one instance of Renderer can be created.");
-        }
 
         Instance = this;
 
@@ -246,9 +238,7 @@ public class Renderer : IDisposable
         this._disposeCollector.DisposeAll();
 
         if (this.GraphicsDevice.MainSwapchain != null)
-        {
             this.GraphicsDevice.SwapBuffers();
-        }
     }
 
 
@@ -286,10 +276,8 @@ public class Renderer : IDisposable
         cl.Begin();
 
         if (renderTexture.SampleCount == TextureSampleCount.Count1)
-        {
             // Nothing to resolve, just copy the texture.
             cl.CopyTexture(renderTexture.ForwardColorTexture, resolvedTexture.VeldridTexture);
-        }
         else
         {
             cl.ResolveTexture(renderTexture.ForwardColorTexture, resolvedTexture.VeldridTexture);
@@ -304,9 +292,7 @@ public class Renderer : IDisposable
     private void RenderCore(CommandList cl, Stage stage, RenderTexture renderTexture)
     {
         if (stage.MultiSampleCount != renderTexture.SampleCount)
-        {
             stage.MultiSampleCount = renderTexture.SampleCount; // It's a hack to invalidate the pipeline of all renderables, but whatever.
-        }
 
         stage.PrepareForRender();
 
@@ -372,9 +358,7 @@ public class Renderer : IDisposable
         {
             var buffer = this._transformDataBuffers[i];
             if (!buffer.IsFull)
-            {
                 return buffer.RequestBlock();
-            }
         }
 
         var newBuffer = new DataBuffer(this.GraphicsDevice, MIN_BUFFER_BLOCKS, 64, this.TransformResourceLayout);
@@ -389,9 +373,7 @@ public class Renderer : IDisposable
         {
             var buffer = this._instanceDataBuffers[i];
             if (buffer.BlockSize == instanceDataBlockSize && !buffer.IsFull)
-            {
                 return buffer.RequestBlock();
-            }
         }
 
         var newBuffer = new DataBuffer(this.GraphicsDevice, MIN_BUFFER_BLOCKS, instanceDataBlockSize, this.InstanceResourceLayout);
@@ -416,9 +398,7 @@ public class Renderer : IDisposable
         {
             var buffer = this._skeletonDataBuffers[i];
             if (!buffer.IsFull)
-            {
                 return buffer.RequestBlock();
-            }
         }
 
         var newBuffer = new DataBuffer(this.GraphicsDevice, MIN_BUFFER_BLOCKS / Skeleton.MAX_NUMBER_OF_BONES, Skeleton.MAX_NUMBER_OF_BONES * 64, this.SkeletonResourceLayout);

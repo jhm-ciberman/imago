@@ -5,11 +5,12 @@ using System.Runtime.InteropServices;
 using Imago.Graphics.Materials;
 using Imago.Graphics.Textures;
 using Imago.SceneGraph;
+using Support;
 using Veldrid;
 
-namespace Imago.Graphics.Particles;
+namespace Imago.Graphics.Rendering;
 
-public class ParticlesPass : IDisposable
+internal class ParticlesPass : IDisposable
 {
     private const int PARTICLES_PER_BATCH = 1000;
 
@@ -36,6 +37,19 @@ public class ParticlesPass : IDisposable
         private readonly float _padding;
         public Vector3 CameraUp;
         private readonly float _padding2;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct ParticleRenderData
+    {
+        public Vector4 PositionSize;
+        public Color Color;
+
+        public ParticleRenderData(Vector3 position, float size, Color color)
+        {
+            this.PositionSize = new Vector4(position, size);
+            this.Color = color;
+        }
     }
 
     private ITexture? _currentTexture = null;

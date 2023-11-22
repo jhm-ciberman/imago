@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using Imago.Graphics.Forward;
 using Imago.Graphics.Materials;
 using Imago.Graphics.Meshes;
 using Imago.Graphics.Textures;
@@ -10,7 +9,7 @@ using Imago.SceneGraph;
 using Veldrid;
 using Veldrid.Utilities;
 
-namespace Imago.Graphics.Passes;
+namespace Imago.Graphics.Rendering;
 
 public class MousePickingPass : IDisposable, IPipelineProvider
 {

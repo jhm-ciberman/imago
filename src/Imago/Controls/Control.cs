@@ -2,9 +2,9 @@ using System;
 using System.Numerics;
 using Imago.Controls.Drawing;
 using Imago.Input;
-using Imago.Graphics.Sprites;
 using Support;
 using Veldrid;
+using Imago.Graphics.Rendering;
 
 namespace Imago.Controls;
 

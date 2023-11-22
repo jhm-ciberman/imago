@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
 using Imago.Graphics;
-using Imago.Graphics.Sprites;
+using Imago.Graphics.Rendering;
 using Support;
 
 namespace Imago.Controls;

@@ -1,13 +1,13 @@
 using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using Imago.Graphics.Passes;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using Color = Support.Color;
 using Veldrid;
 using Vector2Int = Support.Vector2Int;
 using Texture = Imago.Graphics.Textures.Texture;
+using Imago.Graphics.Rendering;
 
 namespace Imago.Graphics.Textures;
 

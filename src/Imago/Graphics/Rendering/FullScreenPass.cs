@@ -4,7 +4,7 @@ using Imago.Graphics.Materials;
 using Imago.Graphics.Textures;
 using Veldrid;
 
-namespace Imago.Graphics.Passes;
+namespace Imago.Graphics.Rendering;
 
 internal class FullScreenPass : IDisposable
 {

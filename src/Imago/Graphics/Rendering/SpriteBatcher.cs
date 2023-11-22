@@ -12,7 +12,7 @@ using Veldrid;
 using Shader = Imago.Graphics.Materials.Shader;
 using Texture = Imago.Graphics.Textures.Texture;
 
-namespace Imago.Graphics.Sprites;
+namespace Imago.Graphics.Rendering;
 
 public class SpriteBatcher : IFontStashRenderer2, IDisposable
 {

@@ -4,7 +4,7 @@ using System.Diagnostics;
 using Imago.Graphics.Meshes;
 using Veldrid;
 
-namespace Imago.Graphics.Forward;
+namespace Imago.Graphics.Rendering;
 
 internal enum RenderBatchPassType
 {
@@ -160,9 +160,7 @@ internal class RenderBatcher
         if (this._offsetsVertexBuffer == null || this._offsetsVertexBuffer.SizeInBytes < requiredSizeInBytes)
         {
             if (this._offsetsVertexBuffer != null)
-            {
                 Renderer.Instance.DisposeWhenIdle(this._offsetsVertexBuffer);
-            }
 
             this._offsetsVertexBuffer = this._gd.ResourceFactory.CreateBuffer(new BufferDescription(
                 requiredSizeInBytes, BufferUsage.VertexBuffer | BufferUsage.Dynamic
@@ -197,7 +195,7 @@ internal class RenderBatcher
                 RenderBatchPassType.Forward => renderable.ForwardPipeline!,
                 RenderBatchPassType.ShadowMap => renderable.ShadowMapPipeline!,
                 RenderBatchPassType.Picking => renderable.PickingPipeline!,
-                _ => throw new System.NotImplementedException()
+                _ => throw new NotImplementedException()
             };
         }
     }

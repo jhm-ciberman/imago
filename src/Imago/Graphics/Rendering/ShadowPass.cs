@@ -10,7 +10,7 @@ using Veldrid;
 using Veldrid.Utilities;
 using Shader = Imago.Graphics.Materials.Shader;
 
-namespace Imago.Graphics.Forward;
+namespace Imago.Graphics.Rendering;
 
 internal class ShadowPass : IDisposable, IPipelineProvider
 {

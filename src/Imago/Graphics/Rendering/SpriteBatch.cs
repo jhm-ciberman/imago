@@ -4,7 +4,7 @@ using Imago.Graphics.Materials;
 using Imago.Graphics.Textures;
 using Support;
 
-namespace Imago.Graphics.Sprites;
+namespace Imago.Graphics.Rendering;
 
 public class SpriteBatch
 {

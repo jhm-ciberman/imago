@@ -7,7 +7,7 @@ using Imago.Graphics.Textures;
 using Imago.SceneGraph;
 using Veldrid;
 
-namespace Imago.Graphics.Passes;
+namespace Imago.Graphics.Rendering;
 
 public class SkyDomePass : IDisposable
 {

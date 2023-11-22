@@ -2,12 +2,12 @@ using System;
 using System.Diagnostics;
 using System.Runtime;
 using Imago.Input;
-using Imago.Graphics;
 using Imago.SceneGraph;
 using Veldrid;
 using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
 using Viewport = Imago.SceneGraph.Viewport;
+using Imago.Graphics.Rendering;
 
 namespace Imago;
 

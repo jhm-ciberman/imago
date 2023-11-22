@@ -4,7 +4,7 @@ using ImGuiNET;
 using Veldrid;
 using Texture = Imago.Graphics.Textures.Texture;
 
-namespace Imago.Graphics.Passes;
+namespace Imago.Graphics.Rendering;
 
 public class ImGuiPass : IDisposable
 {
@@ -50,7 +50,7 @@ public class ImGuiPass : IDisposable
         this._imguiRenderer.Update(deltaTime, inputSnapshot);
     }
 
-    public IntPtr GetOrCreateBinding(Texture texture)
+    public nint GetOrCreateBinding(Texture texture)
     {
         return this._imguiRenderer.GetOrCreateImGuiBinding(this._gd.ResourceFactory, texture.VeldridTexture);
     }

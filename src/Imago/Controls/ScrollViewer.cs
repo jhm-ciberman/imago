@@ -1,8 +1,8 @@
 using System.Numerics;
 using Imago.Controls.Drawing;
 using Imago.Input;
-using Imago.Graphics.Sprites;
 using Support;
+using Imago.Graphics.Rendering;
 
 namespace Imago.Controls;
 

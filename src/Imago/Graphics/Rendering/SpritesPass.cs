@@ -5,7 +5,7 @@ using Imago.SceneGraph;
 using Veldrid;
 using Shader = Imago.Graphics.Materials.Shader;
 
-namespace Imago.Graphics.Sprites;
+namespace Imago.Graphics.Rendering;
 
 public class SpritesPass : IDisposable, IPipelineProvider
 {

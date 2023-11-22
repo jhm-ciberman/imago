@@ -1,7 +1,7 @@
 using System.Numerics;
 using Support;
 
-namespace Imago.Graphics.Particles;
+namespace Imago.SceneGraph;
 
 public struct Particle
 {

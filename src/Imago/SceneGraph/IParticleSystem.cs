@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Numerics;
-using Imago.Graphics.Particles;
 using Imago.Graphics.Textures;
 
 namespace Imago.SceneGraph;

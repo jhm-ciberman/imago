@@ -3,6 +3,7 @@ using System.Numerics;
 using Imago.Graphics;
 using Imago.Graphics.Materials;
 using Imago.Graphics.Meshes;
+using Imago.Graphics.Rendering;
 using Support;
 
 namespace Imago.SceneGraph.Nodes;
