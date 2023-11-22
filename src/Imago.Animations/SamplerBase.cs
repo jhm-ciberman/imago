@@ -1,6 +1,6 @@
 using System;
 
-namespace Imago.Motion;
+namespace Imago.Animations;
 
 public abstract class SamplerBase<T> where T : struct
 {

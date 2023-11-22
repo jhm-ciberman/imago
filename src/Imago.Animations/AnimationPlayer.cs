@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Imago.SceneGraph.Nodes;
 
-namespace Imago.Motion;
+namespace Imago.Animations;
 
 /// <summary>
 /// Provides a way to play animations.

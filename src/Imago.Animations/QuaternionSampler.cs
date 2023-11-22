@@ -1,6 +1,6 @@
 using System.Numerics;
 
-namespace Imago.Motion;
+namespace Imago.Animations;
 
 public class QuaternionSampler : SamplerBase<Quaternion>
 {

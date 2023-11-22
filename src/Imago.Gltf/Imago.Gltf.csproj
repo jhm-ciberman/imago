@@ -5,7 +5,7 @@
     </PropertyGroup>
     <ItemGroup>
         <ProjectReference Include="../Imago/Imago.csproj" />
-        <ProjectReference Include="../Imago.Motion/Imago.Motion.csproj" />
+        <ProjectReference Include="../Imago.Animations/Imago.Animations.csproj" />
         <ProjectReference Include="../Support/Support.csproj" />
     </ItemGroup>
 </Project>

@@ -1,6 +1,6 @@
 using Imago.SceneGraph.Nodes;
 
-namespace Imago.Motion;
+namespace Imago.Animations;
 
 public interface IChannel
 {

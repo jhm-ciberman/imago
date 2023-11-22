@@ -1,7 +1,7 @@
 using System.Numerics;
 using Imago.SceneGraph.Nodes;
 
-namespace Imago.Motion;
+namespace Imago.Animations;
 
 public class RotationChannel : ChannelBase<Quaternion>
 {

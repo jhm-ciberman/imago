@@ -1,13 +1,12 @@
 using System.Numerics;
 using Imago.SceneGraph.Nodes;
 
-namespace Imago.Motion;
+namespace Imago.Animations;
 
-public class ScaleChannel : ChannelBase<Vector3>
+public class PositionChannel : ChannelBase<Vector3>, IChannel
 {
     private readonly Vector3Sampler _sampler;
-
-    public ScaleChannel(string targetName, float[] times, Vector3[] values, InterpolationMode interpolation) : base(targetName)
+    public PositionChannel(string targetName, float[] times, Vector3[] values, InterpolationMode interpolation) : base(targetName)
     {
         this._sampler = new Vector3Sampler(times, values, interpolation);
     }
@@ -16,6 +15,6 @@ public class ScaleChannel : ChannelBase<Vector3>
 
     public override void Update(Node3D target, float time)
     {
-        target.Scale = this._sampler.Sample(time);
+        target.Position = this._sampler.Sample(time);
     }
 }

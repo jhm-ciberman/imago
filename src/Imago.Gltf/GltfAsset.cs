@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Imago.Motion;
+using Imago.Animations;
 
 namespace Imago.Gltf;
 
