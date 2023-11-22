@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Veldrid;
 
-namespace Imago.Rendering.Forward;
+namespace Imago.Rendering.Buffers;
 
 /// <summary>
 /// Represents a buffer of data that can be uploaded to the GPU and used in shaders.

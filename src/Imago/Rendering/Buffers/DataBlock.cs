@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace Imago.Rendering.Forward;
+namespace Imago.Rendering.Buffers;
 
 /// <summary>
 /// Represents a block of data in a <see cref="DataBuffer"/>.

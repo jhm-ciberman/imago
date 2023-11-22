@@ -2,6 +2,7 @@ using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Imago.Rendering.Buffers;
 using Imago.Rendering.Forward;
 using Imago.Rendering.Materials;
 using Imago.Rendering.Meshes;

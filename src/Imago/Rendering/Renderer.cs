@@ -16,6 +16,7 @@ using Veldrid.StartupUtilities;
 using Veldrid.Utilities;
 using Viewport = Imago.SceneGraph.Viewport;
 using Texture = Imago.Rendering.Textures.Texture;
+using Imago.Rendering.Buffers;
 
 namespace Imago.Rendering;
 
