@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
-namespace Support;
+namespace Support.Numerics;
 
 /// <summary>
 /// Represents a 2D vector with integer components.
@@ -190,7 +190,7 @@ public struct Vector2Int : IEquatable<Vector2Int>
 
     public override int GetHashCode()
     {
-        return this.X.GetHashCode() ^ (this.Y.GetHashCode() << 16);
+        return this.X.GetHashCode() ^ this.Y.GetHashCode() << 16;
     }
 
     public override string? ToString()

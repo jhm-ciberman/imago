@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Imago.Graphics.Rendering;
-using Support;
 using Support.ComponentModel;
+using Support.Numerics;
 
 namespace Imago.Controls;
 

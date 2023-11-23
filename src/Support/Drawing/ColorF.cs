@@ -1,7 +1,7 @@
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
-namespace Support;
+namespace Support.Drawing;
 
 public readonly struct ColorF
 {

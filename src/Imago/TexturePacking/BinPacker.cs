@@ -1,5 +1,5 @@
-using Imago.Support;
-using Support;
+using Support.Collections;
+using Support.Numerics;
 
 namespace Imago.TexturePacking;
 

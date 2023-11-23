@@ -1,6 +1,6 @@
 using System.Numerics;
 using Imago.Graphics.Rendering;
-using Support;
+using Support.Numerics;
 
 namespace Imago.Controls;
 

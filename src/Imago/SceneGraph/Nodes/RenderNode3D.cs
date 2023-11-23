@@ -4,7 +4,7 @@ using Imago.Graphics;
 using Imago.Graphics.Materials;
 using Imago.Graphics.Meshes;
 using Imago.Graphics.Rendering;
-using Support;
+using Support.Drawing;
 
 namespace Imago.SceneGraph.Nodes;
 

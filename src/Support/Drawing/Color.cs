@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 // supress IDE0057 (I don't want to use the range operator here)
 #pragma warning disable IDE0057
 
-namespace Support;
+namespace Support.Drawing;
 
 [StructLayout(LayoutKind.Sequential)]
 public readonly struct Color
@@ -77,9 +77,7 @@ public readonly struct Color
     public static Color FromHex(string hexColor)
     {
         if (TryParse(hexColor, out Color color))
-        {
             return color;
-        }
 
         throw new ArgumentException("Invalid hex color string.");
     }
@@ -88,9 +86,7 @@ public readonly struct Color
     {
         ReadOnlySpan<char> span = hexColor;
         if (hexColor.StartsWith("#"))
-        {
             span = span[1..];
-        }
 
         if (span.Length is 6 or 8)
         {
@@ -128,9 +124,7 @@ public readonly struct Color
             var sb = span[2];
             var sa = span.Length == 4 ? span[3] : 'F';
             if (TryParse($"#{sr}{sr}{sg}{sg}{sb}{sb}{sa}{sa}", out color)) // Yes it allocates, but whatever
-            {
                 return true;
-            }
         }
 
         color = default;
@@ -145,15 +139,13 @@ public readonly struct Color
 
     public uint ToPackedUInt()
     {
-        return (uint)((this.A << 24) | (this.B << 16) | (this.G << 8) | (this.R << 0));
+        return (uint)(this.A << 24 | this.B << 16 | this.G << 8 | this.R << 0);
     }
 
     public override string ToString()
     {
         if (this.A == 255)
-        {
             return $"#{this.R:X2}{this.G:X2}{this.B:X2}";
-        }
 
         return $"#{this.R:X2}{this.G:X2}{this.B:X2}{this.A:X2}";
     }
@@ -182,7 +174,7 @@ public readonly struct Color
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator ColorF(Color color)
     {
-        return new ColorF((float)color.R / 255f, (float)color.G / 255f, (float)color.B / 255f, (float)color.A / 255f);
+        return new ColorF(color.R / 255f, color.G / 255f, color.B / 255f, color.A / 255f);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

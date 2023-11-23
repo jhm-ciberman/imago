@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using Imago.Graphics.Materials;
 using Imago.Graphics.Textures;
 using Imago.SceneGraph;
-using Imago.Support;
-using Support;
 using Veldrid;
 using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
 using Veldrid.Utilities;
 using Viewport = Imago.SceneGraph.Viewport;
 using Texture = Imago.Graphics.Textures.Texture;
+using Support.Collections;
+using Support.Drawing;
 
 namespace Imago.Graphics.Rendering;
 

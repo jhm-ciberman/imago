@@ -3,9 +3,9 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using Color = Support.Color;
+using Color = Support.Drawing.Color;
 using Veldrid;
-using Vector2Int = Support.Vector2Int;
+using Vector2Int = Support.Numerics.Vector2Int;
 using Texture = Imago.Graphics.Textures.Texture;
 using Imago.Graphics.Rendering;
 

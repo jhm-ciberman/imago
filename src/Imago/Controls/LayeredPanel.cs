@@ -1,5 +1,5 @@
 using System.Numerics;
-using Support;
+using Support.Numerics;
 
 namespace Imago.Controls;
 

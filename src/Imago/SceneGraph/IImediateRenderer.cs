@@ -1,7 +1,7 @@
 using System.Numerics;
 using Imago.Graphics.Materials;
 using Imago.Graphics.Textures;
-using Support;
+using Support.Drawing;
 
 namespace Imago.SceneGraph;
 

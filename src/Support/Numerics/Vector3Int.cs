@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
-namespace Support;
+namespace Support.Numerics;
 
 /// <summary>
 /// Represents a 3D vector with integer components.
@@ -141,7 +141,7 @@ public struct Vector3Int : IEquatable<Vector3Int>
 
     public override int GetHashCode()
     {
-        return this.X.GetHashCode() ^ (this.Y.GetHashCode() << 16) ^ (this.Z.GetHashCode() << 24);
+        return this.X.GetHashCode() ^ this.Y.GetHashCode() << 16 ^ this.Z.GetHashCode() << 24;
     }
 
     public override string? ToString()

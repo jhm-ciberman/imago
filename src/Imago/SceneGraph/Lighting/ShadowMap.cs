@@ -1,6 +1,7 @@
 using System;
 using Imago.SceneGraph.Cameras;
-using Support;
+using Support.Drawing;
+using Support.Numerics;
 
 namespace Imago.SceneGraph.Lighting;
 

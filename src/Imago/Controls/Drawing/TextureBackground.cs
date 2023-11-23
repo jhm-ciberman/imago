@@ -2,7 +2,7 @@ using System.Numerics;
 using Imago.Graphics.Rendering;
 using Imago.Graphics.Textures;
 using Imago.TexturePacking;
-using Support;
+using Support.Drawing;
 
 namespace Imago.Controls.Drawing;
 

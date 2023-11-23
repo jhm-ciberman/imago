@@ -1,6 +1,6 @@
-using Support;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
+using Support.Numerics;
 
 namespace Imago.TexturePacking;
 

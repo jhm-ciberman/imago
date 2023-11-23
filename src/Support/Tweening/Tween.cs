@@ -1,11 +1,34 @@
 using System;
-using System.Collections.Generic;
-using System.Numerics;
 
-namespace Support.TweenLine;
+namespace Support.Tweening;
 
 public delegate float EasingFunction(float t);
 public delegate T InterpolationFunction<T>(T start, T end, float t);
+
+public interface ITween
+{
+    float Duration { get; }
+
+    float Delay { get; }
+
+    float CurrentTime { get; }
+
+    bool IsFinished { get; }
+
+    float Progress { get; }
+
+    bool Update(float deltaTime);
+
+    ITween AddDelay(float delay);
+
+    ITween WithEasing(EasingFunction easing);
+
+    ITween WithFps(float fps);
+
+    ITween WithFrameTime(float frameTime);
+
+    ITween WithFrameCount(int frameCount);
+}
 
 public class Tween<T> : ITween where T : struct
 {
@@ -83,9 +106,7 @@ public class Tween<T> : ITween where T : struct
             this.Delay -= deltaTime;
 
             if (this.Delay > 0f)
-            {
                 return true;
-            }
             else
             {
                 deltaTime = -this.Delay;
@@ -106,9 +127,7 @@ public class Tween<T> : ITween where T : struct
         float currentTime = this.CurrentTime;
 
         if (this.FrameTime > 0f)
-        {
             currentTime = (float)Math.Floor(currentTime / this.FrameTime) * this.FrameTime;
-        }
 
         float t = this._easing(currentTime / this.Duration);
         T value = this._interpolation(this.StartValue, this.EndValue, t);
@@ -117,71 +136,4 @@ public class Tween<T> : ITween where T : struct
     }
 }
 
-public interface ITween
-{
-    float Duration { get; }
 
-    float Delay { get; }
-
-    float CurrentTime { get; }
-
-    bool IsFinished { get; }
-
-    float Progress { get; }
-
-    bool Update(float deltaTime);
-
-    ITween AddDelay(float delay);
-
-    ITween WithEasing(EasingFunction easing);
-
-    ITween WithFps(float fps);
-
-    ITween WithFrameTime(float frameTime);
-
-    ITween WithFrameCount(int frameCount);
-}
-
-
-public class TweenLine
-{
-    private readonly List<ITween> _tweens = new();
-
-    public ITween AddTween(ITween tween)
-    {
-        this._tweens.Add(tween);
-        return tween;
-    }
-
-    public ITween FromTo(float duration, Quaternion from, Quaternion to, Action<Quaternion> setter, EasingFunction? easing = null)
-    {
-        return this.AddTween(new Tween<Quaternion>(duration, from, to, setter, Quaternion.Slerp, easing));
-    }
-
-    public ITween FromTo(float duration, Vector3 from, Vector3 to, Action<Vector3> setter, EasingFunction? easing = null)
-    {
-        return this.AddTween(new Tween<Vector3>(duration, from, to, setter, Vector3.Lerp, easing));
-    }
-
-    public ITween FromTo(float duration, float from, float to, Action<float> setter, EasingFunction? easing = null)
-    {
-        return this.AddTween(new Tween<float>(duration, from, to, setter, Lerp, easing));
-    }
-
-    private static float Lerp(float start, float end, float t)
-    {
-        return start + (end - start) * t;
-    }
-
-    public void Update(float deltaTime)
-    {
-        for (int i = 0; i < this._tweens.Count; i++)
-        {
-            if (!this._tweens[i].Update(deltaTime))
-            {
-                this._tweens.RemoveAt(i);
-                i--;
-            }
-        }
-    }
-}

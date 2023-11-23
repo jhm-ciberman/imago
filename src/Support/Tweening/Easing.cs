@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Support.TweenLine;
+namespace Support.Tweening;
 
 // Extracted from: https://github.com/franknorton/Pleasing/blob/master/Pleasing/Easing.cs
 /*

@@ -2,7 +2,7 @@ using System;
 using System.Globalization;
 using System.Numerics;
 
-namespace Support;
+namespace Support.Numerics;
 
 /// <summary>
 /// Describes the thickness of a frame around a rectangle.
@@ -162,9 +162,7 @@ public struct Thickness
     public override bool Equals(object? obj)
     {
         if (obj is Thickness thickness)
-        {
             return this.Left == thickness.Left && this.Top == thickness.Top && this.Right == thickness.Right && this.Bottom == thickness.Bottom;
-        }
 
         return false;
     }

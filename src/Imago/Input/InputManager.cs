@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using Support;
+using Support.Numerics;
 using Veldrid;
 using Veldrid.Sdl2;
 

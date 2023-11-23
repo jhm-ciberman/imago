@@ -4,7 +4,7 @@ using System.Numerics;
 using System.Text;
 using Imago.Graphics;
 using Imago.Graphics.Rendering;
-using Support;
+using Support.Drawing;
 
 namespace Imago.Controls;
 

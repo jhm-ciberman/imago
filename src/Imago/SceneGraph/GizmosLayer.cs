@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Imago.Graphics.Meshes;
-using Imago.Support;
-using Support;
+using Support.Collections;
+using Support.Drawing;
 using Veldrid.Utilities;
 
 namespace Imago.SceneGraph;

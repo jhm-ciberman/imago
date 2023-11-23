@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using Imago.Graphics.Materials;
 using Imago.Graphics.Textures;
 using Imago.SceneGraph;
-using Support;
+using Support.Drawing;
 using Veldrid;
 
 namespace Imago.Graphics.Rendering;

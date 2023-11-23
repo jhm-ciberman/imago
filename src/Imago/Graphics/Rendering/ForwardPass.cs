@@ -7,7 +7,7 @@ using Imago.Graphics.Meshes;
 using Imago.Graphics.Textures;
 using Imago.SceneGraph;
 using Imago.SceneGraph.Lighting;
-using Support;
+using Support.Drawing;
 using Veldrid;
 using Veldrid.Utilities;
 using Shader = Imago.Graphics.Materials.Shader;

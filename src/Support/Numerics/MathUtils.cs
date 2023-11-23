@@ -2,7 +2,7 @@ using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
-namespace Support;
+namespace Support.Numerics;
 
 public static class MathUtils
 {
@@ -69,7 +69,7 @@ public static class MathUtils
     {
         float delta = (target - current) % (MathF.PI * 2);
         if (delta > MathF.PI)
-            delta -= (MathF.PI * 2);
+            delta -= MathF.PI * 2;
         return delta;
     }
 

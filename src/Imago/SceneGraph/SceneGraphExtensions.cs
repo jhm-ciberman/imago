@@ -4,6 +4,7 @@ using Imago.Graphics.Materials;
 using Imago.SceneGraph.Nodes;
 using Imago.Support;
 using Imago.TexturePacking;
+using Support.Collections;
 using Veldrid.Utilities;
 
 namespace Imago.SceneGraph;

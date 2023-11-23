@@ -2,7 +2,7 @@ using System;
 using System.Buffers;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using Imago.Numerics;
+using Support.Numerics;
 using Veldrid;
 
 namespace Imago.Graphics.Meshes;

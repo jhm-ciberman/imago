@@ -1,6 +1,6 @@
 using System;
 using System.Numerics;
-using Support;
+using Support.Drawing;
 
 namespace Imago.SceneGraph.Lighting;
 

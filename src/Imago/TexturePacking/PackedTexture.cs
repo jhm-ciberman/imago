@@ -1,6 +1,6 @@
 using System.Numerics;
 using Imago.Graphics.Textures;
-using Support;
+using Support.Numerics;
 
 namespace Imago.TexturePacking;
 

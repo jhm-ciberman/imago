@@ -1,6 +1,6 @@
 using System;
 
-namespace Support;
+namespace Support.Numerics;
 
 public struct RectInt
 {

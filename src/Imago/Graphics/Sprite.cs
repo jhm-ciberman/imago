@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using Imago.Graphics.Textures;
 using Imago.TexturePacking;
-using Support;
+using Support.Numerics;
 
 namespace Imago.Graphics;
 

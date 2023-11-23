@@ -1,5 +1,5 @@
 using Imago.SceneGraph.Lighting;
-using Support;
+using Support.Drawing;
 
 namespace Imago.SceneGraph;
 

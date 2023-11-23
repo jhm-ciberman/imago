@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-namespace Imago.Support;
+namespace Support.Collections;
 
 /// <summary>
 /// Represents a list that inserts and removes in O(1) by assuming the order of elements is not important.

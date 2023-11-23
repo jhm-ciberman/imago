@@ -1,7 +1,7 @@
 using System;
 using System.Numerics;
 
-namespace Support;
+namespace Support.Numerics;
 
 /// <summary>
 /// Represents a 2D rectangle.
