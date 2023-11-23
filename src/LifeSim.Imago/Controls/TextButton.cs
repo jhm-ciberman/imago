@@ -1,4 +1,4 @@
-using LifeSim.Support.ComponentModel;
+using System.Windows.Input;
 using LifeSim.Support.Drawing;
 
 namespace LifeSim.Imago.Controls;

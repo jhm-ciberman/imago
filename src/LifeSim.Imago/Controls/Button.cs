@@ -1,8 +1,8 @@
 using System;
 using System.Numerics;
+using System.Windows.Input;
 using LifeSim.Imago.Controls.Drawing;
 using LifeSim.Imago.Graphics.Rendering;
-using LifeSim.Support.ComponentModel;
 using Veldrid;
 
 namespace LifeSim.Imago.Controls;

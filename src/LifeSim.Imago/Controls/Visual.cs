@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using CommunityToolkit.Mvvm.ComponentModel;
 using LifeSim.Imago.Graphics.Rendering;
-using LifeSim.Support.ComponentModel;
 using LifeSim.Support.Numerics;
 
 namespace LifeSim.Imago.Controls;
