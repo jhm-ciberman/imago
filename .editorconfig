@@ -35,6 +35,7 @@ dotnet_diagnostic.CA1816.severity = silent # Call GC.SuppressFinalize correctly 
 dotnet_diagnostic.CA1001.severity = warning # Types that own disposable fields should be disposable
 dotnet_diagnostic.IDE0005.severity = warning # Unnecessary using directive
 dotnet_diagnostic.IDE0251.severity = none # Bugged I think.
+dotnet_diagnostic.IDE0044.severity = warning # Make field readonly
 
 dotnet_style_require_accessibility_modifiers = always
 dotnet_style_object_initializer = false
