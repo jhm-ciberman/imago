@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using LifeSim.Imago.Graphics;
 using LifeSim.Imago.Graphics.Materials;
 using LifeSim.Imago.Graphics.Meshes;
-using LifeSim.Imago.SceneGraph;
 using LifeSim.Imago.SceneGraph.Nodes;
 
 namespace LifeSim.Imago.Gltf;

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using LifeSim.Imago.Graphics.Meshes;
 using LifeSim.Imago.Graphics.Rendering;
 using Veldrid;

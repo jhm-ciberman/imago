@@ -6,7 +6,6 @@ using SixLabors.ImageSharp.PixelFormats;
 using Color = LifeSim.Support.Drawing.Color;
 using Veldrid;
 using Vector2Int = LifeSim.Support.Numerics.Vector2Int;
-using Texture = LifeSim.Imago.Graphics.Textures.Texture;
 using LifeSim.Imago.Graphics.Rendering;
 
 namespace LifeSim.Imago.Graphics.Textures;
