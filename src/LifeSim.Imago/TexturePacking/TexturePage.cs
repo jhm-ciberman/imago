@@ -1,10 +1,10 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
 using LifeSim.Imago.Graphics.Textures;
 using LifeSim.Support.Numerics;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace LifeSim.Imago.TexturePacking;
 

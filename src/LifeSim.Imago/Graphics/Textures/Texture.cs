@@ -1,12 +1,12 @@
 using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using LifeSim.Imago.Graphics.Rendering;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using Color = LifeSim.Support.Drawing.Color;
 using Veldrid;
+using Color = LifeSim.Support.Drawing.Color;
 using Vector2Int = LifeSim.Support.Numerics.Vector2Int;
-using LifeSim.Imago.Graphics.Rendering;
 
 namespace LifeSim.Imago.Graphics.Textures;
 

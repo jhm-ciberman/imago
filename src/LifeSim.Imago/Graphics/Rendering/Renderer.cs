@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using LifeSim.Imago.Graphics.Materials;
 using LifeSim.Imago.Graphics.Textures;
 using LifeSim.Imago.SceneGraph;
+using LifeSim.Support.Collections;
+using LifeSim.Support.Drawing;
 using Veldrid;
 using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
 using Veldrid.Utilities;
-using Viewport = LifeSim.Imago.SceneGraph.Viewport;
 using Texture = LifeSim.Imago.Graphics.Textures.Texture;
-using LifeSim.Support.Collections;
-using LifeSim.Support.Drawing;
+using Viewport = LifeSim.Imago.SceneGraph.Viewport;
 
 namespace LifeSim.Imago.Graphics.Rendering;
 

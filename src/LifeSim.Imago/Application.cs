@@ -1,13 +1,13 @@
 using System;
 using System.Diagnostics;
 using System.Runtime;
+using LifeSim.Imago.Graphics.Rendering;
 using LifeSim.Imago.Input;
 using LifeSim.Imago.SceneGraph;
 using Veldrid;
 using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
 using Viewport = LifeSim.Imago.SceneGraph.Viewport;
-using LifeSim.Imago.Graphics.Rendering;
 
 namespace LifeSim.Imago;
 

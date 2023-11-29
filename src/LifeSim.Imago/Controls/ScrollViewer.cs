@@ -1,9 +1,9 @@
 using System.Numerics;
 using LifeSim.Imago.Controls.Drawing;
-using LifeSim.Imago.Input;
 using LifeSim.Imago.Graphics.Rendering;
-using LifeSim.Support.Numerics;
+using LifeSim.Imago.Input;
 using LifeSim.Support.Drawing;
+using LifeSim.Support.Numerics;
 
 namespace LifeSim.Imago.Controls;
 

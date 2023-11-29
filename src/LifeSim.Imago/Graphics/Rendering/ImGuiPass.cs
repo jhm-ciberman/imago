@@ -1,6 +1,6 @@
 using System;
-using LifeSim.Imago.Graphics.Textures;
 using ImGuiNET;
+using LifeSim.Imago.Graphics.Textures;
 using Veldrid;
 using Texture = LifeSim.Imago.Graphics.Textures.Texture;
 

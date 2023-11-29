@@ -23,7 +23,7 @@ public class MousePickingPass : IDisposable, IPipelineProvider
     private readonly GraphicsDevice _gd;
     private readonly DeviceBuffer _camera3DInfoBuffer;
     private readonly ResourceLayout _resourceLayout;
-    private ResourceSet _resourceSet;
+    private readonly ResourceSet _resourceSet;
     private readonly RenderTexture _renderTexture;
     private readonly RenderBatcher _renderBatcher;
     private readonly Veldrid.Texture _pixelTexture;

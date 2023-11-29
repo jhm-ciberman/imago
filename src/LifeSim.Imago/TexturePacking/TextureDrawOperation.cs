@@ -1,8 +1,8 @@
 using System;
+using LifeSim.Support.Numerics;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-using LifeSim.Support.Numerics;
 
 namespace LifeSim.Imago.TexturePacking;
 

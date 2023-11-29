@@ -1,11 +1,11 @@
 using System;
 using System.ComponentModel;
 using System.Numerics;
-using LifeSim.Imago.Input;
-using Veldrid;
 using LifeSim.Imago.Graphics.Rendering;
-using LifeSim.Support.Numerics;
+using LifeSim.Imago.Input;
 using LifeSim.Support.Drawing;
+using LifeSim.Support.Numerics;
+using Veldrid;
 
 namespace LifeSim.Imago.Controls;
 
