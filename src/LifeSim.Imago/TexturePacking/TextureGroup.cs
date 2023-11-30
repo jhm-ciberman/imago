@@ -11,7 +11,7 @@ namespace LifeSim.Imago.TexturePacking;
 /// Each group has a name that can be used for finding the group in the <see cref="TexturePacker"/>.
 /// It is recomended to group the textures according to the type of textures. For example: UI, Terrain, game objects, etc.
 /// </summary>
-public class TextureGroup
+public class TextureGroup : IDisposable
 {
     /// <summary>
     /// Occurs when a new page is added to the group.
@@ -177,5 +177,16 @@ public class TextureGroup
 
         page.Redraw(packedTexture, drawOperation);
         this.RequestFlush();
+    }
+
+    /// <summary>
+    /// Releases all resources used by the group.
+    /// </summary>
+    public void Dispose()
+    {
+        foreach (var page in this._pages)
+        {
+            page.Dispose();
+        }
     }
 }

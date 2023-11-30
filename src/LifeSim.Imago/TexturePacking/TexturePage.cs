@@ -11,7 +11,7 @@ namespace LifeSim.Imago.TexturePacking;
 /// <summary>
 /// The TexturePage class is a texture atlas. It is used to pack textures into a single texture.
 /// </summary>
-public class TexturePage
+public class TexturePage : IDisposable
 {
     private const float TEXEL_EPSILON = 0f; //0.05f; // 1/20th of a texel
 
@@ -168,5 +168,14 @@ public class TexturePage
 
         operation.Draw(this.Image, packedTexture.PixelTopLeft);
         this.IsDirty = true;
+    }
+
+    /// <summary>
+    /// Releases all resources used by the page.
+    /// </summary>
+    public void Dispose()
+    {
+        this.Image.Dispose();
+        this.Texture.Dispose();
     }
 }
