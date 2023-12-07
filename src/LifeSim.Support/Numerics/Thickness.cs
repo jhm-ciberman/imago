@@ -181,4 +181,34 @@ public struct Thickness
     {
         return !(left == right);
     }
+
+    public static Thickness FromLeft(float left)
+    {
+        return new Thickness(left, 0, 0, 0);
+    }
+
+    public static Thickness FromTop(float top)
+    {
+        return new Thickness(0, top, 0, 0);
+    }
+
+    public static Thickness FromRight(float right)
+    {
+        return new Thickness(0, 0, right, 0);
+    }
+
+    public static Thickness FromBottom(float bottom)
+    {
+        return new Thickness(0, 0, 0, bottom);
+    }
+
+    public static Thickness FromHorizontal(float horizontal)
+    {
+        return new Thickness(horizontal, 0, horizontal, 0);
+    }
+
+    public static Thickness FromVertical(float vertical)
+    {
+        return new Thickness(0, vertical, 0, vertical);
+    }
 }
