@@ -93,17 +93,17 @@ public class Button : ContentControl
         }
     }
 
-    private ButtonVisualState _visualState = ButtonVisualState.Default;
+    private ButtonAppearance _appearance = ButtonAppearance.Default;
 
-    public ButtonVisualState VisualState
+    public ButtonAppearance Appearance
     {
-        get => this._visualState;
+        get => this._appearance;
         set
         {
-            if (this._visualState == value) return;
+            if (this._appearance == value) return;
 
-            this._visualState = value;
-            this._visualState.ApplyVisualState(this);
+            this._appearance = value;
+            this._appearance.Apply(this);
         }
     }
 
@@ -118,9 +118,14 @@ public class Button : ContentControl
 
         this.Content?.Update(deltaTime);
 
-        this.VisualState.ApplyVisualState(this);
-
         base.Update(deltaTime);
+
+        this.Appearance.Apply(this);
+
+        if (this.IsPressed && !this.IsMouseOver && Input.InputManager.Current.GetMouseButtonUp(MouseButton.Left))
+        {
+            this.IsPressed = false;
+        }
     }
 
     protected override void OnMouseDown(MouseButton button, Vector2 position)

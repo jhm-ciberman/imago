@@ -4,11 +4,11 @@ using LifeSim.Support.Drawing;
 
 namespace LifeSim.Imago.Controls;
 
-public class ButtonVisualState
+public class ButtonAppearance
 {
-    private static readonly ButtonVisualState _default = new ButtonVisualState();
+    private static readonly ButtonAppearance _default = new ButtonAppearance();
 
-    public static ButtonVisualState Default => _default;
+    public static ButtonAppearance Default => _default;
 
     public IBackground Idle { get; set; } = new ColorBackground(Color.White);
 
@@ -19,24 +19,24 @@ public class ButtonVisualState
     public IBackground Disabled { get; set; } = new ColorBackground(Color.White, 0.5f);
 
 
-    public ButtonVisualState()
+    public ButtonAppearance()
     {
         //
     }
 
-    public void ApplyVisualState(Button button)
+    public void Apply(Button button)
     {
-        if (button.IsMouseOver)
+        if (!button.IsEnabled)
         {
-            button.Background = this.Hover;
+            button.Background = this.Disabled;
         }
         else if (button.IsPressed)
         {
             button.Background = this.Pressed;
         }
-        else if (!button.IsEnabled)
+        else if (button.IsMouseOver)
         {
-            button.Background = this.Disabled;
+            button.Background = this.Hover;
         }
         else
         {
@@ -44,9 +44,9 @@ public class ButtonVisualState
         }
     }
 
-    public static ButtonVisualState FromColor(Color color)
+    public static ButtonAppearance FromColor(Color color)
     {
-        return new ButtonVisualState()
+        return new ButtonAppearance()
         {
             Idle = new ColorBackground(color),
             Hover = new ColorBackground(color, 0.9f),
@@ -55,9 +55,9 @@ public class ButtonVisualState
         };
     }
 
-    public static ButtonVisualState FromSprite(Sprite sprite)
+    public static ButtonAppearance FromSprite(Sprite sprite)
     {
-        return new ButtonVisualState()
+        return new ButtonAppearance()
         {
             Idle = new SpriteBackground(sprite, 0),
             Hover = new SpriteBackground(sprite, 1),
@@ -66,9 +66,9 @@ public class ButtonVisualState
         };
     }
 
-    public static ButtonVisualState FromColors(Color defaultColor, Color hoverColor, Color pressedColor, Color disabledColor)
+    public static ButtonAppearance FromColors(Color defaultColor, Color hoverColor, Color pressedColor, Color disabledColor)
     {
-        return new ButtonVisualState()
+        return new ButtonAppearance()
         {
             Idle = new ColorBackground(defaultColor),
             Hover = new ColorBackground(hoverColor),
