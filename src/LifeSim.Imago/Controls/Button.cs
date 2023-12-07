@@ -2,7 +2,9 @@ using System;
 using System.Numerics;
 using System.Windows.Input;
 using LifeSim.Imago.Controls.Drawing;
+using LifeSim.Imago.Graphics;
 using LifeSim.Imago.Graphics.Rendering;
+using LifeSim.Support.Drawing;
 using Veldrid;
 
 namespace LifeSim.Imago.Controls;
@@ -94,59 +96,17 @@ public class Button : ContentControl
         }
     }
 
-    /// <summary>
-    /// Gets or sets the background brush of the button.
-    /// </summary>
-    protected void UpdateBackgroundBrush()
-    {
-        var background = this.Background;
-        if (background == null) return;
+    private ButtonVisualState _visualState = ButtonVisualState.Default;
 
-        if (background is SpriteBackground spriteBrush)
+    public ButtonVisualState VisualState
+    {
+        get => this._visualState;
+        set
         {
-            if (spriteBrush.Sprite == null) return;
-            if (this.IsEnabled)
-            {
-                if (this.IsPressed)
-                {
-                    spriteBrush.FrameIndex = 2;
-                }
-                else if (this.IsMouseOver)
-                {
-                    spriteBrush.FrameIndex = 1;
-                }
-                else
-                {
-                    spriteBrush.FrameIndex = 0;
-                }
-            }
-            else
-            {
-                spriteBrush.FrameIndex = 3;
-            }
-        }
-        else if (background is ColorBackground solidColor)
-        {
-            // Change opacity
-            if (this.IsEnabled)
-            {
-                if (this.IsPressed)
-                {
-                    solidColor.Opacity = 0.8f;
-                }
-                else if (this.IsMouseOver)
-                {
-                    solidColor.Opacity = 0.9f;
-                }
-                else
-                {
-                    solidColor.Opacity = 1.0f;
-                }
-            }
-            else
-            {
-                solidColor.Opacity = 0.5f;
-            }
+            if (this._visualState == value) return;
+
+            this._visualState = value;
+            this._visualState.ApplyVisualState(this);
         }
     }
 
@@ -161,7 +121,7 @@ public class Button : ContentControl
 
         this.Content?.Update(deltaTime);
 
-        this.UpdateBackgroundBrush();
+        this.VisualState.ApplyVisualState(this);
 
         base.Update(deltaTime);
     }
@@ -210,5 +170,79 @@ public class Button : ContentControl
     public Button(string text)
     {
         this.Content = new TextBlock(text);
+    }
+}
+
+public class ButtonVisualState
+{
+    private static readonly ButtonVisualState _default = new ButtonVisualState();
+
+    public static ButtonVisualState Default => _default;
+
+    public IBackground Idle { get; set; } = new ColorBackground(Color.White);
+
+    public IBackground Hover { get; set; } = new ColorBackground(Color.White, 0.9f);
+
+    public IBackground Pressed { get; set; } = new ColorBackground(Color.White, 0.8f);
+
+    public IBackground Disabled { get; set; } = new ColorBackground(Color.White, 0.5f);
+
+
+    public ButtonVisualState()
+    {
+        //
+    }
+
+    public void ApplyVisualState(Button button)
+    {
+        if (button.IsMouseOver)
+        {
+            button.Background = this.Hover;
+        }
+        else if (button.IsPressed)
+        {
+            button.Background = this.Pressed;
+        }
+        else if (!button.IsEnabled)
+        {
+            button.Background = this.Disabled;
+        }
+        else
+        {
+            button.Background = this.Idle;
+        }
+    }
+
+    public static ButtonVisualState FromColor(Color color)
+    {
+        return new ButtonVisualState()
+        {
+            Idle = new ColorBackground(color),
+            Hover = new ColorBackground(color, 0.9f),
+            Pressed = new ColorBackground(color, 0.8f),
+            Disabled = new ColorBackground(color, 0.5f),
+        };
+    }
+
+    public static ButtonVisualState FromSprite(Sprite sprite)
+    {
+        return new ButtonVisualState()
+        {
+            Idle = new SpriteBackground(sprite, 0),
+            Hover = new SpriteBackground(sprite, 1),
+            Pressed = new SpriteBackground(sprite, 2),
+            Disabled = new SpriteBackground(sprite, 3),
+        };
+    }
+
+    public static ButtonVisualState FromColors(Color defaultColor, Color hoverColor, Color pressedColor, Color disabledColor)
+    {
+        return new ButtonVisualState()
+        {
+            Idle = new ColorBackground(defaultColor),
+            Hover = new ColorBackground(hoverColor),
+            Pressed = new ColorBackground(pressedColor),
+            Disabled = new ColorBackground(disabledColor),
+        };
     }
 }
