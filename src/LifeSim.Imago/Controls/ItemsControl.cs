@@ -89,25 +89,38 @@ public abstract class ItemsControl : Control
         base.Update(deltaTime);
     }
 
-    private IItemSource? _itemsSource;
     private Dictionary<object, Control>? _itemControls;
+    private IItemTemplate? _itemItemplate;
 
+    public IItemTemplate? ItemTemplate
+    {
+        get => this._itemItemplate;
+        set
+        {
+            if (this._itemItemplate == value) return;
 
-    public IItemSource? ItemsSource
+            this._itemItemplate = value;
+            this.InvalidateMeasure();
+            this.OnItemsSourceChanged();
+        }
+    }
+
+    private IEnumerable<object>? _itemsSource;
+    public IEnumerable<object>? ItemsSource
     {
         get => this._itemsSource;
         set
         {
             if (this._itemsSource == value) return;
 
-            if (this._itemsSource?.Items is INotifyCollectionChanged oldCollection)
+            if (this._itemsSource is INotifyCollectionChanged oldCollection)
             {
                 oldCollection.CollectionChanged -= this.ItemsSource_CollectionChanged;
             }
 
             this._itemsSource = value;
 
-            if (this._itemsSource?.Items is INotifyCollectionChanged newCollection)
+            if (this._itemsSource is INotifyCollectionChanged newCollection)
             {
                 newCollection.CollectionChanged += this.ItemsSource_CollectionChanged;
             }
@@ -119,6 +132,8 @@ public abstract class ItemsControl : Control
 
     private void ItemsSource_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
+        if (this.ItemTemplate is null) return;
+
         switch (e.Action)
         {
             case NotifyCollectionChangedAction.Add:
@@ -137,12 +152,14 @@ public abstract class ItemsControl : Control
                 this.OnItemsReset();
                 break;
             default:
-                throw new ArgumentOutOfRangeException();
+                throw new InvalidOperationException();
         }
     }
 
     private void OnItemsReset()
     {
+        if (this.Items.Count == 0) return;
+
         this.Items.Clear();
         this._itemControls?.Clear();
     }
@@ -153,7 +170,7 @@ public abstract class ItemsControl : Control
 
         foreach (var item in items)
         {
-            var control = this.ItemsSource!.CreateItem(item);
+            var control = this.ItemTemplate!.CreateItem(item);
             this.Items.Add(control);
             this._itemControls.Add(item, control);
         }
@@ -173,35 +190,30 @@ public abstract class ItemsControl : Control
     {
         this.OnItemsReset();
 
-        if (this.ItemsSource is not null)
-        {
-            var list = this.ItemsSource.Items.Cast<object>().ToList();
-            this.OnItemsAdded(list);
-        }
+        if (this.ItemsSource is null) return;
+        if (this.ItemTemplate is null) return;
+
+        var list = this.ItemsSource is IList listSource ? listSource : this.ItemsSource.ToList();
+        this.OnItemsAdded(list);
     }
 }
 
-public class ItemsSource<T> : IItemSource
+public class ItemTemplate<T> : IItemTemplate
 {
-    public ItemsSource(IEnumerable<T> items, Func<T, Control> itemTemplate)
+    private readonly Func<T, Control> _factory;
+
+    public ItemTemplate(Func<T, Control> itemTemplate)
     {
-        this.Items = items;
-        this.ItemTemplate = itemTemplate;
+        this._factory = itemTemplate;
     }
 
-    public IEnumerable<T> Items { get; }
-    public Func<T, Control> ItemTemplate { get; }
-
-    IEnumerable IItemSource.Items => this.Items;
-
-    Control IItemSource.CreateItem(object item)
+    Control IItemTemplate.CreateItem(object item)
     {
-        return this.ItemTemplate((T)item);
+        return this._factory.Invoke((T)item);
     }
 }
 
-public interface IItemSource
+public interface IItemTemplate
 {
-    IEnumerable Items { get; }
     Control CreateItem(object item);
 }
