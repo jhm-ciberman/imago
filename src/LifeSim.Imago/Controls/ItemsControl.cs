@@ -90,9 +90,9 @@ public abstract class ItemsControl : Control
     }
 
     private Dictionary<object, Control>? _itemControls;
-    private IItemTemplate? _itemItemplate;
+    private IDataTemplate? _itemItemplate;
 
-    public IItemTemplate? ItemTemplate
+    public IDataTemplate? ItemTemplate
     {
         get => this._itemItemplate;
         set
@@ -160,6 +160,11 @@ public abstract class ItemsControl : Control
     {
         if (this.Items.Count == 0) return;
 
+        foreach (var disposable in this.Items.Cast<IDisposable>())
+        {
+            disposable.Dispose();
+        }
+
         this.Items.Clear();
         this._itemControls?.Clear();
     }
@@ -196,24 +201,4 @@ public abstract class ItemsControl : Control
         var list = this.ItemsSource is IList listSource ? listSource : this.ItemsSource.ToList();
         this.OnItemsAdded(list);
     }
-}
-
-public class ItemTemplate<T> : IItemTemplate
-{
-    private readonly Func<T, Control> _factory;
-
-    public ItemTemplate(Func<T, Control> itemTemplate)
-    {
-        this._factory = itemTemplate;
-    }
-
-    Control IItemTemplate.CreateItem(object item)
-    {
-        return this._factory.Invoke((T)item);
-    }
-}
-
-public interface IItemTemplate
-{
-    Control CreateItem(object item);
 }
