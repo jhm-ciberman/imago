@@ -138,3 +138,6 @@ _NCrunch*
 # LifeSim artifacts folder
 artifacts/
 backend.txt
+
+# Code Coverage
+coveragereport/
