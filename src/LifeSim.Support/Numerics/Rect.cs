@@ -4,7 +4,7 @@ using System.Numerics;
 namespace LifeSim.Support.Numerics;
 
 /// <summary>
-/// Represents a 2D rectangle.
+/// Represents a 2D rectangle with floating point coordinates.
 /// </summary>
 public struct Rect : IEquatable<Rect>
 {
