@@ -232,7 +232,9 @@ public class Node3D : IDisposable, IFormattable
 
         // If the current node has a stage, add the node to the stage
         if (this.Stage != null)
+        {
             node.AttachToStage(this.Stage);
+        }
     }
 
     /// <summary>
@@ -269,7 +271,7 @@ public class Node3D : IDisposable, IFormattable
     /// Attaches this node to the given stage.
     /// </summary>
     /// <param name="stage">The stage to attach to.</param>
-    internal virtual void AttachToStage(Stage stage)
+    public virtual void AttachToStage(Stage stage)
     {
         if (this.Stage != null)
             throw new InvalidOperationException("Cannot attach to stage if already attached to one. Please detach first.");
@@ -286,7 +288,7 @@ public class Node3D : IDisposable, IFormattable
     /// <summary>
     /// Detaches this node from the current stage.
     /// </summary>
-    internal virtual void DetachFromStage()
+    public virtual void DetachFromStage()
     {
         if (this.Stage == null) return;
 

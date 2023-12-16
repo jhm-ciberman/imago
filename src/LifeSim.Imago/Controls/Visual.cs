@@ -7,7 +7,7 @@ using LifeSim.Support.Numerics;
 
 namespace LifeSim.Imago.Controls;
 
-public abstract class Visual : ObservableObject
+public abstract class Visual : ObservableObject, IDisposable
 {
     private string _name = string.Empty;
     private Visibility _visibility = Visibility.Visible;
@@ -219,6 +219,8 @@ public abstract class Visual : ObservableObject
 
     protected abstract Rect ArrangeCore(Rect finalRect);
 
+    private IDisposable? _bindings = null;
+
     public virtual void OnAddedToStage(GuiLayer stage)
     {
         if (this.Stage != null)
@@ -233,6 +235,17 @@ public abstract class Visual : ObservableObject
         {
             child.OnAddedToStage(stage);
         }
+
+        this._bindings = this.CreateBindings();
+    }
+
+    /// <summary>
+    /// This method can be overridden to create bindings when the control is added to a stage.
+    /// </summary>
+    /// <returns>The created bindings.</returns>
+    protected virtual IDisposable? CreateBindings()
+    {
+        return null;
     }
 
     public virtual void OnRemovedFromStage(GuiLayer stage)
@@ -247,6 +260,8 @@ public abstract class Visual : ObservableObject
         {
             child.OnRemovedFromStage(stage);
         }
+
+        this._bindings?.Dispose();
     }
 
     /// <summary>
@@ -398,5 +413,35 @@ public abstract class Visual : ObservableObject
         this.IsArrangeValid = false;
 
         this.Parent?.InvalidateArrange();
+    }
+
+    public bool IsDisposed { get; private set; } = false;
+
+    /// <summary>
+    /// Disposes the control.
+    /// </summary>
+    public void Dispose()
+    {
+        if (this.IsDisposed) return;
+        this.IsDisposed = true;
+
+        foreach (var child in this.VisualChildren)
+        {
+            child.Dispose();
+        }
+
+        this.Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    ~Visual() =>  this.Dispose(false);
+
+    /// <summary>
+    /// Disposes the control.
+    /// </summary>
+    /// <param name="disposing">Whether the control is disposing.</param>
+    protected virtual void Dispose(bool disposing)
+    {
+        //
     }
 }

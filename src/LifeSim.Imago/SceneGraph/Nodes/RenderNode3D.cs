@@ -153,7 +153,7 @@ public class RenderNode3D : Node3D, IPickable
         this._renderable.Transform = this.WorldMatrix;
     }
 
-    internal override void AttachToStage(Stage stage)
+    public override void AttachToStage(Stage stage)
     {
         base.AttachToStage(stage);
         this.UpdateRegistrationWithPickingManager();
@@ -161,7 +161,7 @@ public class RenderNode3D : Node3D, IPickable
         this._renderable.Stage = stage;
     }
 
-    internal override void DetachFromStage()
+    public override void DetachFromStage()
     {
         if (this.Stage is null)
             throw new InvalidOperationException("Cannot detach from scene if not attached to one.");
@@ -172,7 +172,7 @@ public class RenderNode3D : Node3D, IPickable
         base.DetachFromStage();
     }
 
-    private void UpdateRegistrationWithPickingManager()
+    public void UpdateRegistrationWithPickingManager()
     {
         if (this.Stage is null) return;
 
