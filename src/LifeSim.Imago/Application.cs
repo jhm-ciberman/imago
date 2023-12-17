@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Runtime;
+using System.Threading;
 using LifeSim.Imago.Graphics.Rendering;
 using LifeSim.Imago.Input;
 using LifeSim.Imago.SceneGraph;
@@ -106,12 +107,31 @@ public class Application : IDisposable
         // This can be overridden by derived classes.
     }
 
+    protected virtual void PrepareForRender()
+    {
+        // This can be overridden by derived classes.
+    }
+
     public void ChangeScene(Scene scene)
     {
         this.Stage.ChangeScene(scene);
     }
 
     public Scene Scene => this.Stage.Scene;
+
+    /// <summary>
+    /// Gets or sets the minimum time that should pass between frames.
+    /// </summary>
+    public float TargetFrameTime { get; set; } = 0f; //1f / 60f;
+
+    /// <summary>
+    /// Gets or sets the target frames per second.
+    /// </summary>
+    public float TargetFramesPerSecond
+    {
+        get => 1f / this.TargetFrameTime;
+        set => this.TargetFrameTime = 1f / value;
+    }
 
     /// <summary>
     /// Starts the application.
@@ -130,6 +150,13 @@ public class Application : IDisposable
             this._input.UpdateFrameInput();
 
             this.ElapsedTime = sw.Elapsed.TotalSeconds;
+
+            while (this.ElapsedTime - previousElapsed < this.TargetFrameTime)
+            {
+                this.ElapsedTime = sw.Elapsed.TotalSeconds;
+                Thread.Sleep(0); // Let other threads run.
+            }
+
             this.DeltaTime = this.ElapsedTime - previousElapsed;
             previousElapsed = this.ElapsedTime;
 
@@ -146,6 +173,8 @@ public class Application : IDisposable
                 this.IsRunning = false;
                 break;
             }
+
+            this.PrepareForRender();
 
             this._renderer.Render(this.Stage);
         }

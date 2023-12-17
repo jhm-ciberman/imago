@@ -276,8 +276,10 @@ public class Renderer : IDisposable
         cl.Begin();
 
         if (renderTexture.SampleCount == TextureSampleCount.Count1)
+        {
             // Nothing to resolve, just copy the texture.
             cl.CopyTexture(renderTexture.ForwardColorTexture, resolvedTexture.VeldridTexture);
+        }
         else
         {
             cl.ResolveTexture(renderTexture.ForwardColorTexture, resolvedTexture.VeldridTexture);
@@ -287,7 +289,6 @@ public class Renderer : IDisposable
 
         this.GraphicsDevice.SubmitCommands(cl);
     }
-
 
     private void RenderCore(CommandList cl, Stage stage, RenderTexture renderTexture)
     {
