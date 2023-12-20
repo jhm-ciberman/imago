@@ -434,7 +434,7 @@ public abstract class Visual : ObservableObject, IDisposable
         GC.SuppressFinalize(this);
     }
 
-    ~Visual() =>  this.Dispose(false);
+    ~Visual() => this.Dispose(false);
 
     /// <summary>
     /// Disposes the control.
