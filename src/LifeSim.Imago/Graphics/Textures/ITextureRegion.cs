@@ -73,4 +73,24 @@ public static class TextureRegionExtensions
 
         return regions;
     }
+
+    /// <summary>
+    /// Creates a texture region that is mirrored horizontally.
+    /// </summary>
+    /// <param name="texture">The texture.</param>
+    /// <returns>The mirrored texture region.</returns>
+    public static ITextureRegion MirrorX(this ITextureRegion texture)
+    {
+        return texture.SubTexture(new Vector2(1f, 0f), new Vector2(0f, 1f));
+    }
+
+    /// <summary>
+    /// Creates a texture region that is mirrored vertically.
+    /// </summary>
+    /// <param name="texture">The texture.</param>
+    /// <returns>The mirrored texture region.</returns>
+    public static ITextureRegion MirrorY(this ITextureRegion texture)
+    {
+        return texture.SubTexture(new Vector2(0f, 1f), new Vector2(1f, 0f));
+    }
 }
