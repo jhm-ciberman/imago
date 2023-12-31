@@ -6,7 +6,7 @@ using LifeSim.Imago.SceneGraph.Nodes;
 
 namespace LifeSim.Imago.SceneGraph;
 
-public interface IPickableView
+public interface IPickableTarget
 {
     void MouseEnter(HitInfo hitInfo);
     void MouseMove(HitInfo hitInfo);
@@ -18,14 +18,38 @@ public interface IPickableView
 /// </summary>
 public class PickingManger
 {
+    /// <summary>
+    /// Occurs when the currently selected pickable object changes.
+    /// </summary>
+    public event EventHandler? PickableTargetChanged;
+
     private readonly Dictionary<uint, IPickable> _pickables = new Dictionary<uint, IPickable>();
     private uint _nextId = 1;
-    private IPickableView? _current = null;
 
     /// <summary>
     /// Gets or sets the currently highlighted pickable object.
+    /// This is the node that is currently under the mouse cursor as reported by the renderer.
     /// </summary>
     public IPickable? HighlightedPickable { get; set; }
+
+    private IPickableTarget? _pickableTarget;
+
+    /// <summary>
+    /// Gets or sets the currently selected pickable object.
+    /// This is the nearst pickable object in the scene graph that is under the mouse cursor. To find this object,
+    /// the scene graph is traversed from the currently highlighted pickable object up to the root node and the first
+    /// object that implements the <see cref="IPickableTarget"/> interface is selected.
+    /// </summary>
+    public IPickableTarget? PickableTarget
+    {
+        get => this._pickableTarget;
+        set
+        {
+            if (this._pickableTarget == value) return;
+            this._pickableTarget = value;
+            this.PickableTargetChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
 
     /// <summary>
     /// Adds a pickable object to the list of pickable objects.
@@ -80,15 +104,17 @@ public class PickingManger
     {
         var pickableView = this.GetPickableView(out var hitInfo);
 
-        if (this._current == pickableView)
+        if (this._pickableTarget == pickableView)
         {
-            this._current?.MouseMove(hitInfo);
+            this._pickableTarget?.MouseMove(hitInfo);
         }
         else
         {
-            this._current?.MouseLeave();
-            this._current = pickableView;
-            this._current?.MouseEnter(hitInfo);
+            this._pickableTarget?.MouseLeave();
+            this._pickableTarget = pickableView;
+            this._pickableTarget?.MouseEnter(hitInfo);
+
+            this.PickableTarget = this._pickableTarget;
         }
     }
 
@@ -97,7 +123,7 @@ public class PickingManger
     /// </summary>
     /// <param name="hitInfo">The hit info that was used to find the pickable.</param>
     /// <returns>The pickable view that is currently under the mouse cursor.</returns>
-    private IPickableView? GetPickableView(out HitInfo hitInfo)
+    private IPickableTarget? GetPickableView(out HitInfo hitInfo)
     {
         hitInfo = default;
         var camera = Application.Instance.Scene.Camera;
@@ -114,7 +140,7 @@ public class PickingManger
         Node3D? node = selectedRenderNode;
         while (node != null) // Traverse the scene graph to find the selected object.
         {
-            if (node is IPickableView pickableView)
+            if (node is IPickableTarget pickableView)
                 return pickableView;
 
             node = node.Parent; // Go up in the scene graph.
