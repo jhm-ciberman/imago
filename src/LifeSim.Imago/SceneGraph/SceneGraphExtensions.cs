@@ -268,4 +268,30 @@ public static class SceneGraphExtensions
 
         return result;
     }
+
+    /// <summary>
+    /// Swaps the child of the specified node.
+    /// </summary>
+    /// <param name="self">The parent node.</param>
+    /// <param name="current">The current child node.</param>
+    /// <param name="next">The new value for the child node.</param>
+    /// <param name="dispose">If true, the current child node will be disposed.</param>
+    /// <returns>True if the child was swapped, false otherwise.</returns>
+    public static bool SwapChild(this Node3D self, ref Node3D? current, Node3D? next, bool dispose = true)
+    {
+        if (current == next) return false;
+
+        if (current != null)
+        {
+            self.RemoveChild(current, dispose);
+        }
+
+        if (next != null)
+        {
+            self.AddChild(next);
+        }
+
+        current = next;
+        return true;
+    }
 }
