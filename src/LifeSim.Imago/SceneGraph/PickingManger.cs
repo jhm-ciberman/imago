@@ -98,23 +98,29 @@ public class PickingManger
     }
 
     /// <summary>
+    /// Gets the HitInfo that was used to find the currently selected pickable object.
+    /// </summary>
+    public HitInfo HitInfo { get; private set; }
+
+    /// <summary>
     /// Updates the picking.
     /// </summary>
     public void Update()
     {
-        var pickableView = this.GetPickableView(out var hitInfo);
+        var newTarget = this.GetPickableView(out var hitInfo);
 
-        if (this._pickableTarget == pickableView)
+        this.HitInfo = hitInfo;
+
+        if (this.PickableTarget == newTarget)
         {
-            this._pickableTarget?.MouseMove(hitInfo);
+            this.PickableTarget?.MouseMove(hitInfo);
         }
         else
         {
-            this._pickableTarget?.MouseLeave();
-            this._pickableTarget = pickableView;
-            this._pickableTarget?.MouseEnter(hitInfo);
+            this.PickableTarget?.MouseLeave();
+            newTarget?.MouseEnter(hitInfo);
 
-            this.PickableTarget = this._pickableTarget;
+            this.PickableTarget = newTarget;
         }
     }
 

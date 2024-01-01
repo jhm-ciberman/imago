@@ -115,6 +115,7 @@ public class MultiMeshRenderNode3D : Node3D
             for (int i = actualCount; i < neededCount; i++)
             {
                 var node = this.CreateRenderNode();
+                node.IsPickable = this.IsPickable;
                 this.AddChild(node);
                 this._renderNodes.Add(node);
             }
