@@ -379,7 +379,7 @@ internal class Renderable : IDisposable
 
     protected bool SetInstanceData<T>(ref T backingField, T value) where T : unmanaged
     {
-        ObjectDisposedException.ThrowIf(this.IsDisposed, this);
+        if (this.IsDisposed) return false;
 
         if (backingField.Equals(value)) return false;
         backingField = value;
