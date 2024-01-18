@@ -185,6 +185,7 @@ public static class SceneGraphExtensions
     /// Prints the hierarchy of the specified node to the console.
     /// </summary>
     /// <param name="self">The node.</param>
+    /// <param name="format">The format string to use for each node.</param>
     public static void PrintHierarchyToConsole(this Node3D self, string? format = null)
     {
         PrintHierarchyToConsoleCore(self, "", true, format);

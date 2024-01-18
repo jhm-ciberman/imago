@@ -48,6 +48,7 @@ public class SpriteBackground : IBackground
     /// Initializes a new instance of the <see cref="SpriteBackground"/> class.
     /// </summary>
     /// <param name="sprite">The sprite to display.</param>
+    /// <param name="frameIndex">The initial frame index.</param>
     public SpriteBackground(Sprite sprite, int frameIndex = 0)
     {
         this._sprite = sprite;

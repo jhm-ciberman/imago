@@ -29,6 +29,7 @@ public static class RayCastExtensions
     /// <summary>
     /// Performs a RayCast against the vertices of this mesh.
     /// </summary>
+    /// <param name="mesh">The mesh to use.</param>
     /// <param name="ray">The ray to use. This ray should be in object-local space.</param>
     /// <param name="hitInfo">If the RayCast is successful, contains the hit information.</param>
     /// <returns>True if the <see cref="Ray"/> intersects the mesh; false otherwise</returns>
@@ -64,6 +65,7 @@ public static class RayCastExtensions
     /// <summary>
     /// Performs a RayCast against the vertices of this mesh.
     /// </summary>
+    /// <param name="mesh">The mesh instance</param>
     /// <param name="ray">The ray to use. This ray should be in object-local space.</param>
     /// <param name="hitInfos">If the RayCast is successful, contains the hit
     /// information of every hit. The distances are not sorted.</param>
