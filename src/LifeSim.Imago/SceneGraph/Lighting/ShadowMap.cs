@@ -1,7 +1,6 @@
 using System;
 using LifeSim.Imago.SceneGraph.Cameras;
 using LifeSim.Support.Drawing;
-using LifeSim.Support.Numerics;
 
 namespace LifeSim.Imago.SceneGraph.Lighting;
 
@@ -161,7 +160,7 @@ public class ShadowMap
             float t = (float)i / cascadesCount;
             float uniformDistance = near + (far - near) * t;
             float logarithmicDistance = near * MathF.Pow(far / near, t);
-            this.SplitDistances[i] = MathUtils.Lerp(logarithmicDistance, uniformDistance, this.SplitLambda);
+            this.SplitDistances[i] = float.Lerp(logarithmicDistance, uniformDistance, this.SplitLambda);
         }
     }
 }

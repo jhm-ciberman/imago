@@ -94,8 +94,8 @@ public struct Vector2Int : IEquatable<Vector2Int>
     public static Vector2Int Lerp(Vector2Int value1, Vector2Int value2, float t)
     {
         return new Vector2Int(
-            (int)Math.Round(MathUtils.Lerp(value1.X, value2.X, t)),
-            (int)Math.Round(MathUtils.Lerp(value1.Y, value2.Y, t)));
+            (int)Math.Round(float.Lerp(value1.X, value2.X, t)),
+            (int)Math.Round(float.Lerp(value1.Y, value2.Y, t)));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

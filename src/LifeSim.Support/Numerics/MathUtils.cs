@@ -34,18 +34,6 @@ public static class MathUtils
     public static float RadToDeg { get; } = 180f / MathF.PI;
 
     /// <summary>
-    /// Linearly interpolates between two values.
-    /// </summary>
-    /// <param name="a">The first value.</param>
-    /// <param name="b">The second value.</param>
-    /// <param name="t">The interpolation factor.</param>
-    /// <returns>The interpolated value.</returns>
-    public static float Lerp(float a, float b, float t)
-    {
-        return a + (b - a) * t;
-    }
-
-    /// <summary>
     /// Smoothly interpolates between two values.
     /// </summary>
     /// <param name="v1">The first value.</param>
@@ -54,7 +42,7 @@ public static class MathUtils
     /// <returns>The interpolated value.</returns>
     public static float SmoothStep(float v1, float v2, float lerpProgress)
     {
-        return Lerp(v1, v2, lerpProgress * lerpProgress * (3f - 2f * lerpProgress));
+        return float.Lerp(v1, v2, lerpProgress * lerpProgress * (3f - 2f * lerpProgress));
     }
 
     // Moves a value /current/ towards /target/.
