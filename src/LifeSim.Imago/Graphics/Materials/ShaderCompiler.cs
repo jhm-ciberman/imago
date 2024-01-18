@@ -92,7 +92,7 @@ public static class ShaderCompiler
                 throw new Exception(exceptionStr);
             }
 
-            throw e;
+            throw;
         }
     }
 
