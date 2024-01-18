@@ -259,7 +259,7 @@ public class Control : Visual
     }
 
     /// <summary>
-    /// Updates the control. This method is called by the <see cref="Root"/> of the control in each frame.
+    /// Updates the control. This method is called by the <see cref="Visual.Stage"/> of the control in each frame.
     /// </summary>
     public virtual void Update(float deltaTime)
     {

@@ -80,8 +80,8 @@ public class Font
     /// Gets a blurred font with the specified font family name and size and blur amount.
     /// </summary>
     /// <param name="fontFamily">The name of the font family.</param>
-    /// <param name="size">The size of the font.</param>
-    /// <param name="blurAmount">The blur amount of the font.</param>
+    /// <param name="fontSize">The size of the font.</param>
+    /// <param name="blur">The blur amount of the font.</param>
     /// <returns>The font.</returns>
     public static Font GetBlurredFont(string? fontFamily, float fontSize, int blur)
     {
@@ -94,8 +94,8 @@ public class Font
     /// Gets a stroked font with the specified font family name and size and stroke amount.
     /// </summary>
     /// <param name="fontFamily">The name of the font family.</param>
-    /// <param name="size">The size of the font.</param>
-    /// <param name="strokeAmount">The stroke amount of the font.</param>
+    /// <param name="fontSize">The size of the font.</param>
+    /// <param name="stroke">The stroke amount of the font.</param>
     /// <returns>The font.</returns>
     public static Font GetStrokedFont(string? fontFamily, int fontSize, int stroke)
     {
@@ -108,7 +108,7 @@ public class Font
     /// Gets a font with the specified font family name and size.
     /// </summary>
     /// <param name="fontFamily">The name of the font family.</param>
-    /// <param name="size">The size of the font.</param>
+    /// <param name="fontSize">The size of the font.</param>
     /// <returns>The font.</returns>
     public static Font GetFont(string? fontFamily, float fontSize)
     {

@@ -16,7 +16,6 @@ public interface ITextEffect
     /// <param name="font">The font used to draw.</param>
     /// <param name="position">The position of the text.</param>
     /// <param name="color">The color of the text.</param>
-    /// <remarks>The <see cref="InvalidateFont"/> method must be called before this method is called.</remarks>
     /// <exception cref="InvalidOperationException">The font is not initialized.</exception>
     void Draw(SpriteBatcher spriteBatcher, string text, Font font, Vector2 position, Color color);
 }

@@ -5,8 +5,7 @@ using Veldrid.Utilities;
 namespace LifeSim.Imago.Graphics.Meshes;
 
 /// <summary>
-/// An object describing generic mesh data. This can be used to construct a <see cref="VertexBuffer"/> and
-/// <see cref="IndexBuffer"/>.
+/// An object describing generic mesh data.
 /// </summary>
 public interface IMeshData
 {

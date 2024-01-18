@@ -107,7 +107,7 @@ public static class MathUtils
     /// <summary>
     /// Returns the angle in radians between 0 and 2*Pi.
     /// </summary>
-    /// <param name="2f">The angle in radians.</param>
+    /// <param name="value">The angle in radians.</param>
     /// <returns>The angle in the range [0, 2*Pi).</returns>
     public static float WrapAngle(float value)
     {

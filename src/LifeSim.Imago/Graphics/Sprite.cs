@@ -123,7 +123,7 @@ public class Sprite
     /// <param name="frameCount">The number of frames in the sprite.</param>
     /// <param name="frameSize">The size of each frame in pixels.</param>
     /// <param name="offset">The offset of each frame from the top-left corner of the sprite sheet in pixels.</param>
-    /// <param name="nineSliceMargin">The margin to be used when the sprite is drawn as a 9-slice.
+    /// <param name="nineSliceMargin">The margin to be used when the sprite is drawn as a 9-slice.</param>
     /// <returns>The sprite.</returns>
     public static Sprite FromSpriteSheet(PackedTexture packedTexture, int frameCount, Vector2 frameSize, Vector2 offset = default, Thickness nineSliceMargin = default)
     {

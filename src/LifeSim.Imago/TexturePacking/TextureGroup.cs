@@ -7,9 +7,6 @@ namespace LifeSim.Imago.TexturePacking;
 /// A texture group is a container for one or more <see cref="TexturePage"/>s. Each texture group
 /// defines the size of the atlas that will be used to pack the textures as well as the alignment of
 /// the items inside the atlas.
-///
-/// Each group has a name that can be used for finding the group in the <see cref="TexturePacker"/>.
-/// It is recomended to group the textures according to the type of textures. For example: UI, Terrain, game objects, etc.
 /// </summary>
 public class TextureGroup : IDisposable
 {

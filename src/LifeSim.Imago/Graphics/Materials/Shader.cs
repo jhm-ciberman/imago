@@ -77,7 +77,6 @@ public class Shader : IDisposable
     /// <summary>
     /// Gets or creates a veldrid pipeline.
     /// </summary>
-    /// <param name="pass">The pass to use.</param>
     /// <param name="vertexFormat">The vertex format to use.</param>
     /// <param name="flags">The render flags to use.</param>
     /// <param name="sampleCount">The sample count to use.</param>

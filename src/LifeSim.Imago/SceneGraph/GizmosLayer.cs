@@ -153,7 +153,7 @@ public class GizmosLayer
     /// <summary>
     /// Draws a wireframe cube at the given position.
     /// </summary>
-    /// <param name="position">The position of the cube.</param>
+    /// <param name="center">The center position of the cube.</param>
     /// <param name="size">The size of the cube.</param>
     /// <param name="color">The color of the cube.</param>
     /// <param name="lifeTime">The amount of time the cube will be visible. A value of 0 means that the cube will be drawn until the next frame.</param>
@@ -206,7 +206,7 @@ public class GizmosLayer
     /// <summary>
     /// Draws a circle at the given position.
     /// </summary>
-    /// <param name="position">The position of the circle.</param>
+    /// <param name="center">The center position of the circle.</param>
     /// <param name="radius">The radius of the circle.</param>
     /// <param name="planeNormal">The normal of the plane the circle is drawn on.</param>
     /// <param name="color">The color of the circle.</param>
@@ -300,7 +300,7 @@ public class GizmosLayer
     /// Draws a plane with an arrow pointing in the normal direction.
     /// </summary>
     /// <param name="position">The position of the plane.</param>
-    /// <param name="normal">The normal of the plane.</param>
+    /// <param name="planeNormal">The normal of the plane.</param>
     /// <param name="planeColor">The color of the plane.</param>
     /// <param name="normalColor">The color of the arrow.</param>
     /// <param name="lifeTime">The amount of time the plane will be visible. A value of 0 means that the plane will be drawn until the next frame.</param>

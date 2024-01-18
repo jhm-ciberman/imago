@@ -187,7 +187,7 @@ public abstract class Visual : ObservableObject, IDisposable
     /// <summary>
     /// Performs the arrange pass of the layout process. In the arrange pass, the control positions its children and computes the actual size of the control.
     /// </summary>
-    /// <param name="finalSize">The final size that this object should use to arrange itself and its children.</param>
+    /// <param name="finalRect">The final size that this object should use to arrange itself and its children.</param>
     public void Arrange(Rect finalRect)
     {
         if (this.IsArrangeValid) return;
