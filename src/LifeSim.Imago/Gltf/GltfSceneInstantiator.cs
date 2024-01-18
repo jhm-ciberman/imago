@@ -23,7 +23,7 @@ internal class GltfSceneInstantiator
         return this.InstantiateNodeRecursive(this._node);
     }
 
-    private Node3D CreateRenderNode(Mesh mesh, Material? material, GltfSkinInfo? skin)
+    private RenderNode3D CreateRenderNode(Mesh mesh, Material? material, GltfSkinInfo? skin)
     {
         return new RenderNode3D()
         {

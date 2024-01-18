@@ -45,7 +45,7 @@ public class SkyDomePass : IDisposable
     // The horizontal axis of the lut is for each hour of the day (left = 0hs, right = 24hs)
     // The vertical axis is for the vertical position of the sky dome (top = top of the sphere, bottom = middle of the sphere)
     // That way we can have different gradients for different times of the day.
-    private readonly ITexture _lutTexture;
+    private readonly ImageTexture _lutTexture;
 
     private readonly Sampler _sampler;
 
