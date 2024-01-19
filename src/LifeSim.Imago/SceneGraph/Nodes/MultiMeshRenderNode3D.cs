@@ -85,6 +85,7 @@ public class MultiMeshRenderNode3D : Node3D
         get => this._isPickable;
         set
         {
+            if (this._isPickable == value) return;
             this._isPickable = value;
             foreach (var node in this._renderNodes)
             {
