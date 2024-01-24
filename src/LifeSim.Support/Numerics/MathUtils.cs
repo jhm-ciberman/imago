@@ -9,6 +9,11 @@ public static class MathUtils
     private const float K_EPSILON_NORMAL_SQRT = 1e-15f;
 
     /// <summary>
+    /// Gets the value of pi as a float.
+    /// </summary>
+    public static float Pi { get; } = MathF.PI;
+
+    /// <summary>
     /// Gets the value of pi divided by two.
     /// </summary>
     public static float HalfPi { get; } = MathF.PI / 2f;
@@ -53,30 +58,16 @@ public static class MathUtils
         return current + MathF.Sign(target - current) * maxDelta;
     }
 
-    public static float DeltaAngle(float current, float target)
+    public static float AngleDifference(float current, float target)
     {
         float delta = (target - current) % (MathF.PI * 2);
+
         if (delta > MathF.PI)
             delta -= MathF.PI * 2;
+        else if (delta < -MathF.PI)
+            delta += MathF.PI * 2;
+
         return delta;
-    }
-
-    /// <summary>
-    /// Returns the angle difference in radians between /from/ and /to/.
-    /// </summary>
-    /// <param name="from">The source angle in radians.</param>
-    /// <param name="to">The target angle in radians.</param>
-    /// <returns>The delta angle in radians.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float AngleDifference(Vector2 from, Vector2 to)
-    {
-        // sqrt(a) * sqrt(b) = sqrt(a * b) -- valid for real numbers
-        float denominator = (float)MathF.Sqrt(from.LengthSquared() * to.LengthSquared());
-        if (denominator < K_EPSILON_NORMAL_SQRT)
-            return 0F;
-
-        float dot = MathF.Max(-1f, Math.Min(1f, Vector2.Dot(from, to) / denominator));
-        return MathF.Acos(dot);
     }
 
     public static Vector2 ClampMagnitude(Vector2 velocity, float maxMagnitude)
@@ -111,10 +102,32 @@ public static class MathUtils
     /// <returns>The angle in the range [0, 2*Pi).</returns>
     public static float WrapAngle(float value)
     {
-        value %= MathF.PI * 2f;
-        if (value < 0f)
-            value += MathF.PI * 2f;
-        return value;
+        return (value + TwoPi) % TwoPi;
+    }
+
+    /// <summary>
+    /// Returns the angle in radians between -Pi and Pi.
+    /// </summary>
+    /// <param name="angle">The angle in radians.</param>
+    /// <returns>The angle in the range [-Pi, Pi).</returns>
+    public static float NormalizeAngleMinusPiToPi(float angle)
+    {
+        angle = (angle + MathF.PI) % TwoPi;
+        if (angle < 0)
+            angle += MathF.PI;
+        return angle - MathF.PI;
+    }
+
+    public static float ClampAngle(float value, float min, float max)
+    {
+        value = WrapAngle(value);
+        min = WrapAngle(min);
+        max = WrapAngle(max);
+
+        if (min < max)
+            return Clamp(value, min, max);
+        else
+            return Clamp(value, max, min);
     }
 
     /// <summary>
@@ -126,7 +139,7 @@ public static class MathUtils
     /// <returns>The interpolated angle in radians.</returns>
     public static float LerpAngle(float a, float b, float t)
     {
-        float delta = DeltaAngle(a, b);
+        float delta = AngleDifference(a, b);
         return a + delta * t;
     }
 
