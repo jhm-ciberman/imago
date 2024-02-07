@@ -75,10 +75,7 @@ public abstract class SamplerBase<T> where T : struct
     /// <returns>The sampled value.</returns>
     public T Sample(float time)
     {
-        if (time < 0 || time > this.Duration)
-        {
-            throw new ArgumentOutOfRangeException(nameof(time));
-        }
+        time = float.Clamp(time, 0, this.Duration);
 
         var index = this.FindNextIndex(time);
         var prevIndex = Math.Max(index - 1, 0);
