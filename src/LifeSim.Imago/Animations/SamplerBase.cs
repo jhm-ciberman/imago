@@ -24,13 +24,14 @@ public abstract class SamplerBase<T> where T : struct
     /// <summary>
     /// Gets the duration of this sampler in seconds.
     /// </summary>
-    public float Duration => this.Times[this.Times.Length - 1];
+    public float Duration { get; }
 
     public SamplerBase(float[] times, T[] values, InterpolationMode interpolation)
     {
         this.Times = times;
         this.Values = values;
         this.Interpolation = interpolation;
+        this.Duration = times[times.Length - 1];
     }
 
     /// <summary>
