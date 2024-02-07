@@ -210,4 +210,16 @@ public readonly struct Color
     {
         return HashCode.Combine(this.R, this.G, this.B, this.A);
     }
+
+    public static Color Lerp(Color from, Color to, float t)
+    {
+        t = Math.Clamp(t, 0, 1);
+
+        return new Color(
+            (byte)(from.R + (to.R - from.R) * t),
+            (byte)(from.G + (to.G - from.G) * t),
+            (byte)(from.B + (to.B - from.B) * t),
+            (byte)(from.A + (to.A - from.A) * t)
+        );
+    }
 }
