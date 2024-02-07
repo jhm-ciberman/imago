@@ -114,6 +114,17 @@ public class AnimationPlayer
     }
 
     /// <summary>
+    /// Plays the given animation from the beginning.
+    /// </summary>
+    /// <param name="animation">The animation to play.</param>
+    /// <param name="loop">Whether the animation should be played in loop mode.</param>
+    public void Play(Animation animation, bool loop)
+    {
+        this.IsLooping = loop;
+        this.Play(animation);
+    }
+
+    /// <summary>
     /// Pauses the animation.
     /// </summary>
     public void Pause()
