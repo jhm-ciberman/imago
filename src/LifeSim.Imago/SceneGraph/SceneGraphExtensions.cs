@@ -168,6 +168,29 @@ public static class SceneGraphExtensions
         });
     }
 
+    /// <summary>
+    /// Renames the node with the specified old name to the new name.
+    /// </summary>
+    /// <param name="self">The root node.</param>
+    /// <param name="oldName">The node name to rename.</param>
+    /// <param name="newName">The new name for the node.</param>
+    /// <returns>True if the node was renamed, false otherwise.</returns>
+    public static bool RenameNode(this Node3D self, string oldName, string newName)
+    {
+        if (self.Name == oldName)
+        {
+            self.Name = newName;
+            return true;
+        }
+
+        for (var i = 0; i < self.Children.Count; i++)
+        {
+            if (self.Children[i].RenameNode(oldName, newName)) return true;
+        }
+
+        return false;
+    }
+
     private static void PrintHierarchyToConsoleCore(Node3D node, string indent, bool isLast, string? format = null)
     {
         var label = node.ToString(format);
