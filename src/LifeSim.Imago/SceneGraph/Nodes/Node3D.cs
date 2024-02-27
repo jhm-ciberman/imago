@@ -168,6 +168,8 @@ public class Node3D : IDisposable, IFormattable
     /// <param name="parentMatrix">The world transform of the parent node.</param>
     public virtual void UpdateTransform(ref Matrix4x4 parentMatrix)
     {
+        if (this.IsDisposed) return;
+
         this._worldMatrix = this.LocalMatrix * parentMatrix;
         this._dirtyFlags &= ~DirtyFlags.WorldMatrix;
         for (int i = 0; i < this.Children.Count; i++)
