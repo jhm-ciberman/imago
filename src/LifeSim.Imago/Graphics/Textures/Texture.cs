@@ -156,11 +156,13 @@ public class Texture : ITexture, ITextureRegion, IDisposable
         if (image.Width != this.Width || image.Height != this.Height)
             throw new ArgumentException("Image size does not match texture size.");
 
-        if (!image.TryGetSinglePixelSpan(out Span<Rgba32> pixels))
-            throw new ArgumentException("Image is not in RGBA32 format.");
+        if (!image.DangerousTryGetSinglePixelMemory(out Memory<Rgba32> memory))
+            throw new InvalidOperationException("Image is not in RGBA32 format.");
+
+        var span = memory.Span;
 
         var dest = new Span<byte>(this._data);
-        MemoryMarshal.Cast<Rgba32, byte>(pixels).CopyTo(dest);
+        MemoryMarshal.Cast<Rgba32, byte>(span).CopyTo(dest);
 
         this.OnTextureDirty();
     }

@@ -51,8 +51,10 @@ public class DirectTexture : ITexture
         if (image.Width != this.Width || image.Height != this.Height)
             throw new ArgumentException("Image size does not match texture size.");
 
-        if (!image.TryGetSinglePixelSpan(out Span<Rgba32> span))
+        if (!image.DangerousTryGetSinglePixelMemory(out Memory<Rgba32> memory))
             throw new InvalidOperationException("Image is not in RGBA32 format.");
+
+        var span = memory.Span;
 
         fixed (void* ptr = &span.GetPinnableReference())
         {
@@ -68,8 +70,10 @@ public class DirectTexture : ITexture
         if (x + image.Width > this.Width || y + image.Height > this.Height)
             throw new ArgumentException($"The size of the rectangle to update is larger than the texture. The area to update is ({x}, {y}) to ({x + image.Width}, {y + image.Height}) and the texture is {this.Width}x{this.Height}.");
 
-        if (!image.TryGetSinglePixelSpan(out Span<Rgba32> span))
+        if (!image.DangerousTryGetSinglePixelMemory(out Memory<Rgba32> memory))
             throw new InvalidOperationException("Image is not in RGBA32 format.");
+
+        var span = memory.Span;
 
         fixed (void* ptr = &span.GetPinnableReference())
         {
