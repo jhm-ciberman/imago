@@ -146,7 +146,7 @@ internal class ShadowPass : IDisposable, IPipelineProvider
             ShaderSet = new ShaderSetDescription(GetVertexLayout(shaderVariant.VertexFormat), shaderVariant.VeldridShaders),
             BlendState = BlendStateDescription.Empty,
             RasterizerState = new RasterizerStateDescription(
-                FaceCullMode.Back,
+                FaceCullMode.None, // Shadows are two-sided
                 PolygonFillMode.Solid,
                 FrontFace.CounterClockwise,
                 depthClipEnabled: false, // Shadow pancaking! Love pancakes!
