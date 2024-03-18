@@ -59,21 +59,21 @@ public class Renderer : IDisposable
     private readonly CommandList _commandList;
     private readonly CommandList _fullScreenCommandList;
     private readonly DisposeCollector _disposeCollector;
-    private readonly Dictionary<ResourceLayoutDescription, ResourceLayout> _resourceLayoutCache = [];
-    private readonly SwapPopList<Renderable> _renderables = [];
+    private readonly Dictionary<ResourceLayoutDescription, ResourceLayout> _resourceLayoutCache = new();
+    private readonly SwapPopList<Renderable> _renderables = new();
 
-    private readonly List<DataBuffer> _instanceDataBuffers = [];
-    private readonly List<DataBuffer> _transformDataBuffers = [];
-    private readonly List<DataBuffer> _skeletonDataBuffers = [];
+    private readonly List<DataBuffer> _instanceDataBuffers = new List<DataBuffer>();
+    private readonly List<DataBuffer> _transformDataBuffers = new List<DataBuffer>();
+    private readonly List<DataBuffer> _skeletonDataBuffers = new List<DataBuffer>();
 
-    private readonly List<Texture> _dirtyTextures = [];
-    private readonly List<Material> _dirtyMaterials = [];
+    private readonly List<Texture> _dirtyTextures = new();
+    private readonly List<Material> _dirtyMaterials = new();
 
     public ResourceLayout TransformResourceLayout { get; }
     public ResourceLayout InstanceResourceLayout { get; }
     public ResourceLayout SkeletonResourceLayout { get; }
 
-    private readonly List<Skeleton> _skeletons = [];
+    private readonly List<Skeleton> _skeletons = new List<Skeleton>();
 
     private readonly FullScreenPass _fullScreenPass;
     private readonly GizmosPass _gizmosPass;

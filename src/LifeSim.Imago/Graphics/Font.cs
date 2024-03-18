@@ -7,15 +7,15 @@ namespace LifeSim.Imago.Graphics;
 
 public class Font
 {
-    private static readonly Dictionary<string, byte[][]> _fontSources = [];
+    private static readonly Dictionary<string, byte[][]> _fontSources = new();
 
     private record struct FontKey(string FontFamily, float Size, FontSystemEffect Effect, int EffectAmount);
 
     private record struct FontSystemKey(string FontFamily, FontSystemEffect Effect, int EffectAmount);
 
-    private static readonly Dictionary<FontKey, Font> _fonts = [];
+    private static readonly Dictionary<FontKey, Font> _fonts = new();
 
-    private static readonly Dictionary<FontSystemKey, FontSystem> _fontSystems = [];
+    private static readonly Dictionary<FontSystemKey, FontSystem> _fontSystems = new();
 
     /// <summary>
     /// Gets or sets the default font family name.

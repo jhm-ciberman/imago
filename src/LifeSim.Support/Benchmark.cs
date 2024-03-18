@@ -9,7 +9,7 @@ public static class Benchmark
     private static readonly Action<object> _defaultLogger = Console.WriteLine;
     private static Action<object> _loggerFunction = _defaultLogger;
 
-    private static readonly Dictionary<string, Stopwatch> _parts = [];
+    private static readonly Dictionary<string, Stopwatch> _parts = new Dictionary<string, Stopwatch>();
 
     public static void SetLogger(Action<object> logger)
     {

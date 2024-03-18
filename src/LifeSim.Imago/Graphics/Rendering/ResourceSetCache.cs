@@ -15,7 +15,7 @@ internal class ResourceSetCache : IDisposable
 {
     private record struct Key(ITexture Texture, Shader Shader);
 
-    private readonly Dictionary<Key, ResourceSet> _cachedResourceSets = [];
+    private readonly Dictionary<Key, ResourceSet> _cachedResourceSets = new Dictionary<Key, ResourceSet>();
 
     private readonly ResourceFactory _factory;
 

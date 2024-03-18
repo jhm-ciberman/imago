@@ -171,7 +171,7 @@ public abstract class ItemsControl : Control
 
     private void OnItemsAdded(IList items)
     {
-        this._itemControls ??= [];
+        this._itemControls ??= new();
 
         foreach (var item in items)
         {

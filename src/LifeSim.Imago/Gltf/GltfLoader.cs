@@ -8,7 +8,7 @@ namespace LifeSim.Imago.Gltf;
 
 public class GltfLoader
 {
-    private static readonly Dictionary<string, GltfAsset> _cache = [];
+    private static readonly Dictionary<string, GltfAsset> _cache = new Dictionary<string, GltfAsset>();
 
     public static GltfAsset LoadFile(string path)
     {

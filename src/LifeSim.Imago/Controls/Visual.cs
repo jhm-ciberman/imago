@@ -13,7 +13,7 @@ public abstract class Visual : ObservableObject, IDisposable
     private Visibility _visibility = Visibility.Visible;
     private GuiLayer? _stage;
     private float _opacity = 1f;
-    private readonly List<Visual> _visualChildren = [];
+    private readonly List<Visual> _visualChildren = new List<Visual>();
     private bool _clipToBounds = false;
     private IStyle? _style;
 

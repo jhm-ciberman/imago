@@ -60,17 +60,17 @@ public class InputManager : IDisposable
 
     private readonly Sdl2Window _window;
 
-    private readonly HashSet<Key> _currentlyPressedKeys = [];
+    private readonly HashSet<Key> _currentlyPressedKeys = new();
 
-    private readonly HashSet<Key> _newKeysThisFrame = [];
+    private readonly HashSet<Key> _newKeysThisFrame = new();
 
-    private readonly HashSet<Key> _releasedKeysThisFrame = [];
+    private readonly HashSet<Key> _releasedKeysThisFrame = new();
 
-    private readonly HashSet<MouseButton> _currentlyPressedMouseButtons = [];
+    private readonly HashSet<MouseButton> _currentlyPressedMouseButtons = new();
 
-    private readonly HashSet<MouseButton> _newMouseButtonsThisFrame = [];
+    private readonly HashSet<MouseButton> _newMouseButtonsThisFrame = new();
 
-    private readonly HashSet<MouseButton> _releasedMouseButtonsThisFrame = [];
+    private readonly HashSet<MouseButton> _releasedMouseButtonsThisFrame = new();
 
     private IReadOnlyList<char> _typedCharactersThisFrame = Array.Empty<char>();
 

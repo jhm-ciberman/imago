@@ -30,7 +30,7 @@ public class TextBlock : Control
     protected Font? _font = null;
     protected Color _foreground = Color.Black;
     private float _lineHeight = float.NaN;
-    private readonly List<string> _textLines = [];
+    private readonly List<string> _textLines = new();
     private bool _textLinesDirty = true;
     private TextWrap _textWrap = TextWrap.NoWrap;
 

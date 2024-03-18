@@ -23,7 +23,7 @@ public class PickingManger
     /// </summary>
     public event EventHandler? PickableTargetChanged;
 
-    private readonly Dictionary<uint, IPickable> _pickables = [];
+    private readonly Dictionary<uint, IPickable> _pickables = new Dictionary<uint, IPickable>();
     private uint _nextId = 1;
 
     /// <summary>

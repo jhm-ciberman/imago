@@ -8,7 +8,7 @@ namespace LifeSim.Imago.SceneGraph;
 
 public class Scene : Node3D
 {
-    private readonly List<ILayer2D> _layers2D = [];
+    private readonly List<ILayer2D> _layers2D = new();
 
     /// <summary>
     /// Gets or sets the clear color of the stage. If null, the stage will not be cleared
@@ -52,7 +52,7 @@ public class Scene : Node3D
         }
     }
 
-    private readonly List<IParticleSystem> _particleSystems = [];
+    private readonly List<IParticleSystem> _particleSystems = new List<IParticleSystem>();
 
     /// <summary>
     /// Gets the particle systems used to render particles.

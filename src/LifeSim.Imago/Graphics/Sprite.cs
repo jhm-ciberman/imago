@@ -12,7 +12,7 @@ namespace LifeSim.Imago.Graphics;
 /// </summary>
 public class Sprite
 {
-    private readonly List<PackedTexture> _frames = [];
+    private readonly List<PackedTexture> _frames = new List<PackedTexture>();
 
     /// <summary>
     /// Gets a list of all frames of the sprite.

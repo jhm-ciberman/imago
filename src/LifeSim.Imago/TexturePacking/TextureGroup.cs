@@ -43,7 +43,7 @@ public class TextureGroup : IDisposable
 
     private readonly List<TexturePage> _pages = new(1);
 
-    private readonly Dictionary<PackedTexture, TexturePage> _packedTexturesPages = [];
+    private readonly Dictionary<PackedTexture, TexturePage> _packedTexturesPages = new();
 
     private bool _flushRequested = false;
 

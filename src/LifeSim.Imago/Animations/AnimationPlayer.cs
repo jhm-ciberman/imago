@@ -11,9 +11,9 @@ public class AnimationPlayer
 {
     private record class BoundChannel(Node3D Target, List<IChannel> Channels);
 
-    private readonly List<BoundChannel> _boundChannels = [];
+    private readonly List<BoundChannel> _boundChannels = new();
 
-    private readonly Dictionary<string, Node3D> _namesToNodes = [];
+    private readonly Dictionary<string, Node3D> _namesToNodes = new();
 
     private Node3D? _root = null;
 

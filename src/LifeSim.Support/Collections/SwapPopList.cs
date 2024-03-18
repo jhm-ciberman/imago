@@ -25,7 +25,7 @@ public class SwapPopList<T> : IList<T>, ICollection<T>, IReadOnlyList<T>, IEnume
 
     public SwapPopList()
     {
-        this._list = [];
+        this._list = new List<T>();
     }
 
     public SwapPopList(IEnumerable<T> collection)

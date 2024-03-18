@@ -5,7 +5,7 @@ namespace LifeSim.Imago.SceneGraph.Nodes;
 
 public class MultiMeshRenderNode3D : Node3D
 {
-    private readonly List<RenderNode3D> _renderNodes = [];
+    private readonly List<RenderNode3D> _renderNodes = new List<RenderNode3D>();
 
     private MeshRenderInfo[] _meshes = System.Array.Empty<MeshRenderInfo>();
 

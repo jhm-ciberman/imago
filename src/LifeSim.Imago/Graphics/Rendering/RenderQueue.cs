@@ -28,10 +28,10 @@ internal class RenderQueue : IEnumerable<Renderable>, IReadOnlyList<Renderable>,
     private static readonly Comparison<RenderIndex> _frontToBack = (x, y) => x.Key.CompareTo(y.Key);
     private static readonly Comparison<RenderIndex> _backToFront = (x, y) => y.Key.CompareTo(x.Key);
 
-    private readonly List<Renderable> _allRenderables = [];
-    private readonly Dictionary<Renderable, int> _renderableToIndex = [];
-    private readonly List<RenderIndex> _culledIndices = [];
-    private readonly List<Renderable> _culledItems = [];
+    private readonly List<Renderable> _allRenderables = new List<Renderable>();
+    private readonly Dictionary<Renderable, int> _renderableToIndex = new Dictionary<Renderable, int>();
+    private readonly List<RenderIndex> _culledIndices = new List<RenderIndex>();
+    private readonly List<Renderable> _culledItems = new List<Renderable>();
     private readonly Comparison<RenderIndex> _comparer;
 
     /// <summary>

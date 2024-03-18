@@ -19,7 +19,7 @@ public struct DebugLine
 
 public class GizmosLayer
 {
-    private readonly SwapPopList<DebugLine> _lines = [];
+    private readonly SwapPopList<DebugLine> _lines = new SwapPopList<DebugLine>();
     public IReadOnlyList<DebugLine> Lines => this._lines;
 
     public static GizmosLayer Default { get; private set; } = null!;
