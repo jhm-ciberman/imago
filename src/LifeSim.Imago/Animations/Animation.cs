@@ -8,7 +8,7 @@ namespace LifeSim.Imago.Animations;
 /// </summary>
 public class Animation : IDisposable
 {
-    private readonly Dictionary<string, List<IChannel>> _channels = new();
+    private readonly Dictionary<string, List<IChannel>> _channels = [];
 
     /// <summary>
     /// Gets the duration of the animation in seconds.
@@ -54,7 +54,7 @@ public class Animation : IDisposable
         }
         else
         {
-            this._channels.Add(key, new List<IChannel> { channel });
+            this._channels.Add(key, [channel]);
         }
 
         this.Duration = MathF.Max(channel.Duration, this.Duration);

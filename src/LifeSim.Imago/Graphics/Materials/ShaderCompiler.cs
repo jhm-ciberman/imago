@@ -29,7 +29,7 @@ public static class ShaderCompiler
 
     private static MacroDefinition[] GetMacroDefinitions(IEnumerable<MacroDefinition>? macros, GraphicsBackend backend)
     {
-        var list = macros == null ? new List<MacroDefinition>() : new List<MacroDefinition>(macros);
+        var list = macros == null ? [] : new List<MacroDefinition>(macros);
         switch (backend)
         {
             case GraphicsBackend.Direct3D11:

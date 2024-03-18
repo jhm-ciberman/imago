@@ -16,7 +16,7 @@ public class GltfReader
     private readonly glTFLoader.Schema.Gltf _model;
     private readonly GltfBuffer?[] _buffersCache;
     private readonly GltfNode?[] _nodesCache;
-    private readonly Dictionary<int, GltfAccessor> _accessorsCache = new();
+    private readonly Dictionary<int, GltfAccessor> _accessorsCache = [];
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GltfReader"/> class.
@@ -143,7 +143,7 @@ public class GltfReader
     private Animation LoadAnimation(int index)
     {
         var animationData = this._model.Animations[index];
-        List<IChannel> list = new List<IChannel>();
+        List<IChannel> list = [];
 
         foreach (var channelData in animationData.Channels)
         {

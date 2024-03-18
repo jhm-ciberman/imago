@@ -29,9 +29,9 @@ public class Shader : IDisposable
     public RenderFlags SupportedRenderFlags { get; } = RenderFlags.None;
 
     private record struct CachedPipeline(VertexFormat VertexFormat, Pipeline Pipeline, RenderFlags Flags, TextureSampleCount SampleCount);
-    private readonly List<CachedPipeline> _pipelines = new List<CachedPipeline>();
+    private readonly List<CachedPipeline> _pipelines = [];
     public ResourceLayout MaterialResourceLayout { get; }
-    private readonly List<ShaderVariant> _variants = new List<ShaderVariant>();
+    private readonly List<ShaderVariant> _variants = [];
     private readonly GraphicsDevice _gd;
 
     private readonly IPipelineProvider _pass;

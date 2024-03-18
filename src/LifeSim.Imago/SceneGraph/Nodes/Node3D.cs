@@ -32,7 +32,7 @@ public class Node3D : IDisposable, IFormattable
     private Quaternion _rotation = Quaternion.Identity;
     private Vector3 _scale = Vector3.One;
 
-    private readonly SwapPopList<Node3D> _children = new SwapPopList<Node3D>();
+    private readonly SwapPopList<Node3D> _children = [];
 
 
     /// <summary>

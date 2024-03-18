@@ -68,7 +68,7 @@ internal class ParticlesPass : IDisposable
 
     private readonly ParticleRenderData[] _particlesForRender = new ParticleRenderData[PARTICLES_PER_BATCH];
 
-    private readonly Dictionary<ITexture, ResourceSet> _textures = new Dictionary<ITexture, ResourceSet>();
+    private readonly Dictionary<ITexture, ResourceSet> _textures = [];
 
     public ParticlesPass(Renderer renderer, IRenderTexture renderTexture)
     {

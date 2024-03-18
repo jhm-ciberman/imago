@@ -20,7 +20,7 @@ public class GltfNode : IInstantiable
     public Material? Material { get; set; } = null;
     public GltfNode? Parent { get; set; } = null;
 
-    private readonly List<GltfNode> _children = new List<GltfNode>();
+    private readonly List<GltfNode> _children = [];
     public IReadOnlyList<GltfNode> Children => this._children;
 
     public GltfNode(string name)

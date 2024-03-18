@@ -6,7 +6,7 @@ namespace LifeSim.Support.Tweening;
 
 public class TweenLine
 {
-    private readonly List<ITween> _tweens = new();
+    private readonly List<ITween> _tweens = [];
 
     public ITween AddTween(ITween tween)
     {

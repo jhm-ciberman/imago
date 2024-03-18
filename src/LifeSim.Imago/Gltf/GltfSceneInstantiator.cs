@@ -9,7 +9,7 @@ namespace LifeSim.Imago.Gltf;
 
 internal class GltfSceneInstantiator
 {
-    private readonly Dictionary<GltfNode, Node3D> _nodesCache = new Dictionary<GltfNode, Node3D>();
+    private readonly Dictionary<GltfNode, Node3D> _nodesCache = [];
 
     private readonly GltfNode _node;
 

@@ -44,7 +44,7 @@ public class Stage
     /// </summary>
     public Scene Scene { get; private set; } = _emptyScene;
 
-    private readonly List<Node3D> _transformDirtyList = new List<Node3D>();
+    private readonly List<Node3D> _transformDirtyList = [];
 
     internal RenderQueue PickingRenderQueue { get; } = new RenderQueue(RenderQueues.Picking);
 
@@ -54,9 +54,9 @@ public class Stage
 
     internal RenderQueue[] ShadowCasterRenderQueues { get; } = new RenderQueue[4];
 
-    private readonly List<Renderable> _renderables = new();
-    private readonly List<Renderable> _dirtyRenderables = new();
-    private readonly List<ImmediateRenderable3D> _immediateRenderables = new();
+    private readonly List<Renderable> _renderables = [];
+    private readonly List<Renderable> _dirtyRenderables = [];
+    private readonly List<ImmediateRenderable3D> _immediateRenderables = [];
 
     private bool _invalidateRendererPipelines = false;
 
