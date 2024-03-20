@@ -12,6 +12,7 @@ public static partial class StringExtensions
 
     public static string ToPascalCase(this string value)
     {
+        // from snake_case to PascalCase
         return GetPascalCaseRegex().Replace(value, m => m.Groups[1].Value.ToUpper());
     }
 
@@ -19,7 +20,7 @@ public static partial class StringExtensions
     [GeneratedRegex("([a-z0-9])([A-Z])", RegexOptions.Compiled)]
     private static partial Regex GetSnakeCaseRegex();
 
-    [GeneratedRegex("([a-z0-9])([A-Z])", RegexOptions.Compiled)]
+    [GeneratedRegex("(?:^|_)([a-z])")]
     private static partial Regex GetPascalCaseRegex();
 
     /// <summary>
@@ -101,4 +102,5 @@ public static partial class StringExtensions
 
         return distance[currentRow, m];
     }
+
 }
