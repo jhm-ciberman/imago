@@ -142,6 +142,11 @@ public readonly struct Color
         return (uint)(this.A << 24 | this.B << 16 | this.G << 8 | this.R << 0);
     }
 
+    public string ToHex()
+    {
+        return this.ToString();
+    }
+
     public override string ToString()
     {
         if (this.A == 255)
