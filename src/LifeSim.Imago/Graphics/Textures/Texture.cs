@@ -182,7 +182,9 @@ public class Texture : ITexture, ITextureRegion, IDisposable
             throw new ArgumentException("Texture size does not match data size.");
 
         if (x == 0 && y == 0 && width == this.Width && height == this.Height)
+        {
             data.CopyTo(this._data, 0);
+        }
         else
         {
             // Copy each row of data into the correct place in the texture
