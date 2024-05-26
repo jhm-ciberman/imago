@@ -37,7 +37,7 @@ dotnet_diagnostic.IDE0005.severity = warning # Unnecessary using directive
 dotnet_diagnostic.IDE0251.severity = none # Bugged I think.
 dotnet_diagnostic.IDE0044.severity = warning # Make field readonly
 dotnet_diagnostic.CA1859.severity = silent # Use concrete types when possible for improved performance
-dotnet_diagnostic.CS1591.severity = suggestion # Missing XML comment for publicly visible type or member
+dotnet_diagnostic.CS1591.severity = silent # Missing XML comment for publicly visible type or member
 
 dotnet_style_require_accessibility_modifiers = always
 dotnet_style_object_initializer = false
