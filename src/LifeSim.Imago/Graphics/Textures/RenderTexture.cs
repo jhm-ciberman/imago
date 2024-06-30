@@ -37,22 +37,27 @@ public class RenderTexture : IRenderTexture
     public Sampler VeldridSampler { get; private set; }
     public TextureSampleCount SampleCount { get; private set; }
 
+    public bool IsDisposed { get; private set; } = false;
+
     private readonly GraphicsDevice _gd;
 
     private readonly Renderer _renderer;
 
-    public RenderTexture(Renderer renderer, uint width, uint height, TextureSampleCount sampleCount = TextureSampleCount.Count1)
+    public RenderTexture(uint width, uint height, TextureSampleCount sampleCount = TextureSampleCount.Count1)
     {
-        this._renderer = renderer;
+        this._renderer = Renderer.Instance;
         this.SampleCount = sampleCount;
-        this._gd = renderer.GraphicsDevice;
+        this._gd = this._renderer.GraphicsDevice;
         this.Width = width;
         this.Height = height;
 
         this.RecreateResources();
 
         this.VeldridSampler = this._gd.LinearSampler;
+        this._renderer.RegisterDisposable(this);
     }
+
+
 
     private void RecreateResources()
     {
@@ -153,6 +158,10 @@ public class RenderTexture : IRenderTexture
 
     public void Dispose()
     {
+        if (this.IsDisposed) return;
+        this.IsDisposed = true;
+
         this.DisposeResources();
+        this._renderer.UnregisterDisposable(this);
     }
 }

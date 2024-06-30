@@ -141,7 +141,7 @@ public class Renderer : IDisposable
 
         this._fullScreenRenderTexture = new SwapchainRenderTexture(gd, swapchain);
 
-        this.MainRenderTexture = new RenderTexture(this, swapchain.Framebuffer.Width, swapchain.Framebuffer.Height);
+        this.MainRenderTexture = new RenderTexture(swapchain.Framebuffer.Width, swapchain.Framebuffer.Height);
 
         this.InstanceResourceLayout = this._factory.CreateResourceLayout(new ResourceLayoutDescription(
             new ResourceLayoutElementDescription("InstanceDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex | ShaderStages.Fragment)
@@ -492,9 +492,10 @@ public class Renderer : IDisposable
                 this._skeletonDataBuffers[i].Dispose();
             }
 
-            foreach (var material in this._disposables.ToArray())
+            foreach (var disposable in this._disposables.ToArray())
             {
-                material.Dispose();
+                Console.WriteLine("Disposing " + disposable.GetType().Name);
+                disposable.Dispose();
             }
 
             // Passes

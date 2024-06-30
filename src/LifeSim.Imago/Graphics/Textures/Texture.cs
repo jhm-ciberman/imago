@@ -104,6 +104,8 @@ public class Texture : ITexture, ITextureRegion, IDisposable
         ));
         this.VeldridSampler = gd.PointSampler;
         this.OnTextureDirty();
+
+        this._renderer.RegisterDisposable(this);
     }
 
     /// <summary>
@@ -120,6 +122,11 @@ public class Texture : ITexture, ITextureRegion, IDisposable
     /// Gets or sets the name of the texture.
     /// </summary>
     public string Name { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets a value indicating whether the texture is disposed.
+    /// </summary>
+    public bool IsDisposed => this.VeldridTexture.IsDisposed;
 
     /// <summary>
     /// Called when the texture is dirty.
@@ -246,7 +253,10 @@ public class Texture : ITexture, ITextureRegion, IDisposable
     /// </summary>
     public virtual void Dispose()
     {
+        if (this.IsDisposed) return;
+
         Renderer.Instance.DisposeWhenIdle(this.VeldridTexture);
+        Renderer.Instance.UnregisterDisposable(this);
     }
 
     // ITextureRegion implementation for the whole texture

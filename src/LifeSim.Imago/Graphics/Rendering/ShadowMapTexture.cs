@@ -4,7 +4,7 @@ using Veldrid;
 
 namespace LifeSim.Imago.Graphics.Rendering;
 
-public class ShadowMapTexture : ITexture, IDisposable
+internal class ShadowMapTexture : ITexture, IDisposable
 {
     /// <summary>
     /// Occurs when the texture is resized.
@@ -29,7 +29,7 @@ public class ShadowMapTexture : ITexture, IDisposable
 
     private readonly Renderer _renderer;
 
-    public ShadowMapTexture(Renderer renderer, uint size, uint cascadesCount)
+    internal ShadowMapTexture(Renderer renderer, uint size, uint cascadesCount)
     {
         var gd = renderer.GraphicsDevice;
         this._renderer = renderer;
