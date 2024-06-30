@@ -134,6 +134,7 @@ public class MousePickingPass : IDisposable, IPipelineProvider
         this._resourceSet.Dispose();
         this._camera3DInfoBuffer.Dispose();
         this._pixelTexture.Dispose();
+        this._renderBatcher.Dispose();
     }
 
     Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant, RenderFlags flags, TextureSampleCount sampleCount)

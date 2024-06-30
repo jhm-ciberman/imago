@@ -74,6 +74,7 @@ public class Renderer : IDisposable
     public ResourceLayout SkeletonResourceLayout { get; }
 
     private readonly List<Skeleton> _skeletons = new List<Skeleton>();
+    private readonly List<Material> _materials = new List<Material>();
 
     private readonly FullScreenPass _fullScreenPass;
     private readonly GizmosPass _gizmosPass;
@@ -393,6 +394,16 @@ public class Renderer : IDisposable
         this._skeletons.Remove(skeleton);
     }
 
+    internal void RegisterMaterial(Material material)
+    {
+        this._materials.Add(material);
+    }
+
+    internal void UnregisterMaterial(Material material)
+    {
+        this._materials.Remove(material);
+    }
+
     internal DataBlock RequestSkeletonDataBlock()
     {
         for (int i = 0; i < this._skeletonDataBuffers.Count; i++)
@@ -465,6 +476,7 @@ public class Renderer : IDisposable
     /// </summary>
     public void Dispose()
     {
+        Console.WriteLine("Disposing renderer.");
         try
         {
             this.GraphicsDevice.WaitForIdle();
@@ -491,6 +503,11 @@ public class Renderer : IDisposable
             foreach (var skeleton in this._skeletons.ToArray())
             {
                 skeleton.Dispose();
+            }
+
+            foreach (var material in this._materials.ToArray())
+            {
+                material.Dispose();
             }
 
             for (int i = 0; i < this._renderables.Count; i++)

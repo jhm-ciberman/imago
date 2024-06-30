@@ -16,7 +16,7 @@ internal enum RenderBatchPassType
 /// <summary>
 /// The RenderBatcher class is responsible for batching and rendering a list of <see cref="Renderable"/> objects.
 /// </summary>
-internal class RenderBatcher
+internal class RenderBatcher : IDisposable
 {
     private const uint BINDING_PASS = 0;
     private const uint BINDING_TRANSFORM = 1;
@@ -160,7 +160,9 @@ internal class RenderBatcher
         if (this._offsetsVertexBuffer == null || this._offsetsVertexBuffer.SizeInBytes < requiredSizeInBytes)
         {
             if (this._offsetsVertexBuffer != null)
+            {
                 Renderer.Instance.DisposeWhenIdle(this._offsetsVertexBuffer);
+            }
 
             this._offsetsVertexBuffer = this._gd.ResourceFactory.CreateBuffer(new BufferDescription(
                 requiredSizeInBytes, BufferUsage.VertexBuffer | BufferUsage.Dynamic
@@ -170,6 +172,11 @@ internal class RenderBatcher
         commandList.UpdateBuffer(this._offsetsVertexBuffer, 0, this._offsetVertexData);
 
         return this._offsetsVertexBuffer;
+    }
+
+    public void Dispose()
+    {
+        this._offsetsVertexBuffer?.Dispose();
     }
 
     private readonly struct RenderBatch

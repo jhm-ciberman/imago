@@ -129,6 +129,7 @@ internal class ShadowPass : IDisposable, IPipelineProvider
         this._resourceLayout.Dispose();
         this.ShadowmapTexture.Dispose();
         this._shadowmapInfoBuffer.Dispose();
+        this._renderBatcher.Dispose();
     }
 
     internal Vector4 GetShadowBiasData(int index)

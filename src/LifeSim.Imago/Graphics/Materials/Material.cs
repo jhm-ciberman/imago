@@ -43,6 +43,7 @@ public class Material
         this._resources[0] = DefaultTexture.VeldridTexture;
         this._resources[1] = DefaultTexture.VeldridSampler;
 
+        this._renderer.RegisterMaterial(this);
         this.NotifyResourcesDirty();
     }
 
@@ -134,5 +135,7 @@ public class Material
     public void Dispose()
     {
         this.ResourceSet?.Dispose();
+        this._resourceSetDirty = false;
+        this._renderer.UnregisterMaterial(this);
     }
 }

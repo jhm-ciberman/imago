@@ -151,6 +151,7 @@ internal class ForwardPass : IDisposable, IPipelineProvider
         this._resourceSet.Dispose();
         this._camera3DInfoBuffer.Dispose();
         this._lightInfoBuffer.Dispose();
+        this._renderBatcher.Dispose();
     }
 
     Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant, RenderFlags flags, TextureSampleCount sampleCount)
