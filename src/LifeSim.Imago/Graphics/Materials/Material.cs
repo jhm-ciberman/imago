@@ -5,11 +5,13 @@ using Texture = LifeSim.Imago.Graphics.Textures.Texture;
 
 namespace LifeSim.Imago.Graphics.Materials;
 
-public class Material
+public class Material : IDisposable
 {
     private static int _count = 0;
 
     public int Id { get; private set; }
+
+    public bool IsDisposed { get; private set; } = false;
 
     private bool _resourceSetDirty = false;
 
@@ -43,7 +45,7 @@ public class Material
         this._resources[0] = DefaultTexture.VeldridTexture;
         this._resources[1] = DefaultTexture.VeldridSampler;
 
-        this._renderer.RegisterMaterial(this);
+        this._renderer.RegisterDisposable(this);
         this.NotifyResourcesDirty();
     }
 
@@ -134,8 +136,11 @@ public class Material
 
     public void Dispose()
     {
+        if (this.IsDisposed) return;
+        this.IsDisposed = true;
+
         this.ResourceSet?.Dispose();
         this._resourceSetDirty = false;
-        this._renderer.UnregisterMaterial(this);
+        this._renderer.UnregisterDisposable(this);
     }
 }

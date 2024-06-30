@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using LifeSim.Imago.Graphics.Materials;
 using LifeSim.Imago.Graphics.Textures;
 using LifeSim.Imago.SceneGraph;
-using LifeSim.Support.Collections;
 using LifeSim.Support.Drawing;
 using Veldrid;
 using Veldrid.Sdl2;
@@ -60,7 +60,6 @@ public class Renderer : IDisposable
     private readonly CommandList _fullScreenCommandList;
     private readonly DisposeCollector _disposeCollector;
     private readonly Dictionary<ResourceLayoutDescription, ResourceLayout> _resourceLayoutCache = new();
-    private readonly SwapPopList<Renderable> _renderables = new();
 
     private readonly List<DataBuffer> _instanceDataBuffers = new List<DataBuffer>();
     private readonly List<DataBuffer> _transformDataBuffers = new List<DataBuffer>();
@@ -74,7 +73,7 @@ public class Renderer : IDisposable
     public ResourceLayout SkeletonResourceLayout { get; }
 
     private readonly List<Skeleton> _skeletons = new List<Skeleton>();
-    private readonly List<Material> _materials = new List<Material>();
+    private readonly HashSet<IDisposable> _disposables = new HashSet<IDisposable>();
 
     private readonly FullScreenPass _fullScreenPass;
     private readonly GizmosPass _gizmosPass;
@@ -204,13 +203,6 @@ public class Renderer : IDisposable
         {
             this.DisposeWhenIdle(disposable);
         }
-    }
-
-    internal Renderable MakeRenderable()
-    {
-        var renderable = new Renderable(this);
-        this._renderables.Add(renderable);
-        return renderable;
     }
 
     /// <summary>
@@ -394,14 +386,14 @@ public class Renderer : IDisposable
         this._skeletons.Remove(skeleton);
     }
 
-    internal void RegisterMaterial(Material material)
+    internal void RegisterDisposable(IDisposable disposable)
     {
-        this._materials.Add(material);
+        this._disposables.Add(disposable);
     }
 
-    internal void UnregisterMaterial(Material material)
+    internal void UnregisterDisposable(IDisposable disposable)
     {
-        this._materials.Remove(material);
+        this._disposables.Remove(disposable);
     }
 
     internal DataBlock RequestSkeletonDataBlock()
@@ -500,19 +492,9 @@ public class Renderer : IDisposable
                 this._skeletonDataBuffers[i].Dispose();
             }
 
-            foreach (var skeleton in this._skeletons.ToArray())
-            {
-                skeleton.Dispose();
-            }
-
-            foreach (var material in this._materials.ToArray())
+            foreach (var material in this._disposables.ToArray())
             {
                 material.Dispose();
-            }
-
-            for (int i = 0; i < this._renderables.Count; i++)
-            {
-                this._renderables[i].Dispose();
             }
 
             // Passes
@@ -527,6 +509,7 @@ public class Renderer : IDisposable
             this._skyDomePass.Dispose();
             this._fullScreenPass.Dispose();
 
+            Console.WriteLine("All resources disposed. Attempting to dispose graphics device.");
             // The last thing to dispose is the graphics device.
             // Otherwise AccessViolationException is thrown.
             this.GraphicsDevice.Dispose();

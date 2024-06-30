@@ -169,9 +169,9 @@ internal class Renderable : IDisposable
     /// <summary>
     /// Initializes a new instance of the <see cref="Renderable"/> class.
     /// </summary>
-    /// <param name="renderer">The renderer.</param>
-    public Renderable(Renderer renderer)
+    public Renderable()
     {
+        var renderer = Renderer.Instance;
         var transformDataBlock = renderer.RequestTransformDataBlock();
         var instanceDataBlock = renderer.RequestInstanceDataBlock(Marshal.SizeOf<InstanceData>());
 
@@ -184,6 +184,8 @@ internal class Renderable : IDisposable
         this.RecomputeOffsetVertexData();
 
         this._instanceDataBlock.Write(ref this._instanceData);
+
+        renderer.RegisterDisposable(this);
     }
 
     private Stage? _stage = null;
@@ -567,9 +569,13 @@ internal class Renderable : IDisposable
     /// </summary>
     public void Dispose()
     {
+        if (this.IsDisposed) return;
+
         this.RenderQueues = RenderQueues.None;
         this._pipelineDirty = false;
         this._transformDataBlock.Dispose();
         this._instanceDataBlock.Dispose();
+
+        Renderer.Instance.UnregisterDisposable(this);
     }
 }

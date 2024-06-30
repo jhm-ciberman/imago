@@ -10,6 +10,9 @@ public class Skeleton : IDisposable
 {
     public const int MAX_NUMBER_OF_BONES = 64;
     public IList<Node3D> Joints { get; } = new List<Node3D>();
+
+    public bool IsDisposed { get; private set; } = false;
+
     public IList<Matrix4x4> InverseBindMatrices { get; }
 
     public Veldrid.ResourceSet ResourceSet { get; }
@@ -34,6 +37,7 @@ public class Skeleton : IDisposable
         this._dataBlock = this._renderer.RequestSkeletonDataBlock();
         this.ResourceSet = this._dataBlock.Buffer.ResourceSet;
         this._renderer.RegisterSkeleton(this);
+        this._renderer.RegisterDisposable(this);
     }
 
 
@@ -49,7 +53,11 @@ public class Skeleton : IDisposable
 
     public void Dispose()
     {
+        if (this.IsDisposed) return;
+        this.IsDisposed = true;
+
         this._dataBlock.Dispose();
         this._renderer.UnregisterSkeleton(this);
+        this._renderer.UnregisterDisposable(this);
     }
 }

@@ -69,6 +69,8 @@ public class Mesh : IDisposable
         this.VeldridIndexBuffer = meshData.CreateIndexBuffer(gd);
         this.VeldridVertexBuffer = meshData.CreateVertexBuffer(gd);
         this.MeshData = meshData;
+
+        Renderer.Instance.RegisterDisposable(this);
     }
 
     /// <summary>
@@ -80,5 +82,7 @@ public class Mesh : IDisposable
         this.IsDisposed = true;
         Renderer.Instance.DisposeWhenIdle(this.VeldridVertexBuffer);
         Renderer.Instance.DisposeWhenIdle(this.VeldridIndexBuffer);
+
+        Renderer.Instance.UnregisterDisposable(this);
     }
 }

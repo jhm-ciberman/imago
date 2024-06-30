@@ -20,7 +20,7 @@ public class RenderNode3D : Node3D, IPickable
     /// </summary>
     public RenderNode3D()
     {
-        this._renderable = Renderer.Instance.MakeRenderable();
+        this._renderable = new Renderable();
     }
 
     /// <summary>
