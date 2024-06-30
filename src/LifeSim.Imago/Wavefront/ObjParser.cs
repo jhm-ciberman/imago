@@ -85,7 +85,6 @@ public class ObjParser
                 this._texCoords.Add(new Vector2(texCoord.X, 1f - texCoord.Y));
                 break;
             case "f":
-                Console.WriteLine($"Face: {line}");
                 this.ProcessFace(args);
                 break;
             case "g":
