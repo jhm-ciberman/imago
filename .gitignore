@@ -141,3 +141,7 @@ backend.txt
 
 # Code Coverage
 coveragereport/
+
+# Include Wavefront .obj files
+!content/**/*.obj
+!res/**/*.obj

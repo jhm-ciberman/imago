@@ -90,7 +90,7 @@ public class ObjParser
                 break;
             case "g":
             case "o":
-                var group = args.Length > 0 ? parts[0] : "unnamed_" + this._groups.Count;
+                var group = args.Length > 0 ? args[0] : "unnamed_" + this._groups.Count;
                 this.ProcessGroup(group);
                 break;
             case "usemtl":
@@ -174,7 +174,7 @@ public class ObjParser
         foreach (var group in this._groups)
         {
             var mesh = this.CreateMesh(group.Key, group.Value);
-            rootNode.Meshes.Add(group.Key, mesh);
+            rootNode.Groups.Add(group.Key, mesh);
         }
 
         return rootNode;

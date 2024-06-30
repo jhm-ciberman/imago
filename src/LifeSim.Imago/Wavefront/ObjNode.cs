@@ -8,32 +8,28 @@ namespace LifeSim.Imago.Wavefront;
 public class ObjNode : IInstantiable
 {
     public string Name { get; set; } = string.Empty;
-    public Dictionary<string, Mesh> Meshes { get; } = new Dictionary<string, Mesh>();
-    public ObjNode? Parent { get; private set; }
-    private readonly List<ObjNode> _children = new List<ObjNode>();
-    public IReadOnlyList<ObjNode> Children => _children;
-
-    public void AddChild(ObjNode child)
-    {
-        child.Parent = this;
-        this._children.Add(child);
-    }
+    public Dictionary<string, Mesh> Groups { get; } = new Dictionary<string, Mesh>();
 
     public Node3D Instantiate()
     {
         var node = new Node3D { Name = this.Name };
 
-        foreach (var mesh in this.Meshes)
+        foreach (var mesh in this.Groups)
         {
             var renderNode = new RenderNode3D { Name = mesh.Key, Mesh = mesh.Value };
             node.AddChild(renderNode);
         }
 
-        foreach (var child in this.Children)
+        return node;
+    }
+
+    public Mesh? FindGroup(string name)
+    {
+        if (this.Groups.TryGetValue(name, out var mesh))
         {
-            node.AddChild(child.Instantiate());
+            return mesh;
         }
 
-        return node;
+        return null;
     }
 }
