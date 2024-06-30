@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Numerics;
-using LifeSim.Imago.Graphics.Meshes;
 using Veldrid.Utilities;
 
 namespace LifeSim.Imago.SceneGraph;
@@ -10,10 +9,10 @@ public struct HitInfo
     public float Distance { get; set; }
     public Vector3 Normal { get; set; }
     public Vector3 Position { get; set; }
-    public IMeshData Mesh { get; set; }
+    public Graphics.Meshes.MeshData Mesh { get; set; }
     public int TriangleIndex { get; set; }
 
-    public HitInfo(IMeshData mesh, int triangleIndex, float distance, Vector3 normal, Vector3 position)
+    public HitInfo(Graphics.Meshes.MeshData mesh, int triangleIndex, float distance, Vector3 normal, Vector3 position)
     {
         this.Mesh = mesh;
         this.TriangleIndex = triangleIndex;
@@ -33,7 +32,7 @@ public static class RayCastExtensions
     /// <param name="ray">The ray to use. This ray should be in object-local space.</param>
     /// <param name="hitInfo">If the RayCast is successful, contains the hit information.</param>
     /// <returns>True if the <see cref="Ray"/> intersects the mesh; false otherwise</returns>
-    public static bool RayCast(this IMeshData mesh, Ray ray, out HitInfo hitInfo)
+    public static bool RayCast(this Graphics.Meshes.MeshData mesh, Ray ray, out HitInfo hitInfo)
     {
         hitInfo = new HitInfo();
         hitInfo.Mesh = mesh;
@@ -70,7 +69,7 @@ public static class RayCastExtensions
     /// <param name="hitInfos">If the RayCast is successful, contains the hit
     /// information of every hit. The distances are not sorted.</param>
     /// <returns>True if the <see cref="Ray"/> intersects the mesh; false otherwise</returns>
-    public static bool RayCast(this IMeshData mesh, Ray ray, List<HitInfo> hitInfos)
+    public static bool RayCast(this Graphics.Meshes.MeshData mesh, Ray ray, List<HitInfo> hitInfos)
     {
         hitInfos.Clear();
         for (int i = 0; i < mesh.Indices.Length - 2; i += 3)

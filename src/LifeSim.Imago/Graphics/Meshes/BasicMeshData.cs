@@ -6,7 +6,7 @@ using Veldrid;
 
 namespace LifeSim.Imago.Graphics.Meshes;
 
-public class BasicMeshData : BaseMeshData
+public class BasicMeshData : MeshData
 {
     public Vector3[] Normals { get; set; }
 

@@ -1,7 +1,7 @@
 using System;
 using LifeSim.Imago.Graphics.Rendering;
 using Veldrid;
-using Veldrid.Utilities;
+using BoundingBox = Veldrid.Utilities.BoundingBox;
 
 namespace LifeSim.Imago.Graphics.Meshes;
 
@@ -45,7 +45,7 @@ public class Mesh : IDisposable
     /// <summary>
     /// Gets the <see cref="MeshData"/> that was used to create the mesh.
     /// </summary>
-    public IMeshData MeshData { get; private set; }
+    public MeshData MeshData { get; private set; }
 
     /// <summary>
     /// Gets whether the mesh is disposed.
@@ -56,7 +56,7 @@ public class Mesh : IDisposable
     /// Initializes a new instance of the <see cref="Mesh"/> class.
     /// </summary>
     /// <param name="meshData">The <see cref="MeshData"/> that was used to create the mesh.</param>
-    public Mesh(IMeshData meshData)
+    public Mesh(MeshData meshData)
     {
         if (meshData.Indices.Length == 0)
             throw new ArgumentException("The mesh data must contain at least one index.", nameof(meshData));

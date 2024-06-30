@@ -228,7 +228,7 @@ public class GltfReader
         return primitives;
     }
 
-    private IMeshData GetPrimitiveData(glTFLoader.Schema.MeshPrimitive data)
+    private MeshData GetPrimitiveData(glTFLoader.Schema.MeshPrimitive data)
     {
         var indicesAccessor = data.Indices.HasValue ? this.GetAccessor(data.Indices.Value) : null;
         var attributes = data.Attributes;
