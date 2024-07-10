@@ -21,12 +21,13 @@ public class ImGuiPass : IDisposable
             ImGui.GetIO().NativePtr->IniFilename = null;
         }
 
-        renderer.ViewportResized += this.OnViewportResized;
+        renderTexture.Resized += this.OnViewportResized;
     }
 
-    private void OnViewportResized(object? sender, ViewportResizedEventArgs e)
+    private void OnViewportResized(object? sender, EventArgs e)
     {
-        this._imguiRenderer.WindowResized((int)e.Width, (int)e.Height);
+        var renderTexture = (IRenderTexture)sender!;
+        this._imguiRenderer.WindowResized((int)renderTexture.Width, (int)renderTexture.Height);
     }
 
     public void Dispose()

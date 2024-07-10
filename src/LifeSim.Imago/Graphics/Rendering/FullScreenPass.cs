@@ -8,19 +8,21 @@ namespace LifeSim.Imago.Graphics.Rendering;
 
 internal class FullScreenPass : IDisposable
 {
-    private ResourceSet? _resourceSet;
-
     private readonly IRenderTexture _sourceTexture;
 
     private readonly IRenderTexture _destinationTexture;
 
     private readonly GraphicsDevice _gd;
+
     private readonly Pipeline _pipeline;
+
     private readonly DeviceBuffer _vertexBuffer;
 
     private readonly ResourceLayout _resourceLayout;
 
-    public FullScreenPass(Renderer renderer, IRenderTexture destinationRenderTexture)
+    private ResourceSet? _resourceSet = null;
+
+    public FullScreenPass(Renderer renderer)
     {
         this._gd = renderer.GraphicsDevice;
         var factory = this._gd.ResourceFactory;
@@ -28,7 +30,7 @@ internal class FullScreenPass : IDisposable
         this._sourceTexture = renderer.MainRenderTexture;
         this._sourceTexture.Resized += (sender, args) => this.RegenerateResourceSet();
 
-        this._destinationTexture = destinationRenderTexture;
+        this._destinationTexture = renderer.FullScreenRenderTexture;
 
         var vertexLayouts = new VertexLayoutDescription(
             new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float4)

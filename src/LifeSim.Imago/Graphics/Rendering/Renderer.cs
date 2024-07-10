@@ -25,11 +25,6 @@ public class Renderer : IDisposable
     public static Renderer Instance { get; private set; } = null!;
 
     /// <summary>
-    /// Occurs when the viewport is resized.
-    /// </summary>
-    public event EventHandler<ViewportResizedEventArgs>? ViewportResized;
-
-    /// <summary>
     /// Gets the current Veldrid's GraphicsDevice.
     /// </summary>
     internal GraphicsDevice GraphicsDevice { get; }
@@ -42,7 +37,7 @@ public class Renderer : IDisposable
     /// <summary>
     /// Gets the full screen render texture.
     /// </summary>
-    internal SwapchainRenderTexture FullScreenRenderTexture => this._fullScreenRenderTexture;
+    internal SwapchainRenderTexture FullScreenRenderTexture { get; }
 
     /// <summary>
     /// Gets the current backend used by the renderer.
@@ -54,20 +49,11 @@ public class Renderer : IDisposable
     /// </summary>
     public Viewport Viewport { get; }
 
-    private readonly SwapchainRenderTexture _fullScreenRenderTexture;
     private readonly ResourceFactory _factory;
     private readonly Fence _fence;
     private readonly CommandList _commandList;
     private readonly CommandList _fullScreenCommandList;
     private readonly DisposeCollector _disposeCollector;
-    private readonly Dictionary<ResourceLayoutDescription, ResourceLayout> _resourceLayoutCache = new();
-
-    private readonly List<Texture> _dirtyTextures = new();
-    private readonly List<Material> _dirtyMaterials = new();
-
-    private readonly List<Skeleton> _skeletons = new List<Skeleton>();
-    private readonly HashSet<IDisposable> _disposables = new HashSet<IDisposable>();
-
     private readonly FullScreenPass _fullScreenPass;
     private readonly GizmosPass _gizmosPass;
     private readonly ForwardPass _forwardPass;
@@ -80,26 +66,11 @@ public class Renderer : IDisposable
     private readonly SkyDomePass _skyDomePass;
     private readonly BuffersManager _buffersManager;
 
-
-    public static GraphicsDeviceOptions GetGraphicsDeviceOptions(bool debug = false)
-    {
-        return new GraphicsDeviceOptions(
-            debug: true, //debug,
-            swapchainDepthFormat: null, //PixelFormat.R16_UNorm,
-            syncToVerticalBlank: false,
-            resourceBindingModel: ResourceBindingModel.Improved,
-            preferDepthRangeZeroToOne: true,
-            preferStandardClipSpaceYDirection: true,
-            swapchainSrgbFormat: false
-        );
-    }
-
-    public static GraphicsDevice CreateGraphicsDevice(Sdl2Window window, GraphicsBackend? graphicsBackend = null, bool debug = false)
-    {
-        GraphicsDeviceOptions options = GetGraphicsDeviceOptions(debug);
-
-        return VeldridStartup.CreateGraphicsDevice(window, options, graphicsBackend ?? VeldridStartup.GetPlatformDefaultBackend());
-    }
+    private readonly List<Texture> _dirtyTextures = new();
+    private readonly List<Material> _dirtyMaterials = new();
+    private readonly List<Skeleton> _skeletons = new List<Skeleton>();
+    private readonly HashSet<IDisposable> _disposables = new HashSet<IDisposable>();
+    private readonly Dictionary<ResourceLayoutDescription, ResourceLayout> _resourceLayoutCache = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Renderer"/> class.
@@ -121,23 +92,25 @@ public class Renderer : IDisposable
     public Renderer(GraphicsDevice gd, Swapchain? swapchain = null)
     {
         if (Instance != null)
+        {
             throw new InvalidOperationException("Only one instance of Renderer can be created.");
+        }
 
         Instance = this;
 
         this.GraphicsDevice = gd;
         swapchain ??= this.GraphicsDevice.MainSwapchain;
 
-        this.Viewport = new Viewport(swapchain.Framebuffer.Width, swapchain.Framebuffer.Height);
+        var framebuffer = swapchain.Framebuffer;
+
+        this.Viewport = new Viewport(framebuffer.Width, framebuffer.Height);
+        this.FullScreenRenderTexture = new SwapchainRenderTexture(gd, swapchain);
+        this.MainRenderTexture = new RenderTexture(framebuffer.Width, framebuffer.Height);
 
         this._disposeCollector = new DisposeCollector();
         this._factory = this.GraphicsDevice.ResourceFactory;
 
         this._buffersManager = new BuffersManager(this.GraphicsDevice);
-
-        this._fullScreenRenderTexture = new SwapchainRenderTexture(gd, swapchain);
-
-        this.MainRenderTexture = new RenderTexture(swapchain.Framebuffer.Width, swapchain.Framebuffer.Height);
 
         this._imGuiPass = new ImGuiPass(this);
         this._mousePickerPass = new MousePickingPass(this);
@@ -148,9 +121,7 @@ public class Renderer : IDisposable
         this._immediatePass = new ImmediatePass(this);
         this._spritesPass = new SpritesPass(this);
         this._skyDomePass = new SkyDomePass(this);
-        this._fullScreenPass = new FullScreenPass(this, this.FullScreenRenderTexture);
-
-
+        this._fullScreenPass = new FullScreenPass(this);
 
         this._commandList = this._factory.CreateCommandList();
 
@@ -220,22 +191,22 @@ public class Renderer : IDisposable
         return this._imGuiPass.GetOrCreateBinding(texture);
     }
 
+    /// <summary>
+    /// Makes a new material.
+    /// </summary>
+    /// <returns>The created material.</returns>
     public Material MakeMaterial()
     {
         return new Material(this._forwardPass.DefaultShader, this._shadowPass.DefaultShader, this._mousePickerPass.DefaultShader);
     }
 
+    /// <summary>
+    /// Disposes the given object when the renderer is idle.
+    /// </summary>
+    /// <param name="disposable">The object to dispose.</param>
     public void DisposeWhenIdle(IDisposable disposable)
     {
         this._disposeCollector.Add(disposable);
-    }
-
-    public void DisposeWhenIdle(IDisposable[] disposables)
-    {
-        foreach (var disposable in disposables)
-        {
-            this.DisposeWhenIdle(disposable);
-        }
     }
 
     /// <summary>
@@ -371,10 +342,8 @@ public class Renderer : IDisposable
     {
         this.GraphicsDevice.ResizeMainWindow(width, height);
         this.GraphicsDevice.WaitForIdle();
-        this._fullScreenRenderTexture.Resize(width, height);
+        this.FullScreenRenderTexture.Resize(width, height);
         this.MainRenderTexture.Resize(width, height);
-
-        this.ViewportResized?.Invoke(this, new ViewportResizedEventArgs(width, height));
     }
 
 
@@ -434,7 +403,6 @@ public class Renderer : IDisposable
 
     internal void NotifyMaterialResourcesDirty(Material material)
     {
-
         this._dirtyMaterials.Add(material);
     }
 
@@ -447,7 +415,7 @@ public class Renderer : IDisposable
         try
         {
             this.GraphicsDevice.WaitForIdle();
-            this._fullScreenRenderTexture.Dispose();
+            this.FullScreenRenderTexture.Dispose();
             this.MainRenderTexture.Dispose();
             this._commandList.Dispose();
             this._fence.Dispose();
@@ -485,5 +453,27 @@ public class Renderer : IDisposable
         {
             Instance = null!;
         }
+    }
+
+    /// <summary>
+    /// Creates a new graphics device.
+    /// </summary>
+    /// <param name="window">The window to render to.</param>
+    /// <param name="graphicsBackend">The graphics backend to use.</param>
+    /// <param name="debug">Whether to enable debug mode in the graphics device.</param>
+    /// <returns>The created graphics device.</returns>
+    public static GraphicsDevice CreateGraphicsDevice(Sdl2Window window, GraphicsBackend? graphicsBackend = null, bool debug = false)
+    {
+        GraphicsDeviceOptions options = new GraphicsDeviceOptions(
+            debug: debug,
+            swapchainDepthFormat: null, //PixelFormat.R16_UNorm,
+            syncToVerticalBlank: false,
+            resourceBindingModel: ResourceBindingModel.Improved,
+            preferDepthRangeZeroToOne: true,
+            preferStandardClipSpaceYDirection: true,
+            swapchainSrgbFormat: false
+        );
+
+        return VeldridStartup.CreateGraphicsDevice(window, options, graphicsBackend ?? VeldridStartup.GetPlatformDefaultBackend());
     }
 }

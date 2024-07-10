@@ -80,7 +80,10 @@ internal class ShadowMapTexture : ITexture, IDisposable
             throw new ArgumentException("Shadow map texture must be square.");
 
         this.Size = width;
-        this._renderer.DisposeWhenIdle(this.Framebuffers);
+        foreach (var framebuffer in this.Framebuffers)
+        {
+            this._renderer.DisposeWhenIdle(framebuffer);
+        }
         this._renderer.DisposeWhenIdle(this.VeldridTexture);
         var factory = this._renderer.GraphicsDevice.ResourceFactory;
         this.VeldridTexture = factory.CreateTexture(TextureDescription.Texture2D(width, height, 1, this.CascadesCount, PixelFormat.R32_Float, TextureUsage.DepthStencil | TextureUsage.Sampled));
