@@ -15,34 +15,47 @@ using Texture = LifeSim.Imago.Graphics.Textures.Texture;
 
 namespace LifeSim.Imago.Graphics.Rendering;
 
-public class SpriteBatcher : IFontStashRenderer2, IDisposable
+public class SpriteBatcher : IDisposable
 {
+    /// <summary>
+    /// Gets the total number of sprites to draw.
+    /// </summary>
+    public int TotalSpritesToDraw { get; private set; } = 0;
+
+    /// <summary>
+    /// Gets the Veldrid vertex buffer.
+    /// </summary>
+    public DeviceBuffer VertexBuffer { get; private set; }
+
+    /// <summary>
+    /// Gets the resource layout for the pass.
+    /// </summary>
+    public ResourceLayout PassResourceLayout { get; }
+
+    /// <summary>
+    /// Gets the number of draw calls.
+    /// </summary>
+    public int DrawCallCount { get; private set; } = 0;
 
     private Shader _currentShaderInUse = null!;
 
-    public int TotalSpritesToDraw { get; private set; } = 0;
-
     private readonly Shader _defaultShader;
+
     private readonly GraphicsDevice _gd;
 
-    public DeviceBuffer VertexBuffer { get; private set; }
-
-    public int Count { get; private set; } = 0;
-
-    public readonly DeviceBuffer _indexBuffer;
+    private readonly DeviceBuffer _indexBuffer;
 
     private readonly int _capacity = 1000;
 
     private readonly SpriteBatch _batch;
 
     private readonly VertexFormat _vertexFormat;
-    private CommandList _commandList = null!;
+
+    private readonly FontStashAdapter _fontStashAdapter;
 
     private readonly ResourceSet _passResourceSet;
 
     private readonly DeviceBuffer _matrixBuffer;
-
-    public ResourceLayout PassResourceLayout { get; }
 
     private readonly ResourceSetCache _resourceSetCache;
 
@@ -50,23 +63,15 @@ public class SpriteBatcher : IFontStashRenderer2, IDisposable
 
     private readonly Stack<float> _opacityStack = new Stack<float>();
 
-    public int DrawCallCount { get; private set; } = 0;
-
-    public void PushOpacity(float opacity)
-    {
-        opacity *= this._opacityStack.Peek();
-        this._opacityStack.Push(opacity);
-        this._batch.Opacity = opacity;
-    }
-
-    public void PopOpacity()
-    {
-        this._opacityStack.Pop();
-        this._batch.Opacity = this._opacityStack.Peek();
-    }
-
     private RenderFlags _currentPipelineFlags = RenderFlags.None;
 
+    private CommandList _commandList = null!;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SpriteBatcher"/> class.
+    /// </summary>
+    /// <param name="gd">The graphics device.</param>
+    /// <param name="defaultShader">The default shader to use.</param>
     internal SpriteBatcher(GraphicsDevice gd, Shader defaultShader)
     {
         this._gd = gd;
@@ -112,9 +117,8 @@ public class SpriteBatcher : IFontStashRenderer2, IDisposable
 
         this._resourceSetCache = new ResourceSetCache(factory);
 
-        this._textureManager = new FontStashTextureManager(this._gd);
+        this._fontStashAdapter = new FontStashAdapter(this._gd, this);
     }
-
 
 
     private void Prepare(Shader shader, ITexture texture, int requiredQuads = 1)
@@ -132,8 +136,12 @@ public class SpriteBatcher : IFontStashRenderer2, IDisposable
         this._batch.Texture = texture;
     }
 
-
-
+    /// <summary>
+    /// Begins the frame and sets up the sprite batcher for drawing.
+    /// This method should be called before any drawing.
+    /// </summary>
+    /// <param name="cl">The command list to use.</param>
+    /// <param name="viewProjectionMatrix">The view projection matrix for the frame.</param>
     public void Begin(CommandList cl, Matrix4x4 viewProjectionMatrix)
     {
         this._commandList = cl;
@@ -149,28 +157,70 @@ public class SpriteBatcher : IFontStashRenderer2, IDisposable
         cl.UpdateBuffer(this._matrixBuffer, 0, ref viewProjectionMatrix);
     }
 
+    /// <summary>
+    /// Ends the frame and flushes any remaining batched sprites. This method should be called after all drawing.
+    /// </summary>
     public void End()
     {
         this.FlushBatch();
     }
 
+    /// <summary>
+    /// Draws a texture at the specified position.
+    /// </summary>
+    /// <param name="shader">The shader to use.</param>
+    /// <param name="texture">The texture to draw.</param>
+    /// <param name="position">The position to draw the texture at.</param>
+    /// <param name="size">The size of the texture to draw.</param>
     public void DrawTexture(Shader? shader, ITexture texture, Vector2 position, Vector2 size)
     {
         this.DrawTexture(shader, texture, position, size, Vector2.Zero, Vector2.One, Color.White);
     }
 
+
+    /// <summary>
+    /// Draws a texture at the specified position with a transformation matrix.
+    /// </summary>
+    /// <param name="shader">The shader to use.</param>
+    /// <param name="texture">The texture to draw.</param>
+    /// <param name="position">The position to draw the texture at.</param>
+    /// <param name="size">The size of the texture to draw.</param>
+    /// <param name="uvTopLeft">The top left UV coordinate of the texture.</param>
+    /// <param name="uvBottomRight">The bottom right UV coordinate of the texture.</param>
+    /// <param name="transform">A transformation matrix to apply to the texture.</param>
+    /// <param name="color">The color to draw the texture with.</param>
     public void DrawTexture(Shader? shader, ITexture texture, Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, in Matrix3x2 transform, Color color)
     {
         this.Prepare(shader ?? this._defaultShader, texture);
         this._batch.DrawCore(position, size, uvTopLeft, uvBottomRight, in transform, color);
     }
 
+    /// <summary>
+    /// Draws a texture at the specified position.
+    /// </summary>
+    /// <param name="shader">The shader to use.</param>
+    /// <param name="texture">The texture to draw.</param>
+    /// <param name="position">The position to draw the texture at.</param>
+    /// <param name="size">The size of the texture to draw.</param>
+    /// <param name="uvTopLeft">The top left UV coordinate of the texture.</param>
+    /// <param name="uvBottomRight">The bottom right UV coordinate of the texture.</param>
+    /// <param name="color">The color to draw the texture with.</param>
     public void DrawTexture(Shader? shader, ITexture texture, Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, Color color)
     {
         this.Prepare(shader ?? this._defaultShader, texture);
         this._batch.DrawCore(position, size, uvTopLeft, uvBottomRight, color);
     }
 
+    /// <summary>
+    /// Draws a texture using a 9-patch scaling algorithm. This method is useful for drawing scalable UI elements.
+    /// </summary>
+    /// <param name="shader">The shader to use.</param>
+    /// <param name="texture">The texture to draw.</param>
+    /// <param name="position">The position to draw the texture at.</param>
+    /// <param name="size">The size of the texture to draw.</param>
+    /// <param name="patchMargin">The margin of the unstretchable area of the texture. Any area inside this margin will be stretched.</param>
+    /// <param name="color">The color to draw the texture with.</param>
+    /// <param name="scale">The scale to apply to the texture.</param>
     public void DrawNinePatch(Shader? shader, PackedTexture texture, Vector2 position, Vector2 size, Thickness patchMargin, Color color, float scale)
     {
         var sizeTL = new Vector2(patchMargin.Left, patchMargin.Top);
@@ -248,39 +298,72 @@ public class SpriteBatcher : IFontStashRenderer2, IDisposable
             new Vector2(uvIntBR.X, uvIntTL.Y), new Vector2(uvExtBR.X, uvIntBR.Y), color);
     }
 
+    /// <summary>
+    /// Draws the given text at the specified position.
+    /// </summary>
+    /// <param name="font">The font to use.</param>
+    /// <param name="text">The text to draw.</param>
+    /// <param name="position">The position to draw the text at.</param>
+    /// <param name="color">The color to draw the text with.</param>
     public void DrawText(Font font, string text, Vector2 position, Color color)
     {
-        // public float DrawText(IFontStashRenderer2 renderer, string text, Vector2 position, FSColor color, Vector2? scale = null, float rotation = 0, Vector2 origin = default(Vector2), float layerDepth = 0, float characterSpacing = 0, float lineSpacing = 0, TextStyle textStyle = TextStyle.None, FontSystemEffect effect = FontSystemEffect.None, int effectAmount = 0);
+        // TODO: Use a LRU cache for text strings. Use Span<char> for the "text" parameter and only call .ToString() if the string is not in the cache.
+        // Idk if this is worth it, but it could be a nice optimization.
 
         var fsColor = new FontStashSharp.FSColor(color.R, color.G, color.B, color.A);
         var style = FontStashSharp.TextStyle.None;
-        font.FontBase.DrawText(this, text, position, fsColor, Vector2.One, 0, Vector2.Zero, 0, 0, 0, style, font.Effect, font.EffectAmount);
+        font.FontBase.DrawText(this._fontStashAdapter, text, position, fsColor, Vector2.One, 0, Vector2.Zero, 0, 0, 0, style, font.Effect, font.EffectAmount);
     }
 
-    private readonly ITexture2DManager _textureManager;
-
-    ITexture2DManager IFontStashRenderer2.TextureManager => this._textureManager;
-
-    void IFontStashRenderer2.DrawQuad(object texture, ref VertexPositionColorTexture topLeft, ref VertexPositionColorTexture topRight, ref VertexPositionColorTexture bottomLeft, ref VertexPositionColorTexture bottomRight)
-    {
-        var v1 = new SpriteBatch.Vertex(topLeft.Position, topLeft.TextureCoordinate, topLeft.Color.PackedValue);
-        var v2 = new SpriteBatch.Vertex(topRight.Position, topRight.TextureCoordinate, topRight.Color.PackedValue);
-        var v3 = new SpriteBatch.Vertex(bottomLeft.Position, bottomLeft.TextureCoordinate, bottomLeft.Color.PackedValue);
-        var v4 = new SpriteBatch.Vertex(bottomRight.Position, bottomRight.TextureCoordinate, bottomRight.Color.PackedValue);
-        this.DrawQuad((ITexture)texture, ref v1, ref v2, ref v3, ref v4);
-    }
-
+    /// <summary>
+    /// Draws a quad with the specified vertices.
+    /// </summary>
+    /// <param name="texture">The texture to use.</param>
+    /// <param name="topLeft">The top left vertex of the quad.</param>
+    /// <param name="topRight">The top right vertex of the quad.</param>
+    /// <param name="bottomLeft">The bottom left vertex of the quad.</param>
+    /// <param name="bottomRight">The bottom right vertex of the quad.</param>
     public void DrawQuad(ITexture texture, ref SpriteBatch.Vertex topLeft, ref SpriteBatch.Vertex topRight, ref SpriteBatch.Vertex bottomLeft, ref SpriteBatch.Vertex bottomRight)
     {
         this.Prepare(this._defaultShader, texture, 1);
         this._batch.DrawCore(ref topLeft, ref topRight, ref bottomLeft, ref bottomRight);
     }
 
+    /// <summary>
+    /// Draws a solid color rectangle at the specified position.
+    /// </summary>
+    /// <param name="position">The position to draw the rectangle at.</param>
+    /// <param name="size">The size of the rectangle to draw.</param>
+    /// <param name="color">The color to draw the rectangle with.</param>
     public void DrawRectangle(Vector2 position, Vector2 size, Color color)
     {
         this.DrawTexture(this._defaultShader, Texture.White, position, size, Vector2.Zero, Vector2.One, color);
     }
 
+    /// <summary>
+    /// Begins drawing with a new opacity value.
+    /// </summary>
+    /// <param name="opacity">The opacity to use.</param>
+    public void PushOpacity(float opacity)
+    {
+        opacity *= this._opacityStack.Peek();
+        this._opacityStack.Push(opacity);
+        this._batch.Opacity = opacity;
+    }
+
+    /// <summary>
+    /// Ends drawing with the current opacity value.
+    /// </summary>
+    public void PopOpacity()
+    {
+        this._opacityStack.Pop();
+        this._batch.Opacity = this._opacityStack.Peek();
+    }
+
+    /// <summary>
+    /// Begins drawing with a new scissor rectangle mask applied. This method will clip all drawing to the specified rectangle.
+    /// </summary>
+    /// <param name="rect">The rectangle to clip to.</param>
     public void PushScissorRectangle(Rect rect)
     {
         this.FlushBatch();
@@ -289,6 +372,9 @@ public class SpriteBatcher : IFontStashRenderer2, IDisposable
         this._commandList.SetScissorRect(0, (uint)rect.X, (uint)rect.Y, (uint)rect.Width, (uint)rect.Height);
     }
 
+    /// <summary>
+    /// Ends drawing with the current scissor rectangle mask applied.
+    /// </summary>
     public void PopScissorRectangle()
     {
         this.FlushBatch();
@@ -310,6 +396,9 @@ public class SpriteBatcher : IFontStashRenderer2, IDisposable
         }
     }
 
+    /// <summary>
+    /// Flushes the current batch of sprites to the command list.
+    /// </summary>
     public void FlushBatch()
     {
         if (this._batch.Count == 0 || this._batch.Texture == null)
@@ -338,7 +427,9 @@ public class SpriteBatcher : IFontStashRenderer2, IDisposable
         this.DrawCallCount++;
     }
 
-
+    /// <summary>
+    /// Disposes of the sprite batcher.
+    /// </summary>
     public void Dispose()
     {
         this._indexBuffer.Dispose();
@@ -349,15 +440,18 @@ public class SpriteBatcher : IFontStashRenderer2, IDisposable
         this._resourceSetCache.Dispose();
     }
 
-
-
-    private class FontStashTextureManager : ITexture2DManager
+    private class FontStashAdapter : ITexture2DManager, IFontStashRenderer2
     {
         private readonly GraphicsDevice _gd;
 
-        public FontStashTextureManager(GraphicsDevice gd)
+        private readonly SpriteBatcher _batcher;
+
+        ITexture2DManager IFontStashRenderer2.TextureManager => this;
+
+        public FontStashAdapter(GraphicsDevice gd, SpriteBatcher batcher)
         {
             this._gd = gd;
+            this._batcher = batcher;
         }
 
         object ITexture2DManager.CreateTexture(int width, int height)
@@ -374,6 +468,15 @@ public class SpriteBatcher : IFontStashRenderer2, IDisposable
         {
             var texture2D = (DirectTexture)texture;
             return new System.Drawing.Point((int)texture2D.Width, (int)texture2D.Height);
+        }
+
+        void IFontStashRenderer2.DrawQuad(object texture, ref VertexPositionColorTexture topLeft, ref VertexPositionColorTexture topRight, ref VertexPositionColorTexture bottomLeft, ref VertexPositionColorTexture bottomRight)
+        {
+            var v1 = new SpriteBatch.Vertex(topLeft.Position, topLeft.TextureCoordinate, topLeft.Color.PackedValue);
+            var v2 = new SpriteBatch.Vertex(topRight.Position, topRight.TextureCoordinate, topRight.Color.PackedValue);
+            var v3 = new SpriteBatch.Vertex(bottomLeft.Position, bottomLeft.TextureCoordinate, bottomLeft.Color.PackedValue);
+            var v4 = new SpriteBatch.Vertex(bottomRight.Position, bottomRight.TextureCoordinate, bottomRight.Color.PackedValue);
+            this._batcher.DrawQuad((ITexture)texture, ref v1, ref v2, ref v3, ref v4);
         }
     }
 }
