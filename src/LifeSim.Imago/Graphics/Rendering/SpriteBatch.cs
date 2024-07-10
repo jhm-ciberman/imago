@@ -8,6 +8,14 @@ namespace LifeSim.Imago.Graphics.Rendering;
 
 public class SpriteBatch
 {
+    public struct Item
+    {
+        public Vertex TopLeft { get; set; }
+        public Vertex TopRight { get; set; }
+        public Vertex BottomRight { get; set; }
+        public Vertex BottomLeft { get; set; }
+    }
+
     public struct Vertex
     {
         public Vector3 Position;
@@ -43,54 +51,75 @@ public class SpriteBatch
         }
     }
 
+    /// <summary>
+    /// Gets or sets the shader used to render the sprites.
+    /// </summary>
     public Shader? Shader { get; set; }
 
+    /// <summary>
+    /// Gets or sets the texture used to render the sprites.
+    /// </summary>
     public ITexture? Texture { get; set; }
 
+    /// <summary>
+    /// Gets the items in the sprite batch. The number of items is determined by <see cref="Count"/>, not by the length of the array.
+    /// </summary>
     public Item[] Items { get; }
 
-    public int Count { get; private set; }
+    /// <summary>
+    /// Gets the number of items in the sprite batch.
+    /// </summary>
+    public int Count { get; private set; } = 0;
 
+    /// <summary>
+    /// Gets or sets the opacity of the sprites in the batch.
+    /// </summary>
+    public float Opacity { get; set; } = 1f;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SpriteBatch"/> class with the specified capacity.
+    /// </summary>
+    /// <param name="capacity">The maximum number of items that the sprite batch can hold.</param>
     public SpriteBatch(int capacity)
     {
         this.Items = new Item[capacity];
     }
 
+    /// <summary>
+    /// Gets whether the sprite batch is full.
+    /// </summary>
     public bool IsFull => this.Count >= this.Items.Length;
 
+    /// <summary>
+    /// Gets or sets the render flags for the sprite batch.
+    /// </summary>
     public RenderFlags RenderFlags { get; internal set; } = RenderFlags.Transparent;
 
+    /// <summary>
+    /// Adds an item to the sprite batch.
+    /// </summary>
+    /// <param name="item">The item to add.</param>
     public void Add(Item item)
     {
         if (this.IsFull)
+        {
             throw new InvalidOperationException("The sprite batch is full.");
+        }
 
         this.Items[this.Count++] = item;
     }
 
-    public struct Item
-    {
-        public Vertex TopLeft { get; set; }
-        public Vertex TopRight { get; set; }
-        public Vertex BottomRight { get; set; }
-        public Vertex BottomLeft { get; set; }
-    }
-
-    public float Opacity { get; set; }
-
-    protected void UpdateColor(ref Color color)
-    {
-        color = new Color(color.R, color.G, color.B, (byte)(color.A * this.Opacity));
-    }
-
-    protected void UpdateColor(ref uint color)
-    {
-        color = color & 0x00FFFFFF | (uint)((color >> 24) * this.Opacity) << 24;
-    }
-
+    /// <summary>
+    /// Draws a sprite at the specified position with the specified size, UV coordinates, and color.
+    /// </summary>
+    /// <param name="position">The position of the sprite.</param>
+    /// <param name="size">The size of the sprite.</param>
+    /// <param name="uvTopLeft">The UV coordinates of the top-left corner of the sprite.</param>
+    /// <param name="uvBottomRight">The UV coordinates of the bottom-right corner of the sprite.</param>
+    /// <param name="color">The color of the sprite.</param>
     public void DrawCore(Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, Color color)
     {
-        this.UpdateColor(ref color);
+        this.ApplyColorAlpha(ref color);
 
         this.Add(new Item
         {
@@ -101,6 +130,18 @@ public class SpriteBatch
         });
     }
 
+    /// <summary>
+    /// Draws a sprite at the specified position with the specified size, UV coordinates, color, scale, rotation, origin, and depth.
+    /// </summary>
+    /// <param name="position">The position of the sprite.</param>
+    /// <param name="size">The size of the sprite.</param>
+    /// <param name="uvTopLeft">The UV coordinates of the top-left corner of the sprite.</param>
+    /// <param name="uvBottomRight">The UV coordinates of the bottom-right corner of the sprite.</param>
+    /// <param name="color">The color of the sprite.</param>
+    /// <param name="scale">The scale of the sprite.</param>
+    /// <param name="rotation">The rotation of the sprite.</param>
+    /// <param name="origin">The origin of the sprite.</param>
+    /// <param name="depth">The depth of the sprite.</param>
     public void DrawCore(Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, Color color, Vector2 scale, float rotation, Vector2 origin, float depth = 0f)
     {
         // Adapted from https://github.com/ThomasMiz/TrippyGL/blob/109eaf483d3289c0214963b7d22bdbd320d243ed/TrippyGL/TextureBatchItem.cs#L90
@@ -123,7 +164,7 @@ public class SpriteBatch
         var blUVs = new Vector2(uvTopLeft.X, uvBottomRight.Y);
         var brUVs = uvBottomRight;
 
-        this.UpdateColor(ref color);
+        this.ApplyColorAlpha(ref color);
 
         this.Add(new Item
         {
@@ -134,6 +175,16 @@ public class SpriteBatch
         });
     }
 
+    /// <summary>
+    /// Draws a sprite at the specified position with the specified size, UV coordinates, transform, color, and depth.
+    /// </summary>
+    /// <param name="position">The position of the sprite.</param>
+    /// <param name="size">The size of the sprite.</param>
+    /// <param name="uvTopLeft">The UV coordinates of the top-left corner of the sprite.</param>
+    /// <param name="uvBottomRight">The UV coordinates of the bottom-right corner of the sprite.</param>
+    /// <param name="transform">A 2D transformation matrix that will be applied to the sprite.</param>
+    /// <param name="color">The color of the sprite.</param>
+    /// <param name="depth">The depth of the sprite.</param>
     public void DrawCore(Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, in Matrix3x2 transform, Color color, float depth = 0f)
     {
         var tl = position;
@@ -146,7 +197,7 @@ public class SpriteBatch
         var blUVs = new Vector2(uvTopLeft.X, uvBottomRight.Y);
         var brUVs = uvBottomRight;
 
-        this.UpdateColor(ref color);
+        this.ApplyColorAlpha(ref color);
 
         this.Add(new Item
         {
@@ -157,14 +208,21 @@ public class SpriteBatch
         });
     }
 
+    /// <summary>
+    /// Draws a sprite at the specified position with the specified size, UV coordinates, transform, color, and depth.
+    /// </summary>
+    /// <param name="topLeft">The top-left vertex of the sprite.</param>
+    /// <param name="topRight">The top-right vertex of the sprite.</param>
+    /// <param name="bottomLeft">The bottom-left vertex of the sprite.</param>
+    /// <param name="bottomRight">The bottom-right vertex of the sprite.</param>
     public void DrawCore(ref Vertex topLeft, ref Vertex topRight, ref Vertex bottomLeft, ref Vertex bottomRight)
     {
         if (this.Opacity < 1f)
         {
-            this.UpdateColor(ref topLeft.Color);
-            this.UpdateColor(ref topRight.Color);
-            this.UpdateColor(ref bottomLeft.Color);
-            this.UpdateColor(ref bottomRight.Color);
+            this.ApplyColorAlpha(ref topLeft.Color);
+            this.ApplyColorAlpha(ref topRight.Color);
+            this.ApplyColorAlpha(ref bottomLeft.Color);
+            this.ApplyColorAlpha(ref bottomRight.Color);
         }
 
         this.Add(new Item
@@ -176,16 +234,31 @@ public class SpriteBatch
         });
     }
 
-
+    /// <summary>
+    /// Clears all items from the sprite batch.
+    /// </summary>
     public void Clear()
     {
         this.Count = 0;
     }
 
+    /// <summary>
+    /// Resets the sprite batch to its initial state.
+    /// </summary>
     public void Reset()
     {
         this.Count = 0;
         this.Opacity = 1f;
         this.RenderFlags = RenderFlags.Transparent;
+    }
+
+    protected void ApplyColorAlpha(ref Color color)
+    {
+        color = new Color(color.R, color.G, color.B, (byte)(color.A * this.Opacity));
+    }
+
+    protected void ApplyColorAlpha(ref uint color)
+    {
+        color = color & 0x00FFFFFF | (uint)((color >> 24) * this.Opacity) << 24;
     }
 }
