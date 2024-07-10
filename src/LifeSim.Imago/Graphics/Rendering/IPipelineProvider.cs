@@ -3,7 +3,7 @@ using Veldrid;
 
 namespace LifeSim.Imago.Graphics.Rendering;
 
-public interface IPipelineProvider
+internal interface IPipelineProvider
 {
     Pipeline MakePipeline(ShaderVariant shaderVariant, RenderFlags flags, TextureSampleCount sampleCount);
 }

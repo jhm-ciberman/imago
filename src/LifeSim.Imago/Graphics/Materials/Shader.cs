@@ -26,7 +26,7 @@ public class Shader : IDisposable
     /// <summary>
     /// Gets the <see cref="RenderFlags"/> supported by this shader.
     /// </summary>
-    public RenderFlags SupportedRenderFlags { get; } = RenderFlags.None;
+    internal RenderFlags SupportedRenderFlags { get; } = RenderFlags.None;
 
     private record struct CachedPipeline(VertexFormat VertexFormat, Pipeline Pipeline, RenderFlags Flags, TextureSampleCount SampleCount);
     private readonly List<CachedPipeline> _pipelines = new List<CachedPipeline>();
@@ -47,7 +47,7 @@ public class Shader : IDisposable
     /// <param name="fragmentCode">The source fragment shader code.</param>
     /// <param name="textures">The names of the textures used by this shader.</param>
     /// <param name="suportedRenderFlags">The <see cref="RenderFlags"/> supported by this shader.</param>
-    public Shader(Renderer renderer, IPipelineProvider pass, string vertexCode, string fragmentCode, string[]? textures = null, RenderFlags suportedRenderFlags = RenderFlags.None)
+    internal Shader(Renderer renderer, IPipelineProvider pass, string vertexCode, string fragmentCode, string[]? textures = null, RenderFlags suportedRenderFlags = RenderFlags.None)
     {
         this._renderer = renderer;
         this._pass = pass;
@@ -155,38 +155,6 @@ public class Shader : IDisposable
         foreach (var pipeline in this._pipelines)
         {
             pipeline.Pipeline.Dispose();
-        }
-    }
-}
-
-public class ShaderVariant : IDisposable
-{
-    public Shader Shader { get; }
-
-    public VertexFormat VertexFormat { get; }
-
-    public Veldrid.Shader[] VeldridShaders { get; }
-
-    public ShaderSetDescription ShaderSetDescription { get; internal set; }
-
-    public ResourceLayout MaterialResourceLayout => this.Shader.MaterialResourceLayout;
-
-    public RenderFlags Flags { get; }
-
-    internal ShaderVariant(Shader shader, VertexFormat vertexFormat, Veldrid.Shader[] shaders, RenderFlags flags)
-    {
-        this.Shader = shader;
-        this.VertexFormat = vertexFormat;
-        this.VeldridShaders = shaders;
-        this.Flags = flags;
-        this.ShaderSetDescription = new ShaderSetDescription(vertexFormat.Layouts, shaders);
-    }
-
-    public void Dispose()
-    {
-        foreach (var shader in this.VeldridShaders)
-        {
-            shader.Dispose();
         }
     }
 }

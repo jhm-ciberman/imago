@@ -6,7 +6,7 @@ using LifeSim.Support.Drawing;
 
 namespace LifeSim.Imago.Graphics.Rendering.Sprites;
 
-public class SpriteBatch
+internal class SpriteBatch
 {
     public record struct Item(SpriteVertex TopLeft, SpriteVertex TopRight, SpriteVertex BottomRight, SpriteVertex BottomLeft);
 

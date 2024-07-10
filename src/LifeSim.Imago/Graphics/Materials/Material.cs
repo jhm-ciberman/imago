@@ -15,7 +15,7 @@ public class Material : IDisposable
 
     private bool _resourceSetDirty = false;
 
-    public RenderFlags RenderFlags { get; protected set; } = RenderFlags.DepthTest | RenderFlags.DepthWrite | RenderFlags.ReceiveShadows | RenderFlags.ColorWrite;
+    internal RenderFlags RenderFlags { get; set; } = RenderFlags.DepthTest | RenderFlags.DepthWrite | RenderFlags.ReceiveShadows | RenderFlags.ColorWrite;
 
 
     public static Texture DefaultTexture { get; } = Texture.Magenta;
@@ -94,7 +94,7 @@ public class Material : IDisposable
         return true;
     }
 
-    protected bool SetRenderFlag(RenderFlags flags, bool value)
+    private bool SetRenderFlag(RenderFlags flags, bool value)
     {
         if (value)
         {
@@ -110,7 +110,7 @@ public class Material : IDisposable
         }
     }
 
-    protected bool GetRenderFlag(RenderFlags flag)
+    private bool GetRenderFlag(RenderFlags flag)
     {
         return (this.RenderFlags & flag) == flag;
     }

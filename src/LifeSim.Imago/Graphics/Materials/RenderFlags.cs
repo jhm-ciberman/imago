@@ -7,7 +7,7 @@ namespace LifeSim.Imago.Graphics.Materials;
 /// be used when rendering.
 /// </summary>
 [Flags]
-public enum RenderFlags : short
+internal enum RenderFlags : short
 {
     None = 0,
     DoubleSided = 1 << 0,
