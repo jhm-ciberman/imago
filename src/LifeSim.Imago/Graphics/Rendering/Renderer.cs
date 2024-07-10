@@ -139,16 +139,16 @@ public class Renderer : IDisposable
 
         this.MainRenderTexture = new RenderTexture(swapchain.Framebuffer.Width, swapchain.Framebuffer.Height);
 
-        this._imGuiPass = new ImGuiPass(this, this.MainRenderTexture);
-        this._mousePickerPass = new MousePickingPass(this, this.MainRenderTexture);
-        this._gizmosPass = new GizmosPass(this, this.MainRenderTexture);
-        this._particlesPass = new ParticlesPass(this, this.MainRenderTexture);
+        this._imGuiPass = new ImGuiPass(this);
+        this._mousePickerPass = new MousePickingPass(this);
+        this._gizmosPass = new GizmosPass(this);
+        this._particlesPass = new ParticlesPass(this);
         this._shadowPass = new ShadowPass(this);
-        this._forwardPass = new ForwardPass(this, this.MainRenderTexture, this._shadowPass);
-        this._immediatePass = new ImmediatePass(this, this.MainRenderTexture);
-        this._spritesPass = new SpritesPass(this, this.MainRenderTexture);
-        this._skyDomePass = new SkyDomePass(this, this.MainRenderTexture);
-        this._fullScreenPass = new FullScreenPass(this, this.MainRenderTexture, this.FullScreenRenderTexture);
+        this._forwardPass = new ForwardPass(this, this._shadowPass);
+        this._immediatePass = new ImmediatePass(this);
+        this._spritesPass = new SpritesPass(this);
+        this._skyDomePass = new SkyDomePass(this);
+        this._fullScreenPass = new FullScreenPass(this, this.FullScreenRenderTexture);
 
 
 

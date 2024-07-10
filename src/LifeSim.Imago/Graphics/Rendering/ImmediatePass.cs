@@ -45,19 +45,14 @@ public class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
 
     private readonly DeviceBuffer _vertexBuffer;
 
-    private int _vertexCount = 0;
-
-    private int _indexCount = 0;
-
     private readonly int _maxVertexBatchSize = 1024; // Number of vertices to batch before drawing. (otherwise, flush)
 
     private readonly int _maxIndexBatchSize = 1024; // Number of indices to batch before drawing. (otherwise, flush)
 
-    private CommandList _commandList = null!;
-
     private readonly Vertex[] _vertices;
 
     private readonly ushort[] _indices;
+
     private readonly ResourceLayout _passResourceLayout;
 
     private readonly DeviceBuffer _passDataBuffer;
@@ -66,29 +61,34 @@ public class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
 
     private readonly Shader _defaultShader;
 
+    private readonly VertexFormat _vertexFormat;
+
+    private readonly ResourceSetCache _resourceSetCache;
+
+    private readonly ITexture _defaultTexture;
+
+    private readonly Renderer _renderer;
+
     private Shader _currentBatchShader = null!;
 
     private Shader _currentShaderInUse = null!;
 
     private ITexture _currentBatchTexture = null!;
 
-    private readonly VertexFormat _vertexFormat;
+    private int _vertexCount = 0;
 
-    private readonly ResourceSetCache _resourceSetCache;
+    private int _indexCount = 0;
 
-    private readonly IRenderTexture _renderTexture;
-
-    private readonly ITexture _defaultTexture;
+    private CommandList _commandList = null!;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ImmediatePass"/> class.
     /// </summary>
     /// <param name="renderer">The renderer.</param>
-    /// <param name="renderTexture">The target render texture.</param>
-    public ImmediatePass(Renderer renderer, IRenderTexture renderTexture)
+    public ImmediatePass(Renderer renderer)
     {
+        this._renderer = renderer;
         this._gd = renderer.GraphicsDevice;
-        this._renderTexture = renderTexture;
         var factory = this._gd.ResourceFactory;
 
         this._vertexBuffer = factory.CreateBuffer(new BufferDescription(
@@ -345,7 +345,7 @@ public class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
                 depthClipEnabled: true,
                 scissorTestEnabled: false
             ),
-            Outputs = ((RenderTexture)this._renderTexture).Framebuffer.OutputDescription,
+            Outputs = this._renderer.MainRenderTexture.Framebuffer.OutputDescription,
             ResourceLayouts = new ResourceLayout[]
             {
                 this._passResourceLayout,

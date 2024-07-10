@@ -49,13 +49,12 @@ internal class ForwardPass : IDisposable, IPipelineProvider
     private readonly DeviceBuffer _camera3DInfoBuffer;
     private readonly ResourceLayout _resourceLayout;
     private ResourceSet _resourceSet;
-    private readonly IRenderTexture _renderTexture;
     private readonly RenderBatcher _renderBatcher;
     private readonly ShadowPass _shadowPass;
 
     public Shader DefaultShader { get; }
 
-    public ForwardPass(Renderer renderer, IRenderTexture mainRenderTexture, ShadowPass shadowPass)
+    public ForwardPass(Renderer renderer, ShadowPass shadowPass)
     {
         this._renderer = renderer;
         this._gd = renderer.GraphicsDevice;
@@ -73,8 +72,6 @@ internal class ForwardPass : IDisposable, IPipelineProvider
         this._lightInfoBuffer = factory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<LightInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
         this._resourceSet = this.CreatePassResourceSet();
-
-        this._renderTexture = mainRenderTexture;
 
         this._renderBatcher = new RenderBatcher(this._gd, RenderBatchPassType.Forward);
 

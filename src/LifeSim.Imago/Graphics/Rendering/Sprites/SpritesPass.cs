@@ -14,25 +14,23 @@ public class SpritesPass : IDisposable, IPipelineProvider
     /// </summary>
     public int DrawCallCount { get; private set; }
 
-    private readonly IRenderTexture _renderTexture;
-
     private readonly GraphicsDevice _gd;
 
     private readonly Shader _defaultShader;
 
     private readonly DrawingContext _drawingContext;
 
+    private readonly Renderer _renderer;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="SpritesPass"/> class.
     /// </summary>
     /// <param name="renderer">The renderer.</param>
-    /// <param name="renderTexture">The target render texture.</param>
-    public SpritesPass(Renderer renderer, IRenderTexture renderTexture)
+    public SpritesPass(Renderer renderer)
     {
+        this._renderer = renderer;
         this._gd = renderer.GraphicsDevice;
         this._defaultShader = new Shader(renderer, this, _vertexShader, _fragmentShader, ["Main"]);
-
-        this._renderTexture = renderTexture;
 
         this._drawingContext = new DrawingContext(this._gd, this._defaultShader);
     }
@@ -62,7 +60,7 @@ public class SpritesPass : IDisposable, IPipelineProvider
                 depthClipEnabled: true,
                 scissorTestEnabled
             ),
-            Outputs = this._renderTexture.OutputDescription,
+            Outputs = this._renderer.MainRenderTexture.OutputDescription,
             ResourceLayouts = new ResourceLayout[]
             {
                 this._drawingContext.PassResourceLayout,

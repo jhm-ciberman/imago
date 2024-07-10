@@ -32,8 +32,6 @@ public class SkyDomePass : IDisposable
 
     private readonly int _indexCount;
 
-    private readonly IRenderTexture _renderTexture;
-
     private readonly ResourceLayout _resourceLayout;
 
     private readonly DeviceBuffer _passDataBuffer;
@@ -44,10 +42,9 @@ public class SkyDomePass : IDisposable
 
     private readonly Sampler _sampler;
 
-    public SkyDomePass(Renderer renderer, IRenderTexture renderTexture)
+    public SkyDomePass(Renderer renderer)
     {
         this._gd = renderer.GraphicsDevice;
-        this._renderTexture = renderTexture;
 
         var factory = this._gd.ResourceFactory;
 
@@ -93,7 +90,7 @@ public class SkyDomePass : IDisposable
                 depthClipEnabled: true,
                 scissorTestEnabled: false
             ),
-            Outputs = this._renderTexture.OutputDescription,
+            Outputs = renderer.MainRenderTexture.OutputDescription,
             ResourceLayouts = new ResourceLayout[] { this._resourceLayout },
         });
 

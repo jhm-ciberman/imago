@@ -31,7 +31,7 @@ public class MousePickingPass : IDisposable, IPipelineProvider
 
     public Materials.Shader DefaultShader { get; }
 
-    public MousePickingPass(Renderer renderer, RenderTexture mainRenderTexture)
+    public MousePickingPass(Renderer renderer)
     {
         this._renderer = renderer;
         this._gd = renderer.GraphicsDevice;
@@ -45,7 +45,7 @@ public class MousePickingPass : IDisposable, IPipelineProvider
 
         this._resourceSet = this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(this._resourceLayout, this._camera3DInfoBuffer));
 
-        this._renderTexture = mainRenderTexture;
+        this._renderTexture = renderer.MainRenderTexture;
 
         this._renderBatcher = new RenderBatcher(this._gd, RenderBatchPassType.Picking);
 

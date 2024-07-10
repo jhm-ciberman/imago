@@ -20,12 +20,12 @@ internal class FullScreenPass : IDisposable
 
     private readonly ResourceLayout _resourceLayout;
 
-    public FullScreenPass(Renderer renderer, IRenderTexture sourceRenderTexture, IRenderTexture destinationRenderTexture)
+    public FullScreenPass(Renderer renderer, IRenderTexture destinationRenderTexture)
     {
         this._gd = renderer.GraphicsDevice;
         var factory = this._gd.ResourceFactory;
 
-        this._sourceTexture = sourceRenderTexture;
+        this._sourceTexture = renderer.MainRenderTexture;
         this._sourceTexture.Resized += (sender, args) => this.RegenerateResourceSet();
 
         this._destinationTexture = destinationRenderTexture;

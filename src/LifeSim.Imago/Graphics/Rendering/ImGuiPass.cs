@@ -10,12 +10,11 @@ public class ImGuiPass : IDisposable
 {
     private readonly GraphicsDevice _gd;
     private readonly ImGuiRenderer _imguiRenderer;
-    private readonly IRenderTexture _renderTexture;
 
-    public ImGuiPass(Renderer renderer, IRenderTexture renderTexture)
+    public ImGuiPass(Renderer renderer)
     {
         this._gd = renderer.GraphicsDevice;
-        this._renderTexture = renderTexture;
+        var renderTexture = renderer.MainRenderTexture;
         this._imguiRenderer = new ImGuiRenderer(this._gd, renderTexture.OutputDescription, (int)renderTexture.Width, (int)renderTexture.Height);
         unsafe
         {

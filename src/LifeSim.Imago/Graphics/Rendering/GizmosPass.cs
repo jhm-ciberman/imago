@@ -13,8 +13,6 @@ internal class GizmosPass : IDisposable
 {
     private const int VERTICES_PER_BATCH = 1000;
 
-
-
     [StructLayout(LayoutKind.Sequential)]
     private struct Vertex
     {
@@ -22,22 +20,24 @@ internal class GizmosPass : IDisposable
         public uint Color;
     }
 
-
-    private int _verticesCount = 0;
     private readonly Vertex[] _vertices = new Vertex[VERTICES_PER_BATCH];
+
     private readonly Pipeline _pipeline;
+
     private readonly ResourceSet _passResourceSet;
+
     private readonly ResourceLayout _passResourceLayout;
-    private readonly IRenderTexture _renderTexture;
+
     private readonly DeviceBuffer _vertexBuffer;
 
     private readonly GraphicsDevice _gd;
 
     private readonly DeviceBuffer _viewProjectionBuffer;
 
-    public GizmosPass(Renderer renderer, IRenderTexture renderTexture)
+    private int _verticesCount = 0;
+
+    public GizmosPass(Renderer renderer)
     {
-        this._renderTexture = renderTexture;
         this._gd = renderer.GraphicsDevice;
         var factory = this._gd.ResourceFactory;
 
@@ -69,7 +69,7 @@ internal class GizmosPass : IDisposable
                 depthClipEnabled: true,
                 scissorTestEnabled: false
             ),
-            Outputs = this._renderTexture.OutputDescription,
+            Outputs = renderer.MainRenderTexture.OutputDescription,
             ResourceLayouts = new ResourceLayout[]
             {
                 this._passResourceLayout,

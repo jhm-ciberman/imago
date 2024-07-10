@@ -56,7 +56,6 @@ internal class ParticlesPass : IDisposable
     private readonly ResourceSet _passResourceSet;
     private readonly ResourceLayout _passResourceLayout;
     private readonly ResourceLayout _materialResourceLayout;
-    private readonly IRenderTexture _renderTexture;
     private readonly DeviceBuffer _vertexBuffer;
     private readonly DeviceBuffer _particlesBuffer;
 
@@ -70,9 +69,8 @@ internal class ParticlesPass : IDisposable
 
     private readonly Dictionary<ITexture, ResourceSet> _textures = new Dictionary<ITexture, ResourceSet>();
 
-    public ParticlesPass(Renderer renderer, IRenderTexture renderTexture)
+    public ParticlesPass(Renderer renderer)
     {
-        this._renderTexture = renderTexture;
         this._particlesForRender = new ParticleRenderData[PARTICLES_PER_BATCH];
         this._gd = renderer.GraphicsDevice;
         var factory = this._gd.ResourceFactory;
@@ -130,7 +128,7 @@ internal class ParticlesPass : IDisposable
                 depthClipEnabled: true,
                 scissorTestEnabled: false
             ),
-            Outputs = this._renderTexture.OutputDescription,
+            Outputs = renderer.MainRenderTexture.OutputDescription,
             ResourceLayouts = new ResourceLayout[]
             {
                 this._passResourceLayout,
