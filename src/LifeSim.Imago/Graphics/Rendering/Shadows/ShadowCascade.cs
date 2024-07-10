@@ -4,15 +4,18 @@ using LifeSim.Imago.SceneGraph.Cameras;
 using LifeSim.Imago.SceneGraph.Lighting;
 using Veldrid.Utilities;
 
-namespace LifeSim.Imago.Graphics.Rendering;
+namespace LifeSim.Imago.Graphics.Rendering.Shadows;
 
 internal class ShadowCascade
 {
     public float SplitNear { get; set; }
+
     public float SplitFar { get; set; }
 
     public float DepthBias { get; set; }
+
     public float NormalOffset { get; set; }
+
     public Matrix4x4 ViewProjectionMatrix { get; set; }
 
     public void UpdateCascadeMatrix(int cascadeIndex, Camera camera, Vector3 lightDirection, float near, float far, ShadowMap config)

@@ -10,7 +10,7 @@ using Veldrid;
 using Veldrid.Utilities;
 using Shader = LifeSim.Imago.Graphics.Materials.Shader;
 
-namespace LifeSim.Imago.Graphics.Rendering;
+namespace LifeSim.Imago.Graphics.Rendering.Shadows;
 
 internal class ShadowPass : IDisposable, IPipelineProvider
 {
@@ -26,16 +26,23 @@ internal class ShadowPass : IDisposable, IPipelineProvider
 
     public ShadowMapTexture ShadowmapTexture { get; private set; }
 
+    public Shader DefaultShader { get; }
+
     private readonly ResourceLayout _resourceLayout;
+
     private readonly ResourceSet _resourceSet;
+
     private readonly GraphicsDevice _gd;
+
     private readonly Renderer _renderer;
+
     private readonly DeviceBuffer _shadowmapInfoBuffer;
+
     private readonly RenderBatcher _renderBatcher;
 
     private readonly ShadowCascade[] _cascades = new ShadowCascade[4];
+
     private Matrix4x4 _scalingMatrix;
-    public Shader DefaultShader { get; }
 
     public ShadowPass(Renderer renderer)
     {

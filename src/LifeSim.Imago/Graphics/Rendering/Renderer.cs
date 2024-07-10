@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using LifeSim.Imago.Graphics.Materials;
 using LifeSim.Imago.Graphics.Rendering.Buffers;
+using LifeSim.Imago.Graphics.Rendering.Shadows;
 using LifeSim.Imago.Graphics.Rendering.Sprites;
 using LifeSim.Imago.Graphics.Textures;
 using LifeSim.Imago.SceneGraph;

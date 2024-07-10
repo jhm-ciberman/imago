@@ -2,7 +2,7 @@ using System;
 using LifeSim.Imago.Graphics.Textures;
 using Veldrid;
 
-namespace LifeSim.Imago.Graphics.Rendering;
+namespace LifeSim.Imago.Graphics.Rendering.Shadows;
 
 internal class ShadowMapTexture : ITexture, IDisposable
 {

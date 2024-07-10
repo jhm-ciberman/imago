@@ -4,6 +4,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using LifeSim.Imago.Graphics.Materials;
 using LifeSim.Imago.Graphics.Meshes;
+using LifeSim.Imago.Graphics.Rendering.Shadows;
 using LifeSim.Imago.Graphics.Textures;
 using LifeSim.Imago.SceneGraph;
 using LifeSim.Imago.SceneGraph.Lighting;
