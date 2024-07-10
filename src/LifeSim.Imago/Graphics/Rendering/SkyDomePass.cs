@@ -34,25 +34,19 @@ public class SkyDomePass : IDisposable
 
     private readonly IRenderTexture _renderTexture;
 
-    private readonly ResourceSet _resourceSet;
-
     private readonly ResourceLayout _resourceLayout;
 
     private readonly DeviceBuffer _passDataBuffer;
 
     private readonly Pipeline _pipeline;
 
-    // The horizontal axis of the lut is for each hour of the day (left = 0hs, right = 24hs)
-    // The vertical axis is for the vertical position of the sky dome (top = top of the sphere, bottom = middle of the sphere)
-    // That way we can have different gradients for different times of the day.
-    private readonly ImageTexture _lutTexture;
+    private readonly Dictionary<ITexture, ResourceSet> _resourceSetCache = new();
 
     private readonly Sampler _sampler;
 
     public SkyDomePass(Renderer renderer, IRenderTexture renderTexture)
     {
         this._gd = renderer.GraphicsDevice;
-        this._lutTexture = new ImageTexture("./res/skydome_lut.png", srgb: false);
         this._renderTexture = renderTexture;
 
         var factory = this._gd.ResourceFactory;
@@ -103,29 +97,40 @@ public class SkyDomePass : IDisposable
             ResourceLayouts = new ResourceLayout[] { this._resourceLayout },
         });
 
-
-
         this._sampler = factory.CreateSampler(new SamplerDescription(
             SamplerAddressMode.Clamp, SamplerAddressMode.Clamp, SamplerAddressMode.Clamp,
             SamplerFilter.MinLinear_MagLinear_MipLinear,
             comparisonKind: null,
             0, 0, 0, 0, SamplerBorderColor.OpaqueBlack));
+    }
 
-        this._resourceSet = factory.CreateResourceSet(new ResourceSetDescription(
-            this._resourceLayout,
-            this._passDataBuffer,
-            this._lutTexture.VeldridTexture,
-            this._sampler
-        ));
+    private ResourceSet GetResourceSet(ITexture texture)
+    {
+        if (!this._resourceSetCache.TryGetValue(texture, out var resourceSet))
+        {
+            resourceSet = this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(
+                this._resourceLayout,
+                this._passDataBuffer,
+                texture.VeldridTexture,
+                this._sampler
+            ));
+
+            this._resourceSetCache.Add(texture, resourceSet);
+        }
+
+        return resourceSet;
     }
 
     public void Dispose()
     {
-        this._lutTexture.Dispose();
+        foreach (var resourceSet in this._resourceSetCache.Values)
+        {
+            resourceSet.Dispose();
+        }
+
         this._sampler.Dispose();
         this._passDataBuffer.Dispose();
         this._resourceLayout.Dispose();
-        this._resourceSet.Dispose();
         this._pipeline.Dispose();
         this._indexBuffer.Dispose();
         this._vertexBuffer.Dispose();
@@ -137,7 +142,7 @@ public class SkyDomePass : IDisposable
         var camera = scene.Camera;
         if (camera == null) return;
 
-        if (!scene.Environment.SkyDomeEnabled) return;
+        if (scene.Environment.SkyDomeLut == null) return;
 
         var xOffset = scene.Environment.SkyDomeDayProgress % 1f;
 
@@ -155,7 +160,8 @@ public class SkyDomePass : IDisposable
         cl.SetVertexBuffer(0, this._vertexBuffer);
         cl.SetIndexBuffer(this._indexBuffer, IndexFormat.UInt16);
 
-        cl.SetGraphicsResourceSet(0, this._resourceSet);
+        var resourceSet = this.GetResourceSet(scene.Environment.SkyDomeLut);
+        cl.SetGraphicsResourceSet(0, resourceSet);
 
         cl.UpdateBuffer(this._passDataBuffer, 0, ref passData);
 

@@ -1,3 +1,4 @@
+using LifeSim.Imago.Graphics.Textures;
 using LifeSim.Imago.SceneGraph.Lighting;
 using LifeSim.Support.Drawing;
 
@@ -31,9 +32,12 @@ public class SceneEnvironment
     public float FogEnd { get; set; } = 300f;
 
     /// <summary>
-    /// Gets or sets a value indicating whether the sky dome is enabled.
+    /// The sky dome lut texture.
+    /// The horizontal axis of the lut is for each hour of the day (left = 0hs, right = 24hs)
+    /// The vertical axis is for the vertical position of the sky dome (top = top of the sphere, bottom = middle of the sphere)
+    /// That way we can have different gradients for different times of the day.
     /// </summary>
-    public bool SkyDomeEnabled { get; set; } = false;
+    public ITexture? SkyDomeLut { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the progress of the day as a value between 0 and 1.
