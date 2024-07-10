@@ -76,7 +76,7 @@ public class Application : IDisposable
         uint width = (uint) this.Window.Width;
         uint height = (uint) this.Window.Height;
         this.Viewport.Resize(width, height);
-        this._renderer.Resize(width, height, this.Viewport.Width, this.Viewport.Height);
+        this._renderer.Resize(width, height);
     }
 
     /// <summary>

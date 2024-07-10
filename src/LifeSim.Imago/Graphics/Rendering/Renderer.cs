@@ -367,16 +367,14 @@ public class Renderer : IDisposable
     /// </summary>
     /// <param name="width">The new width of the render texture.</param>
     /// <param name="height">The new height of the render texture.</param>
-    /// <param name="viewportWidth">The width of the viewport.</param>
-    /// <param name="viewportHeight">The height of the viewport.</param>
-    public void Resize(uint width, uint height, uint viewportWidth, uint viewportHeight)
+    public void Resize(uint width, uint height)
     {
         this.GraphicsDevice.ResizeMainWindow(width, height);
         this.GraphicsDevice.WaitForIdle();
         this._fullScreenRenderTexture.Resize(width, height);
-        this.MainRenderTexture.Resize(viewportWidth, viewportHeight);
+        this.MainRenderTexture.Resize(width, height);
 
-        this.ViewportResized?.Invoke(this, new ViewportResizedEventArgs(viewportWidth, viewportHeight));
+        this.ViewportResized?.Invoke(this, new ViewportResizedEventArgs(width, height));
     }
 
 
