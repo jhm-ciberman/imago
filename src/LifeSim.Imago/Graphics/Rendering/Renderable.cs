@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using LifeSim.Imago.Graphics.Materials;
 using LifeSim.Imago.Graphics.Meshes;
+using LifeSim.Imago.Graphics.Rendering.Buffers;
 using LifeSim.Imago.SceneGraph;
 using Veldrid.Utilities;
 

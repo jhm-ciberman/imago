@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using LifeSim.Imago.Graphics.Rendering;
+using LifeSim.Imago.Graphics.Rendering.Buffers;
 using LifeSim.Imago.SceneGraph.Nodes;
 
 namespace LifeSim.Imago.Graphics;
