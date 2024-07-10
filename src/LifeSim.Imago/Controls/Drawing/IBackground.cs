@@ -1,5 +1,5 @@
 using System.Numerics;
-using LifeSim.Imago.Graphics.Rendering;
+using LifeSim.Imago.Graphics.Rendering.Sprites;
 
 namespace LifeSim.Imago.Controls.Drawing;
 

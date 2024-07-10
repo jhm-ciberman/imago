@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Numerics;
-using LifeSim.Imago.Graphics.Rendering;
+using LifeSim.Imago.Graphics.Rendering.Sprites;
 using LifeSim.Imago.Input;
 using LifeSim.Support.Drawing;
 using LifeSim.Support.Numerics;

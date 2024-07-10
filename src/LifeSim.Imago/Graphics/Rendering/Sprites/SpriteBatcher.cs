@@ -13,7 +13,7 @@ using Veldrid;
 using Shader = LifeSim.Imago.Graphics.Materials.Shader;
 using Texture = LifeSim.Imago.Graphics.Textures.Texture;
 
-namespace LifeSim.Imago.Graphics.Rendering;
+namespace LifeSim.Imago.Graphics.Rendering.Sprites;
 
 public class DrawingContext : IDisposable
 {

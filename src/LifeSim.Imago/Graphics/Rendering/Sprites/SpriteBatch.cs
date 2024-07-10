@@ -4,7 +4,7 @@ using LifeSim.Imago.Graphics.Materials;
 using LifeSim.Imago.Graphics.Textures;
 using LifeSim.Support.Drawing;
 
-namespace LifeSim.Imago.Graphics.Rendering;
+namespace LifeSim.Imago.Graphics.Rendering.Sprites;
 
 public class SpriteBatch
 {
@@ -102,9 +102,7 @@ public class SpriteBatch
     public void Add(Item item)
     {
         if (this.IsFull)
-        {
             throw new InvalidOperationException("The sprite batch is full.");
-        }
 
         this.Items[this.Count++] = item;
     }

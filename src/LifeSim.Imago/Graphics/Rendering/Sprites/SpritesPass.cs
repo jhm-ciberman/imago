@@ -5,31 +5,47 @@ using LifeSim.Imago.SceneGraph;
 using Veldrid;
 using Shader = LifeSim.Imago.Graphics.Materials.Shader;
 
-namespace LifeSim.Imago.Graphics.Rendering;
+namespace LifeSim.Imago.Graphics.Rendering.Sprites;
 
 public class SpritesPass : IDisposable, IPipelineProvider
 {
+    /// <summary>
+    /// Gets the number of draw calls made by the last call to <see cref="Render"/>.
+    /// </summary>
+    public int DrawCallCount { get; private set; }
+
     private readonly IRenderTexture _renderTexture;
+
     private readonly GraphicsDevice _gd;
+
     private readonly Shader _defaultShader;
 
     private readonly DrawingContext _drawingContext;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SpritesPass"/> class.
+    /// </summary>
+    /// <param name="renderer">The renderer.</param>
+    /// <param name="renderTexture">The target render texture.</param>
     public SpritesPass(Renderer renderer, IRenderTexture renderTexture)
     {
         this._gd = renderer.GraphicsDevice;
-        this._defaultShader = new Shader(renderer, this, _vertexShader, _fragmentShader, new[] { "Main" });
+        this._defaultShader = new Shader(renderer, this, _vertexShader, _fragmentShader, ["Main"]);
 
         this._renderTexture = renderTexture;
 
         this._drawingContext = new DrawingContext(this._gd, this._defaultShader);
     }
 
+    /// <summary>
+    /// Disposes of the resources used by this <see cref="SpritesPass"/>.
+    /// </summary>
     public void Dispose()
     {
         this._drawingContext.Dispose();
     }
 
+    /// <inheritdoc/>
     Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant, RenderFlags flags, TextureSampleCount sampleCount)
     {
         var scissorTestEnabled = flags.HasFlag(RenderFlags.ScisorTest);
@@ -55,6 +71,12 @@ public class SpritesPass : IDisposable, IPipelineProvider
         });
     }
 
+    /// <summary>
+    /// Renders the specified stage to the render texture.
+    /// </summary>
+    /// <param name="cl">The command list to use.</param>
+    /// <param name="stage">The stage to render.</param>
+    /// <param name="renderTexture">The render texture to render to.</param>
     public void Render(CommandList cl, Stage stage, RenderTexture renderTexture)
     {
         var layers = stage.Scene.Layers2D;
@@ -75,8 +97,6 @@ public class SpritesPass : IDisposable, IPipelineProvider
             this.DrawCallCount += this._drawingContext.DrawCallCount;
         }
     }
-
-    public int DrawCallCount { get; private set; }
 
     private static readonly string _fragmentShader = @"
         #version 450

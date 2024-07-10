@@ -1,6 +1,6 @@
 using System;
 using System.Numerics;
-using LifeSim.Imago.Graphics.Rendering;
+using LifeSim.Imago.Graphics.Rendering.Sprites;
 using LifeSim.Support.Drawing;
 
 namespace LifeSim.Imago.Controls.Drawing;
