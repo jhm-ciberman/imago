@@ -7,6 +7,6 @@ public interface ILayer2D
 {
     Matrix4x4 ViewProjectionMatrix { get; }
     Viewport Viewport { get; }
-    void Draw(SpriteBatcher spriteBatcher);
+    void Draw(DrawingContext ctx);
     void Update(float deltaTime);
 }

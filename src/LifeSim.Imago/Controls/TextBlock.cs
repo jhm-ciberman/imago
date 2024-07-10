@@ -220,9 +220,9 @@ public class TextBlock : Control
         return new Vector2(size.X, this.ActualLineHeight * this._textLines.Count);
     }
 
-    protected override void DrawCore(SpriteBatcher spriteBatcher)
+    protected override void DrawCore(DrawingContext ctx)
     {
-        base.DrawCore(spriteBatcher);
+        base.DrawCore(ctx);
 
         var font = this.GetFont();
         var offset = new Vector2(0f, MathF.Ceiling(this._lineSpacing / 2f));
@@ -231,11 +231,11 @@ public class TextBlock : Control
             Vector2 position = this.Position + offset + new Vector2(0f, i * this.ActualLineHeight);
             if (this._textEffect == null)
             {
-                spriteBatcher.DrawText(font, this._textLines[i], position, this.Foreground);
+                ctx.DrawText(font, this._textLines[i], position, this.Foreground);
             }
             else
             {
-                this._textEffect.Draw(spriteBatcher, this._textLines[i], font, position, this.Foreground);
+                this._textEffect.Draw(ctx, this._textLines[i], font, position, this.Foreground);
             }
         }
     }

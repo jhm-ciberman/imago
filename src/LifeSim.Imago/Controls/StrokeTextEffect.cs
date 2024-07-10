@@ -40,7 +40,7 @@ public class StrokeTextEffect : ITextEffect
         new Vector2(0, -1), new Vector2(1, 0), new Vector2(0, 1), new Vector2(-1, 0)
     };
 
-    public void Draw(SpriteBatcher spriteBatcher, string text, Font font, Vector2 position, Color color)
+    public void Draw(DrawingContext ctx, string text, Font font, Vector2 position, Color color)
     {
         if (string.IsNullOrWhiteSpace(text))
         {
@@ -56,13 +56,13 @@ public class StrokeTextEffect : ITextEffect
             {
                 var offset = _strokeOffsets[i];
                 var strokePosition = position + offset * strokeThickness;
-                spriteBatcher.DrawText(font, text, strokePosition, strokeColor);
+                ctx.DrawText(font, text, strokePosition, strokeColor);
             }
         }
 
         if (color.A > 0)
         {
-            spriteBatcher.DrawText(font, text, position, color);
+            ctx.DrawText(font, text, position, color);
         }
     }
 }
@@ -83,7 +83,7 @@ public class MultiTextEffect : ITextEffect
         this.Effects = effects;
     }
 
-    public void Draw(SpriteBatcher spriteBatcher, string text, Font font, Vector2 position, Color color)
+    public void Draw(DrawingContext ctx, string text, Font font, Vector2 position, Color color)
     {
         if (string.IsNullOrWhiteSpace(text))
         {
@@ -92,7 +92,7 @@ public class MultiTextEffect : ITextEffect
 
         foreach (var effect in this.Effects)
         {
-            effect.Draw(spriteBatcher, text, font, position, color);
+            effect.Draw(ctx, text, font, position, color);
         }
     }
 }

@@ -69,13 +69,13 @@ public abstract class ItemsControl : Control
         this.Items = new ItemCollection(this);
     }
 
-    protected override void DrawCore(SpriteBatcher spriteBatcher)
+    protected override void DrawCore(DrawingContext ctx)
     {
-        base.DrawCore(spriteBatcher);
+        base.DrawCore(ctx);
 
         for (var i = 0; i < this.Items.Count; i++)
         {
-            this.Items[i].Draw(spriteBatcher);
+            this.Items[i].Draw(ctx);
         }
     }
 

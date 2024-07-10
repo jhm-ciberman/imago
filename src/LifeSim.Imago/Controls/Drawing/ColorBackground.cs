@@ -54,11 +54,11 @@ public class ColorBackground : IBackground, ICloneable
         set => this.Color = new Color(this.Color.R, this.Color.G, this.Color.B, (byte)(value * 255.0f));
     }
 
-    public void DrawRectangle(SpriteBatcher spriteBatcher, Vector2 position, Vector2 size)
+    public void DrawRectangle(DrawingContext ctx, Vector2 position, Vector2 size)
     {
         if (this.Color.A == 0) return;
 
-        spriteBatcher.DrawRectangle(position, size, this.Color);
+        ctx.DrawRectangle(position, size, this.Color);
     }
 
     public static implicit operator ColorBackground(Color color)

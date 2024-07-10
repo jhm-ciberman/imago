@@ -60,13 +60,13 @@ public class TextureBlock : Control
         return new Vector2(width, height);
     }
 
-    protected override void DrawCore(SpriteBatcher spriteBatcher)
+    protected override void DrawCore(DrawingContext ctx)
     {
-        base.DrawCore(spriteBatcher);
+        base.DrawCore(ctx);
 
         if (this.Texture != null)
         {
-            spriteBatcher.DrawTexture(this.Shader, this.Texture, this.Position, this.ActualSize);
+            ctx.DrawTexture(this.Shader, this.Texture, this.Position, this.ActualSize);
         }
     }
 }

@@ -13,7 +13,7 @@ public class SpritesPass : IDisposable, IPipelineProvider
     private readonly GraphicsDevice _gd;
     private readonly Shader _defaultShader;
 
-    private readonly SpriteBatcher _spriteBatcher;
+    private readonly DrawingContext _drawingContext;
 
     public SpritesPass(Renderer renderer, IRenderTexture renderTexture)
     {
@@ -22,12 +22,12 @@ public class SpritesPass : IDisposable, IPipelineProvider
 
         this._renderTexture = renderTexture;
 
-        this._spriteBatcher = new SpriteBatcher(this._gd, this._defaultShader);
+        this._drawingContext = new DrawingContext(this._gd, this._defaultShader);
     }
 
     public void Dispose()
     {
-        this._spriteBatcher.Dispose();
+        this._drawingContext.Dispose();
     }
 
     Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant, RenderFlags flags, TextureSampleCount sampleCount)
@@ -49,7 +49,7 @@ public class SpritesPass : IDisposable, IPipelineProvider
             Outputs = this._renderTexture.OutputDescription,
             ResourceLayouts = new ResourceLayout[]
             {
-                this._spriteBatcher.PassResourceLayout,
+                this._drawingContext.PassResourceLayout,
                 shaderVariant.MaterialResourceLayout,
             },
         });
@@ -68,11 +68,11 @@ public class SpritesPass : IDisposable, IPipelineProvider
             cl.SetFramebuffer(renderTexture.Framebuffer);
             cl.ClearDepthStencil(1f);
 
-            this._spriteBatcher.Begin(cl, layer.ViewProjectionMatrix);
-            layer.Draw(this._spriteBatcher);
-            this._spriteBatcher.End();
+            this._drawingContext.Begin(cl, layer.ViewProjectionMatrix);
+            layer.Draw(this._drawingContext);
+            this._drawingContext.End();
 
-            this.DrawCallCount += this._spriteBatcher.DrawCallCount;
+            this.DrawCallCount += this._drawingContext.DrawCallCount;
         }
     }
 

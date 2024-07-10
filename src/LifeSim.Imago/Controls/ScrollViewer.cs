@@ -144,14 +144,14 @@ public class ScrollViewer : ContentControl
         return finalRect;
     }
 
-    protected override void DrawCore(SpriteBatcher spriteBatcher)
+    protected override void DrawCore(DrawingContext ctx)
     {
-        base.DrawCore(spriteBatcher);
+        base.DrawCore(ctx);
 
         var thumb = this.ScrollBarThumb;
         if (thumb.Visibility == Visibility.Visible)
         {
-            thumb.Draw(spriteBatcher);
+            thumb.Draw(ctx);
         }
     }
 

@@ -15,7 +15,7 @@ using Texture = LifeSim.Imago.Graphics.Textures.Texture;
 
 namespace LifeSim.Imago.Graphics.Rendering;
 
-public class SpriteBatcher : IDisposable
+public class DrawingContext : IDisposable
 {
     /// <summary>
     /// Gets the total number of sprites to draw.
@@ -68,11 +68,11 @@ public class SpriteBatcher : IDisposable
     private CommandList _commandList = null!;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="SpriteBatcher"/> class.
+    /// Initializes a new instance of the <see cref="DrawingContext"/> class.
     /// </summary>
     /// <param name="gd">The graphics device.</param>
     /// <param name="defaultShader">The default shader to use.</param>
-    internal SpriteBatcher(GraphicsDevice gd, Shader defaultShader)
+    internal DrawingContext(GraphicsDevice gd, Shader defaultShader)
     {
         this._gd = gd;
         this._defaultShader = defaultShader;
@@ -176,7 +176,6 @@ public class SpriteBatcher : IDisposable
     {
         this.DrawTexture(shader, texture, position, size, Vector2.Zero, Vector2.One, Color.White);
     }
-
 
     /// <summary>
     /// Draws a texture at the specified position with a transformation matrix.
@@ -444,11 +443,11 @@ public class SpriteBatcher : IDisposable
     {
         private readonly GraphicsDevice _gd;
 
-        private readonly SpriteBatcher _batcher;
+        private readonly DrawingContext _batcher;
 
         ITexture2DManager IFontStashRenderer2.TextureManager => this;
 
-        public FontStashAdapter(GraphicsDevice gd, SpriteBatcher batcher)
+        public FontStashAdapter(GraphicsDevice gd, DrawingContext batcher)
         {
             this._gd = gd;
             this._batcher = batcher;

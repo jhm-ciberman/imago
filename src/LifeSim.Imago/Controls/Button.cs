@@ -107,9 +107,9 @@ public class Button : ContentControl
         }
     }
 
-    protected override void DrawCore(SpriteBatcher spriteBatcher)
+    protected override void DrawCore(DrawingContext ctx)
     {
-        base.DrawCore(spriteBatcher);
+        base.DrawCore(ctx);
     }
 
     public override void Update(float deltaTime)

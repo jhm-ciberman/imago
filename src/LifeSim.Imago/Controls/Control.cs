@@ -356,8 +356,8 @@ public class Control : Visual
         return availableSize;
     }
 
-    protected override void DrawCore(SpriteBatcher spriteBatcher)
+    protected override void DrawCore(DrawingContext ctx)
     {
-        this.Background?.DrawRectangle(spriteBatcher, this.Position, this.ActualSize);
+        this.Background?.DrawRectangle(ctx, this.Position, this.ActualSize);
     }
 }

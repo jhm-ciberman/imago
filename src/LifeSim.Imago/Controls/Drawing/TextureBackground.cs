@@ -30,11 +30,11 @@ public class TextureBackground : IBackground
     /// </summary>
     public Color Color { get; set; } = Color.White;
 
-    public void DrawRectangle(SpriteBatcher spriteBatcher, Vector2 position, Vector2 size)
+    public void DrawRectangle(DrawingContext ctx, Vector2 position, Vector2 size)
     {
         if (this.Texture != null)
         {
-            spriteBatcher.DrawTexture(null, this.Texture.Texture, position, size, this.Texture.TopLeft, this.Texture.BottomRight, this.Color);
+            ctx.DrawTexture(null, this.Texture.Texture, position, size, this.Texture.TopLeft, this.Texture.BottomRight, this.Color);
         }
     }
 

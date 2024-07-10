@@ -75,11 +75,11 @@ public class ContentControl : Control
         return finalRect;
     }
 
-    protected override void DrawCore(SpriteBatcher spriteBatcher)
+    protected override void DrawCore(DrawingContext ctx)
     {
-        base.DrawCore(spriteBatcher);
+        base.DrawCore(ctx);
 
-        this.Content?.Draw(spriteBatcher);
+        this.Content?.Draw(ctx);
     }
 
     public override void Update(float deltaTime)

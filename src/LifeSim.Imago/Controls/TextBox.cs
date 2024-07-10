@@ -226,12 +226,12 @@ public class TextBox : Control
         return finalRect;
     }
 
-    protected override void DrawCore(SpriteBatcher spriteBatcher)
+    protected override void DrawCore(DrawingContext ctx)
     {
-        base.DrawCore(spriteBatcher);
+        base.DrawCore(ctx);
 
         var tb = this.TextBlock;
-        tb.Draw(spriteBatcher);
+        tb.Draw(ctx);
 
         if (this._caretVisible)
         {
@@ -243,7 +243,7 @@ public class TextBox : Control
             ColorF caretColor = this.CaretColor ?? tb.Foreground;
             Vector2 caretPos = new Vector2(this.Position.X + size.X, this.Position.Y) + this.Padding.TopLeft;
             Vector2 caretSize = new Vector2(this.CaretWidth, tb.FontSize);
-            spriteBatcher.DrawRectangle(caretPos, caretSize, caretColor);
+            ctx.DrawRectangle(caretPos, caretSize, caretColor);
         }
     }
 

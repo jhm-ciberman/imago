@@ -129,8 +129,8 @@ public abstract class Visual : ObservableObject, IDisposable
     /// <summary>
     /// Draws the control.
     /// </summary>
-    /// <param name="spriteBatcher">The sprite batch to use for drawing.</param>
-    public void Draw(SpriteBatcher spriteBatcher)
+    /// <param name="ctx">The drawing context to use for drawing.</param>
+    public void Draw(DrawingContext ctx)
     {
         if (this.Visibility != Visibility.Visible || this.Opacity <= 0f)
         {
@@ -139,29 +139,29 @@ public abstract class Visual : ObservableObject, IDisposable
 
         if (this.Opacity < 1f)
         {
-            spriteBatcher.PushOpacity(this.Opacity);
+            ctx.PushOpacity(this.Opacity);
         }
 
         if (this.ClipToBounds)
         {
-            spriteBatcher.PushScissorRectangle(this.GetBounds() * this.Stage!.Zoom);
-            this.DrawCore(spriteBatcher);
-            spriteBatcher.PopScissorRectangle();
+            ctx.PushScissorRectangle(this.GetBounds() * this.Stage!.Zoom);
+            this.DrawCore(ctx);
+            ctx.PopScissorRectangle();
         }
         else
         {
-            this.DrawCore(spriteBatcher);
+            this.DrawCore(ctx);
         }
 
         if (this.Opacity < 1f)
         {
-            spriteBatcher.PopOpacity();
+            ctx.PopOpacity();
         }
     }
 
     protected abstract Rect GetBounds();
 
-    protected abstract void DrawCore(SpriteBatcher spriteBatcher);
+    protected abstract void DrawCore(DrawingContext ctx);
 
     /// <summary>
     /// Performs the measure pass of the layout process. In the measure pass, the control computes the desired size of the control
