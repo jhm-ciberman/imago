@@ -18,8 +18,6 @@ namespace LifeSim.Imago.Graphics.Rendering;
 
 public class Renderer : IDisposable
 {
-    public const int MIN_BUFFER_BLOCKS = 1024;
-
     /// <summary>
     /// Gets the global instance of the renderer.
     /// </summary>
@@ -63,16 +61,8 @@ public class Renderer : IDisposable
     private readonly DisposeCollector _disposeCollector;
     private readonly Dictionary<ResourceLayoutDescription, ResourceLayout> _resourceLayoutCache = new();
 
-    private readonly List<DataBuffer> _instanceDataBuffers = new List<DataBuffer>();
-    private readonly List<DataBuffer> _transformDataBuffers = new List<DataBuffer>();
-    private readonly List<DataBuffer> _skeletonDataBuffers = new List<DataBuffer>();
-
     private readonly List<Texture> _dirtyTextures = new();
     private readonly List<Material> _dirtyMaterials = new();
-
-    public ResourceLayout TransformResourceLayout { get; }
-    public ResourceLayout InstanceResourceLayout { get; }
-    public ResourceLayout SkeletonResourceLayout { get; }
 
     private readonly List<Skeleton> _skeletons = new List<Skeleton>();
     private readonly HashSet<IDisposable> _disposables = new HashSet<IDisposable>();
@@ -87,6 +77,7 @@ public class Renderer : IDisposable
     private readonly MousePickingPass _mousePickerPass;
     private readonly ParticlesPass _particlesPass;
     private readonly SkyDomePass _skyDomePass;
+    private readonly BuffersManager _buffersManager;
 
 
     public static GraphicsDeviceOptions GetGraphicsDeviceOptions(bool debug = false)
@@ -141,24 +132,11 @@ public class Renderer : IDisposable
         this._disposeCollector = new DisposeCollector();
         this._factory = this.GraphicsDevice.ResourceFactory;
 
+        this._buffersManager = new BuffersManager(this.GraphicsDevice);
+
         this._fullScreenRenderTexture = new SwapchainRenderTexture(gd, swapchain);
 
         this.MainRenderTexture = new RenderTexture(swapchain.Framebuffer.Width, swapchain.Framebuffer.Height);
-
-        this.InstanceResourceLayout = this._factory.CreateResourceLayout(new ResourceLayoutDescription(
-            new ResourceLayoutElementDescription("InstanceDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex | ShaderStages.Fragment)
-        ));
-        this.InstanceResourceLayout.Name = "InstanceData Resource Layout";
-
-        this.TransformResourceLayout = this._factory.CreateResourceLayout(new ResourceLayoutDescription(
-            new ResourceLayoutElementDescription("TransformDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
-        ));
-        this.TransformResourceLayout.Name = "TransformData Resource Layout";
-
-        this.SkeletonResourceLayout = this._factory.CreateResourceLayout(new ResourceLayoutDescription(
-            new ResourceLayoutElementDescription("BonesDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
-        ));
-        this.SkeletonResourceLayout.Name = "BonesData Resource Layout";
 
         this._imGuiPass = new ImGuiPass(this, this.MainRenderTexture);
         this._mousePickerPass = new MousePickingPass(this, this.MainRenderTexture);
@@ -170,6 +148,8 @@ public class Renderer : IDisposable
         this._spritesPass = new SpritesPass(this, this.MainRenderTexture);
         this._skyDomePass = new SkyDomePass(this, this.MainRenderTexture);
         this._fullScreenPass = new FullScreenPass(this, this.MainRenderTexture, this.FullScreenRenderTexture);
+
+
 
         this._commandList = this._factory.CreateCommandList();
 
@@ -187,6 +167,46 @@ public class Renderer : IDisposable
     {
         this._imGuiPass.Update(deltaTime, inputSnapshot);
         this._mousePickerPass.SetMousePosition(inputSnapshot.MousePosition);
+    }
+
+    /// <summary>
+    /// Gets the resource layout for transform data.
+    /// </summary>
+    public ResourceLayout TransformResourceLayout => this._buffersManager.TransformResourceLayout;
+
+    /// <summary>
+    /// Gets the resource layout for instance data.
+    /// </summary>
+    public ResourceLayout InstanceResourceLayout => this._buffersManager.InstanceResourceLayout;
+
+    /// <summary>
+    /// Gets the resource layout for skeleton data.
+    /// </summary>
+    public ResourceLayout SkeletonResourceLayout => this._buffersManager.SkeletonResourceLayout;
+
+    /// <summary>
+    /// Requests a data block for instance data.
+    /// </summary>
+    /// <param name="instanceDataBlockSize">The size of the instance data block.</param>
+    internal DataBlock RequestInstanceDataBlock(int instanceDataBlockSize)
+    {
+        return this._buffersManager.RequestInstanceDataBlock(instanceDataBlockSize);
+    }
+
+    /// <summary>
+    /// Requests a data block for transform data.
+    /// </summary>
+    internal DataBlock RequestTransformDataBlock()
+    {
+        return this._buffersManager.RequestTransformDataBlock();
+    }
+
+    /// <summary>
+    /// Requests a data block for skeleton data.
+    /// </summary>
+    internal DataBlock RequestSkeletonDataBlock()
+    {
+        return this._buffersManager.RequestSkeletonDataBlock();
     }
 
     public Material MakeMaterial()
@@ -348,35 +368,6 @@ public class Renderer : IDisposable
         this.ViewportResized?.Invoke(this, new ViewportResizedEventArgs(viewportWidth, viewportHeight));
     }
 
-    internal DataBlock RequestTransformDataBlock()
-    {
-        for (int i = 0; i < this._transformDataBuffers.Count; i++)
-        {
-            var buffer = this._transformDataBuffers[i];
-            if (!buffer.IsFull)
-                return buffer.RequestBlock();
-        }
-
-        var newBuffer = new DataBuffer(this.GraphicsDevice, MIN_BUFFER_BLOCKS, 64, this.TransformResourceLayout);
-        newBuffer.Name = "TransformDataBuffer " + this._transformDataBuffers.Count;
-        this._transformDataBuffers.Add(newBuffer);
-        return newBuffer.RequestBlock();
-    }
-
-    internal DataBlock RequestInstanceDataBlock(int instanceDataBlockSize)
-    {
-        for (int i = 0; i < this._instanceDataBuffers.Count; i++)
-        {
-            var buffer = this._instanceDataBuffers[i];
-            if (buffer.BlockSize == instanceDataBlockSize && !buffer.IsFull)
-                return buffer.RequestBlock();
-        }
-
-        var newBuffer = new DataBuffer(this.GraphicsDevice, MIN_BUFFER_BLOCKS, instanceDataBlockSize, this.InstanceResourceLayout);
-        newBuffer.Name = "InstanceDataBuffer " + this._instanceDataBuffers.Count;
-        this._instanceDataBuffers.Add(newBuffer);
-        return newBuffer.RequestBlock();
-    }
 
     internal void RegisterSkeleton(Skeleton skeleton)
     {
@@ -398,42 +389,15 @@ public class Renderer : IDisposable
         this._disposables.Remove(disposable);
     }
 
-    internal DataBlock RequestSkeletonDataBlock()
-    {
-        for (int i = 0; i < this._skeletonDataBuffers.Count; i++)
-        {
-            var buffer = this._skeletonDataBuffers[i];
-            if (!buffer.IsFull)
-                return buffer.RequestBlock();
-        }
-
-        var newBuffer = new DataBuffer(this.GraphicsDevice, MIN_BUFFER_BLOCKS / Skeleton.MAX_NUMBER_OF_BONES, Skeleton.MAX_NUMBER_OF_BONES * 64, this.SkeletonResourceLayout);
-        newBuffer.Name = "SkeletonDataBuffer " + this._skeletonDataBuffers.Count;
-        this._skeletonDataBuffers.Add(newBuffer);
-        return newBuffer.RequestBlock();
-    }
 
     internal void UpdateBuffers(CommandList commandList)
     {
-        for (int i = 0; i < this._instanceDataBuffers.Count; i++)
-        {
-            this._instanceDataBuffers[i].UploadToGPU(commandList);
-        }
-
-        for (int i = 0; i < this._transformDataBuffers.Count; i++)
-        {
-            this._transformDataBuffers[i].UploadToGPU(commandList);
-        }
-
         foreach (var skeleton in this._skeletons)
         {
             skeleton.Update();
         }
 
-        for (int i = 0; i < this._skeletonDataBuffers.Count; i++)
-        {
-            this._skeletonDataBuffers[i].UploadToGPU(commandList);
-        }
+        this._buffersManager.Update(commandList);
 
         if (this._dirtyMaterials.Count > 0)
         {
@@ -478,21 +442,7 @@ public class Renderer : IDisposable
             this.MainRenderTexture.Dispose();
             this._commandList.Dispose();
             this._fence.Dispose();
-
-            for (int i = 0; i < this._instanceDataBuffers.Count; i++)
-            {
-                this._instanceDataBuffers[i].Dispose();
-            }
-
-            for (int i = 0; i < this._transformDataBuffers.Count; i++)
-            {
-                this._transformDataBuffers[i].Dispose();
-            }
-
-            for (int i = 0; i < this._skeletonDataBuffers.Count; i++)
-            {
-                this._skeletonDataBuffers[i].Dispose();
-            }
+            this._buffersManager.Dispose();
 
             foreach (var disposable in this._disposables.ToArray())
             {
