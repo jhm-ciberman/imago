@@ -6,35 +6,36 @@ using Veldrid;
 
 namespace LifeSim.Imago.Graphics.Materials;
 
+/// <summary>
+/// Represents a shader used for rendering.
+/// </summary>
 public class Shader : IDisposable
 {
-    /// <summary>
-    /// Gets the source vertex shader code.
-    /// </summary>
-    public string VertexCode { get; }
-
-    /// <summary>
-    /// Gets the source fragment shader code.
-    /// </summary>
-    public string FragmentCode { get; }
+    private record struct CachedPipeline(VertexFormat VertexFormat, Pipeline Pipeline, RenderFlags Flags, TextureSampleCount SampleCount);
 
     /// <summary>
     /// Gets an array of the names of the textures used by this shader.
     /// </summary>
-    public string[] Textures { get; internal set; }
+    internal string[] Textures { get; }
 
     /// <summary>
-    /// Gets the <see cref="RenderFlags"/> supported by this shader.
+    /// Gets the resource layout for the material.
     /// </summary>
-    internal RenderFlags SupportedRenderFlags { get; } = RenderFlags.None;
+    internal ResourceLayout MaterialResourceLayout { get; }
 
-    private record struct CachedPipeline(VertexFormat VertexFormat, Pipeline Pipeline, RenderFlags Flags, TextureSampleCount SampleCount);
-    private readonly List<CachedPipeline> _pipelines = new List<CachedPipeline>();
-    public ResourceLayout MaterialResourceLayout { get; }
-    private readonly List<ShaderVariant> _variants = new List<ShaderVariant>();
+    private readonly List<CachedPipeline> _pipelines = [];
+
+    private readonly List<ShaderVariant> _variants = [];
+
     private readonly GraphicsDevice _gd;
 
     private readonly IPipelineProvider _pass;
+
+    private readonly RenderFlags _supportedRenderFlags = RenderFlags.None;
+
+    private readonly string _vertexCode;
+
+    private readonly string _fragmentCode;
 
     private readonly Renderer _renderer;
 
@@ -51,13 +52,13 @@ public class Shader : IDisposable
     {
         this._renderer = renderer;
         this._pass = pass;
-        this.VertexCode = vertexCode;
-        this.FragmentCode = fragmentCode;
-        this.SupportedRenderFlags = suportedRenderFlags;
+        this._vertexCode = vertexCode;
+        this._fragmentCode = fragmentCode;
+        this._supportedRenderFlags = suportedRenderFlags;
 
         this._gd = this._renderer.GraphicsDevice;
 
-        this.Textures = textures ?? Array.Empty<string>();
+        this.Textures = textures ?? [];
         this.MaterialResourceLayout = this._renderer.GetResourceLayout(this.MakeResourceLayoutDescription());
     }
 
@@ -102,7 +103,7 @@ public class Shader : IDisposable
 
     private ShaderVariant GetShaderVariant(VertexFormat vertexFormat, RenderFlags flags)
     {
-        flags &= this.SupportedRenderFlags;
+        flags &= this._supportedRenderFlags;
 
         for (int i = 0; i < this._variants.Count; i++)
         {
@@ -112,7 +113,7 @@ public class Shader : IDisposable
 
         var macros = vertexFormat.GetMacroDefinitions();
         AddFlagsMacros(macros, flags);
-        var shaders = ShaderCompiler.CompileShaders(this._gd, this.VertexCode, this.FragmentCode, macros);
+        var shaders = ShaderCompiler.CompileShaders(this._gd, this._vertexCode, this._fragmentCode, macros);
         var variant = new ShaderVariant(this, vertexFormat, shaders, flags);
         this._variants.Add(variant);
         return variant;
@@ -138,7 +139,9 @@ public class Shader : IDisposable
         foreach (var flag in _renderFlagMacros)
         {
             if (flags.HasFlag(flag.Key))
+            {
                 macros.Add(new Veldrid.SPIRV.MacroDefinition(flag.Value, "1"));
+            }
         }
     }
 
@@ -148,10 +151,12 @@ public class Shader : IDisposable
     public void Dispose()
     {
         this.MaterialResourceLayout.Dispose();
+
         foreach (var variant in this._variants)
         {
             variant.Dispose();
         }
+
         foreach (var pipeline in this._pipelines)
         {
             pipeline.Pipeline.Dispose();
