@@ -8,22 +8,12 @@ namespace LifeSim.Imago.Graphics.Rendering;
 
 public class ImGuiPass : IDisposable
 {
-    /// <summary>
-    /// Gets the instance of the ImGuiPass.
-    /// </summary>
-    public static ImGuiPass Instance { get; private set; } = null!;
-
     private readonly GraphicsDevice _gd;
     private readonly ImGuiRenderer _imguiRenderer;
     private readonly IRenderTexture _renderTexture;
 
     public ImGuiPass(Renderer renderer, IRenderTexture renderTexture)
     {
-        if (Instance != null)
-            throw new InvalidOperationException("Only one instance of ImGuiPass can exist at a time.");
-
-        Instance = this;
-
         this._gd = renderer.GraphicsDevice;
         this._renderTexture = renderTexture;
         this._imguiRenderer = new ImGuiRenderer(this._gd, renderTexture.OutputDescription, (int)renderTexture.Width, (int)renderTexture.Height);

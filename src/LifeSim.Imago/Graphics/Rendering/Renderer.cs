@@ -210,6 +210,16 @@ public class Renderer : IDisposable
         return this._buffersManager.RequestSkeletonDataBlock();
     }
 
+    /// <summary>
+    /// Gets or creates an ImGui binding for the given texture.
+    /// </summary>
+    /// <param name="texture">The texture to get or create the binding for.</param>
+    /// <returns>The ImGui binding.</returns>
+    public nint GetOrCreateImGuiBinding(Texture texture)
+    {
+        return this._imGuiPass.GetOrCreateBinding(texture);
+    }
+
     public Material MakeMaterial()
     {
         return new Material(this._forwardPass.DefaultShader, this._shadowPass.DefaultShader, this._mousePickerPass.DefaultShader);

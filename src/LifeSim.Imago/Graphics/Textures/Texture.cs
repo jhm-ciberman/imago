@@ -111,7 +111,7 @@ public class Texture : ITexture, ITextureRegion, IDisposable
     /// <summary>
     /// Gets the ImGui binding for this texture.
     /// </summary>
-    public nint ImGuiBinding => ImGuiPass.Instance.GetOrCreateBinding(this);  // TODO: Texture should not know about ImGuiPass
+    public nint ImGuiBinding => Renderer.Instance.GetOrCreateImGuiBinding(this);
 
     /// <summary>
     /// Gets the size of the texture.
