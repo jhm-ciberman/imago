@@ -10,45 +10,10 @@ public class SpriteBatch
 {
     public struct Item
     {
-        public Vertex TopLeft { get; set; }
-        public Vertex TopRight { get; set; }
-        public Vertex BottomRight { get; set; }
-        public Vertex BottomLeft { get; set; }
-    }
-
-    public struct Vertex
-    {
-        public Vector3 Position;
-        public Vector2 Uv;
-        public uint Color;
-
-        public Vertex(Vector3 position, Vector2 uv, Color color)
-        {
-            this.Position = position;
-            this.Uv = uv;
-            this.Color = color.ToPackedUInt();
-        }
-
-        public Vertex(Vector3 position, Vector2 uv, uint color)
-        {
-            this.Position = position;
-            this.Uv = uv;
-            this.Color = color;
-        }
-
-        public Vertex(Vector2 position, float depth, Vector2 uv, Color color)
-        {
-            this.Position = new Vector3(position, depth);
-            this.Uv = uv;
-            this.Color = color.ToPackedUInt();
-        }
-
-        public Vertex(float x, float y, float z, float u, float v, Color color)
-        {
-            this.Position = new Vector3(x, y, z);
-            this.Uv = new Vector2(u, v);
-            this.Color = color.ToPackedUInt();
-        }
+        public SpriteVertex TopLeft { get; set; }
+        public SpriteVertex TopRight { get; set; }
+        public SpriteVertex BottomRight { get; set; }
+        public SpriteVertex BottomLeft { get; set; }
     }
 
     /// <summary>
@@ -121,10 +86,10 @@ public class SpriteBatch
 
         this.Add(new Item
         {
-            TopLeft = new Vertex(position.X, position.Y, 0f, uvTopLeft.X, uvTopLeft.Y, color),
-            TopRight = new Vertex(position.X + size.X, position.Y, 0f, uvBottomRight.X, uvTopLeft.Y, color),
-            BottomLeft = new Vertex(position.X, position.Y + size.Y, 0f, uvTopLeft.X, uvBottomRight.Y, color),
-            BottomRight = new Vertex(position.X + size.X, position.Y + size.Y, 0f, uvBottomRight.X, uvBottomRight.Y, color),
+            TopLeft = new SpriteVertex(position.X, position.Y, 0f, uvTopLeft.X, uvTopLeft.Y, color),
+            TopRight = new SpriteVertex(position.X + size.X, position.Y, 0f, uvBottomRight.X, uvTopLeft.Y, color),
+            BottomLeft = new SpriteVertex(position.X, position.Y + size.Y, 0f, uvTopLeft.X, uvBottomRight.Y, color),
+            BottomRight = new SpriteVertex(position.X + size.X, position.Y + size.Y, 0f, uvBottomRight.X, uvBottomRight.Y, color),
         });
     }
 
@@ -166,10 +131,10 @@ public class SpriteBatch
 
         this.Add(new Item
         {
-            TopLeft = new Vertex(tlPos, tlUVs, color),
-            TopRight = new Vertex(trPos, trUVs, color),
-            BottomLeft = new Vertex(blPos, blUVs, color),
-            BottomRight = new Vertex(brPos, brUVs, color),
+            TopLeft = new SpriteVertex(tlPos, tlUVs, color),
+            TopRight = new SpriteVertex(trPos, trUVs, color),
+            BottomLeft = new SpriteVertex(blPos, blUVs, color),
+            BottomRight = new SpriteVertex(brPos, brUVs, color),
         });
     }
 
@@ -199,10 +164,10 @@ public class SpriteBatch
 
         this.Add(new Item
         {
-            TopLeft = new Vertex(Vector2.Transform(tl, transform), depth, tlUVs, color),
-            TopRight = new Vertex(Vector2.Transform(tr, transform), depth, trUVs, color),
-            BottomLeft = new Vertex(Vector2.Transform(bl, transform), depth, blUVs, color),
-            BottomRight = new Vertex(Vector2.Transform(br, transform), depth, brUVs, color),
+            TopLeft = new SpriteVertex(Vector2.Transform(tl, transform), depth, tlUVs, color),
+            TopRight = new SpriteVertex(Vector2.Transform(tr, transform), depth, trUVs, color),
+            BottomLeft = new SpriteVertex(Vector2.Transform(bl, transform), depth, blUVs, color),
+            BottomRight = new SpriteVertex(Vector2.Transform(br, transform), depth, brUVs, color),
         });
     }
 
@@ -213,7 +178,7 @@ public class SpriteBatch
     /// <param name="topRight">The top-right vertex of the sprite.</param>
     /// <param name="bottomLeft">The bottom-left vertex of the sprite.</param>
     /// <param name="bottomRight">The bottom-right vertex of the sprite.</param>
-    public void DrawCore(ref Vertex topLeft, ref Vertex topRight, ref Vertex bottomLeft, ref Vertex bottomRight)
+    public void DrawCore(ref SpriteVertex topLeft, ref SpriteVertex topRight, ref SpriteVertex bottomLeft, ref SpriteVertex bottomRight)
     {
         if (this.Opacity < 1f)
         {
