@@ -8,13 +8,7 @@ namespace LifeSim.Imago.Graphics.Rendering.Sprites;
 
 public class SpriteBatch
 {
-    public struct Item
-    {
-        public SpriteVertex TopLeft { get; set; }
-        public SpriteVertex TopRight { get; set; }
-        public SpriteVertex BottomRight { get; set; }
-        public SpriteVertex BottomLeft { get; set; }
-    }
+    public record struct Item(SpriteVertex TopLeft, SpriteVertex TopRight, SpriteVertex BottomRight, SpriteVertex BottomLeft);
 
     /// <summary>
     /// Gets or sets the shader used to render the sprites.
