@@ -17,27 +17,16 @@ using Viewport = LifeSim.Imago.SceneGraph.Viewport;
 
 namespace LifeSim.Imago.Graphics.Rendering;
 
+/// <summary>
+/// The main engine renderer. This class is responsible for rendering the scene to the screen or to a texture
+/// and orchestrating the rendering passes.
+/// </summary>
 public class Renderer : IDisposable
 {
     /// <summary>
     /// Gets the global instance of the renderer.
     /// </summary>
     public static Renderer Instance { get; private set; } = null!;
-
-    /// <summary>
-    /// Gets the current Veldrid's GraphicsDevice.
-    /// </summary>
-    internal GraphicsDevice GraphicsDevice { get; }
-
-    /// <summary>
-    /// Gets the main render texture.
-    /// </summary>
-    public RenderTexture MainRenderTexture { get; }
-
-    /// <summary>
-    /// Gets the full screen render texture.
-    /// </summary>
-    internal SwapchainRenderTexture FullScreenRenderTexture { get; }
 
     /// <summary>
     /// Gets the current backend used by the renderer.
@@ -48,6 +37,21 @@ public class Renderer : IDisposable
     /// Gets the main Viewport.
     /// </summary>
     public Viewport Viewport { get; }
+
+    /// <summary>
+    /// Gets the current Veldrid's GraphicsDevice.
+    /// </summary>
+    internal GraphicsDevice GraphicsDevice { get; }
+
+    /// <summary>
+    /// Gets the main render texture.
+    /// </summary>
+    internal RenderTexture MainRenderTexture { get; }
+
+    /// <summary>
+    /// Gets the full screen render texture.
+    /// </summary>
+    internal SwapchainRenderTexture FullScreenRenderTexture { get; }
 
     private readonly ResourceFactory _factory;
     private readonly Fence _fence;
@@ -265,9 +269,14 @@ public class Renderer : IDisposable
         this.GraphicsDevice.SubmitCommands(cl);
     }
 
+    /// <summary>
+    /// Resolves the given multisampled render texture to the given texture so it can be used as a regular texture.
+    /// If the render texture is not multisampled, the texture is just copied to the resolved texture.
+    /// </summary>
+    /// <param name="renderTexture">The render texture to resolve.</param>
+    /// <param name="resolvedTexture">The texture to resolve to.</param>
     public void ResolveTexture(RenderTexture renderTexture, Texture resolvedTexture)
     {
-
         var cl = this._commandList;
 
         cl.Begin();
@@ -320,6 +329,11 @@ public class Renderer : IDisposable
         }
     }
 
+    /// <summary>
+    /// Gets or creates a resource layout with the given description.
+    /// </summary>
+    /// <param name="description">The description of the resource layout.</param>
+    /// <returns>The created or cached resource layout.</returns>
     public ResourceLayout GetResourceLayout(ResourceLayoutDescription description)
     {
         if (!this._resourceLayoutCache.TryGetValue(description, out ResourceLayout? layout))
@@ -364,8 +378,18 @@ public class Renderer : IDisposable
         this._disposables.Remove(disposable);
     }
 
+    internal void NotifyTextureDirty(Texture texture)
+    {
+        this._dirtyTextures.Add(texture);
+    }
 
-    internal void UpdateBuffers(CommandList commandList)
+    internal void NotifyMaterialResourcesDirty(Material material)
+    {
+        this._dirtyMaterials.Add(material);
+    }
+
+
+    private void UpdateBuffers(CommandList commandList)
     {
         foreach (var skeleton in this._skeletons)
         {
@@ -393,15 +417,7 @@ public class Renderer : IDisposable
         }
     }
 
-    internal void NotifyTextureDirty(Texture texture)
-    {
-        this._dirtyTextures.Add(texture);
-    }
 
-    internal void NotifyMaterialResourcesDirty(Material material)
-    {
-        this._dirtyMaterials.Add(material);
-    }
 
     /// <summary>
     /// Disposes the renderer.
