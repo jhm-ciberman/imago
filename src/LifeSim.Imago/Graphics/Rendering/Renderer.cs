@@ -29,6 +29,28 @@ public class Renderer : IDisposable
     public static Renderer Instance { get; private set; } = null!;
 
     /// <summary>
+    /// Creates a new graphics device.
+    /// </summary>
+    /// <param name="window">The window to render to.</param>
+    /// <param name="graphicsBackend">The graphics backend to use.</param>
+    /// <param name="debug">Whether to enable debug mode in the graphics device.</param>
+    /// <returns>The created graphics device.</returns>
+    public static GraphicsDevice CreateGraphicsDevice(Sdl2Window window, GraphicsBackend? graphicsBackend = null, bool debug = false)
+    {
+        GraphicsDeviceOptions options = new GraphicsDeviceOptions(
+            debug: debug,
+            swapchainDepthFormat: null, //PixelFormat.R16_UNorm,
+            syncToVerticalBlank: false,
+            resourceBindingModel: ResourceBindingModel.Improved,
+            preferDepthRangeZeroToOne: true,
+            preferStandardClipSpaceYDirection: true,
+            swapchainSrgbFormat: false
+        );
+
+        return VeldridStartup.CreateGraphicsDevice(window, options, graphicsBackend ?? VeldridStartup.GetPlatformDefaultBackend());
+    }
+
+    /// <summary>
     /// Gets the current backend used by the renderer.
     /// </summary>
     public GraphicsBackend BackendType => this.GraphicsDevice.BackendType;
@@ -357,37 +379,59 @@ public class Renderer : IDisposable
         this.MainRenderTexture.Resize(width, height);
     }
 
-
+    /// <summary>
+    /// Registers a skeleton to be updated.
+    /// </summary>
+    /// <param name="skeleton">The skeleton to register.</param>
     internal void RegisterSkeleton(Skeleton skeleton)
     {
         this._skeletons.Add(skeleton);
     }
 
+    /// <summary>
+    /// Unregisters a skeleton.
+    /// </summary>
+    /// <param name="skeleton">The skeleton to unregister.</param>
     internal void UnregisterSkeleton(Skeleton skeleton)
     {
         this._skeletons.Remove(skeleton);
     }
 
+    /// <summary>
+    /// Registers a disposable object to be disposed when the renderer is disposed.
+    /// </summary>
+    /// <param name="disposable">The object to register.</param>
     internal void RegisterDisposable(IDisposable disposable)
     {
         this._disposables.Add(disposable);
     }
 
+    /// <summary>
+    /// Unregisters a disposable object.
+    /// </summary>
+    /// <param name="disposable">The object to unregister.</param>
     internal void UnregisterDisposable(IDisposable disposable)
     {
         this._disposables.Remove(disposable);
     }
 
+    /// <summary>
+    /// Notifies the renderer that the given texture is dirty and needs to be updated.
+    /// </summary>
+    /// <param name="texture">The texture to update.</param>
     internal void NotifyTextureDirty(Texture texture)
     {
         this._dirtyTextures.Add(texture);
     }
 
+    /// <summary>
+    /// Notifies the renderer that the given material's resources are dirty and need to be updated.
+    /// </summary>
+    /// <param name="material">The material to update.</param>
     internal void NotifyMaterialResourcesDirty(Material material)
     {
         this._dirtyMaterials.Add(material);
     }
-
 
     private void UpdateBuffers(CommandList commandList)
     {
@@ -416,8 +460,6 @@ public class Renderer : IDisposable
             this._dirtyTextures.Clear();
         }
     }
-
-
 
     /// <summary>
     /// Disposes the renderer.
@@ -466,27 +508,5 @@ public class Renderer : IDisposable
         {
             Instance = null!;
         }
-    }
-
-    /// <summary>
-    /// Creates a new graphics device.
-    /// </summary>
-    /// <param name="window">The window to render to.</param>
-    /// <param name="graphicsBackend">The graphics backend to use.</param>
-    /// <param name="debug">Whether to enable debug mode in the graphics device.</param>
-    /// <returns>The created graphics device.</returns>
-    public static GraphicsDevice CreateGraphicsDevice(Sdl2Window window, GraphicsBackend? graphicsBackend = null, bool debug = false)
-    {
-        GraphicsDeviceOptions options = new GraphicsDeviceOptions(
-            debug: debug,
-            swapchainDepthFormat: null, //PixelFormat.R16_UNorm,
-            syncToVerticalBlank: false,
-            resourceBindingModel: ResourceBindingModel.Improved,
-            preferDepthRangeZeroToOne: true,
-            preferStandardClipSpaceYDirection: true,
-            swapchainSrgbFormat: false
-        );
-
-        return VeldridStartup.CreateGraphicsDevice(window, options, graphicsBackend ?? VeldridStartup.GetPlatformDefaultBackend());
     }
 }
