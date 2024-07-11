@@ -8,9 +8,13 @@ using LifeSim.Imago.Graphics.Textures;
 using LifeSim.Imago.SceneGraph;
 using Veldrid;
 using Veldrid.Utilities;
+using Shader = LifeSim.Imago.Graphics.Materials.Shader;
 
 namespace LifeSim.Imago.Graphics.Rendering;
 
+/// <summary>
+/// The mouse picking pass is used to determine which object was clicked by the mouse.
+/// </summary>
 public class MousePickingPass : IDisposable, IPipelineProvider
 {
     [StructLayout(LayoutKind.Sequential)]
@@ -18,6 +22,11 @@ public class MousePickingPass : IDisposable, IPipelineProvider
     {
         public Matrix4x4 ViewProjectionMatrix { get; set; }
     }
+
+    /// <summary>
+    /// Gets the default shader used for the mouse picking pass.
+    /// </summary>
+    public Shader DefaultShader { get; }
 
     private readonly Renderer _renderer;
     private readonly GraphicsDevice _gd;
@@ -28,8 +37,6 @@ public class MousePickingPass : IDisposable, IPipelineProvider
     private readonly RenderBatcher _renderBatcher;
     private readonly Veldrid.Texture _pixelTexture;
     private Vector2 _mousePosition;
-
-    public Materials.Shader DefaultShader { get; }
 
     public MousePickingPass(Renderer renderer)
     {
@@ -52,16 +59,33 @@ public class MousePickingPass : IDisposable, IPipelineProvider
         RenderFlags supportedForwardFlags = RenderFlags.AlphaTest | RenderFlags.ReceiveShadows | RenderFlags.Fog | RenderFlags.PixelPerfactShadows | RenderFlags.ColorWrite;
         var baseVertex = ShaderLoader.Load("picking.vert.glsl");
         var baseFragment = ShaderLoader.Load("picking.frag.glsl");
-        this.DefaultShader = new Materials.Shader(renderer, this, baseVertex, baseFragment, new[] { "Surface" }, supportedForwardFlags);
+        this.DefaultShader = new Shader(renderer, this, baseVertex, baseFragment, ["Surface"], supportedForwardFlags);
 
         // This is a 1x1 texture that will be used to read the pixel color from the mouse picking pass.
         this._pixelTexture = factory.CreateTexture(new TextureDescription(
             width: 1, height: 1, depth: 1, mipLevels: 1, arrayLayers: 1,
             PixelFormat.R32_UInt, TextureUsage.Staging, TextureType.Texture2D
         ));
-
     }
 
+    /// <summary>
+    /// Dispose the resources used by the mouse picking pass.
+    /// </summary>
+    public void Dispose()
+    {
+        this._resourceLayout.Dispose();
+        this._resourceSet.Dispose();
+        this._camera3DInfoBuffer.Dispose();
+        this._pixelTexture.Dispose();
+        this._renderBatcher.Dispose();
+    }
+
+    /// <summary>
+    /// Render the scene to the picking texture and update the highlighted pickable object in the stage.
+    /// </summary>
+    /// <param name="cl">The command list to use for rendering.</param>
+    /// <param name="stage">The stage to render.</param>
+    /// <param name="renderTexture">The render texture to render to.</param>
     public void Render(CommandList cl, Stage stage, RenderTexture renderTexture)
     {
         var scene = stage.Scene;
@@ -88,6 +112,16 @@ public class MousePickingPass : IDisposable, IPipelineProvider
         this._renderBatcher.DrawRenderList(cl, this._resourceSet, stage.PickingRenderQueue);
     }
 
+    /// <summary>
+    /// Set the mouse position in screen coordinates. This position will be used to read the pixel color from the picking texture.
+    /// The pixel color will be used to determine the object that was clicked the last frame.
+    /// </summary>
+    /// <param name="mousePos">The mouse position in screen coordinates.</param>
+    public void SetMousePosition(Vector2 mousePos)
+    {
+        this._mousePosition = mousePos;
+    }
+
     private bool MouseIsInside(Vector2 mousePos)
     {
         if (mousePos.X < 0 || mousePos.Y < 0) return false;
@@ -95,12 +129,6 @@ public class MousePickingPass : IDisposable, IPipelineProvider
         if (mousePos.X >= texture.Width || mousePos.Y >= texture.Height) return false;
         return true;
     }
-
-    public void SetMousePosition(Vector2 mousePos)
-    {
-        this._mousePosition = mousePos;
-    }
-
 
     private uint ReadPixel(CommandList cl, Stage stage)
     {
@@ -126,15 +154,6 @@ public class MousePickingPass : IDisposable, IPipelineProvider
         this._gd.Unmap(this._pixelTexture);
 
         return objectID;
-    }
-
-    public void Dispose()
-    {
-        this._resourceLayout.Dispose();
-        this._resourceSet.Dispose();
-        this._camera3DInfoBuffer.Dispose();
-        this._pixelTexture.Dispose();
-        this._renderBatcher.Dispose();
     }
 
     Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant, RenderFlags flags, TextureSampleCount sampleCount)
