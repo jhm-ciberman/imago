@@ -1,16 +1,31 @@
 using System;
 using System.Collections.Generic;
 using LifeSim.Imago.Graphics.Rendering;
+using LifeSim.Imago.Graphics.Textures;
 using LifeSim.Imago.SceneGraph.Nodes;
 
 namespace LifeSim.Imago.SceneGraph;
 
+/// <summary>
+/// Event arguments for the <see cref="Stage.SceneChanged"/> event.
+/// </summary>
 public class SceneChangedEventArgs : EventArgs
 {
+    /// <summary>
+    /// Gets the old scene.
+    /// </summary>
     public Scene? OldScene { get; }
 
+    /// <summary>
+    /// Gets the new scene.
+    /// </summary>
     public Scene? NewScene { get; }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SceneChangedEventArgs"/> class.
+    /// </summary>
+    /// <param name="oldScene">The old scene.</param>
+    /// <param name="newScene">The new scene.</param>
     public SceneChangedEventArgs(Scene oldScene, Scene newScene)
     {
         this.OldScene = oldScene;
@@ -90,10 +105,17 @@ public class Stage
     }
 
     /// <summary>
-    /// Prepares the stage for rendering. This method should be called before rendering a new frame.
+    /// Prepares the stage for rendering. This method should be called by the renderer before rendering the scene.
     /// </summary>
-    public void PrepareForRender()
+    /// <param name="renderTexture">The render texture that will be used for rendering.</param>
+    public void PrepareForRender(RenderTexture renderTexture)
     {
+        if (this.MultiSampleCount != renderTexture.SampleCount)
+        {
+            // This is a hack to invalidate the pipeline of all renderables, but whatever.
+            this.MultiSampleCount = renderTexture.SampleCount;
+        }
+
         this.Scene.RenderImGui();
 
         var camera = this.Scene.Camera;

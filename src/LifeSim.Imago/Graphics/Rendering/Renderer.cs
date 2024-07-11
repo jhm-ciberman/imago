@@ -289,10 +289,7 @@ public class Renderer : IDisposable
 
     private void RenderCore(CommandList cl, Stage stage, RenderTexture renderTexture)
     {
-        if (stage.MultiSampleCount != renderTexture.SampleCount)
-            stage.MultiSampleCount = renderTexture.SampleCount; // It's a hack to invalidate the pipeline of all renderables, but whatever.
-
-        stage.PrepareForRender();
+        stage.PrepareForRender(renderTexture);
 
         this.UpdateBuffers(cl);
 
