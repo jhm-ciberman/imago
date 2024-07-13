@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using LifeSim.Imago.Graphics.Materials;
 using LifeSim.Imago.Graphics.Textures;
 using LifeSim.Imago.SceneGraph;
+using LifeSim.Imago.SceneGraph.Cameras;
 using LifeSim.Support.Drawing;
 using Veldrid;
 
@@ -137,14 +138,15 @@ internal class ParticlesPass : IDisposable
         });
     }
 
-    public void Render(CommandList cl, Stage stage, RenderTexture renderTexture)
+    /// <summary>
+    /// Renders the specified particle systems to the render texture.
+    /// </summary>
+    /// <param name="cl">The command list to use.</param>
+    /// <param name="renderTexture">The render texture to render to.</param>
+    /// <param name="camera">The camera to use.</param>
+    /// <param name="particleSystems">The particle systems to render.</param>
+    public void Render(CommandList cl, RenderTexture renderTexture, Camera camera, IReadOnlyList<IParticleSystem> particleSystems)
     {
-        var scene = stage.Scene;
-        var camera = scene.Camera;
-        if (camera == null) return;
-
-        var particleSystems = scene.ParticleSystems;
-
         this._currentTexture = null;
 
         cl.SetFramebuffer(renderTexture.Framebuffer);

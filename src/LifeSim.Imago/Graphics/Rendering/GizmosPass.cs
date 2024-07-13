@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using LifeSim.Imago.Graphics.Materials;
 using LifeSim.Imago.Graphics.Textures;
 using LifeSim.Imago.SceneGraph;
+using LifeSim.Imago.SceneGraph.Cameras;
 using Veldrid;
 
 namespace LifeSim.Imago.Graphics.Rendering;
@@ -77,13 +78,16 @@ internal class GizmosPass : IDisposable
         });
     }
 
-    public void Render(CommandList cl, Stage stage, RenderTexture renderTexture)
+    /// <summary>
+    /// Render the debug gizmos to the render texture.
+    /// </summary>
+    /// <param name="cl">The command list to use for rendering.</param>
+    /// <param name="renderTexture">The render texture to render the gizmos to.</param>
+    /// <param name="camera">The camera to use for rendering.</param>
+    /// <param name="gizmos">The gizmos to render.</param>
+    public void Render(CommandList cl, RenderTexture renderTexture, Camera camera, GizmosLayer gizmos)
     {
-        var scene = stage.Scene;
-        var camera = scene.Camera;
-        if (camera == null) return;
-
-        if (stage.Gizmos.Lines.Count == 0) return;
+        if (gizmos.Lines.Count == 0) return;
 
         cl.SetFramebuffer(renderTexture.Framebuffer);
         cl.SetPipeline(this._pipeline);
@@ -91,7 +95,7 @@ internal class GizmosPass : IDisposable
         var viewProjectionMatrix = camera.ViewProjectionMatrix;
         cl.UpdateBuffer(this._viewProjectionBuffer, 0, ref viewProjectionMatrix);
 
-        this.RenderLinesVertices(cl, stage.Gizmos.Lines);
+        this.RenderLinesVertices(cl, gizmos.Lines);
     }
 
     private void RenderLinesVertices(CommandList cl, IReadOnlyList<DebugLine> lines)

@@ -329,13 +329,28 @@ public class Renderer : IDisposable
         cl.SetFramebuffer(renderTexture.Framebuffer);
         ClearRenderTarget(cl, stage.Scene);
 
-        this._forwardPass.Render(cl, stage, renderTexture);
-        this._immediatePass.Render(cl, stage, renderTexture);
-        this._skyDomePass.Render(cl, stage, renderTexture);
-        this._mousePickerPass.Render(cl, stage, renderTexture);
-        this._particlesPass.Render(cl, stage, renderTexture);
-        this._gizmosPass.Render(cl, stage, renderTexture);
-        this._spritesPass.Render(cl, stage, renderTexture);
+        var scene = stage.Scene;
+        var camera = scene.Camera;
+
+        if (camera != null)
+        {
+            var opaqueRQ = stage.OpaqueRenderQueue;
+            var transparentRQ = stage.TransparentRenderQueue;
+            var immediateRQ = stage.ImmediateRenderables;
+            var pickingRQ = stage.PickingRenderQueue;
+
+            this._forwardPass.Render(cl, renderTexture, camera, scene.Environment, opaqueRQ, transparentRQ);
+            this._immediatePass.Render(cl, renderTexture, camera, immediateRQ);
+            this._skyDomePass.Render(cl, renderTexture, camera, scene.Environment);
+            this._mousePickerPass.Render(cl, renderTexture, camera, stage.Picking, pickingRQ);
+            this._particlesPass.Render(cl, renderTexture, camera, scene.ParticleSystems);
+            this._gizmosPass.Render(cl, renderTexture, camera, stage.Gizmos);
+        }
+
+        foreach (var layer in scene.Layers2D)
+        {
+            this._spritesPass.Render(cl, renderTexture, layer);
+        }
 
         this._imGuiPass.Render(cl, renderTexture);
     }

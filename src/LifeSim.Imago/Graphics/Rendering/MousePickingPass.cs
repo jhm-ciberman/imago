@@ -6,6 +6,7 @@ using LifeSim.Imago.Graphics.Materials;
 using LifeSim.Imago.Graphics.Meshes;
 using LifeSim.Imago.Graphics.Textures;
 using LifeSim.Imago.SceneGraph;
+using LifeSim.Imago.SceneGraph.Cameras;
 using Veldrid;
 using Veldrid.Utilities;
 using Shader = LifeSim.Imago.Graphics.Materials.Shader;
@@ -15,7 +16,7 @@ namespace LifeSim.Imago.Graphics.Rendering;
 /// <summary>
 /// The mouse picking pass is used to determine which object was clicked by the mouse.
 /// </summary>
-public class MousePickingPass : IDisposable, IPipelineProvider
+internal class MousePickingPass : IDisposable, IPipelineProvider
 {
     [StructLayout(LayoutKind.Sequential)]
     private struct CameraDataBuffer
@@ -84,21 +85,19 @@ public class MousePickingPass : IDisposable, IPipelineProvider
     /// Render the scene to the picking texture and update the highlighted pickable object in the stage.
     /// </summary>
     /// <param name="cl">The command list to use for rendering.</param>
-    /// <param name="stage">The stage to render.</param>
-    /// <param name="renderTexture">The render texture to render to.</param>
-    public void Render(CommandList cl, Stage stage, RenderTexture renderTexture)
+    /// <param name="renderTexture">The render texture to render the scene to.</param>
+    /// <param name="camera">The camera to use for rendering.</param>
+    /// <param name="pickingManger">The picking manager to use for picking.</param>
+    /// <param name="pickingRenderQueue">The render queue to use for rendering.</param>
+    public void Render(CommandList cl, RenderTexture renderTexture, Camera camera, PickingManger pickingManger, RenderQueue pickingRenderQueue)
     {
-        var scene = stage.Scene;
-        var camera = scene.Camera;
-        if (camera == null) return;
-
         // Step 1: Read the pixel color from the previous frame.
-        uint objectID = this.ReadPixel(cl, stage);
-        stage.Picking.HighlightedPickable = stage.Picking.GetPickable(objectID);
+        uint objectID = this.ReadPixel(cl);
+        pickingManger.HighlightedPickable = pickingManger.GetPickable(objectID);
 
         // Step 2: Render the scene to the picking texture.
         var frustumForCulling = new BoundingFrustum(camera.FrustumCullingCamera.ViewProjectionMatrix);
-        stage.PickingRenderQueue.Update(frustumForCulling, camera.Position);
+        pickingRenderQueue.Update(frustumForCulling, camera.Position);
 
         cl.SetFramebuffer(renderTexture.PickingFramebuffer);
         cl.ClearColorTarget(0, RgbaFloat.Black);
@@ -109,7 +108,7 @@ public class MousePickingPass : IDisposable, IPipelineProvider
 
         cl.UpdateBuffer(this._camera3DInfoBuffer, 0, ref cameraInfo);
 
-        this._renderBatcher.DrawRenderList(cl, this._resourceSet, stage.PickingRenderQueue);
+        this._renderBatcher.DrawRenderList(cl, this._resourceSet, pickingRenderQueue);
     }
 
     /// <summary>
@@ -130,7 +129,7 @@ public class MousePickingPass : IDisposable, IPipelineProvider
         return true;
     }
 
-    private uint ReadPixel(CommandList cl, Stage stage)
+    private uint ReadPixel(CommandList cl)
     {
         var mousePos = this._mousePosition;
         if (this.MouseIsInside(mousePos))

@@ -5,11 +5,12 @@ using System.Runtime.InteropServices;
 using LifeSim.Imago.Graphics.Materials;
 using LifeSim.Imago.Graphics.Textures;
 using LifeSim.Imago.SceneGraph;
+using LifeSim.Imago.SceneGraph.Cameras;
 using Veldrid;
 
 namespace LifeSim.Imago.Graphics.Rendering;
 
-public class SkyDomePass : IDisposable
+internal class SkyDomePass : IDisposable
 {
     private struct Vertex
     {
@@ -133,15 +134,18 @@ public class SkyDomePass : IDisposable
         this._vertexBuffer.Dispose();
     }
 
-    public void Render(CommandList cl, Stage stage, RenderTexture renderTexture)
+    /// <summary>
+    /// Renders the sky dome.
+    /// </summary>
+    /// <param name="cl">The command list to use.</param>
+    /// <param name="renderTexture">The target render texture.</param>
+    /// <param name="camera">The camera.</param>
+    /// <param name="environment">The scene environment settings.</param>
+    public void Render(CommandList cl, RenderTexture renderTexture, Camera camera, SceneEnvironment environment)
     {
-        var scene = stage.Scene;
-        var camera = scene.Camera;
-        if (camera == null) return;
+        if (environment.SkyDomeLut == null) return;
 
-        if (scene.Environment.SkyDomeLut == null) return;
-
-        var xOffset = scene.Environment.SkyDomeDayProgress % 1f;
+        var xOffset = environment.SkyDomeDayProgress % 1f;
 
         var passData = new PassData
         {
@@ -157,7 +161,7 @@ public class SkyDomePass : IDisposable
         cl.SetVertexBuffer(0, this._vertexBuffer);
         cl.SetIndexBuffer(this._indexBuffer, IndexFormat.UInt16);
 
-        var resourceSet = this.GetResourceSet(scene.Environment.SkyDomeLut);
+        var resourceSet = this.GetResourceSet(environment.SkyDomeLut);
         cl.SetGraphicsResourceSet(0, resourceSet);
 
         cl.UpdateBuffer(this._passDataBuffer, 0, ref passData);

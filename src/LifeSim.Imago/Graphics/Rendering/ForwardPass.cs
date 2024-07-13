@@ -7,6 +7,7 @@ using LifeSim.Imago.Graphics.Meshes;
 using LifeSim.Imago.Graphics.Rendering.Shadows;
 using LifeSim.Imago.Graphics.Textures;
 using LifeSim.Imago.SceneGraph;
+using LifeSim.Imago.SceneGraph.Cameras;
 using LifeSim.Imago.SceneGraph.Lighting;
 using LifeSim.Support.Drawing;
 using Veldrid;
@@ -99,17 +100,20 @@ internal class ForwardPass : IDisposable, IPipelineProvider
         ));
     }
 
-    public void Render(CommandList cl, Stage stage, RenderTexture renderTexture)
+    /// <summary>
+    /// Renders the scene using a forward rendering pass.
+    /// </summary>
+    /// <param name="cl">The command list to use for rendering.</param>
+    /// <param name="renderTexture">The render texture to render the scene to.</param>
+    /// <param name="camera">The camera to use for rendering.</param>
+    /// <param name="environment">The scene environment to use for rendering.</param>
+    /// <param name="opaque">The render queue for opaque objects.</param>
+    /// <param name="transparent">The render queue for transparent objects.</param>
+    public void Render(CommandList cl, RenderTexture renderTexture, Camera camera, SceneEnvironment environment, RenderQueue opaque, RenderQueue transparent)
     {
-        var scene = stage.Scene;
-        var camera = scene.Camera;
-        if (camera == null) return;
-
-        var env = scene.Environment;
-
         var frustumForCulling = new BoundingFrustum(camera.FrustumCullingCamera.ViewProjectionMatrix);
-        stage.OpaqueRenderQueue.Update(frustumForCulling, camera.Position);
-        stage.TransparentRenderQueue.Update(frustumForCulling, camera.Position);
+        opaque.Update(frustumForCulling, camera.Position);
+        transparent.Update(frustumForCulling, camera.Position);
 
         cl.SetFramebuffer(renderTexture.Framebuffer);
 
@@ -121,21 +125,21 @@ internal class ForwardPass : IDisposable, IPipelineProvider
         cameraInfo.ShadowMapMatrix3 = this._shadowPass.GetShadowCascadeViewProjectionMatrix(3);
 
         LightInfo lightInfo = new LightInfo();
-        lightInfo.AmbientColor = env.AmbientColor;
-        lightInfo.MainLightColor = env.MainLight.Color;
-        lightInfo.ShadowColor = env.MainLight.ShadowMap.Color;
-        lightInfo.MainLightDirection = env.MainLight.Direction;
-        lightInfo.FogColor = env.FogColor;
-        lightInfo.FogStart = env.FogStart; // / (camera.FarPlane - camera.NearPlane);
-        lightInfo.FogEnd = env.FogEnd; // / (camera.FarPlane - camera.NearPlane);
-        lightInfo.ShadowMapDistances = GetShadowCascadeDistances(env.MainLight.ShadowMap);
+        lightInfo.AmbientColor = environment.AmbientColor;
+        lightInfo.MainLightColor = environment.MainLight.Color;
+        lightInfo.ShadowColor = environment.MainLight.ShadowMap.Color;
+        lightInfo.MainLightDirection = environment.MainLight.Direction;
+        lightInfo.FogColor = environment.FogColor;
+        lightInfo.FogStart = environment.FogStart; // / (camera.FarPlane - camera.NearPlane);
+        lightInfo.FogEnd = environment.FogEnd; // / (camera.FarPlane - camera.NearPlane);
+        lightInfo.ShadowMapDistances = GetShadowCascadeDistances(environment.MainLight.ShadowMap);
 
         cl.UpdateBuffer(this._camera3DInfoBuffer, 0, ref cameraInfo);
         cl.UpdateBuffer(this._lightInfoBuffer, 0, ref lightInfo);
 
-        this._renderBatcher.DrawRenderList(cl, this._resourceSet, stage.OpaqueRenderQueue);
+        this._renderBatcher.DrawRenderList(cl, this._resourceSet, opaque);
 
-        this._renderBatcher.DrawRenderList(cl, this._resourceSet, stage.TransparentRenderQueue);
+        this._renderBatcher.DrawRenderList(cl, this._resourceSet, transparent);
     }
 
     internal static Vector4 GetShadowCascadeDistances(ShadowMap shadowMap)

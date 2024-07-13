@@ -9,11 +9,6 @@ namespace LifeSim.Imago.Graphics.Rendering.Sprites;
 
 public class SpritesPass : IDisposable, IPipelineProvider
 {
-    /// <summary>
-    /// Gets the number of draw calls made by the last call to <see cref="Render"/>.
-    /// </summary>
-    public int DrawCallCount { get; private set; }
-
     private readonly GraphicsDevice _gd;
 
     private readonly Shader _defaultShader;
@@ -73,27 +68,16 @@ public class SpritesPass : IDisposable, IPipelineProvider
     /// Renders the specified stage to the render texture.
     /// </summary>
     /// <param name="cl">The command list to use.</param>
-    /// <param name="stage">The stage to render.</param>
     /// <param name="renderTexture">The render texture to render to.</param>
-    public void Render(CommandList cl, Stage stage, RenderTexture renderTexture)
+    /// <param name="layer">The layer to render.</param>
+    public void Render(CommandList cl, RenderTexture renderTexture, ILayer2D layer)
     {
-        var layers = stage.Scene.Layers2D;
-        if (layers.Count == 0) return;
+        cl.SetFramebuffer(renderTexture.Framebuffer);
+        cl.ClearDepthStencil(1f);
 
-        this.DrawCallCount = 0;
-
-        for (int i = 0; i < layers.Count; i++)
-        {
-            var layer = layers[i];
-            cl.SetFramebuffer(renderTexture.Framebuffer);
-            cl.ClearDepthStencil(1f);
-
-            this._drawingContext.Begin(cl, layer.ViewProjectionMatrix);
-            layer.Draw(this._drawingContext);
-            this._drawingContext.End();
-
-            this.DrawCallCount += this._drawingContext.DrawCallCount;
-        }
+        this._drawingContext.Begin(cl, layer.ViewProjectionMatrix);
+        layer.Draw(this._drawingContext);
+        this._drawingContext.End();
     }
 
     private static readonly string _fragmentShader = @"

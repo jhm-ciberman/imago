@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -6,6 +7,7 @@ using LifeSim.Imago.Graphics.Materials;
 using LifeSim.Imago.Graphics.Meshes;
 using LifeSim.Imago.Graphics.Textures;
 using LifeSim.Imago.SceneGraph;
+using LifeSim.Imago.SceneGraph.Cameras;
 using LifeSim.Support.Drawing;
 using Veldrid;
 using Shader = LifeSim.Imago.Graphics.Materials.Shader;
@@ -16,7 +18,7 @@ namespace LifeSim.Imago.Graphics.Rendering;
 /// <summary>
 /// This class is used to batch draw calls together in immediate mode.
 /// </summary>
-public class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
+internal class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
 {
     private struct PassDataBuffer
     {
@@ -127,13 +129,16 @@ public class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
         this._defaultTexture = Texture.White;
     }
 
-    public void Render(CommandList cl, Stage stage, RenderTexture renderTexture)
+    /// <summary>
+    /// Renders the specified immediate renderables to the render texture. Immediate renderables are rendered in immediate mode
+    /// without any kind of batching, culing or sorting.
+    /// </summary>
+    /// <param name="cl">The command list to use.</param>
+    /// <param name="renderTexture">The render texture to render to.</param>
+    /// <param name="camera">The camera to use for rendering.</param>
+    /// <param name="renderables">The renderables to render.</param>
+    public void Render(CommandList cl, RenderTexture renderTexture, Camera camera, IReadOnlyList<ImmediateRenderable3D> renderables)
     {
-        var scene = stage.Scene;
-        var camera = scene.Camera;
-        if (camera == null) return;
-
-        var renderables = stage.ImmediateRenderables;
         if (renderables.Count == 0) return;
 
         cl.SetFramebuffer(renderTexture.Framebuffer);
