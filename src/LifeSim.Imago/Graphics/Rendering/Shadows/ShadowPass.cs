@@ -4,7 +4,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using LifeSim.Imago.Graphics.Materials;
 using LifeSim.Imago.Graphics.Meshes;
-using LifeSim.Imago.SceneGraph;
+using LifeSim.Imago.SceneGraph.Cameras;
 using LifeSim.Imago.SceneGraph.Lighting;
 using Veldrid;
 using Veldrid.Utilities;
@@ -77,20 +77,20 @@ internal class ShadowPass : IDisposable, IPipelineProvider
         this.DefaultShader = new Shader(renderer, this, shadowmapVertex, shadowmapFragment, new[] { "Surface" }, supportedShadowMapFlags);
     }
 
-    public void Render(CommandList cl, Stage stage)
+    /// <summary>
+    /// Renders the shadow map for the given camera and light.
+    /// </summary>
+    /// <param name="cl">The command list to render with.</param>
+    /// <param name="camera">The camera to render from.</param>
+    /// <param name="mainLight">The light to render shadows for.</param>
+    /// <param name="shadowCasterRenderQueues">The render queues for shadow casters. One queue per cascade.</param>
+    public void Render(CommandList cl, Camera camera, DirectionalLight mainLight, Span<RenderQueue> shadowCasterRenderQueues)
     {
-        var scene = stage.Scene;
-        var camera = scene.Camera;
-        if (camera == null) return;
-
-        var mainLight = scene.Environment.MainLight;
         var shadowMap = mainLight.ShadowMap;
 
-        int cascadesCount = stage.CascadesCount;
+        this.UpdateShadowMap(shadowMap, shadowCasterRenderQueues.Length);
 
-        this.UpdateShadowMap(shadowMap, cascadesCount);
-
-        for (int i = 0; i < cascadesCount; i++)
+        for (int i = 0; i < shadowCasterRenderQueues.Length; i++)
         {
             cl.SetFramebuffer(this.ShadowmapTexture.Framebuffers[i]);
             cl.ClearDepthStencil(1f);
@@ -102,7 +102,7 @@ internal class ShadowPass : IDisposable, IPipelineProvider
 
             BoundingFrustum shadowFrustum = new BoundingFrustum(this._cascades[i].ViewProjectionMatrix);
 
-            var renderQueue = stage.ShadowCasterRenderQueues[i];
+            var renderQueue = shadowCasterRenderQueues[i];
             renderQueue.Update(shadowFrustum, camera.Position);
 
             ShadowMapDataBuffer data = new ShadowMapDataBuffer();

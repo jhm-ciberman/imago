@@ -320,17 +320,15 @@ public class Renderer : IDisposable
 
     private void RenderCore(CommandList cl, Stage stage, RenderTexture renderTexture)
     {
+        var scene = stage.Scene;
+        var camera = scene.Camera;
+
         stage.PrepareForRender(renderTexture);
 
         this.UpdateBuffers(cl);
 
-        this._shadowPass.Render(cl, stage);
-
         cl.SetFramebuffer(renderTexture.Framebuffer);
         ClearRenderTarget(cl, stage.Scene);
-
-        var scene = stage.Scene;
-        var camera = scene.Camera;
 
         if (camera != null)
         {
@@ -338,6 +336,9 @@ public class Renderer : IDisposable
             var transparentRQ = stage.TransparentRenderQueue;
             var immediateRQ = stage.ImmediateRenderables;
             var pickingRQ = stage.PickingRenderQueue;
+            var shadowCasterRQs = new Span<RenderQueue>(stage.ShadowCasterRenderQueues, 0, stage.CascadesCount);
+
+            this._shadowPass.Render(cl, camera, scene.Environment.MainLight, shadowCasterRQs);
 
             this._forwardPass.Render(cl, renderTexture, camera, scene.Environment, opaqueRQ, transparentRQ);
             this._immediatePass.Render(cl, renderTexture, camera, immediateRQ);
