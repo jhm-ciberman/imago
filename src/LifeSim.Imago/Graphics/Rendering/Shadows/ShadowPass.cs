@@ -42,7 +42,7 @@ internal class ShadowPass : IDisposable, IPipelineProvider
 
     private readonly ShadowCascade[] _cascades = new ShadowCascade[4];
 
-    private Matrix4x4 _scalingMatrix;
+    private readonly Matrix4x4 _scalingMatrix;
 
     public ShadowPass(Renderer renderer)
     {
@@ -88,7 +88,7 @@ internal class ShadowPass : IDisposable, IPipelineProvider
     {
         var shadowMap = mainLight.ShadowMap;
 
-        this.UpdateShadowMap(shadowMap, shadowCasterRenderQueues.Length);
+        this.ResizeShadowMapTexture(shadowMap, shadowCasterRenderQueues.Length);
 
         for (int i = 0; i < shadowCasterRenderQueues.Length; i++)
         {
@@ -115,19 +115,27 @@ internal class ShadowPass : IDisposable, IPipelineProvider
         }
     }
 
+    /// <summary>
+    /// Returns the view-projection matrix for the shadow cascade at the given index.
+    /// </summary>
+    /// <param name="cascadeIndex">The index of the cascade to get the matrix for.</param>
+    /// <returns>The view-projection matrix for the shadow cascade at the given index.</returns>
     public Matrix4x4 GetShadowCascadeViewProjectionMatrix(int cascadeIndex)
     {
         if (cascadeIndex < 0 || cascadeIndex >= this.ShadowmapTexture.CascadesCount)
+        {
             return Matrix4x4.Identity;
+        }
 
         return this._cascades[cascadeIndex].ViewProjectionMatrix * this._scalingMatrix;
     }
 
-    private void UpdateShadowMap(ShadowMap shadowMap, int cascadesCount)
+    private void ResizeShadowMapTexture(ShadowMap shadowMap, int cascadesCount)
     {
-        var texture = this.ShadowmapTexture;
-        if (shadowMap.Size != texture.Size || cascadesCount != texture.CascadesCount)
+        if (shadowMap.Size != this.ShadowmapTexture.Size || cascadesCount != this.ShadowmapTexture.CascadesCount)
+        {
             this.ShadowmapTexture.Resize(shadowMap.Size, (uint)cascadesCount);
+        }
     }
 
     public void Dispose()
