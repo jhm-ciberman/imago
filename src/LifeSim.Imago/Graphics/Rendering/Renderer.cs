@@ -35,11 +35,11 @@ public class Renderer : IDisposable
     /// <param name="graphicsBackend">The graphics backend to use.</param>
     /// <param name="debug">Whether to enable debug mode in the graphics device.</param>
     /// <returns>The created graphics device.</returns>
-    public static GraphicsDevice CreateGraphicsDevice(Sdl2Window window, GraphicsBackend? graphicsBackend = null, bool debug = false)
+    public static GraphicsDevice CreateGraphicsDevice(Sdl2Window window, GraphicsBackend? graphicsBackend = null, bool debug = true)
     {
         GraphicsDeviceOptions options = new GraphicsDeviceOptions(
             debug: debug,
-            swapchainDepthFormat: null, //PixelFormat.R16_UNorm,
+            swapchainDepthFormat: null, // no default depth buffer, we are doing a full screen final pass
             syncToVerticalBlank: false,
             resourceBindingModel: ResourceBindingModel.Improved,
             preferDepthRangeZeroToOne: true,
