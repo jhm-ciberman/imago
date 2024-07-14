@@ -130,8 +130,8 @@ internal class ForwardPass : IDisposable, IPipelineProvider
         lightInfo.ShadowColor = environment.MainLight.ShadowMap.Color;
         lightInfo.MainLightDirection = environment.MainLight.Direction;
         lightInfo.FogColor = environment.FogColor;
-        lightInfo.FogStart = environment.FogStart; // / (camera.FarPlane - camera.NearPlane);
-        lightInfo.FogEnd = environment.FogEnd; // / (camera.FarPlane - camera.NearPlane);
+        lightInfo.FogStart = environment.FogStart;
+        lightInfo.FogEnd = environment.FogEnd;
         lightInfo.ShadowMapDistances = GetShadowCascadeDistances(environment.MainLight.ShadowMap);
 
         cl.UpdateBuffer(this._camera3DInfoBuffer, 0, ref cameraInfo);
@@ -142,7 +142,7 @@ internal class ForwardPass : IDisposable, IPipelineProvider
         this._renderBatcher.DrawRenderList(cl, this._resourceSet, transparent);
     }
 
-    internal static Vector4 GetShadowCascadeDistances(ShadowMap shadowMap)
+    private static Vector4 GetShadowCascadeDistances(ShadowMap shadowMap)
     {
         return new Vector4(shadowMap.SplitDistances[1], shadowMap.SplitDistances[2], shadowMap.SplitDistances[3], shadowMap.SplitDistances[4]);
     }

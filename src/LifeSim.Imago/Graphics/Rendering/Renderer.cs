@@ -170,17 +170,17 @@ public class Renderer : IDisposable
     /// <summary>
     /// Gets the resource layout for transform data.
     /// </summary>
-    public ResourceLayout TransformResourceLayout => this._buffersManager.TransformResourceLayout;
+    internal ResourceLayout TransformResourceLayout => this._buffersManager.TransformResourceLayout;
 
     /// <summary>
     /// Gets the resource layout for instance data.
     /// </summary>
-    public ResourceLayout InstanceResourceLayout => this._buffersManager.InstanceResourceLayout;
+    internal ResourceLayout InstanceResourceLayout => this._buffersManager.InstanceResourceLayout;
 
     /// <summary>
     /// Gets the resource layout for skeleton data.
     /// </summary>
-    public ResourceLayout SkeletonResourceLayout => this._buffersManager.SkeletonResourceLayout;
+    internal ResourceLayout SkeletonResourceLayout => this._buffersManager.SkeletonResourceLayout;
 
     /// <summary>
     /// Requests a data block for instance data.
