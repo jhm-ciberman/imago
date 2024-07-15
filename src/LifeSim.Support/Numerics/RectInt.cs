@@ -124,6 +124,19 @@ public struct RectInt : IEquatable<RectInt>
     }
 
     /// <summary>
+    /// Checks if the rectangle fully contains the specified rectangle.
+    /// </summary>
+    /// <param name="other">The rectangle to test.</param>
+    /// <returns>True if the rectangle contains the other rectangle, otherwise false.</returns>
+    public bool Contains(RectInt other)
+    {
+        return other.XMin >= this.XMin
+            && other.YMin >= this.YMin
+            && other.XMax <= this.XMax
+            && other.YMax <= this.YMax;
+    }
+
+    /// <summary>
     /// Checks if the given rectangle overlaps with this rectangle.
     /// </summary>
     /// <param name="other">The rectangle to test.</param>
