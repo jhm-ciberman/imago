@@ -1,4 +1,3 @@
-using System;
 using System.Numerics;
 using LifeSim.Imago.TexturePacking;
 using LifeSim.Support.Numerics;
