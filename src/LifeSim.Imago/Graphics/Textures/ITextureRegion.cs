@@ -1,5 +1,7 @@
+using System;
 using System.Numerics;
 using LifeSim.Imago.TexturePacking;
+using LifeSim.Support.Numerics;
 
 namespace LifeSim.Imago.Graphics.Textures;
 
@@ -48,8 +50,10 @@ public static class TextureRegionExtensions
     /// <returns></returns>
     public static ITextureRegion SubTexture(this ITextureRegion region, Vector2 topLeft, Vector2 bottomRight)
     {
-        Vector2 size = region.BottomRight - region.TopLeft;
-        return new PackedTexture(region.Texture, region.TopLeft + topLeft * size, region.TopLeft + bottomRight * size);
+        var tl = MathUtils.Lerp(region.TopLeft, region.BottomRight, topLeft);
+        var br = MathUtils.Lerp(region.TopLeft, region.BottomRight, bottomRight);
+
+        return new PackedTexture(region.Texture, tl, br);
     }
 
     /// <summary>

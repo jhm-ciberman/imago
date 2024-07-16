@@ -152,4 +152,16 @@ public static class MathUtils
     {
         return a.X * b.Y - a.Y * b.X;
     }
+
+    /// <summary>
+    /// Linearly interpolates between two vectors using a vector as the interpolation factor.
+    /// </summary>
+    /// <param name="a">The first vector.</param>
+    /// <param name="b">The second vector.</param>
+    /// <param name="t">A vector containing the interpolation factors for each component.</param>
+    /// <returns>The interpolated vector.</returns>
+    public static Vector2 Lerp(Vector2 a, Vector2 b, Vector2 t)
+    {
+        return a + (b - a) * t;
+    }
 }
