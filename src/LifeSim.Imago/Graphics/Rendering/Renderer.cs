@@ -266,9 +266,10 @@ public class Renderer : IDisposable
     {
         var cl = this._commandList;
 
-        cl.Begin();
-
         stage.PrepareForRender(renderTexture);
+
+        cl.Begin();
+        this._rendererResources.Update(cl);
         this._renderContext.Render(cl, stage, renderTexture);
 
         //if (renderTexture.SampleCount != TextureSampleCount.Count1 && resolvedTexture != null)
