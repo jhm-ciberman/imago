@@ -6,7 +6,7 @@
     <ItemGroup>
         <ProjectReference Include="../LifeSim.Support/LifeSim.Support.csproj" />
         <PackageReference Include="FontStashSharp" Version="1.2.8" />
-        <PackageReference Include="SixLabors.ImageSharp" Version="3.1.4" />
+        <PackageReference Include="SixLabors.ImageSharp" Version="3.1.5" />
         <PackageReference Include="Veldrid" Version="4.9.0" />
         <PackageReference Include="Veldrid.ImGui" Version="5.72.0" />
         <PackageReference Include="Veldrid.StartupUtilities" Version="4.8.0" />
