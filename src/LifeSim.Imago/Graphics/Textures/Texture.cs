@@ -209,13 +209,13 @@ public class Texture : ITexture, ITextureRegion, IDisposable
     /// <summary>
     /// Updates the texture on the GPU.
     /// </summary>
-    /// <param name="gd">The graphics device.</param>
     /// <param name="cl">The command list.</param>
-    public void Update(GraphicsDevice gd, CommandList cl)
+    public void Update(CommandList cl)
     {
         if (!this._isDirty) return;
         this._isDirty = false;
 
+        var gd = Renderer.Instance.GraphicsDevice;
         if (this.Width != this.VeldridTexture.Width || this.Height != this.VeldridTexture.Height)
         {
             this.VeldridTexture.Dispose();

@@ -341,7 +341,7 @@ public class Renderer : IDisposable
         {
             foreach (var resource in this._dirtyTextures)
             {
-                resource.Update(this.GraphicsDevice, commandList);
+                resource.Update(commandList);
             }
             this._dirtyTextures.Clear();
         }
