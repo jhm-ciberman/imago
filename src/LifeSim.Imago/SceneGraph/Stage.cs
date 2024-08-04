@@ -163,7 +163,7 @@ public class Stage
         {
             foreach (var renderable in this._dirtyRenderables)
             {
-                renderable.Update(Renderer.Instance, this);
+                renderable.Update(this);
             }
             this._dirtyRenderables.Clear();
         }

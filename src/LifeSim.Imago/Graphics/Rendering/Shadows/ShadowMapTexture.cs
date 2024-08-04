@@ -29,10 +29,10 @@ internal class ShadowMapTexture : ITexture, IDisposable
 
     private readonly Renderer _renderer;
 
-    internal ShadowMapTexture(Renderer renderer, uint size, uint cascadesCount)
+    internal ShadowMapTexture(uint size, uint cascadesCount)
     {
-        var gd = renderer.GraphicsDevice;
-        this._renderer = renderer;
+        var gd = Renderer.Instance.GraphicsDevice;
+        this._renderer = Renderer.Instance;
         this.Size = size;
         this.CascadesCount = cascadesCount;
         this.VeldridTexture = gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(this.Size, this.Size, 1, this.CascadesCount, PixelFormat.R32_Float, TextureUsage.DepthStencil | TextureUsage.Sampled));
@@ -93,8 +93,7 @@ internal class ShadowMapTexture : ITexture, IDisposable
         for (uint i = 0; i < this.CascadesCount; i++)
         {
             this.Framebuffers[i] = factory.CreateFramebuffer(new FramebufferDescription(
-                new FramebufferAttachmentDescription(this.VeldridTexture, i),
-                Array.Empty<FramebufferAttachmentDescription>()
+                new FramebufferAttachmentDescription(this.VeldridTexture, i), []
             ));
         }
 

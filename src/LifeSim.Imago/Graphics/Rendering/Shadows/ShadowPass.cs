@@ -54,7 +54,7 @@ internal class ShadowPass : IDisposable, IPipelineProvider
             new ResourceLayoutElementDescription("ShadowMapDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
         ));
 
-        this.ShadowmapTexture = new ShadowMapTexture(renderer, size: 16, cascadesCount: 1);
+        this.ShadowmapTexture = new ShadowMapTexture(size: 16, cascadesCount: 1);
 
         this._shadowmapInfoBuffer = factory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<ShadowMapDataBuffer>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 

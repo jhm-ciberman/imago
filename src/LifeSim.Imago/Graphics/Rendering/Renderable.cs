@@ -393,16 +393,15 @@ internal class Renderable : IDisposable
     /// <summary>
     /// Updates the renderable.
     /// </summary>
-    /// <param name="renderer">The renderer.</param>
     /// <param name="stage">The stage.</param>
-    public void Update(Renderer renderer, Stage stage)
+    public void Update(Stage stage)
     {
         if (this._pipelineDirty)
         {
             this._pipelineDirty = false;
             this.RecomputeSortKey();
             this.RecomputeRenderQueue();
-            this.RecomputePipeline(renderer, stage);
+            this.RecomputePipeline(stage);
         }
     }
 
@@ -517,7 +516,7 @@ internal class Renderable : IDisposable
         this.RenderQueues = flags;
     }
 
-    private void RecomputePipeline(Renderer renderer, Stage stage)
+    private void RecomputePipeline(Stage stage)
     {
         if (this._material == null || this._mesh == null || this.RenderQueues == RenderQueues.None)
         {

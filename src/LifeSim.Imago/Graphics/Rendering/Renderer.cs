@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using LifeSim.Imago.Graphics.Materials;
 using LifeSim.Imago.Graphics.Rendering.Buffers;
-using LifeSim.Imago.Graphics.Rendering.Shadows;
 using LifeSim.Imago.Graphics.Rendering.Sprites;
 using LifeSim.Imago.Graphics.Textures;
 using LifeSim.Imago.SceneGraph;
-using LifeSim.Support.Drawing;
 using Veldrid;
 using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
@@ -80,22 +78,16 @@ public class Renderer : IDisposable
     /// </summary>
     internal SwapchainRenderTexture FullScreenRenderTexture { get; }
 
-    private readonly ResourceFactory _factory;
     private readonly CommandList _commandList;
     private readonly CommandList _fullScreenCommandList;
     private readonly DisposeCollector _disposeCollector;
     private readonly FullScreenPass _fullScreenPass;
-    private readonly GizmosPass _gizmosPass;
-    private readonly ForwardPass _forwardPass;
-    private readonly ImmediatePass _immediatePass;
-    private readonly ShadowPass _shadowPass;
+    private readonly RenderContext _renderContext;
+
     private readonly SpritesPass _spritesPass;
     private readonly ImGuiPass _imGuiPass;
-    private readonly MousePickingPass _mousePickerPass;
-    private readonly ParticlesPass _particlesPass;
-    private readonly SkyDomePass _skyDomePass;
-    private readonly BuffersManager _buffersManager;
 
+    private readonly BuffersManager _buffersManager;
     private readonly List<Texture> _dirtyTextures = new();
     private readonly List<Material> _dirtyMaterials = new();
     private readonly List<Skeleton> _skeletons = new List<Skeleton>();
@@ -139,24 +131,17 @@ public class Renderer : IDisposable
         this.GuiRenderTexture = new RenderTexture(framebuffer.Width, framebuffer.Height);
 
         this._disposeCollector = new DisposeCollector();
-        this._factory = this.GraphicsDevice.ResourceFactory;
+
+        this._renderContext = new RenderContext(this);
+        this._imGuiPass = new ImGuiPass(this);
+        this._spritesPass = new SpritesPass(this);
+        this._fullScreenPass = new FullScreenPass(this);
 
         this._buffersManager = new BuffersManager(this.GraphicsDevice);
 
-        this._imGuiPass = new ImGuiPass(this);
-        this._mousePickerPass = new MousePickingPass(this);
-        this._gizmosPass = new GizmosPass(this);
-        this._particlesPass = new ParticlesPass(this);
-        this._shadowPass = new ShadowPass(this);
-        this._forwardPass = new ForwardPass(this, this._shadowPass);
-        this._immediatePass = new ImmediatePass(this);
-        this._spritesPass = new SpritesPass(this);
-        this._skyDomePass = new SkyDomePass(this);
-        this._fullScreenPass = new FullScreenPass(this);
-
-        this._commandList = this._factory.CreateCommandList();
-
-        this._fullScreenCommandList = this._factory.CreateCommandList();
+        var factory = this.GraphicsDevice.ResourceFactory;
+        this._commandList = factory.CreateCommandList();
+        this._fullScreenCommandList = factory.CreateCommandList();
     }
 
     /// <summary>
@@ -167,7 +152,7 @@ public class Renderer : IDisposable
     public void Update(float deltaTime, InputSnapshot inputSnapshot)
     {
         this._imGuiPass.Update(deltaTime, inputSnapshot);
-        this._mousePickerPass.SetMousePosition(inputSnapshot.MousePosition);
+        this._renderContext.Update(inputSnapshot);
     }
 
     /// <summary>
@@ -226,7 +211,7 @@ public class Renderer : IDisposable
     /// <returns>The created material.</returns>
     public Material MakeMaterial()
     {
-        return new Material(this._forwardPass.DefaultShader, this._shadowPass.DefaultShader, this._mousePickerPass.DefaultShader);
+        return this._renderContext.MakeMaterial();
     }
 
     /// <summary>
@@ -246,9 +231,9 @@ public class Renderer : IDisposable
     {
         var cl = this._commandList;
         cl.Begin();
+        this.UpdateBuffers(cl);
         this.RenderMain(cl, stage, this.MainRenderTexture);
         this.RenderSprites(cl, stage, this.GuiRenderTexture);
-
         cl.End();
 
         this.GraphicsDevice.WaitForIdle();
@@ -326,33 +311,7 @@ public class Renderer : IDisposable
 
     private void RenderMain(CommandList cl, Stage stage, RenderTexture renderTexture)
     {
-        var scene = stage.Scene;
-        var camera = scene.Camera;
-
-        stage.PrepareForRender(renderTexture);
-
-        this.UpdateBuffers(cl);
-
-        cl.SetFramebuffer(renderTexture.Framebuffer);
-        ClearRenderTarget(cl, stage.Scene);
-
-        if (camera != null)
-        {
-            var opaqueRQ = stage.OpaqueRenderQueue;
-            var transparentRQ = stage.TransparentRenderQueue;
-            var immediateRQ = stage.ImmediateRenderables;
-            var pickingRQ = stage.PickingRenderQueue;
-            var shadowCasterRQs = new Span<RenderQueue>(stage.ShadowCasterRenderQueues, 0, stage.CascadesCount);
-
-            this._shadowPass.Render(cl, camera, scene.Environment.MainLight, shadowCasterRQs);
-
-            this._forwardPass.Render(cl, renderTexture, camera, scene.Environment, opaqueRQ, transparentRQ);
-            this._immediatePass.Render(cl, renderTexture, camera, immediateRQ);
-            this._skyDomePass.Render(cl, renderTexture, camera, scene.Environment);
-            this._mousePickerPass.Render(cl, renderTexture, camera, stage.Picking, pickingRQ);
-            this._particlesPass.Render(cl, renderTexture, camera, scene.ParticleSystems);
-            this._gizmosPass.Render(cl, renderTexture, camera, stage.Gizmos);
-        }
+        this._renderContext.Render(cl, stage, renderTexture);
     }
 
     private void RenderSprites(CommandList cl, Stage stage, RenderTexture renderTexture)
@@ -368,14 +327,31 @@ public class Renderer : IDisposable
         this._imGuiPass.Render(cl, renderTexture);
     }
 
-    private static void ClearRenderTarget(CommandList cl, Scene scene)
+    private void UpdateBuffers(CommandList commandList)
     {
-        ColorF? clearColor = scene.Camera?.ClearColor ?? scene.ClearColor;
-        if (clearColor != null)
+        foreach (var skeleton in this._skeletons)
         {
-            var col = clearColor.Value;
-            cl.ClearColorTarget(0, new RgbaFloat(col.R, col.G, col.B, col.A));
-            cl.ClearDepthStencil(1f);
+            skeleton.Update();
+        }
+
+        this._buffersManager.Update(commandList);
+
+        if (this._dirtyMaterials.Count > 0)
+        {
+            foreach (var material in this._dirtyMaterials)
+            {
+                material.Update();
+            }
+            this._dirtyMaterials.Clear();
+        }
+
+        if (this._dirtyTextures.Count > 0)
+        {
+            foreach (var resource in this._dirtyTextures)
+            {
+                resource.Update(this.GraphicsDevice, commandList);
+            }
+            this._dirtyTextures.Clear();
         }
     }
 
@@ -388,7 +364,7 @@ public class Renderer : IDisposable
     {
         if (!this._resourceLayoutCache.TryGetValue(description, out ResourceLayout? layout))
         {
-            layout = this._factory.CreateResourceLayout(description);
+            layout = this.GraphicsDevice.ResourceFactory.CreateResourceLayout(description);
             this._resourceLayoutCache.Add(description, layout);
         }
         return layout;
@@ -462,34 +438,6 @@ public class Renderer : IDisposable
         this._dirtyMaterials.Add(material);
     }
 
-    private void UpdateBuffers(CommandList commandList)
-    {
-        foreach (var skeleton in this._skeletons)
-        {
-            skeleton.Update();
-        }
-
-        this._buffersManager.Update(commandList);
-
-        if (this._dirtyMaterials.Count > 0)
-        {
-            foreach (var material in this._dirtyMaterials)
-            {
-                material.Update(this._factory);
-            }
-            this._dirtyMaterials.Clear();
-        }
-
-        if (this._dirtyTextures.Count > 0)
-        {
-            foreach (var resource in this._dirtyTextures)
-            {
-                resource.Update(this.GraphicsDevice, commandList);
-            }
-            this._dirtyTextures.Clear();
-        }
-    }
-
     /// <summary>
     /// Disposes the renderer.
     /// </summary>
@@ -503,7 +451,6 @@ public class Renderer : IDisposable
             this.MainRenderTexture.Dispose();
             this.GuiRenderTexture.Dispose();
             this._commandList.Dispose();
-            this._buffersManager.Dispose();
 
             foreach (var disposable in this._disposables.ToArray())
             {
@@ -513,15 +460,10 @@ public class Renderer : IDisposable
 
             // Passes
             this._imGuiPass.Dispose();
-            this._mousePickerPass.Dispose();
-            this._gizmosPass.Dispose();
-            this._particlesPass.Dispose();
-            this._shadowPass.Dispose();
-            this._forwardPass.Dispose();
-            this._immediatePass.Dispose();
             this._spritesPass.Dispose();
-            this._skyDomePass.Dispose();
             this._fullScreenPass.Dispose();
+            this._renderContext.Dispose();
+            this._buffersManager.Dispose();
 
             Console.WriteLine("All resources disposed. Attempting to dispose graphics device.");
             // The last thing to dispose is the graphics device.

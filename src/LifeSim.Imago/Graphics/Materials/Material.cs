@@ -66,13 +66,14 @@ public class Material : IDisposable
     public bool ReceiveShadows { get => this.GetRenderFlag(RenderFlags.ReceiveShadows); set => this.SetRenderFlag(RenderFlags.ReceiveShadows, value); }
 
 
-    public void Update(ResourceFactory factory)
+    public void Update()
     {
         if (!this._resourceSetDirty) return;
         this._resourceSetDirty = false;
 
         this.ResourceSet?.Dispose();
 
+        var factory = this._renderer.GraphicsDevice.ResourceFactory;
         this.ResourceSet = factory.CreateResourceSet(new ResourceSetDescription(this.ForwardShader.MaterialResourceLayout, this._resources));
     }
 
