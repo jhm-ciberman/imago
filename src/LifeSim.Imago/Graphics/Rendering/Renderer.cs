@@ -79,7 +79,6 @@ public class Renderer : IDisposable
     internal SwapchainRenderTexture FullScreenRenderTexture { get; }
 
     private readonly CommandList _commandList;
-    private readonly CommandList _fullScreenCommandList;
     private readonly DisposeCollector _disposeCollector;
     private readonly FullScreenPass _fullScreenPass;
     private readonly RenderContext _renderContext;
@@ -141,7 +140,6 @@ public class Renderer : IDisposable
 
         var factory = this.GraphicsDevice.ResourceFactory;
         this._commandList = factory.CreateCommandList();
-        this._fullScreenCommandList = factory.CreateCommandList();
     }
 
     /// <summary>
@@ -234,20 +232,14 @@ public class Renderer : IDisposable
         this.UpdateBuffers(cl);
         this.RenderMain(cl, stage, this.MainRenderTexture);
         this.RenderSprites(cl, stage, this.GuiRenderTexture);
-        cl.End();
 
-        this.GraphicsDevice.WaitForIdle();
-
-        this.GraphicsDevice.SubmitCommands(cl);
-
-        cl = this._fullScreenCommandList;
-        cl.Begin();
         this._fullScreenPass.Render(cl, this.MainRenderTexture, this.FullScreenRenderTexture);
         this._fullScreenPass.Render(cl, this.GuiRenderTexture, this.FullScreenRenderTexture);
         this.RenderImGui(cl, this.FullScreenRenderTexture);
         cl.End();
 
-        this.GraphicsDevice.SubmitCommands(cl, null);
+        this.GraphicsDevice.WaitForIdle();
+        this.GraphicsDevice.SubmitCommands(cl);
 
         this._disposeCollector.DisposeAll();
 
