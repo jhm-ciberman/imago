@@ -257,11 +257,13 @@ internal class Renderable : IDisposable
         {
             if (this._skeleton == value) return;
 
+            var oldSkeleton = this._skeleton;
             this._skeleton = value;
             this.SkeletonResourceSet = this._skeleton?.ResourceSet;
             this.UpdateSkeletonTransform();
             this.RecomputeOffsetVertexData();
             this.InvalidatePipeline();
+            this.Stage?.NotifyRenderableSkeletonChanged(this, oldSkeleton, value);
         }
     }
 

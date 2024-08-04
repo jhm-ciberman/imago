@@ -52,7 +52,6 @@ public class RenderContext : IDisposable
         var scene = stage.Scene;
         var camera = scene.Camera;
 
-        stage.PrepareForRender(renderTexture);
         cl.SetFramebuffer(renderTexture.Framebuffer);
         ClearRenderTarget(cl, scene);
 

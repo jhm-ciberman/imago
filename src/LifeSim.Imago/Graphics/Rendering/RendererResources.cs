@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
+using LifeSim.Imago.Graphics.Materials;
+using LifeSim.Imago.Graphics.Rendering.Buffers;
 using Veldrid;
+using Texture = LifeSim.Imago.Graphics.Textures.Texture;
 
-namespace LifeSim.Imago.Graphics.Rendering.Buffers;
+namespace LifeSim.Imago.Graphics.Rendering;
 
-public partial class BuffersManager : IDisposable
+public partial class RendererResources : IDisposable
 {
     public const int MIN_BUFFER_BLOCKS = 1024;
 
@@ -18,8 +21,10 @@ public partial class BuffersManager : IDisposable
     private readonly List<DataBuffer> _instanceDataBuffers = [];
     private readonly List<DataBuffer> _transformDataBuffers = [];
     private readonly List<DataBuffer> _skeletonDataBuffers = [];
+    private readonly List<Texture> _dirtyTextures = [];
+    private readonly List<Material> _dirtyMaterials = [];
 
-    public BuffersManager(GraphicsDevice graphicsDevice)
+    public RendererResources(GraphicsDevice graphicsDevice)
     {
         this._gd = graphicsDevice;
 
@@ -88,6 +93,24 @@ public partial class BuffersManager : IDisposable
         return newBuffer.RequestBlock();
     }
 
+    /// <summary>
+    /// Notifies the renderer that the given texture is dirty and needs to be updated.
+    /// </summary>
+    /// <param name="texture">The texture to update.</param>
+    internal void NotifyTextureDirty(Texture texture)
+    {
+        this._dirtyTextures.Add(texture);
+    }
+
+    /// <summary>
+    /// Notifies the renderer that the given material's resources are dirty and need to be updated.
+    /// </summary>
+    /// <param name="material">The material to update.</param>
+    internal void NotifyMaterialResourcesDirty(Material material)
+    {
+        this._dirtyMaterials.Add(material);
+    }
+
     public void Update(CommandList commandList)
     {
         for (int i = 0; i < this._instanceDataBuffers.Count; i++)
@@ -103,6 +126,24 @@ public partial class BuffersManager : IDisposable
         for (int i = 0; i < this._skeletonDataBuffers.Count; i++)
         {
             this._skeletonDataBuffers[i].UploadToGPU(commandList);
+        }
+
+        if (this._dirtyMaterials.Count > 0)
+        {
+            foreach (var material in this._dirtyMaterials)
+            {
+                material.Update();
+            }
+            this._dirtyMaterials.Clear();
+        }
+
+        if (this._dirtyTextures.Count > 0)
+        {
+            foreach (var resource in this._dirtyTextures)
+            {
+                resource.Update(commandList);
+            }
+            this._dirtyTextures.Clear();
         }
     }
 

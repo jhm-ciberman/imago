@@ -37,7 +37,6 @@ public class Skeleton : IDisposable
         this.BonesMatrices = new Matrix4x4[this.Joints.Count];
         this._dataBlock = this._renderer.RequestSkeletonDataBlock();
         this.ResourceSet = this._dataBlock.Buffer.ResourceSet;
-        this._renderer.RegisterSkeleton(this);
         this._renderer.RegisterDisposable(this);
     }
 
@@ -58,7 +57,6 @@ public class Skeleton : IDisposable
         this.IsDisposed = true;
 
         this._dataBlock.Dispose();
-        this._renderer.UnregisterSkeleton(this);
         this._renderer.UnregisterDisposable(this);
     }
 }

@@ -86,10 +86,7 @@ public class Renderer : IDisposable
     private readonly SpritesPass _spritesPass;
     private readonly ImGuiPass _imGuiPass;
 
-    private readonly BuffersManager _buffersManager;
-    private readonly List<Texture> _dirtyTextures = new();
-    private readonly List<Material> _dirtyMaterials = new();
-    private readonly List<Skeleton> _skeletons = new List<Skeleton>();
+    private readonly RendererResources _rendererResources;
     private readonly HashSet<IDisposable> _disposables = new HashSet<IDisposable>();
     private readonly Dictionary<ResourceLayoutDescription, ResourceLayout> _resourceLayoutCache = new();
 
@@ -120,6 +117,8 @@ public class Renderer : IDisposable
         Instance = this;
 
         this.GraphicsDevice = gd;
+        this._rendererResources = new RendererResources(this.GraphicsDevice);
+
         swapchain ??= this.GraphicsDevice.MainSwapchain;
 
         var framebuffer = swapchain.Framebuffer;
@@ -136,7 +135,7 @@ public class Renderer : IDisposable
         this._spritesPass = new SpritesPass(this);
         this._fullScreenPass = new FullScreenPass(this);
 
-        this._buffersManager = new BuffersManager(this.GraphicsDevice);
+
 
         var factory = this.GraphicsDevice.ResourceFactory;
         this._commandList = factory.CreateCommandList();
@@ -156,17 +155,17 @@ public class Renderer : IDisposable
     /// <summary>
     /// Gets the resource layout for transform data.
     /// </summary>
-    internal ResourceLayout TransformResourceLayout => this._buffersManager.TransformResourceLayout;
+    internal ResourceLayout TransformResourceLayout => this._rendererResources.TransformResourceLayout;
 
     /// <summary>
     /// Gets the resource layout for instance data.
     /// </summary>
-    internal ResourceLayout InstanceResourceLayout => this._buffersManager.InstanceResourceLayout;
+    internal ResourceLayout InstanceResourceLayout => this._rendererResources.InstanceResourceLayout;
 
     /// <summary>
     /// Gets the resource layout for skeleton data.
     /// </summary>
-    internal ResourceLayout SkeletonResourceLayout => this._buffersManager.SkeletonResourceLayout;
+    internal ResourceLayout SkeletonResourceLayout => this._rendererResources.SkeletonResourceLayout;
 
     /// <summary>
     /// Requests a data block for instance data.
@@ -174,7 +173,7 @@ public class Renderer : IDisposable
     /// <param name="instanceDataBlockSize">The size of the instance data block.</param>
     internal DataBlock RequestInstanceDataBlock(int instanceDataBlockSize)
     {
-        return this._buffersManager.RequestInstanceDataBlock(instanceDataBlockSize);
+        return this._rendererResources.RequestInstanceDataBlock(instanceDataBlockSize);
     }
 
     /// <summary>
@@ -182,7 +181,7 @@ public class Renderer : IDisposable
     /// </summary>
     internal DataBlock RequestTransformDataBlock()
     {
-        return this._buffersManager.RequestTransformDataBlock();
+        return this._rendererResources.RequestTransformDataBlock();
     }
 
     /// <summary>
@@ -190,7 +189,7 @@ public class Renderer : IDisposable
     /// </summary>
     internal DataBlock RequestSkeletonDataBlock()
     {
-        return this._buffersManager.RequestSkeletonDataBlock();
+        return this._rendererResources.RequestSkeletonDataBlock();
     }
 
     /// <summary>
@@ -227,9 +226,11 @@ public class Renderer : IDisposable
     /// <param name="stage">The stage to render.</param>
     public void Render(Stage stage)
     {
+        stage.PrepareForRender(this.MainRenderTexture);
+
         var cl = this._commandList;
         cl.Begin();
-        this.UpdateBuffers(cl);
+        this._rendererResources.Update(cl);
         this.RenderMain(cl, stage, this.MainRenderTexture);
         this.RenderSprites(cl, stage, this.GuiRenderTexture);
 
@@ -260,6 +261,7 @@ public class Renderer : IDisposable
 
         cl.Begin();
 
+        stage.PrepareForRender(renderTexture);
         this.RenderMain(cl, stage, renderTexture);
 
         //if (renderTexture.SampleCount != TextureSampleCount.Count1 && resolvedTexture != null)
@@ -319,34 +321,6 @@ public class Renderer : IDisposable
         this._imGuiPass.Render(cl, renderTexture);
     }
 
-    private void UpdateBuffers(CommandList commandList)
-    {
-        foreach (var skeleton in this._skeletons)
-        {
-            skeleton.Update();
-        }
-
-        this._buffersManager.Update(commandList);
-
-        if (this._dirtyMaterials.Count > 0)
-        {
-            foreach (var material in this._dirtyMaterials)
-            {
-                material.Update();
-            }
-            this._dirtyMaterials.Clear();
-        }
-
-        if (this._dirtyTextures.Count > 0)
-        {
-            foreach (var resource in this._dirtyTextures)
-            {
-                resource.Update(commandList);
-            }
-            this._dirtyTextures.Clear();
-        }
-    }
-
     /// <summary>
     /// Gets or creates a resource layout with the given description.
     /// </summary>
@@ -377,24 +351,6 @@ public class Renderer : IDisposable
     }
 
     /// <summary>
-    /// Registers a skeleton to be updated.
-    /// </summary>
-    /// <param name="skeleton">The skeleton to register.</param>
-    internal void RegisterSkeleton(Skeleton skeleton)
-    {
-        this._skeletons.Add(skeleton);
-    }
-
-    /// <summary>
-    /// Unregisters a skeleton.
-    /// </summary>
-    /// <param name="skeleton">The skeleton to unregister.</param>
-    internal void UnregisterSkeleton(Skeleton skeleton)
-    {
-        this._skeletons.Remove(skeleton);
-    }
-
-    /// <summary>
     /// Registers a disposable object to be disposed when the renderer is disposed.
     /// </summary>
     /// <param name="disposable">The object to register.</param>
@@ -418,7 +374,7 @@ public class Renderer : IDisposable
     /// <param name="texture">The texture to update.</param>
     internal void NotifyTextureDirty(Texture texture)
     {
-        this._dirtyTextures.Add(texture);
+        this._rendererResources.NotifyTextureDirty(texture);
     }
 
     /// <summary>
@@ -427,7 +383,7 @@ public class Renderer : IDisposable
     /// <param name="material">The material to update.</param>
     internal void NotifyMaterialResourcesDirty(Material material)
     {
-        this._dirtyMaterials.Add(material);
+        this._rendererResources.NotifyMaterialResourcesDirty(material);
     }
 
     /// <summary>
@@ -455,7 +411,7 @@ public class Renderer : IDisposable
             this._spritesPass.Dispose();
             this._fullScreenPass.Dispose();
             this._renderContext.Dispose();
-            this._buffersManager.Dispose();
+            this._rendererResources.Dispose();
 
             Console.WriteLine("All resources disposed. Attempting to dispose graphics device.");
             // The last thing to dispose is the graphics device.

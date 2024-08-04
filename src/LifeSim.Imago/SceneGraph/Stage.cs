@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using LifeSim.Imago.Graphics;
 using LifeSim.Imago.Graphics.Rendering;
 using LifeSim.Imago.Graphics.Textures;
 using LifeSim.Imago.SceneGraph.Nodes;
@@ -72,6 +73,7 @@ public class Stage
     private readonly List<Renderable> _renderables = new();
     private readonly List<Renderable> _dirtyRenderables = new();
     private readonly List<ImmediateRenderable3D> _immediateRenderables = new();
+    private readonly HashSet<Skeleton> _skeletons = new();
 
     private bool _invalidateRendererPipelines = false;
 
@@ -167,6 +169,11 @@ public class Stage
             }
             this._dirtyRenderables.Clear();
         }
+
+        foreach (var skeleton in this._skeletons)
+        {
+            skeleton.Update();
+        }
     }
 
     /// <summary>
@@ -227,6 +234,25 @@ public class Stage
     }
 
     /// <summary>
+    /// Notifies the stage that the renderable skeleton of the specified renderable has changed.
+    /// </summary>
+    /// <param name="renderable">The renderable.</param>
+    /// <param name="oldSkeleton">The old skeleton.</param>
+    /// <param name="newSkeleton">The new skeleton.</param>
+    internal void NotifyRenderableSkeletonChanged(Renderable renderable, Skeleton? oldSkeleton, Skeleton? newSkeleton)
+    {
+        if (oldSkeleton != null)
+        {
+            this._skeletons.Remove(oldSkeleton);
+        }
+
+        if (newSkeleton != null)
+        {
+            this._skeletons.Add(newSkeleton);
+        }
+    }
+
+    /// <summary>
     /// Gets the immediate renderables used to render objects immediately.
     /// </summary>
     public IReadOnlyList<ImmediateRenderable3D> ImmediateRenderables => this._immediateRenderables;
@@ -254,6 +280,7 @@ public class Stage
         this._renderables.Add(renderable);
         this.NotifyRenderablePipelineDirty(renderable);
         this.NotifyRenderableRenderQueueChanged(renderable, RenderQueues.None, renderable.RenderQueues);
+        this.NotifyRenderableSkeletonChanged(renderable, null, renderable.Skeleton);
     }
 
     internal void RemoveRenderable(Renderable renderable)
