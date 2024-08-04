@@ -7,7 +7,7 @@ using Texture = LifeSim.Imago.Graphics.Textures.Texture;
 
 namespace LifeSim.Imago.Graphics.Rendering;
 
-public partial class RendererResources : IDisposable
+internal class RendererResources : IDisposable
 {
     public const int MIN_BUFFER_BLOCKS = 1024;
 
