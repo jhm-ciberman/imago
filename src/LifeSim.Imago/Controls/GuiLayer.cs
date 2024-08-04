@@ -64,7 +64,7 @@ public class GuiLayer : ILayer2D
 
     private readonly Stopwatch _measureArrangeStopwatch = new Stopwatch();
 
-    public void Draw(DrawingContext spriteBatcher)
+    public void Draw(DrawingContext ctx)
     {
         if (this._content is null) return;
 
@@ -79,7 +79,8 @@ public class GuiLayer : ILayer2D
 
         this.MeasureArrangeTime = this._measureArrangeStopwatch.Elapsed;
 
-        this._content.Draw(spriteBatcher);
+        ctx.SetViewProjectionMatrix(this.ViewProjectionMatrix);
+        this._content.Draw(ctx);
     }
 
     public virtual void Update(float deltaTime)

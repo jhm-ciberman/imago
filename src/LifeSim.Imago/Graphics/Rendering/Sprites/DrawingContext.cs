@@ -140,8 +140,7 @@ public class DrawingContext : IDisposable
     /// This method should be called before any drawing.
     /// </summary>
     /// <param name="cl">The command list to use.</param>
-    /// <param name="viewProjectionMatrix">The view projection matrix for the frame.</param>
-    public void Begin(CommandList cl, Matrix4x4 viewProjectionMatrix)
+    public void Begin(CommandList cl)
     {
         this._commandList = cl;
         this.TotalSpritesToDraw = 0;
@@ -152,8 +151,11 @@ public class DrawingContext : IDisposable
         this._currentPipelineFlags = RenderFlags.None;
         this._clipRectStack.Clear();
         this.DrawCallCount = 0;
+    }
 
-        cl.UpdateBuffer(this._matrixBuffer, 0, ref viewProjectionMatrix);
+    public void SetViewProjectionMatrix(Matrix4x4 viewProjectionMatrix)
+    {
+        this._commandList.UpdateBuffer(this._matrixBuffer, 0, ref viewProjectionMatrix);
     }
 
     /// <summary>
