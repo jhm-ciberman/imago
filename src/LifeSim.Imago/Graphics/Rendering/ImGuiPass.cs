@@ -14,7 +14,7 @@ public class ImGuiPass : IDisposable
     public ImGuiPass(Renderer renderer)
     {
         this._gd = renderer.GraphicsDevice;
-        var renderTexture = renderer.MainRenderTexture;
+        var renderTexture = renderer.FullScreenRenderTexture;
         this._imguiRenderer = new ImGuiRenderer(this._gd, renderTexture.OutputDescription, (int)renderTexture.Width, (int)renderTexture.Height);
         unsafe
         {
@@ -45,7 +45,7 @@ public class ImGuiPass : IDisposable
         return this._imguiRenderer.GetOrCreateImGuiBinding(this._gd.ResourceFactory, texture.VeldridTexture);
     }
 
-    public void Render(CommandList cl, RenderTexture renderTexture)
+    public void Render(CommandList cl, IRenderTexture renderTexture)
     {
         cl.SetFramebuffer(renderTexture.Framebuffer);
         this._imguiRenderer.Render(this._gd, cl);

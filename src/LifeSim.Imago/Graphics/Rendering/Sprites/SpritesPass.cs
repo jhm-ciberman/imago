@@ -70,9 +70,10 @@ public class SpritesPass : IDisposable, IPipelineProvider
     /// <param name="cl">The command list to use.</param>
     /// <param name="renderTexture">The render texture to render to.</param>
     /// <param name="layer">The layer to render.</param>
-    public void Render(CommandList cl, RenderTexture renderTexture, ILayer2D layer)
+    public void Render(CommandList cl, IRenderTexture renderTexture, ILayer2D layer)
     {
         cl.SetFramebuffer(renderTexture.Framebuffer);
+        cl.ClearColorTarget(0, RgbaFloat.Clear);
         cl.ClearDepthStencil(1f);
 
         this._drawingContext.Begin(cl, layer.ViewProjectionMatrix);

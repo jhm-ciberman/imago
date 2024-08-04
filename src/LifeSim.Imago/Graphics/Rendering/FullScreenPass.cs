@@ -1,14 +1,16 @@
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 using LifeSim.Imago.Graphics.Materials;
 using LifeSim.Imago.Graphics.Textures;
 using Veldrid;
+using VeldridTexture = Veldrid.Texture;
 
 namespace LifeSim.Imago.Graphics.Rendering;
 
 internal class FullScreenPass : IDisposable
 {
-    private readonly IRenderTexture _sourceTexture;
+    //private readonly IRenderTexture _sourceTexture;
 
     private readonly IRenderTexture _destinationTexture;
 
@@ -20,15 +22,15 @@ internal class FullScreenPass : IDisposable
 
     private readonly ResourceLayout _resourceLayout;
 
-    private ResourceSet? _resourceSet = null;
+    private readonly Dictionary<VeldridTexture, ResourceSet> _resourceSets = new();
 
     public FullScreenPass(Renderer renderer)
     {
         this._gd = renderer.GraphicsDevice;
         var factory = this._gd.ResourceFactory;
 
-        this._sourceTexture = renderer.MainRenderTexture;
-        this._sourceTexture.Resized += (sender, args) => this.RegenerateResourceSet();
+        //this._sourceTexture = renderer.MainRenderTexture;
+        //this._sourceTexture.Resized += (sender, args) => this.RegenerateResourceSet();
 
         this._destinationTexture = renderer.FullScreenRenderTexture;
 
@@ -47,50 +49,77 @@ internal class FullScreenPass : IDisposable
         {
             DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
             PrimitiveTopology = PrimitiveTopology.TriangleList,
-            ShaderSet = new ShaderSetDescription(new[] { vertexLayouts }, shaders),
-            BlendState = BlendStateDescription.SingleOverrideBlend,
+            ShaderSet = new ShaderSetDescription([vertexLayouts], shaders),
+            BlendState = BlendStateDescription.SingleAlphaBlend,
             RasterizerState = RasterizerStateDescription.CullNone,
             Outputs = this._destinationTexture.OutputDescription,
             ResourceLayouts = new ResourceLayout[] { this._resourceLayout },
         });
 
         this._vertexBuffer = factory.CreateBuffer(new BufferDescription(16 * 6, BufferUsage.VertexBuffer));
-        (float top, float bottom) = this._gd.IsUvOriginTopLeft ? (1f, 0f) : (0f, 1f);
-        this._gd.UpdateBuffer(this._vertexBuffer, 0, new[] {
-            new Vector4(-1f, -1f, 0f, top   ), // x, y, u, v
-            new Vector4( 1f, -1f, 1f, top   ),
-            new Vector4( 1f,  1f, 1f, bottom),
-
-            new Vector4(-1f, -1f, 0f, top   ),
-            new Vector4( 1f,  1f, 1f, bottom),
-            new Vector4(-1f,  1f, 0f, bottom),
-        });
-
-        this.RegenerateResourceSet();
+        var quadVertices = GetQuadVertices(this._gd.IsUvOriginTopLeft);
+        this._gd.UpdateBuffer(this._vertexBuffer, 0, quadVertices);
     }
 
+    private static Vector4[] GetQuadVertices(bool isUvOriginTopLeft)
+    {
+        (float top, float bottom) = isUvOriginTopLeft ? (1f, 0f) : (0f, 1f);
+        return [
+            new Vector4(-1f, -1f, 0f, top), // x, y, u, v
+            new Vector4( 1f, -1f, 1f, top),
+            new Vector4( 1f,  1f, 1f, bottom),
+
+            new Vector4(-1f, -1f, 0f, top),
+            new Vector4( 1f,  1f, 1f, bottom),
+            new Vector4(-1f,  1f, 0f, bottom),
+        ];
+    }
 
     public void Dispose()
     {
-        this._resourceSet?.Dispose();
         this._vertexBuffer.Dispose();
         this._resourceLayout.Dispose();
+        this._pipeline.Dispose();
+
+        foreach (var resourceSet in this._resourceSets.Values)
+        {
+            resourceSet.Dispose();
+        }
     }
 
-    public void Render(CommandList cl)
+    public void Render(CommandList cl, IRenderTexture source, IRenderTexture destination)
     {
-        cl.SetFramebuffer(this._destinationTexture.Framebuffer);
+        cl.SetFramebuffer(destination.Framebuffer);
         cl.SetPipeline(this._pipeline);
         cl.SetVertexBuffer(0, this._vertexBuffer);
-        cl.SetGraphicsResourceSet(0, this._resourceSet);
+
+        var resourceSet = this.GetResourceSet(source.VeldridTexture);
+        cl.SetGraphicsResourceSet(0, resourceSet);
         cl.Draw(6);
     }
 
-    private void RegenerateResourceSet()
+    private ResourceSet GetResourceSet(VeldridTexture texture)
     {
-        this._resourceSet?.Dispose();
-        this._resourceSet = this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(
-            this._resourceLayout, this._sourceTexture.VeldridTexture, this._gd.LinearSampler));
+        if (!this._resourceSets.TryGetValue(texture, out var resourceSet))
+        {
+            resourceSet = this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(
+                this._resourceLayout, texture, this._gd.LinearSampler));
+            this._resourceSets.Add(texture, resourceSet);
+        }
+
+        return resourceSet;
+    }
+
+    public void PruneResourceSets()
+    {
+        foreach (var texture in this._resourceSets.Keys)
+        {
+            if (texture.IsDisposed)
+            {
+                this._resourceSets[texture].Dispose();
+                this._resourceSets.Remove(texture);
+            }
+        }
     }
 
     private static readonly string _vertexCode = @"#version 450

@@ -71,12 +71,16 @@ public class Renderer : IDisposable
     internal RenderTexture MainRenderTexture { get; }
 
     /// <summary>
+    /// Gets the GUI render texture.
+    /// </summary>
+    internal RenderTexture GuiRenderTexture { get; }
+
+    /// <summary>
     /// Gets the full screen render texture.
     /// </summary>
     internal SwapchainRenderTexture FullScreenRenderTexture { get; }
 
     private readonly ResourceFactory _factory;
-    private readonly Fence _fence;
     private readonly CommandList _commandList;
     private readonly CommandList _fullScreenCommandList;
     private readonly DisposeCollector _disposeCollector;
@@ -132,6 +136,7 @@ public class Renderer : IDisposable
         this.Viewport = new Viewport(framebuffer.Width, framebuffer.Height);
         this.FullScreenRenderTexture = new SwapchainRenderTexture(gd, swapchain);
         this.MainRenderTexture = new RenderTexture(framebuffer.Width, framebuffer.Height);
+        this.GuiRenderTexture = new RenderTexture(framebuffer.Width, framebuffer.Height);
 
         this._disposeCollector = new DisposeCollector();
         this._factory = this.GraphicsDevice.ResourceFactory;
@@ -152,8 +157,6 @@ public class Renderer : IDisposable
         this._commandList = this._factory.CreateCommandList();
 
         this._fullScreenCommandList = this._factory.CreateCommandList();
-
-        this._fence = this._factory.CreateFence(false);
     }
 
     /// <summary>
@@ -243,17 +246,20 @@ public class Renderer : IDisposable
     {
         var cl = this._commandList;
         cl.Begin();
-        this.RenderCore(cl, stage, this.MainRenderTexture);
+        this.RenderMain(cl, stage, this.MainRenderTexture);
+        this.RenderSprites(cl, stage, this.GuiRenderTexture);
+
         cl.End();
 
         this.GraphicsDevice.WaitForIdle();
-        this._fence.Reset();
 
-        this.GraphicsDevice.SubmitCommands(cl, this._fence);
+        this.GraphicsDevice.SubmitCommands(cl);
 
         cl = this._fullScreenCommandList;
         cl.Begin();
-        this._fullScreenPass.Render(cl);
+        this._fullScreenPass.Render(cl, this.MainRenderTexture, this.FullScreenRenderTexture);
+        this._fullScreenPass.Render(cl, this.GuiRenderTexture, this.FullScreenRenderTexture);
+        this.RenderImGui(cl, this.FullScreenRenderTexture);
         cl.End();
 
         this.GraphicsDevice.SubmitCommands(cl, null);
@@ -277,7 +283,7 @@ public class Renderer : IDisposable
 
         cl.Begin();
 
-        this.RenderCore(cl, stage, renderTexture);
+        this.RenderMain(cl, stage, renderTexture);
 
         //if (renderTexture.SampleCount != TextureSampleCount.Count1 && resolvedTexture != null)
         //{
@@ -318,7 +324,7 @@ public class Renderer : IDisposable
         this.GraphicsDevice.SubmitCommands(cl);
     }
 
-    private void RenderCore(CommandList cl, Stage stage, RenderTexture renderTexture)
+    private void RenderMain(CommandList cl, Stage stage, RenderTexture renderTexture)
     {
         var scene = stage.Scene;
         var camera = scene.Camera;
@@ -347,12 +353,18 @@ public class Renderer : IDisposable
             this._particlesPass.Render(cl, renderTexture, camera, scene.ParticleSystems);
             this._gizmosPass.Render(cl, renderTexture, camera, stage.Gizmos);
         }
+    }
 
-        foreach (var layer in scene.Layers2D)
+    private void RenderSprites(CommandList cl, Stage stage, RenderTexture renderTexture)
+    {
+        foreach (var layer in stage.Scene.Layers2D)
         {
             this._spritesPass.Render(cl, renderTexture, layer);
         }
+    }
 
+    private void RenderImGui(CommandList cl, IRenderTexture renderTexture)
+    {
         this._imGuiPass.Render(cl, renderTexture);
     }
 
@@ -393,6 +405,7 @@ public class Renderer : IDisposable
         this.GraphicsDevice.WaitForIdle();
         this.FullScreenRenderTexture.Resize(width, height);
         this.MainRenderTexture.Resize(width, height);
+        this.GuiRenderTexture.Resize(width, height);
     }
 
     /// <summary>
@@ -488,8 +501,8 @@ public class Renderer : IDisposable
             this.GraphicsDevice.WaitForIdle();
             this.FullScreenRenderTexture.Dispose();
             this.MainRenderTexture.Dispose();
+            this.GuiRenderTexture.Dispose();
             this._commandList.Dispose();
-            this._fence.Dispose();
             this._buffersManager.Dispose();
 
             foreach (var disposable in this._disposables.ToArray())
