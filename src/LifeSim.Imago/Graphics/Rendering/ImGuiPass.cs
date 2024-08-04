@@ -10,18 +10,19 @@ public class ImGuiPass : IDisposable
 {
     private readonly GraphicsDevice _gd;
     private readonly ImGuiRenderer _imguiRenderer;
+    private readonly IRenderTexture _renderTexture;
 
     public ImGuiPass(Renderer renderer)
     {
         this._gd = renderer.GraphicsDevice;
-        var renderTexture = renderer.FullScreenRenderTexture;
-        this._imguiRenderer = new ImGuiRenderer(this._gd, renderTexture.OutputDescription, (int)renderTexture.Width, (int)renderTexture.Height);
+        this._renderTexture = renderer.FullScreenRenderTexture;
+        this._imguiRenderer = new ImGuiRenderer(this._gd, this._renderTexture.OutputDescription, (int)this._renderTexture.Width, (int)this._renderTexture.Height);
         unsafe
         {
             ImGui.GetIO().NativePtr->IniFilename = null;
         }
 
-        renderTexture.Resized += this.OnViewportResized;
+        this._renderTexture.Resized += this.OnViewportResized;
     }
 
     private void OnViewportResized(object? sender, EventArgs e)
@@ -45,9 +46,9 @@ public class ImGuiPass : IDisposable
         return this._imguiRenderer.GetOrCreateImGuiBinding(this._gd.ResourceFactory, texture.VeldridTexture);
     }
 
-    public void Render(CommandList cl, IRenderTexture renderTexture)
+    public void Render(CommandList cl)
     {
-        cl.SetFramebuffer(renderTexture.Framebuffer);
+        cl.SetFramebuffer(this._renderTexture.Framebuffer);
         this._imguiRenderer.Render(this._gd, cl);
     }
 }

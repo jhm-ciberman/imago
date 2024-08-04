@@ -87,9 +87,9 @@ internal class FullScreenPass : IDisposable
         }
     }
 
-    public void Render(CommandList cl, IRenderTexture source, IRenderTexture destination)
+    public void Render(CommandList cl, IRenderTexture source)
     {
-        cl.SetFramebuffer(destination.Framebuffer);
+        cl.SetFramebuffer(this._destinationTexture.Framebuffer);
         cl.SetPipeline(this._pipeline);
         cl.SetVertexBuffer(0, this._vertexBuffer);
 

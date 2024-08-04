@@ -231,12 +231,17 @@ public class Renderer : IDisposable
         var cl = this._commandList;
         cl.Begin();
         this._rendererResources.Update(cl);
-        this.RenderMain(cl, stage, this.MainRenderTexture);
-        this.RenderSprites(cl, stage, this.GuiRenderTexture);
 
-        this._fullScreenPass.Render(cl, this.MainRenderTexture, this.FullScreenRenderTexture);
-        this._fullScreenPass.Render(cl, this.GuiRenderTexture, this.FullScreenRenderTexture);
-        this.RenderImGui(cl, this.FullScreenRenderTexture);
+        this._renderContext.Render(cl, stage, this.MainRenderTexture);
+
+        foreach (var layer in stage.Scene.Layers2D)
+        {
+            this._spritesPass.Render(cl, this.GuiRenderTexture, layer);
+        }
+
+        this._fullScreenPass.Render(cl, this.MainRenderTexture);
+        this._fullScreenPass.Render(cl, this.GuiRenderTexture);
+        this._imGuiPass.Render(cl);
         cl.End();
 
         this.GraphicsDevice.WaitForIdle();
@@ -245,7 +250,9 @@ public class Renderer : IDisposable
         this._disposeCollector.DisposeAll();
 
         if (this.GraphicsDevice.MainSwapchain != null)
+        {
             this.GraphicsDevice.SwapBuffers();
+        }
     }
 
 
@@ -262,7 +269,7 @@ public class Renderer : IDisposable
         cl.Begin();
 
         stage.PrepareForRender(renderTexture);
-        this.RenderMain(cl, stage, renderTexture);
+        this._renderContext.Render(cl, stage, renderTexture);
 
         //if (renderTexture.SampleCount != TextureSampleCount.Count1 && resolvedTexture != null)
         //{
@@ -301,24 +308,6 @@ public class Renderer : IDisposable
         cl.End();
 
         this.GraphicsDevice.SubmitCommands(cl);
-    }
-
-    private void RenderMain(CommandList cl, Stage stage, RenderTexture renderTexture)
-    {
-        this._renderContext.Render(cl, stage, renderTexture);
-    }
-
-    private void RenderSprites(CommandList cl, Stage stage, RenderTexture renderTexture)
-    {
-        foreach (var layer in stage.Scene.Layers2D)
-        {
-            this._spritesPass.Render(cl, renderTexture, layer);
-        }
-    }
-
-    private void RenderImGui(CommandList cl, IRenderTexture renderTexture)
-    {
-        this._imGuiPass.Render(cl, renderTexture);
     }
 
     /// <summary>
