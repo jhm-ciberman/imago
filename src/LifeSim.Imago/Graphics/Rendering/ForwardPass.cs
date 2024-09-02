@@ -78,7 +78,7 @@ internal class ForwardPass : IDisposable, IPipelineProvider
 
         this._shadowPass.ShadowmapTexture.Resized += this.Shadowmap_Resized;
 
-        RenderFlags supportedForwardFlags = RenderFlags.AlphaTest | RenderFlags.ReceiveShadows | RenderFlags.Fog | RenderFlags.PixelPerfactShadows | RenderFlags.ColorWrite | RenderFlags.ShadowCascades;
+        RenderFlags supportedForwardFlags = RenderFlags.AlphaTest | RenderFlags.ReceiveShadows | RenderFlags.Fog | RenderFlags.PixelPerfactShadows | RenderFlags.ColorWrite | RenderFlags.ShadowCascades | RenderFlags.HalfLambert;
         var baseVertex = ShaderLoader.Load("base.vert.glsl");
         var baseFragment = ShaderLoader.Load("base.frag.glsl");
         this.DefaultShader = new Shader(renderer, this, baseVertex, baseFragment, new[] { "Surface" }, supportedForwardFlags);

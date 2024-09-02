@@ -543,6 +543,7 @@ internal class Renderable : IDisposable
         if (this.RenderQueues.HasFlag(RenderQueues.Transparent)) flags |= RenderFlags.Transparent;
         if (stage.EnableFog) flags |= RenderFlags.Fog;
         if (stage.EnablePixelPerfectShadows) flags |= RenderFlags.PixelPerfactShadows;
+        if (stage.LightingHalfLambert) flags |= RenderFlags.HalfLambert;
         if (stage.CascadesCount > 1) flags |= RenderFlags.ShadowCascades;
 
         return material.ForwardShader.GetPipeline(this._mesh!.VertexFormat, material.RenderFlags | flags, this.Stage!.MultiSampleCount);

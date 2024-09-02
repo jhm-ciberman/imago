@@ -22,4 +22,5 @@ internal enum RenderFlags : short
     ScisorTest = 1 << 9,
     ColorWrite = 1 << 10,
     ShadowCascades = 1 << 11,
+    HalfLambert = 1 << 12,
 }

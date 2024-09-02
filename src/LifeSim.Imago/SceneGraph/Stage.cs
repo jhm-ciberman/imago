@@ -334,6 +334,17 @@ public class Stage
         set => this.SetProperty(ref this._enablePixelPerfectShadows, value);
     }
 
+    private bool _lightingHalfLambert = true;
+
+    /// <summary>
+    /// Gets or sets whether to use half lambert lighting.
+    /// </summary>
+    public bool LightingHalfLambert
+    {
+        get => this._lightingHalfLambert;
+        set => this.SetProperty(ref this._lightingHalfLambert, value);
+    }
+
     private int _cascadesCount = 4;
 
     /// <summary>

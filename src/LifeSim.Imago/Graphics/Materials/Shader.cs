@@ -132,6 +132,7 @@ public class Shader : IDisposable
         [RenderFlags.PixelPerfactShadows] = "ENABLE_PIXEL_PERFECT_SHADOWS",
         [RenderFlags.ColorWrite] = "ENABLE_COLOR_WRITE",
         [RenderFlags.ShadowCascades] = "ENABLE_SHADOW_CASCADES",
+        [RenderFlags.HalfLambert] = "ENABLE_HALF_LAMBERT",
     };
 
     private static void AddFlagsMacros(List<Veldrid.SPIRV.MacroDefinition> macros, RenderFlags flags)
