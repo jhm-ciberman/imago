@@ -2,8 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
-using LifeSim.Imago.Graphics;
-using LifeSim.Imago.Graphics.Rendering.Sprites;
+using LifeSim.Imago.Rendering.Sprites;
 using LifeSim.Support.Drawing;
 
 namespace LifeSim.Imago.Controls;

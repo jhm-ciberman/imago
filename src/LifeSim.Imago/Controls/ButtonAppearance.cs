@@ -1,5 +1,4 @@
 using LifeSim.Imago.Controls.Drawing;
-using LifeSim.Imago.Graphics;
 using LifeSim.Support.Drawing;
 
 namespace LifeSim.Imago.Controls;

@@ -1,4 +1,4 @@
-using LifeSim.Imago.Graphics.Rendering.Sprites;
+using LifeSim.Imago.Rendering.Sprites;
 
 namespace LifeSim.Imago.SceneGraph;
 

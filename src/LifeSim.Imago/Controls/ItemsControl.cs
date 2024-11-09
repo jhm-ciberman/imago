@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
-using LifeSim.Imago.Graphics.Rendering.Sprites;
+using LifeSim.Imago.Rendering.Sprites;
 
 namespace LifeSim.Imago.Controls;
 

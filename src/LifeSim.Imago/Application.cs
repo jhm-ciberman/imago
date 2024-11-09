@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Runtime;
 using System.Threading;
-using LifeSim.Imago.Graphics.Rendering;
+using LifeSim.Imago.Rendering;
 using LifeSim.Imago.Input;
 using LifeSim.Imago.SceneGraph;
 using Veldrid;

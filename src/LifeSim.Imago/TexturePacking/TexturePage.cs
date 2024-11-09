@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
-using LifeSim.Imago.Graphics.Textures;
+using LifeSim.Imago.Textures;
 using LifeSim.Support.Numerics;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;

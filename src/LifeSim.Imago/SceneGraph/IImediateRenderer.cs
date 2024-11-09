@@ -1,6 +1,6 @@
 using System.Numerics;
-using LifeSim.Imago.Graphics.Materials;
-using LifeSim.Imago.Graphics.Textures;
+using LifeSim.Imago.Textures;
+using LifeSim.Imago.Materials;
 using LifeSim.Support.Drawing;
 
 namespace LifeSim.Imago.SceneGraph;

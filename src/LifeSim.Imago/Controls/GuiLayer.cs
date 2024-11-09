@@ -1,8 +1,8 @@
 using System;
 using System.Diagnostics;
 using System.Numerics;
-using LifeSim.Imago.Graphics.Rendering;
-using LifeSim.Imago.Graphics.Rendering.Sprites;
+using LifeSim.Imago.Rendering;
+using LifeSim.Imago.Rendering.Sprites;
 using LifeSim.Imago.SceneGraph;
 using LifeSim.Support.Numerics;
 

@@ -1,6 +1,6 @@
 using System;
 using System.Numerics;
-using LifeSim.Imago.Graphics.Rendering;
+using LifeSim.Imago.Rendering;
 using LifeSim.Support.Drawing;
 using Veldrid.Utilities;
 

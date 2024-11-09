@@ -1,5 +1,5 @@
 using System.Numerics;
-using LifeSim.Imago.Graphics.Textures;
+using LifeSim.Imago.Textures;
 using LifeSim.Support.Numerics;
 
 namespace LifeSim.Imago.TexturePacking;

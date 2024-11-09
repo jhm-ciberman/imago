@@ -1,4 +1,4 @@
-using LifeSim.Imago.Graphics.Textures;
+using LifeSim.Imago.Textures;
 using LifeSim.Imago.SceneGraph.Lighting;
 using LifeSim.Support.Drawing;
 

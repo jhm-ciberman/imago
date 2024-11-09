@@ -1,7 +1,7 @@
 using System;
 using System.Numerics;
 using System.Windows.Input;
-using LifeSim.Imago.Graphics.Rendering.Sprites;
+using LifeSim.Imago.Rendering.Sprites;
 using Veldrid;
 
 namespace LifeSim.Imago.Controls;

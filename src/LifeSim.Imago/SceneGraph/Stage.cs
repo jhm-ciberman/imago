@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
-using LifeSim.Imago.Graphics;
-using LifeSim.Imago.Graphics.Rendering;
-using LifeSim.Imago.Graphics.Textures;
+using LifeSim.Imago.Rendering;
+using LifeSim.Imago.Textures;
 using LifeSim.Imago.SceneGraph.Nodes;
 
 namespace LifeSim.Imago.SceneGraph;

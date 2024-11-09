@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using LifeSim.Imago.Graphics.Meshes;
+using LifeSim.Imago.Meshes;
 using LifeSim.Imago.SceneGraph.Nodes;
 using LifeSim.Imago.SceneGraph.Prefabs;
 

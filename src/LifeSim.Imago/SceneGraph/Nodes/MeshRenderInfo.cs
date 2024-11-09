@@ -1,6 +1,6 @@
 using System.Numerics;
-using LifeSim.Imago.Graphics.Materials;
-using LifeSim.Imago.Graphics.Meshes;
+using LifeSim.Imago.Materials;
+using LifeSim.Imago.Meshes;
 
 namespace LifeSim.Imago.SceneGraph.Nodes;
 

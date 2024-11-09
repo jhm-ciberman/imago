@@ -1,6 +1,6 @@
 using System;
 using System.Numerics;
-using LifeSim.Imago.Graphics.Materials;
+using LifeSim.Imago.Materials;
 using LifeSim.Imago.SceneGraph.Nodes;
 using LifeSim.Imago.TexturePacking;
 using LifeSim.Support.Collections;

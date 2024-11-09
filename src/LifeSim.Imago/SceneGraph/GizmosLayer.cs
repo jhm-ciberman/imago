@@ -321,7 +321,7 @@ public class GizmosLayer
         this.DrawArrow(position, position + planeNormal, normalColor, -1f, lifeTime, drawInFront);
     }
 
-    public void DrawWireMesh(Graphics.Meshes.MeshData mesh, ref Matrix4x4 transform, Color color, float lifeTime = 0, bool drawInFront = false)
+    public void DrawWireMesh(Meshes.MeshData mesh, ref Matrix4x4 transform, Color color, float lifeTime = 0, bool drawInFront = false)
     {
         for (int i = 0; i < mesh.Indices.Length; i += 3)
         {

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using CommunityToolkit.Mvvm.ComponentModel;
-using LifeSim.Imago.Graphics.Rendering.Sprites;
+using LifeSim.Imago.Rendering.Sprites;
 using LifeSim.Support.Numerics;
 
 namespace LifeSim.Imago.Controls;

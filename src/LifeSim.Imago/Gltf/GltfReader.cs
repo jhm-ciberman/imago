@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Numerics;
 using glTFLoader;
 using LifeSim.Imago.Animations;
-using LifeSim.Imago.Graphics.Meshes;
+using LifeSim.Imago.Meshes;
 using static glTFLoader.Schema.AnimationChannelTarget;
 using static glTFLoader.Schema.AnimationSampler;
 

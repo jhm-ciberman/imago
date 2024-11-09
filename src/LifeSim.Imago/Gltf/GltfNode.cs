@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using LifeSim.Imago.Graphics.Materials;
-using LifeSim.Imago.Graphics.Meshes;
+using LifeSim.Imago.Materials;
+using LifeSim.Imago.Meshes;
 using LifeSim.Imago.SceneGraph.Nodes;
 using LifeSim.Imago.SceneGraph.Prefabs;
 

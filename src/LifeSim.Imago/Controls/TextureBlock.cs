@@ -1,7 +1,7 @@
 using System.Numerics;
-using LifeSim.Imago.Graphics.Materials;
-using LifeSim.Imago.Graphics.Rendering.Sprites;
-using LifeSim.Imago.Graphics.Textures;
+using LifeSim.Imago.Rendering.Sprites;
+using LifeSim.Imago.Textures;
+using LifeSim.Imago.Materials;
 
 namespace LifeSim.Imago.Controls;
 

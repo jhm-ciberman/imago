@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Numerics;
-using LifeSim.Imago.Graphics.Textures;
+using LifeSim.Imago.Textures;
 
 namespace LifeSim.Imago.SceneGraph;
 
