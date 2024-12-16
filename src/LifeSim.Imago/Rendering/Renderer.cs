@@ -340,6 +340,15 @@ public class Renderer : IDisposable
         this.GraphicsDevice.WaitForIdle();
         this.FullScreenRenderTexture.Resize(width, height);
         this.MainRenderTexture.Resize(width, height);
+    }
+
+    /// <summary>
+    /// Resizes the GUI render texture.
+    /// </summary>
+    /// <param name="width">The new width of the render texture.</param>
+    /// <param name="height">The new height of the render texture.</param>
+    public void ResizeGui(uint width, uint height)
+    {
         this.GuiRenderTexture.Resize(width, height);
     }
 
