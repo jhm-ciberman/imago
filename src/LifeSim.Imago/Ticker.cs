@@ -6,17 +6,18 @@ namespace LifeSim.Imago;
 
 public class TickedEventArgs : EventArgs
 {
-    public double DeltaTime { get; private set; } = 0;
-    public double ElapsedTime { get; private set; } = 0;
+    /// <summary>
+    /// Gets the time passed since the last frame in seconds.
+    /// </summary>
+    public double DeltaTime { get; internal set; } = 0;
+
+    /// <summary>
+    /// Gets the total time passed since the start of the application in seconds.
+    /// </summary>
+    public double ElapsedTime { get; internal set; } = 0;
 
     public TickedEventArgs()
     {
-    }
-
-    internal void SetValues(double deltaTime, double elapsedTime)
-    {
-        this.DeltaTime = deltaTime;
-        this.ElapsedTime = elapsedTime;
     }
 }
 
@@ -116,7 +117,8 @@ public class Ticker
             }
 
             // Fire the tick event
-            this._tickedEventArgs.SetValues(this._deltaTime, this._elapsedTime);
+            this._tickedEventArgs.DeltaTime = this._deltaTime;
+            this._tickedEventArgs.ElapsedTime = this._elapsedTime;
             Ticked?.Invoke(this, this._tickedEventArgs);
         }
     }
