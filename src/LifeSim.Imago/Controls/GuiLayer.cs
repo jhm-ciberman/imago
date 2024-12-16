@@ -16,11 +16,27 @@ public class GuiLayer : ILayer2D
     /// </summary>
     public Viewport Viewport { get; }
 
+    private float _zoom = 1f;
+
     /// <summary>
     /// Gets or sets the global zoom of the <see cref="GuiLayer"/>.
     /// This will scale all controls on the <see cref="GuiLayer"/> by the given factor.
     /// </summary>
-    public float Zoom { get; set; } = 1f;
+    public float Zoom
+    {
+        get => this._zoom;
+        set
+        {
+            if (this._zoom == value) return;
+            this._zoom = value;
+            this.Content?.InvalidateMeasure();
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating the used render scale.
+    /// </summary>
+    public Vector2 RenderScale { get; set; } = Vector2.One;
 
     /// <summary>
     /// Gets or sets a value indicating whether each control should be snapped to pixels.
@@ -133,5 +149,15 @@ public class GuiLayer : ILayer2D
     {
         if (this.Content == null) throw new InvalidOperationException("Content is null");
         return this.Content.FindOrFail<T>(name);
+    }
+
+    /// <summary>
+    /// Converts a point from window space to viewport space.
+    /// </summary>
+    /// <param name="mousePosition">The point in window space.</param>
+    /// <returns>The point in viewport space.</returns>
+    public Vector2 WindowToViewport(Vector2 mousePosition)
+    {
+        return (mousePosition - this.Viewport.Position) / this.RenderScale;
     }
 }

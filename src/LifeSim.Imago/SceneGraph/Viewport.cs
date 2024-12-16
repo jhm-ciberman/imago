@@ -15,10 +15,18 @@ public class Viewport
     /// </summary>
     /// <param name="size">The size of the viewport.</param>
     /// <param name="position">The position of the viewport.</param>
-    public Viewport(Vector2 size, Vector2 position = default)
+    public Viewport(Vector2 position, Vector2 size)
     {
         this.Size = size;
         this.Position = position;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Viewport"/> class.
+    /// </summary>
+    /// <param name="size">The size of the viewport.</param>
+    public Viewport(Vector2 size) : this(Vector2.Zero, size)
+    {
     }
 
     /// <summary>

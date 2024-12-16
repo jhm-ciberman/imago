@@ -70,7 +70,7 @@ public abstract class Camera
         }
     }
 
-    private Viewport _viewport = new Viewport(Vector2.One, Vector2.Zero);
+    private Viewport _viewport = new Viewport(Vector2.One);
 
     /// <summary>
     /// Gets or sets the viewport of the camera.

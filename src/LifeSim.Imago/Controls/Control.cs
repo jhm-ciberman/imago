@@ -267,7 +267,7 @@ public class Control : Visual
         var input = this.Stage.Input;
 
         var bounds = this.GetBounds();
-        var mousePosition = input.MousePosition / this.Stage.Zoom;
+        var mousePosition = this.Stage.WindowToViewport(input.MousePosition);
         this.IsMouseOver = bounds.Contains(mousePosition);
 
         if (this.IsMouseOver)

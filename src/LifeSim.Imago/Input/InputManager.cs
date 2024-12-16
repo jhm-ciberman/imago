@@ -161,7 +161,7 @@ public class InputManager : IDisposable
     public Vector2Int DisplaySize => new(this._window.Width, this._window.Height);
 
     /// <summary>
-    /// Moves the mouse cursor to the specified position.
+    /// Moves the mouse cursor to the specified position relative to the window.
     /// </summary>
     /// <param name="position">The new position of the mouse cursor.</param>
     public void MoveMouseTo(Vector2 position)
@@ -173,7 +173,7 @@ public class InputManager : IDisposable
     }
 
     /// <summary>
-    /// Gets the current mouse position.
+    /// Gets the current mouse position relative to the window.
     /// </summary>
     public Vector2 MousePosition => this._mousePosition;
 
