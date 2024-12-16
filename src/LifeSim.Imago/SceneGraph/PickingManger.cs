@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using LifeSim.Imago.Input;
+using LifeSim.Imago.SceneGraph.Cameras;
 using LifeSim.Imago.SceneGraph.Nodes;
 
 namespace LifeSim.Imago.SceneGraph;
@@ -31,6 +32,11 @@ public class PickingManger
     /// This is the node that is currently under the mouse cursor as reported by the renderer.
     /// </summary>
     public IPickable? HighlightedPickable { get; set; }
+
+    /// <summary>
+    /// Gets or sets the camera used for picking.
+    /// </summary>
+    public Camera? Camera { get; set; } = null;
 
     private IPickableTarget? _pickableTarget;
 
@@ -103,11 +109,12 @@ public class PickingManger
     public HitInfo HitInfo { get; private set; }
 
     /// <summary>
-    /// Updates the picking.
+    /// Updates the picking manager.
     /// </summary>
-    public void Update()
+    /// <param name="camera">The camera used for picking.</param>
+    public void Update(Camera? camera)
     {
-        var newTarget = this.GetPickableView(out var hitInfo);
+        var newTarget = this.GetPickableView(camera, out var hitInfo);
 
         this.HitInfo = hitInfo;
 
@@ -127,12 +134,12 @@ public class PickingManger
     /// <summary>
     /// Returns the pickable view that is currently under the mouse cursor.
     /// </summary>
+    /// <param name="camera">The camera used for picking.</param>
     /// <param name="hitInfo">The hit info that was used to find the pickable.</param>
     /// <returns>The pickable view that is currently under the mouse cursor.</returns>
-    private IPickableTarget? GetPickableView(out HitInfo hitInfo)
+    private IPickableTarget? GetPickableView(Camera? camera, out HitInfo hitInfo)
     {
         hitInfo = default;
-        var camera = Application.Instance.Scene.Camera;
         if (camera == null) return null;
 
         if (this.HighlightedPickable is not RenderNode3D selectedRenderNode)
