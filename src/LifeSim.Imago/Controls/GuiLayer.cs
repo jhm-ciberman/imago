@@ -11,12 +11,14 @@ namespace LifeSim.Imago.Controls;
 
 public class GuiLayer : ILayer2D
 {
+    /// <summary>
+    /// Gets the <see cref="Viewport"/> of the <see cref="GuiLayer"/>.
+    /// </summary>
     public Viewport Viewport { get; }
 
-    private Control? _content;
-
     /// <summary>
-    /// Gets or sets the global zoom of the page. This will scale all controls on the page by the given factor.
+    /// Gets or sets the global zoom of the <see cref="GuiLayer"/>.
+    /// This will scale all controls on the <see cref="GuiLayer"/> by the given factor.
     /// </summary>
     public float Zoom { get; set; } = 1f;
 
@@ -26,10 +28,21 @@ public class GuiLayer : ILayer2D
     public bool SnapToPixels { get; set; } = true;
 
     /// <summary>
-    /// Gets the <see cref="InputManager"/>.
+    /// Gets the <see cref="InputManager"/> used to handle input events.
     /// </summary>
     public InputManager Input { get; }
 
+    /// <summary>
+    /// Gets the time it took to measure and arrange the content in the last frame.
+    /// </summary>
+    public TimeSpan MeasureArrangeTime { get; private set; }
+
+    private readonly Stopwatch _measureArrangeStopwatch = new Stopwatch();
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GuiLayer"/> class.
+    /// </summary>
+    /// <param name="viewport">The viewport to use.</param>
     public GuiLayer(Viewport? viewport = null)
     {
         this.Input = InputManager.Current;
@@ -42,6 +55,11 @@ public class GuiLayer : ILayer2D
         this.Content?.InvalidateMeasure();
     }
 
+    private Control? _content;
+
+    /// <summary>
+    /// Gets or sets the content of the <see cref="GuiLayer"/>.
+    /// </summary>
     public Control? Content
     {
         get => this._content;
@@ -58,10 +76,10 @@ public class GuiLayer : ILayer2D
         }
     }
 
-    public TimeSpan MeasureArrangeTime { get; private set; }
-
-    private readonly Stopwatch _measureArrangeStopwatch = new Stopwatch();
-
+    /// <summary>
+    /// Draws the gui layer.
+    /// </summary>
+    /// <param name="ctx">The drawing context to use.</param>
     public void Draw(DrawingContext ctx)
     {
         if (this._content is null) return;
@@ -81,6 +99,10 @@ public class GuiLayer : ILayer2D
         this._content.Draw(ctx);
     }
 
+    /// <summary>
+    /// Updates the gui layer.
+    /// </summary>
+    /// <param name="deltaTime">The time since the last update.</param>
     public virtual void Update(float deltaTime)
     {
         if (this._content is null) return;
@@ -88,12 +110,25 @@ public class GuiLayer : ILayer2D
         this._content.Update(deltaTime);
     }
 
+    /// <summary>
+    /// Finds a child control of the specified type by its name recursively.
+    /// </summary>
+    /// <typeparam name="T">The type of the control to find.</typeparam>
+    /// <param name="name">The name of the control to find.</param>
+    /// <returns>The control if found, otherwise null.</returns>
     public T? Find<T>(string name) where T : Visual
     {
         if (this.Content == null) return null;
         return this.Content.Find<T>(name);
     }
 
+    /// <summary>
+    /// Finds a child control of the specified type by its name recursively. Throws an exception if the control could not be found.
+    /// </summary>
+    /// <typeparam name="T">The type of the control to find.</typeparam>
+    /// <param name="name">The name of the control to find.</param>
+    /// <returns>The found control.</returns>
+    /// <exception cref="InvalidOperationException">Thrown if the control could not be found.</exception>
     public T FindOrFail<T>(string name) where T : Visual
     {
         if (this.Content == null) throw new InvalidOperationException("Content is null");
