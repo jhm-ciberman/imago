@@ -6,7 +6,6 @@ using LifeSim.Imago.SceneGraph;
 using Veldrid;
 using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
-using Viewport = LifeSim.Imago.SceneGraph.Viewport;
 
 namespace LifeSim.Imago;
 
@@ -16,11 +15,6 @@ public class Application : IDisposable
     /// Gets the instance of the <see cref="Application"/>.
     /// </summary>
     public static Application Instance { get; private set; } = null!;
-
-    /// <summary>
-    /// Gets the <see cref="Viewport"/>.
-    /// </summary>
-    public Viewport Viewport => this._renderer.Viewport;
 
     /// <summary>
     /// Gets the <see cref="Sdl2Window"/>.
@@ -57,8 +51,15 @@ public class Application : IDisposable
 
         GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
 
-        WindowCreateInfo windowCI = new WindowCreateInfo(100, 100, 1024, 600, WindowState.Normal, "LifeSim.Imago");
-        this.Window = VeldridStartup.CreateWindow(ref windowCI);
+        this.Window = VeldridStartup.CreateWindow(new WindowCreateInfo
+        {
+            X = 100,
+            Y = 100,
+            WindowWidth = 1024,
+            WindowHeight = 600,
+            WindowTitle = "LifeSim.Imago",
+            WindowInitialState = WindowState.Normal,
+        });
 
         this._renderer = new Renderer(this.Window, backend);
 
@@ -79,7 +80,7 @@ public class Application : IDisposable
     {
         uint width = (uint) this.Window.Width;
         uint height = (uint) this.Window.Height;
-        this.Viewport.Resize(width, height);
+        this._renderer.Viewport.Resize(width, height);
         this._renderer.Resize(width, height);
     }
 
