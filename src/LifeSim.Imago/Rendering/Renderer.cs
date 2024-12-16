@@ -81,6 +81,7 @@ public class Renderer : IDisposable
     private readonly CommandList _commandList;
     private readonly DisposeCollector _disposeCollector;
     private readonly FullScreenPass _fullScreenPass;
+    private readonly FullScreenPass _fullScreenPixelArtPass;
     private readonly RenderContext _renderContext;
 
     private readonly SpritesPass _spritesPass;
@@ -133,7 +134,8 @@ public class Renderer : IDisposable
         this._renderContext = new RenderContext(this);
         this._imGuiPass = new ImGuiPass(this);
         this._spritesPass = new SpritesPass(this);
-        this._fullScreenPass = new FullScreenPass(this);
+        this._fullScreenPass = new FullScreenPass(this, isPixelArt: false);
+        this._fullScreenPixelArtPass = new FullScreenPass(this, isPixelArt: true);
 
 
 
@@ -240,7 +242,7 @@ public class Renderer : IDisposable
         }
 
         this._fullScreenPass.Render(cl, this.MainRenderTexture);
-        this._fullScreenPass.Render(cl, this.GuiRenderTexture);
+        this._fullScreenPixelArtPass.Render(cl, this.GuiRenderTexture);
         this._imGuiPass.Render(cl);
         cl.End();
 

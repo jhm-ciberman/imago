@@ -10,8 +10,6 @@ namespace LifeSim.Imago.Rendering;
 
 internal class FullScreenPass : IDisposable
 {
-    //private readonly IRenderTexture _sourceTexture;
-
     private readonly IRenderTexture _destinationTexture;
 
     private readonly GraphicsDevice _gd;
@@ -24,7 +22,7 @@ internal class FullScreenPass : IDisposable
 
     private readonly Dictionary<VeldridTexture, ResourceSet> _resourceSets = new();
 
-    public FullScreenPass(Renderer renderer)
+    public FullScreenPass(Renderer renderer, bool isPixelArt = false)
     {
         this._gd = renderer.GraphicsDevice;
         var factory = this._gd.ResourceFactory;
@@ -43,7 +41,7 @@ internal class FullScreenPass : IDisposable
             new ResourceLayoutElementDescription("MainSampler", ResourceKind.Sampler, ShaderStages.Fragment)
         ));
 
-        var shaders = ShaderCompiler.CompileShaders(this._gd, _vertexCode, _fragmentCode);
+        var shaders = ShaderCompiler.CompileShaders(this._gd, _vertexCode, isPixelArt ? _pixelArtfragmentCode : _fragmentCode);
 
         this._pipeline = this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription
         {
@@ -53,7 +51,7 @@ internal class FullScreenPass : IDisposable
             BlendState = BlendStateDescription.SingleAlphaBlend,
             RasterizerState = RasterizerStateDescription.CullNone,
             Outputs = this._destinationTexture.OutputDescription,
-            ResourceLayouts = new ResourceLayout[] { this._resourceLayout },
+            ResourceLayouts = [this._resourceLayout],
         });
 
         this._vertexBuffer = factory.CreateBuffer(new BufferDescription(16 * 6, BufferUsage.VertexBuffer));
@@ -144,5 +142,31 @@ internal class FullScreenPass : IDisposable
             void main()
             {
                 fsout_Color = texture(sampler2D(MainTexture, MainSampler), fsin_TexCoords);
+            }";
+
+    private static readonly string _pixelArtfragmentCode = @"#version 450
+            layout(location = 0) in vec2 fsin_TexCoords;
+            layout(set = 0, binding = 0) uniform texture2D MainTexture;
+            layout(set = 0, binding = 1) uniform sampler MainSampler;
+
+            layout(location = 0) out vec4 fsout_Color;
+
+            void main() {
+                vec2 textureSize = vec2(textureSize(sampler2D(MainTexture, MainSampler), 0));
+
+                // calculate the box filter size in texel units
+                vec2 boxSize = clamp(fwidth(fsin_TexCoords) * textureSize, vec2(1e-5), vec2(1.0));
+
+                // scale UV by texture size to get texel coordinate
+                vec2 tx = fsin_TexCoords * textureSize - 0.5 * boxSize;
+
+                // compute offset for pixel-sized box filter
+                vec2 txOffset = clamp((fract(tx) - (vec2(1.0) - boxSize)) / boxSize, vec2(0.0), vec2(1.0));
+
+                // compute bilinear sample UV coordinates
+                vec2 uv = (floor(tx) + vec2(0.5) + txOffset) / textureSize;
+
+                vec4 color = texture(sampler2D(MainTexture, MainSampler), uv);
+                fsout_Color = color;
             }";
 }
