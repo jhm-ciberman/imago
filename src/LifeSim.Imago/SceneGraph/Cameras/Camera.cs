@@ -70,7 +70,7 @@ public abstract class Camera
         }
     }
 
-    private Viewport _viewport = new Viewport(0, 0, 1, 1);
+    private Viewport _viewport = new Viewport(Vector2.One, Vector2.Zero);
 
     /// <summary>
     /// Gets or sets the viewport of the camera.
@@ -82,15 +82,15 @@ public abstract class Camera
         {
             if (this._viewport != value)
             {
-                this._viewport.Resized -= this.Viewport_Resized;
+                this._viewport.SizeChanged -= this.Viewport_SizeChanged;
                 this._viewport = value;
                 this._projectionMatrixIsDirty = true;
-                this._viewport.Resized += this.Viewport_Resized;
+                this._viewport.SizeChanged += this.Viewport_SizeChanged;
             }
         }
     }
 
-    private void Viewport_Resized(object? sender, EventArgs e)
+    private void Viewport_SizeChanged(object? sender, EventArgs e)
     {
         this._projectionMatrixIsDirty = true;
     }

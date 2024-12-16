@@ -43,10 +43,10 @@ public class GuiLayer : ILayer2D
     {
         this.Input = InputManager.Current;
         this.Viewport = viewport ?? Renderer.Instance.Viewport;
-        this.Viewport.Resized += this.Viewport_Resized;
+        this.Viewport.SizeChanged += this.Viewport_SizeChanged;
     }
 
-    private void Viewport_Resized(object? sender, EventArgs e)
+    private void Viewport_SizeChanged(object? sender, EventArgs e)
     {
         this.Content?.InvalidateMeasure();
     }

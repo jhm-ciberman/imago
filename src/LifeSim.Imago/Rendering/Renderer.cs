@@ -12,6 +12,7 @@ using Veldrid.StartupUtilities;
 using Veldrid.Utilities;
 using Texture = LifeSim.Imago.Textures.Texture;
 using Viewport = LifeSim.Imago.SceneGraph.Viewport;
+using System.Numerics;
 
 namespace LifeSim.Imago.Rendering;
 
@@ -124,7 +125,7 @@ public class Renderer : IDisposable
 
         var framebuffer = swapchain.Framebuffer;
 
-        this.Viewport = new Viewport(framebuffer.Width, framebuffer.Height);
+        this.Viewport = new Viewport(new Vector2(framebuffer.Width, framebuffer.Height));
         this.FullScreenRenderTexture = new SwapchainRenderTexture(gd, swapchain);
         this.MainRenderTexture = new RenderTexture(framebuffer.Width, framebuffer.Height);
         this.GuiRenderTexture = new RenderTexture(framebuffer.Width, framebuffer.Height);

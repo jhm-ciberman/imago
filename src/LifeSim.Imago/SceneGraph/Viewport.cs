@@ -6,73 +6,45 @@ namespace LifeSim.Imago.SceneGraph;
 public class Viewport
 {
     /// <summary>
-    /// Occurs when the viewport is resized.
+    /// Occurs when the <see cref="Size"/> property changes.
     /// </summary>
-    public event EventHandler? Resized;
+    public event EventHandler? SizeChanged;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Viewport"/> class.
     /// </summary>
-    /// <param name="width">The width of the viewport.</param>
-    /// <param name="height">The height of the viewport.</param>
-    public Viewport(uint width, uint height) : this(0, 0, width, height) { }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="Viewport"/> class.
-    /// </summary>
-    /// <param name="x">The x-coordinate of the viewport.</param>
-    /// <param name="y">The y-coordinate of the viewport.</param>
-    /// <param name="width">The width of the viewport.</param>
-    /// <param name="height">The height of the viewport.</param>
-    public Viewport(uint x, uint y, uint width, uint height)
+    /// <param name="size">The size of the viewport.</param>
+    /// <param name="position">The position of the viewport.</param>
+    public Viewport(Vector2 size, Vector2 position = default)
     {
-        this.X = x;
-        this.Y = y;
-        this.Width = width;
-        this.Height = height;
+        this.Size = size;
+        this.Position = position;
     }
 
     /// <summary>
     /// Resizes the viewport.
     /// </summary>
-    /// <param name="width">The new width of the viewport.</param>
-    /// <param name="height">The new height of the viewport.</param>
-    public void Resize(uint width, uint height)
+    /// <param name="size">The new size of the viewport.</param>
+    public void Resize(Vector2 size)
     {
-        if (this.Width == width && this.Height == height)
-            return;
-        this.Width = width;
-        this.Height = height;
-        this.Resized?.Invoke(this, EventArgs.Empty);
+        if (this.Size == size) return;
+
+        this.Size = size;
+        this.SizeChanged?.Invoke(this, EventArgs.Empty);
     }
 
     /// <summary>
-    /// Gets the width of the viewport.
+    /// Gets the size of the viewport.
     /// </summary>
-    public uint Width { get; private set; }
+    public Vector2 Size { get; private set; }
 
     /// <summary>
-    /// Gets the height of the viewport.
+    /// Gets the position of the viewport.
     /// </summary>
-    public uint Height { get; private set; }
-
-    /// <summary>
-    /// Gets the x-coordinate of the viewport.
-    /// </summary>
-    public uint X { get; private set; }
-
-    /// <summary>
-    /// Gets the y-coordinate of the viewport.
-    /// </summary>
-    public uint Y { get; private set; }
+    public Vector2 Position { get; private set; }
 
     /// <summary>
     /// Gets the aspect ratio of the viewport.
     /// </summary>
-    public float AspectRatio => this.Width / (float)this.Height;
-
-    /// <summary>
-    /// Gets the size of the viewport as a <see cref="Vector2"/>.
-    /// </summary>
-    public Vector2 Size => new Vector2(this.Width, this.Height);
+    public float AspectRatio => this.Size.X / this.Size.Y;
 }
