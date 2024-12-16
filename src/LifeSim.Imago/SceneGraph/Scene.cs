@@ -51,7 +51,7 @@ public class Scene : Node3D
         this.GuiLayer?.Update(deltaTime);
     }
 
-    private readonly List<IParticleSystem> _particleSystems = new List<IParticleSystem>();
+    private readonly List<IParticleSystem> _particleSystems = [];
 
     /// <summary>
     /// Gets the particle systems used to render particles.
