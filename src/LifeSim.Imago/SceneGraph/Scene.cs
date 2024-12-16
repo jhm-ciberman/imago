@@ -7,8 +7,6 @@ namespace LifeSim.Imago.SceneGraph;
 
 public class Scene : Node3D
 {
-    private readonly List<ILayer2D> _layers2D = new();
-
     /// <summary>
     /// Gets or sets the clear color of the stage. If null, the stage will not be cleared
     /// and the previous frame will be visible.
@@ -50,10 +48,7 @@ public class Scene : Node3D
 
     public virtual void Update(float deltaTime)
     {
-        foreach (var layer in this._layers2D)
-        {
-            layer.Update(deltaTime);
-        }
+        this.GuiLayer?.Update(deltaTime);
     }
 
     private readonly List<IParticleSystem> _particleSystems = new List<IParticleSystem>();
