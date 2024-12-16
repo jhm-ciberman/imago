@@ -25,9 +25,12 @@ public class Ticker
     private double _elapsedTime;
     private double _deltaTime;
     private double _framesPerSecond;
-    private readonly Stopwatch _stopwatch;
+    private readonly Stopwatch _stopwatch = new Stopwatch();
     private readonly TickEventArgs _tickEventArgs = new TickEventArgs();
 
+    /// <summary>
+    /// Occurs when a tick is performed.
+    /// </summary>
     public event EventHandler<TickEventArgs>? Tick;
 
     /// <summary>
@@ -51,12 +54,12 @@ public class Ticker
     public float TargetFrameTime { get; set; } = 1f / 60f;
 
     /// <summary>
-    /// Gets or sets the target frames per second.
+    /// Gets or sets the target frames per second. If set to <see cref="float.PositiveInfinity"/>, the ticker will run as fast as possible.
     /// </summary>
     public float TargetFramesPerSecond
     {
-        get => 1f / this.TargetFrameTime;
-        set => this.TargetFrameTime = 1f / value;
+        get => this.TargetFrameTime > 0 ? 1f / this.TargetFrameTime : float.PositiveInfinity;
+        set => this.TargetFrameTime = float.IsPositiveInfinity(value) ? 1f / value : 0;
     }
 
     /// <summary>
@@ -64,18 +67,13 @@ public class Ticker
     /// </summary>
     public bool IsRunning { get; private set; }
 
-    public Ticker(float targetFramesPerSecond = 0f)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Ticker"/> class.
+    /// </summary>
+    /// <param name="targetFramesPerSecond">The target frames per second. If set to <see cref="float.PositiveInfinity"/>, the ticker will run as fast as possible.</param>
+    public Ticker(float targetFramesPerSecond = float.PositiveInfinity)
     {
-        if (targetFramesPerSecond > 0)
-        {
-            this.TargetFramesPerSecond = targetFramesPerSecond;
-        }
-        else
-        {
-            this.TargetFrameTime = 0f; // No forced limit by default
-        }
-
-        this._stopwatch = new Stopwatch();
+        this.TargetFramesPerSecond = targetFramesPerSecond;
     }
 
     /// <summary>
