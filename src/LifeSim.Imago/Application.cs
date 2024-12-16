@@ -34,7 +34,10 @@ public class Application : IDisposable
 
     private readonly InputManager _input;
 
-    private readonly Ticker _ticker = new Ticker();
+    /// <summary>
+    /// Gets the <see cref="Ticker"/> in charge of running the main loop.
+    /// </summary>
+    public Ticker Ticker { get; } = new Ticker();
 
     private readonly Renderer _renderer;
 
@@ -59,20 +62,20 @@ public class Application : IDisposable
 
         this._renderer = new Renderer(this.Window, backend);
 
-        this.Window.Resized += this.OnResize;
-        this._ticker.Tick += this.Ticker_Tick;
+        this.Window.Resized += this.Window_Resized;
+        this.Ticker.Ticked += this.Ticker_Ticked;
 
-        this.OnResize();
+        this.Window_Resized();
 
         this._input = new InputManager(this.Window);
     }
 
     public void Run()
     {
-        this._ticker.Start();
+        this.Ticker.Start();
     }
 
-    private void OnResize()
+    private void Window_Resized()
     {
         uint width = (uint) this.Window.Width;
         uint height = (uint) this.Window.Height;
@@ -87,44 +90,6 @@ public class Application : IDisposable
     {
         this.Dispose();
     }
-
-    /// <summary>
-    /// Gets the time passed since the last frame in seconds.
-    /// </summary>
-    public double DeltaTime => this._ticker.DeltaTime;
-
-    /// <summary>
-    /// Gets the total time passed since the start of the application in seconds.
-    /// </summary>
-    public double ElapsedTime => this._ticker.ElapsedTime;
-
-    /// <summary>
-    /// Gets the number of frames per second.
-    /// </summary>
-    public double FramesPerSecond => this._ticker.FramesPerSecond;
-
-    /// <summary>
-    /// Gets or sets the minimum time that should pass between frames.
-    /// </summary>
-    public float TargetFrameTime
-    {
-        get => this._ticker.TargetFrameTime;
-        set => this._ticker.TargetFrameTime = value;
-    }
-
-    /// <summary>
-    /// Gets or sets the target frames per second.
-    /// </summary>
-    public float TargetFramesPerSecond
-    {
-        get => 1f / this.TargetFrameTime;
-        set => this.TargetFrameTime = 1f / value;
-    }
-
-    /// <summary>
-    /// Gets a value indicating whether the application is running.
-    /// </summary>
-    public bool IsRunning => this._ticker.IsRunning;
 
     /// <summary>
     /// Gets the current <see cref="Scene"/>.
@@ -146,15 +111,15 @@ public class Application : IDisposable
         this.Stage.ChangeScene(scene);
     }
 
-    private void Ticker_Tick(object? sender, TickEventArgs e)
+    private void Ticker_Ticked(object? sender, TickedEventArgs e)
     {
         this._input.UpdateFrameInput();
 
-        this._renderer.Update((float)this.DeltaTime, this._input.InputSnapshot);
+        this._renderer.Update((float)this.Ticker.DeltaTime, this._input.InputSnapshot);
 
         this.Update();
 
-        this.Stage.Update((float)this.DeltaTime);
+        this.Stage.Update((float)this.Ticker.DeltaTime);
 
         if (!this.Window.Exists)
         {
@@ -169,7 +134,7 @@ public class Application : IDisposable
 
     public void Dispose()
     {
-        this._ticker.Stop();
+        this.Ticker.Stop();
         this._input.Dispose();
         this._renderer.Dispose();
         this.Window.Close();

@@ -4,12 +4,12 @@ using System.Threading;
 
 namespace LifeSim.Imago;
 
-public class TickEventArgs : EventArgs
+public class TickedEventArgs : EventArgs
 {
     public double DeltaTime { get; private set; } = 0;
     public double ElapsedTime { get; private set; } = 0;
 
-    public TickEventArgs()
+    public TickedEventArgs()
     {
     }
 
@@ -26,12 +26,12 @@ public class Ticker
     private double _deltaTime;
     private double _framesPerSecond;
     private readonly Stopwatch _stopwatch = new Stopwatch();
-    private readonly TickEventArgs _tickEventArgs = new TickEventArgs();
+    private readonly TickedEventArgs _tickedEventArgs = new TickedEventArgs();
 
     /// <summary>
     /// Occurs when a tick is performed.
     /// </summary>
-    public event EventHandler<TickEventArgs>? Tick;
+    public event EventHandler<TickedEventArgs>? Ticked;
 
     /// <summary>
     /// Gets the time passed since the last frame in seconds.
@@ -116,8 +116,8 @@ public class Ticker
             }
 
             // Fire the tick event
-            this._tickEventArgs.SetValues(this._deltaTime, this._elapsedTime);
-            Tick?.Invoke(this, this._tickEventArgs);
+            this._tickedEventArgs.SetValues(this._deltaTime, this._elapsedTime);
+            Ticked?.Invoke(this, this._tickedEventArgs);
         }
     }
 }
