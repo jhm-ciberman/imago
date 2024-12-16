@@ -236,9 +236,9 @@ public class Renderer : IDisposable
 
         this._renderContext.Render(cl, stage, this.MainRenderTexture);
 
-        foreach (var layer in stage.Scene.Layers2D)
+        if (stage.Scene.GuiLayer != null)
         {
-            this._spritesPass.Render(cl, this.GuiRenderTexture, layer);
+            this._spritesPass.Render(cl, this.GuiRenderTexture, stage.Scene.GuiLayer);
         }
 
         this._fullScreenPass.Render(cl, this.MainRenderTexture);

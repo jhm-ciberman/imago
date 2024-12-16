@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using LifeSim.Imago.SceneGraph.Cameras;
 using LifeSim.Imago.SceneGraph.Nodes;
 using LifeSim.Support.Drawing;
@@ -83,37 +82,9 @@ public class Scene : Node3D
     }
 
     /// <summary>
-    /// Adds a 2D layer to the scene.
+    /// Gets or sets the GUI layer of the scene.
     /// </summary>
-    /// <param name="layer">The layer to add.</param>
-    public void AddLayer(ILayer2D layer)
-    {
-        this._layers2D.Add(layer);
-    }
-
-    /// <summary>
-    /// Removes a 2D layer from the scene.
-    /// </summary>
-    /// <param name="layer">The layer to remove.</param>
-    public void RemoveLayer(ILayer2D layer)
-    {
-        this._layers2D.Remove(layer);
-    }
-
-    /// <summary>
-    /// Gets the first layer of the specified type.
-    /// </summary>
-    /// <typeparam name="T">The type of the layer.</typeparam>
-    /// <returns>The layer or null if no layer of the specified type exists.</returns>
-    public T? GetLayer<T>()
-    {
-        return this._layers2D.OfType<T>().FirstOrDefault();
-    }
-
-    /// <summary>
-    /// Gets the 2D layers of the scene.
-    /// </summary>
-    public IReadOnlyList<ILayer2D> Layers2D => this._layers2D;
+    public ILayer2D? GuiLayer { get; set; } = null;
 
     public override void DetachFromStage()
     {
