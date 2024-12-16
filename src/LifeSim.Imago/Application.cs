@@ -1,7 +1,5 @@
 using System;
-using System.Diagnostics;
 using System.Runtime;
-using System.Threading;
 using LifeSim.Imago.Rendering;
 using LifeSim.Imago.Input;
 using LifeSim.Imago.SceneGraph;
@@ -34,12 +32,9 @@ public class Application : IDisposable
     /// </summary>
     public Stage Stage { get; } = new Stage();
 
-    /// <summary>
-    /// Gets whether the application is currently running.
-    /// </summary>
-    public bool IsRunning { get; private set; } = false;
-
     private readonly InputManager _input;
+
+    private readonly Ticker _ticker = new Ticker();
 
     private readonly Renderer _renderer;
 
@@ -65,10 +60,16 @@ public class Application : IDisposable
         this._renderer = new Renderer(this.Window, backend);
 
         this.Window.Resized += this.OnResize;
+        this._ticker.Tick += this.Ticker_Tick;
 
         this.OnResize();
 
         this._input = new InputManager(this.Window);
+    }
+
+    public void Run()
+    {
+        this._ticker.Start();
     }
 
     private void OnResize()
@@ -90,17 +91,45 @@ public class Application : IDisposable
     /// <summary>
     /// Gets the time passed since the last frame in seconds.
     /// </summary>
-    public double DeltaTime { get; private set; }
+    public double DeltaTime => this._ticker.DeltaTime;
 
     /// <summary>
     /// Gets the total time passed since the start of the application in seconds.
     /// </summary>
-    public double ElapsedTime { get; private set; }
+    public double ElapsedTime => this._ticker.ElapsedTime;
 
     /// <summary>
     /// Gets the number of frames per second.
     /// </summary>
-    public double FramesPerSecond { get; private set; }
+    public double FramesPerSecond => this._ticker.FramesPerSecond;
+
+    /// <summary>
+    /// Gets or sets the minimum time that should pass between frames.
+    /// </summary>
+    public float TargetFrameTime
+    {
+        get => this._ticker.TargetFrameTime;
+        set => this._ticker.TargetFrameTime = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the target frames per second.
+    /// </summary>
+    public float TargetFramesPerSecond
+    {
+        get => 1f / this.TargetFrameTime;
+        set => this.TargetFrameTime = 1f / value;
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether the application is running.
+    /// </summary>
+    public bool IsRunning => this._ticker.IsRunning;
+
+    /// <summary>
+    /// Gets the current <see cref="Scene"/>.
+    /// </summary>
+    public Scene Scene => this.Stage.Scene;
 
     protected virtual void Update()
     {
@@ -117,72 +146,30 @@ public class Application : IDisposable
         this.Stage.ChangeScene(scene);
     }
 
-    public Scene Scene => this.Stage.Scene;
-
-    /// <summary>
-    /// Gets or sets the minimum time that should pass between frames.
-    /// </summary>
-    public float TargetFrameTime { get; set; } = 0f; //1f / 60f;
-
-    /// <summary>
-    /// Gets or sets the target frames per second.
-    /// </summary>
-    public float TargetFramesPerSecond
+    private void Ticker_Tick(object? sender, TickEventArgs e)
     {
-        get => 1f / this.TargetFrameTime;
-        set => this.TargetFrameTime = 1f / value;
-    }
+        this._input.UpdateFrameInput();
 
-    /// <summary>
-    /// Starts the application.
-    /// </summary>
-    public void Run()
-    {
-        if (this.IsRunning) return;
+        this._renderer.Update((float)this.DeltaTime, this._input.InputSnapshot);
 
-        this.IsRunning = true;
+        this.Update();
 
-        Stopwatch sw = Stopwatch.StartNew();
-        double previousElapsed = sw.Elapsed.TotalSeconds;
+        this.Stage.Update((float)this.DeltaTime);
 
-        while (this.IsRunning)
+        if (!this.Window.Exists)
         {
-            this._input.UpdateFrameInput();
-
-            this.ElapsedTime = sw.Elapsed.TotalSeconds;
-
-            while (this.ElapsedTime - previousElapsed < this.TargetFrameTime)
-            {
-                this.ElapsedTime = sw.Elapsed.TotalSeconds;
-                Thread.Sleep(0); // Let other threads run.
-            }
-
-            this.DeltaTime = this.ElapsedTime - previousElapsed;
-            previousElapsed = this.ElapsedTime;
-
-            this.FramesPerSecond = 1d / this.DeltaTime;
-
-            this._renderer.Update((float)this.DeltaTime, this._input.InputSnapshot);
-
-            this.Update();
-
-            this.Stage.Update((float)this.DeltaTime);
-
-            if (!this.Window.Exists)
-            {
-                this.IsRunning = false;
-                break;
-            }
-
-            this.PrepareForRender();
-
-            this._renderer.Render(this.Stage);
+            this.Quit();
+            return;
         }
+
+        this.PrepareForRender();
+
+        this._renderer.Render(this.Stage);
     }
 
     public void Dispose()
     {
-        this.IsRunning = false;
+        this._ticker.Stop();
         this._input.Dispose();
         this._renderer.Dispose();
         this.Window.Close();
