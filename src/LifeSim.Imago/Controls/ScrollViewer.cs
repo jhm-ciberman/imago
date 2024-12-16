@@ -1,7 +1,6 @@
 using System.Numerics;
 using LifeSim.Imago.Controls.Drawing;
 using LifeSim.Imago.Rendering.Sprites;
-using LifeSim.Imago.Input;
 using LifeSim.Support.Drawing;
 using LifeSim.Support.Numerics;
 
@@ -159,7 +158,7 @@ public class ScrollViewer : ContentControl
     {
         base.Update(deltaTime);
 
-        float wheelDelta = -InputManager.Current.MouseWheelDelta;
+        float wheelDelta = -this.Stage?.Input.MouseWheelDelta ?? 0;
 
         if (wheelDelta != 0)
         {

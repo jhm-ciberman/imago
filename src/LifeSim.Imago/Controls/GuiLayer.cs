@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Numerics;
+using LifeSim.Imago.Input;
 using LifeSim.Imago.Rendering;
 using LifeSim.Imago.Rendering.Sprites;
 using LifeSim.Imago.SceneGraph;
@@ -33,8 +34,14 @@ public class GuiLayer : ILayer2D
     /// </summary>
     public bool SnapToPixels { get; set; } = true;
 
+    /// <summary>
+    /// Gets the <see cref="InputManager"/>.
+    /// </summary>
+    public InputManager Input { get; }
+
     public GuiLayer(Viewport? viewport = null)
     {
+        this.Input = InputManager.Current;
         this.Viewport = viewport ?? Renderer.Instance.Viewport;
         this.Viewport.Resized += this.Viewport_Resized;
     }

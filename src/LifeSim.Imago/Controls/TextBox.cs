@@ -254,16 +254,16 @@ public class TextBox : Control
         this.IsFocused = true;
         this.CaretIndex = this.Text.Length;
 
-        InputManager.Current.KeyPressed += this.InputManager_KeyPressed;
-        InputManager.Current.TextEntered += this.InputManager_TextEntered;
+        guiLayer.Input.KeyPressed += this.InputManager_KeyPressed;
+        guiLayer.Input.TextEntered += this.InputManager_TextEntered;
     }
 
     public override void OnRemovedFromStage(GuiLayer stage)
     {
-        base.OnRemovedFromStage(stage);
+        stage.Input.KeyPressed -= this.InputManager_KeyPressed;
+        stage.Input.TextEntered -= this.InputManager_TextEntered;
 
-        InputManager.Current.KeyPressed -= this.InputManager_KeyPressed;
-        InputManager.Current.TextEntered -= this.InputManager_TextEntered;
+        base.OnRemovedFromStage(stage);
     }
 }
 

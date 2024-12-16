@@ -264,18 +264,19 @@ public class Control : Visual
     public virtual void Update(float deltaTime)
     {
         if (this.Stage == null) return;
+        var input = this.Stage.Input;
 
         var bounds = this.GetBounds();
-        var mousePosition = InputManager.Current.MousePosition / this.Stage.Zoom;
+        var mousePosition = input.MousePosition / this.Stage.Zoom;
         this.IsMouseOver = bounds.Contains(mousePosition);
 
         if (this.IsMouseOver)
         {
-            this.CheckMouseButtonEvents(MouseButton.Left, mousePosition);
-            this.CheckMouseButtonEvents(MouseButton.Right, mousePosition);
-            this.CheckMouseButtonEvents(MouseButton.Middle, mousePosition);
+            this.CheckMouseButtonEvents(input, MouseButton.Left, mousePosition);
+            this.CheckMouseButtonEvents(input, MouseButton.Right, mousePosition);
+            this.CheckMouseButtonEvents(input, MouseButton.Middle, mousePosition);
 
-            float delta = InputManager.Current.MouseWheelDelta;
+            float delta = input.MouseWheelDelta;
 
             if (delta != 0)
             {
@@ -284,13 +285,13 @@ public class Control : Visual
         }
     }
 
-    private void CheckMouseButtonEvents(MouseButton button, Vector2 mousePosition)
+    private void CheckMouseButtonEvents(InputManager input, MouseButton button, Vector2 mousePosition)
     {
-        if (InputManager.Current.GetMouseButtonDown(button))
+        if (input.GetMouseButtonDown(button))
         {
             this.OnMouseDown(button, mousePosition);
         }
-        else if (InputManager.Current.GetMouseButtonUp(button))
+        else if (input.GetMouseButtonUp(button))
         {
             this.OnMouseUp(button, mousePosition);
         }
