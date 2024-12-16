@@ -57,7 +57,12 @@ public class Renderer : IDisposable
     /// <summary>
     /// Gets the main Viewport.
     /// </summary>
-    public Viewport Viewport { get; }
+    public Viewport MainViewport { get; }
+
+    /// <summary>
+    /// Gets the GUI Viewport.
+    /// </summary>
+    public Viewport GuiViewport { get; }
 
     /// <summary>
     /// Gets the current Veldrid's GraphicsDevice.
@@ -125,7 +130,9 @@ public class Renderer : IDisposable
 
         var framebuffer = swapchain.Framebuffer;
 
-        this.Viewport = new Viewport(new Vector2(framebuffer.Width, framebuffer.Height));
+        this.MainViewport = new Viewport(new Vector2(framebuffer.Width, framebuffer.Height));
+        this.GuiViewport = new Viewport(new Vector2(framebuffer.Width, framebuffer.Height));
+
         this.FullScreenRenderTexture = new SwapchainRenderTexture(gd, swapchain);
         this.MainRenderTexture = new RenderTexture(framebuffer.Width, framebuffer.Height);
         this.GuiRenderTexture = new RenderTexture(framebuffer.Width, framebuffer.Height);

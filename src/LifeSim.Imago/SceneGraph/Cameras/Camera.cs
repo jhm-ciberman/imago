@@ -22,7 +22,7 @@ public abstract class Camera
     /// <param name="viewport">The viewport.</param>
     public Camera(Viewport? viewport = null)
     {
-        this.Viewport = viewport ?? Renderer.Instance.Viewport;
+        this.Viewport = viewport ?? Renderer.Instance.MainViewport;
         this.FrustumCullingCamera = this;
     }
 
