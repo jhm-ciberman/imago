@@ -42,7 +42,11 @@ public class Stage
 
     private class EmptyScene : Scene { }
 
-    private static readonly Scene _emptyScene = new EmptyScene();
+    private static readonly Scene _emptyScene = new EmptyScene()
+    {
+        Name = "Empty Scene",
+        DisposeOnDetach = false,
+    };
 
     /// <summary>
     /// Gets the gizmos layer used to render gizmos.
@@ -91,13 +95,11 @@ public class Stage
     /// Changes the current scene.
     /// </summary>
     /// <param name="scene">The new scene.</param>
-    /// <param name="disposeOld">if set to <c>true</c> the old scene will be disposed.</param>
-    public void ChangeScene(Scene? scene, bool disposeOld = true)
+    public void ChangeScene(Scene? scene)
     {
+        if (this.Scene == scene) return;
         var old = this.Scene;
         old.DetachFromStage();
-
-        if (disposeOld && old != _emptyScene) old.Dispose();
 
         this.Scene = scene ?? _emptyScene;
         this.Scene.AttachToStage(this);

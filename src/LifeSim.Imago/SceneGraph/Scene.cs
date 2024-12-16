@@ -26,6 +26,11 @@ public class Scene : Node3D
     /// </summary>
     public SceneEnvironment Environment { get; set; } = new SceneEnvironment();
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the scene should be disposed when it is unloaded.
+    /// </summary>
+    public bool DisposeOnDetach { get; set; } = true;
+
     public Scene()
     {
         //
@@ -109,4 +114,14 @@ public class Scene : Node3D
     /// Gets the 2D layers of the scene.
     /// </summary>
     public IReadOnlyList<ILayer2D> Layers2D => this._layers2D;
+
+    public override void DetachFromStage()
+    {
+        base.DetachFromStage();
+
+        if (this.DisposeOnDetach)
+        {
+            this.Dispose();
+        }
+    }
 }
