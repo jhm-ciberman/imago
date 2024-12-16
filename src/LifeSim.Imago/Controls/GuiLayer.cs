@@ -20,15 +20,6 @@ public class GuiLayer : ILayer2D
     /// </summary>
     public float Zoom { get; set; } = 1f;
 
-    public Matrix4x4 ViewProjectionMatrix
-    {
-        get
-        {
-            Vector2 size = this.Viewport.Size / this.Zoom;
-            return Matrix4x4.CreateOrthographicOffCenter(0, size.X, size.Y, 0, -10f, 100f);
-        }
-    }
-
     /// <summary>
     /// Gets or sets a value indicating whether each control should be snapped to pixels.
     /// </summary>
@@ -76,17 +67,17 @@ public class GuiLayer : ILayer2D
         if (this._content is null) return;
 
         this._measureArrangeStopwatch.Restart();
-        if (!this._content.IsArrangeValid || !this._content.IsMeasureValid)
-        {
+        Vector2 size = this.Viewport.Size / this.Zoom;
 
-            Vector2 size = this.Viewport.Size / this.Zoom;
-            this._content.Measure(size);
-            this._content.Arrange(new Rect(0, 0, size.X, size.Y));
-        }
+        this._content.Measure(size);
+        this._content.Arrange(new Rect(Vector2.Zero, size));
 
         this.MeasureArrangeTime = this._measureArrangeStopwatch.Elapsed;
 
-        ctx.SetViewProjectionMatrix(this.ViewProjectionMatrix);
+        var position = this.Viewport.Position;
+        var viewProjectionMatrix = Matrix4x4.CreateOrthographicOffCenter(position.X, size.X, size.Y, position.Y, -10f, 100f);
+
+        ctx.SetViewProjectionMatrix(viewProjectionMatrix);
         this._content.Draw(ctx);
     }
 
