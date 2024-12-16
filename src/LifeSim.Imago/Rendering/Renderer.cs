@@ -394,7 +394,6 @@ public class Renderer : IDisposable
 
             foreach (var disposable in this._disposables.ToArray())
             {
-                Console.WriteLine("Disposing " + disposable.GetType().Name);
                 disposable.Dispose();
             }
 
