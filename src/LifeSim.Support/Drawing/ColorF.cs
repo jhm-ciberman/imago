@@ -1,3 +1,4 @@
+using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
@@ -62,5 +63,35 @@ public readonly struct ColorF
             startColor.G + (endColor.G - startColor.G) * t,
             startColor.B + (endColor.B - startColor.B) * t,
             startColor.A + (endColor.A - startColor.A) * t);
+    }
+
+    public static bool Equals(ColorF left, ColorF right)
+    {
+        return left.R == right.R && left.G == right.G && left.B == right.B && left.A == right.A;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return obj is ColorF color && Equals(this, color);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(this.R, this.G, this.B, this.A);
+    }
+
+    public override string ToString()
+    {
+        return $"R: {this.R}, G: {this.G}, B: {this.B}, A: {this.A}";
+    }
+
+    public static bool operator ==(ColorF left, ColorF right)
+    {
+        return Equals(left, right);
+    }
+
+    public static bool operator !=(ColorF left, ColorF right)
+    {
+        return !Equals(left, right);
     }
 }
