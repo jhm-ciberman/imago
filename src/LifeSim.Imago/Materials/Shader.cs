@@ -123,7 +123,7 @@ public class Shader : IDisposable
     {
         [RenderFlags.DoubleSided] = "ENABLE_DOUBLE_SIDED",
         [RenderFlags.Wireframe] = "ENABLE_WIREFRAME",
-        [RenderFlags.Transparent] = "ENABLE_ALPHA_BLENDING",
+        [RenderFlags.Transparent] = "ENABLE_TRANSPARENT",
         [RenderFlags.AlphaTest] = "ENABLE_ALPHA_TEST",
         [RenderFlags.DepthTest] = "ENABLE_DEPTH_TEST",
         [RenderFlags.DepthWrite] = "ENABLE_DEPTH_WRITE",
