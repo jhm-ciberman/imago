@@ -85,6 +85,16 @@ public readonly struct ColorF
         return $"R: {this.R}, G: {this.G}, B: {this.B}, A: {this.A}";
     }
 
+    /// <summary>
+    /// Returns a new color with the specified alpha value.
+    /// </summary>
+    /// <param name="alpha">The alpha value.</param>
+    /// <returns>The new color.</returns>
+    public ColorF WithAlpha(float alpha)
+    {
+        return new ColorF(this.R, this.G, this.B, alpha);
+    }
+
     public static bool operator ==(ColorF left, ColorF right)
     {
         return Equals(left, right);

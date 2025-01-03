@@ -369,19 +369,6 @@ internal class Renderable : IDisposable
         set => this.SetInstanceData(ref this._instanceData.HighlightColor, value);
     }
 
-    /// <summary>
-    /// Gets or sets the opacity.
-    /// </summary>
-    public float Opacity
-    {
-        get => this._instanceData.AlbedoColor.W;
-        set
-        {
-            if (this.SetInstanceData(ref this._instanceData.AlbedoColor.W, value))
-                this.Transparent = value < 1.0f;
-        }
-    }
-
     protected bool SetInstanceData<T>(ref T backingField, T value) where T : unmanaged
     {
         if (this.IsDisposed) return false;
@@ -403,7 +390,7 @@ internal class Renderable : IDisposable
             this._pipelineDirty = false;
             this.RecomputeSortKey();
             this.RecomputeRenderQueue();
-            this.RecomputePipeline(stage);
+            this.RecomputePipeline();
         }
     }
 
@@ -430,6 +417,7 @@ internal class Renderable : IDisposable
         this.BatchingHash = HashCode.Combine(
             this.Mesh.Id,
             this.Material.Id,
+            this.Transparent,
             instanceBufferHash,
             skekeletonBufferHash,
             transformBufferHash
@@ -450,6 +438,7 @@ internal class Renderable : IDisposable
         return this.BatchingHash == other.BatchingHash
             && this.Mesh == other.Mesh
             && this.Material == other.Material
+            && this.Transparent == other.Transparent
             && this.SkeletonResourceSet == other.SkeletonResourceSet
             && this.InstanceResourceSet == other.InstanceResourceSet
             && this.TransformResourceSet == other.TransformResourceSet;
@@ -506,19 +495,27 @@ internal class Renderable : IDisposable
         if (this.Visible)
         {
             if (this.ShadowCastingMode != ShadowCasting.OnlyShadows)
-                flags |= this.Material.Transparent || this._transparent ? RenderQueues.Transparent : RenderQueues.Opaque;
+            {
+                flags |= this.Material.Transparent || this.Transparent
+                    ? RenderQueues.Transparent
+                    : RenderQueues.Opaque;
+            }
 
             if (this.ShadowCastingMode != ShadowCasting.NoShadows)
+            {
                 flags |= RenderQueues.ShadowCaster;
+            }
         }
 
         if (this.PickingId != 0)
+        {
             flags |= RenderQueues.Picking;
+        }
 
         this.RenderQueues = flags;
     }
 
-    private void RecomputePipeline(Stage stage)
+    private void RecomputePipeline()
     {
         if (this._material == null || this._mesh == null || this.RenderQueues == RenderQueues.None)
         {
@@ -528,17 +525,18 @@ internal class Renderable : IDisposable
             return;
         }
 
-        this.ForwardPipeline = this.GetForwardPipeline(this._material, stage);
+        this.ForwardPipeline = this.GetForwardPipeline(this._material);
         this.ShadowMapPipeline = this.GetShadowmapPipeline(this._material);
         this.PickingPipeline = this.GetPickingPipeline(this._material);
     }
 
-    private Veldrid.Pipeline? GetForwardPipeline(Material material, Stage stage)
+    private Veldrid.Pipeline? GetForwardPipeline(Material material)
     {
         bool isVisible = (this.RenderQueues & RenderQueues.OpaqueOrTransparent) != 0;
         if (!isVisible) return null;
 
-        RenderFlags flags = RenderFlags.None;
+        RenderFlags flags = material.RenderFlags;
+        var stage = this.Stage!;
         if (stage.ForceWireframe) flags |= RenderFlags.Wireframe;
         if (this.RenderQueues.HasFlag(RenderQueues.Transparent)) flags |= RenderFlags.Transparent;
         if (stage.EnableFog) flags |= RenderFlags.Fog;
@@ -546,7 +544,7 @@ internal class Renderable : IDisposable
         if (stage.LightingHalfLambert) flags |= RenderFlags.HalfLambert;
         if (stage.CascadesCount > 1) flags |= RenderFlags.ShadowCascades;
 
-        return material.ForwardShader.GetPipeline(this._mesh!.VertexFormat, material.RenderFlags | flags, this.Stage!.MultiSampleCount);
+        return material.ForwardShader.GetPipeline(this._mesh!.VertexFormat, flags, this.Stage!.MultiSampleCount);
     }
 
     private Veldrid.Pipeline? GetShadowmapPipeline(Material material)

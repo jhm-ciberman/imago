@@ -106,7 +106,12 @@ public class RenderNode3D : Node3D, IPickable
     public ColorF AlbedoColor
     {
         get => this._renderable.AlbedoColor;
-        set => this._renderable.AlbedoColor = value;
+        set
+        {
+            if (this.AlbedoColor == value) return;
+            this._renderable.AlbedoColor = value;
+            this._renderable.Transparent = value.A < 1f;
+        }
     }
 
     /// <summary>
@@ -132,8 +137,8 @@ public class RenderNode3D : Node3D, IPickable
     /// </summary>
     public float Opacity
     {
-        get => this._renderable.Opacity;
-        set => this._renderable.Opacity = value;
+        get => this.AlbedoColor.A;
+        set => this.AlbedoColor = this.AlbedoColor.WithAlpha(value);
     }
 
     /// <summary>

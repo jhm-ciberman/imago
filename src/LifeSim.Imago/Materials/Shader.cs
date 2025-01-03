@@ -31,7 +31,7 @@ public class Shader : IDisposable
 
     private readonly IPipelineProvider _pass;
 
-    private readonly RenderFlags _supportedRenderFlags = RenderFlags.None;
+    private readonly RenderFlags _usedRenderFlags = RenderFlags.None;
 
     private readonly string _vertexCode;
 
@@ -47,14 +47,13 @@ public class Shader : IDisposable
     /// <param name="vertexCode">The source vertex shader code.</param>
     /// <param name="fragmentCode">The source fragment shader code.</param>
     /// <param name="textures">The names of the textures used by this shader.</param>
-    /// <param name="suportedRenderFlags">The <see cref="RenderFlags"/> supported by this shader.</param>
-    internal Shader(Renderer renderer, IPipelineProvider pass, string vertexCode, string fragmentCode, string[]? textures = null, RenderFlags suportedRenderFlags = RenderFlags.None)
+    internal Shader(Renderer renderer, IPipelineProvider pass, string vertexCode, string fragmentCode, string[]? textures = null)
     {
         this._renderer = renderer;
         this._pass = pass;
         this._vertexCode = vertexCode;
         this._fragmentCode = fragmentCode;
-        this._supportedRenderFlags = suportedRenderFlags;
+        this._usedRenderFlags = InferUsedRenderFlags(vertexCode) | InferUsedRenderFlags(fragmentCode);
 
         this._gd = this._renderer.GraphicsDevice;
 
@@ -103,7 +102,7 @@ public class Shader : IDisposable
 
     private ShaderVariant GetShaderVariant(VertexFormat vertexFormat, RenderFlags flags)
     {
-        flags &= this._supportedRenderFlags;
+        flags &= this._usedRenderFlags;
 
         for (int i = 0; i < this._variants.Count; i++)
         {
@@ -142,6 +141,18 @@ public class Shader : IDisposable
             if (flags.HasFlag(flag.Key))
                 macros.Add(new Veldrid.SPIRV.MacroDefinition(flag.Value, "1"));
         }
+    }
+
+    private static RenderFlags InferUsedRenderFlags(string code)
+    {
+        var flags = RenderFlags.None;
+        foreach (var flag in _renderFlagMacros)
+        {
+            if (code.Contains(flag.Value))
+                flags |= flag.Key;
+        }
+
+        return flags;
     }
 
     /// <summary>

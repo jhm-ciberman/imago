@@ -58,10 +58,9 @@ internal class MousePickingPass : IDisposable, IPipelineProvider
 
         this._renderBatcher = new RenderBatcher(this._gd, RenderBatchPassType.Picking);
 
-        RenderFlags supportedForwardFlags = RenderFlags.AlphaTest | RenderFlags.ReceiveShadows | RenderFlags.Fog | RenderFlags.PixelPerfactShadows | RenderFlags.ColorWrite;
         var baseVertex = ShaderLoader.Load("picking.vert.glsl");
         var baseFragment = ShaderLoader.Load("picking.frag.glsl");
-        this.DefaultShader = new Shader(renderer, this, baseVertex, baseFragment, ["Surface"], supportedForwardFlags);
+        this.DefaultShader = new Shader(renderer, this, baseVertex, baseFragment, ["Surface"]);
 
         // This is a 1x1 texture that will be used to read the pixel color from the mouse picking pass.
         this._pixelTexture = factory.CreateTexture(new TextureDescription(

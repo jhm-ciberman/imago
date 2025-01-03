@@ -72,10 +72,9 @@ internal class ShadowPass : IDisposable, IPipelineProvider
         }
 
 
-        RenderFlags supportedShadowMapFlags = RenderFlags.AlphaTest;
         var shadowmapVertex = ShaderLoader.Load("shadowmap.vert.glsl");
         var shadowmapFragment = ShaderLoader.Load("shadowmap.frag.glsl");
-        this.DefaultShader = new Shader(renderer, this, shadowmapVertex, shadowmapFragment, new[] { "Surface" }, supportedShadowMapFlags);
+        this.DefaultShader = new Shader(renderer, this, shadowmapVertex, shadowmapFragment, new[] { "Surface" });
     }
 
     /// <summary>
