@@ -400,6 +400,8 @@ public class Renderer : IDisposable
     /// </summary>
     public void Dispose()
     {
+        if (Instance == null) return;
+
         Console.WriteLine("Disposing renderer.");
         try
         {
