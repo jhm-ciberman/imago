@@ -137,6 +137,66 @@ public struct RectInt : IEquatable<RectInt>
     }
 
     /// <summary>
+    /// Deflates the rectangle by the specified padding.
+    /// </summary>
+    /// <param name="padding">The padding to deflate the rectangle by.</param>
+    /// <returns>The deflated rectangle.</returns>
+    public RectInt Deflate(int padding)
+    {
+        return this.Deflate(new Vector2Int(padding, padding));
+    }
+
+    /// <summary>
+    /// Deflates the rectangle by the specified padding.
+    /// </summary>
+    /// <param name="padding">The padding to deflate the rectangle by.</param>
+    /// <returns>The deflated rectangle.</returns>
+    public RectInt Deflate(Vector2Int padding)
+    {
+        return new RectInt(this.Position + padding, this.Size - padding * 2);
+    }
+
+    /// <summary>
+    /// Deflates the rectangle by the specified padding.
+    /// </summary>
+    /// <param name="padding">The padding to deflate the rectangle by.</param>
+    /// <returns>The deflated rectangle.</returns>
+    public RectInt Deflate(ThicknessInt padding)
+    {
+        return new RectInt(this.Position + padding.TopLeft, this.Size - padding.Total);
+    }
+
+    /// <summary>
+    /// Inflates the rectangle by the specified padding.
+    /// </summary>
+    /// <param name="padding">The padding to inflate the rectangle by.</param>
+    /// <returns>The inflated rectangle.</returns>
+    public RectInt Inflate(int padding)
+    {
+        return this.Inflate(new Vector2Int(padding, padding));
+    }
+
+    /// <summary>
+    /// Inflates the rectangle by the specified padding.
+    /// </summary>
+    /// <param name="padding">The padding to inflate the rectangle by.</param>
+    /// <returns>The inflated rectangle.</returns>
+    public RectInt Inflate(Vector2Int padding)
+    {
+        return new RectInt(this.Position - padding, this.Size + padding * 2);
+    }
+
+    /// <summary>
+    /// Inflates the rectangle by the specified padding.
+    /// </summary>
+    /// <param name="padding">The padding to inflate the rectangle by.</param>
+    /// <returns>The inflated rectangle.</returns>
+    public RectInt Inflate(ThicknessInt padding)
+    {
+        return new RectInt(this.Position - padding.TopLeft, this.Size + padding.Total);
+    }
+
+    /// <summary>
     /// Checks if the given rectangle overlaps with this rectangle.
     /// </summary>
     /// <param name="other">The rectangle to test.</param>
