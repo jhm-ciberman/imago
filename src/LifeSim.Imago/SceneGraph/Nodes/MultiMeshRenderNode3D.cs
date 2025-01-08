@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using LifeSim.Support.Drawing;
 
 namespace LifeSim.Imago.SceneGraph.Nodes;
 
@@ -94,6 +95,44 @@ public class MultiMeshRenderNode3D : Node3D
         }
     }
 
+    private ColorF _albedoColor = ColorF.White;
+
+    /// <summary>
+    /// Gets or sets the albedo color of the meshes.
+    /// </summary>
+    public ColorF AlbedoColor
+    {
+        get => this._albedoColor;
+        set
+        {
+            if (this._albedoColor == value) return;
+            this._albedoColor = value;
+            foreach (var node in this._renderNodes)
+            {
+                node.AlbedoColor = value;
+            }
+        }
+    }
+
+    private ColorF _highlightColor = new ColorF(1.0f, 1.0f, 1.0f, 0.0f);
+
+    /// <summary>
+    /// Gets or sets the highlight color of the meshes.
+    /// </summary>
+    public ColorF HighlightColor
+    {
+        get => this._highlightColor;
+        set
+        {
+            if (this._highlightColor == value) return;
+            this._highlightColor = value;
+            foreach (var node in this._renderNodes)
+            {
+                node.HighlightColor = value;
+            }
+        }
+    }
+
     private void SetMeshes(MeshRenderInfo[] meshes)
     {
         this._meshes = meshes;
@@ -105,6 +144,8 @@ public class MultiMeshRenderNode3D : Node3D
             this._renderNodes[i].Mesh = meshes[i].Mesh;
             this._renderNodes[i].Material = meshes[i].Material;
             this._renderNodes[i].TextureST = meshes[i].TextureST;
+            this._renderNodes[i].AlbedoColor = this.AlbedoColor;
+            this._renderNodes[i].HighlightColor = this.HighlightColor;
         }
     }
 
