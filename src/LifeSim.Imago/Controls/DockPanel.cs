@@ -116,11 +116,9 @@ public class DockPanel : ItemsControl
                     availableRect.Height -= childDesiredSize.Y;
                     break;
                 case Dock.Right:
-                    availableRect.X += childDesiredSize.X;
                     availableRect.Width -= childDesiredSize.X;
                     break;
                 case Dock.Bottom:
-                    availableRect.Y += childDesiredSize.Y;
                     availableRect.Height -= childDesiredSize.Y;
                     break;
                 default:
