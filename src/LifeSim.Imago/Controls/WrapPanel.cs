@@ -84,7 +84,6 @@ public class WrapPanel : ItemsControl
 
     protected override Rect ArrangeOverride(Rect finalRect)
     {
-        Console.WriteLine($"Final rect: {finalRect}");
         Rect originalRect = finalRect;
         finalRect = finalRect.Deflate(this.Padding);
         Vector2 availableSize = finalRect.Size;
