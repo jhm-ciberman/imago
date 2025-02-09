@@ -45,42 +45,40 @@ public class DockPanel : ItemsControl
             var child = this.Items[i];
             bool isLast = i == this.Items.Count - 1;
 
-            Vector2 childDesiredSize = Vector2.Min(child.DesiredSize, availableRect.Size);
-
-            if (isLast)
+            if (isLast && this.LastChildFill)
             {
-                if (!this.LastChildFill)
-                {
-                    availableRect.Size = childDesiredSize;
-                }
-
                 child.Arrange(availableRect);
+                continue;
             }
-            else
+
+            Vector2 childDesiredSize = Vector2.Min(child.DesiredSize, availableRect.Size);
+            Rect rect;
+            switch (child.Dock)
             {
-                switch (child.Dock)
-                {
-                    case Dock.Left:
-                        child.Arrange(new Rect(availableRect.X, availableRect.Y, childDesiredSize.X, availableRect.Height));
-                        availableRect.X += childDesiredSize.X;
-                        availableRect.Width -= childDesiredSize.X;
-                        break;
-                    case Dock.Top:
-                        child.Arrange(new Rect(availableRect.X, availableRect.Y, availableRect.Width, childDesiredSize.Y));
-                        availableRect.Y += childDesiredSize.Y;
-                        availableRect.Height -= childDesiredSize.Y;
-                        break;
-                    case Dock.Right:
-                        child.Arrange(new Rect(availableRect.Right - childDesiredSize.X, availableRect.Y, childDesiredSize.X, availableRect.Height));
-                        availableRect.Width -= childDesiredSize.X;
-                        break;
-                    case Dock.Bottom:
-                        child.Arrange(new Rect(availableRect.X, availableRect.Bottom - childDesiredSize.Y, availableRect.Width, childDesiredSize.Y));
-                        availableRect.Height -= childDesiredSize.Y;
-                        break;
-                    default:
-                        throw new NotSupportedException();
-                }
+                case Dock.Left:
+                    rect = new Rect(availableRect.X, availableRect.Y, childDesiredSize.X, availableRect.Height);
+                    child.Arrange(rect);
+                    availableRect.X += childDesiredSize.X;
+                    availableRect.Width -= childDesiredSize.X;
+                    break;
+                case Dock.Top:
+                    rect = new Rect(availableRect.X, availableRect.Y, availableRect.Width, childDesiredSize.Y);
+                    child.Arrange(rect);
+                    availableRect.Y += childDesiredSize.Y;
+                    availableRect.Height -= childDesiredSize.Y;
+                    break;
+                case Dock.Right:
+                    rect = new Rect(availableRect.Right - childDesiredSize.X, availableRect.Y, childDesiredSize.X, availableRect.Height);
+                    child.Arrange(rect);
+                    availableRect.Width -= childDesiredSize.X;
+                    break;
+                case Dock.Bottom:
+                    rect = new Rect(availableRect.X, availableRect.Bottom - childDesiredSize.Y, availableRect.Width, childDesiredSize.Y);
+                    child.Arrange(rect);
+                    availableRect.Height -= childDesiredSize.Y;
+                    break;
+                default:
+                    throw new NotSupportedException();
             }
 
         }
@@ -103,25 +101,30 @@ public class DockPanel : ItemsControl
 
             child.Measure(availableRect.Size);
             Vector2 childDesiredSize = child.DesiredSize;
-            desiredSize = Vector2.Max(desiredSize, childDesiredSize + availableRect.Position);
 
             switch (child.Dock)
             {
                 case Dock.Left:
                     availableRect.X += childDesiredSize.X;
                     availableRect.Width -= childDesiredSize.X;
+                    desiredSize.X += childDesiredSize.X;
+                    desiredSize.Y = Math.Max(desiredSize.Y, childDesiredSize.Y);
                     break;
                 case Dock.Top:
                     availableRect.Y += childDesiredSize.Y;
                     availableRect.Height -= childDesiredSize.Y;
+                    desiredSize.Y += childDesiredSize.Y;
+                    desiredSize.X = Math.Max(desiredSize.X, childDesiredSize.X);
                     break;
                 case Dock.Right:
-                    availableRect.X += childDesiredSize.X;
                     availableRect.Width -= childDesiredSize.X;
+                    desiredSize.X += childDesiredSize.X;
+                    desiredSize.Y = Math.Max(desiredSize.Y, childDesiredSize.Y);
                     break;
                 case Dock.Bottom:
-                    availableRect.Y += childDesiredSize.Y;
                     availableRect.Height -= childDesiredSize.Y;
+                    desiredSize.Y += childDesiredSize.Y;
+                    desiredSize.X = Math.Max(desiredSize.X, childDesiredSize.X);
                     break;
                 default:
                     throw new NotSupportedException();
