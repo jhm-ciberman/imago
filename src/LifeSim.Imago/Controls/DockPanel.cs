@@ -45,44 +45,41 @@ public class DockPanel : ItemsControl
             var child = this.Items[i];
             bool isLast = i == this.Items.Count - 1;
 
-            Vector2 childDesiredSize = Vector2.Min(child.DesiredSize, availableRect.Size);
-
-            if (isLast)
+            if (isLast && this.LastChildFill)
             {
-                if (!this.LastChildFill)
-                {
-                    availableRect.Size = childDesiredSize;
-                }
-
                 child.Arrange(availableRect);
-            }
-            else
-            {
-                switch (child.Dock)
-                {
-                    case Dock.Left:
-                        child.Arrange(new Rect(availableRect.X, availableRect.Y, childDesiredSize.X, availableRect.Height));
-                        availableRect.X += childDesiredSize.X;
-                        availableRect.Width -= childDesiredSize.X;
-                        break;
-                    case Dock.Top:
-                        child.Arrange(new Rect(availableRect.X, availableRect.Y, availableRect.Width, childDesiredSize.Y));
-                        availableRect.Y += childDesiredSize.Y;
-                        availableRect.Height -= childDesiredSize.Y;
-                        break;
-                    case Dock.Right:
-                        child.Arrange(new Rect(availableRect.Right - childDesiredSize.X, availableRect.Y, childDesiredSize.X, availableRect.Height));
-                        availableRect.Width -= childDesiredSize.X;
-                        break;
-                    case Dock.Bottom:
-                        child.Arrange(new Rect(availableRect.X, availableRect.Bottom - childDesiredSize.Y, availableRect.Width, childDesiredSize.Y));
-                        availableRect.Height -= childDesiredSize.Y;
-                        break;
-                    default:
-                        throw new NotSupportedException();
-                }
+                continue;
             }
 
+            Vector2 childDesiredSize = Vector2.Min(child.DesiredSize, availableRect.Size);
+            Rect rect;
+            switch (child.Dock)
+            {
+                case Dock.Left:
+                    rect = new Rect(availableRect.X, availableRect.Y, childDesiredSize.X, availableRect.Height);
+                    child.Arrange(rect);
+                    availableRect.X += childDesiredSize.X;
+                    availableRect.Width -= childDesiredSize.X;
+                    break;
+                case Dock.Top:
+                    rect = new Rect(availableRect.X, availableRect.Y, availableRect.Width, childDesiredSize.Y);
+                    child.Arrange(rect);
+                    availableRect.Y += childDesiredSize.Y;
+                    availableRect.Height -= childDesiredSize.Y;
+                    break;
+                case Dock.Right:
+                    rect = new Rect(availableRect.Right - childDesiredSize.X, availableRect.Y, childDesiredSize.X, availableRect.Height);
+                    child.Arrange(rect);
+                    availableRect.Width -= childDesiredSize.X;
+                    break;
+                case Dock.Bottom:
+                    rect = new Rect(availableRect.X, availableRect.Bottom - childDesiredSize.Y, availableRect.Width, childDesiredSize.Y);
+                    child.Arrange(rect);
+                    availableRect.Height -= childDesiredSize.Y;
+                    break;
+                default:
+                    throw new NotSupportedException();
+            }
         }
 
         return finalRect;
