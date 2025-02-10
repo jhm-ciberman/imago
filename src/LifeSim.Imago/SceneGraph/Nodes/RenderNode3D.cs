@@ -41,6 +41,15 @@ public class RenderNode3D : Node3D, IPickable
     }
 
     /// <summary>
+    /// Gets or sets the culling distance.
+    /// </summary>
+    public float CullingDistance
+    {
+        get => this._renderable.CullingDistance;
+        set => this._renderable.CullingDistance = value;
+    }
+
+    /// <summary>
     /// Gets or sets the material to use.
     /// </summary>
     public Material? Material

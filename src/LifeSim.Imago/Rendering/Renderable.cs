@@ -76,6 +76,22 @@ internal class Renderable : IDisposable
     /// </summary>
     public BoundingBox BoundingBox { get; private set; }
 
+    private float _cullingDistance = 0.0f;
+
+    /// <summary>
+    /// Gets or sets the culling distance of this renderable.
+    /// </summary>
+    public float CullingDistance
+    {
+        get => this._cullingDistance;
+        set
+        {
+            if (this._cullingDistance == value) return;
+            this._cullingDistance = value;
+            this.RecomputeBoundingBox();
+        }
+    }
+
     private DataBlock _transformDataBlock;
     private DataBlock _instanceDataBlock;
 
@@ -459,11 +475,13 @@ internal class Renderable : IDisposable
 
     private void RecomputeBoundingBox()
     {
-        if (this.Mesh != null)
-        {
-            this.BoundingBox = BoundingBox.Transform(this.Mesh.BoundingBox, this.Transform);
-            this.CenterPosition = this.BoundingBox.GetCenter();
-        }
+        if (this.Mesh == null) return;
+
+        var bb = BoundingBox.Transform(this.Mesh.BoundingBox, this.Transform);
+
+        var p = new Vector3(this.CullingDistance);
+        this.BoundingBox = new BoundingBox(bb.Min - p, bb.Max + p);
+        this.CenterPosition = bb.GetCenter();
     }
 
     private void UpdateSkeletonTransform()
