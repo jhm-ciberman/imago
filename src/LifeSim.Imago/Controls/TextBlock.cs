@@ -332,7 +332,7 @@ public class TextBlock : Control
 
             lineLength++;
             sb.Clear();
-            sb.Append(this.Text.AsSpan(lineStart, lineLength));
+            sb.Append(this.Text.AsSpan(lineStart, Math.Min(lineLength, this.Text.Length - lineStart)));
             if (font.FontBase.MeasureString(sb).X > maxWidth)
             {
                 if (lastSpace != -1)
