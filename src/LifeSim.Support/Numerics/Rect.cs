@@ -237,6 +237,15 @@ public struct Rect : IEquatable<Rect>
         return $"{this.X}, {this.Y}, {this.Width}, {this.Height}";
     }
 
+    public static Rect Union(Rect rectA, Rect rectB)
+    {
+        var x = MathF.Min(rectA.X, rectB.X);
+        var y = MathF.Min(rectA.Y, rectB.Y);
+        var width = MathF.Max(rectA.Right, rectB.Right) - x;
+        var height = MathF.Max(rectA.Bottom, rectB.Bottom) - y;
+        return new Rect(x, y, width, height);
+    }
+
     public static bool operator ==(Rect left, Rect right)
     {
         return left.Equals(right);

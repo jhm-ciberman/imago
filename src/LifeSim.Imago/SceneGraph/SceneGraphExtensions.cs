@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 using LifeSim.Imago.Materials;
 using LifeSim.Imago.SceneGraph.Nodes;
 using LifeSim.Imago.TexturePacking;
 using LifeSim.Support.Collections;
+using LifeSim.Support.Numerics;
 using Veldrid.Utilities;
 
 namespace LifeSim.Imago.SceneGraph;
@@ -141,6 +143,28 @@ public static class SceneGraphExtensions
     }
 
     /// <summary>
+    /// Returns all children of the specified node that are of the specified type.
+    /// </summary>
+    /// <typeparam name="T">The type of node to find.</typeparam>
+    /// <param name="self">The node.</param>
+    /// <returns></returns>
+    public static IEnumerable<T> GetChildrenOfType<T>(this Node3D self)
+    {
+        if (self is T tNode)
+        {
+            yield return tNode;
+        }
+
+        foreach (var child in self.Children)
+        {
+            foreach (var grandChild in child.GetChildrenOfType<T>())
+            {
+                yield return grandChild;
+            }
+        }
+    }
+
+    /// <summary>
     /// Sets the specified material to all renderable nodes starting from the specified node.
     /// </summary>
     /// <param name="self">The node.</param>
@@ -274,7 +298,6 @@ public static class SceneGraphExtensions
     /// <returns>The bounding box of the node and all its children, or null if the node has no mesh.</returns>
     public static BoundingBox? GetBoundingBox(this Node3D self)
     {
-        BoundingBox bbox;
         BoundingBox? result = null;
         self.ForEachRecursive<RenderNode3D>((node) =>
         {
@@ -286,11 +309,72 @@ public static class SceneGraphExtensions
                 return;
             }
 
-            bbox = BoundingBox.Transform(node.Mesh.BoundingBox, node.WorldMatrix);
+            BoundingBox bbox = BoundingBox.Transform(node.Mesh.BoundingBox, node.WorldMatrix);
             result = BoundingBox.Combine(result.Value, bbox);
         });
 
         return result;
+    }
+
+    /// <summary>
+    /// Computes the tight bounding box of the node and all its children.
+    /// </summary>
+    /// <param name="self">The node.</param>
+    /// <param name="viewProjection">The view-projection matrix to use for the projection.</param>
+    /// <returns>The tight bounding box of the node and all its children, or null if the node has no mesh.</returns>
+    /// <remarks>
+    /// This method is slower than <see cref="GetBoundingBox(Node3D)"/> but it computes a tighter bounding box.
+    /// This is done by iterating over all vertices of all the meshes. So it is not recommended to use this method
+    /// for a large number of meshes.
+    /// </remarks>
+    public static Rect? GetTightProjectedRect(this Node3D self, ref Matrix4x4 viewProjection)
+    {
+        bool first = true;
+        Rect result = default;
+        var renderables = self.GetChildrenOfType<RenderNode3D>();
+
+        foreach (var renderable in renderables)
+        {
+            if (renderable.Mesh is null) continue;
+            var positions = renderable.Mesh.MeshData.Positions;
+
+            for (var i = 0; i < positions.Length; i++)
+            {
+                var matrix = renderable.WorldMatrix * viewProjection;
+                var projected = Vector3.Transform(positions[i], matrix);
+
+                if (first)
+                {
+                    result = new Rect(projected.X, projected.Y, 0, 0);
+                    first = false;
+                }
+                else
+                {
+                    result = Rect.Union(result, new Rect(projected.X, projected.Y, 0, 0));
+                }
+            }
+        }
+
+        return first ? null : result;
+    }
+
+    /// <summary>
+    /// Gets the projected rectangle of the bounding box of the node and all its children.
+    /// </summary>
+    /// <param name="self">The node.</param>
+    /// <param name="viewProjection">The view-projection matrix to use for the projection.</param>
+    /// <returns>The projected rectangle of the bounding box of the node and all its children, or null if the node has no mesh.</returns>
+    public static Rect? GetProjectedRect(this Node3D self, ref Matrix4x4 viewProjection)
+    {
+        var bbox = self.GetBoundingBox();
+        if (bbox is null) return null;
+
+        var projectedBB = BoundingBox.Transform(bbox.Value, viewProjection);
+
+        var center = projectedBB.GetCenter();
+        var size = projectedBB.GetDimensions();
+
+        return new Rect(center.X - size.X / 2, center.Y - size.Y / 2, size.X, size.Y);
     }
 
     /// <summary>
