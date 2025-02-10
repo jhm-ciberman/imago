@@ -12,7 +12,7 @@ public interface IDataTemplate
     /// </summary>
     /// <param name="item">The item to create a control for.</param>
     /// <returns>The created control.</returns>
-    Control CreateItem(object item);
+    public Control CreateItem(object item);
 }
 
 /// <summary>
