@@ -160,7 +160,7 @@ public abstract class ItemsControl : Control
     {
         if (this.Items.Count == 0) return;
 
-        foreach (var disposable in this.Items.Cast<IDisposable>())
+        foreach (var disposable in this.Items.OfType<IDisposable>())
         {
             disposable.Dispose();
         }
@@ -186,6 +186,12 @@ public abstract class ItemsControl : Control
         foreach (var item in items)
         {
             var control = this._itemControls![item];
+
+            if (control is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
+
             this.Items.Remove(control);
             this._itemControls.Remove(item);
         }
