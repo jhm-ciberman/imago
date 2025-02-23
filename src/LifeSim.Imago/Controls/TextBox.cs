@@ -1,8 +1,8 @@
 using System;
 using System.ComponentModel;
 using System.Numerics;
-using LifeSim.Imago.Rendering.Sprites;
 using LifeSim.Imago.Input;
+using LifeSim.Imago.Rendering.Sprites;
 using LifeSim.Support.Drawing;
 using LifeSim.Support.Numerics;
 using Veldrid;

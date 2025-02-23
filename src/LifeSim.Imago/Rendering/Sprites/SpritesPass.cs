@@ -1,7 +1,7 @@
 using System;
-using LifeSim.Imago.Textures;
 using LifeSim.Imago.Materials;
 using LifeSim.Imago.SceneGraph;
+using LifeSim.Imago.Textures;
 using Veldrid;
 using Shader = LifeSim.Imago.Materials.Shader;
 

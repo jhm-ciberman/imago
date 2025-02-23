@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using LifeSim.Imago.Rendering;
 using LifeSim.Imago.Meshes;
+using LifeSim.Imago.Rendering;
 using Veldrid;
 
 namespace LifeSim.Imago.Materials;

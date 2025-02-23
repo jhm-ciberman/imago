@@ -1,18 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using LifeSim.Imago.Rendering.Sprites;
-using LifeSim.Imago.Textures;
+using System.Numerics;
 using LifeSim.Imago.Materials;
 using LifeSim.Imago.Rendering.Buffers;
+using LifeSim.Imago.Rendering.Sprites;
 using LifeSim.Imago.SceneGraph;
+using LifeSim.Imago.Textures;
 using Veldrid;
 using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
 using Veldrid.Utilities;
 using Texture = LifeSim.Imago.Textures.Texture;
 using Viewport = LifeSim.Imago.SceneGraph.Viewport;
-using System.Numerics;
 
 namespace LifeSim.Imago.Rendering;
 

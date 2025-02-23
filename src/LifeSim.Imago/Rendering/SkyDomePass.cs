@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using LifeSim.Imago.Textures;
 using LifeSim.Imago.Materials;
 using LifeSim.Imago.SceneGraph;
 using LifeSim.Imago.SceneGraph.Cameras;
+using LifeSim.Imago.Textures;
 using Veldrid;
 
 namespace LifeSim.Imago.Rendering;

@@ -1,8 +1,8 @@
 using System;
 using System.Numerics;
-using LifeSim.Imago.Rendering;
 using LifeSim.Imago.Materials;
 using LifeSim.Imago.Meshes;
+using LifeSim.Imago.Rendering;
 using LifeSim.Support.Drawing;
 
 namespace LifeSim.Imago.SceneGraph.Nodes;

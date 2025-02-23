@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using LifeSim.Imago.Rendering;
-using LifeSim.Imago.Textures;
 using LifeSim.Imago.SceneGraph.Nodes;
+using LifeSim.Imago.Textures;
 
 namespace LifeSim.Imago.SceneGraph;
 

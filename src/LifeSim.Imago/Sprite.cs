@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using LifeSim.Imago.Textures;
 using LifeSim.Imago.TexturePacking;
+using LifeSim.Imago.Textures;
 using LifeSim.Support.Numerics;
 
 namespace LifeSim.Imago;
