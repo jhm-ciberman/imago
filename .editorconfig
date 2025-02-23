@@ -39,6 +39,7 @@ dotnet_diagnostic.IDE0044.severity = warning # Make field readonly
 dotnet_diagnostic.CA1859.severity = silent # Use concrete types when possible for improved performance
 dotnet_diagnostic.CS1591.severity = silent # Missing XML comment for publicly visible type or member
 dotnet_diagnostic.IDE0290.severity = silent # Use primary constructor
+dotnet_diagnostic.IDE0036.severity = warning # Order modifiers
 
 dotnet_style_require_accessibility_modifiers = always
 dotnet_style_object_initializer = false
