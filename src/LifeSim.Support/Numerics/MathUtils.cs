@@ -164,4 +164,34 @@ public static class MathUtils
     {
         return a + (b - a) * t;
     }
+
+    /// <summary>
+    /// Computes the octile distance between two points. This is the distance between two points if only moving
+    /// diagonally or orthogonally is allowed.
+    /// </summary>
+    /// <param name="a">The first point.</param>
+    /// <param name="b">The second point.</param>
+    /// <returns>The octile distance between the two points.</returns>
+    public static float OctileDistance(Vector2 a, Vector2 b)
+    {
+        Vector2 v = a - b;
+        float dx = Math.Abs(v.X);
+        float dy = Math.Abs(v.Y);
+        float diagonal = Math.Min(dx, dy);
+        float orthogonal = Math.Abs(dx - dy);
+        return orthogonal + diagonal * 1.4f;
+    }
+
+    /// <summary>
+    /// Computes the Manhattan distance between two points. This is the distance between two points if only moving
+    /// orthogonally is allowed.
+    /// </summary>
+    /// <param name="a">The first point.</param>
+    /// <param name="b">The second point.</param>
+    /// <returns>The Manhattan distance between the two points.</returns>
+    public static float ManhattanDistance(Vector2 a, Vector2 b)
+    {
+        Vector2 v = a - b;
+        return Math.Abs(v.X) + Math.Abs(v.Y);
+    }
 }
