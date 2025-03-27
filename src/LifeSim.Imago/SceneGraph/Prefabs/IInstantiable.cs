@@ -11,5 +11,5 @@ public interface IInstantiable
     /// Instantiates the resource.
     /// </summary>
     /// <returns>The root node of the scene.</returns>
-    Node3D Instantiate();
+    public Node3D Instantiate();
 }

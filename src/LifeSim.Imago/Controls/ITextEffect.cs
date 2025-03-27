@@ -16,5 +16,5 @@ public interface ITextEffect
     /// <param name="position">The position of the text.</param>
     /// <param name="color">The color of the text.</param>
     /// <exception cref="InvalidOperationException">The font is not initialized.</exception>
-    void Draw(DrawingContext ctx, string text, Font font, Vector2 position, Color color);
+    public void Draw(DrawingContext ctx, string text, Font font, Vector2 position, Color color);
 }

@@ -4,6 +4,6 @@ namespace LifeSim.Imago.SceneGraph;
 
 public interface ILayer2D
 {
-    void Draw(DrawingContext ctx);
-    void Update(float deltaTime);
+    public void Draw(DrawingContext ctx);
+    public void Update(float deltaTime);
 }

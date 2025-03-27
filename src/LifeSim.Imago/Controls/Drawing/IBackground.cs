@@ -8,5 +8,5 @@ namespace LifeSim.Imago.Controls.Drawing;
 /// </summary>
 public interface IBackground
 {
-    void DrawRectangle(DrawingContext ctx, Vector2 position, Vector2 size);
+    public void DrawRectangle(DrawingContext ctx, Vector2 position, Vector2 size);
 }

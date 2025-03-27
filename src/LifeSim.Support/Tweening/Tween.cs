@@ -7,27 +7,27 @@ public delegate T InterpolationFunction<T>(T start, T end, float t);
 
 public interface ITween
 {
-    float Duration { get; }
+    public float Duration { get; }
 
-    float Delay { get; }
+    public float Delay { get; }
 
-    float CurrentTime { get; }
+    public float CurrentTime { get; }
 
-    bool IsFinished { get; }
+    public bool IsFinished { get; }
 
-    float Progress { get; }
+    public float Progress { get; }
 
-    bool Update(float deltaTime);
+    public bool Update(float deltaTime);
 
-    ITween AddDelay(float delay);
+    public ITween AddDelay(float delay);
 
-    ITween WithEasing(EasingFunction easing);
+    public ITween WithEasing(EasingFunction easing);
 
-    ITween WithFps(float fps);
+    public ITween WithFps(float fps);
 
-    ITween WithFrameTime(float frameTime);
+    public ITween WithFrameTime(float frameTime);
 
-    ITween WithFrameCount(int frameCount);
+    public ITween WithFrameCount(int frameCount);
 }
 
 public class Tween<T> : ITween where T : struct

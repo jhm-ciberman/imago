@@ -8,5 +8,5 @@ public interface IPickable
     /// <summary>
     /// Gets the ID of the pickable object.
     /// </summary>
-    uint PickId { get; set; }
+    public uint PickId { get; set; }
 }

@@ -4,7 +4,7 @@ namespace LifeSim.Imago.Animations;
 
 public interface IChannel
 {
-    string TargetName { get; }
-    float Duration { get; }
-    void Update(Node3D target, float time);
+    public string TargetName { get; }
+    public float Duration { get; }
+    public void Update(Node3D target, float time);
 }

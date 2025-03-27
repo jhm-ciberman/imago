@@ -9,9 +9,9 @@ namespace LifeSim.Imago.SceneGraph;
 
 public interface IPickableTarget
 {
-    void MouseEnter(HitInfo hitInfo);
-    void MouseMove(HitInfo hitInfo);
-    void MouseLeave();
+    public void MouseEnter(HitInfo hitInfo);
+    public void MouseMove(HitInfo hitInfo);
+    public void MouseLeave();
 }
 
 /// <summary>
