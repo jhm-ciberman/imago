@@ -12,16 +12,10 @@ namespace LifeSim.Imago.Input;
 /// </summary>
 public class InputManager : IDisposable
 {
-    private static InputManager _instance = null!;
-
     /// <summary>
     /// Gets the instance of the input.
     /// </summary>
-    public static InputManager Current
-    {
-        protected set => _instance = value;
-        get => _instance;
-    }
+    public static InputManager Instance { get; private set; } = null!;
 
     /// <summary>
     /// Occurs when a key is pressed.
@@ -51,7 +45,7 @@ public class InputManager : IDisposable
     /// <summary>
     /// Gets the mouse wheel delta for this frame.
     /// </summary>
-    public float MouseWheelDelta { get; private set; }
+    public float MouseScrollDelta { get; private set; }
 
     /// <summary>
     /// Gets the Input Snapshot for the current frame.
@@ -60,21 +54,21 @@ public class InputManager : IDisposable
 
     private readonly Sdl2Window _window;
 
-    private readonly HashSet<Key> _currentlyPressedKeys = new();
+    private readonly HashSet<Key> _keysDown = new();
 
-    private readonly HashSet<Key> _newKeysThisFrame = new();
+    private readonly HashSet<Key> _keysPressedThisFrame = new();
 
-    private readonly HashSet<Key> _releasedKeysThisFrame = new();
+    private readonly HashSet<Key> _keysReleasedThisFrame = new();
 
-    private readonly HashSet<MouseButton> _currentlyPressedMouseButtons = new();
+    private readonly HashSet<MouseButton> _mouseButtonsDown = new();
 
-    private readonly HashSet<MouseButton> _newMouseButtonsThisFrame = new();
+    private readonly HashSet<MouseButton> _mouseButtonsPressedThisFrame = new();
 
-    private readonly HashSet<MouseButton> _releasedMouseButtonsThisFrame = new();
+    private readonly HashSet<MouseButton> _mouseButtonsReleasedThisFrame = new();
 
-    private IReadOnlyList<char> _typedCharactersThisFrame = Array.Empty<char>();
+    private IReadOnlyList<char> _charactersTypedThisFrame = Array.Empty<char>();
 
-    private Vector2 _mousePosition;
+    private Vector2 _cursorPosition;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="InputManager"/> class.
@@ -83,10 +77,10 @@ public class InputManager : IDisposable
     /// <exception cref="Exception">Thrown if the Input instance has already been created.</exception>
     public InputManager(Sdl2Window window)
     {
-        if (_instance != null)
+        if (Instance != null)
             throw new Exception("Input already initialized");
 
-        _instance = this;
+        Instance = this;
         this._window = window;
         this.InputSnapshot = window.PumpEvents();
         this._window.MouseMove += this.Window_MouseMove;
@@ -102,22 +96,22 @@ public class InputManager : IDisposable
         // Why using this event instead of InputSnapshot.MousePosition?
         // Well, there is a bug in which InputSnapshot.MousePosition is updated 2 frames after the mouse is moved with this._window.SetMousePosition().
         // I don't know if it's a bug in Veldrid or if I'm doing something wrong, but this event is a workaround and it works. ¯\_(ツ)_/¯
-        this._mousePosition = args.MousePosition;
+        this._cursorPosition = args.MousePosition;
     }
 
     /// <summary>
     /// Updates the input state.
     /// </summary>
-    public void UpdateFrameInput()
+    public void UpdateState()
     {
         this.InputSnapshot = this._window.PumpEvents();
 
-        this.MouseWheelDelta = this.InputSnapshot.WheelDelta;
+        this.MouseScrollDelta = this.InputSnapshot.WheelDelta;
 
-        this._newKeysThisFrame.Clear();
-        this._releasedKeysThisFrame.Clear();
-        this._newMouseButtonsThisFrame.Clear();
-        this._releasedMouseButtonsThisFrame.Clear();
+        this._keysPressedThisFrame.Clear();
+        this._keysReleasedThisFrame.Clear();
+        this._mouseButtonsPressedThisFrame.Clear();
+        this._mouseButtonsReleasedThisFrame.Clear();
 
         for (int i = 0; i < this.InputSnapshot.KeyEvents.Count; i++)
         {
@@ -149,10 +143,10 @@ public class InputManager : IDisposable
             }
         }
 
-        this._typedCharactersThisFrame = this.InputSnapshot.KeyCharPresses;
+        this._charactersTypedThisFrame = this.InputSnapshot.KeyCharPresses;
 
-        if (this.TextEntered != null && this._typedCharactersThisFrame.Count > 0)
-            this.TextEntered.Invoke(this, new TextEventArgs(this._typedCharactersThisFrame));
+        if (this.TextEntered != null && this._charactersTypedThisFrame.Count > 0)
+            this.TextEntered.Invoke(this, new TextEventArgs(this._charactersTypedThisFrame));
     }
 
     /// <summary>
@@ -164,23 +158,23 @@ public class InputManager : IDisposable
     /// Moves the mouse cursor to the specified position relative to the window.
     /// </summary>
     /// <param name="position">The new position of the mouse cursor.</param>
-    public void MoveMouseTo(Vector2 position)
+    public void SetCursorPosition(Vector2 position)
     {
         position.X = (int)position.X;
         position.Y = (int)position.Y;
         this._window.SetMousePosition(position);
-        this._mousePosition = position;
+        this._cursorPosition = position;
     }
 
     /// <summary>
     /// Gets the current mouse position relative to the window.
     /// </summary>
-    public Vector2 MousePosition => this._mousePosition;
+    public Vector2 CursorPosition => this._cursorPosition;
 
     /// <summary>
     /// Gets or sets whether the mouse is currently visible.
     /// </summary>
-    public bool CursorIsVisible
+    public bool IsCursorVisible
     {
         get => this._window.CursorVisible;
         set => this._window.CursorVisible = value;
@@ -191,9 +185,9 @@ public class InputManager : IDisposable
     /// </summary>
     /// <param name="key">The key to check.</param>
     /// <returns>Whether the specified key is currently pressed.</returns>
-    public bool GetKey(Key key)
+    public bool IsKeyDown(Key key)
     {
-        return this._currentlyPressedKeys.Contains(key);
+        return this._keysDown.Contains(key);
     }
 
     /// <summary>
@@ -201,9 +195,9 @@ public class InputManager : IDisposable
     /// </summary>
     /// <param name="key">The key to check.</param>
     /// <returns>Whether the specified key was pressed this frame.</returns>
-    public bool GetKeyDown(Key key)
+    public bool WasKeyPressedThisFrame(Key key)
     {
-        return this._newKeysThisFrame.Contains(key);
+        return this._keysPressedThisFrame.Contains(key);
     }
 
     /// <summary>
@@ -211,9 +205,9 @@ public class InputManager : IDisposable
     /// </summary>
     /// <param name="key">The key to check.</param>
     /// <returns>Whether the specified key was released this frame.</returns>
-    public bool GetKeyUp(Key key)
+    public bool WasKeyReleasedThisFrame(Key key)
     {
-        return this._releasedKeysThisFrame.Contains(key);
+        return this._keysReleasedThisFrame.Contains(key);
     }
 
     /// <summary>
@@ -221,9 +215,9 @@ public class InputManager : IDisposable
     /// </summary>
     /// <param name="button">The mouse button to check.</param>
     /// <returns>Whether the specified mouse button is currently pressed.</returns>
-    public bool GetMouseButton(MouseButton button)
+    public bool IsMouseButtonDown(MouseButton button)
     {
-        return this._currentlyPressedMouseButtons.Contains(button);
+        return this._mouseButtonsDown.Contains(button);
     }
 
     /// <summary>
@@ -231,9 +225,9 @@ public class InputManager : IDisposable
     /// </summary>
     /// <param name="button">The mouse button to check.</param>
     /// <returns>Whether the specified mouse button was pressed this frame.</returns>
-    public bool GetMouseButtonDown(MouseButton button)
+    public bool WasMouseButtonPressedThisFrame(MouseButton button)
     {
-        return this._newMouseButtonsThisFrame.Contains(button);
+        return this._mouseButtonsPressedThisFrame.Contains(button);
     }
 
     /// <summary>
@@ -241,9 +235,9 @@ public class InputManager : IDisposable
     /// </summary>
     /// <param name="button">The mouse button to check.</param>
     /// <returns>Whether the specified mouse button was released this frame.</returns>
-    public bool GetMouseButtonUp(MouseButton button)
+    public bool WasMouseButtonReleasedThisFrame(MouseButton button)
     {
-        return this._releasedMouseButtonsThisFrame.Contains(button);
+        return this._mouseButtonsReleasedThisFrame.Contains(button);
     }
 
     /// <summary>
@@ -252,9 +246,9 @@ public class InputManager : IDisposable
     /// <param name="mouseButton">The mouse button to press.</param>
     public void PressMouseButton(MouseButton mouseButton)
     {
-        this._currentlyPressedMouseButtons.Remove(mouseButton);
-        this._newMouseButtonsThisFrame.Remove(mouseButton);
-        this._releasedMouseButtonsThisFrame.Add(mouseButton);
+        this._mouseButtonsDown.Remove(mouseButton);
+        this._mouseButtonsPressedThisFrame.Remove(mouseButton);
+        this._mouseButtonsReleasedThisFrame.Add(mouseButton);
     }
 
     /// <summary>
@@ -263,10 +257,10 @@ public class InputManager : IDisposable
     /// <param name="mouseButton">The mouse button to release.</param>
     public void ReleaseMouseButton(MouseButton mouseButton)
     {
-        if (this._currentlyPressedMouseButtons.Add(mouseButton))
+        if (this._mouseButtonsDown.Add(mouseButton))
         {
-            this._newMouseButtonsThisFrame.Add(mouseButton);
-            this._releasedMouseButtonsThisFrame.Remove(mouseButton);
+            this._mouseButtonsPressedThisFrame.Add(mouseButton);
+            this._mouseButtonsReleasedThisFrame.Remove(mouseButton);
         }
     }
 
@@ -276,9 +270,9 @@ public class InputManager : IDisposable
     /// <param name="key">The key to press.</param>
     public void PressKey(Key key)
     {
-        this._currentlyPressedKeys.Remove(key);
-        this._newKeysThisFrame.Remove(key);
-        this._releasedKeysThisFrame.Add(key);
+        this._keysDown.Remove(key);
+        this._keysPressedThisFrame.Remove(key);
+        this._keysReleasedThisFrame.Add(key);
     }
 
     /// <summary>
@@ -287,15 +281,15 @@ public class InputManager : IDisposable
     /// <param name="key">The key to release.</param>
     public void ReleaseKey(Key key)
     {
-        if (this._currentlyPressedKeys.Add(key))
+        if (this._keysDown.Add(key))
         {
-            this._newKeysThisFrame.Add(key);
-            this._releasedKeysThisFrame.Remove(key);
+            this._keysPressedThisFrame.Add(key);
+            this._keysReleasedThisFrame.Remove(key);
         }
     }
 
     /// <summary>
     /// Gets a read-only list of the currently pressed characters.
     /// </summary>
-    public IReadOnlyList<char> TypedCharacters => this._typedCharactersThisFrame;
+    public IReadOnlyList<char> TypedCharacters => this._charactersTypedThisFrame;
 }

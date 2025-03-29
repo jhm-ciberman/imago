@@ -122,7 +122,7 @@ public class Button : ContentControl
 
         this.Appearance.Apply(this);
 
-        if (this.IsPressed && !this.IsMouseOver && this.Stage.Input.GetMouseButtonUp(MouseButton.Left))
+        if (this.IsPressed && !this.IsMouseOver && this.Stage.Input.WasMouseButtonReleasedThisFrame(MouseButton.Left))
         {
             this.IsPressed = false;
         }

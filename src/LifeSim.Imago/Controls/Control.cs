@@ -267,7 +267,7 @@ public class Control : Visual
         var input = this.Stage.Input;
 
         var bounds = this.GetBounds();
-        var mousePosition = this.Stage.WindowToViewport(input.MousePosition);
+        var mousePosition = this.Stage.WindowToViewport(input.CursorPosition);
         this.IsMouseOver = bounds.Contains(mousePosition);
 
         if (this.IsMouseOver)
@@ -276,7 +276,7 @@ public class Control : Visual
             this.CheckMouseButtonEvents(input, MouseButton.Right, mousePosition);
             this.CheckMouseButtonEvents(input, MouseButton.Middle, mousePosition);
 
-            float delta = input.MouseWheelDelta;
+            float delta = input.MouseScrollDelta;
 
             if (delta != 0)
             {
@@ -287,11 +287,11 @@ public class Control : Visual
 
     private void CheckMouseButtonEvents(InputManager input, MouseButton button, Vector2 mousePosition)
     {
-        if (input.GetMouseButtonDown(button))
+        if (input.WasMouseButtonPressedThisFrame(button))
         {
             this.OnMouseDown(button, mousePosition);
         }
-        else if (input.GetMouseButtonUp(button))
+        else if (input.WasMouseButtonReleasedThisFrame(button))
         {
             this.OnMouseUp(button, mousePosition);
         }

@@ -145,7 +145,7 @@ public class PickingManger
         if (this.HighlightedPickable is not RenderNode3D selectedRenderNode)
             return null;
 
-        Vector2 viewPortPoint = InputManager.Current.MousePosition / camera.Viewport.Size;
+        Vector2 viewPortPoint = InputManager.Instance.CursorPosition / camera.Viewport.Size;
         var ray = camera.ViewportRay(viewPortPoint);
         if (!selectedRenderNode.RayCast(ray, out hitInfo))
             return null;

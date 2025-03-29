@@ -61,7 +61,7 @@ public class GuiLayer : ILayer2D
     /// <param name="viewport">The viewport to use.</param>
     public GuiLayer(Viewport? viewport = null)
     {
-        this.Input = InputManager.Current;
+        this.Input = InputManager.Instance;
         this.Viewport = viewport ?? Renderer.Instance.GuiViewport;
         this.Viewport.SizeChanged += this.Viewport_SizeChanged;
     }
