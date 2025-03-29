@@ -86,9 +86,13 @@ public class InputManager : IDisposable
         this._window.MouseMove += this.Window_MouseMove;
     }
 
+    /// <summary>
+    /// Disposes the input manager and releases all resources.
+    /// </summary>
     public void Dispose()
     {
         this._window.MouseMove -= this.Window_MouseMove;
+        Instance = null!;
     }
 
     private void Window_MouseMove(MouseMoveEventArgs args)
