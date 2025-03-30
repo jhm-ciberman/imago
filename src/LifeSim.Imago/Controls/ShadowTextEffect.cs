@@ -1,4 +1,5 @@
 using System.Numerics;
+using FontStashSharp;
 using LifeSim.Imago.Rendering.Sprites;
 using LifeSim.Support.Drawing;
 
@@ -75,8 +76,9 @@ public class ShadowTextEffect : ITextEffect
         if (this.Color.A > 0)
         {
             var offset = this.Offset - new Vector2(this.BlurAmount, this.BlurAmount);
-            var shadowFont = this.BlurAmount == 0 ? font : Font.GetBlurredFont(font.FontFamily, font.FontSize, this.BlurAmount);
-            ctx.DrawText(shadowFont, text, position + offset, this.Color);
+            //var shadowFont = this.BlurAmount == 0 ? font : Font.GetBlurredFont(font.FontFamily, font.FontSize, this.BlurAmount);
+            var effect = this.BlurAmount > 0 ? FontSystemEffect.Blurry : FontSystemEffect.None;
+            ctx.DrawText(font, text, position + offset, this.Color, effect, this.BlurAmount);
         }
 
         // Draw the text

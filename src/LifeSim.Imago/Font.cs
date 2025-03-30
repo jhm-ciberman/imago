@@ -9,13 +9,11 @@ public class Font
 {
     private static readonly Dictionary<string, byte[][]> _fontSources = new();
 
-    private record struct FontKey(string FontFamily, float Size, FontSystemEffect Effect, int EffectAmount);
-
-    private record struct FontSystemKey(string FontFamily, FontSystemEffect Effect, int EffectAmount);
+    private record struct FontKey(string FontFamily, float Size);
 
     private static readonly Dictionary<FontKey, Font> _fonts = new();
 
-    private static readonly Dictionary<FontSystemKey, FontSystem> _fontSystems = new();
+    private static readonly Dictionary<string, FontSystem> _fontSystems = new(); // key: font family name, value: FontSystem
 
     /// <summary>
     /// Gets or sets the default font family name.
@@ -71,34 +69,6 @@ public class Font
     }
 
     /// <summary>
-    /// Gets a blurred font with the specified font family name and size and blur amount.
-    /// </summary>
-    /// <param name="fontFamily">The name of the font family.</param>
-    /// <param name="fontSize">The size of the font.</param>
-    /// <param name="blur">The blur amount of the font.</param>
-    /// <returns>The font.</returns>
-    public static Font GetBlurredFont(string? fontFamily, float fontSize, int blur)
-    {
-        return blur == 0
-            ? GetFontCore(fontFamily, fontSize, FontSystemEffect.None, 0)
-            : GetFontCore(fontFamily, fontSize, FontSystemEffect.Blurry, blur);
-    }
-
-    /// <summary>
-    /// Gets a stroked font with the specified font family name and size and stroke amount.
-    /// </summary>
-    /// <param name="fontFamily">The name of the font family.</param>
-    /// <param name="fontSize">The size of the font.</param>
-    /// <param name="stroke">The stroke amount of the font.</param>
-    /// <returns>The font.</returns>
-    public static Font GetStrokedFont(string? fontFamily, int fontSize, int stroke)
-    {
-        return stroke == 0
-            ? GetFontCore(fontFamily, fontSize, FontSystemEffect.None, 0)
-            : GetFontCore(fontFamily, fontSize, FontSystemEffect.Stroked, stroke);
-    }
-
-    /// <summary>
     /// Gets a font with the specified font family name and size.
     /// </summary>
     /// <param name="fontFamily">The name of the font family.</param>
@@ -106,22 +76,20 @@ public class Font
     /// <returns>The font.</returns>
     public static Font GetFont(string? fontFamily, float fontSize)
     {
-        return GetFontCore(fontFamily, fontSize, FontSystemEffect.None, 0);
+        return GetFontCore(fontFamily, fontSize);
     }
 
-    private static Font GetFontCore(string? fontFamily, float size, FontSystemEffect effect, int effectAmount)
+    private static Font GetFontCore(string? fontFamily, float size)
     {
-        var key = new FontKey(fontFamily ?? DefaultFontFamily, size, effect, effectAmount);
+        var key = new FontKey(fontFamily ?? DefaultFontFamily, size);
         if (!_fonts.TryGetValue(key, out var font))
         {
-            font = new Font(key.FontFamily, key.Size, key.Effect, key.EffectAmount);
+            font = new Font(key.FontFamily, key.Size);
             _fonts.Add(key, font);
         }
         return font;
     }
 
-
-    #region Font class
     /// <summary>
     /// Gets the font family name.
     /// </summary>
@@ -142,17 +110,12 @@ public class Font
     /// </summary>
     internal SpriteFontBase FontBase { get; }
 
-    internal FontSystemEffect Effect { get; }
-
-    internal int EffectAmount { get; }
-
-    private Font(string fontFamily, float fontSize, FontSystemEffect effect, int effectAmount)
+    private Font(string fontFamily, float fontSize)
     {
         this.FontFamily = fontFamily;
 
         // First try to search for a font system with the same font family and effect.
-        var key = new FontSystemKey(fontFamily, effect, effectAmount);
-        if (_fontSystems.TryGetValue(key, out FontSystem? fontSystem))
+        if (_fontSystems.TryGetValue(fontFamily, out FontSystem? fontSystem))
         {
             this.FontBase = fontSystem.GetFont(fontSize);
             return;
@@ -162,8 +125,6 @@ public class Font
         if (!IsFontLoaded(fontFamily))
             throw new ArgumentException($"Font {fontFamily} not loaded.");
 
-        this.Effect = effect;
-        this.EffectAmount = effectAmount;
         fontSystem = new FontSystem(new FontSystemSettings
         {
             PremultiplyAlpha = false,
@@ -175,10 +136,8 @@ public class Font
             fontSystem.AddFont(dataArr[i]);
         }
 
-        _fontSystems.Add(key, fontSystem); // Add it to the cache.
+        _fontSystems.Add(fontFamily, fontSystem); // Add it to the cache.
 
         this.FontBase = fontSystem.GetFont(fontSize);
     }
-
-    #endregion
 }
