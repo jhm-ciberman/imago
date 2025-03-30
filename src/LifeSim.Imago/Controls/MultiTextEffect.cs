@@ -16,7 +16,7 @@ public class MultiTextEffect : ITextEffect
     /// Initializes a new instance of the <see cref="MultiTextEffect"/> class.
     /// </summary>
     /// <param name="effects">The text effects.</param>
-    public MultiTextEffect(params ITextEffect[] effects)
+    public MultiTextEffect(ITextEffect[] effects)
     {
         this.Effects = effects;
     }
