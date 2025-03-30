@@ -25,7 +25,7 @@ public class TextBlock : Control
 {
     protected string _text = string.Empty;
     private ITextEffect? _textEffect;
-    protected float _fontSize = 12f;
+    protected float _fontSize = 11f;
     protected FontSystem? _fontSystem = null;
     protected SpriteFontBase? _font = null;
     protected Color _foreground = Color.Black;
