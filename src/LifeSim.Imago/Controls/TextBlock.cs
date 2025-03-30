@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
+using FontStashSharp;
 using LifeSim.Imago.Rendering.Sprites;
 using LifeSim.Support.Drawing;
 
@@ -25,8 +26,8 @@ public class TextBlock : Control
     protected string _text = string.Empty;
     private ITextEffect? _textEffect;
     protected float _fontSize = 12f;
-    protected string? _fontFamily = null;
-    protected Font? _font = null;
+    protected FontSystem? _fontSystem = null;
+    protected SpriteFontBase? _font = null;
     protected Color _foreground = Color.Black;
     private float _lineHeight = float.NaN;
     private readonly List<string> _textLines = new();
@@ -61,14 +62,14 @@ public class TextBlock : Control
     }
 
     /// <summary>
-    /// Gets or sets the font family of the text block.
+    /// Gets or sets the font system of the text block.
     /// </summary>
-    public string? FontFamily
+    public FontSystem? FontSystem
     {
-        get => this._fontFamily;
+        get => this._fontSystem;
         set
         {
-            if (this.SetPropertyAndInvalidateMeasure(ref this._fontFamily, value))
+            if (this.SetPropertyAndInvalidateMeasure(ref this._fontSystem, value))
             {
                 this._actualLineHeight = float.NaN;
                 this._font = null;
@@ -110,7 +111,7 @@ public class TextBlock : Control
             if (float.IsNaN(this._actualLineHeight))
             {
                 this._actualLineHeight = float.IsNaN(this._lineHeight)
-                    ? this.GetFont().LineHeight
+                    ? this.Font.LineHeight
                     : this._lineHeight;
                 this._lineSpacing = this._actualLineHeight - this.FontSize;
             }
@@ -195,11 +196,24 @@ public class TextBlock : Control
         this.Text = text;
     }
 
-    protected Font GetFont()
+    protected SpriteFontBase Font
     {
-        this._font ??= Font.GetFont(this.FontFamily, this.FontSize);
+        get
+        {
+            if (this._font != null)
+            {
+                return this._font;
+            }
 
-        return this._font;
+            if (this.FontSystem == null)
+            {
+                throw new InvalidOperationException("FontSystem is not set.");
+            }
+
+            this._font = this.FontSystem.GetFont(this.FontSize);
+
+            return this._font;
+        }
     }
 
     protected override Vector2 MeasureOverride(Vector2 availableSize)
@@ -214,8 +228,7 @@ public class TextBlock : Control
             this.RecomputeTextLines(availableSize);
         }
 
-        var font = this.GetFont();
-        var size = font.FontBase.MeasureString(this.Text);
+        var size = this.Font.MeasureString(this.Text);
         return new Vector2(size.X, this.ActualLineHeight * this._textLines.Count);
     }
 
@@ -223,7 +236,7 @@ public class TextBlock : Control
     {
         base.DrawCore(ctx);
 
-        var font = this.GetFont();
+        var font = this.Font;
         var offset = new Vector2(0f, MathF.Ceiling(this._lineSpacing / 2f));
         for (var i = 0; i < this._textLines.Count; i++)
         {
@@ -255,7 +268,7 @@ public class TextBlock : Control
         for (var i = 0; i < this._textLines.Count; i++)
         {
             var span = this._textLines[i].AsSpan(0, charNumber);
-            size.X = Math.Max(size.X, this.GetFont().FontBase.MeasureString(span.ToString()).X);
+            size.X = Math.Max(size.X, this.Font.MeasureString(span.ToString()).X);
         }
 
         return size;
@@ -311,7 +324,7 @@ public class TextBlock : Control
     private void ApplyWrap(float maxWidth)
     {
         var sb = _measureStringBuilder;
-        var font = this.GetFont();
+        var font = this.Font;
         var lineStart = 0;
         var lineLength = 0;
         var lastSpace = -1;
@@ -333,7 +346,7 @@ public class TextBlock : Control
             lineLength++;
             sb.Clear();
             sb.Append(this.Text.AsSpan(lineStart, Math.Min(lineLength, this.Text.Length - lineStart)));
-            if (font.FontBase.MeasureString(sb).X > maxWidth)
+            if (font.MeasureString(sb).X > maxWidth)
             {
                 if (lastSpace != -1)
                 {

@@ -65,7 +65,7 @@ public class ShadowTextEffect : ITextEffect
         this.BlurAmount = blurAmount;
     }
 
-    public void Draw(DrawingContext ctx, string text, Font font, Vector2 position, Color color)
+    public void Draw(DrawingContext ctx, string text, SpriteFontBase font, Vector2 position, Color color)
     {
         if (string.IsNullOrWhiteSpace(text))
         {

@@ -1,4 +1,5 @@
 using System.Numerics;
+using FontStashSharp;
 using LifeSim.Imago.Rendering.Sprites;
 using LifeSim.Support.Drawing;
 
@@ -34,12 +35,11 @@ public class StrokeTextEffect : ITextEffect
     {
     }
 
-    private static readonly Vector2[] _strokeOffsets = new Vector2[]
-    {
+    private static readonly Vector2[] _strokeOffsets = [
         new Vector2(0, -1), new Vector2(1, 0), new Vector2(0, 1), new Vector2(-1, 0)
-    };
+    ];
 
-    public void Draw(DrawingContext ctx, string text, Font font, Vector2 position, Color color)
+    public void Draw(DrawingContext ctx, string text, SpriteFontBase font, Vector2 position, Color color)
     {
         if (string.IsNullOrWhiteSpace(text))
         {
@@ -62,36 +62,6 @@ public class StrokeTextEffect : ITextEffect
         if (color.A > 0)
         {
             ctx.DrawText(font, text, position, color);
-        }
-    }
-}
-
-public class MultiTextEffect : ITextEffect
-{
-    /// <summary>
-    /// Gets or sets the text effects.
-    /// </summary>
-    public ITextEffect[] Effects { get; set; }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="MultiTextEffect"/> class.
-    /// </summary>
-    /// <param name="effects">The text effects.</param>
-    public MultiTextEffect(params ITextEffect[] effects)
-    {
-        this.Effects = effects;
-    }
-
-    public void Draw(DrawingContext ctx, string text, Font font, Vector2 position, Color color)
-    {
-        if (string.IsNullOrWhiteSpace(text))
-        {
-            return;
-        }
-
-        foreach (var effect in this.Effects)
-        {
-            effect.Draw(ctx, text, font, position, color);
         }
     }
 }

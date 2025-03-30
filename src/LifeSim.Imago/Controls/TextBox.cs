@@ -86,7 +86,7 @@ public class TextBox : Control
     {
         if (e.PropertyName == nameof(this.TextBlock.Text)
             || e.PropertyName == nameof(this.TextBlock.FontSize)
-            || e.PropertyName == nameof(this.TextBlock.FontFamily))
+            || e.PropertyName == nameof(this.TextBlock.FontSystem))
         {
             this._caretIndex = Math.Min(this._caretIndex, this.Text.Length);
             this._caretBlinkTimer = this.CaretBlinkSpeed;

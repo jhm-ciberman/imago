@@ -1,5 +1,6 @@
 using System;
 using System.Numerics;
+using FontStashSharp;
 using LifeSim.Imago.Rendering.Sprites;
 using LifeSim.Support.Drawing;
 
@@ -16,5 +17,5 @@ public interface ITextEffect
     /// <param name="position">The position of the text.</param>
     /// <param name="color">The color of the text.</param>
     /// <exception cref="InvalidOperationException">The font is not initialized.</exception>
-    public void Draw(DrawingContext ctx, string text, Font font, Vector2 position, Color color);
+    public void Draw(DrawingContext ctx, string text, SpriteFontBase font, Vector2 position, Color color);
 }

@@ -1,4 +1,5 @@
 using System.Windows.Input;
+using FontStashSharp;
 using LifeSim.Support.Drawing;
 
 namespace LifeSim.Imago.Controls;
@@ -56,12 +57,12 @@ public class TextButton : Button
     }
 
     /// <summary>
-    /// Gets or sets the font family of the text block.
+    /// Gets or sets the font system of the text block.
     /// </summary>
-    public string? FontFamily
+    public FontSystem? FontSystem
     {
-        get => this._textBlock.FontFamily;
-        set => this._textBlock.FontFamily = value;
+        get => this._textBlock.FontSystem;
+        set => this._textBlock.FontSystem = value;
     }
 
     /// <summary>

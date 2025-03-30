@@ -312,14 +312,14 @@ public class DrawingContext : IDisposable
     /// <param name="color">The color to draw the text with.</param>
     /// <param name="effect">The effect to apply to the text.</param>
     /// <param name="effectAmount">The amount of the effect to apply.</param>
-    public void DrawText(Font font, string text, Vector2 position, Color color, FontSystemEffect effect = FontSystemEffect.None, int effectAmount = 0)
+    public void DrawText(SpriteFontBase font, string text, Vector2 position, Color color, FontSystemEffect effect = FontSystemEffect.None, int effectAmount = 0)
     {
         // TODO: Use a LRU cache for text strings. Use Span<char> for the "text" parameter and only call .ToString() if the string is not in the cache.
         // Idk if this is worth it, but it could be a nice optimization.
 
-        var fsColor = new FontStashSharp.FSColor(color.R, color.G, color.B, color.A);
-        var style = FontStashSharp.TextStyle.None;
-        font.FontBase.DrawText(this._fontStashAdapter, text, position, fsColor, Vector2.One, 0, Vector2.Zero, 0, 0, 0, style, effect, effectAmount);
+        var fsColor = new FSColor(color.R, color.G, color.B, color.A);
+        var style = TextStyle.None;
+        font.DrawText(this._fontStashAdapter, text, position, fsColor, Vector2.One, 0, Vector2.Zero, 0, 0, 0, style, effect, effectAmount);
     }
 
     /// <summary>
