@@ -140,11 +140,11 @@ public class Font
     /// <summary>
     /// Gets the internal font base used by the render system.
     /// </summary>
-    public SpriteFontBase FontBase { get; } // TODO: make internal
+    internal SpriteFontBase FontBase { get; }
 
-    public FontSystemEffect Effect { get; }
+    internal FontSystemEffect Effect { get; }
 
-    public int EffectAmount { get; }
+    internal int EffectAmount { get; }
 
     private Font(string fontFamily, float fontSize, FontSystemEffect effect, int effectAmount)
     {
