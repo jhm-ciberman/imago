@@ -205,12 +205,11 @@ public class TextBlock : Control
                 return this._font;
             }
 
-            if (this.FontSystem == null)
-            {
-                throw new InvalidOperationException("FontSystem is not set.");
-            }
+            var system = this.FontSystem
+                ?? Visual.DefaultFontSystem
+                ?? throw new InvalidOperationException("FontSystem is not set.");
 
-            this._font = this.FontSystem.GetFont(this.FontSize);
+            this._font = system.GetFont(this.FontSize);
 
             return this._font;
         }

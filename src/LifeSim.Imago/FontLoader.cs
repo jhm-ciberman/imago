@@ -1,5 +1,6 @@
 using System.IO;
 using FontStashSharp;
+using LifeSim.Imago.Controls;
 
 namespace LifeSim.Imago;
 
@@ -17,6 +18,8 @@ public class FontLoader
         {
             fontSystem.AddFont(File.ReadAllBytes(path));
         }
+
+        Visual.DefaultFontSystem ??= fontSystem;
         return fontSystem;
     }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using CommunityToolkit.Mvvm.ComponentModel;
+using FontStashSharp;
 using LifeSim.Imago.Rendering.Sprites;
 using LifeSim.Support.Numerics;
 
@@ -9,6 +10,8 @@ namespace LifeSim.Imago.Controls;
 
 public abstract class Visual : ObservableObject, IDisposable
 {
+    public static FontSystem? DefaultFontSystem { get; set; } = null!;
+
     private string _name = string.Empty;
     private Visibility _visibility = Visibility.Visible;
     private GuiLayer? _stage;
