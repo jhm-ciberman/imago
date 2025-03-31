@@ -226,7 +226,7 @@ public class Control : Visual
                 finalRect.Width = availableSize.X;
                 break;
             default: throw new InvalidOperationException();
-        };
+        }
 
         switch (this.VerticalAlignment)
         {
@@ -245,7 +245,7 @@ public class Control : Visual
                 finalRect.Height = availableSize.Y;
                 break;
             default: throw new InvalidOperationException();
-        };
+        }
 
         finalRect.Width = !float.IsNaN(this.Width) ? this.Width : MathF.Max(0, finalRect.Width);
         finalRect.Height = !float.IsNaN(this.Height) ? this.Height : MathF.Max(0, finalRect.Height);
