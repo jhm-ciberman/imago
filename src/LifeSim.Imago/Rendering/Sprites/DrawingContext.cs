@@ -180,6 +180,18 @@ public class DrawingContext : IDisposable
     }
 
     /// <summary>
+    /// Draws a texture at the specified position.
+    /// </summary>
+    /// <param name="shader">The shader to use.</param>
+    /// <param name="texture">The texture to draw.</param>
+    /// <param name="position">The position to draw the texture at.</param>
+    /// <param name="size">The size of the texture to draw.</param>
+    public void DrawTexture(Shader? shader, ITextureRegion texture, Vector2 position, Vector2 size)
+    {
+        this.DrawTexture(shader, texture.Texture, position, size, texture.TransformUV(Vector2.Zero), texture.TransformUV(Vector2.One), Color.White);
+    }
+
+    /// <summary>
     /// Draws a texture at the specified position with a transformation matrix.
     /// </summary>
     /// <param name="shader">The shader to use.</param>

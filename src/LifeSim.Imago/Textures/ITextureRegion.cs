@@ -96,4 +96,17 @@ public static class TextureRegionExtensions
     {
         return texture.SubTexture(new Vector2(0f, 1f), new Vector2(1f, 0f));
     }
+
+    /// <summary>
+    /// Transform the given UV coordinates to the texture space coordinates.
+    /// </summary>
+    /// <param name="region">The texture region.</param>
+    /// <param name="uv">The UV coordinates.</param>
+    /// <returns>The transformed texture space coordinates.</returns>
+    public static Vector2 TransformUV(this ITextureRegion region, Vector2 uv)
+    {
+        var size = region.BottomRight - region.TopLeft;
+        var offset = region.TopLeft;
+        return uv * size + offset;
+    }
 }
