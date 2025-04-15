@@ -85,6 +85,18 @@ public struct Vector2Int : IEquatable<Vector2Int>
     }
 
     /// <summary>
+    /// Clamps the specified coordinates to the nearest valid coordinates based on the given vector.
+    /// </summary>
+    /// <param name="value">The vector to clamp.</param>
+    /// <param name="min">The minimum vector.</param>
+    /// <param name="max">The maximum vector.</param>
+    /// <returns>The clamped vector.</returns>
+    public static Vector2Int Clamp(Vector2Int value, Vector2Int min, Vector2Int max)
+    {
+        return new Vector2Int(Math.Clamp(value.X, min.X, max.X), Math.Clamp(value.Y, min.Y, max.Y));
+    }
+
+    /// <summary>
     /// Linearly interpolates between two vectors.
     /// </summary>
     /// <param name="value1">The first vector.</param>
@@ -96,6 +108,16 @@ public struct Vector2Int : IEquatable<Vector2Int>
         return new Vector2Int(
             (int)Math.Round(float.Lerp(value1.X, value2.X, t)),
             (int)Math.Round(float.Lerp(value1.Y, value2.Y, t)));
+    }
+
+    /// <summary>
+    /// Returns the absolute value of the vector for each component.
+    /// </summary>
+    /// <param name="value">The vector to get the absolute value of.</param>
+    /// <returns>The absolute value of the vector.</returns>
+    public static Vector2Int Abs(Vector2Int value)
+    {
+        return new Vector2Int(Math.Abs(value.X), Math.Abs(value.Y));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
