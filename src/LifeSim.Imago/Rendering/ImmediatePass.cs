@@ -54,7 +54,7 @@ internal class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
 
     private readonly Renderer _renderer;
 
-    private Shader _currentBatchShader = null!;
+    private Shader _shader = null!;
 
     private Shader _currentShaderInUse = null!;
 
@@ -68,7 +68,7 @@ internal class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
 
     private RenderFlags _renderFlags = RenderFlags.None;
 
-    private RenderFlags _currentRenderFlags = RenderFlags.None;
+    private RenderFlags _currentRenderFlagsInUse = RenderFlags.None;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ImmediatePass"/> class.
@@ -134,8 +134,6 @@ internal class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
 
         for (var i = 0; i < renderables.Count; i++)
         {
-            this._renderFlags = RenderFlags.None;
-            this._currentRenderFlags = RenderFlags.None;
             renderables[i].Render(this);
         }
 
@@ -152,11 +150,11 @@ internal class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
         this._commandList = cl;
         this._vertexCount = 0;
         this._indexCount = 0;
-        this._currentBatchShader = null!;
+        this._shader = null!;
         this._currentBatchTexture = null!;
         this._currentShaderInUse = null!;
         this._renderFlags = RenderFlags.None;
-        this._currentRenderFlags = RenderFlags.None;
+        this._currentRenderFlagsInUse = RenderFlags.None;
 
         cl.UpdateBuffer(this._passDataBuffer, 0, new PassDataBuffer { ViewProjection = viewProjectionMatrix });
     }
@@ -175,11 +173,6 @@ internal class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
 
         if (this._indexCount + indexCount > this._maxIndexBatchSize)
             throw new InvalidOperationException($"The number of provided indices exceeds the maximum batch size. {this._indexCount + indexCount} > {this._maxIndexBatchSize}");
-
-        if (this._renderFlags != this._currentRenderFlags)
-        {
-            this.Flush();
-        }
     }
 
     /// <summary>
@@ -189,10 +182,10 @@ internal class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
     public void SetShader(Shader? shader)
     {
         shader ??= this._defaultShader;
-        if (this._currentBatchShader != shader)
+        if (this._shader != shader)
         {
             this.Flush();
-            this._currentBatchShader = shader;
+            this._shader = shader;
         }
     }
 
@@ -216,9 +209,18 @@ internal class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
     public bool IsTransparencyEnabled
     {
         get => this._renderFlags.HasFlag(RenderFlags.Transparent);
-        set => this._renderFlags = value
-            ? this._renderFlags | RenderFlags.Transparent
-            : this._renderFlags & ~RenderFlags.Transparent;
+        set
+        {
+            var renderFlags = this._renderFlags;
+            var newRenderFlags = value
+                ? renderFlags | RenderFlags.Transparent
+                : renderFlags & ~RenderFlags.Transparent;
+            if (renderFlags != newRenderFlags)
+            {
+                this.Flush();
+                this._renderFlags = newRenderFlags;
+            }
+        }
     }
 
     /// <summary>
@@ -318,22 +320,22 @@ internal class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
         if (this._vertexCount == 0 || this._indexCount == 0)
             return;
 
-        this._currentRenderFlags = this._renderFlags;
         this._commandList.UpdateBuffer(this._vertexBuffer, 0, new ReadOnlySpan<ImmediateVertex>(this._vertices, 0, this._vertexCount));
         this._commandList.UpdateBuffer(this._indexBuffer, 0, new ReadOnlySpan<ushort>(this._indices, 0, this._indexCount));
 
         this._commandList.SetVertexBuffer(0, this._vertexBuffer);
         this._commandList.SetIndexBuffer(this._indexBuffer, IndexFormat.UInt16);
 
-        if (this._currentBatchShader != this._currentShaderInUse)
+        if (this._shader != this._currentShaderInUse || this._renderFlags != this._currentRenderFlagsInUse)
         {
-            this._currentShaderInUse = this._currentBatchShader;
+            this._currentShaderInUse = this._shader;
+            this._currentRenderFlagsInUse = this._renderFlags;
             var pipeline = this._currentShaderInUse.GetPipeline(this._vertexFormat, this._renderFlags);
             this._commandList.SetPipeline(pipeline);
         }
 
         this._commandList.SetGraphicsResourceSet(0, this._passResourceSet);
-        ResourceSet resourceSet = this._resourceSetCache.GetResourceSet(this._currentBatchShader, this._currentBatchTexture);
+        ResourceSet resourceSet = this._resourceSetCache.GetResourceSet(this._shader, this._currentBatchTexture);
         this._commandList.SetGraphicsResourceSet(1, resourceSet);
 
         this._commandList.DrawIndexed((uint)this._indexCount);
