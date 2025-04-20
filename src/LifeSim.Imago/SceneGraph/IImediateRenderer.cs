@@ -1,9 +1,26 @@
+using System;
 using System.Numerics;
 using LifeSim.Imago.Materials;
 using LifeSim.Imago.Textures;
 using LifeSim.Support.Drawing;
 
 namespace LifeSim.Imago.SceneGraph;
+
+public struct ImmediateVertex
+{
+    public Vector3 Position { get; set; }
+
+    public Vector2 TextureCoords { get; set; }
+
+    public uint Color { get; set; }
+
+    public ImmediateVertex(Vector3 position, Vector2 textureCoords, Color color)
+    {
+        this.Position = position;
+        this.TextureCoords = textureCoords;
+        this.Color = color.ToPackedUInt();
+    }
+}
 
 public interface IImediateRenderer
 {
@@ -17,14 +34,13 @@ public interface IImediateRenderer
     /// </summary>
     /// <param name="texture">The texture to use or null to use the default texture.</param>
     public void SetTexture(ITexture? texture);
+
     /// <summary>
     /// Draws a batch of vertices in immediate mode.
     /// </summary>
     /// <param name="indices">The indices of the vertices to draw.</param>
-    /// <param name="positions">The positions of the vertices to draw.</param>
-    /// <param name="texCoords">The texture coordinates of the vertices to draw.</param>
-    /// <param name="color">The color to tint the vertices with.</param>
-    public void DrawVertices(ushort[] indices, Vector3[] positions, Vector2[] texCoords, Color color);
+    /// <param name="vertices">The vertices to draw.</param>
+    public void DrawVertices(ReadOnlySpan<ushort> indices, ReadOnlySpan<ImmediateVertex> vertices);
 
     /// <summary>
     /// Draws a quad in immediate mode. The quad is drawn using two triangles. The vertices should be in counter-clockwise order.

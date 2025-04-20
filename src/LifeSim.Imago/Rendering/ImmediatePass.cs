@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using LifeSim.Imago.Materials;
@@ -25,22 +24,6 @@ internal class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
         public Matrix4x4 ViewProjection;
     }
 
-    private struct Vertex
-    {
-        public Vector3 Position { get; set; }
-
-        public Vector2 TextureCoords { get; set; }
-
-        public uint Color { get; set; }
-
-        public Vertex(Vector3 position, Vector2 textureCoords, Color color)
-        {
-            this.Position = position;
-            this.TextureCoords = textureCoords;
-            this.Color = color.ToPackedUInt();
-        }
-    }
-
     private readonly GraphicsDevice _gd;
 
     private readonly DeviceBuffer _indexBuffer;
@@ -51,7 +34,7 @@ internal class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
 
     private readonly int _maxIndexBatchSize = 1024; // Number of indices to batch before drawing. (otherwise, flush)
 
-    private readonly Vertex[] _vertices;
+    private readonly ImmediateVertex[] _vertices;
 
     private readonly ushort[] _indices;
 
@@ -105,7 +88,7 @@ internal class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
             (uint)Unsafe.SizeOf<PassDataBuffer>(),
             BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
-        this._vertices = new Vertex[this._maxVertexBatchSize];
+        this._vertices = new ImmediateVertex[this._maxVertexBatchSize];
         this._indices = new ushort[this._maxIndexBatchSize];
 
         this._passResourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
@@ -218,24 +201,23 @@ internal class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
     /// Draws a batch of vertices in immediate mode.
     /// </summary>
     /// <param name="indices">The indices of the vertices to draw.</param>
-    /// <param name="positions">The positions of the vertices to draw.</param>
-    /// <param name="texCoords">The texture coordinates of the vertices to draw.</param>
-    /// <param name="color">The color to tint the vertices with.</param>
-    public void DrawVertices(ushort[] indices, Vector3[] positions, Vector2[] texCoords, Color color)
+    /// <param name="vertices">The vertices to draw.</param>
+    public void DrawVertices(ReadOnlySpan<ushort> indices, ReadOnlySpan<ImmediateVertex> vertices)
     {
-        Debug.Assert(positions.Length == texCoords.Length, "The number of positions and texture coordinates must be the same.");
+        this.Prepare(0, vertices.Length);
 
-        this.Prepare(indices.Length, positions.Length);
-
-        Array.Copy(indices, 0, this._indices, this._indexCount, indices.Length);
-
-        for (int i = 0; i < positions.Length; i++)
+        for (int i = 0; i < vertices.Length; i++)
         {
-            this._vertices[this._vertexCount + i] = new Vertex(positions[i], texCoords[i], color);
+            this._vertices[this._vertexCount + i] = vertices[i];
         }
 
-        this._vertexCount += positions.Length;
-        this._indexCount += indices.Length;
+        for (int i = 0; i < indices.Length; i++)
+        {
+            this._indices[this._indexCount + i] = (ushort)(this._vertexCount + indices[i]);
+        }
+
+        this._vertexCount += vertices.Length;
+        this._indexCount += vertices.Length;
     }
 
     /// <summary>
@@ -254,10 +236,10 @@ internal class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
     {
         this.Prepare(6, 4);
 
-        this._vertices[this._vertexCount + 0] = new Vertex(v1, t1, color);
-        this._vertices[this._vertexCount + 1] = new Vertex(v2, t2, color);
-        this._vertices[this._vertexCount + 2] = new Vertex(v3, t3, color);
-        this._vertices[this._vertexCount + 3] = new Vertex(v4, t4, color);
+        this._vertices[this._vertexCount + 0] = new ImmediateVertex(v1, t1, color);
+        this._vertices[this._vertexCount + 1] = new ImmediateVertex(v2, t2, color);
+        this._vertices[this._vertexCount + 2] = new ImmediateVertex(v3, t3, color);
+        this._vertices[this._vertexCount + 3] = new ImmediateVertex(v4, t4, color);
 
         int i = this._vertexCount;
         this._indices[this._indexCount + 0] = (ushort)i;
@@ -286,9 +268,9 @@ internal class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
     {
         this.Prepare(3, 3);
 
-        this._vertices[this._vertexCount + 0] = new Vertex(v1, t1, color);
-        this._vertices[this._vertexCount + 1] = new Vertex(v2, t2, color);
-        this._vertices[this._vertexCount + 2] = new Vertex(v3, t3, color);
+        this._vertices[this._vertexCount + 0] = new ImmediateVertex(v1, t1, color);
+        this._vertices[this._vertexCount + 1] = new ImmediateVertex(v2, t2, color);
+        this._vertices[this._vertexCount + 2] = new ImmediateVertex(v3, t3, color);
 
         int i = this._vertexCount;
         this._indices[this._indexCount + 0] = (ushort)(i + 0);
@@ -312,7 +294,7 @@ internal class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
         if (this._vertexCount == 0 || this._indexCount == 0)
             return;
 
-        this._commandList.UpdateBuffer(this._vertexBuffer, 0, new ReadOnlySpan<Vertex>(this._vertices, 0, this._vertexCount));
+        this._commandList.UpdateBuffer(this._vertexBuffer, 0, new ReadOnlySpan<ImmediateVertex>(this._vertices, 0, this._vertexCount));
         this._commandList.UpdateBuffer(this._indexBuffer, 0, new ReadOnlySpan<ushort>(this._indices, 0, this._indexCount));
 
         this._commandList.SetVertexBuffer(0, this._vertexBuffer);
