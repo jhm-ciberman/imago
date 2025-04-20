@@ -32,7 +32,7 @@ internal class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
 
     private readonly int _maxVertexBatchSize = 1024; // Number of vertices to batch before drawing. (otherwise, flush)
 
-    private readonly int _maxIndexBatchSize = 1024; // Number of indices to batch before drawing. (otherwise, flush)
+    private readonly int _maxIndexBatchSize = 1024 * 3; // Number of indices to batch before drawing. (otherwise, flush)
 
     private readonly ImmediateVertex[] _vertices;
 
@@ -65,6 +65,10 @@ internal class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
     private int _indexCount = 0;
 
     private CommandList _commandList = null!;
+
+    private RenderFlags _renderFlags = RenderFlags.None;
+
+    private RenderFlags _currentRenderFlags = RenderFlags.None;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ImmediatePass"/> class.
@@ -130,6 +134,8 @@ internal class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
 
         for (var i = 0; i < renderables.Count; i++)
         {
+            this._renderFlags = RenderFlags.None;
+            this._currentRenderFlags = RenderFlags.None;
             renderables[i].Render(this);
         }
 
@@ -149,6 +155,8 @@ internal class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
         this._currentBatchShader = null!;
         this._currentBatchTexture = null!;
         this._currentShaderInUse = null!;
+        this._renderFlags = RenderFlags.None;
+        this._currentRenderFlags = RenderFlags.None;
 
         cl.UpdateBuffer(this._passDataBuffer, 0, new PassDataBuffer { ViewProjection = viewProjectionMatrix });
     }
@@ -167,6 +175,11 @@ internal class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
 
         if (this._indexCount + indexCount > this._maxIndexBatchSize)
             throw new InvalidOperationException($"The number of provided indices exceeds the maximum batch size. {this._indexCount + indexCount} > {this._maxIndexBatchSize}");
+
+        if (this._renderFlags != this._currentRenderFlags)
+        {
+            this.Flush();
+        }
     }
 
     /// <summary>
@@ -198,13 +211,24 @@ internal class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
     }
 
     /// <summary>
+    /// Gets or sets whether the immediate mode renderer should use transparency for the next batch of draw calls.
+    /// </summary>
+    public bool IsTransparencyEnabled
+    {
+        get => this._renderFlags.HasFlag(RenderFlags.Transparent);
+        set => this._renderFlags = value
+            ? this._renderFlags | RenderFlags.Transparent
+            : this._renderFlags & ~RenderFlags.Transparent;
+    }
+
+    /// <summary>
     /// Draws a batch of vertices in immediate mode.
     /// </summary>
     /// <param name="indices">The indices of the vertices to draw.</param>
     /// <param name="vertices">The vertices to draw.</param>
     public void DrawVertices(ReadOnlySpan<ushort> indices, ReadOnlySpan<ImmediateVertex> vertices)
     {
-        this.Prepare(0, vertices.Length);
+        this.Prepare(indices.Length, vertices.Length);
 
         for (int i = 0; i < vertices.Length; i++)
         {
@@ -217,7 +241,7 @@ internal class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
         }
 
         this._vertexCount += vertices.Length;
-        this._indexCount += vertices.Length;
+        this._indexCount += indices.Length;
     }
 
     /// <summary>
@@ -294,6 +318,7 @@ internal class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
         if (this._vertexCount == 0 || this._indexCount == 0)
             return;
 
+        this._currentRenderFlags = this._renderFlags;
         this._commandList.UpdateBuffer(this._vertexBuffer, 0, new ReadOnlySpan<ImmediateVertex>(this._vertices, 0, this._vertexCount));
         this._commandList.UpdateBuffer(this._indexBuffer, 0, new ReadOnlySpan<ushort>(this._indices, 0, this._indexCount));
 
@@ -303,7 +328,7 @@ internal class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
         if (this._currentBatchShader != this._currentShaderInUse)
         {
             this._currentShaderInUse = this._currentBatchShader;
-            var pipeline = this._currentShaderInUse.GetPipeline(this._vertexFormat, RenderFlags.None);
+            var pipeline = this._currentShaderInUse.GetPipeline(this._vertexFormat, this._renderFlags);
             this._commandList.SetPipeline(pipeline);
         }
 
@@ -319,12 +344,16 @@ internal class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
 
     Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant, RenderFlags flags, TextureSampleCount sampleCount)
     {
+        var blend = flags.HasFlag(RenderFlags.Transparent)
+            ? BlendAttachmentDescription.AlphaBlend
+            : BlendAttachmentDescription.OverrideBlend;
+
         return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
         {
             DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
             PrimitiveTopology = PrimitiveTopology.TriangleList,
             ShaderSet = shaderVariant.ShaderSetDescription,
-            BlendState = new BlendStateDescription(RgbaFloat.Black, BlendAttachmentDescription.OverrideBlend),
+            BlendState = new BlendStateDescription(RgbaFloat.Black, blend),
             RasterizerState = new RasterizerStateDescription(
                 FaceCullMode.Back,
                 PolygonFillMode.Solid,

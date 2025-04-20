@@ -24,6 +24,12 @@ public struct ImmediateVertex
 
 public interface IImediateRenderer
 {
+
+    /// <summary>
+    /// Gets or sets whether the immediate mode renderer should use transparency for the next batch of draw calls.
+    /// </summary>
+    public bool IsTransparencyEnabled { get; set; }
+
     /// <summary>
     /// Sets the shader to use for the next subsequent draw calls.
     /// </summary>
