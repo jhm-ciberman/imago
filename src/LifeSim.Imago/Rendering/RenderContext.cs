@@ -65,8 +65,8 @@ public class RenderContext : IDisposable
 
         this._shadowPass.Render(cl, camera, scene.Environment.MainLight, shadowCasterRQs);
         this._forwardPass.Render(cl, renderTexture, camera, scene.Environment, opaqueRQ, transparentRQ);
-        this._immediatePass.Render(cl, renderTexture, camera, immediateRQ);
         this._skyDomePass.Render(cl, renderTexture, camera, scene.Environment);
+        this._immediatePass.Render(cl, renderTexture, camera, immediateRQ);
         this._mousePickerPass.Render(cl, renderTexture, camera, stage.Picking, pickingRQ);
         this._particlesPass.Render(cl, renderTexture, camera, scene.ParticleSystems);
         this._gizmosPass.Render(cl, renderTexture, camera, stage.Gizmos);
