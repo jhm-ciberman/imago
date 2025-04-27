@@ -29,7 +29,7 @@ public class Stage
     /// <summary>
     /// Gets the picking manager used to pick objects.
     /// </summary>
-    public PickingManger Picking { get; } = new PickingManger();
+    public PickingManager Picking { get; } = new PickingManager();
 
     /// <summary>
     /// Gets the current scene.

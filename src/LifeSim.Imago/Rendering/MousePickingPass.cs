@@ -89,7 +89,7 @@ internal class MousePickingPass : IDisposable, IPipelineProvider
     /// <param name="camera">The camera to use for rendering.</param>
     /// <param name="pickingManger">The picking manager to use for picking.</param>
     /// <param name="pickingRenderQueue">The render queue to use for rendering.</param>
-    public void Render(CommandList cl, RenderTexture renderTexture, Camera camera, PickingManger pickingManger, RenderQueue pickingRenderQueue)
+    public void Render(CommandList cl, RenderTexture renderTexture, Camera camera, PickingManager pickingManger, RenderQueue pickingRenderQueue)
     {
         // Step 1: Read the pixel color from the previous frame.
         uint objectID = this.ReadPixel(cl);

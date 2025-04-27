@@ -17,7 +17,7 @@ public interface IPickableTarget
 /// <summary>
 /// This class is responsible for managing a list of pickable objects and assigning them unique IDs.
 /// </summary>
-public class PickingManger
+public class PickingManager
 {
     /// <summary>
     /// Occurs when the currently selected pickable object changes.
