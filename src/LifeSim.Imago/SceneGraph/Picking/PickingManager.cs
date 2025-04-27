@@ -5,14 +5,7 @@ using LifeSim.Imago.Input;
 using LifeSim.Imago.SceneGraph.Cameras;
 using LifeSim.Imago.SceneGraph.Nodes;
 
-namespace LifeSim.Imago.SceneGraph;
-
-public interface IPickableTarget
-{
-    public void MouseEnter(HitInfo hitInfo);
-    public void MouseMove(HitInfo hitInfo);
-    public void MouseLeave();
-}
+namespace LifeSim.Imago.SceneGraph.Picking;
 
 /// <summary>
 /// This class is responsible for managing a list of pickable objects and assigning them unique IDs.
@@ -64,9 +57,7 @@ public class PickingManager
     public void RegisterPickable(IPickable pickable)
     {
         if (pickable.PickId != 0)
-        {
             throw new InvalidOperationException("The pickable object already has an ID assigned.");
-        }
 
         pickable.PickId = this._nextId;
         this._pickables.Add(this._nextId, pickable);
@@ -80,9 +71,7 @@ public class PickingManager
     public void UnregisterPickable(IPickable pickable)
     {
         if (pickable.PickId == 0)
-        {
             throw new InvalidOperationException("The pickable object does not have an ID assigned.");
-        }
 
         this._pickables.Remove(pickable.PickId);
         pickable.PickId = 0;
@@ -96,9 +85,7 @@ public class PickingManager
     public IPickable? GetPickable(uint id)
     {
         if (this._pickables.TryGetValue(id, out IPickable? pickable))
-        {
             return pickable;
-        }
 
         return null;
     }
@@ -119,9 +106,7 @@ public class PickingManager
         this.HitInfo = hitInfo;
 
         if (this.PickableTarget == newTarget)
-        {
             this.PickableTarget?.MouseMove(hitInfo);
-        }
         else
         {
             this.PickableTarget?.MouseLeave();

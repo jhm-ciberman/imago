@@ -1,4 +1,4 @@
-namespace LifeSim.Imago.SceneGraph;
+namespace LifeSim.Imago.SceneGraph.Picking;
 
 /// <summary>
 /// An interface for objects that can be picked.

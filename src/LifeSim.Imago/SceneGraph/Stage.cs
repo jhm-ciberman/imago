@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using LifeSim.Imago.Rendering;
 using LifeSim.Imago.SceneGraph.Nodes;
+using LifeSim.Imago.SceneGraph.Picking;
 using LifeSim.Imago.Textures;
 
 namespace LifeSim.Imago.SceneGraph;
