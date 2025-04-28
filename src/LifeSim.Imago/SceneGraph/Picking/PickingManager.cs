@@ -12,6 +12,8 @@ namespace LifeSim.Imago.SceneGraph.Picking;
 /// </summary>
 public class PickingManager
 {
+    public static PickingManager Instance { get; } = new PickingManager();
+
     /// <summary>
     /// Occurs when the currently selected pickable object changes.
     /// </summary>

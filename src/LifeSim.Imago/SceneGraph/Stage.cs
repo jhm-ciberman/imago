@@ -30,7 +30,7 @@ public class Stage
     /// <summary>
     /// Gets the picking manager used to pick objects.
     /// </summary>
-    public PickingManager Picking { get; } = new PickingManager();
+    public PickingManager Picking { get; } = PickingManager.Instance;
 
     /// <summary>
     /// Gets the current scene.
