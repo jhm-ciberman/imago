@@ -120,6 +120,19 @@ public struct Vector2Int : IEquatable<Vector2Int>
         return new Vector2Int(Math.Abs(value.X), Math.Abs(value.Y));
     }
 
+    /// <summary>
+    /// Clamps the vector to the specified bounds.
+    /// </summary>
+    /// <param name="bounds">The bounds to clamp the vector to.</param>
+    /// <returns>The clamped vector.</returns>
+    public Vector2Int Clamp(RectInt bounds)
+    {
+        return new Vector2Int(
+            Math.Clamp(this.X, bounds.X, bounds.X + bounds.Width),
+            Math.Clamp(this.Y, bounds.Y, bounds.Y + bounds.Height)
+        );
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Vector2Int operator +(Vector2Int a, Vector2Int b)
     {
