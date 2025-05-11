@@ -56,6 +56,21 @@ public struct RectInt : IEquatable<RectInt>
     }
 
     /// <summary>
+    /// Creates a rectangle from two corners.
+    /// </summary>
+    /// <param name="corner1">The first corner of the rectangle.</param>
+    /// <param name="corner2">The second corner of the rectangle.</param>
+    /// <returns>A new rectangle defined by the two corners.</returns>
+    public static RectInt FromCorners(Vector2Int corner1, Vector2Int corner2)
+    {
+        int x = Math.Min(corner1.X, corner2.X);
+        int y = Math.Min(corner1.Y, corner2.Y);
+        int width = Math.Abs(corner2.X - corner1.X);
+        int height = Math.Abs(corner2.Y - corner1.Y);
+        return new RectInt(x, y, width, height);
+    }
+
+    /// <summary>
     /// Gets or sets the position of the rectangle.
     /// </summary>
     public Vector2Int Position
