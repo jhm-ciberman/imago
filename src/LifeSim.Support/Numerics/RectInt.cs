@@ -109,12 +109,30 @@ public struct RectInt : IEquatable<RectInt>
     /// <summary>
     /// Get or sets the leftmost position of the rectangle.
     /// </summary>
-    public int Left { get => this.X; set => this.X = value; }
+    public int Left
+    {
+        get => this.X;
+        set
+        {
+            int oldX = this.X;
+            this.X = value;
+            this.Width = oldX + this.Width - this.X;
+        }
+    }
 
     /// <summary>
     /// Get or sets the topmost position of the rectangle.
     /// </summary>
-    public int Top { get => this.Y; set => this.Y = value; }
+    public int Top
+    {
+        get => this.Y;
+        set
+        {
+            int oldY = this.Y;
+            this.Y = value;
+            this.Height = oldY + this.Height - this.Y;
+        }
+    }
 
     public Vector2Int Min => new Vector2Int(this.XMin, this.YMin);
     public Vector2Int Max => new Vector2Int(this.XMax, this.YMax);
@@ -209,6 +227,31 @@ public struct RectInt : IEquatable<RectInt>
     public RectInt Inflate(ThicknessInt padding)
     {
         return new RectInt(this.Position - padding.TopLeft, this.Size + padding.Total);
+    }
+
+    /// <summary>
+    /// Checks if this rectangle intersects with the given rectangle.
+    /// </summary>
+    /// <param name="bounds">The rectangle to test.</param>
+    /// <param name="intersection">The intersection rectangle.</param>
+    /// <returns>True if the rectangles intersect, otherwise false.</returns>
+    public bool IntersectionTest(RectInt bounds, out RectInt intersection)
+    {
+        // Calculate the intersection rectangle
+        int xMin = Math.Max(this.X, bounds.X);
+        int yMin = Math.Max(this.Y, bounds.Y);
+        int xMax = Math.Min(this.X + this.Width, bounds.X + bounds.Width);
+        int yMax = Math.Min(this.Y + this.Height, bounds.Y + bounds.Height);
+
+        // Check if there is an intersection
+        if (xMin < xMax && yMin < yMax)
+        {
+            intersection = new RectInt(xMin, yMin, xMax - xMin, yMax - yMin);
+            return true;
+        }
+
+        intersection = default;
+        return false;
     }
 
     /// <summary>
