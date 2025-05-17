@@ -83,7 +83,7 @@ public struct Thickness
     /// </summary>
     /// <param name="horizontal">The horizontal thickness of the frame that will be used for the left and right sides.</param>
     /// <param name="vertical">The vertical thickness of the frame that will be used for the top and bottom sides.</param>
-    public Thickness(float horizontal, float vertical)
+    public Thickness(float horizontal = 0f, float vertical = 0f)
     {
         this.Left = horizontal;
         this.Top = vertical;
@@ -98,7 +98,7 @@ public struct Thickness
     /// <param name="top">The top thickness of the frame.</param>
     /// <param name="right">The right thickness of the frame.</param>
     /// <param name="bottom">The bottom thickness of the frame.</param>
-    public Thickness(float left, float top, float right, float bottom)
+    public Thickness(float left = 0f, float top = 0f, float right = 0f, float bottom = 0f)
     {
         this.Left = left;
         this.Top = top;
