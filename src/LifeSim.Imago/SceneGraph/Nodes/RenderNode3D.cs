@@ -89,7 +89,7 @@ public class RenderNode3D : Node3D, IPickable
     /// <summary>
     /// Gets or sets whether this node is visible.
     /// </summary>
-    public bool Visible
+    public bool IsVisible
     {
         get => this._visible;
         set

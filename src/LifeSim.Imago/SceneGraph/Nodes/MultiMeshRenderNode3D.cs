@@ -133,6 +133,25 @@ public class MultiMeshRenderNode3D : Node3D
         }
     }
 
+    private bool _isVisible = true;
+
+    /// <summary>
+    /// Gets or sets whether the node is visible.
+    /// </summary>
+    public bool IsVisible
+    {
+        get => this._isVisible;
+        set
+        {
+            if (this._isVisible == value) return;
+            this._isVisible = value;
+            foreach (var node in this._renderNodes)
+            {
+                node.IsVisible = value;
+            }
+        }
+    }
+
     private void SetMeshes(MeshRenderInfo[] meshes)
     {
         this._meshes = meshes;
