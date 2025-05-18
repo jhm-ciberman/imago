@@ -23,8 +23,10 @@ csharp_prefer_braces = when_multiline
 csharp_prefer_simple_default_expression = false
 csharp_style_implicit_object_creation_when_type_is_apparent = false
 csharp_style_namespace_declarations = file_scoped:error
+csharp_style_throw_expression = true
 
 dotnet_diagnostic.IDE0011.severity = warning # Add braces
+dotnet_diagnostic.IDE0016.severity = warning # Use 'throw' expression
 dotnet_diagnostic.IDE0040.severity = warning # access modifier required
 dotnet_diagnostic.IDE0008.severity = none # Use explicit type instead of 'var'
 dotnet_diagnostic.IDE0007.severity = none # Use 'var' instead of explicit type
