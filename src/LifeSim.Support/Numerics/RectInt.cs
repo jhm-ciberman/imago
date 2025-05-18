@@ -142,6 +142,8 @@ public struct RectInt : IEquatable<RectInt>
     public int XMax { get => Math.Max(this.X, this.X + this.Width); set { this.Width = value - this.X; } }
     public int YMax { get => Math.Max(this.Y, this.Y + this.Height); set { this.Height = value - this.Y; } }
 
+    public bool IsEmpty => this.Width <= 0 || this.Height <= 0;
+
 
     /// <summary>
     /// Checks if the rectangle contains the specified point.
