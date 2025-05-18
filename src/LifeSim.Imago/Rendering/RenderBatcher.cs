@@ -142,7 +142,9 @@ internal class RenderBatcher : IDisposable
 
             // If it's batcheable, add to current batch. If not, finish batch
             if (renderable.CanBeBatchedWith(prevRenderable))
+            {
                 instanceCount++;
+            }
             else
             {
                 this._batches.Add(new RenderBatch(instanceCount, prevRenderable, this._pass));

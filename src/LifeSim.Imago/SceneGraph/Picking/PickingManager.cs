@@ -108,7 +108,9 @@ public class PickingManager
         this.HitInfo = hitInfo;
 
         if (this.PickableTarget == newTarget)
+        {
             this.PickableTarget?.MouseMove(hitInfo);
+        }
         else
         {
             this.PickableTarget?.MouseLeave();

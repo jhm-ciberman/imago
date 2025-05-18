@@ -106,7 +106,9 @@ public class Tween<T> : ITween where T : struct
             this.Delay -= deltaTime;
 
             if (this.Delay > 0f)
+            {
                 return true;
+            }
             else
             {
                 deltaTime = -this.Delay;

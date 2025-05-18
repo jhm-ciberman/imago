@@ -298,7 +298,9 @@ public static class Easing
         public static float Out(float k)
         {
             if (k < 1f / 2.75f)
+            {
                 return 7.5625f * k * k;
+            }
             else if (k < 2f / 2.75f)
             {
                 return 7.5625f * (k -= 1.5f / 2.75f) * k + 0.75f;
