@@ -31,10 +31,20 @@ public class TextureDrawOperation : IDrawOperation, IDisposable
     {
     }
 
+    private static GraphicsOptions GraphicsOptions { get; } = new GraphicsOptions
+    {
+        Antialias = false, // We are just copying, we don't need antialiasing
+        AlphaCompositionMode = PixelAlphaCompositionMode.Src, // We want to override the alpha channel, not blend it
+    };
+
     /// <inheritdoc />
     void IDrawOperation.Draw(Image<Rgba32> destination, Vector2Int position)
     {
-        destination.Mutate(ctx => ctx.DrawImage(this._image, new Point(position.X, position.Y), 1f));
+        destination.Mutate(ctx => ctx.DrawImage(
+            foreground: this._image,
+            backgroundLocation: new Point(position.X, position.Y),
+            options: GraphicsOptions)
+        );
     }
 
     public void Dispose()
