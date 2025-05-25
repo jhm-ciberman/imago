@@ -186,4 +186,17 @@ public class TextureGroup : IDisposable
             page.Dispose();
         }
     }
+
+    /// <summary>
+    /// Saves the texture atlas to a PNG file.
+    /// </summary>
+    /// <param name="name">The name of the file to save.</param>
+    public void SaveToPng(string name)
+    {
+        for (int i = 0; i < this._pages.Count; i++)
+        {
+            var page = this._pages[i];
+            page.SaveToPng(name.Replace(".png", $"_{i}.png"));
+        }
+    }
 }

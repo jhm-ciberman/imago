@@ -171,6 +171,15 @@ public class TexturePage : IDisposable
     }
 
     /// <summary>
+    /// Saves the texture atlas to a PNG file.
+    /// </summary>
+    /// <param name="path">The path to save the PNG file to.</param>
+    public void SaveToPng(string path)
+    {
+        this.Image.SaveAsPng(path);
+    }
+
+    /// <summary>
     /// Releases all resources used by the page.
     /// </summary>
     public void Dispose()
