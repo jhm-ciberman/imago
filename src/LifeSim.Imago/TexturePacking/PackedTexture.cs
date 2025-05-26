@@ -1,3 +1,4 @@
+using System;
 using System.Numerics;
 using LifeSim.Imago.Textures;
 using LifeSim.Support.Numerics;
@@ -47,17 +48,26 @@ public class PackedTexture : ITextureRegion
     /// <summary>
     /// Gets the size of the packed texture in pixels.
     /// </summary>
-    public Vector2Int PixelSize => new Vector2Int((int)(this.Size.X * this.Texture.Size.X), (int)(this.Size.Y * this.Texture.Size.Y));
+    public Vector2Int PixelSize => new Vector2Int(
+        (int)Math.Round(this.Size.X * this.Texture.Size.X),
+        (int)Math.Round(this.Size.Y * this.Texture.Size.Y)
+    );
 
     /// <summary>
     /// Gets the position of the left top corner of the packed texture in pixels.
     /// </summary>
-    public Vector2Int PixelTopLeft => new Vector2Int((int)(this.TopLeft.X * this.Texture.Size.X), (int)(this.TopLeft.Y * this.Texture.Size.Y));
+    public Vector2Int PixelTopLeft => new Vector2Int(
+        (int)Math.Round(this.TopLeft.X * this.Texture.Size.X),
+        (int)Math.Round(this.TopLeft.Y * this.Texture.Size.Y)
+    );
 
     /// <summary>
     /// Gets the position of the right bottom corner of the packed texture in pixels.
     /// </summary>
-    public Vector2Int PixelBottomRight => new Vector2Int((int)(this.BottomRight.X * this.Texture.Size.X), (int)(this.BottomRight.Y * this.Texture.Size.Y));
+    public Vector2Int PixelBottomRight => new Vector2Int(
+        (int)Math.Round(this.BottomRight.X * this.Texture.Size.X),
+        (int)Math.Round(this.BottomRight.Y * this.Texture.Size.Y)
+    );
 
     /// <summary>
     /// Gets a vector containing the size and offset of the packed texture in texture space coordinates.

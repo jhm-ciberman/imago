@@ -103,7 +103,7 @@ public class Sprite
 
         // Validate that the frame has the same size as the first frame
         var firstFrame = this._frames[0];
-        if (frame.Size != firstFrame.Size)
+        if (frame.PixelSize != firstFrame.PixelSize)
             throw new ArgumentException("The added frame must have the same size as the first frame.");
     }
 

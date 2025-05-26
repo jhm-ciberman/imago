@@ -13,8 +13,6 @@ namespace LifeSim.Imago.TexturePacking;
 /// </summary>
 public class TexturePage : IDisposable
 {
-    private const float TEXEL_EPSILON = 0f; //0.05f; // 1/20th of a texel
-
     private readonly uint _tileSize;
     private readonly BinPacker _binPacker;
 
@@ -104,8 +102,8 @@ public class TexturePage : IDisposable
         Vector2 uvTopLeft = coords / imgSize;
         Vector2 uvBottomRight = (coords + operation.Size) / imgSize;
 
-        var texelEpsilon = Vector2.One / imgSize * TEXEL_EPSILON;
-        result = new PackedTexture(this.Texture, uvTopLeft - texelEpsilon, uvBottomRight + texelEpsilon);
+        var texelEpsilon = Vector2.One / imgSize * this.Group.TexelInsetFactor;
+        result = new PackedTexture(this.Texture, uvTopLeft + texelEpsilon, uvBottomRight - texelEpsilon);
 
         return true;
     }

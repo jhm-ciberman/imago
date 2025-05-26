@@ -41,6 +41,17 @@ public class TextureGroup : IDisposable
     /// </summary>
     public bool IsSrgb { get; } = false;
 
+    /// <summary>
+    /// Gets or sets the factor used to calculate an inward inset for texture coordinates within the atlas.
+    /// This inset acts as a small safety margin, effectively shrinking the usable UV area slightly
+    /// to prevent visual artifacts such as color bleeding from adjacent textures or shimmering at edges
+    /// due to floating-point inaccuracies during GPU texture sampling.
+    /// The value is a multiplier relative to the size of a single texel. For example, the default
+    /// value of 0.02f (1/50th) means the UV coordinates will be inset by 2% of a texel's dimension
+    /// from their true edges on each side.
+    /// </summary>
+    public float TexelInsetFactor { get; set; } = 1f / 50f; // 1/50th of a texel
+
     private readonly List<TexturePage> _pages = new(1);
 
     private readonly Dictionary<PackedTexture, TexturePage> _packedTexturesPages = new();
