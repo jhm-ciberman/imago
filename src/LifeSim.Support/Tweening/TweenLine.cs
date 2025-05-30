@@ -38,7 +38,8 @@ public class TweenLine
     {
         for (int i = 0; i < this._tweens.Count; i++)
         {
-            if (!this._tweens[i].Update(deltaTime))
+            var tween = this._tweens[i];
+            if (tween.IsFinished || !tween.Update(deltaTime))
             {
                 this._tweens.RemoveAt(i);
                 i--;

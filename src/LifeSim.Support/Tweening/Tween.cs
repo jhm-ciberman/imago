@@ -28,6 +28,8 @@ public interface ITween
     public ITween WithFrameTime(float frameTime);
 
     public ITween WithFrameCount(int frameCount);
+
+    public void Stop();
 }
 
 public class Tween<T> : ITween where T : struct
@@ -92,6 +94,13 @@ public class Tween<T> : ITween where T : struct
     {
         this.FrameTime = this.Duration / frameCount;
         return this;
+    }
+
+    public void Stop()
+    {
+        if (this.IsFinished) return;
+        this.CurrentTime = this.Duration;
+        this._setter(this.EndValue);
     }
 
     /// <summary>
