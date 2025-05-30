@@ -217,14 +217,14 @@ public class TextBlock : Control
 
     protected override Vector2 MeasureOverride(Vector2 availableSize)
     {
-        if (this.Text == string.Empty)
-        {
-            return Vector2.Zero;
-        }
-
         if (this._textLinesDirty)
         {
             this.RecomputeTextLines(availableSize);
+        }
+
+        if (this.Text == string.Empty)
+        {
+            return Vector2.Zero;
         }
 
         var size = this.Font.MeasureString(this.Text);
