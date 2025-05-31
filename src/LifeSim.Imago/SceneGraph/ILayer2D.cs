@@ -5,6 +5,7 @@ namespace LifeSim.Imago.SceneGraph;
 
 public interface ILayer2D
 {
+    public bool IsCursorOverElement { get; }
     public void Draw(DrawingContext ctx);
     public void Update(float deltaTime);
     public void HandleMousePressed(MouseButtonEventArgs e);

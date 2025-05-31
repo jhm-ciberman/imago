@@ -321,6 +321,17 @@ public class Control : Visual
     }
 
     /// <summary>
+    /// Gets the children of this control that should be considered for hit testing.
+    /// </summary>
+    protected virtual IReadOnlyList<Control> HitTestingChildren => [];
+
+
+    /// <summary>
+    /// Gets or sets whether the control interacts with hit testing.
+    /// </summary>
+    public bool IsHitTestVisible { get; set; } = true;
+
+    /// <summary>
     /// Recursively searches for a control at the specified position.
     /// </summary>
     /// <param name="position">The position to hit test, in viewport space.</param>
@@ -329,8 +340,9 @@ public class Control : Visual
     {
         // if the element is not visible, we also remove all its children
         if (this.Visibility != Visibility.Visible) return null;
+        if (!this.IsHitTestVisible) return null;
 
-        var hits = this.GetBounds().Contains(position);
+        bool hits = this.GetBounds().Contains(position);
 
         // Early exit if the position is outside the bounds of this control
         if (this.ClipToBounds && !hits) return null;
@@ -346,11 +358,6 @@ public class Control : Visual
         }
 
         // If no child control was hit, return this control
-        return hits ? this : null;
+        return hits && this.Background != null ? this : null;
     }
-
-    /// <summary>
-    /// Gets the children of this control that should be considered for hit testing.
-    /// </summary>
-    protected virtual IReadOnlyList<Control> HitTestingChildren => [];
 }

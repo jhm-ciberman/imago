@@ -101,9 +101,10 @@ public class PickingManager
     /// Updates the picking manager.
     /// </summary>
     /// <param name="camera">The camera used for picking.</param>
-    public void Update(Camera? camera)
+    /// <param name="isCursorOverUi">Whether the cursor is currently over a UI element.</param>
+    public void Update(Camera? camera, bool isCursorOverUi)
     {
-        var newTarget = this.GetPickableView(camera, out var hitInfo);
+        var newTarget = this.GetPickableView(camera, isCursorOverUi, out var hitInfo);
 
         this.HitInfo = hitInfo;
 
@@ -124,12 +125,14 @@ public class PickingManager
     /// Returns the pickable view that is currently under the mouse cursor.
     /// </summary>
     /// <param name="camera">The camera used for picking.</param>
+    /// <param name="isCursorOverUi">Whether the cursor is currently over a UI element.</param>
     /// <param name="hitInfo">The hit info that was used to find the pickable.</param>
     /// <returns>The pickable view that is currently under the mouse cursor.</returns>
-    private IPickableTarget? GetPickableView(Camera? camera, out HitInfo hitInfo)
+    private IPickableTarget? GetPickableView(Camera? camera, bool isCursorOverUi, out HitInfo hitInfo)
     {
         hitInfo = default;
         if (camera == null) return null;
+        if (isCursorOverUi) return null; // This is super hacky but whatever.
 
         if (this.HighlightedPickable is not RenderNode3D selectedRenderNode)
             return null;

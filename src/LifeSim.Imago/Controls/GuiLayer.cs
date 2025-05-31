@@ -132,18 +132,11 @@ public class GuiLayer : ILayer2D
 
         var position = this.WindowToViewport(this.Input.CursorPosition);
 
-        var old = this.ControlUnderCursor;
         this.ControlUnderCursor = this._content.HitTest(position);
-
-        if (this.ControlUnderCursor != old)
-        {
-            var c = this.ControlUnderCursor;
-            Console.WriteLine((c == null)
-                ? "Control under cursor: None"
-                : $"Control under cursor: {c.GetType().Name} ({c.Name}) at {c.Position} with size {c.ActualSize}"
-            );
-        }
+        this.IsCursorOverElement = this.ControlUnderCursor != null;
     }
+
+    public bool IsCursorOverElement { get; private set; } = false;
 
     public void HandleMousePressed(MouseButtonEventArgs e)
     {

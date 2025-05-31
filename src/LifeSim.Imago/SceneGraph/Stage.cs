@@ -204,7 +204,9 @@ public class Stage
     public virtual void Update(float deltaTime)
     {
         this.Gizmos.Update(deltaTime);
-        this.Picking.Update(this.Scene.Camera);
+
+        bool isCursorOverUi = this.Scene.GuiLayer?.IsCursorOverElement ?? false;
+        this.Picking.Update(this.Scene.Camera, isCursorOverUi);
         this.Scene.Update(deltaTime);
     }
 
