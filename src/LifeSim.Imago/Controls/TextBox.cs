@@ -141,7 +141,7 @@ public class TextBox : Control
         set => this.SetPropertyAndInvalidateMeasure(ref this._padding, value);
     }
 
-    private void InputManager_KeyPressed(object? sender, KeyEvent e)
+    private void InputManager_KeyPressed(object? sender, KeyboardEventArgs e)
     {
         if (!this.IsFocused) return;
 
@@ -173,9 +173,9 @@ public class TextBox : Control
 
     private void InputManager_TextEntered(object? sender, TextEventArgs e)
     {
-        if (this.IsFocused && e.Characters.Count > 0)
+        if (this.IsFocused && e.TypedCharacters.Count > 0)
         {
-            string typedText = string.Join(string.Empty, e.Characters);
+            string typedText = string.Join(string.Empty, e.TypedCharacters);
             this.Text = this.Text.Insert(this.CaretIndex, typedText);
             this.CaretIndex += typedText.Length;
         }

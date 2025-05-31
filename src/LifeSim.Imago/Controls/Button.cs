@@ -1,6 +1,6 @@
 using System;
-using System.Numerics;
 using System.Windows.Input;
+using LifeSim.Imago.Input;
 using LifeSim.Imago.Rendering.Sprites;
 using Veldrid;
 
@@ -128,24 +128,28 @@ public class Button : ContentControl
         }
     }
 
-    protected override void OnMouseDown(MouseButton button, Vector2 position)
+    public override void HandleMousePressed(MouseButtonEventArgs e)
     {
-        base.OnMouseDown(button, position);
-
-        if (button == MouseButton.Left)
+        Console.WriteLine(e);
+        if (e.Button == MouseButton.Left)
         {
             this.IsPressed = true;
+            e.Handled = true; // Prevent further propagation of the event
         }
+
+        base.HandleMousePressed(e);
     }
 
-    protected override void OnMouseUp(MouseButton button, Vector2 position)
+    public override void HandleMouseReleased(MouseButtonEventArgs e)
     {
-        base.OnMouseUp(button, position);
-
-        if (button == MouseButton.Left)
+        Console.WriteLine(e);
+        if (e.Button == MouseButton.Left)
         {
             this.IsPressed = false;
+            e.Handled = true; // Prevent further propagation of the event
         }
+
+        base.HandleMouseReleased(e);
     }
 
     /// <summary>

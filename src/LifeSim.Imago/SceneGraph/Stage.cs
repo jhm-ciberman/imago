@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using LifeSim.Imago.Input;
 using LifeSim.Imago.Rendering;
 using LifeSim.Imago.SceneGraph.Nodes;
 using LifeSim.Imago.SceneGraph.Picking;
@@ -63,6 +64,51 @@ public class Stage
         {
             this.ShadowCasterRenderQueues[i] = new RenderQueue(RenderQueues.ShadowCaster);
         }
+    }
+
+    public void EnableInputHandling()
+    {
+        var input = InputManager.Instance;
+        input.MouseButtonPressed += this.Input_MouseButtonPressed;
+        input.MouseButtonReleased += this.Input_MouseButtonReleased;
+        input.MouseWheelScrolled += this.Input_MouseWheelScrolled;
+        input.KeyPressed += this.Input_KeyPressed;
+        input.KeyReleased += this.Input_KeyReleased;
+    }
+
+    public void DisableInputHandling()
+    {
+        var input = InputManager.Instance;
+        input.MouseButtonPressed -= this.Input_MouseButtonPressed;
+        input.MouseButtonReleased -= this.Input_MouseButtonReleased;
+        input.MouseWheelScrolled -= this.Input_MouseWheelScrolled;
+        input.KeyPressed -= this.Input_KeyPressed;
+        input.KeyReleased -= this.Input_KeyReleased;
+    }
+
+    private void Input_MouseButtonPressed(object? sender, MouseButtonEventArgs e)
+    {
+        this.Scene.HandleMousePressed(e);
+    }
+
+    private void Input_MouseButtonReleased(object? sender, MouseButtonEventArgs e)
+    {
+        this.Scene.HandleMouseReleased(e);
+    }
+
+    private void Input_MouseWheelScrolled(object? sender, MouseWheelEventArgs e)
+    {
+        this.Scene.HandleMouseWheelScrolled(e);
+    }
+
+    private void Input_KeyPressed(object? sender, KeyboardEventArgs e)
+    {
+        this.Scene.HandleKeyPressed(e);
+    }
+
+    private void Input_KeyReleased(object? sender, KeyboardEventArgs e)
+    {
+        this.Scene.HandleKeyReleased(e);
     }
 
     /// <summary>

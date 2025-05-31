@@ -1,36 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 using LifeSim.Imago.Controls.Drawing;
 using LifeSim.Imago.Input;
 using LifeSim.Imago.Rendering.Sprites;
 using LifeSim.Support.Numerics;
-using Veldrid;
 
 namespace LifeSim.Imago.Controls;
-
-public class MouseButtonEventArgs : EventArgs
-{
-    public MouseButton Button { get; }
-    public Vector2 Position { get; }
-
-    public MouseButtonEventArgs(MouseButton button, Vector2 position)
-    {
-        this.Button = button;
-        this.Position = position;
-    }
-}
-
-public class MouseWheelEventArgs : EventArgs
-{
-    public float Delta { get; }
-    public Vector2 Position { get; }
-
-    public MouseWheelEventArgs(float delta, Vector2 position)
-    {
-        this.Delta = delta;
-        this.Position = position;
-    }
-}
 
 public class Control : Visual
 {
@@ -269,47 +245,29 @@ public class Control : Visual
         var bounds = this.GetBounds();
         var mousePosition = this.Stage.WindowToViewport(input.CursorPosition);
         this.IsMouseOver = bounds.Contains(mousePosition);
-
-        if (this.IsMouseOver)
-        {
-            this.CheckMouseButtonEvents(input, MouseButton.Left, mousePosition);
-            this.CheckMouseButtonEvents(input, MouseButton.Right, mousePosition);
-            this.CheckMouseButtonEvents(input, MouseButton.Middle, mousePosition);
-
-            float delta = input.MouseScrollDelta;
-
-            if (delta != 0)
-            {
-                this.OnMouseWheel(delta, mousePosition);
-            }
-        }
     }
 
-    private void CheckMouseButtonEvents(InputManager input, MouseButton button, Vector2 mousePosition)
+    protected Control? ControlParent => this.Parent as Control;
+
+    public virtual void HandleMousePressed(MouseButtonEventArgs e)
     {
-        if (input.WasMouseButtonPressedThisFrame(button))
-        {
-            this.OnMouseDown(button, mousePosition);
-        }
-        else if (input.WasMouseButtonReleasedThisFrame(button))
-        {
-            this.OnMouseUp(button, mousePosition);
-        }
+        this.MouseDown?.Invoke(this, e);
+        if (e.Handled) return;
+        this.ControlParent?.HandleMousePressed(e);
     }
 
-    protected virtual void OnMouseDown(MouseButton button, Vector2 mousePosition)
+    public virtual void HandleMouseReleased(MouseButtonEventArgs e)
     {
-        this.MouseDown?.Invoke(this, new MouseButtonEventArgs(button, mousePosition));
+        this.MouseUp?.Invoke(this, e);
+        if (e.Handled) return;
+        this.ControlParent?.HandleMouseReleased(e);
     }
 
-    protected virtual void OnMouseUp(MouseButton button, Vector2 mousePosition)
+    public virtual void HandleMouseWheel(MouseWheelEventArgs e)
     {
-        this.MouseUp?.Invoke(this, new MouseButtonEventArgs(button, mousePosition));
-    }
-
-    protected virtual void OnMouseWheel(float delta, Vector2 mousePosition)
-    {
-        this.MouseWheel?.Invoke(this, new MouseWheelEventArgs(delta, mousePosition));
+        this.MouseWheel?.Invoke(this, e);
+        if (e.Handled) return;
+        this.ControlParent?.HandleMouseWheel(e);
     }
 
     protected virtual void OnMouseEnter()
@@ -361,4 +319,38 @@ public class Control : Visual
     {
         this.Background?.DrawRectangle(ctx, this.Position, this.ActualSize);
     }
+
+    /// <summary>
+    /// Recursively searches for a control at the specified position.
+    /// </summary>
+    /// <param name="position">The position to hit test, in viewport space.</param>
+    /// <returns>The control at the specified position, or null if no control was found.</returns>
+    public Control? HitTest(Vector2 position)
+    {
+        // if the element is not visible, we also remove all its children
+        if (this.Visibility != Visibility.Visible) return null;
+
+        var hits = this.GetBounds().Contains(position);
+
+        // Early exit if the position is outside the bounds of this control
+        if (this.ClipToBounds && !hits) return null;
+
+        // Recursively check child controls
+        foreach (var child in this.HitTestingChildren)
+        {
+            var hitControl = child.HitTest(position);
+            if (hitControl != null)
+            {
+                return hitControl;
+            }
+        }
+
+        // If no child control was hit, return this control
+        return hits ? this : null;
+    }
+
+    /// <summary>
+    /// Gets the children of this control that should be considered for hit testing.
+    /// </summary>
+    protected virtual IReadOnlyList<Control> HitTestingChildren => [];
 }

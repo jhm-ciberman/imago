@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using LifeSim.Imago.Input;
 using LifeSim.Imago.SceneGraph.Cameras;
 using LifeSim.Imago.SceneGraph.Nodes;
 using LifeSim.Support.Drawing;
@@ -89,5 +90,30 @@ public class Scene : Node3D
         {
             this.Dispose();
         }
+    }
+
+    public void HandleMousePressed(MouseButtonEventArgs e)
+    {
+        this.GuiLayer?.HandleMousePressed(e);
+    }
+
+    public void HandleMouseReleased(MouseButtonEventArgs e)
+    {
+        this.GuiLayer?.HandleMouseReleased(e);
+    }
+
+    public void HandleMouseWheelScrolled(MouseWheelEventArgs e)
+    {
+        this.GuiLayer?.HandleMouseWheel(e);
+    }
+
+    public void HandleKeyPressed(KeyboardEventArgs e)
+    {
+        this.GuiLayer?.HandleKeyPressed(e);
+    }
+
+    public void HandleKeyReleased(KeyboardEventArgs e)
+    {
+        this.GuiLayer?.HandleKeyReleased(e);
     }
 }

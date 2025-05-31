@@ -116,6 +116,11 @@ public class GuiLayer : ILayer2D
     }
 
     /// <summary>
+    /// Gets the control that is currently under the mouse cursor, or null if no control is under the cursor.
+    /// </summary>
+    public Control? ControlUnderCursor { get; private set; } = null;
+
+    /// <summary>
     /// Updates the gui layer.
     /// </summary>
     /// <param name="deltaTime">The time since the last update.</param>
@@ -124,6 +129,45 @@ public class GuiLayer : ILayer2D
         if (this._content is null) return;
 
         this._content.Update(deltaTime);
+
+        var position = this.WindowToViewport(this.Input.CursorPosition);
+
+        var old = this.ControlUnderCursor;
+        this.ControlUnderCursor = this._content.HitTest(position);
+
+        if (this.ControlUnderCursor != old)
+        {
+            var c = this.ControlUnderCursor;
+            Console.WriteLine((c == null)
+                ? "Control under cursor: None"
+                : $"Control under cursor: {c.GetType().Name} ({c.Name}) at {c.Position} with size {c.ActualSize}"
+            );
+        }
+    }
+
+    public void HandleMousePressed(MouseButtonEventArgs e)
+    {
+        this.ControlUnderCursor?.HandleMousePressed(e);
+    }
+
+    public void HandleMouseReleased(MouseButtonEventArgs e)
+    {
+        this.ControlUnderCursor?.HandleMouseReleased(e);
+    }
+
+    public void HandleMouseWheel(MouseWheelEventArgs e)
+    {
+        this.ControlUnderCursor?.HandleMouseWheel(e);
+    }
+
+    public void HandleKeyPressed(KeyboardEventArgs e)
+    {
+        //
+    }
+
+    public void HandleKeyReleased(KeyboardEventArgs e)
+    {
+        //
     }
 
     /// <summary>

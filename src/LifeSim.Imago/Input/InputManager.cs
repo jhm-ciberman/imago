@@ -1,11 +1,64 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Numerics;
 using LifeSim.Support.Numerics;
 using Veldrid;
 using Veldrid.Sdl2;
 
 namespace LifeSim.Imago.Input;
+
+public class KeyboardEventArgs : HandledEventArgs
+{
+    /// <summary>
+    /// Gets the key that was pressed or released.
+    /// </summary>
+    public Key Key { get; internal set; } = default;
+
+    /// <summary>
+    /// Gets the new state of the key. True if the key is now pressed, false if it is released.
+    /// </summary>
+    public bool IsDown { get; internal set; } = false;
+
+    public override string ToString()
+    {
+        return $"Key: {this.Key}, Handled: {this.Handled}";
+    }
+}
+
+public class MouseButtonEventArgs : HandledEventArgs
+{
+    /// <summary>
+    /// Gets the mouse button that was pressed or released.
+    /// </summary>
+    public MouseButton Button { get; internal set; } = default;
+
+    /// <summary>
+    /// Gets the new state of the mouse button. True if the button is now pressed, false if it is released.
+    /// </summary>
+    public bool IsDown { get; internal set; } = false;
+
+    public override string ToString()
+    {
+        return $"Button: {this.Button}, IsDown: {this.IsDown}, Handled: {this.Handled}";
+    }
+}
+
+public class MouseWheelEventArgs : HandledEventArgs
+{
+    /// <summary>
+    /// Gets the delta of the mouse wheel scroll. This how much the wheel was scrolled.
+    /// </summary>
+    public float WheelDelta { get; internal set; } = 0f;
+}
+
+public class TextEventArgs : EventArgs
+{
+    /// <summary>
+    /// Gets the characters that were typed.
+    /// </summary>
+    public IReadOnlyList<char> TypedCharacters { get; internal set; } = [];
+}
 
 /// <summary>
 /// Captures and manages the mouse and keyboard input.
@@ -20,27 +73,32 @@ public class InputManager : IDisposable
     /// <summary>
     /// Occurs when a key is pressed.
     /// </summary>
-    public event EventHandler<KeyEvent>? KeyPressed;
+    public event EventHandler<KeyboardEventArgs>? KeyPressed;
 
     /// <summary>
     /// Occurs when a key is released.
     /// </summary>
-    public event EventHandler<KeyEvent>? KeyReleased;
+    public event EventHandler<KeyboardEventArgs>? KeyReleased;
 
     /// <summary>
     /// Occurs when a mouse button is pressed.
     /// </summary>
-    public event EventHandler<MouseEvent>? MouseButtonPressed;
+    public event EventHandler<MouseButtonEventArgs>? MouseButtonPressed;
 
     /// <summary>
     /// Occurs when a mouse button is released.
     /// </summary>
-    public event EventHandler<MouseEvent>? MouseButtonReleased;
+    public event EventHandler<MouseButtonEventArgs>? MouseButtonReleased;
 
     /// <summary>
     /// Occurs when one or more characters are typed.
     /// </summary>
     public event EventHandler<TextEventArgs>? TextEntered;
+
+    /// <summary>
+    /// Occurs when the mouse wheel is scrolled.
+    /// </summary>
+    public event EventHandler<MouseWheelEventArgs>? MouseWheelScrolled;
 
     /// <summary>
     /// Gets the mouse wheel delta for this frame.
@@ -123,12 +181,12 @@ public class InputManager : IDisposable
             if (ke.Down)
             {
                 this.ReleaseKey(ke.Key);
-                this.KeyPressed?.Invoke(this, ke);
+                this.OnKeyPressed(ke.Key);
             }
             else
             {
                 this.PressKey(ke.Key);
-                this.KeyReleased?.Invoke(this, ke);
+                this.OnKeyReleased(ke.Key);
             }
         }
 
@@ -138,19 +196,26 @@ public class InputManager : IDisposable
             if (me.Down)
             {
                 this.ReleaseMouseButton(me.MouseButton);
-                this.MouseButtonPressed?.Invoke(this, me);
+                this.OnMouseButtonPressed(me);
             }
             else
             {
                 this.PressMouseButton(me.MouseButton);
-                this.MouseButtonReleased?.Invoke(this, me);
+                this.OnMouseButtonReleased(me);
             }
         }
 
         this._charactersTypedThisFrame = this.InputSnapshot.KeyCharPresses;
 
-        if (this.TextEntered != null && this._charactersTypedThisFrame.Count > 0)
-            this.TextEntered.Invoke(this, new TextEventArgs(this._charactersTypedThisFrame));
+        if (this._charactersTypedThisFrame.Count > 0)
+        {
+            this.OnTextEntered(this._charactersTypedThisFrame);
+        }
+
+        if (this.InputSnapshot.WheelDelta != 0f)
+        {
+            this.OnMouseWheelScrolled(this.InputSnapshot.WheelDelta);
+        }
     }
 
     /// <summary>
@@ -171,7 +236,7 @@ public class InputManager : IDisposable
     }
 
     /// <summary>
-    /// Gets the current mouse position relative to the window.
+    /// Gets the current mouse position in window space.
     /// </summary>
     public Vector2 CursorPosition => this._cursorPosition;
 
@@ -296,4 +361,74 @@ public class InputManager : IDisposable
     /// Gets a read-only list of the currently pressed characters.
     /// </summary>
     public IReadOnlyList<char> TypedCharacters => this._charactersTypedThisFrame;
+
+    private readonly KeyboardEventArgs _keyboardEventArgs = new KeyboardEventArgs();
+    private readonly MouseButtonEventArgs _mouseButtonEventArgs = new MouseButtonEventArgs();
+    private readonly MouseWheelEventArgs _mouseWheelEventArgs = new MouseWheelEventArgs();
+    private readonly TextEventArgs _textEventArgs = new TextEventArgs();
+
+    /// <summary>
+    /// Raises the <see cref="KeyPressed"/> event.
+    /// </summary>
+    /// <param name="key">The key that was pressed.</param>
+    protected void OnKeyPressed(Key key)
+    {
+        this._keyboardEventArgs.Key = key;
+        this._keyboardEventArgs.IsDown = true;
+        this._keyboardEventArgs.Handled = false;
+        this.KeyPressed?.Invoke(this, this._keyboardEventArgs);
+    }
+
+    /// <summary>
+    /// Raises the <see cref="KeyReleased"/> event.
+    /// </summary>
+    /// <param name="key">The key that was released.</param>
+    protected void OnKeyReleased(Key key)
+    {
+        this._keyboardEventArgs.Key = key;
+        this._keyboardEventArgs.IsDown = false;
+        this._keyboardEventArgs.Handled = false;
+        this.KeyReleased?.Invoke(this, this._keyboardEventArgs);
+    }
+
+    /// <summary>
+    /// Raises the <see cref="MouseButtonPressed"/> event.
+    /// </summary>
+    /// <param name="mouseEvent">The mouse event that was pressed.</param>
+    protected void OnMouseButtonPressed(MouseEvent mouseEvent)
+    {
+        this._mouseButtonEventArgs.Button = mouseEvent.MouseButton;
+        this._mouseButtonEventArgs.Handled = false;
+        this.MouseButtonPressed?.Invoke(this, this._mouseButtonEventArgs);
+    }
+
+    /// <summary>
+    /// Raises the <see cref="MouseButtonReleased"/> event.
+    /// </summary>
+    protected virtual void OnMouseButtonReleased(MouseEvent mouseEvent)
+    {
+        this._mouseButtonEventArgs.Button = mouseEvent.MouseButton;
+        this._mouseButtonEventArgs.Handled = false;
+        this.MouseButtonReleased?.Invoke(this, this._mouseButtonEventArgs);
+    }
+
+    /// <summary>
+    /// Raises the <see cref="TextEntered"/> event.
+    /// </summary>
+    /// <param name="characters">The characters that were typed.</param>
+    protected void OnTextEntered(IReadOnlyList<char> characters)
+    {
+        this._textEventArgs.TypedCharacters = characters;
+        this.TextEntered?.Invoke(this, this._textEventArgs);
+    }
+
+    /// <summary>
+    /// Raises the <see cref="MouseWheelScrolled"/> event.
+    /// </summary>
+    /// <param name="delta">The amount the mouse wheel was scrolled.</param>
+    protected void OnMouseWheelScrolled(float delta)
+    {
+        this._mouseWheelEventArgs.WheelDelta = delta;
+        this.MouseWheelScrolled?.Invoke(this, this._mouseWheelEventArgs);
+    }
 }

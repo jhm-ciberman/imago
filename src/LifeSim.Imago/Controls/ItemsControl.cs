@@ -64,6 +64,8 @@ public abstract class ItemsControl : Control
 
     public ItemCollection Items { get; }
 
+    protected override IReadOnlyList<Control> HitTestingChildren => this.Items;
+
     public ItemsControl()
     {
         this.Items = new ItemCollection(this);

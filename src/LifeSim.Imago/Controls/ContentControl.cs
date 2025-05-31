@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Numerics;
 using LifeSim.Imago.Rendering.Sprites;
 using LifeSim.Support.Numerics;
@@ -21,6 +22,7 @@ public class ContentControl : Control
     }
 
     private Control? _content;
+    private readonly Control[] _hitTestChildren = [null!];
 
     /// <summary>
     /// Gets or sets the content of the control.
@@ -39,6 +41,7 @@ public class ContentControl : Control
                 }
 
                 this._content = value;
+                this._hitTestChildren[0] = value!;
 
                 if (this._content != null)
                 {
@@ -48,6 +51,11 @@ public class ContentControl : Control
                 this.InvalidateMeasure();
             }
         }
+    }
+
+    protected override IReadOnlyList<Control> HitTestingChildren
+    {
+        get => this.Content != null ? this._hitTestChildren : [];
     }
 
     protected override Vector2 MeasureOverride(Vector2 availableSize)
