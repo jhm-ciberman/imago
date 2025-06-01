@@ -130,7 +130,6 @@ public class Button : ContentControl
 
     public override void HandleMousePressed(MouseButtonEventArgs e)
     {
-        Console.WriteLine(e);
         if (e.Button == MouseButton.Left)
         {
             this.IsPressed = true;
@@ -142,7 +141,6 @@ public class Button : ContentControl
 
     public override void HandleMouseReleased(MouseButtonEventArgs e)
     {
-        Console.WriteLine(e);
         if (e.Button == MouseButton.Left)
         {
             this.IsPressed = false;
