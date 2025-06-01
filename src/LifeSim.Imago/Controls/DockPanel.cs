@@ -80,7 +80,6 @@ public class DockPanel : ItemsControl
                 default:
                     throw new NotSupportedException();
             }
-
         }
 
         return finalRect;
@@ -93,7 +92,11 @@ public class DockPanel : ItemsControl
         // measure the children correctly.
         Rect availableRect = new Rect(Vector2.Zero, availableSize);
         availableRect = availableRect.Deflate(this.Padding);
-        Vector2 desiredSize = Vector2.Zero;
+
+        float leftRightWidth = 0; // Total width consumed by left/right docked items
+        float topBottomHeight = 0; // Total height consumed by top/bottom docked items
+        float maxWidthForTopBottom = 0; // Maximum width needed by any top/bottom docked item
+        float maxHeightForLeftRight = 0; // Maximum height needed by any left/right docked item
 
         for (var i = 0; i < this.Items.Count; i++)
         {
@@ -105,31 +108,26 @@ public class DockPanel : ItemsControl
             switch (child.Dock)
             {
                 case Dock.Left:
-                    availableRect.X += childDesiredSize.X;
-                    availableRect.Width -= childDesiredSize.X;
-                    desiredSize.X += childDesiredSize.X;
-                    desiredSize.Y = Math.Max(desiredSize.Y, childDesiredSize.Y);
-                    break;
-                case Dock.Top:
-                    availableRect.Y += childDesiredSize.Y;
-                    availableRect.Height -= childDesiredSize.Y;
-                    desiredSize.Y += childDesiredSize.Y;
-                    desiredSize.X = Math.Max(desiredSize.X, childDesiredSize.X);
-                    break;
                 case Dock.Right:
                     availableRect.Width -= childDesiredSize.X;
-                    desiredSize.X += childDesiredSize.X;
-                    desiredSize.Y = Math.Max(desiredSize.Y, childDesiredSize.Y);
+                    leftRightWidth += childDesiredSize.X;
+                    maxHeightForLeftRight = Math.Max(maxHeightForLeftRight, childDesiredSize.Y);
                     break;
+                case Dock.Top:
                 case Dock.Bottom:
                     availableRect.Height -= childDesiredSize.Y;
-                    desiredSize.Y += childDesiredSize.Y;
-                    desiredSize.X = Math.Max(desiredSize.X, childDesiredSize.X);
+                    topBottomHeight += childDesiredSize.Y;
+                    maxWidthForTopBottom = Math.Max(maxWidthForTopBottom, childDesiredSize.X);
                     break;
                 default:
                     throw new NotSupportedException();
             }
         }
+
+        // Calculate the final desired size
+        Vector2 desiredSize;
+        desiredSize.X = leftRightWidth + maxWidthForTopBottom;
+        desiredSize.Y = Math.Max(maxHeightForLeftRight, topBottomHeight);
 
         return desiredSize + this.Padding.Total;
     }
