@@ -7,6 +7,8 @@ namespace LifeSim.Support.Numerics;
 /// </summary>
 public struct RectInt : IEquatable<RectInt>
 {
+    public static RectInt Empty => default;
+
     /// <summary>
     /// Gets or sets the X position of the rectangle.
     /// </summary>

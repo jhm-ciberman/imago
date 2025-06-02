@@ -8,6 +8,8 @@ namespace LifeSim.Support.Numerics;
 /// </summary>
 public struct Rect : IEquatable<Rect>
 {
+    public static Rect Empty => default;
+
     /// <summary>
     /// The X position of the rectangle.
     /// </summary>
@@ -111,6 +113,11 @@ public struct Rect : IEquatable<Rect>
     /// Get or sets the topmost position of the rectangle.
     /// </summary>
     public float Top { get => this.Y; set => this.Y = value; }
+
+    /// <summary>
+    /// Gets whether the rectangle is empty (i.e., has no width or height).
+    /// </summary>
+    public bool IsEmpty => this.Width <= 0f || this.Height <= 0f;
 
     /// <summary>
     /// Returns whether the rectangle contains the specified point.
@@ -264,5 +271,10 @@ public struct Rect : IEquatable<Rect>
     public static Rect operator /(Rect rect, float scale)
     {
         return new Rect(rect.X / scale, rect.Y / scale, rect.Width / scale, rect.Height / scale);
+    }
+
+    public static implicit operator Rect(RectInt rect)
+    {
+        return new Rect(rect.X, rect.Y, rect.Width, rect.Height);
     }
 }
