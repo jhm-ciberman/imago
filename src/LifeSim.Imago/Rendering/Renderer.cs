@@ -439,6 +439,9 @@ public class Renderer : IDisposable
         {
             Console.WriteLine("Error disposing renderer:");
             Console.WriteLine(e);
+#if DEBUG
+            throw; // We want to fix any issues in debug mode.
+#endif
         }
         finally
         {
