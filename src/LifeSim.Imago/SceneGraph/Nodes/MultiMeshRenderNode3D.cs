@@ -133,6 +133,24 @@ public class MultiMeshRenderNode3D : Node3D
         }
     }
 
+    /// <summary>
+    /// Gets or sets the opacity of this render node.
+    /// </summary>
+    public float Opacity
+    {
+        get => this._albedoColor.A;
+        set
+        {
+            var col = this._albedoColor;
+            if (col.A == value) return;
+            this._albedoColor = col.WithAlpha(value);
+            foreach (var node in this._renderNodes)
+            {
+                node.Opacity = value;
+            }
+        }
+    }
+
     private bool _isVisible = true;
 
     /// <summary>
