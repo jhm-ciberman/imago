@@ -34,4 +34,14 @@ public class Cursor
         this.Hotspot = hotspot;
         this.Texture = new ImageTexture(this.TexturePath, srgb: false);
     }
+
+    /// <summary>
+    /// Gets the hotspot in pixel coordinates based on the texture size.
+    /// </summary>
+    public Vector2 HotspotPixels => this.Hotspot * this.Texture.Size;
+
+    /// <summary>
+    /// Gets the size of the cursor texture in pixels.
+    /// </summary>
+    public Vector2 TextureSize => this.Texture.Size;
 }
