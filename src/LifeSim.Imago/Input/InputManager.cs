@@ -241,15 +241,6 @@ public class InputManager : IDisposable
     public Vector2 CursorPosition => this._cursorPosition;
 
     /// <summary>
-    /// Gets or sets whether the mouse is currently visible.
-    /// </summary>
-    public bool IsCursorVisible
-    {
-        get => this._window.CursorVisible;
-        set => this._window.CursorVisible = value;
-    }
-
-    /// <summary>
     /// Gets whether the specified key is currently pressed.
     /// </summary>
     /// <param name="key">The key to check.</param>

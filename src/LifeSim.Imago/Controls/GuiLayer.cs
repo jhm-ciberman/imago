@@ -50,6 +50,18 @@ public class GuiLayer : ILayer2D
     public Cursor? Cursor { get; set; } = null;
 
     /// <summary>
+    /// Gets or sets the scale of the cursor.
+    /// </summary>
+    public float CursorScale { get; set; } = .5f;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the custom cursor is enabled.
+    /// If true, the <see cref="Cursor"/> will be drawn when the mouse is visible.
+    /// If false, the system cursor will be used instead.
+    /// </summary>
+    public bool IsCustomCursorEnabled { get; set; } = true;
+
+    /// <summary>
     /// Gets the <see cref="InputManager"/> used to handle input events.
     /// </summary>
     public InputManager Input { get; }
@@ -120,7 +132,10 @@ public class GuiLayer : ILayer2D
         this._content.Draw(ctx);
 
         // Draw custom cursor if set and cursor is visible
-        this.DrawCursor(ctx);
+        if (this.IsCustomCursorEnabled)
+        {
+            this.DrawCursor(ctx);
+        }
     }
 
     /// <summary>
@@ -129,13 +144,15 @@ public class GuiLayer : ILayer2D
     /// <param name="ctx">The drawing context to use.</param>
     private void DrawCursor(DrawingContext ctx)
     {
-        if (this.Cursor?.Texture == null || !this.Input.IsCursorVisible) return;
+        if (this.Cursor == null) return;
 
         var mousePosition = this.WindowToViewport(this.Input.CursorPosition);
-        var cursorPosition = mousePosition - this.Cursor.Hotspot;
 
         // Draw the cursor texture
         Vector2 cursorSize = this.Cursor.Texture.Size;
+        cursorSize *= this.CursorScale;
+        Vector2 hotspot = this.Cursor.Hotspot * this.CursorScale;
+        var cursorPosition = mousePosition - hotspot;
         ctx.DrawTexture(null, this.Cursor.Texture, cursorPosition, cursorSize, Vector2.Zero, Vector2.One, Color.White);
     }
 
