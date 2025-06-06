@@ -5,6 +5,7 @@ using LifeSim.Imago.Input;
 using LifeSim.Imago.Rendering;
 using LifeSim.Imago.Rendering.Sprites;
 using LifeSim.Imago.SceneGraph;
+using LifeSim.Support.Drawing;
 using LifeSim.Support.Numerics;
 
 namespace LifeSim.Imago.Controls;
@@ -42,6 +43,11 @@ public class GuiLayer : ILayer2D
     /// Gets or sets a value indicating whether each control should be snapped to pixels.
     /// </summary>
     public bool SnapToPixels { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets the custom cursor to display. If null, the system cursor is used.
+    /// </summary>
+    public Cursor? Cursor { get; set; } = null;
 
     /// <summary>
     /// Gets the <see cref="InputManager"/> used to handle input events.
@@ -91,7 +97,6 @@ public class GuiLayer : ILayer2D
             }
         }
     }
-
     /// <summary>
     /// Draws the gui layer.
     /// </summary>
@@ -113,6 +118,25 @@ public class GuiLayer : ILayer2D
 
         ctx.SetViewProjectionMatrix(viewProjectionMatrix);
         this._content.Draw(ctx);
+
+        // Draw custom cursor if set and cursor is visible
+        this.DrawCursor(ctx);
+    }
+
+    /// <summary>
+    /// Draws the custom cursor if one is set.
+    /// </summary>
+    /// <param name="ctx">The drawing context to use.</param>
+    private void DrawCursor(DrawingContext ctx)
+    {
+        if (this.Cursor?.Texture == null || !this.Input.IsCursorVisible) return;
+
+        var mousePosition = this.WindowToViewport(this.Input.CursorPosition);
+        var cursorPosition = mousePosition - this.Cursor.Hotspot;
+
+        // Draw the cursor texture
+        Vector2 cursorSize = this.Cursor.Texture.Size;
+        ctx.DrawTexture(null, this.Cursor.Texture, cursorPosition, cursorSize, Vector2.Zero, Vector2.One, Color.White);
     }
 
     /// <summary>
