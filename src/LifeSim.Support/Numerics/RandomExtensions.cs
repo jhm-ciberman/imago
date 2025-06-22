@@ -3,6 +3,7 @@ namespace LifeSim.Support.Numerics;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using CommunityToolkit.Diagnostics;
 
 public static class RandomExtensions
 {
@@ -15,7 +16,7 @@ public static class RandomExtensions
     /// <typeparam name="T">The type of the elements in the list.</typeparam>
     public static T NextElement<T>(this Random random, IList<T> list)
     {
-        if (list.Count == 0) throw new ArgumentException("List cannot be empty.", nameof(list));
+        Guard.IsNotEmpty(list);
         if (list.Count == 1) return list[0];
         return list[random.Next(list.Count)];
     }
@@ -30,7 +31,7 @@ public static class RandomExtensions
     /// <returns>A random <see cref="Vector2Int"/> within the specified range.</returns>
     public static Vector2Int NextVector2Int(this Random random, Vector2Int min, Vector2Int max)
     {
-        if (min.X >= max.X || min.Y >= max.Y) throw new ArgumentException("Min must be less than max.");
+        if (min.X >= max.X || min.Y >= max.Y) ThrowHelper.ThrowArgumentException("Min must be less than max.");
         return new Vector2Int(random.Next(min.X, max.X), random.Next(min.Y, max.Y));
     }
 
@@ -44,7 +45,7 @@ public static class RandomExtensions
     /// <returns>A random <see cref="Vector2"/> within the specified range.</returns>
     public static Vector2 NextVector2(this Random random, Vector2 min, Vector2 max)
     {
-        if (min.X >= max.X || min.Y >= max.Y) throw new ArgumentException("Min must be less than max.");
+        if (min.X >= max.X || min.Y >= max.Y) ThrowHelper.ThrowArgumentException("Min must be less than max.");
         return new Vector2(
             (float)(random.NextDouble() * (max.X - min.X) + min.X),
             (float)(random.NextDouble() * (max.Y - min.Y) + min.Y));
@@ -60,7 +61,7 @@ public static class RandomExtensions
     /// <returns>A random <see cref="float"/> within the specified range.</returns>
     public static float NextSingle(this Random random, float min, float max)
     {
-        if (min >= max) throw new ArgumentException("Min must be less than max.");
+        if (min >= max) ThrowHelper.ThrowArgumentException("Min must be less than max.");
         return (float)(random.NextDouble() * (max - min) + min);
     }
 }

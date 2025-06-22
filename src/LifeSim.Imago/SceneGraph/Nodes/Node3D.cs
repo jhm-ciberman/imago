@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using CommunityToolkit.Diagnostics;
 using LifeSim.Support.Collections;
 
 namespace LifeSim.Imago.SceneGraph.Nodes;
@@ -223,7 +224,7 @@ public class Node3D : IDisposable, IFormattable
         if (node.Parent == this) return;
 
         // Prevent adding self as child
-        if (node == this) throw new ArgumentException("Cannot add self as child", nameof(node));
+        if (node == this) ThrowHelper.ThrowArgumentException(nameof(node), "Cannot add self as child");
 
         // Remove from old parent
         node.Parent?.RemoveChild(node, dispose: false);
