@@ -7,8 +7,6 @@
         <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)\bin\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
         <BaseOutputPath>$(MSBuildThisFileDirectory)\bin\$(MSBuildProjectName)\</BaseOutputPath>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <TieredCompilationQuickJit>true</TieredCompilationQuickJit>
-        <TieredCompilationQuickJitForLoops>false</TieredCompilationQuickJitForLoops>
         <Disabletransitiveprojectreferences>true</Disabletransitiveprojectreferences>
     </PropertyGroup>
 
