@@ -2,7 +2,7 @@ using System;
 using System.Numerics;
 using LifeSim.Imago.SceneGraph.Cameras;
 using LifeSim.Imago.SceneGraph.Lighting;
-using Veldrid.Utilities;
+using LifeSim.Imago.Utilities;
 
 namespace LifeSim.Imago.Rendering.Shadows;
 

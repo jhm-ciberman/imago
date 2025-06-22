@@ -4,9 +4,9 @@ using System.Numerics;
 using LifeSim.Imago.Materials;
 using LifeSim.Imago.SceneGraph.Nodes;
 using LifeSim.Imago.TexturePacking;
+using LifeSim.Imago.Utilities;
 using LifeSim.Support.Collections;
 using LifeSim.Support.Numerics;
-using Veldrid.Utilities;
 
 namespace LifeSim.Imago.SceneGraph;
 

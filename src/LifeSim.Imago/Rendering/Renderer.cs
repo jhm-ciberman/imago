@@ -8,9 +8,9 @@ using LifeSim.Imago.Rendering.Sprites;
 using LifeSim.Imago.SceneGraph;
 using LifeSim.Imago.Startup;
 using LifeSim.Imago.Textures;
+using LifeSim.Imago.Utilities;
 using Veldrid;
 using Veldrid.Sdl2;
-using Veldrid.Utilities;
 using Texture = LifeSim.Imago.Textures.Texture;
 using Viewport = LifeSim.Imago.SceneGraph.Viewport;
 

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Numerics;
-using Veldrid.Utilities;
+using LifeSim.Imago.Utilities;
 
 namespace LifeSim.Imago.SceneGraph;
 

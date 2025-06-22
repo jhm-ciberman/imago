@@ -1,7 +1,7 @@
 using System;
 using LifeSim.Imago.Rendering;
 using Veldrid;
-using BoundingBox = Veldrid.Utilities.BoundingBox;
+using BoundingBox = LifeSim.Imago.Utilities.BoundingBox;
 
 namespace LifeSim.Imago.Meshes;
 

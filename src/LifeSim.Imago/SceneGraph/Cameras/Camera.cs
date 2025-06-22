@@ -1,8 +1,8 @@
 using System;
 using System.Numerics;
 using LifeSim.Imago.Rendering;
+using LifeSim.Imago.Utilities;
 using LifeSim.Support.Drawing;
-using Veldrid.Utilities;
 
 namespace LifeSim.Imago.SceneGraph.Cameras;
 

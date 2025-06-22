@@ -7,8 +7,8 @@ using LifeSim.Imago.Materials;
 using LifeSim.Imago.Meshes;
 using LifeSim.Imago.SceneGraph.Cameras;
 using LifeSim.Imago.SceneGraph.Lighting;
+using LifeSim.Imago.Utilities;
 using Veldrid;
-using Veldrid.Utilities;
 using Shader = LifeSim.Imago.Materials.Shader;
 
 namespace LifeSim.Imago.Rendering.Shadows;

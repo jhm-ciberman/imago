@@ -6,7 +6,7 @@ using LifeSim.Imago.Materials;
 using LifeSim.Imago.Meshes;
 using LifeSim.Imago.Rendering.Buffers;
 using LifeSim.Imago.SceneGraph;
-using Veldrid.Utilities;
+using LifeSim.Imago.Utilities;
 
 namespace LifeSim.Imago.Rendering;
 
