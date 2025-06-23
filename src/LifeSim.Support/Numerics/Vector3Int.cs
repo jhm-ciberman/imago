@@ -148,4 +148,12 @@ public struct Vector3Int : IEquatable<Vector3Int>
     {
         return $"({this.X}, {this.Y}, {this.Z})";
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Deconstruct(out int x, out int y, out int z)
+    {
+        x = this.X;
+        y = this.Y;
+        z = this.Z;
+    }
 }

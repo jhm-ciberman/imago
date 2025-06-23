@@ -232,4 +232,11 @@ public struct Vector2Int : IEquatable<Vector2Int>
     {
         return "(" + this.X + ", " + this.Y + ")";
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Deconstruct(out int x, out int y)
+    {
+        x = this.X;
+        y = this.Y;
+    }
 }
