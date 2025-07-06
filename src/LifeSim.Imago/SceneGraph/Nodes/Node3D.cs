@@ -215,6 +215,22 @@ public class Node3D : IDisposable, IFormattable
     }
 
     /// <summary>
+    /// Gets the world rotation of this node as a quaternion.
+    /// </summary>
+    public Quaternion WorldRotation
+    {
+        get
+        {
+            var mat = this.WorldMatrix;
+            return Quaternion.CreateFromRotationMatrix(new Matrix4x4(
+                mat.M11, mat.M12, mat.M13, 0f,
+                mat.M21, mat.M22, mat.M23, 0f,
+                mat.M31, mat.M32, mat.M33, 0f,
+                0f, 0f, 0f, 1f));
+        }
+    }
+
+    /// <summary>
     /// Adds a child node to this node.
     /// </summary>
     /// <param name="node">The node to add.</param>
