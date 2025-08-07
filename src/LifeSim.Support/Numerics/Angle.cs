@@ -33,7 +33,13 @@ public static class Angle
     /// <returns>The angle in the range [0, 2*Pi).</returns>
     public static float Wrap(float value)
     {
-        return (value + float.Pi * 2f) % (float.Pi * 2f);
+        float twoPi = float.Pi * 2f;
+        float result = value % twoPi;
+        if (result < 0)
+        {
+            result += twoPi;
+        }
+        return result;
     }
 
     /// <summary>
