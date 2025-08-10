@@ -5,8 +5,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Veldrid;
 using Veldrid.OpenGL;
-using Veldrid.Vk;
 using Veldrid.Sdl2;
+using Veldrid.Vk;
 
 // This file was copied from the Veldrid project.
 // Original source:
