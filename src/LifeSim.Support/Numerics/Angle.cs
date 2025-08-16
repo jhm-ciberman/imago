@@ -54,4 +54,33 @@ public static class Angle
         float delta = Difference(a, b);
         return a + delta * t;
     }
+
+    /// <summary>
+    /// Clamps an angle to be within a specified offset range from a reference angle.
+    /// Useful for limiting camera/head rotation relative to body facing direction.
+    /// </summary>
+    /// <param name="angle">The angle to clamp in radians.</param>
+    /// <param name="reference">The reference angle in radians (e.g., body facing direction).</param>
+    /// <param name="minOffset">The minimum allowed offset from reference in radians (typically negative).</param>
+    /// <param name="maxOffset">The maximum allowed offset from reference in radians (typically positive).</param>
+    /// <returns>The clamped angle in radians.</returns>
+    public static float ClampRelative(float angle, float reference, float minOffset, float maxOffset)
+    {
+        float offset = Difference(reference, angle);
+        float clampedOffset = float.Clamp(offset, minOffset, maxOffset);
+        return reference + clampedOffset;
+    }
+
+    /// <summary>
+    /// Clamps an angle to be within a symmetric offset range from a reference angle.
+    /// For example, to limit head rotation to ±90° from body facing direction.
+    /// </summary>
+    /// <param name="angle">The angle to clamp in radians.</param>
+    /// <param name="reference">The reference angle in radians (e.g., body facing direction).</param>
+    /// <param name="maxOffset">The maximum allowed offset from reference in radians (e.g., Pi/2 for 90 degrees).</param>
+    /// <returns>The clamped angle in radians.</returns>
+    public static float ClampRelative(float angle, float reference, float maxOffset)
+    {
+        return ClampRelative(angle, reference, -maxOffset, maxOffset);
+    }
 }
