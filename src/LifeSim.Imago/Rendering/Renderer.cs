@@ -39,7 +39,7 @@ public class Renderer : IDisposable
         GraphicsDeviceOptions options = new GraphicsDeviceOptions(
             debug: debug,
             swapchainDepthFormat: null, // no default depth buffer, we are doing a full screen final pass
-            syncToVerticalBlank: false,
+            syncToVerticalBlank: true,
             resourceBindingModel: ResourceBindingModel.Improved,
             preferDepthRangeZeroToOne: true,
             preferStandardClipSpaceYDirection: true,
