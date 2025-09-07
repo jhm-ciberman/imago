@@ -12,6 +12,9 @@ bin/
 # LifeSim artifacts folder
 artifacts/
 
+# Save files
+saves/
+
 # LifeSim Backend config file
 backend.txt
 
