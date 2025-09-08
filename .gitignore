@@ -33,3 +33,6 @@ coveragereport/
 # I have a private repo for this, but I normally have a copy here for quick access
 # and I don't want to commit it by accident.
 gdd.md
+
+# Claude Files
+.claude/settings.local.json
