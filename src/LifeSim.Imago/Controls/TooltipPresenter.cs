@@ -1,4 +1,5 @@
 using System.Numerics;
+using FontStashSharp;
 using LifeSim.Imago.Controls.Drawing;
 using LifeSim.Support.Drawing;
 using LifeSim.Support.Numerics;
@@ -11,6 +12,15 @@ namespace LifeSim.Imago.Controls;
 public class TooltipPresenter : ContentControl
 {
     private Tooltip? _tooltip;
+
+    // Text styling properties
+    private FontSystem? _fontSystem;
+    private float _fontSize = 12f;
+    private float _lineHeight = 14f;
+    private Color _foreground = Color.White;
+    private ITextEffect? _textEffect;
+    private HorizontalAlignment _textHorizontalAlignment = HorizontalAlignment.Left;
+    private VerticalAlignment _textVerticalAlignment = VerticalAlignment.Top;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TooltipPresenter"/> class.
@@ -30,12 +40,73 @@ public class TooltipPresenter : ContentControl
         get => this._tooltip;
         set
         {
-            if (this._tooltip != value)
-            {
-                this._tooltip = value;
-                this.UpdateContent();
-            }
+            if (this._tooltip == value) return;
+            this._tooltip = value;
+            this.UpdateContent();
         }
+    }
+
+    /// <summary>
+    /// Gets or sets the font system for the tooltip text.
+    /// </summary>
+    public FontSystem? FontSystem
+    {
+        get => this._fontSystem;
+        set => this._fontSystem = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the font size for the tooltip text.
+    /// </summary>
+    public float FontSize
+    {
+        get => this._fontSize;
+        set => this._fontSize = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the line height for the tooltip text.
+    /// </summary>
+    public float LineHeight
+    {
+        get => this._lineHeight;
+        set => this._lineHeight = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the foreground color for the tooltip text.
+    /// </summary>
+    public Color Foreground
+    {
+        get => this._foreground;
+        set => this._foreground = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the text effect for the tooltip text.
+    /// </summary>
+    public ITextEffect? TextEffect
+    {
+        get => this._textEffect;
+        set => this._textEffect = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the horizontal alignment for the tooltip text.
+    /// </summary>
+    public HorizontalAlignment TextHorizontalAlignment
+    {
+        get => this._textHorizontalAlignment;
+        set => this._textHorizontalAlignment = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the vertical alignment for the tooltip text.
+    /// </summary>
+    public VerticalAlignment TextVerticalAlignment
+    {
+        get => this._textVerticalAlignment;
+        set => this._textVerticalAlignment = value;
     }
 
     /// <summary>
@@ -50,6 +121,8 @@ public class TooltipPresenter : ContentControl
             return;
         }
 
+        (this._tooltip.Style ?? Tooltip.DefaultStyle)?.Apply(this);
+
         if (this._tooltip.Content != null)
         {
             this.Content = this._tooltip.Content;
@@ -59,7 +132,13 @@ public class TooltipPresenter : ContentControl
             this.Content = new TextBlock
             {
                 Text = this._tooltip.Text,
-                Foreground = Color.White
+                FontSystem = this._fontSystem,
+                FontSize = this._fontSize,
+                LineHeight = this._lineHeight,
+                Foreground = this._foreground,
+                TextEffect = this._textEffect,
+                HorizontalAlignment = this._textHorizontalAlignment,
+                VerticalAlignment = this._textVerticalAlignment
             };
         }
         else

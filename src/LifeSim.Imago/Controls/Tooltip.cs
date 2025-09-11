@@ -6,6 +6,11 @@ namespace LifeSim.Imago.Controls;
 public class Tooltip
 {
     /// <summary>
+    /// Gets or sets the default style that will be applied to tooltips when no specific style is set.
+    /// </summary>
+    public static IStyle? DefaultStyle { get; set; } = null;
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="Tooltip"/> class.
     /// </summary>
     public Tooltip()
@@ -48,4 +53,9 @@ public class Tooltip
     /// Gets or sets the placement of the tooltip relative to its target control.
     /// </summary>
     public TooltipPlacement Placement { get; set; } = TooltipPlacement.Top;
+
+    /// <summary>
+    /// Gets or sets the style of the tooltip.
+    /// </summary>
+    public IStyle? Style { get; set; } = null;
 }
