@@ -47,6 +47,7 @@ public class Control : Visual
     private float _top = float.NaN;
     private float _right = float.NaN;
     private float _bottom = float.NaN;
+    private Tooltip? _tooltip = null;
 
     /// <summary>
     /// Gets or sets the margin of the control.
@@ -147,6 +148,15 @@ public class Control : Visual
     {
         get => this._bottom;
         set => this.SetPropertyAndInvalidateMeasure(ref this._bottom, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the tooltip that will be displayed when the mouse hovers over this control.
+    /// </summary>
+    public Tooltip? Tooltip
+    {
+        get => this._tooltip;
+        set => this.SetProperty(ref this._tooltip, value);
     }
 
     /// <summary>
@@ -273,11 +283,21 @@ public class Control : Visual
     protected virtual void OnMouseEnter()
     {
         this.MouseEnter?.Invoke(this, EventArgs.Empty);
+
+        if (this.Tooltip != null && this.Stage != null)
+        {
+            TooltipService.Instance.ShowTooltip(this);
+        }
     }
 
     protected virtual void OnMouseLeave()
     {
         this.MouseLeave?.Invoke(this, EventArgs.Empty);
+
+        if (this.Tooltip != null)
+        {
+            TooltipService.Instance.HideTooltip();
+        }
     }
 
     private bool _isMouseOver = false;

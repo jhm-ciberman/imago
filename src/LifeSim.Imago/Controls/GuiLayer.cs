@@ -131,6 +131,9 @@ public class GuiLayer : ILayer2D
         ctx.SetViewProjectionMatrix(viewProjectionMatrix);
         this._content.Draw(ctx);
 
+        // Draw tooltips after content but before cursor
+        TooltipService.Instance.Draw(ctx);
+
         // Draw custom cursor if set and cursor is visible
         if (this.IsCustomCursorEnabled)
         {
@@ -169,6 +172,9 @@ public class GuiLayer : ILayer2D
         if (this._content is null) return;
 
         this._content.Update(deltaTime);
+
+        // Update tooltip service after content update
+        TooltipService.Instance.Update(deltaTime);
 
         var position = this.WindowToViewport(this.Input.CursorPosition);
 
