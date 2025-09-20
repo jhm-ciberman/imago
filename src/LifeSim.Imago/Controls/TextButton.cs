@@ -4,6 +4,9 @@ using LifeSim.Support.Drawing;
 
 namespace LifeSim.Imago.Controls;
 
+/// <summary>
+/// Represents a button control that displays text.
+/// </summary>
 public class TextButton : Button
 {
     private readonly TextBlock _textBlock;

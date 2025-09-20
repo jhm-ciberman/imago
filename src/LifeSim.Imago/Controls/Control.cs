@@ -8,30 +8,33 @@ using LifeSim.Support.Numerics;
 
 namespace LifeSim.Imago.Controls;
 
+/// <summary>
+/// Represents the base class for all UI elements that have a visual representation in the 2D GUI.
+/// </summary>
 public class Control : Visual
 {
     /// <summary>
-    /// Occurs when the mouse enters the bounds of the control.
+    /// Occurs when the mouse pointer enters the bounds of the control.
     /// </summary>
     public EventHandler? MouseEnter;
 
     /// <summary>
-    /// Occurs when the mouse leaves the bounds of the control.
+    /// Occurs when the mouse pointer leaves the bounds of the control.
     /// </summary>
     public EventHandler? MouseLeave;
 
     /// <summary>
-    /// Occurs when a mouse button is pressed down on the control.
+    /// Occurs when a mouse button is pressed while the pointer is over the control.
     /// </summary>
     public EventHandler<MouseButtonEventArgs>? MouseDown;
 
     /// <summary>
-    /// Occurs when a mouse button is released on the control.
+    /// Occurs when a mouse button is released while the pointer is over the control.
     /// </summary>
     public EventHandler<MouseButtonEventArgs>? MouseUp;
 
     /// <summary>
-    /// Occurs when the mouse wheel is scrolled while the mouse is over the control.
+    /// Occurs when the mouse wheel is scrolled while the pointer is over the control.
     /// </summary>
     public EventHandler<MouseWheelEventArgs>? MouseWheel;
 
@@ -50,7 +53,7 @@ public class Control : Visual
     private Tooltip? _tooltip = null;
 
     /// <summary>
-    /// Gets or sets the margin of the control.
+    /// Gets or sets the margin of the control, which is the space around the control.
     /// </summary>
     public Thickness Margin
     {
@@ -59,7 +62,7 @@ public class Control : Visual
     }
 
     /// <summary>
-    /// Gets or sets the horizontal alignment of the control.
+    /// Gets or sets the horizontal alignment of the control within its parent's layout slot.
     /// </summary>
     public HorizontalAlignment HorizontalAlignment
     {
@@ -68,7 +71,7 @@ public class Control : Visual
     }
 
     /// <summary>
-    /// Gets or sets the vertical alignment of the control.
+    /// Gets or sets the vertical alignment of the control within its parent's layout slot.
     /// </summary>
     public VerticalAlignment VerticalAlignment
     {
@@ -77,7 +80,7 @@ public class Control : Visual
     }
 
     /// <summary>
-    /// Gets or sets the dock position of the control.
+    /// Gets or sets the dock position of the control within a <see cref="DockPanel"/>.
     /// </summary>
     public Dock Dock
     {
@@ -86,7 +89,7 @@ public class Control : Visual
     }
 
     /// <summary>
-    /// Gets or sets the background brush of the control.
+    /// Gets or sets the background of the control.
     /// </summary>
     public IBackground? Background
     {
@@ -95,7 +98,7 @@ public class Control : Visual
     }
 
     /// <summary>
-    /// Gets or sets the width of the control. A value of float.NaN indicates that the width should be calculated automatically using the control's content.
+    /// Gets or sets the width of the control. A value of <see cref="float.NaN"/> indicates that the width is determined by the layout process.
     /// </summary>
     public float Width
     {
@@ -104,7 +107,7 @@ public class Control : Visual
     }
 
     /// <summary>
-    /// Gets or sets the height of the control. A value of float.NaN indicates that the height should be calculated automatically using the control's content.
+    /// Gets or sets the height of the control. A value of <see cref="float.NaN"/> indicates that the height is determined by the layout process.
     /// </summary>
     public float Height
     {
@@ -112,10 +115,8 @@ public class Control : Visual
         set => this.SetPropertyAndInvalidateMeasure(ref this._height, value);
     }
 
-    // left, top, right, bottom
-
     /// <summary>
-    /// Gets or sets the left position of the control. This is only relevant when positioning the control inside a <see cref="Canvas"/>.
+    /// Gets or sets the distance between the left edge of the control and the left edge of its parent <see cref="Canvas"/>.
     /// </summary>
     public float Left
     {
@@ -124,7 +125,7 @@ public class Control : Visual
     }
 
     /// <summary>
-    /// Gets or sets the top position of the control. This is only relevant when positioning the control inside a <see cref="Canvas"/>.
+    /// Gets or sets the distance between the top edge of the control and the top edge of its parent <see cref="Canvas"/>.
     /// </summary>
     public float Top
     {
@@ -133,7 +134,7 @@ public class Control : Visual
     }
 
     /// <summary>
-    /// Gets or sets the right position of the control. This is only relevant when positioning the control inside a <see cref="Canvas"/>.
+    /// Gets or sets the distance between the right edge of the control and the right edge of its parent <see cref="Canvas"/>.
     /// </summary>
     public float Right
     {
@@ -142,7 +143,7 @@ public class Control : Visual
     }
 
     /// <summary>
-    /// Gets or sets the bottom position of the control. This is only relevant when positioning the control inside a <see cref="Canvas"/>.
+    /// Gets or sets the distance between the bottom edge of the control and the bottom edge of its parent <see cref="Canvas"/>.
     /// </summary>
     public float Bottom
     {
@@ -151,7 +152,7 @@ public class Control : Visual
     }
 
     /// <summary>
-    /// Gets or sets the tooltip that will be displayed when the mouse hovers over this control.
+    /// Gets or sets the tooltip that is displayed for this control.
     /// </summary>
     public Tooltip? Tooltip
     {
@@ -164,6 +165,7 @@ public class Control : Visual
     /// </summary>
     public Control() : base() { }
 
+    /// <inheritdoc/>
     protected override Vector2 MeasureCore(Vector2 availableSize)
     {
         var margin = this.Margin.Total;
@@ -188,6 +190,7 @@ public class Control : Visual
         return desiredSize + margin;
     }
 
+    /// <inheritdoc/>
     protected override Rect ArrangeCore(Rect finalRect)
     {
         finalRect = finalRect.Deflate(this.Margin);
@@ -239,14 +242,16 @@ public class Control : Visual
         return this.ArrangeOverride(finalRect);
     }
 
+    /// <inheritdoc/>
     protected override Rect GetBounds()
     {
         return new Rect(this.Position, this.ActualSize);
     }
 
     /// <summary>
-    /// Updates the control. This method is called by the <see cref="Visual.Stage"/> of the control in each frame.
+    /// Updates the control's state, called once per frame.
     /// </summary>
+    /// <param name="deltaTime">The time elapsed since the last frame, in seconds.</param>
     public virtual void Update(float deltaTime)
     {
         if (this.Stage == null) return;
@@ -257,8 +262,15 @@ public class Control : Visual
         this.IsMouseOver = bounds.Contains(mousePosition);
     }
 
+    /// <summary>
+    /// Gets the parent of this control as a <see cref="Control"/>, or null if the parent is not a <see cref="Control"/> or if the control has no parent.
+    /// </summary>
     protected Control? ControlParent => this.Parent as Control;
 
+    /// <summary>
+    /// Handles mouse button press events for this control.
+    /// </summary>
+    /// <param name="e">The event arguments.</param>
     public virtual void HandleMousePressed(MouseButtonEventArgs e)
     {
         this.MouseDown?.Invoke(this, e);
@@ -266,6 +278,10 @@ public class Control : Visual
         this.ControlParent?.HandleMousePressed(e);
     }
 
+    /// <summary>
+    /// Handles mouse button release events for this control.
+    /// </summary>
+    /// <param name="e">The event arguments.</param>
     public virtual void HandleMouseReleased(MouseButtonEventArgs e)
     {
         this.MouseUp?.Invoke(this, e);
@@ -273,6 +289,10 @@ public class Control : Visual
         this.ControlParent?.HandleMouseReleased(e);
     }
 
+    /// <summary>
+    /// Handles mouse wheel scroll events for this control.
+    /// </summary>
+    /// <param name="e">The event arguments.</param>
     public virtual void HandleMouseWheel(MouseWheelEventArgs e)
     {
         this.MouseWheel?.Invoke(this, e);
@@ -303,7 +323,7 @@ public class Control : Visual
     private bool _isMouseOver = false;
 
     /// <summary>
-    /// Gets a value indicating whether the mouse is currently over the control.
+    /// Gets a value indicating whether the mouse pointer is currently over the control.
     /// </summary>
     public bool IsMouseOver
     {
@@ -325,16 +345,37 @@ public class Control : Visual
         }
     }
 
+    /// <summary>
+    /// Provides the core arrangement logic for derived classes. This method can be overridden
+    /// to customize how the control positions and sizes its content within its allocated space.
+    /// </summary>
+    /// <param name="finalRect">
+    /// The final area within the parent that this control should use to arrange itself and its children.
+    /// </param>
+    /// <returns>
+    /// The actual size and position that the control occupies after arrangement.
+    /// </returns>
     protected virtual Rect ArrangeOverride(Rect finalRect)
     {
         return finalRect;
     }
 
+    /// <summary>
+    /// Provides the core measuring logic for derived classes. This method can be overridden
+    /// to customize how the control calculates its desired size based on the available space and its content.
+    /// </summary>
+    /// <param name="availableSize">
+    /// The available size that this object can give to child objects. Infinity can be specified as a value to indicate that the object will size to whatever content is available.
+    /// </param>
+    /// <returns>
+    /// The desired size of the control, including any padding or content size.
+    /// </returns>
     protected virtual Vector2 MeasureOverride(Vector2 availableSize)
     {
         return availableSize;
     }
 
+    /// <inheritdoc/>
     protected override void DrawCore(DrawingContext ctx)
     {
         this.Background?.DrawRectangle(ctx, this.Position, this.ActualSize);
@@ -343,19 +384,22 @@ public class Control : Visual
     /// <summary>
     /// Gets the children of this control that should be considered for hit testing.
     /// </summary>
+    /// <summary>
+    /// Gets a read-only list of child controls that should be considered when performing hit testing. Derived classes can override this property to specify which children participate in hit testing.
+    /// </summary>
     protected virtual IReadOnlyList<Control> HitTestingChildren => [];
 
 
     /// <summary>
-    /// Gets or sets whether the control interacts with hit testing.
+    /// Gets or sets a value indicating whether this control can be hit by input events.
     /// </summary>
     public bool IsHitTestVisible { get; set; } = true;
 
     /// <summary>
-    /// Recursively searches for a control at the specified position.
+    /// Performs a hit test to find the control at the specified position.
     /// </summary>
-    /// <param name="position">The position to hit test, in viewport space.</param>
-    /// <returns>The control at the specified position, or null if no control was found.</returns>
+    /// <param name="position">The position to test, in viewport space.</param>
+    /// <returns>The topmost control at the specified position, or null if no control is found.</returns>
     public Control? HitTest(Vector2 position)
     {
         // if the element is not visible, we also remove all its children

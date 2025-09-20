@@ -10,18 +10,20 @@ using LifeSim.Support.Numerics;
 
 namespace LifeSim.Imago.Controls;
 
+/// <summary>
+/// Represents the root of a 2D user interface, managing the layout, rendering, and input for a tree of <see cref="Control"/> objects.
+/// </summary>
 public class GuiLayer : ILayer2D
 {
     /// <summary>
-    /// Gets the <see cref="Viewport"/> of the <see cref="GuiLayer"/>.
+    /// Gets the viewport that this GUI layer is rendered to.
     /// </summary>
     public Viewport Viewport { get; }
 
     private float _zoom = 1f;
 
     /// <summary>
-    /// Gets or sets the global zoom of the <see cref="GuiLayer"/>.
-    /// This will scale all controls on the <see cref="GuiLayer"/> by the given factor.
+    /// Gets or sets the global zoom factor for the GUI layer.
     /// </summary>
     public float Zoom
     {
@@ -35,34 +37,32 @@ public class GuiLayer : ILayer2D
     }
 
     /// <summary>
-    /// Gets or sets a value indicating the used render scale.
+    /// Gets or sets the render scale, used to adjust for high-DPI displays.
     /// </summary>
     public Vector2 RenderScale { get; set; } = Vector2.One;
 
     /// <summary>
-    /// Gets or sets a value indicating whether each control should be snapped to pixels.
+    /// Gets or sets a value indicating whether control positions and sizes should be snapped to the nearest pixel.
     /// </summary>
     public bool SnapToPixels { get; set; } = true;
 
     /// <summary>
-    /// Gets or sets the custom cursor to display. If null, the system cursor is used.
+    /// Gets or sets the custom cursor to display when the mouse is over this layer.
     /// </summary>
     public Cursor? Cursor { get; set; } = null;
 
     /// <summary>
-    /// Gets or sets the scale of the cursor.
+    /// Gets or sets the scale of the custom cursor.
     /// </summary>
     public float CursorScale { get; set; } = .5f;
 
     /// <summary>
     /// Gets or sets a value indicating whether the custom cursor is enabled.
-    /// If true, the <see cref="Cursor"/> will be drawn when the mouse is visible.
-    /// If false, the system cursor will be used instead.
     /// </summary>
     public bool IsCustomCursorEnabled { get; set; } = true;
 
     /// <summary>
-    /// Gets the <see cref="InputManager"/> used to handle input events.
+    /// Gets the <see cref="InputManager"/> instance used by this layer.
     /// </summary>
     public InputManager Input { get; }
 
@@ -76,7 +76,7 @@ public class GuiLayer : ILayer2D
     /// <summary>
     /// Initializes a new instance of the <see cref="GuiLayer"/> class.
     /// </summary>
-    /// <param name="viewport">The viewport to use.</param>
+    /// <param name="viewport">The viewport to render the GUI to. If null, the default GUI viewport is used.</param>
     public GuiLayer(Viewport? viewport = null)
     {
         this.Input = InputManager.Instance;
@@ -92,7 +92,7 @@ public class GuiLayer : ILayer2D
     private Control? _content;
 
     /// <summary>
-    /// Gets or sets the content of the <see cref="GuiLayer"/>.
+    /// Gets or sets the root control of the GUI layer.
     /// </summary>
     public Control? Content
     {
@@ -109,8 +109,9 @@ public class GuiLayer : ILayer2D
             }
         }
     }
+
     /// <summary>
-    /// Draws the gui layer.
+    /// Draws the GUI layer and all its visible controls.
     /// </summary>
     /// <param name="ctx">The drawing context to use.</param>
     public void Draw(DrawingContext ctx)
@@ -141,10 +142,6 @@ public class GuiLayer : ILayer2D
         }
     }
 
-    /// <summary>
-    /// Draws the custom cursor if one is set.
-    /// </summary>
-    /// <param name="ctx">The drawing context to use.</param>
     private void DrawCursor(DrawingContext ctx)
     {
         if (this.Cursor == null) return;
@@ -159,14 +156,14 @@ public class GuiLayer : ILayer2D
     }
 
     /// <summary>
-    /// Gets the control that is currently under the mouse cursor, or null if no control is under the cursor.
+    /// Gets the control that is currently under the mouse cursor.
     /// </summary>
     public Control? ControlUnderCursor { get; private set; } = null;
 
     /// <summary>
-    /// Updates the gui layer.
+    /// Updates the state of the GUI layer and its controls.
     /// </summary>
-    /// <param name="deltaTime">The time since the last update.</param>
+    /// <param name="deltaTime">The time elapsed since the last update, in seconds.</param>
     public virtual void Update(float deltaTime)
     {
         if (this._content is null) return;
@@ -182,39 +179,62 @@ public class GuiLayer : ILayer2D
         this.IsCursorOverElement = this.ControlUnderCursor != null;
     }
 
+    /// <summary>
+    /// Gets a value indicating whether the mouse cursor is currently over any element in this layer.
+    /// </summary>
     public bool IsCursorOverElement { get; private set; } = false;
 
+    /// <summary>
+    /// Handles mouse button press events and dispatches them to the appropriate control.
+    /// </summary>
+    /// <param name="e">The event arguments.</param>
     public void HandleMousePressed(MouseButtonEventArgs e)
     {
         this.ControlUnderCursor?.HandleMousePressed(e);
     }
 
+    /// <summary>
+    /// Handles mouse button release events and dispatches them to the appropriate control.
+    /// </summary>
+    /// <param name="e">The event arguments.</param>
     public void HandleMouseReleased(MouseButtonEventArgs e)
     {
         this.ControlUnderCursor?.HandleMouseReleased(e);
     }
 
+    /// <summary>
+    /// Handles mouse wheel scroll events and dispatches them to the appropriate control.
+    /// </summary>
+    /// <param name="e">The event arguments.</param>
     public void HandleMouseWheel(MouseWheelEventArgs e)
     {
         this.ControlUnderCursor?.HandleMouseWheel(e);
     }
 
+    /// <summary>
+    /// Handles key press events.
+    /// </summary>
+    /// <param name="e">The event arguments.</param>
     public void HandleKeyPressed(KeyboardEventArgs e)
     {
         //
     }
 
+    /// <summary>
+    /// Handles key release events.
+    /// </summary>
+    /// <param name="e">The event arguments.</param>
     public void HandleKeyReleased(KeyboardEventArgs e)
     {
         //
     }
 
     /// <summary>
-    /// Finds a child control of the specified type by its name recursively.
+    /// Finds a control of the specified type by its name within the GUI layer.
     /// </summary>
     /// <typeparam name="T">The type of the control to find.</typeparam>
     /// <param name="name">The name of the control to find.</param>
-    /// <returns>The control if found, otherwise null.</returns>
+    /// <returns>The control if found; otherwise, null.</returns>
     public T? Find<T>(string name) where T : Visual
     {
         if (this.Content == null) return null;
@@ -222,12 +242,12 @@ public class GuiLayer : ILayer2D
     }
 
     /// <summary>
-    /// Finds a child control of the specified type by its name recursively. Throws an exception if the control could not be found.
+    /// Finds a control of the specified type by its name within the GUI layer, throwing an exception if not found.
     /// </summary>
     /// <typeparam name="T">The type of the control to find.</typeparam>
     /// <param name="name">The name of the control to find.</param>
     /// <returns>The found control.</returns>
-    /// <exception cref="InvalidOperationException">Thrown if the control could not be found.</exception>
+    /// <exception cref="InvalidOperationException">Thrown if the content is null or the control is not found.</exception>
     public T FindOrFail<T>(string name) where T : Visual
     {
         if (this.Content == null) throw new InvalidOperationException("Content is null");
@@ -235,7 +255,7 @@ public class GuiLayer : ILayer2D
     }
 
     /// <summary>
-    /// Converts a point from window space to viewport space.
+    /// Converts a point from window client space to this layer's viewport space.
     /// </summary>
     /// <param name="mousePosition">The point in window space.</param>
     /// <returns>The point in viewport space.</returns>

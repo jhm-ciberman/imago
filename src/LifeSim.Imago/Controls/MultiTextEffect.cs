@@ -5,6 +5,10 @@ using LifeSim.Support.Drawing;
 
 namespace LifeSim.Imago.Controls;
 
+/// <summary>
+/// Represents a text effect that combines multiple <see cref="ITextEffect"/> instances,
+/// applying them sequentially to render text with a composite visual style.
+/// </summary>
 public class MultiTextEffect : ITextEffect
 {
     /// <summary>
@@ -21,6 +25,7 @@ public class MultiTextEffect : ITextEffect
         this.Effects = effects;
     }
 
+    /// <inheritdoc/>
     public void Draw(DrawingContext ctx, string text, SpriteFontBase font, Vector2 position, Color color)
     {
         if (string.IsNullOrWhiteSpace(text))

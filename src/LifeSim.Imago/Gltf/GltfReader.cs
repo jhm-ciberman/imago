@@ -10,6 +10,9 @@ using static glTFLoader.Schema.AnimationSampler;
 
 namespace LifeSim.Imago.Gltf;
 
+/// <summary>
+/// Provides functionality to read and parse glTF 2.0 files into a usable asset structure.
+/// </summary>
 public class GltfReader
 {
     private readonly string _path;

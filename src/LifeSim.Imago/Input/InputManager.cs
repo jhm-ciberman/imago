@@ -8,6 +8,9 @@ using Veldrid.Sdl2;
 
 namespace LifeSim.Imago.Input;
 
+/// <summary>
+/// Provides data for keyboard-related events.
+/// </summary>
 public class KeyboardEventArgs : HandledEventArgs
 {
     /// <summary>
@@ -16,16 +19,20 @@ public class KeyboardEventArgs : HandledEventArgs
     public Key Key { get; internal set; } = default;
 
     /// <summary>
-    /// Gets the new state of the key. True if the key is now pressed, false if it is released.
+    /// Gets a value indicating whether the key is now in the down state.
     /// </summary>
     public bool IsDown { get; internal set; } = false;
 
+    /// <inheritdoc/>
     public override string ToString()
     {
         return $"Key: {this.Key}, Handled: {this.Handled}";
     }
 }
 
+/// <summary>
+/// Provides data for mouse button-related events.
+/// </summary>
 public class MouseButtonEventArgs : HandledEventArgs
 {
     /// <summary>
@@ -34,24 +41,31 @@ public class MouseButtonEventArgs : HandledEventArgs
     public MouseButton Button { get; internal set; } = default;
 
     /// <summary>
-    /// Gets the new state of the mouse button. True if the button is now pressed, false if it is released.
+    /// Gets a value indicating whether the mouse button is now in the down state.
     /// </summary>
     public bool IsDown { get; internal set; } = false;
 
+    /// <inheritdoc/>
     public override string ToString()
     {
         return $"Button: {this.Button}, IsDown: {this.IsDown}, Handled: {this.Handled}";
     }
 }
 
+/// <summary>
+/// Provides data for mouse wheel-related events.
+/// </summary>
 public class MouseWheelEventArgs : HandledEventArgs
 {
     /// <summary>
-    /// Gets the delta of the mouse wheel scroll. This how much the wheel was scrolled.
+    /// Gets the delta of the mouse wheel scroll. This indicates the amount and direction the wheel was scrolled.
     /// </summary>
     public float WheelDelta { get; internal set; } = 0f;
 }
 
+/// <summary>
+/// Provides data for text input events.
+/// </summary>
 public class TextEventArgs : EventArgs
 {
     /// <summary>
@@ -61,22 +75,22 @@ public class TextEventArgs : EventArgs
 }
 
 /// <summary>
-/// Captures and manages the mouse and keyboard input.
+/// Captures and manages mouse and keyboard input from a window.
 /// </summary>
 public class InputManager : IDisposable
 {
     /// <summary>
-    /// Gets the instance of the input.
+    /// Gets the singleton instance of the input manager.
     /// </summary>
     public static InputManager Instance { get; private set; } = null!;
 
     /// <summary>
-    /// Occurs when a key is pressed.
+    /// Occurs when a keyboard key is pressed.
     /// </summary>
     public event EventHandler<KeyboardEventArgs>? KeyPressed;
 
     /// <summary>
-    /// Occurs when a key is released.
+    /// Occurs when a keyboard key is released.
     /// </summary>
     public event EventHandler<KeyboardEventArgs>? KeyReleased;
 
@@ -101,12 +115,12 @@ public class InputManager : IDisposable
     public event EventHandler<MouseWheelEventArgs>? MouseWheelScrolled;
 
     /// <summary>
-    /// Gets the mouse wheel delta for this frame.
+    /// Gets the mouse wheel scroll delta for the current frame.
     /// </summary>
     public float MouseScrollDelta { get; private set; }
 
     /// <summary>
-    /// Gets the Input Snapshot for the current frame.
+    /// Gets the complete input snapshot for the current frame.
     /// </summary>
     public InputSnapshot InputSnapshot { get; private set; }
 
@@ -132,7 +146,7 @@ public class InputManager : IDisposable
     /// Initializes a new instance of the <see cref="InputManager"/> class.
     /// </summary>
     /// <param name="window">The window to capture input from.</param>
-    /// <exception cref="Exception">Thrown if the Input instance has already been created.</exception>
+    /// <exception cref="Exception">Thrown if an InputManager instance has already been created.</exception>
     public InputManager(Sdl2Window window)
     {
         if (Instance != null)
@@ -162,7 +176,7 @@ public class InputManager : IDisposable
     }
 
     /// <summary>
-    /// Updates the input state.
+    /// Updates the input state for the current frame, processing all new events.
     /// </summary>
     public void UpdateState()
     {
@@ -236,72 +250,72 @@ public class InputManager : IDisposable
     }
 
     /// <summary>
-    /// Gets the current mouse position in window space.
+    /// Gets the current mouse position in window client space.
     /// </summary>
     public Vector2 CursorPosition => this._cursorPosition;
 
     /// <summary>
-    /// Gets whether the specified key is currently pressed.
+    /// Gets a value indicating whether the specified key is currently held down.
     /// </summary>
     /// <param name="key">The key to check.</param>
-    /// <returns>Whether the specified key is currently pressed.</returns>
+    /// <returns>True if the key is down; otherwise, false.</returns>
     public bool IsKeyDown(Key key)
     {
         return this._keysDown.Contains(key);
     }
 
     /// <summary>
-    /// Gets whether the specified key was pressed this frame.
+    /// Gets a value indicating whether the specified key was pressed during the current frame.
     /// </summary>
     /// <param name="key">The key to check.</param>
-    /// <returns>Whether the specified key was pressed this frame.</returns>
+    /// <returns>True if the key was pressed this frame; otherwise, false.</returns>
     public bool WasKeyPressedThisFrame(Key key)
     {
         return this._keysPressedThisFrame.Contains(key);
     }
 
     /// <summary>
-    /// Gets whether the specified key was released this frame.
+    /// Gets a value indicating whether the specified key was released during the current frame.
     /// </summary>
     /// <param name="key">The key to check.</param>
-    /// <returns>Whether the specified key was released this frame.</returns>
+    /// <returns>True if the key was released this frame; otherwise, false.</returns>
     public bool WasKeyReleasedThisFrame(Key key)
     {
         return this._keysReleasedThisFrame.Contains(key);
     }
 
     /// <summary>
-    /// Gets whether the specified mouse button is currently pressed.
+    /// Gets a value indicating whether the specified mouse button is currently held down.
     /// </summary>
     /// <param name="button">The mouse button to check.</param>
-    /// <returns>Whether the specified mouse button is currently pressed.</returns>
+    /// <returns>True if the mouse button is down; otherwise, false.</returns>
     public bool IsMouseButtonDown(MouseButton button)
     {
         return this._mouseButtonsDown.Contains(button);
     }
 
     /// <summary>
-    /// Gets whether the specified mouse button was pressed this frame.
+    /// Gets a value indicating whether the specified mouse button was pressed during the current frame.
     /// </summary>
     /// <param name="button">The mouse button to check.</param>
-    /// <returns>Whether the specified mouse button was pressed this frame.</returns>
+    /// <returns>True if the mouse button was pressed this frame; otherwise, false.</returns>
     public bool WasMouseButtonPressedThisFrame(MouseButton button)
     {
         return this._mouseButtonsPressedThisFrame.Contains(button);
     }
 
     /// <summary>
-    /// Gets whether the specified mouse button was released this frame.
+    /// Gets a value indicating whether the specified mouse button was released during the current frame.
     /// </summary>
     /// <param name="button">The mouse button to check.</param>
-    /// <returns>Whether the specified mouse button was released this frame.</returns>
+    /// <returns>True if the mouse button was released this frame; otherwise, false.</returns>
     public bool WasMouseButtonReleasedThisFrame(MouseButton button)
     {
         return this._mouseButtonsReleasedThisFrame.Contains(button);
     }
 
     /// <summary>
-    /// Simulates pressing the specified mouse button.
+    /// Manually injects a mouse button press event.
     /// </summary>
     /// <param name="mouseButton">The mouse button to press.</param>
     public void PressMouseButton(MouseButton mouseButton)
@@ -312,7 +326,7 @@ public class InputManager : IDisposable
     }
 
     /// <summary>
-    /// Simulates releasing the specified mouse button.
+    /// Manually injects a mouse button release event.
     /// </summary>
     /// <param name="mouseButton">The mouse button to release.</param>
     public void ReleaseMouseButton(MouseButton mouseButton)
@@ -325,7 +339,7 @@ public class InputManager : IDisposable
     }
 
     /// <summary>
-    /// Simulates pressing the specified key.
+    /// Manually injects a key press event.
     /// </summary>
     /// <param name="key">The key to press.</param>
     public void PressKey(Key key)
@@ -336,7 +350,7 @@ public class InputManager : IDisposable
     }
 
     /// <summary>
-    /// Simulates releasing the specified key.
+    /// Manually injects a key release event.
     /// </summary>
     /// <param name="key">The key to release.</param>
     public void ReleaseKey(Key key)
@@ -349,7 +363,7 @@ public class InputManager : IDisposable
     }
 
     /// <summary>
-    /// Gets a read-only list of the currently pressed characters.
+    /// Gets a read-only list of characters typed during the current frame.
     /// </summary>
     public IReadOnlyList<char> TypedCharacters => this._charactersTypedThisFrame;
 
@@ -396,6 +410,7 @@ public class InputManager : IDisposable
     /// <summary>
     /// Raises the <see cref="MouseButtonReleased"/> event.
     /// </summary>
+    /// <param name="mouseEvent">The original mouse event.</param>
     protected virtual void OnMouseButtonReleased(MouseEvent mouseEvent)
     {
         this._mouseButtonEventArgs.Button = mouseEvent.MouseButton;

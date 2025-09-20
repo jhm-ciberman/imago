@@ -10,6 +10,10 @@ namespace LifeSim.Imago.Controls;
 
 public abstract class Visual : ObservableObject, IDisposable
 {
+    /// <summary>
+    /// Gets or sets the default font system used by all controls.
+    /// If not set, controls must manually define a font system to use for text rendering.
+    /// </summary>
     public static FontSystem? DefaultFontSystem { get; set; } = null!;
 
     private string _name = string.Empty;
@@ -28,7 +32,6 @@ public abstract class Visual : ObservableObject, IDisposable
         get => this._name;
         set => this.SetProperty(ref this._name, value);
     }
-
 
     /// <summary>
     /// Gets or sets the visibility of the control.
@@ -162,8 +165,19 @@ public abstract class Visual : ObservableObject, IDisposable
         }
     }
 
+    /// <summary>
+    /// Calculates the actual rendered area of the control within the GUI system.
+    /// This method returns a <see cref="Rect"/> that defines the control's position and size
+    /// after layout and arrangement have been performed.
+    /// </summary>
+    /// <returns>A <see cref="Rect"/> representing the control's bounding box in screen coordinates.</returns>
     protected abstract Rect GetBounds();
 
+    /// <summary>
+    /// Implements the core drawing logic for the control. Derived classes should override this method
+    /// to render their specific visual content, such as backgrounds, borders, or child elements.
+    /// </summary>
+    /// <param name="ctx">The <see cref="DrawingContext"/> to use for rendering operations.</param>
     protected abstract void DrawCore(DrawingContext ctx);
 
     /// <summary>
@@ -185,6 +199,12 @@ public abstract class Visual : ObservableObject, IDisposable
         this.DesiredSize = this.MeasureCore(availableSize);
     }
 
+    /// <summary>
+    /// Implements the core measuring logic for the control. Derived classes should override this method
+    /// to calculate their desired size based on the available space and their content.
+    /// </summary>
+    /// <param name="availableSize">The available size that the parent element can allocate for this control.</param>
+    /// <returns>The desired size of the control, including any padding or content size.</returns>
     protected abstract Vector2 MeasureCore(Vector2 availableSize);
 
     /// <summary>
@@ -220,15 +240,30 @@ public abstract class Visual : ObservableObject, IDisposable
         this.ActualSize = size;
     }
 
+    /// <summary>
+    /// Implements the core arranging logic for the control. Derived classes should override this method
+    /// to position and size their content within the provided final size.
+    /// </summary>
+    /// <param name="finalRect">
+    /// The final area within the parent that this control should use to arrange itself and its children.
+    /// </param>
+    /// <returns>
+    /// The actual size and position that the control occupies after arrangement.
+    /// </returns>
     protected abstract Rect ArrangeCore(Rect finalRect);
 
     private IDisposable? _bindings = null;
 
+    /// <summary>
+    /// Called when the control is added to the <see cref="GuiLayer"/>.
+    /// </summary>
+    /// <param name="stage">The <see cref="GuiLayer"/> the control is added to.</param>
+    /// <exception cref="InvalidOperationException">Thrown if the control is already added to a stage.</exception>
     public virtual void OnAddedToStage(GuiLayer stage)
     {
         if (this.Stage != null)
         {
-            throw new InvalidOperationException("The control is already added to a page.");
+            throw new InvalidOperationException("The control is already added to a stage.");
         }
 
         this.IsArrangeValid = false;
@@ -251,11 +286,16 @@ public abstract class Visual : ObservableObject, IDisposable
         return null;
     }
 
+    /// <summary>
+    /// Called when the control is removed from the <see cref="GuiLayer"/>.
+    /// </summary>
+    /// <param name="stage">The <see cref="GuiLayer"/> the control is removed from.</param>
+    /// <exception cref="InvalidOperationException">Thrown if the control is not added to the specified stage.</exception>
     public virtual void OnRemovedFromStage(GuiLayer stage)
     {
         if (this.Stage != stage)
         {
-            throw new InvalidOperationException("The control is not added to the specified page.");
+            throw new InvalidOperationException("The control is not added to the specified stage.");
         }
 
         this.Stage = null;
@@ -305,6 +345,10 @@ public abstract class Visual : ObservableObject, IDisposable
         return this.Find<T>(name) ?? throw new InvalidOperationException($"Could not find control with name '{name}'.");
     }
 
+    /// <summary>
+    /// Adds a visual child to the control.
+    /// </summary>
+    /// <param name="child">The child visual to add.</param>
     protected virtual void AddVisualChild(Visual child)
     {
         this._visualChildren.Add(child);
@@ -316,6 +360,10 @@ public abstract class Visual : ObservableObject, IDisposable
         }
     }
 
+    /// <summary>
+    /// Removes a visual child from the control.
+    /// </summary>
+    /// <param name="child">The child visual to remove.</param>
     protected virtual void RemoveVisualChild(Visual child)
     {
         this._visualChildren.Remove(child);
@@ -363,7 +411,9 @@ public abstract class Visual : ObservableObject, IDisposable
 
         return false;
     }
-
+    /// <summary>
+    /// Invalidates the measure of the control and its children.
+    /// </summary>
     protected internal void InvalidateMeasure()
     {
         this.ForceMeasure();
@@ -392,6 +442,9 @@ public abstract class Visual : ObservableObject, IDisposable
         this.Parent?.InvalidateMeasure();
     }
 
+    /// <summary>
+    /// Invalidates the arrange of the control and its children.
+    /// </summary>
     protected internal void InvalidateArrange()
     {
         this.ForceArrange();
@@ -418,6 +471,9 @@ public abstract class Visual : ObservableObject, IDisposable
         this.Parent?.InvalidateArrange();
     }
 
+    /// <summary>
+    /// Gets whether the control has been disposed.
+    /// </summary>
     public bool IsDisposed { get; private set; } = false;
 
     /// <summary>

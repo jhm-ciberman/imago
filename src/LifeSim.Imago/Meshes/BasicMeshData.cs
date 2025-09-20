@@ -6,14 +6,30 @@ using Veldrid;
 
 namespace LifeSim.Imago.Meshes;
 
+/// <summary>
+/// Represents mesh data for a basic 3D model, including positions, normals, and texture coordinates.
+/// </summary>
 public class BasicMeshData : MeshData
 {
+    /// <summary>
+    /// Gets or sets the array of normal vectors for each vertex.
+    /// </summary>
     public Vector3[] Normals { get; set; }
 
+    /// <summary>
+    /// Gets or sets the array of 2D texture coordinates for each vertex.
+    /// </summary>
     public Vector2[] TexCoords { get; set; }
 
     public override VertexFormat VertexFormat => BasicVertex.VertexFormat;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BasicMeshData"/> class.
+    /// </summary>
+    /// <param name="indices">The array of indices defining the triangles.</param>
+    /// <param name="positions">The array of vertex positions.</param>
+    /// <param name="normals">Optional: The array of normal vectors. If null, normals will be recomputed.</param>
+    /// <param name="texCoords">Optional: The array of texture coordinates. If null, default zero vectors will be used.</param>
     public BasicMeshData(ushort[] indices, Vector3[] positions, Vector3[]? normals, Vector2[]? texCoords) : base(indices, positions)
     {
         this.Normals = normals ?? new Vector3[positions.Length];
@@ -23,6 +39,7 @@ public class BasicMeshData : MeshData
             this.RecomputeNormals();
     }
 
+    /// <inheritdoc/>
     protected override void Validate()
     {
         base.Validate();
@@ -34,6 +51,7 @@ public class BasicMeshData : MeshData
             throw new ArgumentException("The number of texture coordinates must match the number of positions.");
     }
 
+    /// <inheritdoc/>
     public override DeviceBuffer CreateVertexBuffer(GraphicsDevice gd)
     {
         this.Validate();
@@ -53,6 +71,10 @@ public class BasicMeshData : MeshData
         return vertexBuffer;
     }
 
+    /// <summary>
+    /// Creates a deep clone of this <see cref="BasicMeshData"/> instance.
+    /// </summary>
+    /// <returns>A new <see cref="BasicMeshData"/> object that is a copy of this instance.</returns>
     public BasicMeshData Clone()
     {
         ushort[] indices = (ushort[]) this.Indices.Clone();
@@ -62,6 +84,10 @@ public class BasicMeshData : MeshData
         return new BasicMeshData(indices, positions, normals, texCoords);
     }
 
+    /// <summary>
+    /// Recomputes the normal vectors for each vertex based on the face normals of the mesh.
+    /// This method assumes a triangle list topology.
+    /// </summary>
     public void RecomputeNormals()
     {
         for (var i = 0; i < this.Indices.Length; i += 3)
@@ -85,6 +111,9 @@ public class BasicMeshData : MeshData
     }
 
 
+    /// <summary>
+    /// Inverts the direction of all normal vectors in the mesh data.
+    /// </summary>
     public void FlipNormals()
     {
         for (int i = 0; i < this.Normals.Length; i++)
@@ -93,12 +122,22 @@ public class BasicMeshData : MeshData
         }
     }
 
+    /// <summary>
+    /// Flips the winding order of the faces and inverts the normal vectors.
+    /// This effectively reverses the visible side of the mesh.
+    /// </summary>
     public void FlipFaces()
     {
         this.FlipIndices();
         this.FlipNormals();
     }
 
+    /// <summary>
+    /// Merges the provided <see cref="BasicMeshData"/> into this instance.
+    /// The new mesh data will be appended, and indices will be adjusted accordingly.
+    /// </summary>
+    /// <param name="mesh">The <see cref="BasicMeshData"/> to merge.</param>
+    /// <returns>A new <see cref="BasicMeshData"/> instance containing the merged data.</returns>
     public BasicMeshData Merge(BasicMeshData mesh)
     {
         Vector3[] positions = new Vector3[mesh.Positions.Length + this.Positions.Length];

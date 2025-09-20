@@ -6,14 +6,14 @@ using BoundingBox = LifeSim.Imago.Utilities.BoundingBox;
 namespace LifeSim.Imago.Meshes;
 
 /// <summary>
-/// Represents a mesh that can be rendered by the <see cref="Renderer"/>.
+/// Represents a collection of vertices and indices uploaded to the GPU, ready for rendering.
 /// </summary>
 public class Mesh : IDisposable
 {
     private static int _count = 0;
 
     /// <summary>
-    /// Gets the unique ID of the mesh.
+    /// Gets the unique identifier for this mesh.
     /// </summary>
     public int Id { get; private set; }
 
@@ -23,39 +23,39 @@ public class Mesh : IDisposable
     public uint IndexCount { get; private set; }
 
     /// <summary>
-    /// Gets the <see cref="VertexFormat"/> of the mesh.
+    /// Gets the vertex format of the mesh.
     /// </summary>
     public VertexFormat VertexFormat { get; private set; }
 
     /// <summary>
-    /// Gets the underlying Veldrid vertex buffer.
+    /// Gets the Veldrid device buffer containing the vertex data.
     /// </summary>
     public DeviceBuffer VeldridVertexBuffer { get; private set; }
 
     /// <summary>
-    /// Gets the underlying Veldrid index buffer.
+    /// Gets the Veldrid device buffer containing the index data.
     /// </summary>
     public DeviceBuffer VeldridIndexBuffer { get; private set; }
 
     /// <summary>
-    /// Gets the bounding box of the mesh.
+    /// Gets the axis-aligned bounding box that contains all vertices of the mesh.
     /// </summary>
     public BoundingBox BoundingBox { get; private set; }
 
     /// <summary>
-    /// Gets the <see cref="MeshData"/> that was used to create the mesh.
+    /// Gets the original <see cref="MeshData"/> used to create this mesh.
     /// </summary>
     public MeshData MeshData { get; private set; }
 
     /// <summary>
-    /// Gets whether the mesh is disposed.
+    /// Gets a value indicating whether this mesh has been disposed.
     /// </summary>
     public bool IsDisposed { get; private set; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Mesh"/> class.
     /// </summary>
-    /// <param name="meshData">The <see cref="MeshData"/> that was used to create the mesh.</param>
+    /// <param name="meshData">The mesh data to upload to the GPU.</param>
     public Mesh(MeshData meshData)
     {
         if (meshData.Indices.Length == 0)
@@ -74,7 +74,7 @@ public class Mesh : IDisposable
     }
 
     /// <summary>
-    /// Disposes the mesh.
+    /// Disposes the mesh and releases the underlying GPU resources.
     /// </summary>
     public void Dispose()
     {

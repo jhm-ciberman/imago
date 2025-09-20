@@ -8,6 +8,9 @@ using LifeSim.Support.Drawing;
 
 namespace LifeSim.Imago.Controls;
 
+/// <summary>
+/// Specifies how text should be wrapped within a <see cref="TextBlock"/>.
+/// </summary>
 public enum TextWrap
 {
     /// <summary>
@@ -21,6 +24,9 @@ public enum TextWrap
     Wrap,
 }
 
+/// <summary>
+/// Represents a control for displaying text.
+/// </summary>
 public class TextBlock : Control
 {
     protected string _text = string.Empty;
@@ -35,7 +41,7 @@ public class TextBlock : Control
     private TextWrap _textWrap = TextWrap.NoWrap;
 
     /// <summary>
-    /// Gets or sets the text of the text block.
+    /// Gets or sets the text content of the text block.
     /// </summary>
     public string Text
     {
@@ -53,7 +59,7 @@ public class TextBlock : Control
     }
 
     /// <summary>
-    /// Gets or sets the foreground color of the text block.
+    /// Gets or sets the foreground color of the text.
     /// </summary>
     public Color Foreground
     {
@@ -62,7 +68,7 @@ public class TextBlock : Control
     }
 
     /// <summary>
-    /// Gets or sets the font system of the text block.
+    /// Gets or sets the font system used to render the text.
     /// </summary>
     public FontSystem? FontSystem
     {
@@ -80,7 +86,7 @@ public class TextBlock : Control
     }
 
     /// <summary>
-    /// Gets or sets the font size of the text block.
+    /// Gets or sets the font size of the text.
     /// </summary>
     public float FontSize
     {
@@ -102,7 +108,7 @@ public class TextBlock : Control
     private float _lineSpacing = 0f;
 
     /// <summary>
-    /// Gets the actual height of each line of text.
+    /// Gets the actual height of a single line of text, including spacing.
     /// </summary>
     public float ActualLineHeight
     {
@@ -121,7 +127,7 @@ public class TextBlock : Control
     }
 
     /// <summary>
-    /// Gets or sets the line height of the text block. A value of float.NaN indicates that the line height should be determined automatically.
+    /// Gets or sets the height of each line of text. A value of <see cref="float.NaN"/> uses the default line height from the font.
     /// </summary>
     public float LineHeight
     {
@@ -139,7 +145,7 @@ public class TextBlock : Control
     }
 
     /// <summary>
-    /// Gets or sets the text wrap of the text block.
+    /// Gets or sets the text wrapping behavior.
     /// </summary>
     public TextWrap TextWrap
     {
@@ -156,7 +162,7 @@ public class TextBlock : Control
     }
 
     /// <summary>
-    /// Gets or sets the text effect of the text block.
+    /// Gets or sets the text effect to apply to the text.
     /// </summary>
     public ITextEffect? TextEffect
     {
@@ -188,14 +194,18 @@ public class TextBlock : Control
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="TextBlock"/> class.
+    /// Initializes a new instance of the <see cref="TextBlock"/> class with the specified text.
     /// </summary>
-    /// <param name="text">The text of the text block.</param>
+    /// <param name="text">The text to display.</param>
     public TextBlock(string text)
     {
         this.Text = text;
     }
 
+    /// <summary>
+    /// Gets the <see cref="SpriteFontBase"/> instance used for rendering the text,
+    /// creating it from the <see cref="FontSystem"/> and <see cref="FontSize"/> if necessary.
+    /// </summary>
     protected SpriteFontBase Font
     {
         get
@@ -215,6 +225,7 @@ public class TextBlock : Control
         }
     }
 
+    /// <inheritdoc/>
     protected override Vector2 MeasureOverride(Vector2 availableSize)
     {
         if (this._textLinesDirty)
@@ -231,6 +242,7 @@ public class TextBlock : Control
         return new Vector2(size.X, this.ActualLineHeight * this._textLines.Count);
     }
 
+    /// <inheritdoc/>
     protected override void DrawCore(DrawingContext ctx)
     {
         base.DrawCore(ctx);
@@ -251,6 +263,11 @@ public class TextBlock : Control
         }
     }
 
+    /// <summary>
+    /// Measures the size of a specified number of characters from the beginning of the text.
+    /// </summary>
+    /// <param name="charNumber">The number of characters to measure.</param>
+    /// <returns>The size of the measured substring.</returns>
     internal Vector2 MeasureString(int charNumber)
     {
         if (this.Text == string.Empty)
@@ -273,7 +290,11 @@ public class TextBlock : Control
         return size;
     }
 
-    // We need to split the text into lines accounting the line breaks and the width of the text block.
+    /// <summary>
+    /// Recomputes the internal list of text lines based on the current <see cref="Text"/>,
+    /// <see cref="TextWrap"/> mode, and available width.
+    /// </summary>
+    /// <param name="availableSize">The available size for text layout.</param>
     private void RecomputeTextLines(Vector2 availableSize)
     {
         this._textLines.Clear();
@@ -320,6 +341,10 @@ public class TextBlock : Control
     // FontBase.MeasureString do not LifeSim.Support ReadOnlySpan<char>, so we use this ugly StringBuilder to allocate a little less memory.
     private static readonly StringBuilder _measureStringBuilder = new();
 
+    /// <summary>
+    /// Applies word wrapping to the text, breaking lines at word boundaries to fit within the specified maximum width.
+    /// </summary>
+    /// <param name="maxWidth">The maximum width available for a line of text.</param>
     private void ApplyWrap(float maxWidth)
     {
         var sb = _measureStringBuilder;

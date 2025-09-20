@@ -4,6 +4,9 @@ using Veldrid;
 
 namespace LifeSim.Imago.Meshes;
 
+/// <summary>
+/// Represents abstract base class for mesh data, providing common properties and methods for vertex and index data.
+/// </summary>
 public abstract class MeshData
 {
     /// <summary>

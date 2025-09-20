@@ -12,8 +12,20 @@ internal class GltfAccessor
     private readonly int _count;
     private readonly ComponentTypeEnum _componentType;
     private readonly bool _normalized;
+    /// <summary>
+    /// Gets the type of data stored in the accessor (e.g., SCALAR, VEC2, VEC3, VEC4, MAT2, MAT3, MAT4).
+    /// </summary>
     public TypeEnum Type { get; }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GltfAccessor"/> class.
+    /// </summary>
+    /// <param name="bufferView">The buffer view containing the accessor's data.</param>
+    /// <param name="byteOffset">The byte offset of the accessor relative to the start of its buffer view.</param>
+    /// <param name="count">The number of elements in the accessor.</param>
+    /// <param name="componentType">The data type of components in the accessor.</param>
+    /// <param name="type">The type of data (e.g., SCALAR, VEC2, VEC3, VEC4, MAT2, MAT3, MAT4).</param>
+    /// <param name="normalized">Whether integer data values should be normalized into a range [0, 1] (for unsigned types) or [-1, 1] (for signed types).</param>
     public GltfAccessor(IGltfBufferView bufferView, int byteOffset, int count, ComponentTypeEnum componentType, TypeEnum type, bool normalized)
     {
         this._bufferView = bufferView;
@@ -25,6 +37,12 @@ internal class GltfAccessor
     }
 
 
+    /// <summary>
+    /// Reads the accessor's data and returns it as an array of unsigned shorts, suitable for index buffers.
+    /// Handles conversion from different component types (UNSIGNED_BYTE, UNSIGNED_SHORT, UNSIGNED_INT).
+    /// </summary>
+    /// <returns>An array of <see cref="ushort"/> representing the indices.</returns>
+    /// <exception cref="NotSupportedException">Thrown if the component type is not supported for index conversion.</exception>
     public ushort[] AsIndicesArray()
     {
         return this._componentType switch
@@ -56,6 +74,11 @@ internal class GltfAccessor
         return arr;
     }
 
+    /// <summary>
+    /// Reads the accessor's data and returns it as an array of single-precision floating-point numbers.
+    /// </summary>
+    /// <returns>An array of <see cref="float"/>.</returns>
+    /// <exception cref="NotSupportedException">Thrown if the component type is not FLOAT.</exception>
     public float[] AsFloatArray()
     {
         return this._componentType switch
@@ -65,6 +88,11 @@ internal class GltfAccessor
         };
     }
 
+    /// <summary>
+    /// Reads the accessor's data and returns it as an array of <see cref="Vector2"/>.
+    /// </summary>
+    /// <returns>An array of <see cref="Vector2"/>.</returns>
+    /// <exception cref="NotSupportedException">Thrown if the component type is not FLOAT.</exception>
     public Vector2[] AsVector2Array()
     {
         return this._componentType switch
@@ -74,6 +102,11 @@ internal class GltfAccessor
         };
     }
 
+    /// <summary>
+    /// Reads the accessor's data and returns it as an array of <see cref="Vector3"/>.
+    /// </summary>
+    /// <returns>An array of <see cref="Vector3"/>.</returns>
+    /// <exception cref="NotSupportedException">Thrown if the component type is not FLOAT.</exception>
     public Vector3[] AsVector3Array()
     {
         return this._componentType switch
@@ -83,6 +116,11 @@ internal class GltfAccessor
         };
     }
 
+    /// <summary>
+    /// Reads the accessor's data and returns it as an array of <see cref="Vector4"/>.
+    /// </summary>
+    /// <returns>An array of <see cref="Vector4"/>.</returns>
+    /// <exception cref="NotSupportedException">Thrown if the component type is not FLOAT.</exception>
     public Vector4[] AsVector4Array()
     {
         return this._componentType switch
@@ -92,6 +130,12 @@ internal class GltfAccessor
         };
     }
 
+    /// <summary>
+    /// Reads the accessor's data and returns it as an array of <see cref="Quaternion"/>.
+    /// Handles normalization if the accessor is marked as normalized.
+    /// </summary>
+    /// <returns>An array of <see cref="Quaternion"/>.</returns>
+    /// <exception cref="NotSupportedException">Thrown if the component type is not supported for quaternion conversion.</exception>
     public Quaternion[] AsQuaternionArray()
     {
         return this._componentType switch
@@ -106,6 +150,11 @@ internal class GltfAccessor
     }
 
 
+    /// <summary>
+    /// Reads the accessor's data and returns it as an array of <see cref="Vector4UShort"/>.
+    /// </summary>
+    /// <returns>An array of <see cref="Vector4UShort"/>.</returns>
+    /// <exception cref="NotSupportedException">Thrown if the component type is not supported for Vector4UShort conversion.</exception>
     public Vector4UShort[] AsUShort4Array()
     {
         return this._componentType switch
@@ -192,6 +241,10 @@ internal class GltfAccessor
         return arr;
     }
 
+    /// <summary>
+    /// Reads the accessor's data and returns it as an array of <see cref="Matrix4x4"/>.
+    /// </summary>
+    /// <returns>An array of <see cref="Matrix4x4"/>.</returns>
     public Matrix4x4[] AsMatrix4x4()
     {
         return this._bufferView.ReadMatrix4x4Array(this._byteOffset, this._count);

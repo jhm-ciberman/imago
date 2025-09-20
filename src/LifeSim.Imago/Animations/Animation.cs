@@ -4,14 +4,14 @@ using System.Collections.Generic;
 namespace LifeSim.Imago.Animations;
 
 /// <summary>
-/// Represents an animation.
+/// Represents a collection of animation channels that work together to animate a scene graph.
 /// </summary>
 public class Animation : IDisposable
 {
     private readonly Dictionary<string, List<IChannel>> _channels = new();
 
     /// <summary>
-    /// Gets the duration of the animation in seconds.
+    /// Gets the total duration of the animation in seconds.
     /// </summary>
     public float Duration { get; private set; }
 
@@ -21,7 +21,7 @@ public class Animation : IDisposable
     public string Name { get; }
 
     /// <summary>
-    /// Gets an enumerable of all channel names.
+    /// Gets an enumerable collection of all unique target names affected by this animation's channels.
     /// </summary>
     public IEnumerable<string> ChannelNames => this._channels.Keys;
 
@@ -29,7 +29,7 @@ public class Animation : IDisposable
     /// Initializes a new instance of the <see cref="Animation"/> class.
     /// </summary>
     /// <param name="name">The name of the animation.</param>
-    /// <param name="channels">The channels of the animation.</param>
+    /// <param name="channels">A list of channels that make up the animation.</param>
     public Animation(string name, IReadOnlyList<IChannel> channels)
     {
         this.Name = name;
@@ -41,7 +41,7 @@ public class Animation : IDisposable
     }
 
     /// <summary>
-    /// Adds a channel to the animation.
+    /// Adds a channel to the animation and updates the total duration if necessary.
     /// </summary>
     /// <param name="channel">The channel to add.</param>
     public void AddChannel(IChannel channel)
@@ -61,7 +61,7 @@ public class Animation : IDisposable
     }
 
     /// <summary>
-    /// Disposes the animation.
+    /// Disposes the animation and its resources.
     /// </summary>
     public void Dispose()
     {
@@ -69,10 +69,10 @@ public class Animation : IDisposable
     }
 
     /// <summary>
-    /// Finds all the channels that affect the given target.
+    /// Finds all channels that affect a specific target node by name.
     /// </summary>
-    /// <param name="targetName">The name of the target.</param>
-    /// <returns>An list of all the channels that affect the given target or null if no channels affect the target.</returns>
+    /// <param name="targetName">The name of the target node.</param>
+    /// <returns>A list of channels that affect the specified target, or null if no channels are found.</returns>
     public List<IChannel>? FindChannels(string targetName)
     {
         this._channels.TryGetValue(targetName, out List<IChannel>? list);

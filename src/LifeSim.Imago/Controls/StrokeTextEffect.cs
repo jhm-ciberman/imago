@@ -5,6 +5,9 @@ using LifeSim.Support.Drawing;
 
 namespace LifeSim.Imago.Controls;
 
+/// <summary>
+/// Represents a text effect that draws an outline (stroke) around the text.
+/// </summary>
 public class StrokeTextEffect : ITextEffect
 {
     /// <summary>
@@ -39,6 +42,7 @@ public class StrokeTextEffect : ITextEffect
         new Vector2(0, -1), new Vector2(1, 0), new Vector2(0, 1), new Vector2(-1, 0)
     ];
 
+    /// <inheritdoc/>
     public void Draw(DrawingContext ctx, string text, SpriteFontBase font, Vector2 position, Color color)
     {
         if (string.IsNullOrWhiteSpace(text))

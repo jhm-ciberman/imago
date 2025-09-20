@@ -11,17 +11,31 @@ namespace LifeSim.Imago.Controls;
 /// </summary>
 public enum ScrollDirection
 {
+    /// <summary>
+    /// No scrolling is enabled.
+    /// </summary>
     None = 0,
+
+    /// <summary>
+    /// Horizontal scrolling is enabled.
+    /// </summary>
     Horizontal = 1,
+
+    /// <summary>
+    /// Vertical scrolling is enabled.
+    /// </summary>
     Vertical = 2,
 }
 
+/// <summary>
+/// Represents a scrollable content control that enables users to pan and scroll content that extends beyond the visible area.
+/// </summary>
 public class ScrollViewer : ContentControl
 {
     private ScrollDirection _scrollDirection = ScrollDirection.Vertical;
 
     /// <summary>
-    /// Gets or sets the direction of the scroll.
+    /// Gets or sets the direction in which the content can be scrolled.
     /// </summary>
     public ScrollDirection ScrollDirection
     {
@@ -32,7 +46,7 @@ public class ScrollViewer : ContentControl
     private Vector2 _scrollOffset;
 
     /// <summary>
-    /// Gets or sets the scroll viewer's scroll offset.
+    /// Gets or sets the current scroll offset of the content within the viewer.
     /// </summary>
     public Vector2 ScrollOffset
     {
@@ -53,22 +67,22 @@ public class ScrollViewer : ContentControl
     }
 
     /// <summary>
-    /// Gets or sets the aceleration in pixels/s^2 that the scroll viewer will use to scroll when the user scrolls with the mouse wheel one unit.
+    /// Gets or sets the acceleration in pixels/s^2 that the scroll viewer will use to scroll when the user scrolls with the mouse wheel one unit.
     /// </summary>
     public float MouseWheelAcceleration { get; set; } = 150f;
 
     /// <summary>
-    /// Gets or sets the scroll friction. This is how much the content speed will be reduced when the user stops scrolling in each frame.
+    /// Gets or sets the friction applied to scrolling speed. A value closer to 0 means more friction (faster deceleration).
     /// </summary>
     public float ScrollFriction { get; set; } = 0.85f;
 
     /// <summary>
-    /// Gets or sets the scroll viewer's current scroll speed.
+    /// Gets or sets the current scrolling speed of the content.
     /// </summary>
     public Vector2 ScrollSpeed { get; set; } = Vector2.Zero;
 
     /// <summary>
-    /// Gets or sets the scroll percentage from 0 to 1 in the horizontal axis.
+    /// Gets or sets the horizontal scroll percentage (0.0 to 1.0).
     /// </summary>
     public float ScrollPercentageX
     {
@@ -77,7 +91,7 @@ public class ScrollViewer : ContentControl
     }
 
     /// <summary>
-    /// Gets or sets the scroll percentage from 0 to 1 in the vertical axis.
+    /// Gets or sets the vertical scroll percentage (0.0 to 1.0).
     /// </summary>
     public float ScrollPercentageY
     {
@@ -88,7 +102,7 @@ public class ScrollViewer : ContentControl
     private Control? _scrollBarThumb = null;
 
     /// <summary>
-    /// Gets or sets the scroll viewer's scroll bar thumb element.
+    /// Gets or sets the control used as the scroll bar thumb. If null, a default thumb is created.
     /// </summary>
     public Control ScrollBarThumb
     {
@@ -108,11 +122,15 @@ public class ScrollViewer : ContentControl
         return this._scrollBarThumb;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ScrollViewer"/> class.
+    /// </summary>
     public ScrollViewer() : base()
     {
         this.ClipToBounds = true;
     }
 
+    /// <inheritdoc/>
     protected override Vector2 MeasureOverride(Vector2 availableSize)
     {
         if (this.ScrollDirection == ScrollDirection.Horizontal)
@@ -129,6 +147,7 @@ public class ScrollViewer : ContentControl
         return base.MeasureOverride(availableSize);
     }
 
+    /// <inheritdoc/>
     protected override Rect ArrangeOverride(Rect finalRect)
     {
         if (this.Content != null)
@@ -143,6 +162,7 @@ public class ScrollViewer : ContentControl
         return finalRect;
     }
 
+    /// <inheritdoc/>
     protected override void DrawCore(DrawingContext ctx)
     {
         base.DrawCore(ctx);
@@ -154,6 +174,7 @@ public class ScrollViewer : ContentControl
         }
     }
 
+    /// <inheritdoc/>
     public override void Update(float deltaTime)
     {
         base.Update(deltaTime);
@@ -182,12 +203,14 @@ public class ScrollViewer : ContentControl
         }
     }
 
+    /// <inheritdoc/>
     public override void OnAddedToStage(GuiLayer stage)
     {
         base.OnAddedToStage(stage);
         this.ScrollBarThumb.OnAddedToStage(stage);
     }
 
+    /// <inheritdoc/>
     public override void OnRemovedFromStage(GuiLayer stage)
     {
         base.OnRemovedFromStage(stage);
@@ -195,7 +218,7 @@ public class ScrollViewer : ContentControl
     }
 
     /// <summary>
-    /// Gets the scrollable size of the scroll viewer. This is the size of the scroll viewer minus the size of the scroll viewer's content.
+    /// Gets the total size of the content that is currently outside the visible area of the scroll viewer.
     /// </summary>
     public Vector2 ScrollableSize
     {

@@ -2,6 +2,9 @@ using System;
 
 namespace LifeSim.Imago.Controls;
 
+/// <summary>
+/// Represents a contract for styling UI controls, allowing for reusable sets of visual properties and behaviors.
+/// </summary>
 public interface IStyle
 {
     /// <summary>

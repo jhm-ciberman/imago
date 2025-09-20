@@ -181,6 +181,7 @@ public class TextBox : Control
         }
     }
 
+    /// <inheritdoc/>
     public override void Update(float deltaTime)
     {
         base.Update(deltaTime);
@@ -197,6 +198,10 @@ public class TextBox : Control
         }
     }
 
+    /// <summary>
+    /// Removes a character from the text at the specified index, handling surrogate pairs.
+    /// </summary>
+    /// <param name="index">The zero-based index of the character to remove.</param>
     protected void RemoveCharacter(int index)
     {
         if (index >= this.Text.Length || index < 0) return;
@@ -206,6 +211,7 @@ public class TextBox : Control
             : this.Text.Remove(index, 1);
     }
 
+    /// <inheritdoc/>
     protected override Vector2 MeasureOverride(Vector2 availableSize)
     {
         if (this.Text.Length == 0)
@@ -219,6 +225,7 @@ public class TextBox : Control
         return this.TextBlock.DesiredSize + padding;
     }
 
+    /// <inheritdoc/>
     protected override Rect ArrangeOverride(Rect finalRect)
     {
         Rect rect = finalRect.Deflate(this.Padding);
@@ -226,6 +233,7 @@ public class TextBox : Control
         return finalRect;
     }
 
+    /// <inheritdoc/>
     protected override void DrawCore(DrawingContext ctx)
     {
         base.DrawCore(ctx);
@@ -247,6 +255,7 @@ public class TextBox : Control
         }
     }
 
+    /// <inheritdoc/>
     public override void OnAddedToStage(GuiLayer guiLayer)
     {
         base.OnAddedToStage(guiLayer);
@@ -258,6 +267,7 @@ public class TextBox : Control
         guiLayer.Input.TextEntered += this.InputManager_TextEntered;
     }
 
+    /// <inheritdoc/>
     public override void OnRemovedFromStage(GuiLayer stage)
     {
         stage.Input.KeyPressed -= this.InputManager_KeyPressed;

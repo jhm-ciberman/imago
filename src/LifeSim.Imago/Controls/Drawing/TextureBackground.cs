@@ -30,6 +30,7 @@ public class TextureBackground : IBackground
     /// </summary>
     public Color Color { get; set; } = Color.White;
 
+    /// <inheritdoc/>
     public void DrawRectangle(DrawingContext ctx, Vector2 position, Vector2 size)
     {
         if (this.Texture != null)
@@ -38,11 +39,21 @@ public class TextureBackground : IBackground
         }
     }
 
+    /// <summary>
+    /// Allows implicit conversion from a <see cref="Texture"/> to a <see cref="TextureBackground"/>.
+    /// </summary>
+    /// <param name="texture">The texture to convert.</param>
+    /// <returns>A new <see cref="TextureBackground"/> instance with the specified texture.</returns>
     public static implicit operator TextureBackground(Texture texture)
     {
         return new TextureBackground(texture);
     }
 
+    /// <summary>
+    /// Allows implicit conversion from a <see cref="PackedTexture"/> to a <see cref="TextureBackground"/>.
+    /// </summary>
+    /// <param name="texture">The packed texture to convert.</param>
+    /// <returns>A new <see cref="TextureBackground"/> instance with the specified packed texture.</returns>
     public static implicit operator TextureBackground(PackedTexture texture)
     {
         return new TextureBackground(texture);

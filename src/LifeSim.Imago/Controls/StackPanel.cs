@@ -4,6 +4,9 @@ using LifeSim.Support.Numerics;
 
 namespace LifeSim.Imago.Controls;
 
+/// <summary>
+/// Represents a panel that arranges child elements in a single line, either horizontally or vertically.
+/// </summary>
 public class StackPanel : ItemsControl
 {
     private Orientation _orientation = Orientation.Vertical;
@@ -11,7 +14,7 @@ public class StackPanel : ItemsControl
     private Thickness _padding = new Thickness(0);
 
     /// <summary>
-    /// Gets or sets the orientation of the stack panel.
+    /// Gets or sets the orientation of the stack panel, which determines whether children are arranged horizontally or vertically.
     /// </summary>
     public Orientation Orientation
     {
@@ -20,7 +23,7 @@ public class StackPanel : ItemsControl
     }
 
     /// <summary>
-    /// Gets or sets the padding of the stack panel.
+    /// Gets or sets the padding of the stack panel, which is the space between the panel's border and its content.
     /// </summary>
     public Thickness Padding
     {
@@ -28,6 +31,15 @@ public class StackPanel : ItemsControl
         set => this.SetPropertyAndInvalidateMeasure(ref this._padding, value);
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="StackPanel"/> class.
+    /// </summary>
+    public StackPanel()
+    {
+        //
+    }
+
+    /// <inheritdoc/>
     protected override Vector2 MeasureOverride(Vector2 availableSize)
     {
         var desiredSize = Vector2.Zero;
@@ -58,6 +70,7 @@ public class StackPanel : ItemsControl
         return desiredSize + this.Padding.Total;
     }
 
+    /// <inheritdoc/>
     protected override Rect ArrangeOverride(Rect finalRect)
     {
         // use DesiredSize to calculate the final rect
@@ -88,6 +101,4 @@ public class StackPanel : ItemsControl
 
         return finalRect;
     }
-
-
 }

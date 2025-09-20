@@ -11,7 +11,8 @@ using Vector2Int = LifeSim.Support.Numerics.Vector2Int;
 namespace LifeSim.Imago.Textures;
 
 /// <summary>
-/// Represents a texture.
+/// Represents a 2D texture that can be used for rendering.
+/// Wraps a Veldrid texture and provides methods for updating its content.
 /// </summary>
 public class Texture : ITexture, ITextureRegion, IDisposable
 {
@@ -22,22 +23,22 @@ public class Texture : ITexture, ITextureRegion, IDisposable
 
 
     /// <summary>
-    /// Gets a small white texture.
+    /// Gets a singleton 2x2 white texture.
     /// </summary>
     public static Texture White => _white ??= new ImageTexture(new Image<Rgba32>(2, 2, new Rgba32(255, 255, 255, 255)));
 
     /// <summary>
-    /// Gets a small black texture.
+    /// Gets a singleton 2x2 black texture.
     /// </summary>
     public static Texture Black => _black ??= new ImageTexture(new Image<Rgba32>(2, 2, new Rgba32(0, 0, 0, 255)));
 
     /// <summary>
-    /// Gets a small transparent texture.
+    /// Gets a singleton 2x2 transparent texture.
     /// </summary>
     public static Texture Transparent => _transparent ??= new ImageTexture(new Image<Rgba32>(2, 2, new Rgba32(0, 0, 0, 0)));
 
     /// <summary>
-    /// Gets a small magenta texture.
+    /// Gets a singleton 2x2 magenta texture, often used to indicate missing textures.
     /// </summary>
     public static Texture Magenta => _magenta ??= new ImageTexture(new Image<Rgba32>(2, 2, new Rgba32(255, 0, 255, 255)));
 
@@ -47,27 +48,27 @@ public class Texture : ITexture, ITextureRegion, IDisposable
     public event EventHandler? Resized;
 
     /// <summary>
-    /// Gets the Veldrid texture object.
+    /// Gets the underlying Veldrid texture object.
     /// </summary>
     public Veldrid.Texture VeldridTexture { get; protected set; }
 
     /// <summary>
-    /// Gets the Veldrid sampler object.
+    /// Gets the Veldrid sampler object used for sampling this texture.
     /// </summary>
     public Sampler VeldridSampler { get; private set; }
 
     /// <summary>
-    /// Gets the width of the texture.
+    /// Gets the width of the texture in pixels.
     /// </summary>
     public uint Width { get; protected set; }
 
     /// <summary>
-    /// Gets the height of the texture.
+    /// Gets the height of the texture in pixels.
     /// </summary>
     public uint Height { get; protected set; }
 
     /// <summary>
-    /// Gets the number of mip levels.
+    /// Gets the number of mipmap levels.
     /// </summary>
     public uint MipLevels { get; protected set; }
 
@@ -80,10 +81,10 @@ public class Texture : ITexture, ITextureRegion, IDisposable
     /// <summary>
     /// Initializes a new instance of the <see cref="Texture"/> class.
     /// </summary>
-    /// <param name="width">The width of the texture.</param>
-    /// <param name="height">The height of the texture.</param>
-    /// <param name="mipLevels">The number of mip levels.</param>
-    /// <param name="srgb">Whether to use sRGB.</param>
+    /// <param name="width">The width of the texture in pixels.</param>
+    /// <param name="height">The height of the texture in pixels.</param>
+    /// <param name="mipLevels">The number of mipmap levels. If 0, a full mipmap chain is generated.</param>
+    /// <param name="srgb">A value indicating whether the texture uses the sRGB color space.</param>
     public Texture(uint width, uint height, uint mipLevels = 0, bool srgb = true)
     {
         this._renderer = Renderer.Instance;
@@ -109,27 +110,27 @@ public class Texture : ITexture, ITextureRegion, IDisposable
     }
 
     /// <summary>
-    /// Gets the ImGui binding for this texture.
+    /// Gets the ImGui binding for this texture, allowing it to be displayed in an ImGui UI.
     /// </summary>
     public nint ImGuiBinding => Renderer.Instance.GetOrCreateImGuiBinding(this);
 
     /// <summary>
-    /// Gets the size of the texture.
+    /// Gets the size of the texture as a <see cref="Vector2Int"/>.
     /// </summary>
     public Vector2Int Size => new Vector2Int((int)this.Width, (int)this.Height);
 
     /// <summary>
-    /// Gets or sets the name of the texture.
+    /// Gets or sets the name of the texture, used for debugging purposes.
     /// </summary>
     public string Name { get; set; } = string.Empty;
 
     /// <summary>
-    /// Gets a value indicating whether the texture is disposed.
+    /// Gets a value indicating whether this texture has been disposed.
     /// </summary>
     public bool IsDisposed => this.VeldridTexture.IsDisposed;
 
     /// <summary>
-    /// Called when the texture is dirty.
+    /// Marks the texture as dirty, indicating that its data needs to be re-uploaded to the GPU.
     /// </summary>
     protected void OnTextureDirty()
     {
@@ -140,8 +141,9 @@ public class Texture : ITexture, ITextureRegion, IDisposable
     }
 
     /// <summary>
-    /// Fills the texture with a color.
+    /// Fills the entire texture with a single color.
     /// </summary>
+    /// <param name="fillColor">The color to fill the texture with.</param>
     public void Fill(Color fillColor)
     {
         for (int i = 0; i < this._data.Length; i += 4)
@@ -155,9 +157,9 @@ public class Texture : ITexture, ITextureRegion, IDisposable
     }
 
     /// <summary>
-    /// Sets the texture data from an image.
+    /// Sets the texture data from an <see cref="Image{Rgba32}"/>.
     /// </summary>
-    /// <param name="image">The image.</param>
+    /// <param name="image">The image to upload.</param>
     public unsafe void SetDataFromImage(Image<Rgba32> image)
     {
         if (image.Width != this.Width || image.Height != this.Height)
@@ -175,14 +177,13 @@ public class Texture : ITexture, ITextureRegion, IDisposable
     }
 
     /// <summary>
-    /// Sets the texture data from a byte array of RGBA data.
+    /// Sets a region of the texture from a byte array of RGBA data.
     /// </summary>
-    /// <param name="data">The data.</param>
-    /// <param name="x">The x coordinate to start at.</param>
-    /// <param name="y">The y coordinate to start at.</param>
-    /// <param name="width">The width of the data.</param>
-    /// <param name="height">The height of the data.</param>
-    /// <exception cref="ArgumentException">Texture size does not match data size.</exception>
+    /// <param name="x">The X coordinate of the top-left corner of the region to update.</param>
+    /// <param name="y">The Y coordinate of the top-left corner of the region to update.</param>
+    /// <param name="width">The width of the region to update.</param>
+    /// <param name="height">The height of the region to update.</param>
+    /// <param name="data">The raw RGBA pixel data.</param>
     public unsafe void SetDataFromBytes(int x, int y, int width, int height, byte[] data)
     {
         if (x + width > this.Width || y + height > this.Height)
@@ -207,9 +208,9 @@ public class Texture : ITexture, ITextureRegion, IDisposable
     }
 
     /// <summary>
-    /// Updates the texture on the GPU.
+    /// Uploads the texture data to the GPU if it is dirty.
     /// </summary>
-    /// <param name="cl">The command list.</param>
+    /// <param name="cl">The command list to use for the upload.</param>
     public void Update(CommandList cl)
     {
         if (!this._isDirty) return;
@@ -237,8 +238,11 @@ public class Texture : ITexture, ITextureRegion, IDisposable
     /// <summary>
     /// Resizes the texture.
     /// </summary>
-    /// <param name="width">The new width.</param>
-    /// <param name="height">The new height.</param>
+    /// <remarks>
+    /// This operation discards the current texture content.
+    /// </remarks>
+    /// <param name="width">The new width in pixels.</param>
+    /// <param name="height">The new height in pixels.</param>
     public void Resize(uint width, uint height)
     {
         this.Width = width;
@@ -249,7 +253,7 @@ public class Texture : ITexture, ITextureRegion, IDisposable
     }
 
     /// <summary>
-    /// Disposes the resources used by the texture.
+    /// Disposes the texture and releases its GPU resources.
     /// </summary>
     public virtual void Dispose()
     {

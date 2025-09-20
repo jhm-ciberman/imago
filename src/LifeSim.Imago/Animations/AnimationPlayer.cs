@@ -5,7 +5,7 @@ using LifeSim.Imago.SceneGraph.Nodes;
 namespace LifeSim.Imago.Animations;
 
 /// <summary>
-/// Provides a way to play animations.
+/// Controls the playback of an <see cref="Animation"/> on a scene graph node and its children.
 /// </summary>
 public class AnimationPlayer
 {
@@ -24,7 +24,7 @@ public class AnimationPlayer
     /// <summary>
     /// Initializes a new instance of the <see cref="AnimationPlayer"/> class.
     /// </summary>
-    /// <param name="root">The root node of the animation.</param>
+    /// <param name="root">The root node of the hierarchy to be animated.</param>
     /// <param name="animation">The animation to play.</param>
     public AnimationPlayer(Node3D? root = null, Animation? animation = null)
     {
@@ -33,7 +33,7 @@ public class AnimationPlayer
     }
 
     /// <summary>
-    /// Gets or sets the root node.
+    /// Gets or sets the root node of the hierarchy to be animated.
     /// </summary>
     public Node3D? Root
     {
@@ -47,7 +47,7 @@ public class AnimationPlayer
     }
 
     /// <summary>
-    /// Gets or sets the current animation.
+    /// Gets or sets the current <see cref="Animation"/>.
     /// </summary>
     public Animation? Animation
     {
@@ -67,13 +67,13 @@ public class AnimationPlayer
     }
 
     /// <summary>
-    /// Gets the current animation duration in seconds.
+    /// Gets the duration of the current animation in seconds.
     /// </summary>
     public float Duration => this.Animation?.Duration ?? 0f;
 
     /// <summary>
     /// Gets or sets the current time of the animation in seconds.
-    /// The value will be clamped to the animation duration.
+    /// The value will be clamped to the animation duration if not looping.
     /// </summary>
     public float CurrentTime
     {
@@ -86,15 +86,14 @@ public class AnimationPlayer
     }
 
     /// <summary>
-    /// Gets or sets whether the animation is in loop mode.
+    /// Gets or sets a value indicating whether the animation should loop.
     /// </summary>
     public bool IsLooping { get; set; } = true;
 
 
     /// <summary>
     /// Gets or sets the playback speed of the animation.
-    /// A value of 1 means the animation will play at its original speed.
-    /// A negative value means the animation will play backwards.
+    /// A value of 1 is normal speed, 2 is double speed, 0.5 is half speed, and a negative value plays the animation in reverse.
     /// </summary>
     public float PlaybackSpeed { get; set; } = 1f;
 
@@ -114,10 +113,10 @@ public class AnimationPlayer
     }
 
     /// <summary>
-    /// Plays the given animation from the beginning.
+    /// Plays the given animation from the beginning with a specific loop setting.
     /// </summary>
     /// <param name="animation">The animation to play.</param>
-    /// <param name="loop">Whether the animation should be played in loop mode.</param>
+    /// <param name="loop">A value indicating whether the animation should loop.</param>
     public void Play(Animation animation, bool loop)
     {
         this.IsLooping = loop;
@@ -125,7 +124,7 @@ public class AnimationPlayer
     }
 
     /// <summary>
-    /// Pauses the animation.
+    /// Pauses the animation playback.
     /// </summary>
     public void Pause()
     {
@@ -133,7 +132,7 @@ public class AnimationPlayer
     }
 
     /// <summary>
-    /// Resumes the animation.
+    /// Resumes the animation playback at the current time.
     /// </summary>
     public void Resume()
     {
@@ -141,9 +140,9 @@ public class AnimationPlayer
     }
 
     /// <summary>
-    /// Updates the animation player.
+    /// Advances the animation by a given time delta and applies the new state to the target nodes.
     /// </summary>
-    /// <param name="deltaTime">The time since the last update in seconds.</param>
+    /// <param name="deltaTime">The time elapsed since the last update, in seconds.</param>
     public void Update(float deltaTime)
     {
         if (this._animation == null) return;
@@ -166,8 +165,8 @@ public class AnimationPlayer
     }
 
     /// <summary>
-    /// Rebinds all channels to the current root.
-    /// This method can be called if some nodes were added or removed or changed their names.
+    /// Rebinds all animation channels to the nodes in the current root hierarchy.
+    /// This is useful if the scene graph has changed since the animation was first bound.
     /// </summary>
     public void Rebind()
     {

@@ -4,6 +4,9 @@ using System.Text.RegularExpressions;
 
 namespace LifeSim.Imago.Graphics;
 
+/// <summary>
+/// Provides static methods for loading GLSL shader code, including handling of #include directives.
+/// </summary>
 public static partial class ShaderLoader
 {
     private static readonly string _shadersBasePath = "./res/shaders/";
@@ -13,12 +16,22 @@ public static partial class ShaderLoader
 
     private static readonly Regex _includeRegex = IncludeRegex();
 
+    /// <summary>
+    /// Loads the content of a shader file, resolving its path and processing any `#include` directives.
+    /// </summary>
+    /// <param name="filename">The name of the shader file to load.</param>
+    /// <returns>The full GLSL source code with all includes resolved.</returns>
     public static string Load(string filename)
     {
         var fullPath = ResolvePath(filename);
         return GetGlsl(fullPath);
     }
 
+    /// <summary>
+    /// Recursively loads GLSL shader code from the specified path, resolving `#include` directives.
+    /// </summary>
+    /// <param name="path">The full path to the GLSL shader file.</param>
+    /// <returns>The processed GLSL source code.</returns>
     private static string GetGlsl(string path)
     {
         // Substitute include files

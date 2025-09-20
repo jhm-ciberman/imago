@@ -78,6 +78,7 @@ public class SpriteBackground : IBackground
         this.FrameIndex = frameIndex;
     }
 
+    /// <inheritdoc/>
     public virtual void DrawRectangle(DrawingContext ctx, Vector2 position, Vector2 size)
     {
         int frameIndex = (int)this._frameIndex;
@@ -93,6 +94,11 @@ public class SpriteBackground : IBackground
         }
     }
 
+    /// <summary>
+    /// Allows implicit conversion from a <see cref="Sprite"/> to a <see cref="SpriteBackground"/>.
+    /// </summary>
+    /// <param name="sprite">The sprite to convert.</param>
+    /// <returns>A new <see cref="SpriteBackground"/> instance with the specified sprite.</returns>
     public static implicit operator SpriteBackground(Sprite sprite)
     {
         return new SpriteBackground(sprite, 0);

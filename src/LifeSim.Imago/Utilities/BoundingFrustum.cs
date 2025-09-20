@@ -3,6 +3,9 @@ using System.Runtime.CompilerServices;
 
 namespace LifeSim.Imago.Utilities;
 
+/// <summary>
+/// Represents a view frustum, defined by six planes, used for visibility culling.
+/// </summary>
 public unsafe struct BoundingFrustum
 {
     private SixPlane _planes;
@@ -17,6 +20,10 @@ public unsafe struct BoundingFrustum
         public Plane Far;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BoundingFrustum"/> struct from a combined view-projection matrix.
+    /// </summary>
+    /// <param name="m">The view-projection matrix.</param>
     public BoundingFrustum(Matrix4x4 m)
     {
         // Plane computations: http://gamedevs.org/uploads/fast-extraction-viewing-frustum-planes-from-world-view-projection-matrix.pdf
@@ -63,6 +70,15 @@ public unsafe struct BoundingFrustum
                 m.M44 - m.M43));
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BoundingFrustum"/> struct from six planes.
+    /// </summary>
+    /// <param name="left">The left plane.</param>
+    /// <param name="right">The right plane.</param>
+    /// <param name="bottom">The bottom plane.</param>
+    /// <param name="top">The top plane.</param>
+    /// <param name="near">The near plane.</param>
+    /// <param name="far">The far plane.</param>
     public BoundingFrustum(Plane left, Plane right, Plane bottom, Plane top, Plane near, Plane far)
     {
         this._planes.Left = left;
@@ -73,6 +89,11 @@ public unsafe struct BoundingFrustum
         this._planes.Far = far;
     }
 
+    /// <summary>
+    /// Checks whether the frustum contains the specified point.
+    /// </summary>
+    /// <param name="point">The point to check.</param>
+    /// <returns>A <see cref="ContainmentType"/> indicating the relationship.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ContainmentType Contains(Vector3 point)
     {
@@ -87,6 +108,11 @@ public unsafe struct BoundingFrustum
         return ContainmentType.Contains;
     }
 
+    /// <summary>
+    /// Checks whether the frustum contains the specified point.
+    /// </summary>
+    /// <param name="point">A pointer to the point to check.</param>
+    /// <returns>A <see cref="ContainmentType"/> indicating the relationship.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ContainmentType Contains(Vector3* point)
     {
@@ -101,6 +127,11 @@ public unsafe struct BoundingFrustum
         return ContainmentType.Contains;
     }
 
+    /// <summary>
+    /// Checks whether the frustum contains the specified bounding sphere.
+    /// </summary>
+    /// <param name="sphere">The bounding sphere to check.</param>
+    /// <returns>A <see cref="ContainmentType"/> indicating the relationship.</returns>
     public ContainmentType Contains(BoundingSphere sphere)
     {
         Plane* planes = (Plane*)Unsafe.AsPointer(ref this._planes);
@@ -122,8 +153,19 @@ public unsafe struct BoundingFrustum
         return result;
     }
 
+    /// <summary>
+    /// Checks whether the frustum contains the specified bounding box.
+    /// </summary>
+    /// <param name="box">The bounding box to check.</param>
+    /// <returns>A <see cref="ContainmentType"/> indicating the relationship.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ContainmentType Contains(BoundingBox box) => this.Contains(ref box);
+
+    /// <summary>
+    /// Checks whether the frustum contains the specified bounding box.
+    /// </summary>
+    /// <param name="box">The bounding box to check.</param>
+    /// <returns>A <see cref="ContainmentType"/> indicating the relationship.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ContainmentType Contains(ref BoundingBox box)
     {
@@ -171,6 +213,11 @@ public unsafe struct BoundingFrustum
         return result;
     }
 
+    /// <summary>
+    /// Checks whether the frustum contains another frustum.
+    /// </summary>
+    /// <param name="other">The other frustum to check.</param>
+    /// <returns>A <see cref="ContainmentType"/> indicating the relationship.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public unsafe ContainmentType Contains(ref BoundingFrustum other)
     {
@@ -197,12 +244,20 @@ public unsafe struct BoundingFrustum
         }
     }
 
+    /// <summary>
+    /// Gets the eight corners of the frustum.
+    /// </summary>
+    /// <returns>A <see cref="FrustumCorners"/> struct containing the corner points.</returns>
     public FrustumCorners GetCorners()
     {
         this.GetCorners(out FrustumCorners corners);
         return corners;
     }
 
+    /// <summary>
+    /// Gets the eight corners of the frustum.
+    /// </summary>
+    /// <param name="corners">An out parameter that will be populated with the corner points.</param>
     public void GetCorners(out FrustumCorners corners)
     {
         PlaneIntersection(ref this._planes.Near, ref this._planes.Top, ref this._planes.Left, out corners.NearTopLeft);

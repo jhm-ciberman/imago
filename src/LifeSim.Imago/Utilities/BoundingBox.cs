@@ -4,17 +4,37 @@ using System.Runtime.CompilerServices;
 
 namespace LifeSim.Imago.Utilities;
 
+/// <summary>
+/// Represents an axis-aligned bounding box in 3D space.
+/// </summary>
 public struct BoundingBox : IEquatable<BoundingBox>
 {
+    /// <summary>
+    /// The minimum point of the bounding box.
+    /// </summary>
     public Vector3 Min;
+
+    /// <summary>
+    /// The maximum point of the bounding box.
+    /// </summary>
     public Vector3 Max;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BoundingBox"/> struct.
+    /// </summary>
+    /// <param name="min">The minimum point of the bounding box.</param>
+    /// <param name="max">The maximum point of the bounding box.</param>
     public BoundingBox(Vector3 min, Vector3 max)
     {
         this.Min = min;
         this.Max = max;
     }
 
+    /// <summary>
+    /// Determines how another bounding box is contained within this one.
+    /// </summary>
+    /// <param name="other">The other bounding box to check.</param>
+    /// <returns>A <see cref="ContainmentType"/> indicating the relationship between the two boxes.</returns>
     public ContainmentType Contains(ref BoundingBox other)
     {
         if (this.Max.X < other.Min.X || this.Min.X > other.Max.X
@@ -35,16 +55,30 @@ public struct BoundingBox : IEquatable<BoundingBox>
         }
     }
 
+    /// <summary>
+    /// Gets the center point of the bounding box.
+    /// </summary>
+    /// <returns>The center point.</returns>
     public Vector3 GetCenter()
     {
         return (this.Max + this.Min) / 2f;
     }
 
+    /// <summary>
+    /// Gets the dimensions (width, height, depth) of the bounding box.
+    /// </summary>
+    /// <returns>The dimensions of the box.</returns>
     public Vector3 GetDimensions()
     {
         return this.Max - this.Min;
     }
 
+    /// <summary>
+    /// Creates a new bounding box that is transformed by the given matrix.
+    /// </summary>
+    /// <param name="box">The original bounding box.</param>
+    /// <param name="mat">The transformation matrix.</param>
+    /// <returns>The transformed bounding box.</returns>
     public static unsafe BoundingBox Transform(BoundingBox box, Matrix4x4 mat)
     {
         AlignedBoxCorners corners = box.GetCorners();
@@ -62,6 +96,15 @@ public struct BoundingBox : IEquatable<BoundingBox>
         return new BoundingBox(min, max);
     }
 
+    /// <summary>
+    /// Creates a new bounding box from a set of vertices.
+    /// </summary>
+    /// <param name="vertices">A pointer to the first vertex.</param>
+    /// <param name="numVertices">The number of vertices.</param>
+    /// <param name="rotation">A rotation to apply to the vertices.</param>
+    /// <param name="offset">An offset to apply to the vertices.</param>
+    /// <param name="scale">A scale to apply to the vertices.</param>
+    /// <returns>The created bounding box.</returns>
     public static unsafe BoundingBox CreateFromVertices(
         Vector3* vertices,
         int numVertices,
@@ -69,6 +112,17 @@ public struct BoundingBox : IEquatable<BoundingBox>
         Vector3 offset,
         Vector3 scale)
         => CreateFromPoints(vertices, Unsafe.SizeOf<Vector3>(), numVertices, rotation, offset, scale);
+
+    /// <summary>
+    /// Creates a new bounding box from a set of points.
+    /// </summary>
+    /// <param name="vertexPtr">A pointer to the first point.</param>
+    /// <param name="numVertices">The number of points.</param>
+    /// <param name="vertexStride">The stride between points in bytes.</param>
+    /// <param name="rotation">A rotation to apply to the points.</param>
+    /// <param name="offset">An offset to apply to the points.</param>
+    /// <param name="scale">A scale to apply to the points.</param>
+    /// <returns>The created bounding box.</returns>
     public static unsafe BoundingBox CreateFromPoints(
         Vector3* vertexPtr,
         int numVertices,
@@ -100,11 +154,24 @@ public struct BoundingBox : IEquatable<BoundingBox>
         return new BoundingBox(min * scale + offset, max * scale + offset);
     }
 
+    /// <summary>
+    /// Creates a new bounding box from an array of vertices.
+    /// </summary>
+    /// <param name="vertices">The array of vertices.</param>
+    /// <returns>The created bounding box.</returns>
     public static unsafe BoundingBox CreateFromVertices(Vector3[] vertices)
     {
         return CreateFromVertices(vertices, Quaternion.Identity, Vector3.Zero, Vector3.One);
     }
 
+    /// <summary>
+    /// Creates a new bounding box from an array of vertices with a transformation.
+    /// </summary>
+    /// <param name="vertices">The array of vertices.</param>
+    /// <param name="rotation">A rotation to apply to the vertices.</param>
+    /// <param name="offset">An offset to apply to the vertices.</param>
+    /// <param name="scale">A scale to apply to the vertices.</param>
+    /// <returns>The created bounding box.</returns>
     public static unsafe BoundingBox CreateFromVertices(Vector3[] vertices, Quaternion rotation, Vector3 offset, Vector3 scale)
     {
         Vector3 min = Vector3.Transform(vertices[0], rotation);
@@ -127,6 +194,12 @@ public struct BoundingBox : IEquatable<BoundingBox>
         return new BoundingBox(min * scale + offset, max * scale + offset);
     }
 
+    /// <summary>
+    /// Creates a new bounding box that contains two other bounding boxes.
+    /// </summary>
+    /// <param name="box1">The first bounding box.</param>
+    /// <param name="box2">The second bounding box.</param>
+    /// <returns>A new bounding box that contains both input boxes.</returns>
     public static BoundingBox Combine(BoundingBox box1, BoundingBox box2)
     {
         return new BoundingBox(
@@ -161,12 +234,13 @@ public struct BoundingBox : IEquatable<BoundingBox>
 
     public override int GetHashCode()
     {
-        int h1 = this.Min.GetHashCode();
-        int h2 = this.Max.GetHashCode();
-        uint shift5 = (uint)h1 << 5 | (uint)h1 >> 27;
-        return (int)shift5 + h1 ^ h2;
+        return HashCode.Combine(this.Min, this.Max);
     }
 
+    /// <summary>
+    /// Gets the eight corners of the bounding box.
+    /// </summary>
+    /// <returns>An <see cref="AlignedBoxCorners"/> struct containing the corner points.</returns>
     public AlignedBoxCorners GetCorners()
     {
         AlignedBoxCorners corners;
@@ -183,6 +257,10 @@ public struct BoundingBox : IEquatable<BoundingBox>
         return corners;
     }
 
+    /// <summary>
+    /// Checks if any of the bounding box's components are NaN.
+    /// </summary>
+    /// <returns>True if any component is NaN; otherwise, false.</returns>
     public bool ContainsNaN()
     {
         return float.IsNaN(this.Min.X) || float.IsNaN(this.Min.Y) || float.IsNaN(this.Min.Z)

@@ -6,18 +6,33 @@ using Veldrid;
 
 namespace LifeSim.Imago.Meshes;
 
+/// <summary>
+/// Represents mesh data for terrain, extending <see cref="BasicMeshData"/> with light information.
+/// </summary>
 public class TerrainMeshData : BasicMeshData
 {
+    /// <summary>
+    /// Gets or sets the array of 2D lightmap coordinates for each vertex.
+    /// </summary>
     public Vector2[] Lights { get; set; }
 
     public override VertexFormat VertexFormat => TerrainVertex.VertexFormat;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TerrainMeshData"/> class.
+    /// </summary>
+    /// <param name="indices">The array of indices defining the triangles.</param>
+    /// <param name="positions">The array of vertex positions.</param>
+    /// <param name="normals">Optional: The array of normal vectors. If null, normals will be recomputed.</param>
+    /// <param name="texCoords">The array of texture coordinates.</param>
+    /// <param name="lights">The array of lightmap coordinates.</param>
     public TerrainMeshData(ushort[] indices, Vector3[] positions, Vector3[]? normals, Vector2[] texCoords, Vector2[] lights)
         : base(indices, positions, normals, texCoords)
     {
         this.Lights = lights;
     }
 
+    /// <inheritdoc/>
     protected override void Validate()
     {
         base.Validate();
@@ -26,6 +41,7 @@ public class TerrainMeshData : BasicMeshData
             throw new ArgumentException("The number of lights vertices must match the number of positions.");
     }
 
+    /// <inheritdoc/>
     public override DeviceBuffer CreateVertexBuffer(GraphicsDevice gd)
     {
         this.Validate();

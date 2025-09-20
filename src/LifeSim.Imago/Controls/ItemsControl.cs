@@ -8,23 +8,38 @@ using LifeSim.Imago.Rendering.Sprites;
 
 namespace LifeSim.Imago.Controls;
 
+/// <summary>
+/// Represents a control that can display a collection of items.
+/// </summary>
 public abstract class ItemsControl : Control
 {
+    /// <summary>
+    /// Represents a collection of <see cref="Control"/> objects managed by an <see cref="ItemsControl"/>.
+    /// </summary>
     public class ItemCollection : Collection<Control>
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ItemCollection"/> class.
+        /// </summary>
+        /// <param name="owner">The <see cref="ItemsControl"/> that owns this collection.</param>
         public ItemCollection(ItemsControl owner)
         {
             this.Owner = owner;
         }
 
+        /// <summary>
+        /// Gets the <see cref="ItemsControl"/> that owns this collection.
+        /// </summary>
         public ItemsControl Owner { get; }
 
+        /// <inheritdoc/>
         protected override void InsertItem(int index, Control item)
         {
             base.InsertItem(index, item);
             this.Owner.AddVisualChild(item);
         }
 
+        /// <inheritdoc/>
         protected override void RemoveItem(int index)
         {
             var item = this[index];
@@ -32,6 +47,7 @@ public abstract class ItemsControl : Control
             this.Owner.RemoveVisualChild(item);
         }
 
+        /// <inheritdoc/>
         protected override void SetItem(int index, Control item)
         {
             var oldItem = this[index];
@@ -40,12 +56,21 @@ public abstract class ItemsControl : Control
             this.Owner.AddVisualChild(item);
         }
 
+        /// <summary>
+        /// Replaces an existing item in the collection with a new item.
+        /// </summary>
+        /// <param name="oldItem">The item to replace.</param>
+        /// <param name="newItem">The new item to insert.</param>
         public void Replace(Control oldItem, Control newItem)
         {
             var index = this.IndexOf(oldItem);
             this[index] = newItem;
         }
 
+        /// <summary>
+        /// Adds a range of items to the collection.
+        /// </summary>
+        /// <param name="items">The items to add.</param>
         public void AddRange(IEnumerable<Control> items)
         {
             foreach (var item in items)
@@ -54,6 +79,10 @@ public abstract class ItemsControl : Control
             }
         }
 
+        /// <summary>
+        /// Returns an enumerator that iterates through the <see cref="ItemCollection"/>.
+        /// </summary>
+        /// <returns>A <see cref="List{T}.Enumerator"/> for the <see cref="ItemCollection"/>.</returns>
         public new List<Control>.Enumerator GetEnumerator()
         {
             // This override is to prevent the use of the base GetEnumerator method which allocates a new enumerator.
@@ -62,15 +91,23 @@ public abstract class ItemsControl : Control
         }
     }
 
+    /// <summary>
+    /// Gets the collection of child controls displayed by this <see cref="ItemsControl"/>.
+    /// </summary>
     public ItemCollection Items { get; }
 
+    /// <inheritdoc/>
     protected override IReadOnlyList<Control> HitTestingChildren => this.Items;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ItemsControl"/> class.
+    /// </summary>
     public ItemsControl()
     {
         this.Items = new ItemCollection(this);
     }
 
+    /// <inheritdoc/>
     protected override void DrawCore(DrawingContext ctx)
     {
         base.DrawCore(ctx);
@@ -81,6 +118,7 @@ public abstract class ItemsControl : Control
         }
     }
 
+    /// <inheritdoc/>
     public override void Update(float deltaTime)
     {
         for (var i = 0; i < this.Items.Count; i++)
@@ -94,6 +132,9 @@ public abstract class ItemsControl : Control
     private Dictionary<object, Control>? _itemControls;
     private IDataTemplate? _itemItemplate;
 
+    /// <summary>
+    /// Gets or sets the data template used to generate a <see cref="Control"/> for each item in the <see cref="ItemsSource"/>.
+    /// </summary>
     public IDataTemplate? ItemTemplate
     {
         get => this._itemItemplate;
@@ -108,6 +149,9 @@ public abstract class ItemsControl : Control
     }
 
     private IEnumerable<object>? _itemsSource;
+    /// <summary>
+    /// Gets or sets a collection that is used to generate the content of the <see cref="ItemsControl"/>.
+    /// </summary>
     public IEnumerable<object>? ItemsSource
     {
         get => this._itemsSource;
@@ -195,6 +239,10 @@ public abstract class ItemsControl : Control
         }
     }
 
+    /// <summary>
+    /// Called when the <see cref="ItemsSource"/> property changes. This method resets the current items
+    /// and then generates new controls for the items in the new source using the <see cref="ItemTemplate"/>.
+    /// </summary>
     protected virtual void OnItemsSourceChanged()
     {
         this.OnItemsReset();

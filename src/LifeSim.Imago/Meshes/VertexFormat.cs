@@ -5,7 +5,7 @@ using Veldrid.SPIRV;
 namespace LifeSim.Imago.Meshes;
 
 /// <summary>
-/// Represents a vertex format.
+/// Defines the structure of a vertex by describing its attributes.
 /// </summary>
 public class VertexFormat
 {
@@ -15,12 +15,12 @@ public class VertexFormat
     public string Name { get; set; }
 
     /// <summary>
-    /// Gets or sets the vertex layouts.
+    /// Gets or sets the array of vertex layout descriptions that define the vertex structure.
     /// </summary>
     public VertexLayoutDescription[] Layouts { get; set; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether the vertex format is skinned.
+    /// Gets or sets a value indicating whether this vertex format includes skinning information (bone indices and weights).
     /// </summary>
     public bool IsSkinned { get; set; } = false;
 
@@ -28,7 +28,7 @@ public class VertexFormat
     /// Initializes a new instance of the <see cref="VertexFormat"/> class.
     /// </summary>
     /// <param name="name">The name of the vertex format.</param>
-    /// <param name="layouts">The vertex layouts.</param>
+    /// <param name="layouts">The array of vertex layout descriptions.</param>
     public VertexFormat(string name, params VertexLayoutDescription[] layouts)
     {
         this.Name = name;
@@ -36,8 +36,9 @@ public class VertexFormat
     }
 
     /// <summary>
-    /// Gets the vertex shader macros for the vertex format.
+    /// Gets the shader macro definitions required to support this vertex format.
     /// </summary>
+    /// <returns>A list of macro definitions for the shader compiler.</returns>
     public List<MacroDefinition> GetMacroDefinitions()
     {
         var macros = new List<MacroDefinition>();

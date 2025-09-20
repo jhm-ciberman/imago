@@ -6,17 +6,28 @@ using LifeSim.Imago.SceneGraph.Nodes;
 
 namespace LifeSim.Imago.Gltf;
 
+/// <summary>
+/// Responsible for instantiating a glTF scene graph into a hierarchy of <see cref="Node3D"/> objects.
+/// </summary>
 internal class GltfSceneInstantiator
 {
     private readonly Dictionary<GltfNode, Node3D> _nodesCache = new Dictionary<GltfNode, Node3D>();
 
     private readonly GltfNode _node;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GltfSceneInstantiator"/> class.
+    /// </summary>
+    /// <param name="node">The root <see cref="GltfNode"/> to instantiate.</param>
     internal GltfSceneInstantiator(GltfNode node)
     {
         this._node = node;
     }
 
+    /// <summary>
+    /// Instantiates the glTF scene graph into a hierarchy of <see cref="Node3D"/> objects.
+    /// </summary>
+    /// <returns>The root <see cref="Node3D"/> of the instantiated scene graph.</returns>
     internal Node3D Instantiate()
     {
         return this.InstantiateNodeRecursive(this._node);

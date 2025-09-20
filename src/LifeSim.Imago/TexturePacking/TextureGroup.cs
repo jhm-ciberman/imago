@@ -4,51 +4,43 @@ using System.Collections.Generic;
 namespace LifeSim.Imago.TexturePacking;
 
 /// <summary>
-/// A texture group is a container for one or more <see cref="TexturePage"/>s. Each texture group
-/// defines the size of the atlas that will be used to pack the textures as well as the alignment of
-/// the items inside the atlas.
+/// Manages a collection of texture atlases (<see cref="TexturePage"/>s) for packing individual textures into larger sheets.
 /// </summary>
 public class TextureGroup : IDisposable
 {
     /// <summary>
-    /// Occurs when a new page is added to the group.
+    /// Occurs when a new <see cref="TexturePage"/> is added to the group to accommodate more textures.
     /// </summary>
     public event EventHandler<TexturePage>? PageAdded;
 
     /// <summary>
-    /// Occurs when the group needs to flush the pending changes to the atlas.
+    /// Occurs when the group has pending changes that need to be uploaded to the GPU.
     /// </summary>
     public event EventHandler? FlushRequested;
 
     /// <summary>
-    /// Gets the name of the group.
+    /// Gets the name of the texture group.
     /// </summary>
     public string Name { get; } = string.Empty;
 
     /// <summary>
-    /// Gets the size of the atlas.
+    /// Gets the size (width and height) of the texture atlases managed by this group.
     /// </summary>
     public uint AtlasSize { get; } = 0;
 
     /// <summary>
-    /// Gets the tile size. This is the size in pixels of each tile in the atlas. This can be used to prevent MipMap levels
-    /// from bleeding into each other.
+    /// Gets the size in pixels of each tile in the atlas, used to prevent MipMap bleeding.
     /// </summary>
     public uint TileSize { get; } = 1;
 
     /// <summary>
-    /// Gets whether the texture pages of this group should use the SRGB color space.
+    /// Gets a value indicating whether the texture pages of this group use the sRGB color space.
     /// </summary>
     public bool IsSrgb { get; } = false;
 
     /// <summary>
     /// Gets or sets the factor used to calculate an inward inset for texture coordinates within the atlas.
-    /// This inset acts as a small safety margin, effectively shrinking the usable UV area slightly
-    /// to prevent visual artifacts such as color bleeding from adjacent textures or shimmering at edges
-    /// due to floating-point inaccuracies during GPU texture sampling.
-    /// The value is a multiplier relative to the size of a single texel. For example, the default
-    /// value of 0.02f (1/50th) means the UV coordinates will be inset by 2% of a texel's dimension
-    /// from their true edges on each side.
+    /// This prevents visual artifacts like color bleeding from adjacent textures.
     /// </summary>
     public float TexelInsetFactor { get; set; } = 1f / 50f; // 1/50th of a texel
 
@@ -62,9 +54,9 @@ public class TextureGroup : IDisposable
     /// Initializes a new instance of the <see cref="TextureGroup"/> class.
     /// </summary>
     /// <param name="name">The name of the group.</param>
-    /// <param name="atlasSize">The size of the atlas.</param>
-    /// <param name="tileSize">The tile size.</param>
-    /// <param name="srgb">Whether the texture pages of this group should use the SRGB color space.</param>
+    /// <param name="atlasSize">The size (width and height) of the texture atlases.</param>
+    /// <param name="tileSize">The size of each tile in the atlas.</param>
+    /// <param name="srgb">A value indicating whether to use the sRGB color space.</param>
     public TextureGroup(string name, uint atlasSize, uint tileSize, bool srgb = false)
     {
         this.Name = name;
@@ -74,11 +66,11 @@ public class TextureGroup : IDisposable
     }
 
     /// <summary>
-    /// Packs the specified texture and returns a packed texture.
+    /// Packs a texture, defined by a draw operation, into a texture atlas.
     /// </summary>
-    /// <param name="unpackedTexture">The texture to pack.</param>
-    /// <returns>The packed texture.</returns>
-    /// <exception cref="InvalidOperationException">Thrown when the texture is already packed or it's too big to be packed in any page.</exception>
+    /// <param name="unpackedTexture">The draw operation representing the texture to pack.</param>
+    /// <returns>A <see cref="PackedTexture"/> representing the location of the packed texture.</returns>
+    /// <exception cref="InvalidOperationException">Thrown if the texture is too large to fit in any page.</exception>
     public PackedTexture Pack(IDrawOperation unpackedTexture)
     {
         PackedTexture? packedTexture;
@@ -111,11 +103,11 @@ public class TextureGroup : IDisposable
     }
 
     /// <summary>
-    /// Packs the specified texture and returns a packed texture.
+    /// Packs a texture from a file path into a texture atlas.
     /// </summary>
-    /// <param name="sourcePath">The path to the texture to pack.</param>
-    /// <returns>The packed texture.</returns>
-    /// <exception cref="InvalidOperationException">Thrown when the texture is already packed or it's too big to be packed in any page.</exception>
+    /// <param name="sourcePath">The file path of the texture to pack.</param>
+    /// <returns>A <see cref="PackedTexture"/> representing the location of the packed texture.</returns>
+    /// <exception cref="InvalidOperationException">Thrown if the texture is too large to fit in any page.</exception>
     public PackedTexture Pack(string sourcePath)
     {
         return this.Pack(new TextureDrawOperation(sourcePath));
@@ -131,12 +123,12 @@ public class TextureGroup : IDisposable
     }
 
     /// <summary>
-    /// Gets a list of all the pages in the group.
+    /// Gets a read-only list of all texture pages in the group.
     /// </summary>
     public IReadOnlyList<TexturePage> Pages => this._pages;
 
     /// <summary>
-    /// Flushes the pending changes to the atlas.
+    /// Applies all pending packing and redraw operations to the GPU textures.
     /// </summary>
     public void FlushChanges()
     {
@@ -150,10 +142,10 @@ public class TextureGroup : IDisposable
     }
 
     /// <summary>
-    /// Releases the specified packed texture.
+    /// Releases a packed texture, making its space available for new textures.
     /// </summary>
     /// <param name="packedTexture">The packed texture to release.</param>
-    /// <exception cref="InvalidOperationException">Thrown when the texture is not found in any page.</exception>
+    /// <exception cref="InvalidOperationException">Thrown if the texture is not part of this group.</exception>
     public void Release(PackedTexture packedTexture)
     {
         if (!this._packedTexturesPages.TryGetValue(packedTexture, out var page))
@@ -170,12 +162,11 @@ public class TextureGroup : IDisposable
 
 
     /// <summary>
-    /// Redraws the texture contained in the specified packed texture. This is useful when you want to update the texture
-    /// without having to release and repack it.
+    /// Redraws an existing packed texture region with a new texture.
     /// </summary>
-    /// <param name="packedTexture">The packed texture to redraw.</param>
-    /// <param name="drawOperation">The draw operation to use.</param>
-    /// <exception cref="InvalidOperationException">Thrown when the texture is not found in any page.</exception>
+    /// <param name="packedTexture">The packed texture region to update.</param>
+    /// <param name="drawOperation">The draw operation for the new texture content.</param>
+    /// <exception cref="InvalidOperationException">Thrown if the texture is not part of this group.</exception>
     public void Redraw(PackedTexture packedTexture, IDrawOperation drawOperation)
     {
         if (!this._packedTexturesPages.TryGetValue(packedTexture, out var page))
@@ -188,7 +179,7 @@ public class TextureGroup : IDisposable
     }
 
     /// <summary>
-    /// Releases all resources used by the group.
+    /// Disposes all texture pages managed by this group.
     /// </summary>
     public void Dispose()
     {
@@ -199,9 +190,9 @@ public class TextureGroup : IDisposable
     }
 
     /// <summary>
-    /// Saves the texture atlas to a PNG file.
+    /// Saves all texture atlases in this group to PNG files.
     /// </summary>
-    /// <param name="name">The name of the file to save.</param>
+    /// <param name="name">The base name for the output files. Each page will be saved as "{name}_{index}.png".</param>
     public void SaveToPng(string name)
     {
         for (int i = 0; i < this._pages.Count; i++)

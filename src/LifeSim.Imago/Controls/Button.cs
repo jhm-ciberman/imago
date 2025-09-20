@@ -6,6 +6,9 @@ using Veldrid;
 
 namespace LifeSim.Imago.Controls;
 
+/// <summary>
+/// Represents a clickable button control.
+/// </summary>
 public class Button : ContentControl
 {
     /// <summary>
@@ -16,7 +19,7 @@ public class Button : ContentControl
     private bool _isPressed = false;
 
     /// <summary>
-    /// Gets whether the button is currently pressed.
+    /// Gets a value indicating whether the button is currently in the pressed state.
     /// </summary>
     public bool IsPressed
     {
@@ -42,14 +45,14 @@ public class Button : ContentControl
     }
 
     /// <summary>
-    /// Gets or sets whether the button is enabled.
+    /// Gets or sets a value indicating whether the button is enabled and can be interacted with.
     /// </summary>
     public bool IsEnabled { get; set; } = true;
     private ICommand? _command = null;
     private object? _commandParameter = null;
 
     /// <summary>
-    /// Command that is executed when the button is clicked.
+    /// Gets or sets the command to execute when the button is clicked.
     /// </summary>
     public ICommand? Command
     {
@@ -73,13 +76,18 @@ public class Button : ContentControl
         }
     }
 
+    /// <summary>
+    /// Handles changes in the <see cref="ICommand.CanExecute"/> status, updating the button's <see cref="IsEnabled"/> state accordingly.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     protected virtual void OnCommandCanExecuteChanged(object? sender, EventArgs e)
     {
         this.IsEnabled = this.Command?.CanExecute(this.CommandParameter) ?? true;
     }
 
     /// <summary>
-    /// Parameter that is passed to the command.
+    /// Gets or sets the parameter to pass to the <see cref="Command"/> property.
     /// </summary>
     public object? CommandParameter
     {
@@ -95,6 +103,9 @@ public class Button : ContentControl
 
     private ButtonAppearance _appearance = ButtonAppearance.Default;
 
+    /// <summary>
+    /// Gets or sets the appearance of the button.
+    /// </summary>
     public ButtonAppearance Appearance
     {
         get => this._appearance;
@@ -107,11 +118,13 @@ public class Button : ContentControl
         }
     }
 
+    /// <inheritdoc/>
     protected override void DrawCore(DrawingContext ctx)
     {
         base.DrawCore(ctx);
     }
 
+    /// <inheritdoc/>
     public override void Update(float deltaTime)
     {
         if (this.Stage == null) return;
@@ -128,6 +141,7 @@ public class Button : ContentControl
         }
     }
 
+    /// <inheritdoc/>
     public override void HandleMousePressed(MouseButtonEventArgs e)
     {
         if (e.Button == MouseButton.Left)
@@ -139,6 +153,7 @@ public class Button : ContentControl
         base.HandleMousePressed(e);
     }
 
+    /// <inheritdoc/>
     public override void HandleMouseReleased(MouseButtonEventArgs e)
     {
         if (e.Button == MouseButton.Left)
@@ -159,7 +174,7 @@ public class Button : ContentControl
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Button"/> class.
+    /// Initializes a new instance of the <see cref="Button"/> class with the specified content.
     /// </summary>
     /// <param name="content">The content of the button.</param>
     public Button(Control? content)
@@ -168,9 +183,9 @@ public class Button : ContentControl
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Button"/> class.
+    /// Initializes a new instance of the <see cref="Button"/> class with the specified text.
     /// </summary>
-    /// <param name="text">The text of the button.</param>
+    /// <param name="text">The text to display on the button.</param>
     public Button(string text)
     {
         this.Content = new TextBlock(text);

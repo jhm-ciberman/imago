@@ -6,14 +6,14 @@ using LifeSim.Support.Numerics;
 namespace LifeSim.Imago.Controls;
 
 /// <summary>
-/// Represents a control that can contain one other control.
+/// Represents a control that can contain a single child control.
 /// </summary>
 public class ContentControl : Control
 {
     private Thickness _padding = new Thickness(0);
 
     /// <summary>
-    /// Gets or sets the padding of the content control.
+    /// Gets or sets the padding of the content control, which is the space between the control's border and its content.
     /// </summary>
     public Thickness Padding
     {
@@ -25,7 +25,7 @@ public class ContentControl : Control
     private readonly Control[] _hitTestChildren = [null!];
 
     /// <summary>
-    /// Gets or sets the content of the control.
+    /// Gets or sets the single child control contained within this <see cref="ContentControl"/>.
     /// </summary>
     public Control? Content
     {
@@ -53,11 +53,13 @@ public class ContentControl : Control
         }
     }
 
+    /// <inheritdoc/>
     protected override IReadOnlyList<Control> HitTestingChildren
     {
         get => this.Content != null ? this._hitTestChildren : [];
     }
 
+    /// <inheritdoc/>
     protected override Vector2 MeasureOverride(Vector2 availableSize)
     {
         if (this.Content != null)
@@ -72,6 +74,7 @@ public class ContentControl : Control
         }
     }
 
+    /// <inheritdoc/>
     protected override Rect ArrangeOverride(Rect finalRect)
     {
         if (this.Content != null)
@@ -83,6 +86,7 @@ public class ContentControl : Control
         return finalRect;
     }
 
+    /// <inheritdoc/>
     protected override void DrawCore(DrawingContext ctx)
     {
         base.DrawCore(ctx);
@@ -90,6 +94,7 @@ public class ContentControl : Control
         this.Content?.Draw(ctx);
     }
 
+    /// <inheritdoc/>
     public override void Update(float deltaTime)
     {
         this.Content?.Update(deltaTime);

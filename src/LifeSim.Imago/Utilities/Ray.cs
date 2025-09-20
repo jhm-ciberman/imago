@@ -2,22 +2,47 @@ using System.Numerics;
 
 namespace LifeSim.Imago.Utilities;
 
+/// <summary>
+/// Represents a ray in 3D space, defined by an origin and a direction.
+/// </summary>
 public struct Ray
 {
+    /// <summary>
+    /// The origin point of the ray.
+    /// </summary>
     public Vector3 Origin;
+
+    /// <summary>
+    /// The normalized direction vector of the ray.
+    /// </summary>
     public Vector3 Direction;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Ray"/> struct.
+    /// </summary>
+    /// <param name="origin">The origin point of the ray.</param>
+    /// <param name="direction">The direction vector of the ray.</param>
     public Ray(Vector3 origin, Vector3 direction)
     {
         this.Origin = origin;
         this.Direction = direction;
     }
 
+    /// <summary>
+    /// Checks whether the ray intersects with a bounding box.
+    /// </summary>
+    /// <param name="box">The bounding box to check.</param>
+    /// <returns>True if the ray intersects the box; otherwise, false.</returns>
     public bool Intersects(BoundingBox box)
     {
         return this.Intersects(ref box);
     }
 
+    /// <summary>
+    /// Checks whether the ray intersects with a bounding box.
+    /// </summary>
+    /// <param name="box">The bounding box to check.</param>
+    /// <returns>True if the ray intersects the box; otherwise, false.</returns>
     public bool Intersects(ref BoundingBox box)
     {
         // http://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection
@@ -66,14 +91,28 @@ public struct Ray
         (b, a) = (a, b);
     }
 
+    /// <summary>
+    /// Creates a new ray that is transformed by the given matrix.
+    /// </summary>
+    /// <param name="ray">The original ray.</param>
+    /// <param name="mat">The transformation matrix.</param>
+    /// <returns>The transformed ray.</returns>
     public static Ray Transform(Ray ray, Matrix4x4 mat)
     {
         return new Ray(Vector3.Transform(ray.Origin, mat), Vector3.Normalize(Vector3.TransformNormal(ray.Direction, mat)));
     }
 
-    // Ray-Triangle Intersection, using the Möller–Trumbore intersection algorithm.
-    // https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
-
+    /// <summary>
+    /// Checks whether the ray intersects with a triangle.
+    /// </summary>
+    /// <remarks>
+    /// This method uses the Möller–Trumbore intersection algorithm.
+    /// </remarks>
+    /// <param name="V1">The first vertex of the triangle.</param>
+    /// <param name="V2">The second vertex of the triangle.</param>
+    /// <param name="V3">The third vertex of the triangle.</param>
+    /// <param name="distance">When this method returns, contains the distance from the ray origin to the intersection point, if an intersection occurred.</param>
+    /// <returns>True if the ray intersects the triangle; otherwise, false.</returns>
     public bool Intersects(ref Vector3 V1, ref Vector3 V2, ref Vector3 V3, out float distance)
     {
         const float EPSILON = 1E-6f;

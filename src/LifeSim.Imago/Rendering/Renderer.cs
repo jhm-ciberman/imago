@@ -152,10 +152,10 @@ public class Renderer : IDisposable
     }
 
     /// <summary>
-    /// Updates the renderer.
+    /// Updates the state of the renderer and its components.
     /// </summary>
-    /// <param name="deltaTime">The time since the last update in seconds.</param>
-    /// <param name="inputSnapshot">The current input state.</param>
+    /// <param name="deltaTime">The time elapsed since the last frame, in seconds.</param>
+    /// <param name="inputSnapshot">The current input snapshot.</param>
     public void Update(float deltaTime, InputSnapshot inputSnapshot)
     {
         this._imGuiPass.Update(deltaTime, inputSnapshot);
@@ -213,16 +213,16 @@ public class Renderer : IDisposable
     }
 
     /// <summary>
-    /// Makes a new material.
+    /// Creates a new <see cref="Material"/> instance with default shaders.
     /// </summary>
-    /// <returns>The created material.</returns>
+    /// <returns>A new <see cref="Material"/> instance.</returns>
     public Material MakeMaterial()
     {
         return this._renderContext.MakeMaterial();
     }
 
     /// <summary>
-    /// Disposes the given object when the renderer is idle.
+    /// Schedules a disposable resource to be released when the GPU is idle.
     /// </summary>
     /// <param name="disposable">The object to dispose.</param>
     public void DisposeWhenIdle(IDisposable disposable)
@@ -231,7 +231,7 @@ public class Renderer : IDisposable
     }
 
     /// <summary>
-    /// Renders the scene to the screen.
+    /// Renders a <see cref="Stage"/> to the main swapchain.
     /// </summary>
     /// <param name="stage">The stage to render.</param>
     public void Render(Stage stage)
@@ -267,11 +267,11 @@ public class Renderer : IDisposable
 
 
     /// <summary>
-    /// Renders the scene to the given render texture. If the render texture is multisampled, the result can be resolved to the given texture.
+    /// Renders a <see cref="Stage"/> to an off-screen texture.
     /// </summary>
     /// <param name="stage">The stage to render.</param>
     /// <param name="renderTexture">The render texture to render to.</param>
-    /// <param name="resolvedTexture">The texture to resolve to. If null, the render texture is not resolved.</param>
+    /// <param name="resolvedTexture">The texture to resolve the multisampled result to. If null, no resolving is performed.</param>
     public void RenderToOffScreenTexture(Stage stage, RenderTexture renderTexture, Texture? resolvedTexture = null)
     {
         var cl = this._commandList;
@@ -295,11 +295,13 @@ public class Renderer : IDisposable
     }
 
     /// <summary>
-    /// Resolves the given multisampled render texture to the given texture so it can be used as a regular texture.
-    /// If the render texture is not multisampled, the texture is just copied to the resolved texture.
+    /// Resolves a multisampled render texture into a non-multisampled texture.
     /// </summary>
-    /// <param name="renderTexture">The render texture to resolve.</param>
-    /// <param name="resolvedTexture">The texture to resolve to.</param>
+    /// <remarks>
+    /// If the source render texture is not multisampled, this method performs a copy.
+    /// </remarks>
+    /// <param name="renderTexture">The multisampled render texture to resolve.</param>
+    /// <param name="resolvedTexture">The target non-multisampled texture.</param>
     public void ResolveTexture(RenderTexture renderTexture, Texture resolvedTexture)
     {
         var cl = this._commandList;
@@ -322,10 +324,10 @@ public class Renderer : IDisposable
     }
 
     /// <summary>
-    /// Gets or creates a resource layout with the given description.
+    /// Gets or creates a cached <see cref="ResourceLayout"/> for the given description.
     /// </summary>
     /// <param name="description">The description of the resource layout.</param>
-    /// <returns>The created or cached resource layout.</returns>
+    /// <returns>The cached or newly created resource layout.</returns>
     public ResourceLayout GetResourceLayout(ResourceLayoutDescription description)
     {
         if (!this._resourceLayoutCache.TryGetValue(description, out ResourceLayout? layout))
@@ -337,10 +339,10 @@ public class Renderer : IDisposable
     }
 
     /// <summary>
-    /// Resizes the main render texture.
+    /// Resizes the main viewport and all related textures.
     /// </summary>
-    /// <param name="width">The new width of the render texture.</param>
-    /// <param name="height">The new height of the render texture.</param>
+    /// <param name="width">The new width of the viewport.</param>
+    /// <param name="height">The new height of the viewport.</param>
     public void Resize(uint width, uint height)
     {
         this.GraphicsDevice.ResizeMainWindow(width, height);
@@ -350,10 +352,10 @@ public class Renderer : IDisposable
     }
 
     /// <summary>
-    /// Resizes the GUI render texture.
+    /// Resizes the GUI viewport and its related textures.
     /// </summary>
-    /// <param name="width">The new width of the render texture.</param>
-    /// <param name="height">The new height of the render texture.</param>
+    /// <param name="width">The new width of the GUI viewport.</param>
+    /// <param name="height">The new height of the GUI viewport.</param>
     public void ResizeGui(uint width, uint height)
     {
         this.GuiRenderTexture.Resize(width, height);

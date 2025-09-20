@@ -2,6 +2,10 @@ using System;
 
 namespace LifeSim.Imago.Controls;
 
+/// <summary>
+/// Represents a generic style that can be applied to a control of a specific type.
+/// </summary>
+/// <typeparam name="T">The type of the control to which the style can be applied.</typeparam>
 public class Style<T> : IStyle
 {
     private readonly Action<T> _applyCore;

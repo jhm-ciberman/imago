@@ -5,8 +5,19 @@ using Veldrid.SPIRV;
 
 namespace LifeSim.Imago.Materials;
 
+/// <summary>
+/// Provides static methods for compiling GLSL shader code into Veldrid-compatible shader objects.
+/// </summary>
 public static class ShaderCompiler
 {
+    /// <summary>
+    /// Compiles vertex and fragment GLSL shader code into Veldrid <see cref="Veldrid.Shader"/> objects.
+    /// </summary>
+    /// <param name="gd">The <see cref="GraphicsDevice"/> used for creating shader resources.</param>
+    /// <param name="vertexCode">The GLSL source code for the vertex shader.</param>
+    /// <param name="fragmentCode">The GLSL source code for the fragment shader.</param>
+    /// <param name="macros">Optional: A collection of <see cref="MacroDefinition"/> to apply during compilation.</param>
+    /// <returns>An array containing the compiled vertex and fragment <see cref="Veldrid.Shader"/> objects.</returns>
     public static Veldrid.Shader[] CompileShaders(GraphicsDevice gd, string vertexCode, string fragmentCode, IEnumerable<MacroDefinition>? macros = null)
     {
         var macroDefinitions = GetMacroDefinitions(macros, gd.BackendType);

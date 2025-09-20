@@ -5,6 +5,9 @@ using LifeSim.Support.Drawing;
 
 namespace LifeSim.Imago.Controls;
 
+/// <summary>
+/// Represents a text effect that draws a shadow behind the text.
+/// </summary>
 public class ShadowTextEffect : ITextEffect
 {
     /// <summary>
@@ -65,6 +68,7 @@ public class ShadowTextEffect : ITextEffect
         this.BlurAmount = blurAmount;
     }
 
+    /// <inheritdoc/>
     public void Draw(DrawingContext ctx, string text, SpriteFontBase font, Vector2 position, Color color)
     {
         if (string.IsNullOrWhiteSpace(text))

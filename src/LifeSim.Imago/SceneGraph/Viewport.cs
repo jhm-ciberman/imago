@@ -3,6 +3,9 @@ using System.Numerics;
 
 namespace LifeSim.Imago.SceneGraph;
 
+/// <summary>
+/// Defines a 2D rectangular area on the screen.
+/// </summary>
 public class Viewport
 {
     /// <summary>
@@ -13,8 +16,8 @@ public class Viewport
     /// <summary>
     /// Initializes a new instance of the <see cref="Viewport"/> class.
     /// </summary>
-    /// <param name="size">The size of the viewport.</param>
-    /// <param name="position">The position of the viewport.</param>
+    /// <param name="position">The position of the top-left corner of the viewport.</param>
+    /// <param name="size">The size of the viewport in pixels.</param>
     public Viewport(Vector2 position, Vector2 size)
     {
         this.Size = size;
@@ -24,7 +27,7 @@ public class Viewport
     /// <summary>
     /// Initializes a new instance of the <see cref="Viewport"/> class.
     /// </summary>
-    /// <param name="size">The size of the viewport.</param>
+    /// <param name="size">The size of the viewport in pixels.</param>
     public Viewport(Vector2 size) : this(Vector2.Zero, size)
     {
     }
@@ -32,7 +35,7 @@ public class Viewport
     /// <summary>
     /// Resizes the viewport.
     /// </summary>
-    /// <param name="size">The new size of the viewport.</param>
+    /// <param name="size">The new size of the viewport in pixels.</param>
     public void Resize(Vector2 size)
     {
         if (this.Size == size) return;
@@ -42,12 +45,12 @@ public class Viewport
     }
 
     /// <summary>
-    /// Gets the size of the viewport.
+    /// Gets the size of the viewport in pixels.
     /// </summary>
     public Vector2 Size { get; private set; }
 
     /// <summary>
-    /// Gets the position of the viewport.
+    /// Gets the position of the top-left corner of the viewport.
     /// </summary>
     public Vector2 Position { get; private set; }
 

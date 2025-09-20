@@ -4,11 +4,20 @@ using LifeSim.Imago.SceneGraph.Prefabs;
 
 namespace LifeSim.Imago.Wavefront;
 
+/// <summary>
+/// Provides static methods for loading Wavefront OBJ files.
+/// </summary>
 public static class ObjLoader
 {
     private static readonly Dictionary<string, ObjNode> _sceneCache = new Dictionary<string, ObjNode>();
     private static readonly Dictionary<(string path, string group), Mesh> _meshCache = new Dictionary<(string, string), Mesh>();
 
+    /// <summary>
+    /// Loads an OBJ file as a scene prefab.
+    /// </summary>
+    /// <param name="path">The file path of the OBJ asset.</param>
+    /// <param name="rootNode">The name of the group to use as the root node. If null, the entire scene is loaded.</param>
+    /// <returns>An <see cref="IInstantiable"/> representing the loaded scene or mesh prefab.</returns>
     public static IInstantiable LoadScenePrefab(string path, string? rootNode = null)
     {
         if (!_sceneCache.TryGetValue(path, out ObjNode? scene))
@@ -28,6 +37,12 @@ public static class ObjLoader
         return scene;
     }
 
+    /// <summary>
+    /// Loads a single mesh from an OBJ file by its group name.
+    /// </summary>
+    /// <param name="path">The file path of the OBJ asset.</param>
+    /// <param name="groupName">The name of the group to load as a mesh.</param>
+    /// <returns>The loaded <see cref="Mesh"/>, or null if the group was not found.</returns>
     public static Mesh? LoadMeshByGroupName(string path, string groupName)
     {
         var key = (path, groupName);

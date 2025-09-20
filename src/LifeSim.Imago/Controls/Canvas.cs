@@ -4,8 +4,12 @@ using LifeSim.Support.Numerics;
 
 namespace LifeSim.Imago.Controls;
 
+/// <summary>
+/// Represents a layout panel that allows absolute positioning of its child elements.
+/// </summary>
 public class Canvas : ItemsControl
 {
+    /// <inheritdoc/>
     protected override Rect ArrangeOverride(Rect finalRect)
     {
         foreach (Control child in this.Items)
@@ -60,7 +64,11 @@ public class Canvas : ItemsControl
         return finalRect;
     }
 
-
+    /// <summary>
+    /// Measures the size required for the canvas and its children.
+    /// </summary>
+    /// <param name="availableSize">The available size that this element can give to child elements.</param>
+    /// <returns>The size that this element determines it needs during layout, based on its calculations of child element sizes.</returns>
     protected override Vector2 MeasureOverride(Vector2 availableSize)
     {
         // Measure all child elements.

@@ -2,6 +2,10 @@ using System;
 
 namespace LifeSim.Imago.Animations;
 
+/// <summary>
+/// Provides a base class for interpolating animation values over time.
+/// </summary>
+/// <typeparam name="T">The type of value being sampled.</typeparam>
 public abstract class SamplerBase<T> where T : struct
 {
     /// <summary>
@@ -26,6 +30,12 @@ public abstract class SamplerBase<T> where T : struct
     /// </summary>
     public float Duration { get; }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SamplerBase{T}"/> class.
+    /// </summary>
+    /// <param name="times">An array of keyframe times.</param>
+    /// <param name="values">An array of values corresponding to the keyframe times.</param>
+    /// <param name="interpolation">The interpolation mode to use between keyframes.</param>
     public SamplerBase(float[] times, T[] values, InterpolationMode interpolation)
     {
         this.Times = times;

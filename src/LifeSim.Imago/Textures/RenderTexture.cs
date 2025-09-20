@@ -10,6 +10,13 @@ public enum TextureInterpolation
     Linear,
 };
 
+/// <summary>
+/// Represents a texture that can be used as a rendering target.
+/// </summary>
+/// <remarks>
+/// This class encapsulates the color and depth textures, as well as the framebuffers, required for off-screen rendering.
+/// It also manages the resources for mouse picking.
+/// </remarks>
 public class RenderTexture : IRenderTexture
 {
     /// <summary>
@@ -20,29 +27,81 @@ public class RenderTexture : IRenderTexture
 
     Veldrid.Texture ITexture.VeldridTexture => this.ForwardColorTexture;
 
+    /// <summary>
+    /// Gets the color texture for the main forward rendering pass.
+    /// </summary>
     public Veldrid.Texture ForwardColorTexture { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the depth texture for the main forward rendering pass.
+    /// </summary>
     public Veldrid.Texture ForwardDepthTexture { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the color texture used for the mouse picking pass.
+    /// </summary>
     public Veldrid.Texture PickingColorTexture { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the depth texture used for the mouse picking pass.
+    /// </summary>
     public Veldrid.Texture PickingDepthTexture { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the framebuffer for the main forward rendering pass.
+    /// </summary>
     public Framebuffer Framebuffer { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the framebuffer for the mouse picking pass.
+    /// </summary>
     public Framebuffer PickingFramebuffer { get; private set; } = null!;
 
+    /// <summary>
+    /// Gets the output description for the main framebuffer.
+    /// </summary>
     public OutputDescription OutputDescription => this.Framebuffer.OutputDescription;
 
+    /// <summary>
+    /// Gets the output description for the picking framebuffer.
+    /// </summary>
     public OutputDescription PickingOutputDescription => this.PickingFramebuffer.OutputDescription;
 
+    /// <summary>
+    /// Gets the width of the render texture in pixels.
+    /// </summary>
     public uint Width { get; private set; }
+
+    /// <summary>
+    /// Gets the height of the render texture in pixels.
+    /// </summary>
     public uint Height { get; private set; }
 
+    /// <summary>
+    /// Gets the sampler used for sampling the render texture.
+    /// </summary>
     public Sampler VeldridSampler { get; private set; }
+
+    /// <summary>
+    /// Gets the multi-sample count for the render texture.
+    /// </summary>
     public TextureSampleCount SampleCount { get; private set; }
 
+    /// <summary>
+    /// Gets a value indicating whether this render texture has been disposed.
+    /// </summary>
     public bool IsDisposed { get; private set; } = false;
 
     private readonly GraphicsDevice _gd;
 
     private readonly Renderer _renderer;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RenderTexture"/> class.
+    /// </summary>
+    /// <param name="width">The width of the render texture in pixels.</param>
+    /// <param name="height">The height of the render texture in pixels.</param>
+    /// <param name="sampleCount">The multi-sample count.</param>
     public RenderTexture(uint width, uint height, TextureSampleCount sampleCount = TextureSampleCount.Count1)
     {
         this._renderer = Renderer.Instance;
@@ -123,7 +182,11 @@ public class RenderTexture : IRenderTexture
         this._renderer.DisposeWhenIdle(this.PickingFramebuffer);
     }
 
-
+    /// <summary>
+    /// Resizes the render texture and recreates its underlying resources.
+    /// </summary>
+    /// <param name="width">The new width in pixels.</param>
+    /// <param name="height">The new height in pixels.</param>
     public void Resize(uint width, uint height)
     {
         if (this.Width == width && this.Height == height) return;
@@ -158,6 +221,9 @@ public class RenderTexture : IRenderTexture
         }
     }
 
+    /// <summary>
+    /// Disposes the render texture and releases its GPU resources.
+    /// </summary>
     public void Dispose()
     {
         if (this.IsDisposed) return;

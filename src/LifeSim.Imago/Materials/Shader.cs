@@ -7,8 +7,12 @@ using Veldrid;
 namespace LifeSim.Imago.Materials;
 
 /// <summary>
-/// Represents a shader used for rendering.
+/// Represents a shader program, managing its source code, variants, and compiled pipelines.
 /// </summary>
+/// <remarks>
+/// A Shader object is responsible for taking GLSL source code, compiling it into variants based on
+/// required features (RenderFlags), and providing the appropriate Veldrid Pipeline for rendering.
+/// </remarks>
 public class Shader : IDisposable
 {
     private record struct CachedPipeline(VertexFormat VertexFormat, Pipeline Pipeline, RenderFlags Flags, TextureSampleCount SampleCount);
@@ -156,7 +160,7 @@ public class Shader : IDisposable
     }
 
     /// <summary>
-    /// Disposes this shader.
+    /// Disposes the shader and all its created pipelines and variants.
     /// </summary>
     public void Dispose()
     {

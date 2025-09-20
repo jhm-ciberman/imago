@@ -6,38 +6,36 @@ using LifeSim.Support.Numerics;
 namespace LifeSim.Imago.TexturePacking;
 
 /// <summary>
-/// A packed texture is a texture that is packed into a single texture. The class
-/// contains a reference to the base texture and the coordinates of the texture in
-/// the base texture.
+/// Represents a region within a larger texture atlas, defining its location and size in UV coordinates.
 /// </summary>
 public class PackedTexture : ITextureRegion
 {
     /// <summary>
-    /// Gets the base texture.
+    /// Gets the underlying texture atlas that this packed texture belongs to.
     /// </summary>
     public Texture Texture { get; }
 
     /// <summary>
-    /// Gets the coordinate of the top left corner of the packed texture in texture space coordinates.
+    /// Gets the UV coordinate of the top-left corner of the packed region within the texture atlas.
     /// </summary>
     public Vector2 TopLeft { get; }
 
     /// <summary>
-    /// Gets the coordinate of the bottom right corner of the packed texture in texture space coordinates.
+    /// Gets the UV coordinate of the bottom-right corner of the packed region within the texture atlas.
     /// </summary>
     public Vector2 BottomRight { get; }
 
     /// <summary>
-    /// Gets the size of the packed texture in texture space coordinates.
+    /// Gets the size of the packed region in UV coordinates.
     /// </summary>
     public Vector2 Size => this.BottomRight - this.TopLeft;
 
     /// <summary>
-    /// Creates a new packed texture.
+    /// Initializes a new instance of the <see cref="PackedTexture"/> class.
     /// </summary>
-    /// <param name="texture">The base texture.</param>
-    /// <param name="topLeft">The coordinate of the top left corner of the packed texture in the base texture in texture space.</param>
-    /// <param name="bottomRight">The coordinate of the bottom right corner of the packed texture in the base texture in texture space.</param>
+    /// <param name="texture">The texture atlas.</param>
+    /// <param name="topLeft">The top-left UV coordinate of the region.</param>
+    /// <param name="bottomRight">The bottom-right UV coordinate of the region.</param>
     public PackedTexture(Texture texture, Vector2 topLeft, Vector2 bottomRight)
     {
         this.Texture = texture;
@@ -46,7 +44,7 @@ public class PackedTexture : ITextureRegion
     }
 
     /// <summary>
-    /// Gets the size of the packed texture in pixels.
+    /// Gets the size of the packed texture region in pixels.
     /// </summary>
     public Vector2Int PixelSize => new Vector2Int(
         (int)Math.Round(this.Size.X * this.Texture.Size.X),
@@ -54,7 +52,7 @@ public class PackedTexture : ITextureRegion
     );
 
     /// <summary>
-    /// Gets the position of the left top corner of the packed texture in pixels.
+    /// Gets the top-left position of the packed texture region in pixels.
     /// </summary>
     public Vector2Int PixelTopLeft => new Vector2Int(
         (int)Math.Round(this.TopLeft.X * this.Texture.Size.X),
@@ -62,7 +60,7 @@ public class PackedTexture : ITextureRegion
     );
 
     /// <summary>
-    /// Gets the position of the right bottom corner of the packed texture in pixels.
+    /// Gets the bottom-right position of the packed texture region in pixels.
     /// </summary>
     public Vector2Int PixelBottomRight => new Vector2Int(
         (int)Math.Round(this.BottomRight.X * this.Texture.Size.X),
@@ -70,11 +68,10 @@ public class PackedTexture : ITextureRegion
     );
 
     /// <summary>
-    /// Gets a vector containing the size and offset of the packed texture in texture space coordinates.
-    /// The first two components are the size of the texture
-    /// and the last two components are the offset of the texture in the base texture.
+    /// Gets a vector containing the UV scale (XY) and offset (ZW) for this packed texture.
+    /// This is useful for passing texture coordinate transformations to a shader.
     /// </summary>
-    /// <returns>A vector containing the size and offset of the packed texture in texture space coordinates.</returns>
+    /// <returns>A <see cref="Vector4"/> where XY is the size and ZW is the top-left offset.</returns>
     public Vector4 GetTextureST()
     {
         Vector2 size = this.Size;
@@ -87,11 +84,11 @@ public class PackedTexture : ITextureRegion
     }
 
     /// <summary>
-    /// Gets a sub texture of this packed texture.
+    /// Creates a new <see cref="PackedTexture"/> representing a sub-region of this packed texture.
     /// </summary>
-    /// <param name="topLeft">The top left corner of the sub texture in texture space coordinates.</param>
-    /// <param name="bottomRight">The bottom right corner of the sub texture in texture space coordinates.</param>
-    /// <returns></returns>
+    /// <param name="topLeft">The top-left UV coordinate of the sub-region, relative to this packed texture.</param>
+    /// <param name="bottomRight">The bottom-right UV coordinate of the sub-region, relative to this packed texture.</param>
+    /// <returns>A new <see cref="PackedTexture"/> for the specified sub-region.</returns>
     public PackedTexture SubTexture(Vector2 topLeft, Vector2 bottomRight)
     {
         return new PackedTexture(this.Texture, this.TopLeft + topLeft * this.Size, this.TopLeft + bottomRight * this.Size);

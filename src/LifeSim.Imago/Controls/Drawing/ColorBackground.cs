@@ -54,6 +54,7 @@ public class ColorBackground : IBackground, ICloneable
         set => this.Color = new Color(this.Color.R, this.Color.G, this.Color.B, (byte)(value * 255.0f));
     }
 
+    /// <inheritdoc/>
     public void DrawRectangle(DrawingContext ctx, Vector2 position, Vector2 size)
     {
         if (this.Color.A == 0) return;
@@ -61,11 +62,17 @@ public class ColorBackground : IBackground, ICloneable
         ctx.DrawRectangle(position, size, this.Color);
     }
 
+    /// <summary>
+    /// Allows implicit conversion from a <see cref="Color"/> to a <see cref="ColorBackground"/>.
+    /// </summary>
+    /// <param name="color">The color to convert.</param>
+    /// <returns>A new <see cref="ColorBackground"/> instance with the specified color.</returns>
     public static implicit operator ColorBackground(Color color)
     {
         return new ColorBackground(color);
     }
 
+    /// <inheritdoc/>
     public virtual object Clone()
     {
         return new ColorBackground(this.Color);

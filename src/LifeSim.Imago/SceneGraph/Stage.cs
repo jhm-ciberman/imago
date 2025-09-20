@@ -8,6 +8,13 @@ using LifeSim.Imago.Textures;
 
 namespace LifeSim.Imago.SceneGraph;
 
+/// <summary>
+/// Represents the main container for a <see cref="Scene"/> and manages the overall rendering state.
+/// </summary>
+/// <remarks>
+/// The Stage is responsible for holding the active scene, managing render queues, and handling the update and render loop.
+/// It also provides properties to control various rendering features like wireframe mode, fog, and shadows.
+/// </remarks>
 public class Stage
 {
     /// <summary>
@@ -24,17 +31,17 @@ public class Stage
     };
 
     /// <summary>
-    /// Gets the gizmos layer used to render gizmos.
+    /// Gets the gizmos layer used to render debug and editor visuals.
     /// </summary>
     public GizmosLayer Gizmos { get; } = new GizmosLayer();
 
     /// <summary>
-    /// Gets the picking manager used to pick objects.
+    /// Gets the picking manager for object selection in the scene.
     /// </summary>
     public PickingManager Picking { get; } = PickingManager.Instance;
 
     /// <summary>
-    /// Gets the current scene.
+    /// Gets the currently active scene.
     /// </summary>
     public Scene Scene { get; private set; } = _emptyScene;
 
@@ -66,6 +73,9 @@ public class Stage
         }
     }
 
+    /// <summary>
+    /// Subscribes to input events to enable input handling for the current scene.
+    /// </summary>
     public void EnableInputHandling()
     {
         var input = InputManager.Instance;
@@ -76,6 +86,9 @@ public class Stage
         input.KeyReleased += this.Input_KeyReleased;
     }
 
+    /// <summary>
+    /// Unsubscribes from input events to disable input handling for the current scene.
+    /// </summary>
     public void DisableInputHandling()
     {
         var input = InputManager.Instance;
@@ -112,9 +125,9 @@ public class Stage
     }
 
     /// <summary>
-    /// Changes the current scene.
+    /// Changes the currently active scene, detaching the old one and attaching the new one.
     /// </summary>
-    /// <param name="scene">The new scene.</param>
+    /// <param name="scene">The new scene to display. If null, an empty scene is used.</param>
     public void ChangeScene(Scene? scene)
     {
         if (this.Scene == scene) return;
@@ -128,8 +141,11 @@ public class Stage
     }
 
     /// <summary>
-    /// Prepares the stage for rendering. This method should be called by the renderer before rendering the scene.
+    /// Prepares the stage for rendering by updating transforms, skeletons, and render queues.
     /// </summary>
+    /// <remarks>
+    /// This method should be called by the renderer before executing the main render passes.
+    /// </remarks>
     /// <param name="renderTexture">The render texture that will be used for rendering.</param>
     public void PrepareForRender(RenderTexture renderTexture)
     {
@@ -198,9 +214,9 @@ public class Stage
     }
 
     /// <summary>
-    /// Updates the stage.
+    /// Updates the stage and the active scene's logic.
     /// </summary>
-    /// <param name="deltaTime">The time since the last update in seconds.</param>
+    /// <param name="deltaTime">The time elapsed since the last update, in seconds.</param>
     public virtual void Update(float deltaTime)
     {
         this.Gizmos.Update(deltaTime);
@@ -276,12 +292,12 @@ public class Stage
     }
 
     /// <summary>
-    /// Gets the immediate renderables used to render objects immediately.
+    /// Gets the list of immediate-mode renderables.
     /// </summary>
     public IReadOnlyList<ImmediateRenderable3D> ImmediateRenderables => this._immediateRenderables;
 
     /// <summary>
-    /// Adds an immediate renderable to the scene.
+    /// Adds an immediate-mode renderable to the stage.
     /// </summary>
     /// <param name="immediateRenderable">The immediate renderable to add.</param>
     public void AddImmediateRenderable(ImmediateRenderable3D immediateRenderable)
@@ -290,7 +306,7 @@ public class Stage
     }
 
     /// <summary>
-    /// Removes an immediate renderable from the scene.
+    /// Removes an immediate-mode renderable from the stage.
     /// </summary>
     /// <param name="immediateRenderable">The immediate renderable to remove.</param>
     public void RemoveImmediateRenderable(ImmediateRenderable3D immediateRenderable)
@@ -316,7 +332,7 @@ public class Stage
     private Veldrid.TextureSampleCount _multiSampleCount = Veldrid.TextureSampleCount.Count1;
 
     /// <summary>
-    /// Gets or sets the multi sample count used for rendering.
+    /// Gets or sets the multi-sample anti-aliasing (MSAA) count for rendering.
     /// </summary>
     public Veldrid.TextureSampleCount MultiSampleCount
     {
@@ -327,7 +343,7 @@ public class Stage
     private bool _forceWireframe = false;
 
     /// <summary>
-    /// Gets or sets whether to force wireframe rendering.
+    /// Gets or sets a value indicating whether to force wireframe rendering for all objects.
     /// </summary>
     public bool ForceWireframe
     {
@@ -338,7 +354,7 @@ public class Stage
     private bool _enableFog = true;
 
     /// <summary>
-    /// Gets or sets whether to enable fog.
+    /// Gets or sets a value indicating whether to enable fog.
     /// </summary>
     public bool EnableFog
     {
@@ -349,7 +365,7 @@ public class Stage
     private bool _enablePixelPerfectShadows = true;
 
     /// <summary>
-    /// Gets or sets whether to enable pixel perfect shadows.
+    /// Gets or sets a value indicating whether to enable pixel-perfect shadows.
     /// </summary>
     public bool EnablePixelPerfectShadows
     {
@@ -360,7 +376,7 @@ public class Stage
     private bool _lightingHalfLambert = true;
 
     /// <summary>
-    /// Gets or sets whether to use half lambert lighting.
+    /// Gets or sets a value indicating whether to use Half-Lambert lighting model.
     /// </summary>
     public bool LightingHalfLambert
     {
@@ -371,7 +387,7 @@ public class Stage
     private int _cascadesCount = 4;
 
     /// <summary>
-    /// Gets or sets the number of shadow cascades used for rendering.
+    /// Gets or sets the number of cascades for shadow mapping.
     /// </summary>
     public int CascadesCount
     {

@@ -4,6 +4,10 @@ using LifeSim.Support.Numerics;
 
 namespace LifeSim.Imago.Controls;
 
+/// <summary>
+/// Represents a panel that positions child elements in sequential order from left to right or top to bottom,
+/// automatically wrapping to the next line or column when elements exceed the available space.
+/// </summary>
 public class WrapPanel : ItemsControl
 {
     private Orientation _orientation = Orientation.Horizontal;
@@ -28,6 +32,7 @@ public class WrapPanel : ItemsControl
         set => this.SetPropertyAndInvalidateMeasure(ref this._padding, value);
     }
 
+    /// <inheritdoc/>
     protected override Vector2 MeasureOverride(Vector2 availableSize)
     {
         Vector2 minRequiredSize = Vector2.Zero;
@@ -82,6 +87,7 @@ public class WrapPanel : ItemsControl
         return minRequiredSize + this.Padding.Total;
     }
 
+    /// <inheritdoc/>
     protected override Rect ArrangeOverride(Rect finalRect)
     {
         Rect originalRect = finalRect;

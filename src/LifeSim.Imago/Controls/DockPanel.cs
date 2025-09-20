@@ -4,12 +4,15 @@ using LifeSim.Support.Numerics;
 
 namespace LifeSim.Imago.Controls;
 
+/// <summary>
+/// Represents a panel that arranges its child elements along its edges, either horizontally or vertically.
+/// </summary>
 public class DockPanel : ItemsControl
 {
     private bool _lastChildFill = true;
 
     /// <summary>
-    /// Gets or sets whether the last child is stretched to fill the remaining space.
+    /// Gets or sets a value indicating whether the last child element added to the <see cref="DockPanel"/> fills the remaining available space.
     /// </summary>
     public bool LastChildFill
     {
@@ -20,7 +23,7 @@ public class DockPanel : ItemsControl
     private Thickness _padding = new Thickness(0);
 
     /// <summary>
-    /// Gets or sets the padding of the dock panel.
+    /// Gets or sets the padding of the dock panel, which is the space between the panel's border and its content.
     /// </summary>
     public Thickness Padding
     {
@@ -28,11 +31,15 @@ public class DockPanel : ItemsControl
         set => this.SetPropertyAndInvalidateMeasure(ref this._padding, value);
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DockPanel"/> class.
+    /// </summary>
     public DockPanel()
     {
         //
     }
 
+    /// <inheritdoc/>
     protected override Rect ArrangeOverride(Rect finalRect)
     {
         // Use the "Dock" property to arrange the children.
@@ -85,6 +92,7 @@ public class DockPanel : ItemsControl
         return finalRect;
     }
 
+    /// <inheritdoc/>
     protected override Vector2 MeasureOverride(Vector2 availableSize)
     {
         // Use the "Dock" property to measure the children.
