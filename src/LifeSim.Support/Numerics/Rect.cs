@@ -8,6 +8,9 @@ namespace LifeSim.Support.Numerics;
 /// </summary>
 public struct Rect : IEquatable<Rect>
 {
+    /// <summary>
+    /// Gets an empty rectangle with all properties set to zero.
+    /// </summary>
     public static Rect Empty => default;
 
     /// <summary>
@@ -244,6 +247,12 @@ public struct Rect : IEquatable<Rect>
         return $"{this.X}, {this.Y}, {this.Width}, {this.Height}";
     }
 
+    /// <summary>
+    /// Creates a rectangle that contains both specified rectangles.
+    /// </summary>
+    /// <param name="rectA">The first rectangle.</param>
+    /// <param name="rectB">The second rectangle.</param>
+    /// <returns>A rectangle that contains both input rectangles.</returns>
     public static Rect Union(Rect rectA, Rect rectB)
     {
         var x = MathF.Min(rectA.X, rectB.X);
@@ -253,26 +262,55 @@ public struct Rect : IEquatable<Rect>
         return new Rect(x, y, width, height);
     }
 
+    /// <summary>
+    /// Determines whether two <see cref="Rect"/> instances are equal.
+    /// </summary>
+    /// <param name="left">The first rectangle.</param>
+    /// <param name="right">The second rectangle.</param>
+    /// <returns>true if the rectangles are equal; otherwise, false.</returns>
     public static bool operator ==(Rect left, Rect right)
     {
         return left.Equals(right);
     }
 
+    /// <summary>
+    /// Determines whether two <see cref="Rect"/> instances are not equal.
+    /// </summary>
+    /// <param name="left">The first rectangle.</param>
+    /// <param name="right">The second rectangle.</param>
+    /// <returns>true if the rectangles are not equal; otherwise, false.</returns>
     public static bool operator !=(Rect left, Rect right)
     {
         return !(left == right);
     }
 
+    /// <summary>
+    /// Scales a <see cref="Rect"/> by a specified factor.
+    /// </summary>
+    /// <param name="rect">The rectangle to scale.</param>
+    /// <param name="scale">The scaling factor.</param>
+    /// <returns>The scaled rectangle.</returns>
     public static Rect operator *(Rect rect, float scale)
     {
         return new Rect(rect.X * scale, rect.Y * scale, rect.Width * scale, rect.Height * scale);
     }
 
+    /// <summary>
+    /// Scales a <see cref="Rect"/> by dividing by a specified factor.
+    /// </summary>
+    /// <param name="rect">The rectangle to scale.</param>
+    /// <param name="scale">The scaling factor to divide by.</param>
+    /// <returns>The scaled rectangle.</returns>
     public static Rect operator /(Rect rect, float scale)
     {
         return new Rect(rect.X / scale, rect.Y / scale, rect.Width / scale, rect.Height / scale);
     }
 
+    /// <summary>
+    /// Implicitly converts a <see cref="RectInt"/> to a <see cref="Rect"/>.
+    /// </summary>
+    /// <param name="rect">The <see cref="RectInt"/> to convert.</param>
+    /// <returns>A <see cref="Rect"/> with the same dimensions.</returns>
     public static implicit operator Rect(RectInt rect)
     {
         return new Rect(rect.X, rect.Y, rect.Width, rect.Height);

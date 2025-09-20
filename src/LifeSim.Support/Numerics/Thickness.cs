@@ -9,6 +9,9 @@ namespace LifeSim.Support.Numerics;
 /// </summary>
 public struct Thickness
 {
+    /// <summary>
+    /// Gets a <see cref="Thickness"/> with all sides set to zero.
+    /// </summary>
     public static Thickness Zero => new Thickness(0);
 
     /// <summary>
@@ -106,31 +109,65 @@ public struct Thickness
         this.Bottom = bottom;
     }
 
+    /// <summary>
+    /// Adds two <see cref="Thickness"/> instances.
+    /// </summary>
+    /// <param name="a">The first thickness.</param>
+    /// <param name="b">The second thickness.</param>
+    /// <returns>The sum of the two thickness values.</returns>
     public static Thickness operator +(Thickness a, Thickness b)
     {
         return new Thickness(a.Left + b.Left, a.Top + b.Top, a.Right + b.Right, a.Bottom + b.Bottom);
     }
 
+    /// <summary>
+    /// Subtracts the second <see cref="Thickness"/> from the first.
+    /// </summary>
+    /// <param name="a">The first thickness.</param>
+    /// <param name="b">The second thickness.</param>
+    /// <returns>The difference of the two thickness values.</returns>
     public static Thickness operator -(Thickness a, Thickness b)
     {
         return new Thickness(a.Left - b.Left, a.Top - b.Top, a.Right - b.Right, a.Bottom - b.Bottom);
     }
 
+    /// <summary>
+    /// Adds a <see cref="Thickness"/> and a <see cref="Vector2"/>.
+    /// </summary>
+    /// <param name="a">The thickness.</param>
+    /// <param name="b">The vector.</param>
+    /// <returns>A vector with the thickness's left and top values added to the vector components.</returns>
     public static Vector2 operator +(Thickness a, Vector2 b)
     {
         return new Vector2(a.Left + b.X, a.Top + b.Y);
     }
 
+    /// <summary>
+    /// Subtracts a <see cref="Vector2"/> from a <see cref="Thickness"/>.
+    /// </summary>
+    /// <param name="a">The thickness.</param>
+    /// <param name="b">The vector.</param>
+    /// <returns>A vector with the vector components subtracted from the thickness's left and top values.</returns>
     public static Vector2 operator -(Thickness a, Vector2 b)
     {
         return new Vector2(a.Left - b.X, a.Top - b.Y);
     }
 
+    /// <summary>
+    /// Implicitly converts a <see cref="Thickness"/> to a <see cref="Vector4"/>.
+    /// </summary>
+    /// <param name="thickness">The thickness to convert.</param>
+    /// <returns>A <see cref="Vector4"/> with components (Left, Top, Right, Bottom).</returns>
     public static implicit operator Vector4(Thickness thickness)
     {
         return new Vector4(thickness.Left, thickness.Top, thickness.Right, thickness.Bottom);
     }
 
+    /// <summary>
+    /// Implicitly converts a <see cref="Vector4"/> to a <see cref="Thickness"/>.
+    /// </summary>
+    /// <param name="vector">The vector to convert.</param>
+    /// <returns>A <see cref="Thickness"/> with components (X=Left, Y=Top, Z=Right, W=Bottom).</returns>
     public static implicit operator Thickness(Vector4 vector)
     {
         return new Thickness(vector.X, vector.Y, vector.Z, vector.W);
@@ -141,11 +178,22 @@ public struct Thickness
         return $"{this.Left}, {this.Top}, {this.Right}, {this.Bottom}";
     }
 
+    /// <summary>
+    /// Implicitly converts a float value to a <see cref="Thickness"/> with all sides set to the same value.
+    /// </summary>
+    /// <param name="value">The value for all sides.</param>
+    /// <returns>A <see cref="Thickness"/> with all sides set to the specified value.</returns>
     public static implicit operator Thickness(float value)
     {
         return new Thickness(value);
     }
 
+    /// <summary>
+    /// Implicitly converts a string to a <see cref="Thickness"/>.
+    /// </summary>
+    /// <param name="value">A comma-separated string with 1, 2, or 4 values.</param>
+    /// <returns>A <see cref="Thickness"/> parsed from the string.</returns>
+    /// <exception cref="FormatException">Thrown when the string format is invalid.</exception>
     public static implicit operator Thickness(string value)
     {
         var values = value.Split(',');
@@ -172,41 +220,83 @@ public struct Thickness
         return this.Left.GetHashCode() ^ this.Top.GetHashCode() ^ this.Right.GetHashCode() ^ this.Bottom.GetHashCode();
     }
 
+    /// <summary>
+    /// Determines whether two <see cref="Thickness"/> instances are equal.
+    /// </summary>
+    /// <param name="left">The first thickness.</param>
+    /// <param name="right">The second thickness.</param>
+    /// <returns>true if the thickness values are equal; otherwise, false.</returns>
     public static bool operator ==(Thickness left, Thickness right)
     {
         return left.Equals(right);
     }
 
+    /// <summary>
+    /// Determines whether two <see cref="Thickness"/> instances are not equal.
+    /// </summary>
+    /// <param name="left">The first thickness.</param>
+    /// <param name="right">The second thickness.</param>
+    /// <returns>true if the thickness values are not equal; otherwise, false.</returns>
     public static bool operator !=(Thickness left, Thickness right)
     {
         return !(left == right);
     }
 
+    /// <summary>
+    /// Creates a <see cref="Thickness"/> with only the left side set.
+    /// </summary>
+    /// <param name="left">The left thickness value.</param>
+    /// <returns>A <see cref="Thickness"/> with only the left side set to the specified value.</returns>
     public static Thickness FromLeft(float left)
     {
         return new Thickness(left, 0, 0, 0);
     }
 
+    /// <summary>
+    /// Creates a <see cref="Thickness"/> with only the top side set.
+    /// </summary>
+    /// <param name="top">The top thickness value.</param>
+    /// <returns>A <see cref="Thickness"/> with only the top side set to the specified value.</returns>
     public static Thickness FromTop(float top)
     {
         return new Thickness(0, top, 0, 0);
     }
 
+    /// <summary>
+    /// Creates a <see cref="Thickness"/> with only the right side set.
+    /// </summary>
+    /// <param name="right">The right thickness value.</param>
+    /// <returns>A <see cref="Thickness"/> with only the right side set to the specified value.</returns>
     public static Thickness FromRight(float right)
     {
         return new Thickness(0, 0, right, 0);
     }
 
+    /// <summary>
+    /// Creates a <see cref="Thickness"/> with only the bottom side set.
+    /// </summary>
+    /// <param name="bottom">The bottom thickness value.</param>
+    /// <returns>A <see cref="Thickness"/> with only the bottom side set to the specified value.</returns>
     public static Thickness FromBottom(float bottom)
     {
         return new Thickness(0, 0, 0, bottom);
     }
 
+    /// <summary>
+    /// Creates a <see cref="Thickness"/> with only the horizontal sides (left and right) set.
+    /// </summary>
+    /// <param name="horizontal">The horizontal thickness value.</param>
+    /// <returns>A <see cref="Thickness"/> with left and right sides set to the specified value.</returns>
     public static Thickness FromHorizontal(float horizontal)
     {
         return new Thickness(horizontal, 0, horizontal, 0);
     }
 
+    /// <summary>
+    /// Creates a <see cref="Thickness"/> with only the vertical sides (top and bottom) set.
+    /// </summary>
+    /// <param name="vertical">The vertical thickness value.</param>
+    /// <returns>A <see cref="Thickness"/> with top and bottom sides set to the specified value.</returns>
     public static Thickness FromVertical(float vertical)
     {
         return new Thickness(0, vertical, 0, vertical);
