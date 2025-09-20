@@ -232,16 +232,19 @@ public struct Rect : IEquatable<Rect>
         this.Height = MathF.Max(topLeft.Y, MathF.Max(topRight.Y, MathF.Max(bottomLeft.Y, bottomRight.Y))) - this.Y;
     }
 
+    /// <inheritdoc />
     public override bool Equals(object? obj)
     {
         return obj is Rect other && this.Equals(other);
     }
 
+    /// <inheritdoc />
     public override int GetHashCode()
     {
         return HashCode.Combine(this.X, this.Y, this.Width, this.Height);
     }
 
+    /// <inheritdoc />
     public override string ToString()
     {
         return $"{this.X}, {this.Y}, {this.Width}, {this.Height}";

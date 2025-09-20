@@ -152,6 +152,7 @@ public struct ThicknessInt : IEquatable<ThicknessInt>
         return new Vector2Int(a.Left - b.X, a.Top - b.Y);
     }
 
+    /// <inheritdoc />
     public override string ToString()
     {
         return $"{this.Left}, {this.Top}, {this.Right}, {this.Bottom}";
@@ -186,16 +187,19 @@ public struct ThicknessInt : IEquatable<ThicknessInt>
         };
     }
 
+    /// <inheritdoc />
     public override bool Equals(object? obj)
     {
         return obj is ThicknessInt thickness && this.Equals(thickness);
     }
 
+    /// <inheritdoc />
     public bool Equals(ThicknessInt other)
     {
         return this.Left == other.Left && this.Top == other.Top && this.Right == other.Right && this.Bottom == other.Bottom;
     }
 
+    /// <inheritdoc />
     public override int GetHashCode()
     {
         return HashCode.Combine(this.Left, this.Top, this.Right, this.Bottom);

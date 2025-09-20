@@ -1,4 +1,4 @@
-#pragma warning disable IDE1006, IDE0066, IDE0009, CA1822, CA1050
+#pragma warning disable IDE1006, IDE0066, IDE0009, CA1822, CA1050, CS1591
 
 
 namespace LifeSim.Support.Numerics;

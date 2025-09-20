@@ -287,23 +287,27 @@ public struct Vector2Int : IEquatable<Vector2Int>
         return new Vector2(a.X, a.Y);
     }
 
+    /// <inheritdoc />
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override bool Equals([AllowNull] object obj)
     {
         return obj is Vector2Int vector && this.Equals(vector);
     }
 
+    /// <inheritdoc />
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool Equals(Vector2Int other)
     {
         return this.X == other.X && this.Y == other.Y;
     }
 
+    /// <inheritdoc />
     public override int GetHashCode()
     {
         return this.X.GetHashCode() ^ this.Y.GetHashCode() << 16;
     }
 
+    /// <inheritdoc />
     public override string? ToString()
     {
         return "(" + this.X + ", " + this.Y + ")";

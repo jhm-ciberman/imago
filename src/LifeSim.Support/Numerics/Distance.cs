@@ -2,6 +2,9 @@ using System.Numerics;
 
 namespace LifeSim.Support.Numerics;
 
+/// <summary>
+/// Provides utility methods for calculating various distance metrics between points.
+/// </summary>
 public static class Distance
 {
     /// <summary>

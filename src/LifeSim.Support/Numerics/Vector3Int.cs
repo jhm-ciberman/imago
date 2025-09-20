@@ -192,23 +192,27 @@ public struct Vector3Int : IEquatable<Vector3Int>
         return new Vector3(a.X, a.Y, a.Z);
     }
 
+    /// <inheritdoc />
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override bool Equals([AllowNull] object obj)
     {
         return obj is Vector3Int vector && this.Equals(vector);
     }
 
+    /// <inheritdoc />
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool Equals(Vector3Int other)
     {
         return this.X == other.X && this.Y == other.Y && this.Z == other.Z;
     }
 
+    /// <inheritdoc />
     public override int GetHashCode()
     {
         return this.X.GetHashCode() ^ this.Y.GetHashCode() << 16 ^ this.Z.GetHashCode() << 24;
     }
 
+    /// <inheritdoc />
     public override string? ToString()
     {
         return $"({this.X}, {this.Y}, {this.Z})";

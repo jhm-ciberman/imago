@@ -173,6 +173,7 @@ public struct Thickness
         return new Thickness(vector.X, vector.Y, vector.Z, vector.W);
     }
 
+    /// <inheritdoc />
     public override string ToString()
     {
         return $"{this.Left}, {this.Top}, {this.Right}, {this.Bottom}";
@@ -207,6 +208,7 @@ public struct Thickness
         };
     }
 
+    /// <inheritdoc />
     public override bool Equals(object? obj)
     {
         if (obj is Thickness thickness)
@@ -215,6 +217,7 @@ public struct Thickness
         return false;
     }
 
+    /// <inheritdoc />
     public override int GetHashCode()
     {
         return this.Left.GetHashCode() ^ this.Top.GetHashCode() ^ this.Right.GetHashCode() ^ this.Bottom.GetHashCode();

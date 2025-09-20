@@ -170,6 +170,7 @@ public readonly struct Color
         return this.ToString();
     }
 
+    /// <inheritdoc />
     public override string ToString()
     {
         if (this.A == 255)
@@ -335,11 +336,13 @@ public readonly struct Color
         return !(left == right);
     }
 
+    /// <inheritdoc />
     public override bool Equals([NotNullWhen(true)] object? obj)
     {
         return obj is Color color && this == color;
     }
 
+    /// <inheritdoc />
     public override int GetHashCode()
     {
         return HashCode.Combine(this.R, this.G, this.B, this.A);

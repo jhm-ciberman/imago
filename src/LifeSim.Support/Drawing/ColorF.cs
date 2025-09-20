@@ -139,16 +139,19 @@ public readonly struct ColorF
         return left.R == right.R && left.G == right.G && left.B == right.B && left.A == right.A;
     }
 
+    /// <inheritdoc />
     public override bool Equals(object? obj)
     {
         return obj is ColorF color && Equals(this, color);
     }
 
+    /// <inheritdoc />
     public override int GetHashCode()
     {
         return HashCode.Combine(this.R, this.G, this.B, this.A);
     }
 
+    /// <inheritdoc />
     public override string ToString()
     {
         return $"R: {this.R}, G: {this.G}, B: {this.B}, A: {this.A}";

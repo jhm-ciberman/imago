@@ -298,7 +298,7 @@ public static class TailwindColors
     public static Color Stone950 { get; } = GetColor("#0c0a09");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of f2f2");.
+    /// Gets the Tailwind color with the value of #fef2f2.
     /// </summary>
     public static Color Red50 { get; } = GetColor("#fef2f2");
 
@@ -793,7 +793,7 @@ public static class TailwindColors
     public static Color Cyan950 { get; } = GetColor("#083344");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of f9ff");.
+    /// Gets the Tailwind color with the value of #f0f9ff.
     /// </summary>
     public static Color Sky50 { get; } = GetColor("#f0f9ff");
 

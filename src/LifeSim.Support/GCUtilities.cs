@@ -3,6 +3,9 @@ using System.Runtime;
 
 namespace LifeSim.Support;
 
+/// <summary>
+/// Provides utility methods for garbage collection management.
+/// </summary>
 public static class GCUtilities
 {
     /// <summary>

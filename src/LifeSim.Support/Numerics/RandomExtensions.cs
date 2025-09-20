@@ -5,6 +5,9 @@ using System.Collections.Generic;
 using System.Numerics;
 using CommunityToolkit.Diagnostics;
 
+/// <summary>
+/// Provides extension methods for the <see cref="Random"/> class.
+/// </summary>
 public static class RandomExtensions
 {
     /// <summary>

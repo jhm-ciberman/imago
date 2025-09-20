@@ -1,5 +1,8 @@
 namespace LifeSim.Support.Numerics;
 
+/// <summary>
+/// Provides utility methods for working with angles in radians.
+/// </summary>
 public static class Angle
 {
     /// <summary>

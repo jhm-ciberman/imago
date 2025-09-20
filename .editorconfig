@@ -99,4 +99,6 @@ dotnet_naming_rule.const_with_uppercase.symbols  = const
 dotnet_naming_rule.const_with_uppercase.style    = uppercase
 dotnet_naming_rule.const_with_uppercase.severity = suggestion
 
-
+# LifeSim.Support project - Enable documentation warnings for 100% coverage
+[**/LifeSim.Support/**/*.cs]
+dotnet_diagnostic.CS1591.severity = warning # Missing XML comment for publicly visible type or member
