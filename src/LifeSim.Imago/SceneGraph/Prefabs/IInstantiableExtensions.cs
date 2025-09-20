@@ -4,6 +4,9 @@ using LifeSim.Imago.SceneGraph.Nodes;
 
 namespace LifeSim.Imago.SceneGraph.Prefabs;
 
+/// <summary>
+/// Provides extension methods for instantiable objects to simplify creation with materials and transformations.
+/// </summary>
 public static class IInstantiableExtensions
 {
     /// <summary>

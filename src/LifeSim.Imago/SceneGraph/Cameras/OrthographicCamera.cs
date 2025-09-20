@@ -3,11 +3,18 @@ using System.Numerics;
 
 namespace LifeSim.Imago.SceneGraph.Cameras;
 
+/// <summary>
+/// Represents an orthographic camera that provides parallel projection without perspective distortion.
+/// </summary>
 public class OrthographicCamera : Camera
 {
     private Matrix4x4 _projectionMatrix;
     private float _width = 10f;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="OrthographicCamera"/> class.
+    /// </summary>
+    /// <param name="viewport">The viewport to use. If null, uses the main viewport.</param>
     public OrthographicCamera(Viewport? viewport = null) : base(viewport)
     {
     }
@@ -26,7 +33,7 @@ public class OrthographicCamera : Camera
             if (this._width != value)
             {
                 this._width = value;
-                this._projectionMatrixIsDirty = true;
+                this.ProjectionMatrixIsDirty = true;
             }
         }
     }
@@ -47,20 +54,22 @@ public class OrthographicCamera : Camera
     {
         get
         {
-            if (this._projectionMatrixIsDirty)
+            if (this.ProjectionMatrixIsDirty)
             {
                 this._projectionMatrix = Matrix4x4.CreateOrthographic(this.Width, this.Height, this.NearPlane, this.FarPlane);
-                this._projectionMatrixIsDirty = false;
+                this.ProjectionMatrixIsDirty = false;
             }
 
             return this._projectionMatrix;
         }
     }
 
+    /// <inheritdoc/>
     public override Matrix4x4 GetShadowCascadeViewProjectionMatrix(float near, float far)
     {
         return Matrix4x4.CreateOrthographic(this.Width, this.Height, near, far);
     }
 
+    /// <inheritdoc/>
     public override int MaxShadowCascades => 1;
 }

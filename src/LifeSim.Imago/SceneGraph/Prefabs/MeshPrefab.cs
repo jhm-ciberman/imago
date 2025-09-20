@@ -19,6 +19,7 @@ public class MeshPrefab : IInstantiable
         this._mesh = mesh;
     }
 
+    /// <inheritdoc/>
     public Node3D Instantiate()
     {
         return new RenderNode3D(this._mesh);

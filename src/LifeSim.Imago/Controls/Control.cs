@@ -300,6 +300,9 @@ public class Control : Visual
         this.ControlParent?.HandleMouseWheel(e);
     }
 
+    /// <summary>
+    /// Called when the mouse enters the control's bounds.
+    /// </summary>
     protected virtual void OnMouseEnter()
     {
         this.MouseEnter?.Invoke(this, EventArgs.Empty);
@@ -310,6 +313,9 @@ public class Control : Visual
         }
     }
 
+    /// <summary>
+    /// Called when the mouse leaves the control's bounds.
+    /// </summary>
     protected virtual void OnMouseLeave()
     {
         this.MouseLeave?.Invoke(this, EventArgs.Empty);

@@ -100,6 +100,9 @@ public class RenderContext : IDisposable
         }
     }
 
+    /// <summary>
+    /// Disposes the render context and releases associated resources.
+    /// </summary>
     public void Dispose()
     {
         this._mousePickerPass.Dispose();

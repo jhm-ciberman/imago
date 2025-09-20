@@ -8,6 +8,9 @@ using LifeSim.Imago.Meshes;
 
 namespace LifeSim.Imago.Wavefront;
 
+/// <summary>
+/// Provides functionality for parsing Wavefront OBJ files and converting them to meshes and scenes.
+/// </summary>
 public class ObjParser
 {
     private readonly List<Vector3> _positions = new List<Vector3>();
@@ -16,6 +19,11 @@ public class ObjParser
     private readonly Dictionary<string, List<(int positionIndex, int? texCoordIndex, int? normalIndex)>> _groups = new Dictionary<string, List<(int, int?, int?)>>();
     private string _currentGroup = "default";
 
+    /// <summary>
+    /// Loads an entire OBJ scene from a file, including all groups and objects.
+    /// </summary>
+    /// <param name="path">The path to the OBJ file to load.</param>
+    /// <returns>An ObjNode containing all the loaded mesh groups.</returns>
     public ObjNode LoadScene(string path)
     {
         this.ClearData();
@@ -32,6 +40,12 @@ public class ObjParser
         return this.CreateScene();
     }
 
+    /// <summary>
+    /// Loads a specific mesh group from an OBJ file by group name.
+    /// </summary>
+    /// <param name="path">The path to the OBJ file to load.</param>
+    /// <param name="groupName">The name of the group to extract.</param>
+    /// <returns>The mesh for the specified group if found; otherwise, null.</returns>
     public Mesh? LoadMeshByGroupName(string path, string groupName)
     {
         this.ClearData();

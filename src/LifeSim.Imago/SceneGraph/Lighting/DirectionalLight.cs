@@ -4,6 +4,9 @@ using LifeSim.Support.Drawing;
 
 namespace LifeSim.Imago.SceneGraph.Lighting;
 
+/// <summary>
+/// Represents a directional light source that illuminates the scene from a specific direction.
+/// </summary>
 public class DirectionalLight
 {
     private Vector3 _direction = Vector3.Normalize(new Vector3(-1, 1, -1));

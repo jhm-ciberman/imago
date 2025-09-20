@@ -22,8 +22,10 @@ public class RotationChannel : ChannelBase<Quaternion>
         this._sampler = new QuaternionSampler(times, values, interpolation);
     }
 
+    /// <inheritdoc/>
     public override float Duration => this._sampler.Duration;
 
+    /// <inheritdoc/>
     public override void Update(Node3D target, float time)
     {
         target.Rotation = this._sampler.Sample(time);

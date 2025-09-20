@@ -4,6 +4,9 @@ using LifeSim.Support.Drawing;
 
 namespace LifeSim.Imago.SceneGraph;
 
+/// <summary>
+/// Represents the environmental settings for a scene, including lighting and atmospheric properties.
+/// </summary>
 public class SceneEnvironment
 {
     /// <summary>

@@ -12,6 +12,9 @@ namespace LifeSim.Imago.SceneGraph.Picking;
 /// </summary>
 public class PickingManager
 {
+    /// <summary>
+    /// Gets the singleton instance of the picking manager.
+    /// </summary>
     public static PickingManager Instance { get; } = new PickingManager();
 
     /// <summary>

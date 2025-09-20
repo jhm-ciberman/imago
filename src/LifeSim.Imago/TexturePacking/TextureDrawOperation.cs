@@ -6,6 +6,9 @@ using SixLabors.ImageSharp.Processing;
 
 namespace LifeSim.Imago.TexturePacking;
 
+/// <summary>
+/// Represents a drawing operation that can render an image onto a texture atlas.
+/// </summary>
 public class TextureDrawOperation : IDrawOperation, IDisposable
 {
     /// <inheritdoc />
@@ -47,6 +50,9 @@ public class TextureDrawOperation : IDrawOperation, IDisposable
         );
     }
 
+    /// <summary>
+    /// Disposes the texture draw operation and releases associated resources.
+    /// </summary>
     public void Dispose()
     {
         this._image.Dispose();

@@ -33,16 +33,24 @@ public class InterpolationCamera : Camera
         this.PreviousCamera = initialCamera;
     }
 
+    /// <summary>
+    /// Gets the current interpolation progress between cameras (0 = previous camera, 1 = target camera).
+    /// </summary>
     public float Progress { get; private set; } = 1f;
 
+    /// <summary>
+    /// Gets the duration of camera transitions in seconds.
+    /// </summary>
     public float TransitionDuration { get; private set; } = 0.5f;
 
     private Matrix4x4 _projectionMatrix;
 
+    /// <inheritdoc/>
     public override Matrix4x4 ProjectionMatrix => this._projectionMatrix;
 
     private int _maxShadowCascades = 4;
 
+    /// <inheritdoc/>
     public override int MaxShadowCascades => this._maxShadowCascades;
 
     /// <summary>
@@ -81,6 +89,7 @@ public class InterpolationCamera : Camera
         this._maxShadowCascades = camera.MaxShadowCascades;
     }
 
+    /// <inheritdoc/>
     public override Matrix4x4 GetShadowCascadeViewProjectionMatrix(float near, float far)
     {
         if (this.TargetCamera == null)
@@ -89,6 +98,10 @@ public class InterpolationCamera : Camera
         return this.TargetCamera.GetShadowCascadeViewProjectionMatrix(near, far);
     }
 
+    /// <summary>
+    /// Updates the camera interpolation and properties.
+    /// </summary>
+    /// <param name="deltaTime">The time elapsed since the last update.</param>
     public virtual void Update(float deltaTime)
     {
         if (this.TargetCamera == null) return;

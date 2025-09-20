@@ -6,15 +6,36 @@ using LifeSim.Support.Drawing;
 
 namespace LifeSim.Imago.SceneGraph.Cameras;
 
+/// <summary>
+/// Represents an abstract base class for all camera types in the scene.
+/// </summary>
 public abstract class Camera
 {
     private Matrix4x4 _viewMatrix;
     private Vector3 _position = Vector3.Zero;
     private Quaternion _rotation  = Quaternion.Identity;
-    protected bool _viewMatrixIsDirty = true;
-    protected bool _projectionMatrixIsDirty = true;
+    private bool _viewMatrixIsDirty = true;
+    private bool _projectionMatrixIsDirty = true;
     private float _nearPlane = 0.1f;
     private float _farPlane = 300f;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the view matrix needs to be recalculated.
+    /// </summary>
+    protected bool ViewMatrixIsDirty 
+    { 
+        get => this._viewMatrixIsDirty; 
+        set => this._viewMatrixIsDirty = value; 
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the projection matrix needs to be recalculated.
+    /// </summary>
+    protected bool ProjectionMatrixIsDirty 
+    { 
+        get => this._projectionMatrixIsDirty; 
+        set => this._projectionMatrixIsDirty = value; 
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Camera"/> class.
@@ -48,7 +69,7 @@ public abstract class Camera
             if (this._position != value)
             {
                 this._position = value;
-                this._viewMatrixIsDirty = true;
+                this.ViewMatrixIsDirty = true;
             }
         }
     }
@@ -65,7 +86,7 @@ public abstract class Camera
             if (this._rotation != value)
             {
                 this._rotation = value;
-                this._viewMatrixIsDirty = true;
+                this.ViewMatrixIsDirty = true;
             }
         }
     }
@@ -84,7 +105,7 @@ public abstract class Camera
             {
                 this._viewport.SizeChanged -= this.Viewport_SizeChanged;
                 this._viewport = value;
-                this._projectionMatrixIsDirty = true;
+                this.ProjectionMatrixIsDirty = true;
                 this._viewport.SizeChanged += this.Viewport_SizeChanged;
             }
         }
@@ -92,7 +113,7 @@ public abstract class Camera
 
     private void Viewport_SizeChanged(object? sender, EventArgs e)
     {
-        this._projectionMatrixIsDirty = true;
+        this.ProjectionMatrixIsDirty = true;
     }
 
     /// <summary>
@@ -102,12 +123,12 @@ public abstract class Camera
     {
         get
         {
-            if (this._viewMatrixIsDirty)
+            if (this.ViewMatrixIsDirty)
             {
                 Vector3 forward = Vector3.Transform(Vector3.UnitZ, this._rotation);
                 Vector3 up = Vector3.Transform(Vector3.UnitY, this._rotation);
                 this._viewMatrix = Matrix4x4.CreateLookAt(this.Position, this.Position + forward, up);
-                this._viewMatrixIsDirty = false;
+                this.ViewMatrixIsDirty = false;
             }
 
             return this._viewMatrix;
@@ -125,7 +146,7 @@ public abstract class Camera
             if (this._nearPlane != value)
             {
                 this._nearPlane = value;
-                this._projectionMatrixIsDirty = true;
+                this.ProjectionMatrixIsDirty = true;
             }
         }
     }
@@ -143,7 +164,7 @@ public abstract class Camera
             if (this._farPlane != value)
             {
                 this._farPlane = value;
-                this._projectionMatrixIsDirty = true;
+                this.ProjectionMatrixIsDirty = true;
             }
         }
     }

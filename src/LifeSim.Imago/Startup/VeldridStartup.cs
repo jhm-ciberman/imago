@@ -1,3 +1,5 @@
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+
 using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -15,8 +17,21 @@ using Veldrid.Vk;
 
 namespace LifeSim.Imago.Startup;
 
+/// <summary>
+/// Provides utility methods for creating windows and graphics devices using Veldrid.
+/// </summary>
+/// <remarks>
+/// This class contains platform-specific code for initializing graphics contexts
+/// across different operating systems and graphics backends.
+/// </remarks>
 public static class VeldridStartup
 {
+    /// <summary>
+    /// Creates a window and graphics device with default options and the platform's default backend.
+    /// </summary>
+    /// <param name="windowCI">Information about the window to create.</param>
+    /// <param name="window">The created SDL2 window.</param>
+    /// <param name="gd">The created graphics device.</param>
     public static void CreateWindowAndGraphicsDevice(
         WindowCreateInfo windowCI,
         out Sdl2Window window,
@@ -28,6 +43,13 @@ public static class VeldridStartup
             out window,
             out gd);
 
+    /// <summary>
+    /// Creates a window and graphics device with the specified options and preferred backend.
+    /// </summary>
+    /// <param name="windowCI">Information about the window to create.</param>
+    /// <param name="deviceOptions">The graphics device options to use.</param>
+    /// <param name="window">The created SDL2 window.</param>
+    /// <param name="gd">The created graphics device.</param>
     public static void CreateWindowAndGraphicsDevice(
         WindowCreateInfo windowCI,
         GraphicsDeviceOptions deviceOptions,
@@ -35,6 +57,14 @@ public static class VeldridStartup
         out GraphicsDevice gd)
         => CreateWindowAndGraphicsDevice(windowCI, deviceOptions, GetPlatformDefaultBackend(), out window, out gd);
 
+    /// <summary>
+    /// Creates a window and graphics device with the specified options and backend.
+    /// </summary>
+    /// <param name="windowCI">Information about the window to create.</param>
+    /// <param name="deviceOptions">The graphics device options to use.</param>
+    /// <param name="preferredBackend">The preferred graphics backend to use.</param>
+    /// <param name="window">The created SDL2 window.</param>
+    /// <param name="gd">The created graphics device.</param>
     public static void CreateWindowAndGraphicsDevice(
         WindowCreateInfo windowCI,
         GraphicsDeviceOptions deviceOptions,
@@ -51,8 +81,18 @@ public static class VeldridStartup
     }
 
 
+    /// <summary>
+    /// Creates a new SDL2 window using the specified window create information.
+    /// </summary>
+    /// <param name="windowCI">Information about the window to create.</param>
+    /// <returns>The created SDL2 window.</returns>
     public static Sdl2Window CreateWindow(WindowCreateInfo windowCI) => CreateWindow(ref windowCI);
 
+    /// <summary>
+    /// Creates a new SDL2 window using the specified window create information.
+    /// </summary>
+    /// <param name="windowCI">Information about the window to create (passed by reference).</param>
+    /// <returns>The created SDL2 window.</returns>
     public static Sdl2Window CreateWindow(ref WindowCreateInfo windowCI)
     {
         SDL_WindowFlags flags = SDL_WindowFlags.OpenGL | SDL_WindowFlags.Resizable

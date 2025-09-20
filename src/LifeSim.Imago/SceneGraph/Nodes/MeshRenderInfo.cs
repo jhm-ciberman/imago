@@ -4,6 +4,9 @@ using LifeSim.Imago.Meshes;
 
 namespace LifeSim.Imago.SceneGraph.Nodes;
 
+/// <summary>
+/// Contains rendering information for a mesh, including material, mesh data, and texture transformation.
+/// </summary>
 public class MeshRenderInfo
 {
     /// <summary>

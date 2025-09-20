@@ -24,6 +24,7 @@ public class SkinnedMeshData : BasicMeshData
     /// </summary>
     public Vector4[] Weights { get; set; }
 
+    /// <inheritdoc/>
     public override VertexFormat VertexFormat => SkinnedVertex.VertexFormat;
 
     /// <summary>

@@ -22,8 +22,10 @@ public class ScaleChannel : ChannelBase<Vector3>
         this._sampler = new Vector3Sampler(times, values, interpolation);
     }
 
+    /// <inheritdoc/>
     public override float Duration => this._sampler.Duration;
 
+    /// <inheritdoc/>
     public override void Update(Node3D target, float time)
     {
         target.Scale = this._sampler.Sample(time);

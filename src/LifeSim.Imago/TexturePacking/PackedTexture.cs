@@ -78,6 +78,10 @@ public class PackedTexture : ITextureRegion
         return new Vector4(size.X, size.Y, this.TopLeft.X, this.TopLeft.Y);
     }
 
+    /// <summary>
+    /// Returns a string representation of the packed texture.
+    /// </summary>
+    /// <returns>A string representation of the packed texture.</returns>
     public override string ToString()
     {
         return $"{this.Texture.Name} {this.TopLeft} {this.BottomRight}";

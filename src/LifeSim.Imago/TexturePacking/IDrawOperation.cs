@@ -4,6 +4,9 @@ using SixLabors.ImageSharp.PixelFormats;
 
 namespace LifeSim.Imago.TexturePacking;
 
+/// <summary>
+/// Defines a contract for drawing operations that can be performed on texture atlases.
+/// </summary>
 public interface IDrawOperation
 {
     /// <summary>

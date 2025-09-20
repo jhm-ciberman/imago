@@ -16,6 +16,7 @@ public class TerrainMeshData : BasicMeshData
     /// </summary>
     public Vector2[] Lights { get; set; }
 
+    /// <inheritdoc/>
     public override VertexFormat VertexFormat => TerrainVertex.VertexFormat;
 
     /// <summary>

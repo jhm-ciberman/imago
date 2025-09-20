@@ -4,6 +4,9 @@ using LifeSim.Support.Drawing;
 
 namespace LifeSim.Imago.SceneGraph.Lighting;
 
+/// <summary>
+/// Represents a shadow map used for rendering shadows from directional lights.
+/// </summary>
 public class ShadowMap
 {
     private float _maximumShadowDistance = 50f;
@@ -133,6 +136,11 @@ public class ShadowMap
     /// </summary>
     public float[] SplitDistances { get; } = new float[5]; // 4 splits + 1 for far plane
 
+    /// <summary>
+    /// Updates the split distances for shadow cascade calculation based on the camera's view frustum.
+    /// </summary>
+    /// <param name="camera">The camera to base the split distances on.</param>
+    /// <param name="cascadesCount">The number of shadow cascades that will be used.</param>
     public void UpdateSplitDistances(Camera camera, out int cascadesCount)
     {
         // Lerp between uniform and logarithmic split distances.

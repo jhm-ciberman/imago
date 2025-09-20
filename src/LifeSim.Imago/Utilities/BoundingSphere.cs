@@ -30,6 +30,10 @@ public struct BoundingSphere
         this.Radius = radius;
     }
 
+    /// <summary>
+    /// Returns a string representation of the bounding sphere.
+    /// </summary>
+    /// <returns>A string representation of the bounding sphere.</returns>
     public override string ToString()
     {
         return string.Format("Center:{0}, Radius:{1}", this.Center, this.Radius);

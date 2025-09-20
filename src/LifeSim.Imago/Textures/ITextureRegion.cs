@@ -24,6 +24,9 @@ public interface ITextureRegion
     public Vector2 BottomRight { get; }
 }
 
+/// <summary>
+/// Provides extension methods for texture region operations and calculations.
+/// </summary>
 public static class TextureRegionExtensions
 {
     /// <summary>

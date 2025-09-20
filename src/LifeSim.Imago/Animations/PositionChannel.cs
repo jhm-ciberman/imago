@@ -22,8 +22,10 @@ public class PositionChannel : ChannelBase<Vector3>, IChannel
         this._sampler = new Vector3Sampler(times, values, interpolation);
     }
 
+    /// <inheritdoc/>
     public override float Duration => this._sampler.Duration;
 
+    /// <inheritdoc/>
     public override void Update(Node3D target, float time)
     {
         target.Position = this._sampler.Sample(time);

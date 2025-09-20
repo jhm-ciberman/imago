@@ -15,6 +15,9 @@ using Texture = LifeSim.Imago.Textures.Texture;
 
 namespace LifeSim.Imago.Rendering.Sprites;
 
+/// <summary>
+/// Provides a context for drawing 2D sprites, text, and other graphical elements.
+/// </summary>
 public class DrawingContext : IDisposable
 {
     /// <summary>
@@ -154,6 +157,10 @@ public class DrawingContext : IDisposable
         this.DrawCallCount = 0;
     }
 
+    /// <summary>
+    /// Sets the view projection matrix for rendering transformations.
+    /// </summary>
+    /// <param name="viewProjectionMatrix">The view projection matrix to use.</param>
     public void SetViewProjectionMatrix(Matrix4x4 viewProjectionMatrix)
     {
         this._commandList.UpdateBuffer(this._matrixBuffer, 0, ref viewProjectionMatrix);

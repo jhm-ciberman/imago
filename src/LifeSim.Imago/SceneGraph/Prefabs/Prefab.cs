@@ -3,6 +3,9 @@ using LifeSim.Imago.SceneGraph.Nodes;
 
 namespace LifeSim.Imago.SceneGraph.Prefabs;
 
+/// <summary>
+/// Represents a prefab that wraps an instantiable object with additional transformation properties.
+/// </summary>
 public class WrapingPrefab : IInstantiable
 {
     /// <summary>
@@ -27,6 +30,7 @@ public class WrapingPrefab : IInstantiable
     }
 
 
+    /// <inheritdoc/>
     public Node3D Instantiate()
     {
         var node = new Node3D();

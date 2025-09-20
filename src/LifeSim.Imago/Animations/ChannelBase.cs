@@ -2,6 +2,10 @@ using LifeSim.Imago.SceneGraph.Nodes;
 
 namespace LifeSim.Imago.Animations;
 
+/// <summary>
+/// Provides a base implementation for animation channels that target scene nodes.
+/// </summary>
+/// <typeparam name="T">The type of value this channel animates.</typeparam>
 public abstract class ChannelBase<T> : IChannel where T : struct
 {
     /// <summary>

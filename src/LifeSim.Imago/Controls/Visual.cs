@@ -8,6 +8,9 @@ using LifeSim.Support.Numerics;
 
 namespace LifeSim.Imago.Controls;
 
+/// <summary>
+/// Represents the base class for all visual elements in the user interface.
+/// </summary>
 public abstract class Visual : ObservableObject, IDisposable
 {
     /// <summary>
@@ -493,6 +496,9 @@ public abstract class Visual : ObservableObject, IDisposable
         GC.SuppressFinalize(this);
     }
 
+    /// <summary>
+    /// Finalizes an instance of the <see cref="Visual"/> class.
+    /// </summary>
     ~Visual() => this.Dispose(false);
 
     /// <summary>

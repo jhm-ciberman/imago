@@ -207,31 +207,61 @@ public struct BoundingBox : IEquatable<BoundingBox>
             Vector3.Max(box1.Max, box2.Max));
     }
 
+    /// <summary>
+    /// Determines whether two <see cref="BoundingBox"/> instances are equal.
+    /// </summary>
+    /// <param name="first">The first bounding box to compare.</param>
+    /// <param name="second">The second bounding box to compare.</param>
+    /// <returns>true if the bounding boxes are equal; otherwise, false.</returns>
     public static bool operator ==(BoundingBox first, BoundingBox second)
     {
         return first.Equals(second);
     }
 
+    /// <summary>
+    /// Determines whether two <see cref="BoundingBox"/> instances are not equal.
+    /// </summary>
+    /// <param name="first">The first bounding box to compare.</param>
+    /// <param name="second">The second bounding box to compare.</param>
+    /// <returns>true if the bounding boxes are not equal; otherwise, false.</returns>
     public static bool operator !=(BoundingBox first, BoundingBox second)
     {
         return !first.Equals(second);
     }
 
+    /// <summary>
+    /// Indicates whether the current bounding box is equal to another bounding box.
+    /// </summary>
+    /// <param name="other">The bounding box to compare with this bounding box.</param>
+    /// <returns>true if the current bounding box is equal to the other parameter; otherwise, false.</returns>
     public bool Equals(BoundingBox other)
     {
         return this.Min == other.Min && this.Max == other.Max;
     }
 
+    /// <summary>
+    /// Returns a string representation of the bounding box.
+    /// </summary>
+    /// <returns>A string representation of the bounding box.</returns>
     public override string ToString()
     {
         return string.Format("Min:{0}, Max:{1}", this.Min, this.Max);
     }
 
+    /// <summary>
+    /// Indicates whether this instance and a specified object are equal.
+    /// </summary>
+    /// <param name="obj">The object to compare with the current instance.</param>
+    /// <returns>true if obj and this instance are the same type and represent the same value; otherwise, false.</returns>
     public override bool Equals(object? obj)
     {
         return obj is BoundingBox && ((BoundingBox)obj).Equals(this);
     }
 
+    /// <summary>
+    /// Returns the hash code for this instance.
+    /// </summary>
+    /// <returns>A 32-bit signed integer that is the hash code for this instance.</returns>
     public override int GetHashCode()
     {
         return HashCode.Combine(this.Min, this.Max);

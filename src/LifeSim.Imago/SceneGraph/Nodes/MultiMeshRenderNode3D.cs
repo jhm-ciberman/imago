@@ -3,7 +3,9 @@ using LifeSim.Support.Drawing;
 
 namespace LifeSim.Imago.SceneGraph.Nodes;
 
-
+/// <summary>
+/// Represents a 3D node that can render multiple meshes with individual materials and transformations.
+/// </summary>
 public class MultiMeshRenderNode3D : Node3D
 {
     private readonly List<RenderNode3D> _renderNodes = new List<RenderNode3D>();
@@ -214,6 +216,7 @@ public class MultiMeshRenderNode3D : Node3D
         this._renderNodes.TrimExcess();
     }
 
+    /// <inheritdoc/>
     protected override void Dispose(bool disposing)
     {
         if (disposing)

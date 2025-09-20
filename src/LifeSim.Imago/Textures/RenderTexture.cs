@@ -4,9 +4,19 @@ using Veldrid;
 
 namespace LifeSim.Imago.Textures;
 
+/// <summary>
+/// Defines the interpolation methods for texture sampling.
+/// </summary>
 public enum TextureInterpolation
 {
+    /// <summary>
+    /// Nearest neighbor interpolation, providing sharp pixel boundaries.
+    /// </summary>
     Nearest,
+    
+    /// <summary>
+    /// Linear interpolation, providing smooth blending between pixels.
+    /// </summary>
     Linear,
 };
 

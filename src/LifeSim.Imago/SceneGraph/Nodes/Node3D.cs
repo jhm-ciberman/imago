@@ -7,6 +7,9 @@ using LifeSim.Support.Collections;
 
 namespace LifeSim.Imago.SceneGraph.Nodes;
 
+/// <summary>
+/// Represents a 3D node in the scene graph with transformation, hierarchy, and lifecycle management.
+/// </summary>
 public class Node3D : IDisposable, IFormattable
 {
     [Flags]
@@ -321,6 +324,10 @@ public class Node3D : IDisposable, IFormattable
         }
     }
 
+    /// <summary>
+    /// Disposes the node and releases associated resources.
+    /// </summary>
+    /// <param name="disposing">True if disposing managed resources; otherwise, false.</param>
     protected virtual void Dispose(bool disposing)
     {
         if (!this._disposedValue)
@@ -337,6 +344,9 @@ public class Node3D : IDisposable, IFormattable
         }
     }
 
+    /// <summary>
+    /// Disposes the node and releases associated resources.
+    /// </summary>
     public void Dispose()
     {
         this.Dispose(disposing: true);

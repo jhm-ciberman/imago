@@ -3,6 +3,9 @@ using Veldrid;
 
 namespace LifeSim.Imago.Textures;
 
+/// <summary>
+/// Defines a contract for textures that can be used as rendering targets.
+/// </summary>
 public interface IRenderTexture : ITexture, IDisposable
 {
     /// <summary>

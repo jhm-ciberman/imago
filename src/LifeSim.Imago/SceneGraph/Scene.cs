@@ -99,6 +99,7 @@ public class Scene : Node3D
     /// </summary>
     public ILayer2D? GuiLayer { get; set; } = null;
 
+    /// <inheritdoc/>
     public override void DetachFromStage()
     {
         base.DetachFromStage();

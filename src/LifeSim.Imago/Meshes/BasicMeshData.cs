@@ -21,6 +21,7 @@ public class BasicMeshData : MeshData
     /// </summary>
     public Vector2[] TexCoords { get; set; }
 
+    /// <inheritdoc/>
     public override VertexFormat VertexFormat => BasicVertex.VertexFormat;
 
     /// <summary>

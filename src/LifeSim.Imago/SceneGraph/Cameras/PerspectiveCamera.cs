@@ -3,11 +3,18 @@ using System.Numerics;
 
 namespace LifeSim.Imago.SceneGraph.Cameras;
 
+/// <summary>
+/// Represents a perspective camera that provides perspective projection with depth and field of view.
+/// </summary>
 public class PerspectiveCamera : Camera
 {
     private Matrix4x4 _projectionMatrix;
     private float _fieldOfView = 60 * MathF.PI / 180f;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PerspectiveCamera"/> class.
+    /// </summary>
+    /// <param name="viewport">The viewport to use. If null, uses the main viewport.</param>
     public PerspectiveCamera(Viewport? viewport = null) : base(viewport)
     {
     }
@@ -29,7 +36,7 @@ public class PerspectiveCamera : Camera
             if (this._fieldOfView != value)
             {
                 this._fieldOfView = value;
-                this._projectionMatrixIsDirty = true;
+                this.ProjectionMatrixIsDirty = true;
             }
         }
     }
@@ -41,16 +48,17 @@ public class PerspectiveCamera : Camera
     {
         get
         {
-            if (this._projectionMatrixIsDirty)
+            if (this.ProjectionMatrixIsDirty)
             {
                 this._projectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(this._fieldOfView, this.Viewport.AspectRatio, this.NearPlane, this.FarPlane);
-                this._projectionMatrixIsDirty = false;
+                this.ProjectionMatrixIsDirty = false;
             }
 
             return this._projectionMatrix;
         }
     }
 
+    /// <inheritdoc/>
     public override Matrix4x4 GetShadowCascadeViewProjectionMatrix(float near, float far)
     {
         return Matrix4x4.CreatePerspectiveFieldOfView(this.FieldOfView, this.Viewport.AspectRatio, near, far);

@@ -29,12 +29,12 @@ public enum TextWrap
 /// </summary>
 public class TextBlock : Control
 {
-    protected string _text = string.Empty;
+    private string _text = string.Empty;
     private ITextEffect? _textEffect;
-    protected float _fontSize = 11f;
-    protected FontSystem? _fontSystem = null;
-    protected SpriteFontBase? _font = null;
-    protected Color _foreground = Color.Black;
+    private float _fontSize = 11f;
+    private FontSystem? _fontSystem = null;
+    private SpriteFontBase? _font = null;
+    private Color _foreground = Color.Black;
     private float _lineHeight = float.NaN;
     private readonly List<string> _textLines = new();
     private bool _textLinesDirty = true;

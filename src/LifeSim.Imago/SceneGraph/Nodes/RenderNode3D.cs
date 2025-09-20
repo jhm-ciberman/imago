@@ -160,6 +160,7 @@ public class RenderNode3D : Node3D, IPickable
         set => this._renderable.PickingId = value;
     }
 
+    /// <inheritdoc/>
     public override void UpdateTransform(ref Matrix4x4 parentMatrix)
     {
         base.UpdateTransform(ref parentMatrix);
@@ -167,6 +168,7 @@ public class RenderNode3D : Node3D, IPickable
         this._renderable.Transform = this.WorldMatrix;
     }
 
+    /// <inheritdoc/>
     public override void AttachToStage(Stage stage)
     {
         base.AttachToStage(stage);
@@ -175,6 +177,7 @@ public class RenderNode3D : Node3D, IPickable
         this._renderable.Stage = stage;
     }
 
+    /// <inheritdoc/>
     public override void DetachFromStage()
     {
         if (this.Stage is null)
@@ -186,6 +189,9 @@ public class RenderNode3D : Node3D, IPickable
         base.DetachFromStage();
     }
 
+    /// <summary>
+    /// Updates the registration of this node with the picking manager based on its pickable state.
+    /// </summary>
     public void UpdateRegistrationWithPickingManager()
     {
         if (this.Stage is null) return;
@@ -220,6 +226,7 @@ public class RenderNode3D : Node3D, IPickable
         this.TextureST = renderInfo.TextureST;
     }
 
+    /// <inheritdoc/>
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);

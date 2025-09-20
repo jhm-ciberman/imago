@@ -4,14 +4,44 @@ using LifeSim.Imago.Utilities;
 
 namespace LifeSim.Imago.SceneGraph;
 
+/// <summary>
+/// Contains information about a ray hit including distance, position, normal, and mesh data.
+/// </summary>
 public struct HitInfo
 {
+    /// <summary>
+    /// Gets or sets the distance from the ray origin to the hit point.
+    /// </summary>
     public float Distance { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the surface normal at the hit point.
+    /// </summary>
     public Vector3 Normal { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the world position of the hit point.
+    /// </summary>
     public Vector3 Position { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the mesh data that was hit.
+    /// </summary>
     public Meshes.MeshData Mesh { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the index of the triangle that was hit.
+    /// </summary>
     public int TriangleIndex { get; set; }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="HitInfo"/> struct.
+    /// </summary>
+    /// <param name="mesh">The mesh data that was hit.</param>
+    /// <param name="triangleIndex">The index of the triangle that was hit.</param>
+    /// <param name="distance">The distance from the ray origin to the hit point.</param>
+    /// <param name="normal">The surface normal at the hit point.</param>
+    /// <param name="position">The world position of the hit point.</param>
     public HitInfo(Meshes.MeshData mesh, int triangleIndex, float distance, Vector3 normal, Vector3 position)
     {
         this.Mesh = mesh;
@@ -22,6 +52,9 @@ public struct HitInfo
     }
 }
 
+/// <summary>
+/// Provides extension methods for performing ray casting operations on meshes.
+/// </summary>
 public static class RayCastExtensions
 {
 

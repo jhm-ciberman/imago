@@ -113,6 +113,9 @@ public class TextureGroup : IDisposable
         return this.Pack(new TextureDrawOperation(sourcePath));
     }
 
+    /// <summary>
+    /// Requests that the texture group be flushed to update its packed texture.
+    /// </summary>
     protected void RequestFlush()
     {
         if (!this._flushRequested)

@@ -2,6 +2,9 @@ using System;
 
 namespace LifeSim.Imago.Textures;
 
+/// <summary>
+/// Defines a contract for texture objects that can be used for rendering.
+/// </summary>
 public interface ITexture : IDisposable
 {
     /// <summary>

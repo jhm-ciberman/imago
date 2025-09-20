@@ -10,6 +10,9 @@ using LifeSim.Support.Numerics;
 
 namespace LifeSim.Imago.SceneGraph;
 
+/// <summary>
+/// Provides extension methods for scene graph operations and node manipulation.
+/// </summary>
 public static class SceneGraphExtensions
 {
     /// <summary>

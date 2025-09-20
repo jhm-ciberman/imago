@@ -7,22 +7,57 @@ using LifeSim.Support.Drawing;
 
 namespace LifeSim.Imago.SceneGraph;
 
+/// <summary>
+/// Represents a debug line used for visualization and debugging purposes.
+/// </summary>
 public struct DebugLine
 {
+    /// <summary>
+    /// Gets or sets the start position of the debug line.
+    /// </summary>
     public Vector3 Start;
+    
+    /// <summary>
+    /// Gets or sets the end position of the debug line.
+    /// </summary>
     public Vector3 End;
+    
+    /// <summary>
+    /// Gets or sets the color of the debug line.
+    /// </summary>
     public Color Color;
+    
+    /// <summary>
+    /// Gets or sets the lifetime of the debug line in seconds. A value of 0 means the line persists for one frame.
+    /// </summary>
     public float LifeTime;
+    
+    /// <summary>
+    /// Gets or sets a value indicating whether the debug line should be drawn in front of other objects.
+    /// </summary>
     public bool DrawInFront;
 }
 
+/// <summary>
+/// Provides functionality for drawing debug visualization elements such as lines, shapes, and wireframes.
+/// </summary>
 public class GizmosLayer
 {
     private readonly SwapPopList<DebugLine> _lines = new SwapPopList<DebugLine>();
+    
+    /// <summary>
+    /// Gets the collection of debug lines to be rendered.
+    /// </summary>
     public IReadOnlyList<DebugLine> Lines => this._lines;
 
+    /// <summary>
+    /// Gets the default gizmos layer instance used throughout the application.
+    /// </summary>
     public static GizmosLayer Default { get; private set; } = null!;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GizmosLayer"/> class.
+    /// </summary>
     public GizmosLayer()
     {
         Default ??= this;
@@ -235,6 +270,16 @@ public class GizmosLayer
         }
     }
 
+    /// <summary>
+    /// Draws a cone between two points with the specified base radius.
+    /// </summary>
+    /// <param name="basePosition">The position of the cone's base.</param>
+    /// <param name="apexPosition">The position of the cone's apex.</param>
+    /// <param name="baseRadius">The radius of the cone's base.</param>
+    /// <param name="color">The color of the cone wireframe.</param>
+    /// <param name="segments">The number of segments to divide the cone's base into.</param>
+    /// <param name="lifeTime">The amount of time the cone will be visible. A value of 0 means it will be drawn until the next frame.</param>
+    /// <param name="drawInFront">Whether the cone should be drawn in front of other objects or using depth.</param>
     public void DrawCone(Vector3 basePosition, Vector3 apexPosition, float baseRadius, Color color, int segments = 12, float lifeTime = 0, bool drawInFront = false)
     {
         float deltaStep = MathF.PI * 2 / segments;
@@ -321,6 +366,14 @@ public class GizmosLayer
         this.DrawArrow(position, position + planeNormal, normalColor, -1f, lifeTime, drawInFront);
     }
 
+    /// <summary>
+    /// Draws the wireframe of a mesh at the specified transform.
+    /// </summary>
+    /// <param name="mesh">The mesh data to draw as wireframe.</param>
+    /// <param name="transform">The transformation matrix to apply to the mesh.</param>
+    /// <param name="color">The color of the wireframe.</param>
+    /// <param name="lifeTime">The amount of time the wireframe will be visible. A value of 0 means it will be drawn until the next frame.</param>
+    /// <param name="drawInFront">Whether the wireframe should be drawn in front of other objects or using depth.</param>
     public void DrawWireMesh(Meshes.MeshData mesh, ref Matrix4x4 transform, Color color, float lifeTime = 0, bool drawInFront = false)
     {
         for (int i = 0; i < mesh.Indices.Length; i += 3)
