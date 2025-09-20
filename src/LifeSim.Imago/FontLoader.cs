@@ -4,6 +4,9 @@ using LifeSim.Imago.Controls;
 
 namespace LifeSim.Imago;
 
+/// <summary>
+/// Provides functionality for loading fonts into FontStash font systems.
+/// </summary>
 public class FontLoader
 {
     /// <summary>

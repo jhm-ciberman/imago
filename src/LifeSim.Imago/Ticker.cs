@@ -4,6 +4,9 @@ using System.Threading;
 
 namespace LifeSim.Imago;
 
+/// <summary>
+/// Provides data for the <see cref="Ticker.Ticked"/> event.
+/// </summary>
 public class TickedEventArgs : EventArgs
 {
     /// <summary>
@@ -16,11 +19,17 @@ public class TickedEventArgs : EventArgs
     /// </summary>
     public double ElapsedTime { get; internal set; } = 0;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TickedEventArgs"/> class.
+    /// </summary>
     public TickedEventArgs()
     {
     }
 }
 
+/// <summary>
+/// Provides a mechanism to run a loop at a specified frame rate, firing events on each tick.
+/// </summary>
 public class Ticker
 {
     private double _elapsedTime;
