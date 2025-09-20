@@ -6,7 +6,7 @@ using Texture = LifeSim.Imago.Textures.Texture;
 
 namespace LifeSim.Imago.Rendering;
 
-public class ImGuiPass : IDisposable
+internal class ImGuiPass : IDisposable
 {
     private readonly GraphicsDevice _gd;
     private readonly ImGuiRenderer _imguiRenderer;

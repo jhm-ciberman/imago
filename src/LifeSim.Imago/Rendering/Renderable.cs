@@ -10,7 +10,7 @@ using LifeSim.Imago.Utilities;
 
 namespace LifeSim.Imago.Rendering;
 
-public struct OffsetVertexData // It's 16 bytes only!
+internal struct OffsetVertexData // It's 16 bytes only!
 {
     public uint TransformDataOffset { get; set; } // x
     public uint InstanceDataOffset { get; set; } // y

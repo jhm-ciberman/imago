@@ -7,7 +7,7 @@ using Shader = LifeSim.Imago.Materials.Shader;
 
 namespace LifeSim.Imago.Rendering.Sprites;
 
-public class SpritesPass : IDisposable, IPipelineProvider
+internal class SpritesPass : IDisposable, IPipelineProvider
 {
     private readonly GraphicsDevice _gd;
 
