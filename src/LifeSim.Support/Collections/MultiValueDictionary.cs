@@ -14,6 +14,11 @@ public class MultiValueDictionary<TKey, TValue> where TKey : notnull
 
     private readonly List<TValue> _emptyList = new();
 
+    /// <summary>
+    /// Adds a value to the collection of values associated with the specified key.
+    /// </summary>
+    /// <param name="key">The key to associate the value with.</param>
+    /// <param name="value">The value to add to the collection.</param>
     public void Add(TKey key, TValue value)
     {
         if (!this._data.TryGetValue(key, out var list))
@@ -25,6 +30,12 @@ public class MultiValueDictionary<TKey, TValue> where TKey : notnull
         list.Add(value);
     }
 
+    /// <summary>
+    /// Removes a specific value from the collection associated with the specified key.
+    /// </summary>
+    /// <param name="key">The key to remove the value from.</param>
+    /// <param name="value">The value to remove from the collection.</param>
+    /// <returns>true if the value was found and removed; otherwise, false.</returns>
     public bool Remove(TKey key, TValue value)
     {
         if (!this._data.TryGetValue(key, out var list)) return false;
@@ -38,6 +49,11 @@ public class MultiValueDictionary<TKey, TValue> where TKey : notnull
         return true;
     }
 
+    /// <summary>
+    /// Gets the collection of values associated with the specified key.
+    /// </summary>
+    /// <param name="key">The key to get the values for.</param>
+    /// <returns>A read-only list of values associated with the key, or an empty list if the key is not found.</returns>
     public IReadOnlyList<TValue> this[TKey key]
     {
         get

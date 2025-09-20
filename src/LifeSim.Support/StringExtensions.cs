@@ -3,13 +3,26 @@ using System.Text.RegularExpressions;
 
 namespace LifeSim.Support;
 
+/// <summary>
+/// Provides extension methods for the <see cref="string"/> class.
+/// </summary>
 public static partial class StringExtensions
 {
+    /// <summary>
+    /// Converts a string from PascalCase or camelCase to snake_case.
+    /// </summary>
+    /// <param name="value">The string to convert.</param>
+    /// <returns>The string converted to snake_case.</returns>
     public static string ToSnakeCase(this string value)
     {
         return GetSnakeCaseRegex().Replace(value, "$1_$2").ToLower();
     }
 
+    /// <summary>
+    /// Converts a string from snake_case to PascalCase.
+    /// </summary>
+    /// <param name="value">The string to convert.</param>
+    /// <returns>The string converted to PascalCase.</returns>
     public static string ToPascalCase(this string value)
     {
         // from snake_case to PascalCase
@@ -54,6 +67,15 @@ public static partial class StringExtensions
     }
 
 
+    /// <summary>
+    /// Calculates the Levenshtein distance between two strings.
+    /// </summary>
+    /// <remarks>
+    /// The Levenshtein distance is the minimum number of single-character edits (insertions, deletions, or substitutions) required to change one string into another.
+    /// </remarks>
+    /// <param name="source">The source string.</param>
+    /// <param name="target">The target string to compare against.</param>
+    /// <returns>The Levenshtein distance between the two strings.</returns>
     public static int LevenshteinDistance(this string source, string target)
     {
         if (string.IsNullOrEmpty(source))

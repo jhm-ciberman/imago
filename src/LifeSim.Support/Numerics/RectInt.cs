@@ -7,6 +7,9 @@ namespace LifeSim.Support.Numerics;
 /// </summary>
 public struct RectInt : IEquatable<RectInt>
 {
+    /// <summary>
+    /// Gets an empty rectangle with all properties set to zero.
+    /// </summary>
     public static RectInt Empty => default;
 
     /// <summary>
@@ -136,14 +139,39 @@ public struct RectInt : IEquatable<RectInt>
         }
     }
 
+    /// <summary>
+    /// Gets the minimum corner of the rectangle.
+    /// </summary>
     public Vector2Int Min => new Vector2Int(this.XMin, this.YMin);
+
+    /// <summary>
+    /// Gets the maximum corner of the rectangle.
+    /// </summary>
     public Vector2Int Max => new Vector2Int(this.XMax, this.YMax);
 
+    /// <summary>
+    /// Gets or sets the minimum X coordinate of the rectangle.
+    /// </summary>
     public int XMin { get => Math.Min(this.X, this.X + this.Width); set { int oldxmax = this.XMax; this.X = value; this.Width = oldxmax - this.X; } }
+
+    /// <summary>
+    /// Gets or sets the minimum Y coordinate of the rectangle.
+    /// </summary>
     public int YMin { get => Math.Min(this.Y, this.Y + this.Height); set { int oldymax = this.YMax; this.Y = value; this.Height = oldymax - this.Y; } }
+
+    /// <summary>
+    /// Gets or sets the maximum X coordinate of the rectangle.
+    /// </summary>
     public int XMax { get => Math.Max(this.X, this.X + this.Width); set { this.Width = value - this.X; } }
+
+    /// <summary>
+    /// Gets or sets the maximum Y coordinate of the rectangle.
+    /// </summary>
     public int YMax { get => Math.Max(this.Y, this.Y + this.Height); set { this.Height = value - this.Y; } }
 
+    /// <summary>
+    /// Gets a value indicating whether this rectangle is empty (has zero or negative area).
+    /// </summary>
     public bool IsEmpty => this.Width <= 0 || this.Height <= 0;
 
 
