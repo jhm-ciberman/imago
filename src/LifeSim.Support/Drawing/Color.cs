@@ -9,6 +9,9 @@ using System.Runtime.InteropServices;
 
 namespace LifeSim.Support.Drawing;
 
+/// <summary>
+/// Represents a color using 8-bit RGBA components.
+/// </summary>
 [StructLayout(LayoutKind.Sequential)]
 public readonly struct Color
 {
@@ -82,6 +85,12 @@ public readonly struct Color
         throw new ArgumentException("Invalid hex color string.");
     }
 
+    /// <summary>
+    /// Tries to parse a hex color string into a <see cref="Color"/>.
+    /// </summary>
+    /// <param name="hexColor">The hex color string to parse.</param>
+    /// <param name="color">The parsed color, if successful.</param>
+    /// <returns>true if the parsing was successful; otherwise, false.</returns>
     public static bool TryParse(ReadOnlySpan<char> hexColor, out Color color)
     {
         ReadOnlySpan<char> span = hexColor;
@@ -131,17 +140,31 @@ public readonly struct Color
         return false;
     }
 
+    /// <summary>
+    /// Creates a new <see cref="Color"/> from an existing color with a modified alpha value.
+    /// </summary>
+    /// <param name="color">The base color.</param>
+    /// <param name="alpha">The alpha multiplier (0.0 to 1.0).</param>
+    /// <returns>A new color with the modified alpha value.</returns>
     public static Color FromColorAlpha(Color color, float alpha)
     {
         alpha = color.A / 255f * alpha;
         return new Color(color.R, color.G, color.B, (byte)(alpha * 255));
     }
 
+    /// <summary>
+    /// Converts the color to a packed unsigned integer representation.
+    /// </summary>
+    /// <returns>The color as a packed ARGB unsigned integer.</returns>
     public uint ToPackedUInt()
     {
         return (uint)(this.A << 24 | this.B << 16 | this.G << 8 | this.R << 0);
     }
 
+    /// <summary>
+    /// Converts the color to a hexadecimal string representation.
+    /// </summary>
+    /// <returns>A hex string representation of the color.</returns>
     public string ToHex()
     {
         return this.ToString();
@@ -155,51 +178,157 @@ public readonly struct Color
         return $"#{this.R:X2}{this.G:X2}{this.B:X2}{this.A:X2}";
     }
 
+    /// <summary>
+    /// Gets the color white.
+    /// </summary>
     public static Color White => new Color(255, 255, 255, 255);
+
+    /// <summary>
+    /// Gets the color gray.
+    /// </summary>
     public static Color Gray => new Color(128, 128, 128, 255);
+
+    /// <summary>
+    /// Gets the color light gray.
+    /// </summary>
     public static Color LightGray => new Color(192, 192, 192, 255);
+
+    /// <summary>
+    /// Gets the color dark gray.
+    /// </summary>
     public static Color DarkGray => new Color(64, 64, 64, 255);
+
+    /// <summary>
+    /// Gets the color cool gray.
+    /// </summary>
     public static Color CoolGray => new Color(140, 146, 172, 255);
+
+    /// <summary>
+    /// Gets the color black.
+    /// </summary>
     public static Color Black => new Color(0, 0, 0, 255);
+
+    /// <summary>
+    /// Gets the color red.
+    /// </summary>
     public static Color Red => new Color(255, 0, 0, 255);
+
+    /// <summary>
+    /// Gets the color green.
+    /// </summary>
     public static Color Green => new Color(0, 255, 0, 255);
+
+    /// <summary>
+    /// Gets the color blue.
+    /// </summary>
     public static Color Blue => new Color(0, 0, 255, 255);
+
+    /// <summary>
+    /// Gets the color yellow.
+    /// </summary>
     public static Color Yellow => new Color(255, 255, 0, 255);
+
+    /// <summary>
+    /// Gets the color cyan.
+    /// </summary>
     public static Color Cyan => new Color(0, 255, 255, 255);
+
+    /// <summary>
+    /// Gets the color magenta.
+    /// </summary>
     public static Color Magenta => new Color(255, 0, 255, 255);
+
+    /// <summary>
+    /// Gets the color transparent (black with zero alpha).
+    /// </summary>
     public static Color Transparent => new Color(0, 0, 0, 0);
+
+    /// <summary>
+    /// Gets the color orange.
+    /// </summary>
     public static Color Orange => new Color(255, 128, 0, 255);
+
+    /// <summary>
+    /// Gets the color purple.
+    /// </summary>
     public static Color Purple => new Color(128, 0, 128, 255);
+
+    /// <summary>
+    /// Gets the color brown.
+    /// </summary>
     public static Color Brown => new Color(128, 64, 0, 255);
+
+    /// <summary>
+    /// Gets the color pink.
+    /// </summary>
     public static Color Pink => new Color(255, 192, 203, 255);
+
+    /// <summary>
+    /// Gets the color indigo.
+    /// </summary>
     public static Color Indigo => new Color(75, 0, 130, 255);
+
+    /// <summary>
+    /// Gets the color violet.
+    /// </summary>
     public static Color Violet => new Color(238, 130, 238, 255);
+
+    /// <summary>
+    /// Gets the color ghost white.
+    /// </summary>
     public static Color GhostWhite => new Color(248, 248, 255, 255);
 
+    /// <summary>
+    /// Implicitly converts a <see cref="Color"/> to a <see cref="ColorF"/>.
+    /// </summary>
+    /// <param name="color">The color to convert.</param>
+    /// <returns>A <see cref="ColorF"/> with normalized component values.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator ColorF(Color color)
     {
         return new ColorF(color.R / 255f, color.G / 255f, color.B / 255f, color.A / 255f);
     }
 
+    /// <summary>
+    /// Implicitly converts a <see cref="Color"/> to a <see cref="System.Drawing.Color"/>.
+    /// </summary>
+    /// <param name="color">The color to convert.</param>
+    /// <returns>A <see cref="System.Drawing.Color"/> with the same component values.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator System.Drawing.Color(Color color)
     {
         return System.Drawing.Color.FromArgb(color.A, color.R, color.G, color.B);
     }
 
+    /// <summary>
+    /// Implicitly converts a <see cref="System.Drawing.Color"/> to a <see cref="Color"/>.
+    /// </summary>
+    /// <param name="color">The color to convert.</param>
+    /// <returns>A <see cref="Color"/> with the same component values.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator Color(System.Drawing.Color color)
     {
         return new Color(color.R, color.G, color.B, color.A);
     }
 
+    /// <summary>
+    /// Determines whether two <see cref="Color"/> instances are equal.
+    /// </summary>
+    /// <param name="left">The first color.</param>
+    /// <param name="right">The second color.</param>
+    /// <returns>true if the colors are equal; otherwise, false.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator ==(Color left, Color right)
     {
         return left.R == right.R && left.G == right.G && left.B == right.B && left.A == right.A;
     }
 
+    /// <summary>
+    /// Determines whether two <see cref="Color"/> instances are not equal.
+    /// </summary>
+    /// <param name="left">The first color.</param>
+    /// <param name="right">The second color.</param>
+    /// <returns>true if the colors are not equal; otherwise, false.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator !=(Color left, Color right)
     {
@@ -216,6 +345,13 @@ public readonly struct Color
         return HashCode.Combine(this.R, this.G, this.B, this.A);
     }
 
+    /// <summary>
+    /// Linearly interpolates between two colors.
+    /// </summary>
+    /// <param name="from">The start color.</param>
+    /// <param name="to">The end color.</param>
+    /// <param name="t">The interpolation factor (0.0 to 1.0).</param>
+    /// <returns>The interpolated color.</returns>
     public static Color Lerp(Color from, Color to, float t)
     {
         t = Math.Clamp(t, 0, 1);
