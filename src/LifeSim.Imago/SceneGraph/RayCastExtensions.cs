@@ -13,22 +13,22 @@ public struct HitInfo
     /// Gets or sets the distance from the ray origin to the hit point.
     /// </summary>
     public float Distance { get; set; }
-    
+
     /// <summary>
     /// Gets or sets the surface normal at the hit point.
     /// </summary>
     public Vector3 Normal { get; set; }
-    
+
     /// <summary>
     /// Gets or sets the world position of the hit point.
     /// </summary>
     public Vector3 Position { get; set; }
-    
+
     /// <summary>
     /// Gets or sets the mesh data that was hit.
     /// </summary>
     public Meshes.MeshData Mesh { get; set; }
-    
+
     /// <summary>
     /// Gets or sets the index of the triangle that was hit.
     /// </summary>

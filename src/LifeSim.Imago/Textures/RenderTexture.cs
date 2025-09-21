@@ -13,7 +13,7 @@ public enum TextureInterpolation
     /// Nearest neighbor interpolation, providing sharp pixel boundaries.
     /// </summary>
     Nearest,
-    
+
     /// <summary>
     /// Linear interpolation, providing smooth blending between pixels.
     /// </summary>

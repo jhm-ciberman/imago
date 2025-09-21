@@ -22,19 +22,19 @@ public abstract class Camera
     /// <summary>
     /// Gets or sets a value indicating whether the view matrix needs to be recalculated.
     /// </summary>
-    protected bool ViewMatrixIsDirty 
-    { 
-        get => this._viewMatrixIsDirty; 
-        set => this._viewMatrixIsDirty = value; 
+    protected bool ViewMatrixIsDirty
+    {
+        get => this._viewMatrixIsDirty;
+        set => this._viewMatrixIsDirty = value;
     }
 
     /// <summary>
     /// Gets or sets a value indicating whether the projection matrix needs to be recalculated.
     /// </summary>
-    protected bool ProjectionMatrixIsDirty 
-    { 
-        get => this._projectionMatrixIsDirty; 
-        set => this._projectionMatrixIsDirty = value; 
+    protected bool ProjectionMatrixIsDirty
+    {
+        get => this._projectionMatrixIsDirty;
+        set => this._projectionMatrixIsDirty = value;
     }
 
     /// <summary>

@@ -16,22 +16,22 @@ public struct DebugLine
     /// Gets or sets the start position of the debug line.
     /// </summary>
     public Vector3 Start;
-    
+
     /// <summary>
     /// Gets or sets the end position of the debug line.
     /// </summary>
     public Vector3 End;
-    
+
     /// <summary>
     /// Gets or sets the color of the debug line.
     /// </summary>
     public Color Color;
-    
+
     /// <summary>
     /// Gets or sets the lifetime of the debug line in seconds. A value of 0 means the line persists for one frame.
     /// </summary>
     public float LifeTime;
-    
+
     /// <summary>
     /// Gets or sets a value indicating whether the debug line should be drawn in front of other objects.
     /// </summary>
@@ -44,7 +44,7 @@ public struct DebugLine
 public class GizmosLayer
 {
     private readonly SwapPopList<DebugLine> _lines = new SwapPopList<DebugLine>();
-    
+
     /// <summary>
     /// Gets the collection of debug lines to be rendered.
     /// </summary>
