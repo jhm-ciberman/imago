@@ -65,7 +65,7 @@ public static class TextureRegionExtensions
     /// <returns></returns>
     public static ITextureRegion[] MakeFlipBook(this ITextureRegion texture, int frameCount)
     {
-        if (frameCount == 1) return new ITextureRegion[] { texture };
+        if (frameCount == 1) return [texture];
 
         var regions = new ITextureRegion[frameCount];
         var u = 1f / frameCount;
