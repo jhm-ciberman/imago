@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using LifeSim.Support;
 
 namespace LifeSim.Imago.TexturePacking;
 
@@ -8,6 +9,13 @@ namespace LifeSim.Imago.TexturePacking;
 /// </summary>
 public class TextureGroup : IDisposable
 {
+    private static readonly List<TextureGroup> _allGroups = new();
+
+    /// <summary>
+    /// Gets a read-only list of all existing <see cref="TextureGroup"/> instances.
+    /// </summary>
+    public static IReadOnlyList<TextureGroup> AllGroups => _allGroups;
+
     /// <summary>
     /// Occurs when a new <see cref="TexturePage"/> is added to the group to accommodate more textures.
     /// </summary>
@@ -63,6 +71,8 @@ public class TextureGroup : IDisposable
         this.AtlasSize = atlasSize;
         this.TileSize = tileSize;
         this.IsSrgb = srgb;
+
+        _allGroups.Add(this);
     }
 
     /// <summary>
@@ -190,6 +200,8 @@ public class TextureGroup : IDisposable
         {
             page.Dispose();
         }
+
+        _allGroups.Remove(this);
     }
 
     /// <summary>
@@ -202,6 +214,19 @@ public class TextureGroup : IDisposable
         {
             var page = this._pages[i];
             page.SaveToPng(name.Replace(".png", $"_{i}.png"));
+        }
+    }
+
+    /// <summary>
+    /// Saves all texture atlases of all existing texture groups to PNG files in the specified directory
+    /// with filenames based on the group names.
+    /// </summary>
+    public static void SaveAllGroupsToPng(string directory)
+    {
+        foreach (var group in _allGroups)
+        {
+            var safeGroupName = string.IsNullOrWhiteSpace(group.Name) ? "texture_group" : group.Name.ToSnakeCase();
+            group.SaveToPng(System.IO.Path.Combine(directory, $"{safeGroupName}.png"));
         }
     }
 }
