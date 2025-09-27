@@ -152,7 +152,7 @@ public class GuiLayer : ILayer2D
         Vector2 cursorSize = this.Cursor.TextureSize * this.CursorScale;
         Vector2 hotspot = this.Cursor.HotspotPixels * this.CursorScale;
         var cursorPosition = mousePosition - hotspot;
-        ctx.DrawTexture(null, this.Cursor.Texture, cursorPosition, cursorSize, Vector2.Zero, Vector2.One, Color.White);
+        ctx.DrawTexture(this.Cursor.Texture, cursorPosition, cursorSize, Vector2.Zero, Vector2.One, Color.White);
     }
 
     /// <summary>

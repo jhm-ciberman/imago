@@ -124,8 +124,9 @@ public class DrawingContext : IDisposable
     }
 
 
-    private void Prepare(Shader shader, ITexture texture, int requiredQuads = 1)
+    private void Prepare(ITexture texture, int requiredQuads = 1)
     {
+        Shader shader = this._defaultShader;
         if (this._batch.Shader == shader && this._batch.Texture == texture)
         {
             if (this._batch.Count + requiredQuads > this._batch.Items.Length)
@@ -177,31 +178,28 @@ public class DrawingContext : IDisposable
     /// <summary>
     /// Draws a texture at the specified position.
     /// </summary>
-    /// <param name="shader">The shader to use.</param>
     /// <param name="texture">The texture to draw.</param>
     /// <param name="position">The position to draw the texture at.</param>
     /// <param name="size">The size of the texture to draw.</param>
-    public void DrawTexture(Shader? shader, ITexture texture, Vector2 position, Vector2 size)
+    public void DrawTexture(ITexture texture, Vector2 position, Vector2 size)
     {
-        this.DrawTexture(shader, texture, position, size, Vector2.Zero, Vector2.One, Color.White);
+        this.DrawTexture(texture, position, size, Vector2.Zero, Vector2.One, Color.White);
     }
 
     /// <summary>
     /// Draws a texture at the specified position.
     /// </summary>
-    /// <param name="shader">The shader to use.</param>
     /// <param name="texture">The texture to draw.</param>
     /// <param name="position">The position to draw the texture at.</param>
     /// <param name="size">The size of the texture to draw.</param>
-    public void DrawTexture(Shader? shader, ITextureRegion texture, Vector2 position, Vector2 size)
+    public void DrawTexture(ITextureRegion texture, Vector2 position, Vector2 size)
     {
-        this.DrawTexture(shader, texture.Texture, position, size, texture.TransformUV(Vector2.Zero), texture.TransformUV(Vector2.One), Color.White);
+        this.DrawTexture(texture.Texture, position, size, texture.TransformUV(Vector2.Zero), texture.TransformUV(Vector2.One), Color.White);
     }
 
     /// <summary>
     /// Draws a texture at the specified position with a transformation matrix.
     /// </summary>
-    /// <param name="shader">The shader to use.</param>
     /// <param name="texture">The texture to draw.</param>
     /// <param name="position">The position to draw the texture at.</param>
     /// <param name="size">The size of the texture to draw.</param>
@@ -209,39 +207,37 @@ public class DrawingContext : IDisposable
     /// <param name="uvBottomRight">The bottom right UV coordinate of the texture.</param>
     /// <param name="transform">A transformation matrix to apply to the texture.</param>
     /// <param name="color">The color to draw the texture with.</param>
-    public void DrawTexture(Shader? shader, ITexture texture, Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, in Matrix3x2 transform, Color color)
+    public void DrawTexture(ITexture texture, Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, in Matrix3x2 transform, Color color)
     {
-        this.Prepare(shader ?? this._defaultShader, texture);
+        this.Prepare(texture);
         this._batch.DrawCore(position, size, uvTopLeft, uvBottomRight, in transform, color);
     }
 
     /// <summary>
     /// Draws a texture at the specified position.
     /// </summary>
-    /// <param name="shader">The shader to use.</param>
     /// <param name="texture">The texture to draw.</param>
     /// <param name="position">The position to draw the texture at.</param>
     /// <param name="size">The size of the texture to draw.</param>
     /// <param name="uvTopLeft">The top left UV coordinate of the texture.</param>
     /// <param name="uvBottomRight">The bottom right UV coordinate of the texture.</param>
     /// <param name="color">The color to draw the texture with.</param>
-    public void DrawTexture(Shader? shader, ITexture texture, Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, Color color)
+    public void DrawTexture(ITexture texture, Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, Color color)
     {
-        this.Prepare(shader ?? this._defaultShader, texture);
+        this.Prepare(texture);
         this._batch.DrawCore(position, size, uvTopLeft, uvBottomRight, color);
     }
 
     /// <summary>
     /// Draws a texture using a 9-patch scaling algorithm. This method is useful for drawing scalable UI elements.
     /// </summary>
-    /// <param name="shader">The shader to use.</param>
     /// <param name="texture">The texture to draw.</param>
     /// <param name="position">The position to draw the texture at.</param>
     /// <param name="size">The size of the texture to draw.</param>
     /// <param name="patchMargin">The margin of the unstretchable area of the texture. Any area inside this margin will be stretched.</param>
     /// <param name="color">The color to draw the texture with.</param>
     /// <param name="scale">The scale to apply to the texture.</param>
-    public void DrawNinePatch(Shader? shader, PackedTexture texture, Vector2 position, Vector2 size, Thickness patchMargin, Color color, float scale)
+    public void DrawNinePatch(PackedTexture texture, Vector2 position, Vector2 size, Thickness patchMargin, Color color, float scale)
     {
         var sizeTL = new Vector2(patchMargin.Left, patchMargin.Top);
         var sizeBR = new Vector2(patchMargin.Right, patchMargin.Bottom);
@@ -270,7 +266,7 @@ public class DrawingContext : IDisposable
         sizeBL *= scale;
         var sizeSegmentCenter = size - sizeTL - sizeBR;
 
-        this.Prepare(shader ?? this._defaultShader, texture.Texture, 9);
+        this.Prepare(texture.Texture, 9);
 
         if (sizeSegmentCenter.X > 0 && sizeSegmentCenter.Y > 0)
         {
@@ -351,7 +347,7 @@ public class DrawingContext : IDisposable
     /// <param name="bottomRight">The bottom right vertex of the quad.</param>
     public void DrawQuad(ITexture texture, ref SpriteVertex topLeft, ref SpriteVertex topRight, ref SpriteVertex bottomLeft, ref SpriteVertex bottomRight)
     {
-        this.Prepare(this._defaultShader, texture, 1);
+        this.Prepare(texture, 1);
         this._batch.DrawCore(ref topLeft, ref topRight, ref bottomLeft, ref bottomRight);
     }
 
@@ -363,7 +359,7 @@ public class DrawingContext : IDisposable
     /// <param name="color">The color to draw the rectangle with.</param>
     public void DrawRectangle(Vector2 position, Vector2 size, Color color)
     {
-        this.DrawTexture(this._defaultShader, Texture.White, position, size, Vector2.Zero, Vector2.One, color);
+        this.DrawTexture(Texture.White, position, size, Vector2.Zero, Vector2.One, color);
     }
 
     /// <summary>

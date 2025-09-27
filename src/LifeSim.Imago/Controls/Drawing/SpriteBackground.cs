@@ -86,11 +86,11 @@ public class SpriteBackground : IBackground
         var sprite = this.Sprite;
         if (sprite.IsNineSlice)
         {
-            ctx.DrawNinePatch(null, frame, position, size, sprite.NineSliceMargin, this.Color, sprite.Scale);
+            ctx.DrawNinePatch(frame, position, size, sprite.NineSliceMargin, this.Color, sprite.Scale);
         }
         else
         {
-            ctx.DrawTexture(null, frame.Texture, position, size, frame.TopLeft, frame.BottomRight, this.Color);
+            ctx.DrawTexture(frame.Texture, position, size, frame.TopLeft, frame.BottomRight, this.Color);
         }
     }
 

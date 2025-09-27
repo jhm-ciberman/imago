@@ -1,6 +1,5 @@
 using System.Drawing;
 using System.Numerics;
-using LifeSim.Imago.Materials;
 using LifeSim.Imago.Rendering.Sprites;
 using LifeSim.Imago.Textures;
 
@@ -67,11 +66,6 @@ public class TextureBlock : Control
     public ITextureRegion? Texture { get; set; }
 
     /// <summary>
-    /// Gets or sets the custom shader to use for rendering the texture. If null, the default shader is used.
-    /// </summary>
-    public Shader? Shader { get; set; }
-
-    /// <summary>
     /// Gets or sets the desired size of the texture block. If <see cref="float.NaN"/> for a dimension,
     /// the natural size of the <see cref="Texture"/> will be used for that dimension.
     /// </summary>
@@ -120,7 +114,7 @@ public class TextureBlock : Control
         if (this.Texture != null)
         {
             var coords = GetTextureCoordinates(this.Texture, this.FlipX, this.FlipY);
-            ctx.DrawTexture(this.Shader, this.Texture.Texture, this.Position, this.ActualSize, coords.TopLeft, coords.BottomRight, this.Color);
+            ctx.DrawTexture(this.Texture.Texture, this.Position, this.ActualSize, coords.TopLeft, coords.BottomRight, this.Color);
         }
     }
 

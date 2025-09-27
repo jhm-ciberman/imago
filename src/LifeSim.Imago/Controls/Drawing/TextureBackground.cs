@@ -35,7 +35,7 @@ public class TextureBackground : IBackground
     {
         if (this.Texture != null)
         {
-            ctx.DrawTexture(null, this.Texture.Texture, position, size, this.Texture.TopLeft, this.Texture.BottomRight, this.Color);
+            ctx.DrawTexture(this.Texture.Texture, position, size, this.Texture.TopLeft, this.Texture.BottomRight, this.Color);
         }
     }
 
