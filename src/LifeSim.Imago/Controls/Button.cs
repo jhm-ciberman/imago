@@ -44,10 +44,17 @@ public class Button : ContentControl
         }
     }
 
+    private bool _isEnabled = true;
+
     /// <summary>
     /// Gets or sets a value indicating whether the button is enabled and can be interacted with.
     /// </summary>
-    public bool IsEnabled { get; set; } = true;
+    public bool IsEnabled
+    {
+        get => this._isEnabled;
+        set => this.SetProperty(ref this._isEnabled, value);
+    }
+
     private ICommand? _command = null;
     private object? _commandParameter = null;
 

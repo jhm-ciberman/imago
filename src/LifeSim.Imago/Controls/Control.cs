@@ -426,7 +426,7 @@ public class Control : Visual
         if (this.Visibility != Visibility.Visible) return null;
         if (!this.IsHitTestVisible) return null;
 
-        bool hits = this.GetBounds().Contains(position);
+        bool hits = this.GetHitTestBounds().Contains(position);
 
         // Early exit if the position is outside the bounds of this control
         if (this.ClipToBounds && !hits) return null;
