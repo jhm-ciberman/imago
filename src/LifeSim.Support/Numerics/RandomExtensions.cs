@@ -17,7 +17,7 @@ public static class RandomExtensions
     /// <param name="list">The list to select from.</param>
     /// <exception cref="ArgumentException">Thrown when the list is empty.</exception>
     /// <typeparam name="T">The type of the elements in the list.</typeparam>
-    public static T NextElement<T>(this Random random, IList<T> list)
+    public static T NextElement<T>(this Random random, IReadOnlyList<T> list)
     {
         Guard.IsNotEmpty(list);
         if (list.Count == 1) return list[0];
