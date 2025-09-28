@@ -74,16 +74,17 @@ internal class SpriteBatch
     /// <param name="uvTopLeft">The UV coordinates of the top-left corner of the sprite.</param>
     /// <param name="uvBottomRight">The UV coordinates of the bottom-right corner of the sprite.</param>
     /// <param name="color">The color of the sprite.</param>
-    public void DrawCore(Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, Color color)
+    /// <param name="depth">The depth of the sprite.</param>
+    public void DrawCore(Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, Color color, float depth = 0f)
     {
         this.ApplyColorAlpha(ref color);
 
         this.Add(new Item
         {
-            TopLeft = new SpriteVertex(position.X, position.Y, 0f, uvTopLeft.X, uvTopLeft.Y, color),
-            TopRight = new SpriteVertex(position.X + size.X, position.Y, 0f, uvBottomRight.X, uvTopLeft.Y, color),
-            BottomLeft = new SpriteVertex(position.X, position.Y + size.Y, 0f, uvTopLeft.X, uvBottomRight.Y, color),
-            BottomRight = new SpriteVertex(position.X + size.X, position.Y + size.Y, 0f, uvBottomRight.X, uvBottomRight.Y, color),
+            TopLeft = new SpriteVertex(position.X, position.Y, depth, uvTopLeft.X, uvTopLeft.Y, color),
+            TopRight = new SpriteVertex(position.X + size.X, position.Y, depth, uvBottomRight.X, uvTopLeft.Y, color),
+            BottomLeft = new SpriteVertex(position.X, position.Y + size.Y, depth, uvTopLeft.X, uvBottomRight.Y, color),
+            BottomRight = new SpriteVertex(position.X + size.X, position.Y + size.Y, depth, uvBottomRight.X, uvBottomRight.Y, color),
         });
     }
 
