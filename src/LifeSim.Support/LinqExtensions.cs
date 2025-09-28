@@ -45,4 +45,18 @@ public static class LinqExtensions
         random ??= Random.Shared;
         return source.Where(_ => random.NextDouble() < chance);
     }
+
+    /// <summary>
+    /// Returns a new enumerable containing a specified number of random elements from the source enumerable.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the source enumerable.</typeparam>
+    /// <param name="source">The source enumerable to take elements from.</param>
+    /// <param name="count">The number of random elements to take.</param>
+    /// <param name="random">An optional random number generator. If not provided, <see cref="Random.Shared"/> is used.</param>
+    /// <returns>A new enumerable containing the specified number of random elements from the source enumerable.</returns>
+    public static IEnumerable<T> TakeRandom<T>(this IEnumerable<T> source, int count, Random? random = null)
+    {
+        random ??= Random.Shared;
+        return source.Shuffle(random).Take(count);
+    }
 }
