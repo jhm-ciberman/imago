@@ -321,7 +321,7 @@ public class Control : Visual
     {
         this.MouseEnter?.Invoke(this, EventArgs.Empty);
 
-        if (this.Tooltip != null && this.Stage != null)
+        if (this.Tooltip != null && this.Stage != null && this.Visibility == Visibility.Visible)
         {
             TooltipService.Instance.ShowTooltip(this);
         }
@@ -336,7 +336,7 @@ public class Control : Visual
 
         if (this.Tooltip != null)
         {
-            TooltipService.Instance.HideTooltip();
+            TooltipService.Instance.HideTooltip(this);
         }
     }
 

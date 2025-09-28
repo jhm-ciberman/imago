@@ -35,9 +35,9 @@ public class TooltipService : IDisposable
         if (control.Tooltip == null || control.Stage == null) return;
 
         // Hide existing tooltip if different control
-        if (this._currentTooltipOwner != control)
+        if (this._currentTooltipOwner != null && this._currentTooltipOwner != control)
         {
-            this.HideTooltip();
+            this.HideTooltip(this._currentTooltipOwner);
         }
 
         // Create or reuse tooltip presenter
@@ -59,8 +59,11 @@ public class TooltipService : IDisposable
     /// <summary>
     /// Hides the currently displayed tooltip.
     /// </summary>
-    public void HideTooltip()
+    /// <param name="control">The control that owns the tooltip.</param>
+    public void HideTooltip(Control control)
     {
+        if (this._currentTooltipOwner != control) return;
+
         this._activeTooltipPresenter?.Hide();
         this._currentTooltipOwner = null;
     }
