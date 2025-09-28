@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using LifeSim.Support.Numerics;
 
 namespace LifeSim.Support;
 
@@ -58,5 +59,21 @@ public static class LinqExtensions
     {
         random ??= Random.Shared;
         return source.Shuffle(random).Take(count);
+    }
+
+    /// <summary>
+    /// Picks one random element from the source enumerable.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the source enumerable.</typeparam>
+    /// <param name="source">The source enumerable to take elements from.</param>
+    /// <param name="random">An optional random number generator. If not provided, <see cref="Random.Shared"/> is used.</param>
+    /// <returns>A random element from the source enumerable.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when the source enumerable is empty.</exception>
+    public static T PickOneRandom<T>(this IEnumerable<T> source, Random? random = null)
+    {
+        random ??= Random.Shared;
+        var list = source as IReadOnlyList<T> ?? source.ToList();
+        if (list.Count == 0) throw new InvalidOperationException("Sequence contains no elements");
+        return random.NextElement(list);
     }
 }

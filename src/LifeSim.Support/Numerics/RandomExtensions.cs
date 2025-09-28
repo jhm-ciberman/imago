@@ -16,6 +16,7 @@ public static class RandomExtensions
     /// <param name="random">The random number generator.</param>
     /// <param name="list">The list to select from.</param>
     /// <exception cref="ArgumentException">Thrown when the list is empty.</exception>
+    /// <returns>A random element from the list.</returns>
     /// <typeparam name="T">The type of the elements in the list.</typeparam>
     public static T NextElement<T>(this Random random, IReadOnlyList<T> list)
     {
