@@ -161,6 +161,12 @@ public class Control : Visual
     }
 
     /// <summary>
+    /// Gets or sets the padding applied to the hit test bounds of the control.
+    /// This padding expands (positive values) or contracts (negative values) the area used for hit testing.
+    /// </summary>
+    public Thickness HitTestPadding { get; set; } = new Thickness(0);
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="Control"/> class.
     /// </summary>
     public Control() : base() { }
@@ -249,6 +255,15 @@ public class Control : Visual
     }
 
     /// <summary>
+    /// Gets the bounds used for hit testing.
+    /// </summary>
+    /// <returns>The bounds used for hit testing.</returns>
+    protected virtual Rect GetHitTestBounds()
+    {
+        return this.GetBounds().Inflate(this.HitTestPadding);
+    }
+
+    /// <summary>
     /// Updates the control's state, called once per frame.
     /// </summary>
     /// <param name="deltaTime">The time elapsed since the last frame, in seconds.</param>
@@ -257,9 +272,8 @@ public class Control : Visual
         if (this.Stage == null) return;
         var input = this.Stage.Input;
 
-        var bounds = this.GetBounds();
         var mousePosition = this.Stage.WindowToViewport(input.CursorPosition);
-        this.IsMouseOver = bounds.Contains(mousePosition);
+        this.IsMouseOver = this.GetHitTestBounds().Contains(mousePosition);
     }
 
     /// <summary>

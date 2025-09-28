@@ -87,16 +87,24 @@ public class ButtonAppearance
     /// <summary>
     /// Creates a <see cref="ButtonAppearance"/> using a sprite for different states.
     /// </summary>
+    /// <remarks>
+    /// The sprite should contain multiple frames representing different button states:
+    /// - Frame 0: Idle
+    /// - Frame 1: Hover
+    /// - Frame 2: Pressed (Optional, defaults to Idle if not present)
+    /// - Frame 3: Disabled (Optional, defaults to Idle if not present)
+    /// </remarks>
     /// <param name="sprite">The sprite containing different frames for button states.</param>
     /// <returns>A new <see cref="ButtonAppearance"/> instance.</returns>
     public static ButtonAppearance FromSprite(Sprite sprite)
     {
+        int frames = sprite.Frames.Count;
         return new ButtonAppearance()
         {
             Idle = new SpriteBackground(sprite, 0),
             Hover = new SpriteBackground(sprite, 1),
-            Pressed = new SpriteBackground(sprite, 2),
-            Disabled = new SpriteBackground(sprite, 3),
+            Pressed = new SpriteBackground(sprite, frames >= 2 ? 2 : 0),
+            Disabled = new SpriteBackground(sprite, frames >= 3 ? 3 : 0),
         };
     }
 

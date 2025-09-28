@@ -72,6 +72,15 @@ public struct Rect : IEquatable<Rect>
     }
 
     /// <summary>
+    /// Inflates the rectangle by the specified thickness.
+    /// </summary>
+    /// <param name="thickness">The thickness to expand by.</param>
+    public Rect Inflate(Thickness thickness)
+    {
+        return new Rect(this.X - thickness.Left, this.Y - thickness.Top, this.Width + thickness.Horizontal, this.Height + thickness.Vertical);
+    }
+
+    /// <summary>
     /// Gets or sets the position of the rectangle.
     /// </summary>
     public Vector2 Position
@@ -165,54 +174,58 @@ public struct Rect : IEquatable<Rect>
     /// Expands the rectangle by the specified amount.
     /// </summary>
     /// <param name="point">The amount to expand the rectangle.</param>
-    public void Expand(Vector2 point)
+    public Rect Expand(Vector2 point)
     {
-        if (point.X < this.X)
+        Rect result = this;
+        if (point.X < result.X)
         {
-            this.Width += this.X - point.X;
-            this.X = point.X;
+            result.Width += result.X - point.X;
+            result.X = point.X;
         }
-        else if (point.X > this.Right)
+        else if (point.X > result.Right)
         {
-            this.Width = point.X - this.X;
+            result.Width = point.X - result.X;
         }
 
-        if (point.Y < this.Y)
+        if (point.Y < result.Y)
         {
-            this.Height += this.Y - point.Y;
-            this.Y = point.Y;
+            result.Height += result.Y - point.Y;
+            result.Y = point.Y;
         }
-        else if (point.Y > this.Bottom)
+        else if (point.Y > result.Bottom)
         {
-            this.Height = point.Y - this.Y;
+            result.Height = point.Y - result.Y;
         }
+        return result;
     }
 
     /// <summary>
     /// Expands the rectangle in order to contain the specified rectangle.
     /// </summary>
     /// <param name="rect">The rectangle to contain.</param>
-    public void Expand(Rect rect)
+    public Rect Expand(Rect rect)
     {
-        if (rect.X < this.X)
+        Rect result = this;
+        if (rect.X < result.X)
         {
-            this.Width += this.X - rect.X;
-            this.X = rect.X;
+            result.Width += result.X - rect.X;
+            result.X = rect.X;
         }
-        else if (rect.Right > this.Right)
+        else if (rect.Right > result.Right)
         {
-            this.Width = rect.Right - this.X;
+            result.Width = rect.Right - result.X;
         }
 
-        if (rect.Y < this.Y)
+        if (rect.Y < result.Y)
         {
-            this.Height += this.Y - rect.Y;
-            this.Y = rect.Y;
+            result.Height += result.Y - rect.Y;
+            result.Y = rect.Y;
         }
-        else if (rect.Bottom > this.Bottom)
+        else if (rect.Bottom > result.Bottom)
         {
-            this.Height = rect.Bottom - this.Y;
+            result.Height = rect.Bottom - result.Y;
         }
+        return result;
     }
 
     /// <summary>
