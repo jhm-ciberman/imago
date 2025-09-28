@@ -55,6 +55,18 @@ public static class RandomExtensions
     }
 
     /// <summary>
+    /// Returns a random <see cref="Vector2"/> from the specified range.
+    /// </summary>
+    /// <param name="random">The random number generator.</param>
+    /// <param name="min">The minimum value (inclusive).</param>
+    /// <param name="max">The maximum value (exclusive).</param>
+    /// <returns>A random <see cref="Vector2"/> within the specified range.</returns>
+    public static Vector2 NextVector2(this Random random, float min, float max)
+    {
+        return NextVector2(random, new Vector2(min), new Vector2(max));
+    }
+
+    /// <summary>
     /// Returns a random <see cref="float"/> from the specified range.
     /// </summary>
     /// <param name="random">The random number generator.</param>
