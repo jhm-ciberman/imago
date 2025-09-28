@@ -1,4 +1,5 @@
 using LifeSim.Imago.Controls.Drawing;
+using LifeSim.Imago.Textures;
 using LifeSim.Support.Drawing;
 
 namespace LifeSim.Imago.Controls;
@@ -90,7 +91,7 @@ public class ButtonAppearance
     /// <remarks>
     /// The sprite should contain multiple frames representing different button states:
     /// - Frame 0: Idle
-    /// - Frame 1: Hover
+    /// - Frame 1: Hover (Optional, defaults to Idle if not present)
     /// - Frame 2: Pressed (Optional, defaults to Idle if not present)
     /// - Frame 3: Disabled (Optional, defaults to Idle if not present)
     /// </remarks>
@@ -102,9 +103,26 @@ public class ButtonAppearance
         return new ButtonAppearance()
         {
             Idle = new SpriteBackground(sprite, 0),
-            Hover = new SpriteBackground(sprite, 1),
+            Hover = new SpriteBackground(sprite, frames >= 2 ? 1 : 0),
             Pressed = new SpriteBackground(sprite, frames >= 2 ? 2 : 0),
             Disabled = new SpriteBackground(sprite, frames >= 3 ? 3 : 0),
+        };
+    }
+
+    /// <summary>
+    /// Creates a <see cref="ButtonAppearance"/> using a texture for all states.
+    /// </summary>
+    /// <param name="texture">The texture to use for all states.</param>
+    /// <returns>A new <see cref="ButtonAppearance"/> instance.</returns>
+    public static ButtonAppearance FromTexture(ITextureRegion texture)
+    {
+        var bg = new TextureBackground(texture);
+        return new ButtonAppearance()
+        {
+            Idle = bg,
+            Hover = bg,
+            Pressed = bg,
+            Disabled = bg,
         };
     }
 

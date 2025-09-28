@@ -5,7 +5,6 @@ using System.Runtime.InteropServices;
 using FontStashSharp;
 using LifeSim.Imago.Materials;
 using LifeSim.Imago.Meshes;
-using LifeSim.Imago.TexturePacking;
 using LifeSim.Imago.Textures;
 using LifeSim.Support.Drawing;
 using LifeSim.Support.Numerics;
@@ -237,18 +236,18 @@ public class DrawingContext : IDisposable
     /// <param name="patchMargin">The margin of the unstretchable area of the texture. Any area inside this margin will be stretched.</param>
     /// <param name="color">The color to draw the texture with.</param>
     /// <param name="scale">The scale to apply to the texture.</param>
-    public void DrawNinePatch(PackedTexture texture, Vector2 position, Vector2 size, Thickness patchMargin, Color color, float scale)
+    public void DrawNinePatch(ITextureRegion texture, Vector2 position, Vector2 size, Thickness patchMargin, Color color, float scale)
     {
         var sizeTL = new Vector2(patchMargin.Left, patchMargin.Top);
         var sizeBR = new Vector2(patchMargin.Right, patchMargin.Bottom);
         var sizeTR = new Vector2(patchMargin.Top, patchMargin.Right);
-        var sizeBL = new Vector2(patchMargin.Left, patchMargin.Bottom);
+        var sizeBL = new Vector2(patchMargin.Left, patchMargin.Bottom) ;
 
-        var sizeTotal = texture.PixelSize;
+        var texelUV = Vector2.One / texture.Texture.Size;
         var uvExtTL = texture.TopLeft;
         var uvExtBR = texture.BottomRight;
-        var uvIntTL = uvExtTL + sizeTL / sizeTotal * texture.Size;
-        var uvIntBR = uvExtBR - sizeBR / sizeTotal * texture.Size;
+        var uvIntTL = uvExtTL + sizeTL * texelUV;
+        var uvIntBR = uvExtBR - sizeBR * texelUV;
 
         // Scale if the size is smaller (after calculating UVs)
         var minimumRequiredSize = (sizeTL + sizeBR) * scale;

@@ -111,4 +111,20 @@ public static class TextureRegionExtensions
         var offset = region.TopLeft;
         return uv * size + offset;
     }
+
+    /// <summary>
+    /// Gets the size of the texture region in pixels.
+    /// </summary>
+    /// <param name="region">The texture region.</param>
+    /// <returns>The size of the texture region in pixels.</returns>
+    public static Vector2 GetPixelSize(this ITextureRegion region)
+    {
+        if (region is PackedTexture packed)
+        {
+            return packed.PixelSize;
+        }
+
+        var size = (region.BottomRight - region.TopLeft) * region.Texture.Size;
+        return new Vector2(size.X, size.Y);
+    }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using LifeSim.Imago.TexturePacking;
 using LifeSim.Imago.Textures;
@@ -12,12 +13,12 @@ namespace LifeSim.Imago;
 /// </summary>
 public class Sprite
 {
-    private readonly List<PackedTexture> _frames = new List<PackedTexture>();
+    private readonly List<ITextureRegion> _frames = new List<ITextureRegion>();
 
     /// <summary>
     /// Gets a list of all frames of the sprite.
     /// </summary>
-    public IReadOnlyList<PackedTexture> Frames => this._frames;
+    public IReadOnlyList<ITextureRegion> Frames => this._frames;
 
     /// <summary>
     /// Gets whether the sprite is animated.
@@ -71,17 +72,17 @@ public class Sprite
     /// Initializes a new instance of the <see cref="Sprite"/> class from a list of <see cref="PackedTexture"/>.
     /// </summary>
     /// <param name="frames">The list of textures to display.</param>
-    public Sprite(IEnumerable<PackedTexture> frames)
+    public Sprite(IEnumerable<ITextureRegion> frames)
     {
-        this._frames.AddRange(frames);
-
         // Validate that all frames have the same size
-        var firstFrame = this._frames[0];
-        foreach (var frame in this._frames)
+        var firstFrameSize = frames.First().GetPixelSize();
+        foreach (var frame in frames)
         {
-            if (frame.Size != firstFrame.Size)
+            if (frame.GetPixelSize() != firstFrameSize)
                 throw new ArgumentException("All frames of a sprite must have the same size.");
         }
+
+        this._frames.AddRange(frames);
     }
 
     /// <summary>
@@ -97,13 +98,13 @@ public class Sprite
     /// Adds a frame to the sprite.
     /// </summary>
     /// <param name="frame">The frame to add.</param>
-    public void AddFrame(PackedTexture frame)
+    public void AddFrame(ITextureRegion frame)
     {
         this._frames.Add(frame);
 
         // Validate that the frame has the same size as the first frame
-        var firstFrame = this._frames[0];
-        if (frame.PixelSize != firstFrame.PixelSize)
+        var firstFrameSize = this._frames[0].GetPixelSize();
+        if (frame.GetPixelSize() != firstFrameSize)
             throw new ArgumentException("The added frame must have the same size as the first frame.");
     }
 
