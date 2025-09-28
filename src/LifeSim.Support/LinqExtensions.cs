@@ -21,6 +21,20 @@ public static class LinqExtensions
     }
 
     /// <summary>
+    /// Invokes the specified action with the current instance if the condition is true, and returns the instance.
+    /// </summary>
+    /// <typeparam name="T">The type of the instance.</typeparam>
+    /// <param name="source">The instance to potentially invoke the action on.</param>
+    /// <param name="condition">If true, the action will be invoked; otherwise, it will be skipped.</param>
+    /// <param name="action">The action to invoke with the current instance if the condition is true.</param>
+    /// <returns>The current instance for method chaining.</returns>
+    public static T TapIf<T>(this T source, bool condition, Action<T> action)
+    {
+        if (condition) action(source);
+        return source;
+    }
+
+    /// <summary>
     /// Randomly shuffles the elements of the source enumerable.
     /// </summary>
     /// <typeparam name="T">The type of the elements in the source enumerable.</typeparam>
