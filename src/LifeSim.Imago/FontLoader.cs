@@ -16,7 +16,11 @@ public class FontLoader
     /// <returns>A <see cref="FontSystem"/> instance with the loaded fonts.</returns>
     public static FontSystem Load(params string[] paths)
     {
-        var fontSystem = new FontSystem();
+        var fontSystem = new FontSystem(new FontSystemSettings
+        {
+            PremultiplyAlpha = false,
+        });
+
         foreach (var path in paths)
         {
             fontSystem.AddFont(File.ReadAllBytes(path));

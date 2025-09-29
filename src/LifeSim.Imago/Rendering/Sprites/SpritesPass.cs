@@ -47,21 +47,7 @@ internal class SpritesPass : IDisposable, IPipelineProvider
             DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
             PrimitiveTopology = PrimitiveTopology.TriangleList,
             ShaderSet = shaderVariant.ShaderSetDescription,
-            BlendState = new BlendStateDescription
-            {
-                AttachmentStates = [
-                    new BlendAttachmentDescription
-                    {
-                        BlendEnabled = true,
-                        SourceColorFactor = BlendFactor.SourceAlpha,
-                        DestinationColorFactor = BlendFactor.InverseSourceAlpha,
-                        ColorFunction = BlendFunction.Add,
-                        SourceAlphaFactor = BlendFactor.SourceAlpha,
-                        DestinationAlphaFactor = BlendFactor.DestinationAlpha,
-                        AlphaFunction = BlendFunction.Add
-                    }
-                ],
-            },
+            BlendState = GetBlendState(),
             RasterizerState = new RasterizerStateDescription(
                 FaceCullMode.Back,
                 PolygonFillMode.Solid,
@@ -70,12 +56,37 @@ internal class SpritesPass : IDisposable, IPipelineProvider
                 scissorTestEnabled
             ),
             Outputs = this._renderer.MainRenderTexture.OutputDescription,
-            ResourceLayouts = new ResourceLayout[]
-            {
+            ResourceLayouts =
+            [
                 this._drawingContext.PassResourceLayout,
                 shaderVariant.MaterialResourceLayout,
-            },
+            ],
         });
+    }
+
+    private static BlendStateDescription GetBlendState()
+    {
+        // Our target is transparent, not opaque, so we cannot use the classic BlendStateDescription.SingleAlphaBlend, because that
+        // only works when the output is opaque. But here we are rendering the UI to a transparent target.
+        // See: https://limnu.com/webgl-blending-youre-probably-wrong/
+        // So we use the formula:
+        // out.rgb = src.rgb * src.a + dst.rgb * (1 - src.a)
+        // out.a   = src.a * 1 + dst.a * (1 - src.a)
+        return new BlendStateDescription
+        {
+            AttachmentStates = [
+                new BlendAttachmentDescription
+                {
+                    BlendEnabled = true,
+                    SourceColorFactor = BlendFactor.SourceAlpha,
+                    DestinationColorFactor = BlendFactor.InverseSourceAlpha,
+                    ColorFunction = BlendFunction.Add,
+                    SourceAlphaFactor = BlendFactor.One,
+                    DestinationAlphaFactor = BlendFactor.InverseSourceAlpha,
+                    AlphaFunction = BlendFunction.Add
+                }
+            ],
+        };
     }
 
     /// <summary>
