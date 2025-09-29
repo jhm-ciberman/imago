@@ -80,4 +80,88 @@ public static class RandomExtensions
         if (min >= max) ThrowHelper.ThrowArgumentException("Min must be less than max.");
         return (float)(random.NextDouble() * (max - min) + min);
     }
+
+    /// <summary>
+    /// Returns true with the specified probability (0.0 to 1.0).
+    /// </summary>
+    /// <param name="random">The random number generator.</param>
+    /// <param name="probability">The probability of returning true (0.0 to 1.0).</param>
+    /// <returns>True if the random roll is less than the probability; otherwise, false.</returns>
+    public static bool Chance(this Random random, float probability)
+    {
+        return random.NextDouble() < probability;
+    }
+
+    /// <summary>
+    /// Rolls a number of d-sided dice and returns the total.
+    /// </summary>
+    /// <code>
+    /// int total = random.Roll(3, d: 6); // Roll 3d6
+    /// </code>
+    /// <param name="random">The random number generator.</param>
+    /// <param name="count">The number of dice to roll.</param>
+    /// <param name="d">The number of sides on the dice.</param>
+    /// <returns>The total of the rolled dice.</returns>
+    public static int Roll(this Random random, int count, int d)
+    {
+        Guard.IsGreaterThan(count, 0);
+        Guard.IsGreaterThan(d, 1);
+
+        var total = 0;
+        for (var i = 0; i < count; i++)
+        {
+            total += random.Next(1, d + 1);
+        }
+
+        return total;
+    }
+
+    /// <summary>
+    /// Rolls a number of d-sided dice and returns the lowest result.
+    /// </summary>
+    /// <code>
+    /// int lowest = random.RollMin(4, d: 6); // Roll 4d6 and take the lowest
+    /// </code>
+    /// <param name="random">The random number generator.</param>
+    /// <param name="count">The number of dice to roll.</param>
+    /// <param name="d">The number of sides on the dice.</param>
+    /// <returns>The lowest result of the rolled dice.</returns>
+    public static int RollMin(this Random random, int count, int d)
+    {
+        Guard.IsGreaterThan(count, 1);
+        Guard.IsGreaterThan(d, 1);
+
+        int min = int.MaxValue;
+        for (var i = 0; i < count; i++)
+        {
+            min = Math.Min(min, random.Next(1, d + 1));
+        }
+
+        return min;
+    }
+
+    /// <summary>
+    /// Rolls a number of d-sided dice and returns the highest result.
+    /// </summary>
+    /// <code>
+    /// int highest = random.RollMax(4, d: 6); // Roll 4d6 and take the highest
+    /// </code>
+    /// <param name="random">The random number generator.</param>
+    /// <param name="count">The number of dice to roll.</param>
+    /// <param name="d">The number of sides on the dice.</param>
+    /// <returns>The highest result of the rolled dice.</returns>
+    public static int RollMax(this Random random, int count, int d)
+    {
+        Guard.IsGreaterThan(count, 1);
+        Guard.IsGreaterThan(d, 1);
+
+        int max = int.MinValue;
+        for (var i = 0; i < count; i++)
+        {
+            max = Math.Max(max, random.Next(1, d + 1));
+        }
+
+        return max;
+    }
+
 }
