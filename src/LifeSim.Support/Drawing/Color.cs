@@ -366,4 +366,14 @@ public readonly struct Color
             (byte)(from.A + (to.A - from.A) * t)
         );
     }
+
+    /// <summary>
+    /// Creates a new <see cref="Color"/> with the specified alpha value.
+    /// </summary>
+    /// <param name="alpha">The alpha value (0.0 to 1.0).</param>
+    /// <returns>A new color with the specified alpha value.</returns>
+    public Color WithAlpha(float alpha)
+    {
+        return new Color(this.R, this.G, this.B, (byte)(alpha * 255));
+    }
 }
