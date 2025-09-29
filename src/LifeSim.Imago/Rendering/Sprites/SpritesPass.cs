@@ -47,7 +47,21 @@ internal class SpritesPass : IDisposable, IPipelineProvider
             DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
             PrimitiveTopology = PrimitiveTopology.TriangleList,
             ShaderSet = shaderVariant.ShaderSetDescription,
-            BlendState = BlendStateDescription.SingleAlphaBlend,
+            BlendState = new BlendStateDescription
+            {
+                AttachmentStates = [
+                    new BlendAttachmentDescription
+                    {
+                        BlendEnabled = true,
+                        SourceColorFactor = BlendFactor.SourceAlpha,
+                        DestinationColorFactor = BlendFactor.InverseSourceAlpha,
+                        ColorFunction = BlendFunction.Add,
+                        SourceAlphaFactor = BlendFactor.SourceAlpha,
+                        DestinationAlphaFactor = BlendFactor.DestinationAlpha,
+                        AlphaFunction = BlendFunction.Add
+                    }
+                ],
+            },
             RasterizerState = new RasterizerStateDescription(
                 FaceCullMode.Back,
                 PolygonFillMode.Solid,
