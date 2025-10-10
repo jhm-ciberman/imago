@@ -69,6 +69,17 @@ public class TooltipService : IDisposable
     }
 
     /// <summary>
+    /// Hides the currently displayed tooltip, if any.
+    /// </summary>
+    public void HideTooltip()
+    {
+        if (this._currentTooltipOwner != null)
+        {
+            this.HideTooltip(this._currentTooltipOwner);
+        }
+    }
+
+    /// <summary>
     /// Updates the tooltip service.
     /// </summary>
     /// <param name="deltaTime">The time since the last update.</param>
