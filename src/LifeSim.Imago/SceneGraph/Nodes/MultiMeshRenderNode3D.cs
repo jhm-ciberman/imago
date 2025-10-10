@@ -185,6 +185,8 @@ public class MultiMeshRenderNode3D : Node3D
             this._renderNodes[i].TextureST = meshes[i].TextureST;
             this._renderNodes[i].AlbedoColor = this.AlbedoColor;
             this._renderNodes[i].HighlightColor = this.HighlightColor;
+            this._renderNodes[i].IsPickable = this.IsPickable;
+            this._renderNodes[i].IsVisible = this.IsVisible;
         }
     }
 
