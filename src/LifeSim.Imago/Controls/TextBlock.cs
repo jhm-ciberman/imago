@@ -25,6 +25,27 @@ public enum TextWrap
 }
 
 /// <summary>
+/// Specifies the horizontal alignment of text within a <see cref="TextBlock"/>.
+/// </summary>
+public enum TextHorizontalAlignment
+{
+    /// <summary>
+    /// Text is aligned to the left.
+    /// </summary>
+    Left,
+
+    /// <summary>
+    /// Text is centered.
+    /// </summary>
+    Center,
+
+    /// <summary>
+    /// Text is aligned to the right.
+    /// </summary>
+    Right,
+}
+
+/// <summary>
 /// Represents a control for displaying text.
 /// </summary>
 public class TextBlock : Control
@@ -39,6 +60,7 @@ public class TextBlock : Control
     private readonly List<string> _textLines = new();
     private bool _textLinesDirty = true;
     private TextWrap _textWrap = TextWrap.NoWrap;
+    private TextHorizontalAlignment _textHorizontalAlignment = TextHorizontalAlignment.Left;
 
     /// <summary>
     /// Gets or sets the text content of the text block.
@@ -162,6 +184,15 @@ public class TextBlock : Control
     }
 
     /// <summary>
+    /// Gets or sets the horizontal alignment of text within the text block.
+    /// </summary>
+    public TextHorizontalAlignment TextHorizontalAlignment
+    {
+        get => this._textHorizontalAlignment;
+        set => this.SetProperty(ref this._textHorizontalAlignment, value);
+    }
+
+    /// <summary>
     /// Gets or sets the text effect to apply to the text.
     /// </summary>
     public ITextEffect? TextEffect
@@ -238,8 +269,15 @@ public class TextBlock : Control
             return Vector2.Zero;
         }
 
-        var size = this.Font.MeasureString(this.Text);
-        return new Vector2(size.X, this.ActualLineHeight * this._textLines.Count);
+        var font = this.Font;
+        var maxWidth = 0f;
+        for (var i = 0; i < this._textLines.Count; i++)
+        {
+            var lineWidth = font.MeasureString(this._textLines[i]).X;
+            maxWidth = MathF.Max(maxWidth, lineWidth);
+        }
+
+        return new Vector2(maxWidth, this.ActualLineHeight * this._textLines.Count);
     }
 
     /// <inheritdoc/>
@@ -251,14 +289,25 @@ public class TextBlock : Control
         var offset = new Vector2(0f, MathF.Ceiling(this._lineSpacing / 2f));
         for (var i = 0; i < this._textLines.Count; i++)
         {
-            Vector2 position = this.Position + offset + new Vector2(0f, i * this.ActualLineHeight);
+            var line = this._textLines[i];
+            var lineWidth = font.MeasureString(line).X;
+
+            var xOffset = this._textHorizontalAlignment switch
+            {
+                TextHorizontalAlignment.Left => 0f,
+                TextHorizontalAlignment.Center => (this.ActualSize.X - lineWidth) / 2f,
+                TextHorizontalAlignment.Right => this.ActualSize.X - lineWidth,
+                _ => 0f,
+            };
+
+            Vector2 position = this.Position + offset + new Vector2(xOffset, i * this.ActualLineHeight);
             if (this._textEffect == null)
             {
-                ctx.DrawText(font, this._textLines[i], position, this.Foreground);
+                ctx.DrawText(font, line, position, this.Foreground);
             }
             else
             {
-                this._textEffect.Draw(ctx, this._textLines[i], font, position, this.Foreground);
+                this._textEffect.Draw(ctx, line, font, position, this.Foreground);
             }
         }
     }
