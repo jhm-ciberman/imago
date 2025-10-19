@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using LifeSim.Support;
 
 namespace LifeSim.Imago.TexturePacking;
@@ -210,6 +211,8 @@ public class TextureGroup : IDisposable
     /// <param name="name">The base name for the output files. Each page will be saved as "{name}_{index}.png".</param>
     public void SaveToPng(string name)
     {
+        Directory.CreateDirectory(Path.GetDirectoryName(name) ?? ".");
+
         for (int i = 0; i < this._pages.Count; i++)
         {
             var page = this._pages[i];
@@ -226,7 +229,7 @@ public class TextureGroup : IDisposable
         foreach (var group in _allGroups)
         {
             var safeGroupName = string.IsNullOrWhiteSpace(group.Name) ? "texture_group" : group.Name.ToSnakeCase();
-            group.SaveToPng(System.IO.Path.Combine(directory, $"{safeGroupName}.png"));
+            group.SaveToPng(Path.Combine(directory, $"{safeGroupName}.png"));
         }
     }
 }
