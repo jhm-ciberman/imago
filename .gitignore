@@ -15,8 +15,9 @@ artifacts/
 # Save files
 saves/
 
-# LifeSim Backend config file
+# LifeSim config files
 backend.txt
+config.json
 
 # Code Coverage
 coveragereport/
