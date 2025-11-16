@@ -9,7 +9,7 @@ namespace LifeSim.Imago.Rendering;
 
 internal class RendererResources : IDisposable
 {
-    public const int MIN_BUFFER_BLOCKS = 1024;
+    public const int MinBufferBlocks = 1024;
 
     public ResourceLayout TransformResourceLayout { get; }
 
@@ -56,7 +56,7 @@ internal class RendererResources : IDisposable
                 return buffer.RequestBlock();
         }
 
-        var newBuffer = new DataBuffer(this._gd, MIN_BUFFER_BLOCKS, instanceDataBlockSize, this.InstanceResourceLayout);
+        var newBuffer = new DataBuffer(this._gd, MinBufferBlocks, instanceDataBlockSize, this.InstanceResourceLayout);
         newBuffer.Name = "InstanceDataBuffer " + this._instanceDataBuffers.Count;
         this._instanceDataBuffers.Add(newBuffer);
         return newBuffer.RequestBlock();
@@ -71,7 +71,7 @@ internal class RendererResources : IDisposable
                 return buffer.RequestBlock();
         }
 
-        var newBuffer = new DataBuffer(this._gd, MIN_BUFFER_BLOCKS, 64, this.TransformResourceLayout);
+        var newBuffer = new DataBuffer(this._gd, MinBufferBlocks, 64, this.TransformResourceLayout);
         newBuffer.Name = "TransformDataBuffer " + this._transformDataBuffers.Count;
         this._transformDataBuffers.Add(newBuffer);
         return newBuffer.RequestBlock();
@@ -87,7 +87,7 @@ internal class RendererResources : IDisposable
                 return buffer.RequestBlock();
         }
 
-        var newBuffer = new DataBuffer(this._gd, MIN_BUFFER_BLOCKS / Skeleton.MAX_NUMBER_OF_BONES, Skeleton.MAX_NUMBER_OF_BONES * 64, this.SkeletonResourceLayout);
+        var newBuffer = new DataBuffer(this._gd, MinBufferBlocks / Skeleton.MaxNumberOfBones, Skeleton.MaxNumberOfBones * 64, this.SkeletonResourceLayout);
         newBuffer.Name = "SkeletonDataBuffer " + this._skeletonDataBuffers.Count;
         this._skeletonDataBuffers.Add(newBuffer);
         return newBuffer.RequestBlock();

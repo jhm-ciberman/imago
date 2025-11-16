@@ -61,8 +61,8 @@ using FNLfloat = System.Single;
 
 public class FastNoiseLite
 {
-    private const short INLINE = 256; // MethodImplOptions.AggressiveInlining;
-    private const short OPTIMISE = 512; // MethodImplOptions.AggressiveOptimization;
+    private const short Inline = 256; // MethodImplOptions.AggressiveInlining;
+    private const short Optimise = 512; // MethodImplOptions.AggressiveOptimization;
 
     public enum NoiseType
     {
@@ -311,7 +311,7 @@ public class FastNoiseLite
     /// <returns>
     /// Noise output bounded between -1...1
     /// </returns>
-    [MethodImpl(OPTIMISE)]
+    [MethodImpl(Optimise)]
     public float GetNoise(FNLfloat x, FNLfloat y)
     {
         TransformNoiseCoordinate(ref x, ref y);
@@ -335,7 +335,7 @@ public class FastNoiseLite
     /// <returns>
     /// Noise output bounded between -1...1
     /// </returns>
-    [MethodImpl(OPTIMISE)]
+    [MethodImpl(Optimise)]
     public float GetNoise(FNLfloat x, FNLfloat y, FNLfloat z)
     {
         TransformNoiseCoordinate(ref x, ref y, ref z);
@@ -362,7 +362,7 @@ public class FastNoiseLite
     /// <code>DomainWarp(ref x, ref y)
     /// noise = GetNoise(x, y)</code>
     /// </example>
-    [MethodImpl(OPTIMISE)]
+    [MethodImpl(Optimise)]
     public void DomainWarp(ref FNLfloat x, ref FNLfloat y)
     {
         switch (mFractalType)
@@ -387,7 +387,7 @@ public class FastNoiseLite
     /// <code>DomainWarp(ref x, ref y, ref z)
     /// noise = GetNoise(x, y, z)</code>
     /// </example>
-    [MethodImpl(OPTIMISE)]
+    [MethodImpl(Optimise)]
     public void DomainWarp(ref FNLfloat x, ref FNLfloat y, ref FNLfloat z)
     {
         switch (mFractalType)
@@ -534,41 +534,41 @@ public class FastNoiseLite
     };
 
 
-    [MethodImpl(INLINE)]
+    [MethodImpl(Inline)]
     private static float FastMin(float a, float b) { return a < b ? a : b; }
 
-    [MethodImpl(INLINE)]
+    [MethodImpl(Inline)]
     private static float FastMax(float a, float b) { return a > b ? a : b; }
 
-    [MethodImpl(INLINE)]
+    [MethodImpl(Inline)]
     private static float FastAbs(float f) { return f < 0 ? -f : f; }
 
-    [MethodImpl(INLINE)]
+    [MethodImpl(Inline)]
     private static float FastSqrt(float f) { return (float)Math.Sqrt(f); }
 
-    [MethodImpl(INLINE)]
+    [MethodImpl(Inline)]
     private static int FastFloor(FNLfloat f) { return f >= 0 ? (int)f : (int)f - 1; }
 
-    [MethodImpl(INLINE)]
+    [MethodImpl(Inline)]
     private static int FastRound(FNLfloat f) { return f >= 0 ? (int)(f + 0.5f) : (int)(f - 0.5f); }
 
-    [MethodImpl(INLINE)]
+    [MethodImpl(Inline)]
     private static float Lerp(float a, float b, float t) { return a + t * (b - a); }
 
-    [MethodImpl(INLINE)]
+    [MethodImpl(Inline)]
     private static float InterpHermite(float t) { return t * t * (3 - 2 * t); }
 
-    [MethodImpl(INLINE)]
+    [MethodImpl(Inline)]
     private static float InterpQuintic(float t) { return t * t * t * (t * (t * 6 - 15) + 10); }
 
-    [MethodImpl(INLINE)]
+    [MethodImpl(Inline)]
     private static float CubicLerp(float a, float b, float c, float d, float t)
     {
         float p = d - c - (a - b);
         return t * t * t * p + t * t * (a - b - p) + t * (c - a) + b;
     }
 
-    [MethodImpl(INLINE)]
+    [MethodImpl(Inline)]
     private static float PingPong(float t)
     {
         t -= (int)(t * 0.5f) * 2;
@@ -593,7 +593,7 @@ public class FastNoiseLite
     private const int PrimeY = 1136930381;
     private const int PrimeZ = 1720413743;
 
-    [MethodImpl(INLINE)]
+    [MethodImpl(Inline)]
     private static int Hash(int seed, int xPrimed, int yPrimed)
     {
         int hash = seed ^ xPrimed ^ yPrimed;
@@ -602,7 +602,7 @@ public class FastNoiseLite
         return hash;
     }
 
-    [MethodImpl(INLINE)]
+    [MethodImpl(Inline)]
     private static int Hash(int seed, int xPrimed, int yPrimed, int zPrimed)
     {
         int hash = seed ^ xPrimed ^ yPrimed ^ zPrimed;
@@ -611,7 +611,7 @@ public class FastNoiseLite
         return hash;
     }
 
-    [MethodImpl(INLINE)]
+    [MethodImpl(Inline)]
     private static float ValCoord(int seed, int xPrimed, int yPrimed)
     {
         int hash = Hash(seed, xPrimed, yPrimed);
@@ -621,7 +621,7 @@ public class FastNoiseLite
         return hash * (1 / 2147483648.0f);
     }
 
-    [MethodImpl(INLINE)]
+    [MethodImpl(Inline)]
     private static float ValCoord(int seed, int xPrimed, int yPrimed, int zPrimed)
     {
         int hash = Hash(seed, xPrimed, yPrimed, zPrimed);
@@ -631,7 +631,7 @@ public class FastNoiseLite
         return hash * (1 / 2147483648.0f);
     }
 
-    [MethodImpl(INLINE)]
+    [MethodImpl(Inline)]
     private static float GradCoord(int seed, int xPrimed, int yPrimed, float xd, float yd)
     {
         int hash = Hash(seed, xPrimed, yPrimed);
@@ -644,7 +644,7 @@ public class FastNoiseLite
         return xd * xg + yd * yg;
     }
 
-    [MethodImpl(INLINE)]
+    [MethodImpl(Inline)]
     private static float GradCoord(int seed, int xPrimed, int yPrimed, int zPrimed, float xd, float yd, float zd)
     {
         int hash = Hash(seed, xPrimed, yPrimed, zPrimed);
@@ -658,7 +658,7 @@ public class FastNoiseLite
         return xd * xg + yd * yg + zd * zg;
     }
 
-    [MethodImpl(INLINE)]
+    [MethodImpl(Inline)]
     private static void GradCoordOut(int seed, int xPrimed, int yPrimed, out float xo, out float yo)
     {
         int hash = Hash(seed, xPrimed, yPrimed) & 255 << 1;
@@ -667,7 +667,7 @@ public class FastNoiseLite
         yo = RandVecs2D[hash | 1];
     }
 
-    [MethodImpl(INLINE)]
+    [MethodImpl(Inline)]
     private static void GradCoordOut(int seed, int xPrimed, int yPrimed, int zPrimed, out float xo, out float yo, out float zo)
     {
         int hash = Hash(seed, xPrimed, yPrimed, zPrimed) & 255 << 2;
@@ -677,7 +677,7 @@ public class FastNoiseLite
         zo = RandVecs3D[hash | 2];
     }
 
-    [MethodImpl(INLINE)]
+    [MethodImpl(Inline)]
     private static void GradCoordDual(int seed, int xPrimed, int yPrimed, float xd, float yd, out float xo, out float yo)
     {
         int hash = Hash(seed, xPrimed, yPrimed);
@@ -695,7 +695,7 @@ public class FastNoiseLite
         yo = value * ygo;
     }
 
-    [MethodImpl(INLINE)]
+    [MethodImpl(Inline)]
     private static void GradCoordDual(int seed, int xPrimed, int yPrimed, int zPrimed, float xd, float yd, float zd, out float xo, out float yo, out float zo)
     {
         int hash = Hash(seed, xPrimed, yPrimed, zPrimed);
@@ -764,7 +764,7 @@ public class FastNoiseLite
 
     // Noise Coordinate Transforms (frequency, and possible skew or rotation)
 
-    [MethodImpl(INLINE)]
+    [MethodImpl(Inline)]
     private void TransformNoiseCoordinate(ref FNLfloat x, ref FNLfloat y)
     {
         x *= mFrequency;
@@ -787,7 +787,7 @@ public class FastNoiseLite
         }
     }
 
-    [MethodImpl(INLINE)]
+    [MethodImpl(Inline)]
     private void TransformNoiseCoordinate(ref FNLfloat x, ref FNLfloat y, ref FNLfloat z)
     {
         x *= mFrequency;
@@ -858,7 +858,7 @@ public class FastNoiseLite
 
     // Domain Warp Coordinate Transforms
 
-    [MethodImpl(INLINE)]
+    [MethodImpl(Inline)]
     private void TransformDomainWarpCoordinate(ref FNLfloat x, ref FNLfloat y)
     {
         switch (mDomainWarpType)
@@ -877,7 +877,7 @@ public class FastNoiseLite
         }
     }
 
-    [MethodImpl(INLINE)]
+    [MethodImpl(Inline)]
     private void TransformDomainWarpCoordinate(ref FNLfloat x, ref FNLfloat y, ref FNLfloat z)
     {
         switch (mWarpTransformType3D)

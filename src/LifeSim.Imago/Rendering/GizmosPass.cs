@@ -12,7 +12,7 @@ namespace LifeSim.Imago.Rendering;
 
 internal class GizmosPass : IDisposable
 {
-    private const int VERTICES_PER_BATCH = 1000;
+    private const int VerticesPerBatch = 1000;
 
     [StructLayout(LayoutKind.Sequential)]
     private struct Vertex
@@ -21,7 +21,7 @@ internal class GizmosPass : IDisposable
         public uint Color;
     }
 
-    private readonly Vertex[] _vertices = new Vertex[VERTICES_PER_BATCH];
+    private readonly Vertex[] _vertices = new Vertex[VerticesPerBatch];
 
     private readonly Pipeline _pipeline;
 
@@ -42,7 +42,7 @@ internal class GizmosPass : IDisposable
         this._gd = renderer.GraphicsDevice;
         var factory = this._gd.ResourceFactory;
 
-        this._vertexBuffer = factory.CreateBuffer(new BufferDescription((uint)(VERTICES_PER_BATCH * Marshal.SizeOf<Vertex>()), BufferUsage.VertexBuffer | BufferUsage.Dynamic));
+        this._vertexBuffer = factory.CreateBuffer(new BufferDescription((uint)(VerticesPerBatch * Marshal.SizeOf<Vertex>()), BufferUsage.VertexBuffer | BufferUsage.Dynamic));
         this._viewProjectionBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
         this._passResourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
@@ -106,7 +106,7 @@ internal class GizmosPass : IDisposable
         {
             DebugLine line = lines[i];
 
-            if (this._verticesCount + 2 >= VERTICES_PER_BATCH)
+            if (this._verticesCount + 2 >= VerticesPerBatch)
                 this.FlushVertices(cl);
 
             this._vertices[this._verticesCount++] = new Vertex { Position = line.Start, Color = line.Color.ToPackedUInt() };

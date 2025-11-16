@@ -75,10 +75,6 @@ dotnet_naming_style.prefix_underscore.required_prefix = _
 # pascal_case
 dotnet_naming_style.pascal_case.capitalization = pascal_case
 
-# uppercase
-dotnet_naming_style.uppercase.capitalization = all_upper
-dotnet_naming_style.uppercase.word_separator = _
-
 # private int _fooBar = 5;
 dotnet_naming_rule.private_members_with_underscore.symbols  = private_fields
 dotnet_naming_rule.private_members_with_underscore.style    = prefix_underscore
@@ -89,15 +85,15 @@ dotnet_naming_rule.pascal_case.symbols  = element_group
 dotnet_naming_rule.pascal_case.style    = pascal_case
 dotnet_naming_rule.pascal_case.severity = suggestion
 
-# public static readonly FOO_BAR = 5;
-dotnet_naming_rule.static_readonly_with_uppercase.symbols  = static_readonly
-dotnet_naming_rule.static_readonly_with_uppercase.style    = uppercase
-dotnet_naming_rule.static_readonly_with_uppercase.severity = suggestion
+# public static readonly FooBar = 5;
+dotnet_naming_rule.public_static_readonly_pascal_case.symbols  = static_readonly
+dotnet_naming_rule.public_static_readonly_pascal_case.style    = pascal_case
+dotnet_naming_rule.public_static_readonly_pascal_case.severity = suggestion
 
-# public const FOO_BAR = 5;
-dotnet_naming_rule.const_with_uppercase.symbols  = const
-dotnet_naming_rule.const_with_uppercase.style    = uppercase
-dotnet_naming_rule.const_with_uppercase.severity = suggestion
+# public const FooBar = 5;
+dotnet_naming_rule.const_pascal_case.symbols  = const
+dotnet_naming_rule.const_pascal_case.style    = pascal_case
+dotnet_naming_rule.const_pascal_case.severity = suggestion
 
 # Enable documentation warnings for 100% coverage
 [**/LifeSim.Support/**/*.cs]

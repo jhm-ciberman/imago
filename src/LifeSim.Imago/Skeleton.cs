@@ -12,7 +12,7 @@ public class Skeleton : IDisposable
     /// <summary>
     /// Gets the maximum number of bones in a skeleton.
     /// </summary>
-    public const int MAX_NUMBER_OF_BONES = 64;
+    public const int MaxNumberOfBones = 64;
 
     /// <summary>
     /// Gets the joints of the skeleton.
@@ -37,7 +37,7 @@ public class Skeleton : IDisposable
     /// <summary>
     /// Gets the offset of the bone data in the buffer.
     /// </summary>
-    public uint BoneDataOffset => this._dataBlock.BlockIndex * MAX_NUMBER_OF_BONES;
+    public uint BoneDataOffset => this._dataBlock.BlockIndex * MaxNumberOfBones;
 
     /// <summary>
     /// Gets the bone matrices of the skeleton.

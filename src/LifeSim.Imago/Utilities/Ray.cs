@@ -115,7 +115,7 @@ public struct Ray
     /// <returns>True if the ray intersects the triangle; otherwise, false.</returns>
     public bool Intersects(ref Vector3 V1, ref Vector3 V2, ref Vector3 V3, out float distance)
     {
-        const float EPSILON = 1E-6f;
+        const float Epsilon = 1E-6f;
 
         Vector3 e1, e2;  //Edge1, Edge2
         Vector3 P, Q, T;
@@ -130,7 +130,7 @@ public struct Ray
         //if determinant is near zero, ray lies in plane of triangle or ray is parallel to plane of triangle
         det = Vector3.Dot(e1, P);
         //NOT CULLIN
-        if (det > -EPSILON && det < EPSILON)
+        if (det > -Epsilon && det < Epsilon)
         {
             distance = 0f;
             return false;
@@ -164,7 +164,7 @@ public struct Ray
 
         t = Vector3.Dot(e2, Q) * inv_det;
 
-        if (t > EPSILON)
+        if (t > Epsilon)
         { //ray intersection
             distance = t;
             return true;

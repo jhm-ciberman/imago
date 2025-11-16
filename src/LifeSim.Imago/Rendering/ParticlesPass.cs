@@ -13,7 +13,7 @@ namespace LifeSim.Imago.Rendering;
 
 internal class ParticlesPass : IDisposable
 {
-    private const int PARTICLES_PER_BATCH = 1000;
+    private const int ParticlesPerBatch = 1000;
 
 
     [StructLayout(LayoutKind.Sequential)]
@@ -66,18 +66,18 @@ internal class ParticlesPass : IDisposable
 
     private readonly Pipeline _pipeline;
 
-    private readonly ParticleRenderData[] _particlesForRender = new ParticleRenderData[PARTICLES_PER_BATCH];
+    private readonly ParticleRenderData[] _particlesForRender = new ParticleRenderData[ParticlesPerBatch];
 
     private readonly Dictionary<ITexture, ResourceSet> _textures = new Dictionary<ITexture, ResourceSet>();
 
     public ParticlesPass(Renderer renderer)
     {
-        this._particlesForRender = new ParticleRenderData[PARTICLES_PER_BATCH];
+        this._particlesForRender = new ParticleRenderData[ParticlesPerBatch];
         this._gd = renderer.GraphicsDevice;
         var factory = this._gd.ResourceFactory;
 
         this._vertexBuffer = factory.CreateBuffer(new BufferDescription((uint)(4 * Marshal.SizeOf<Vertex>()), BufferUsage.VertexBuffer));
-        this._particlesBuffer = factory.CreateBuffer(new BufferDescription((uint)(PARTICLES_PER_BATCH * Marshal.SizeOf<ParticleRenderData>()), BufferUsage.VertexBuffer | BufferUsage.Dynamic));
+        this._particlesBuffer = factory.CreateBuffer(new BufferDescription((uint)(ParticlesPerBatch * Marshal.SizeOf<ParticleRenderData>()), BufferUsage.VertexBuffer | BufferUsage.Dynamic));
 
         this._viewProjectionBuffer = factory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<CameraDataBuffer>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
@@ -173,16 +173,16 @@ internal class ParticlesPass : IDisposable
     private void RenderParticles(CommandList cl, IReadOnlyList<Particle> particles, ITexture texture)
     {
         if (particles.Count == 0) return;
-        if (particles.Count <= PARTICLES_PER_BATCH)
+        if (particles.Count <= ParticlesPerBatch)
             this.FlushParticles(cl, particles, 0, particles.Count, texture);
 
         int batchStartIndex = 0;
         int batchEndIndex;
-        int numberOfbatches = (int)Math.Ceiling(particles.Count / (float)PARTICLES_PER_BATCH);
+        int numberOfbatches = (int)Math.Ceiling(particles.Count / (float)ParticlesPerBatch);
 
         for (int i = 0; i < numberOfbatches; i++)
         {
-            batchEndIndex = Math.Min(particles.Count, batchStartIndex + PARTICLES_PER_BATCH);
+            batchEndIndex = Math.Min(particles.Count, batchStartIndex + ParticlesPerBatch);
             this.FlushParticles(cl, particles, batchStartIndex, batchEndIndex, texture);
             batchStartIndex = batchEndIndex;
         }

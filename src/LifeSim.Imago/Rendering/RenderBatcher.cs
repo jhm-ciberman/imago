@@ -18,11 +18,11 @@ internal enum RenderBatchPassType
 /// </summary>
 internal class RenderBatcher : IDisposable
 {
-    private const uint BINDING_PASS = 0;
-    private const uint BINDING_TRANSFORM = 1;
-    private const uint BINDING_MATERIAL = 2;
-    private const uint BINDING_INSTANCE = 3;
-    private const uint BINDING_SKELETON = 4;
+    private const uint BindingPass = 0;
+    private const uint BindingTransform = 1;
+    private const uint BindingMaterial = 2;
+    private const uint BindingInstance = 3;
+    private const uint BindingSkeleton = 4;
 
     private DeviceBuffer? _offsetsVertexBuffer = null;
     private OffsetVertexData[] _offsetVertexData;
@@ -76,7 +76,7 @@ internal class RenderBatcher : IDisposable
             if (currentPipeline != batch.Pipeline)
             {
                 commandList.SetPipeline(batch.Pipeline);
-                commandList.SetGraphicsResourceSet(BINDING_PASS, passResourceSet);
+                commandList.SetGraphicsResourceSet(BindingPass, passResourceSet);
                 currentPipeline = batch.Pipeline;
                 currentTransformRS = null;
                 currentMaterialRS = null;
@@ -86,22 +86,22 @@ internal class RenderBatcher : IDisposable
             if (currentTransformRS != batch.TransformResourceSet)
             {
                 currentTransformRS = batch.TransformResourceSet;
-                commandList.SetGraphicsResourceSet(BINDING_TRANSFORM, batch.TransformResourceSet);
+                commandList.SetGraphicsResourceSet(BindingTransform, batch.TransformResourceSet);
             }
             if (currentMaterialRS != batch.MaterialResourceSet)
             {
                 currentMaterialRS = batch.MaterialResourceSet;
-                commandList.SetGraphicsResourceSet(BINDING_MATERIAL, batch.MaterialResourceSet);
+                commandList.SetGraphicsResourceSet(BindingMaterial, batch.MaterialResourceSet);
             }
             if (currentInstanceRS != batch.InstanceResourceSet)
             {
                 currentInstanceRS = batch.InstanceResourceSet;
-                commandList.SetGraphicsResourceSet(BINDING_INSTANCE, batch.InstanceResourceSet);
+                commandList.SetGraphicsResourceSet(BindingInstance, batch.InstanceResourceSet);
             }
             if (batch.SkeletonResourceSet != null && currentSkeletonRS != batch.SkeletonResourceSet)
             {
                 currentSkeletonRS = batch.SkeletonResourceSet;
-                commandList.SetGraphicsResourceSet(BINDING_SKELETON, batch.SkeletonResourceSet);
+                commandList.SetGraphicsResourceSet(BindingSkeleton, batch.SkeletonResourceSet);
             }
 
             if (currentMesh != batch.Mesh)
