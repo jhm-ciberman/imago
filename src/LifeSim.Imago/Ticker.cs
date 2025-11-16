@@ -7,23 +7,27 @@ namespace LifeSim.Imago;
 /// <summary>
 /// Provides data for the <see cref="Ticker.Ticked"/> event.
 /// </summary>
-public class TickedEventArgs : EventArgs
+public struct TickedEventArgs
 {
     /// <summary>
     /// Gets the time passed since the last frame in seconds.
     /// </summary>
-    public double DeltaTime { get; internal set; } = 0;
+    public double DeltaTime { get; }
 
     /// <summary>
     /// Gets the total time passed since the start of the application in seconds.
     /// </summary>
-    public double ElapsedTime { get; internal set; } = 0;
+    public double ElapsedTime { get; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TickedEventArgs"/> class.
     /// </summary>
-    public TickedEventArgs()
+    /// <param name="deltaTime">The time passed since the last frame in seconds.</param>
+    /// <param name="elapsedTime">The total time passed since the start of the application in seconds.</param>
+    public TickedEventArgs(double deltaTime, double elapsedTime)
     {
+        this.DeltaTime = deltaTime;
+        this.ElapsedTime = elapsedTime;
     }
 }
 
@@ -36,7 +40,6 @@ public class Ticker
     private double _deltaTime;
     private double _framesPerSecond;
     private readonly Stopwatch _stopwatch = new Stopwatch();
-    private readonly TickedEventArgs _tickedEventArgs = new TickedEventArgs();
 
     /// <summary>
     /// Occurs when a tick is performed.
@@ -125,10 +128,7 @@ public class Ticker
                 this._framesPerSecond = 1.0 / this._deltaTime;
             }
 
-            // Fire the tick event
-            this._tickedEventArgs.DeltaTime = this._deltaTime;
-            this._tickedEventArgs.ElapsedTime = this._elapsedTime;
-            Ticked?.Invoke(this, this._tickedEventArgs);
+            this.Ticked?.Invoke(this, new TickedEventArgs(this._deltaTime, this._elapsedTime));
         }
     }
 }
