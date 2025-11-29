@@ -104,3 +104,6 @@ dotnet_diagnostic.CS1591.severity = warning # Missing XML comment for publicly v
 
 [**/LifeSim.Core/**/*.cs]
 dotnet_diagnostic.CS1591.severity = warning # Missing XML comment for publicly visible type or member
+
+[**/LifeSim.ViewModels/**/*.cs]
+dotnet_diagnostic.CS1591.severity = warning # Missing XML comment for publicly visible type or member
