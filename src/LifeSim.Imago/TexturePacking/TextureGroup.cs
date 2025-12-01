@@ -59,6 +59,8 @@ public class TextureGroup : IDisposable
 
     private bool _flushRequested = false;
 
+    private readonly object _packLock = new();
+
     /// <summary>
     /// Initializes a new instance of the <see cref="TextureGroup"/> class.
     /// </summary>
@@ -84,33 +86,36 @@ public class TextureGroup : IDisposable
     /// <exception cref="InvalidOperationException">Thrown if the texture is too large to fit in any page.</exception>
     public PackedTexture Pack(IDrawOperation unpackedTexture)
     {
-        PackedTexture? packedTexture;
-
-        // Try to find any already allocated page that can fit the request
-        foreach (var currentPage in this._pages)
+        lock (this._packLock)
         {
-            if (currentPage.TryPack(unpackedTexture, out packedTexture))
+            PackedTexture? packedTexture;
+
+            // Try to find any already allocated page that can fit the request
+            foreach (var currentPage in this._pages)
             {
-                this._packedTexturesPages.Add(packedTexture, currentPage);
+                if (currentPage.TryPack(unpackedTexture, out packedTexture))
+                {
+                    this._packedTexturesPages.Add(packedTexture, currentPage);
+                    this.RequestFlush();
+                    return packedTexture;
+                }
+            }
+
+            // If any page can't fit the request, we will need to create a new page and fit the request.
+            var page = new TexturePage(this);
+            this._pages.Add(page);
+            this.PageAdded?.Invoke(this, page);
+            if (page.TryPack(unpackedTexture, out packedTexture))
+            {
+                this._packedTexturesPages.Add(packedTexture, page);
                 this.RequestFlush();
                 return packedTexture;
             }
-        }
 
-        // If any page can't fit the request, we will need to create a new page and fit the request.
-        var page = new TexturePage(this);
-        this._pages.Add(page);
-        this.PageAdded?.Invoke(this, page);
-        if (page.TryPack(unpackedTexture, out packedTexture))
-        {
-            this._packedTexturesPages.Add(packedTexture, page);
-            this.RequestFlush();
-            return packedTexture;
+            // If the request cannot fit even in the newly empty page, then it's a fatal error
+            // probably because the request is too big.
+            throw new InvalidOperationException("Cannot pack texture in any texture page");
         }
-
-        // If the request cannot fit even in the newly empty page, then it's a fatal error
-        // probably because the request is too big.
-        throw new InvalidOperationException("Cannot pack texture in any texture page");
     }
 
     /// <summary>
