@@ -5,6 +5,9 @@ using LifeSim.Support.Numerics;
 
 namespace LifeSim.Support;
 
+/// <summary>
+/// Provides extension methods for LINQ operations.
+/// </summary>
 public static class LinqExtensions
 {
     /// <summary>

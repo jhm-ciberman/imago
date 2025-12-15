@@ -7,6 +7,9 @@ using LifeSim.Imago.SceneGraph.Nodes;
 
 namespace LifeSim.Imago;
 
+/// <summary>
+/// Represents a skeleton for skeletal animation.
+/// </summary>
 public class Skeleton : IDisposable
 {
     /// <summary>
