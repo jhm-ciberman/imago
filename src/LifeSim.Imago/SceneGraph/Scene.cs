@@ -1,55 +1,161 @@
+using System;
 using System.Collections.Generic;
-using LifeSim.Imago.Input;
+using LifeSim.Imago.Controls;
 using LifeSim.Imago.SceneGraph.Cameras;
-using LifeSim.Imago.SceneGraph.Nodes;
 using LifeSim.Support.Drawing;
 
 namespace LifeSim.Imago.SceneGraph;
 
 /// <summary>
-/// Represents a container for all 3D and 2D elements that are rendered and updated together.
+/// Represents a container for layers that are rendered and updated together.
 /// </summary>
 /// <remarks>
-/// A scene is a <see cref="Node3D"/> that acts as the root of the scene graph. It holds the camera, environment settings,
-/// particle systems, and a 2D GUI layer.
+/// A scene is a collection of layers (both 3D and 2D). When a scene is activated,
+/// its layers are added to the Stage. When deactivated, they are removed.
 /// </remarks>
-public class Scene : Node3D
+public class Scene : IDisposable
 {
     /// <summary>
-    /// Gets or sets the clear color of the stage. If null, the stage will not be cleared
-    /// and the previous frame will be visible.
+    /// Occurs when a layer is added to the scene.
     /// </summary>
-    public Color? ClearColor { get; set; } = Color.Black;
+    public event EventHandler<LayerChangedEventArgs>? LayerAdded;
 
     /// <summary>
-    /// Gets or sets the camera used to render the scene.
+    /// Occurs when a layer is removed from the scene.
     /// </summary>
-    public Camera? Camera { get; set; } = null;
+    public event EventHandler<LayerChangedEventArgs>? LayerRemoved;
+
+    private readonly List<ILayer> _layers = new();
 
     /// <summary>
-    /// Gets or sets the environment of the scene.
+    /// Gets the list of layers in the scene.
     /// </summary>
-    public SceneEnvironment Environment { get; set; } = new SceneEnvironment();
+    public IReadOnlyList<ILayer> Layers => this._layers;
 
     /// <summary>
-    /// Gets or sets a value indicating whether the scene should be disposed when it is unloaded.
+    /// Gets the primary 3D layer of the scene, if any.
     /// </summary>
-    public bool DisposeOnDetach { get; set; } = true;
+    public Layer3D? Layer3D { get; private set; }
+
+    /// <summary>
+    /// Gets the primary UI layer of the scene, if any.
+    /// </summary>
+    public GuiLayer? GuiLayer { get; private set; }
+
+    /// <summary>
+    /// Gets or sets the clear color for the scene.
+    /// This is a convenience property that sets ClearColor on the primary Layer3D.
+    /// </summary>
+    public Color? ClearColor
+    {
+        get => this.Layer3D?.ClearColor;
+        set
+        {
+            if (this.Layer3D != null)
+                this.Layer3D.ClearColor = value;
+        }
+    }
+
+    /// <summary>
+    /// Gets the environment from the primary Layer3D, if any.
+    /// </summary>
+    public SceneEnvironment? Environment => this.Layer3D?.Environment;
+
+    /// <summary>
+    /// Gets the camera from the primary Layer3D, if any.
+    /// </summary>
+    public Camera? Camera => this.Layer3D?.Camera;
+
+    private bool _disposedValue;
+
+    /// <summary>
+    /// Gets a value indicating whether this scene has been disposed.
+    /// </summary>
+    public bool IsDisposed => this._disposedValue;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Scene"/> class.
     /// </summary>
     public Scene()
     {
-        //
     }
 
     /// <summary>
-    /// Called by the <see cref="Stage"/> before the scene is rendered to perform any necessary preparations.
+    /// Adds a layer to the scene.
     /// </summary>
-    public virtual void PrepareForRender()
+    /// <param name="layer">The layer to add.</param>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when attempting to add a second Layer3D or GuiLayer.
+    /// </exception>
+    public void AddLayer(ILayer layer)
     {
-        //
+        if (layer is Layer3D layer3D)
+        {
+            if (this.Layer3D != null)
+            {
+                throw new InvalidOperationException("Scene already has a Layer3D. Only one Layer3D per scene is supported.");
+            }
+
+            this.Layer3D = layer3D;
+        }
+        else if (layer is GuiLayer guiLayer)
+        {
+            if (this.GuiLayer != null)
+            {
+                throw new InvalidOperationException("Scene already has a GuiLayer. Only one GuiLayer per scene is supported.");
+            }
+
+            this.GuiLayer = guiLayer;
+        }
+
+        this._layers.Add(layer);
+        this.LayerAdded?.Invoke(this, new LayerChangedEventArgs(layer));
+    }
+
+    /// <summary>
+    /// Removes a layer from the scene.
+    /// </summary>
+    /// <param name="layer">The layer to remove.</param>
+    public void RemoveLayer(ILayer layer)
+    {
+        if (!this._layers.Remove(layer)) return;
+
+        if (layer == this.Layer3D)
+        {
+            this.Layer3D = null;
+        }
+        else if (layer == this.GuiLayer)
+        {
+            this.GuiLayer = null;
+        }
+
+        this.LayerRemoved?.Invoke(this, new LayerChangedEventArgs(layer));
+    }
+
+    /// <summary>
+    /// Called when the scene is activated (becomes the current scene).
+    /// </summary>
+    public virtual void OnActivated()
+    {
+    }
+
+    /// <summary>
+    /// Called when the scene is deactivated (no longer the current scene).
+    /// </summary>
+    public virtual void OnDeactivated()
+    {
+    }
+
+    /// <summary>
+    /// Updates the scene and all its layers.
+    /// </summary>
+    /// <param name="deltaTime">The time elapsed since the last update, in seconds.</param>
+    public virtual void Update(float deltaTime)
+    {
+        foreach (var layer in this._layers)
+        {
+            layer.Update(deltaTime);
+        }
     }
 
     /// <summary>
@@ -57,101 +163,35 @@ public class Scene : Node3D
     /// </summary>
     public virtual void RenderImGui()
     {
-        // Virtual method
     }
 
     /// <summary>
-    /// Updates the scene's state.
+    /// Disposes the scene and all its layers.
     /// </summary>
-    /// <param name="deltaTime">The time elapsed since the last update, in seconds.</param>
-    public virtual void Update(float deltaTime)
+    protected virtual void Dispose(bool disposing)
     {
-        this.GuiLayer?.Update(deltaTime);
-    }
-
-    private readonly List<IParticleSystem> _particleSystems = [];
-
-    /// <summary>
-    /// Gets the list of particle systems in the scene.
-    /// </summary>
-    public IReadOnlyList<IParticleSystem> ParticleSystems => this._particleSystems;
-
-    /// <summary>
-    /// Adds a particle system to the scene.
-    /// </summary>
-    /// <param name="particleSystem">The particle system to add.</param>
-    public void AddParticleSystem(IParticleSystem particleSystem)
-    {
-        this._particleSystems.Add(particleSystem);
-    }
-
-    /// <summary>
-    /// Removes a particle system from the scene.
-    /// </summary>
-    /// <param name="particleSystem">The particle system to remove.</param>
-    public void RemoveParticleSystem(IParticleSystem particleSystem)
-    {
-        this._particleSystems.Remove(particleSystem);
-    }
-
-    /// <summary>
-    /// Gets or sets the 2D GUI layer of the scene.
-    /// </summary>
-    public ILayer2D? GuiLayer { get; set; } = null;
-
-    /// <inheritdoc/>
-    public override void DetachFromStage()
-    {
-        base.DetachFromStage();
-
-        if (this.DisposeOnDetach)
+        if (!this._disposedValue)
         {
-            this.Dispose();
+            if (disposing)
+            {
+                foreach (var layer in this._layers)
+                {
+                    if (layer is IDisposable disposable)
+                    {
+                        disposable.Dispose();
+                    }
+                }
+                this._layers.Clear();
+            }
+
+            this._disposedValue = true;
         }
     }
 
-    /// <summary>
-    /// Handles mouse button press events.
-    /// </summary>
-    /// <param name="e">The mouse button event arguments.</param>
-    public void HandleMousePressed(MouseButtonEventArgs e)
+    /// <inheritdoc />
+    public void Dispose()
     {
-        this.GuiLayer?.HandleMousePressed(e);
-    }
-
-    /// <summary>
-    /// Handles mouse button release events.
-    /// </summary>
-    /// <param name="e">The mouse button event arguments.</param>
-    public void HandleMouseReleased(MouseButtonEventArgs e)
-    {
-        this.GuiLayer?.HandleMouseReleased(e);
-    }
-
-    /// <summary>
-    /// Handles mouse wheel scroll events.
-    /// </summary>
-    /// <param name="e">The mouse wheel event arguments.</param>
-    public void HandleMouseWheelScrolled(MouseWheelEventArgs e)
-    {
-        this.GuiLayer?.HandleMouseWheel(e);
-    }
-
-    /// <summary>
-    /// Handles key press events.
-    /// </summary>
-    /// <param name="e">The keyboard event arguments.</param>
-    public void HandleKeyPressed(KeyboardEventArgs e)
-    {
-        this.GuiLayer?.HandleKeyPressed(e);
-    }
-
-    /// <summary>
-    /// Handles key release events.
-    /// </summary>
-    /// <param name="e">The keyboard event arguments.</param>
-    public void HandleKeyReleased(KeyboardEventArgs e)
-    {
-        this.GuiLayer?.HandleKeyReleased(e);
+        this.Dispose(disposing: true);
+        GC.SuppressFinalize(this);
     }
 }

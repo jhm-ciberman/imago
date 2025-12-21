@@ -96,7 +96,7 @@ public class RenderNode3D : Node3D, IPickable
         {
             if (this._visible == value) return;
             this._visible = value;
-            this._renderable.Visible = value && this.Stage != null;
+            this._renderable.Visible = value && this.Layer3D != null;
         }
 
     }
@@ -169,24 +169,24 @@ public class RenderNode3D : Node3D, IPickable
     }
 
     /// <inheritdoc/>
-    public override void AttachToStage(Stage stage)
+    public override void AttachToLayer(Layer3D layer)
     {
-        base.AttachToStage(stage);
+        base.AttachToLayer(layer);
         this.UpdateRegistrationWithPickingManager();
         this._renderable.Visible = this._visible;
-        this._renderable.Stage = stage;
+        this._renderable.Layer3D = layer;
     }
 
     /// <inheritdoc/>
-    public override void DetachFromStage()
+    public override void DetachFromLayer()
     {
-        if (this.Stage is null)
-            throw new InvalidOperationException("Cannot detach from scene if not attached to one.");
+        if (this.Layer3D is null)
+            throw new InvalidOperationException("Cannot detach from layer if not attached to one.");
 
         this._renderable.Visible = false;
-        this._renderable.Stage = null;
+        this._renderable.Layer3D = null;
         this.UpdateRegistrationWithPickingManager();
-        base.DetachFromStage();
+        base.DetachFromLayer();
     }
 
     /// <summary>
@@ -194,17 +194,17 @@ public class RenderNode3D : Node3D, IPickable
     /// </summary>
     public void UpdateRegistrationWithPickingManager()
     {
-        if (this.Stage is null) return;
+        if (this.Layer3D is null) return;
 
         if (this._isPickable)
         {
             if (this._renderable.PickingId == 0)
-                this.Stage.Picking.RegisterPickable(this);
+                this.Layer3D.Picking.RegisterPickable(this);
         }
         else
         {
             if (this._renderable.PickingId != 0)
-                this.Stage.Picking.UnregisterPickable(this);
+                this.Layer3D.Picking.UnregisterPickable(this);
         }
     }
 

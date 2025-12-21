@@ -242,11 +242,28 @@ public class Renderer : IDisposable
         cl.Begin();
         this._rendererResources.Update(cl);
 
-        this._forward3DRenderer.Render(cl, stage, this.MainRenderTexture);
-
-        if (stage.Scene.GuiLayer != null)
+        // Render 3D layer if present
+        var layer3D = stage.Layer3D;
+        if (layer3D != null && layer3D.IsVisible)
         {
-            this._spritesPass.Render(cl, this.GuiRenderTexture, stage.Scene.GuiLayer);
+            this._forward3DRenderer.Render(cl, layer3D, this.MainRenderTexture);
+        }
+        else
+        {
+            // No 3D layer - clear the render target using stage's default clear color
+            cl.SetFramebuffer(this.MainRenderTexture.Framebuffer);
+            var col = stage.DefaultClearColor;
+            cl.ClearColorTarget(0, new RgbaFloat(col.R / 255f, col.G / 255f, col.B / 255f, col.A / 255f));
+            cl.ClearDepthStencil(1f);
+        }
+
+        // Render all 2D layers sorted by ZOrder
+        foreach (var layer in stage.Layers)
+        {
+            if (layer is ILayer2D layer2D && layer2D.IsVisible)
+            {
+                this._spritesPass.Render(cl, this.GuiRenderTexture, layer2D);
+            }
         }
 
         this._fullScreenPass.Render(cl, this.MainRenderTexture);
@@ -267,20 +284,20 @@ public class Renderer : IDisposable
 
 
     /// <summary>
-    /// Renders a <see cref="Stage"/> to an off-screen texture.
+    /// Renders a <see cref="Layer3D"/> to an off-screen texture.
     /// </summary>
-    /// <param name="stage">The stage to render.</param>
+    /// <param name="layer">The 3D layer to render.</param>
     /// <param name="renderTexture">The render texture to render to.</param>
     /// <param name="resolvedTexture">The texture to resolve the multisampled result to. If null, no resolving is performed.</param>
-    public void RenderToOffScreenTexture(Stage stage, RenderTexture renderTexture, Texture? resolvedTexture = null)
+    public void RenderToOffScreenTexture(Layer3D layer, RenderTexture renderTexture, Texture? resolvedTexture = null)
     {
         var cl = this._commandList;
 
-        stage.PrepareForRender(renderTexture);
+        layer.PrepareForRender(renderTexture);
 
         cl.Begin();
         this._rendererResources.Update(cl);
-        this._forward3DRenderer.Render(cl, stage, renderTexture);
+        this._forward3DRenderer.Render(cl, layer, renderTexture);
 
         //if (renderTexture.SampleCount != TextureSampleCount.Count1 && resolvedTexture != null)
         //{

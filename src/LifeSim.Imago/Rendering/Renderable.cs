@@ -141,7 +141,7 @@ internal class Renderable : IDisposable
             {
                 var oldFlags = this._renderQueueFlags;
                 this._renderQueueFlags = value;
-                this._stage?.NotifyRenderableRenderQueueChanged(this, oldFlags, value);
+                this._layer3D?.NotifyRenderableRenderQueueChanged(this, oldFlags, value);
             }
         }
     }
@@ -205,23 +205,23 @@ internal class Renderable : IDisposable
         renderer.RegisterDisposable(this);
     }
 
-    private Stage? _stage = null;
+    private Layer3D? _layer3D = null;
 
     /// <summary>
-    /// Gets or sets the stage in which this renderable is.
+    /// Gets or sets the 3D layer this renderable belongs to.
     /// </summary>
-    public Stage? Stage
+    public Layer3D? Layer3D
     {
-        get => this._stage;
+        get => this._layer3D;
         set
         {
-            if (this._stage == value) return;
+            if (this._layer3D == value) return;
 
-            this._stage?.RemoveRenderable(this);
+            this._layer3D?.RemoveRenderable(this);
 
-            this._stage = value;
+            this._layer3D = value;
 
-            this._stage?.AddRenderable(this);
+            this._layer3D?.AddRenderable(this);
         }
     }
 
@@ -279,7 +279,7 @@ internal class Renderable : IDisposable
             this.UpdateSkeletonTransform();
             this.RecomputeOffsetVertexData();
             this.InvalidatePipeline();
-            this.Stage?.NotifyRenderableSkeletonChanged(this, oldSkeleton, value);
+            this.Layer3D?.NotifyRenderableSkeletonChanged(this, oldSkeleton, value);
         }
     }
 
@@ -355,7 +355,7 @@ internal class Renderable : IDisposable
         if (this._pipelineDirty) return;
 
         this._pipelineDirty = true;
-        this._stage?.NotifyRenderablePipelineDirty(this);
+        this._layer3D?.NotifyRenderablePipelineDirty(this);
     }
 
     /// <summary>
@@ -398,8 +398,8 @@ internal class Renderable : IDisposable
     /// <summary>
     /// Updates the renderable.
     /// </summary>
-    /// <param name="stage">The stage.</param>
-    public void Update(Stage stage)
+    /// <param name="layer">The 3D layer.</param>
+    public void Update(Layer3D layer)
     {
         if (this._pipelineDirty)
         {
@@ -554,15 +554,15 @@ internal class Renderable : IDisposable
         if (!isVisible) return null;
 
         RenderFlags flags = material.RenderFlags;
-        var stage = this.Stage!;
-        if (stage.ForceWireframe) flags |= RenderFlags.Wireframe;
+        var layer = this.Layer3D!;
+        if (layer.ForceWireframe) flags |= RenderFlags.Wireframe;
         if (this.RenderQueues.HasFlag(RenderQueues.Transparent)) flags |= RenderFlags.Transparent;
-        if (stage.EnableFog) flags |= RenderFlags.Fog;
-        if (stage.EnablePixelPerfectShadows) flags |= RenderFlags.PixelPerfactShadows;
-        if (stage.LightingHalfLambert) flags |= RenderFlags.HalfLambert;
-        if (stage.CascadesCount > 1) flags |= RenderFlags.ShadowCascades;
+        if (layer.EnableFog) flags |= RenderFlags.Fog;
+        if (layer.EnablePixelPerfectShadows) flags |= RenderFlags.PixelPerfactShadows;
+        if (layer.LightingHalfLambert) flags |= RenderFlags.HalfLambert;
+        if (layer.CascadesCount > 1) flags |= RenderFlags.ShadowCascades;
 
-        return material.ForwardShader.GetPipeline(this._mesh!.VertexFormat, flags, this.Stage!.MultiSampleCount);
+        return material.ForwardShader.GetPipeline(this._mesh!.VertexFormat, flags, this.Layer3D!.MultiSampleCount);
     }
 
     private Veldrid.Pipeline? GetShadowmapPipeline(Material material)

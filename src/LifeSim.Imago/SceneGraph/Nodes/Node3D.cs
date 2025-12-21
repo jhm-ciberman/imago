@@ -87,9 +87,9 @@ public class Node3D : IDisposable, IFormattable
     }
 
     /// <summary>
-    /// Gets the scene this node is in or null if it is not in a scene.
+    /// Gets the 3D layer this node is attached to, or null if not attached.
     /// </summary>
-    public Stage? Stage { get; protected set; } = null;
+    public Layer3D? Layer3D { get; protected set; } = null;
 
     private Matrix4x4 _localMatrix = Matrix4x4.Identity;
     private Matrix4x4 _worldMatrix = Matrix4x4.Identity;
@@ -127,7 +127,7 @@ public class Node3D : IDisposable, IFormattable
     {
         if (this.LocalTransformIsDirty) return;
         this._dirtyFlags |= DirtyFlags.LocalMatrix | DirtyFlags.WorldMatrix;
-        this.Stage?.NotifyTransformDirty(this);
+        this.Layer3D?.NotifyTransformDirty(this);
 
         foreach (var child in this._children)
         {
@@ -140,7 +140,7 @@ public class Node3D : IDisposable, IFormattable
     {
         if (this.WorldTransformIsDirty) return;
         this._dirtyFlags |= DirtyFlags.WorldMatrix;
-        this.Stage?.NotifyTransformDirty(this);
+        this.Layer3D?.NotifyTransformDirty(this);
 
         foreach (var child in this._children)
         {
@@ -253,10 +253,10 @@ public class Node3D : IDisposable, IFormattable
 
         node.Parent = this;
 
-        // If the current node has a stage, add the node to the stage
-        if (this.Stage != null)
+        // If the current node has a layer, add the node to the layer
+        if (this.Layer3D != null)
         {
-            node.AttachToStage(this.Stage);
+            node.AttachToLayer(this.Layer3D);
         }
     }
 
@@ -273,8 +273,8 @@ public class Node3D : IDisposable, IFormattable
 
         node.Parent = null;
 
-        if (node.Stage != null)
-            node.DetachFromStage();
+        if (node.Layer3D != null)
+            node.DetachFromLayer();
 
         if (dispose)
             node.Dispose();
@@ -291,36 +291,36 @@ public class Node3D : IDisposable, IFormattable
     }
 
     /// <summary>
-    /// Attaches this node to the given stage.
+    /// Attaches this node to the given 3D layer.
     /// </summary>
-    /// <param name="stage">The stage to attach to.</param>
-    public virtual void AttachToStage(Stage stage)
+    /// <param name="layer">The layer to attach to.</param>
+    public virtual void AttachToLayer(Layer3D layer)
     {
-        if (this.Stage != null)
-            throw new InvalidOperationException("Cannot attach to stage if already attached to one. Please detach first.");
+        if (this.Layer3D != null)
+            throw new InvalidOperationException("Cannot attach to layer if already attached to one. Please detach first.");
 
-        this.Stage = stage;
-        this.Stage.NotifyTransformDirty(this);
+        this.Layer3D = layer;
+        this.Layer3D.NotifyTransformDirty(this);
 
         foreach (var child in this._children)
         {
-            child.AttachToStage(stage);
+            child.AttachToLayer(layer);
         }
     }
 
     /// <summary>
-    /// Detaches this node from the current stage.
+    /// Detaches this node from the current 3D layer.
     /// </summary>
-    public virtual void DetachFromStage()
+    public virtual void DetachFromLayer()
     {
-        if (this.Stage == null) return;
+        if (this.Layer3D == null) return;
 
-        this.Stage.NotifyTransformNotDirty(this);
-        this.Stage = null;
+        this.Layer3D.NotifyTransformNotDirty(this);
+        this.Layer3D = null;
 
         foreach (var child in this._children)
         {
-            child.DetachFromStage();
+            child.DetachFromLayer();
         }
     }
 

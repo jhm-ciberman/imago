@@ -8,17 +8,17 @@ namespace LifeSim.Imago.SceneGraph;
 public class ImmediateRenderable3D : Node3D
 {
     /// <inheritdoc/>
-    public override void AttachToStage(Stage stage)
+    public override void AttachToLayer(Layer3D layer)
     {
-        stage.AddImmediateRenderable(this);
-        base.AttachToStage(stage);
+        layer.AddImmediateRenderable(this);
+        base.AttachToLayer(layer);
     }
 
     /// <inheritdoc/>
-    public override void DetachFromStage()
+    public override void DetachFromLayer()
     {
-        this.Stage!.RemoveImmediateRenderable(this);
-        base.DetachFromStage();
+        this.Layer3D!.RemoveImmediateRenderable(this);
+        base.DetachFromLayer();
     }
 
     /// <summary>

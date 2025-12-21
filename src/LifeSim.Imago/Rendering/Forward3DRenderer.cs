@@ -9,10 +9,10 @@ using Veldrid;
 namespace LifeSim.Imago.Rendering;
 
 /// <summary>
-/// Orchestrates the rendering of a <see cref="Stage"/> by coordinating various rendering passes.
+/// Orchestrates the rendering of a <see cref="Layer3D"/> by coordinating various rendering passes.
 /// </summary>
 /// <remarks>
-/// This class is responsible for setting up and executing the rendering pipeline for a scene,
+/// This class is responsible for setting up and executing the rendering pipeline for a 3D layer,
 /// including shadow mapping, forward rendering, skybox, particles, and gizmos.
 /// </remarks>
 public class Forward3DRenderer : IDisposable
@@ -59,39 +59,38 @@ public class Forward3DRenderer : IDisposable
     }
 
     /// <summary>
-    /// Renders a <see cref="Stage"/> to the specified <see cref="RenderTexture"/>.
+    /// Renders a <see cref="Layer3D"/> to the specified <see cref="RenderTexture"/>.
     /// </summary>
     /// <param name="cl">The Veldrid command list.</param>
-    /// <param name="stage">The stage to render.</param>
+    /// <param name="layer">The 3D layer to render.</param>
     /// <param name="renderTexture">The target render texture.</param>
-    public void Render(CommandList cl, Stage stage, RenderTexture renderTexture)
+    public void Render(CommandList cl, Layer3D layer, RenderTexture renderTexture)
     {
-        var scene = stage.Scene;
-        var camera = scene.Camera;
+        var camera = layer.Camera;
 
         cl.SetFramebuffer(renderTexture.Framebuffer);
-        ClearRenderTarget(cl, scene);
+        this.ClearRenderTarget(cl, layer);
 
         if (camera == null) return;
 
-        var opaqueRQ = stage.OpaqueRenderQueue;
-        var transparentRQ = stage.TransparentRenderQueue;
-        var immediateRQ = stage.ImmediateRenderables;
-        var pickingRQ = stage.PickingRenderQueue;
-        var shadowCasterRQs = new Span<RenderQueue>(stage.ShadowCasterRenderQueues, 0, stage.CascadesCount);
+        var opaqueRQ = layer.OpaqueRenderQueue;
+        var transparentRQ = layer.TransparentRenderQueue;
+        var immediateRQ = layer.ImmediateRenderables;
+        var pickingRQ = layer.PickingRenderQueue;
+        var shadowCasterRQs = new Span<RenderQueue>(layer.ShadowCasterRenderQueues, 0, layer.CascadesCount);
 
-        this._shadowPass.Render(cl, camera, scene.Environment.MainLight, shadowCasterRQs);
-        this._forwardPass.Render(cl, renderTexture, camera, scene.Environment, opaqueRQ, transparentRQ);
-        this._skyDomePass.Render(cl, renderTexture, camera, scene.Environment);
+        this._shadowPass.Render(cl, camera, layer.Environment.MainLight, shadowCasterRQs);
+        this._forwardPass.Render(cl, renderTexture, camera, layer.Environment, opaqueRQ, transparentRQ);
+        this._skyDomePass.Render(cl, renderTexture, camera, layer.Environment);
         this._immediatePass.Render(cl, renderTexture, camera, immediateRQ);
-        this._mousePickerPass.Render(cl, renderTexture, camera, stage.Picking, pickingRQ);
-        this._particlesPass.Render(cl, renderTexture, camera, scene.ParticleSystems);
-        this._gizmosPass.Render(cl, renderTexture, camera, stage.Gizmos);
+        this._mousePickerPass.Render(cl, renderTexture, camera, layer.Picking, pickingRQ);
+        this._particlesPass.Render(cl, renderTexture, camera, layer.ParticleSystems);
+        this._gizmosPass.Render(cl, renderTexture, camera, layer.Gizmos);
     }
 
-    private static void ClearRenderTarget(CommandList cl, Scene scene)
+    private void ClearRenderTarget(CommandList cl, Layer3D layer)
     {
-        ColorF? clearColor = scene.Camera?.ClearColor ?? scene.ClearColor;
+        ColorF? clearColor = layer.Camera?.ClearColor ?? layer.ClearColor;
         if (clearColor != null)
         {
             var col = clearColor.Value;

@@ -15,6 +15,12 @@ namespace LifeSim.Imago.Controls;
 /// </summary>
 public class GuiLayer : ILayer2D
 {
+    /// <inheritdoc />
+    public int ZOrder { get; init; } = 100;
+
+    /// <inheritdoc />
+    public bool IsVisible { get; set; } = true;
+
     /// <summary>
     /// Gets the viewport that this GUI layer is rendered to.
     /// </summary>

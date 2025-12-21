@@ -6,7 +6,7 @@ namespace LifeSim.Imago.SceneGraph;
 /// <summary>
 /// Defines a contract for 2D layers that can be rendered and handle user input.
 /// </summary>
-public interface ILayer2D
+public interface ILayer2D : ILayer
 {
     /// <summary>
     /// Gets a value indicating whether the cursor is currently over any element in this layer.
@@ -20,38 +20,42 @@ public interface ILayer2D
     public void Draw(DrawingContext ctx);
 
     /// <summary>
-    /// Updates the layer with the specified time delta.
-    /// </summary>
-    /// <param name="deltaTime">The time elapsed since the last update in seconds.</param>
-    public void Update(float deltaTime);
-
-    /// <summary>
     /// Handles mouse button press events.
     /// </summary>
     /// <param name="e">The mouse button event arguments.</param>
-    public void HandleMousePressed(MouseButtonEventArgs e);
+    public void HandleMousePressed(MouseButtonEventArgs e)
+    {
+    }
 
     /// <summary>
     /// Handles mouse button release events.
     /// </summary>
     /// <param name="e">The mouse button event arguments.</param>
-    public void HandleMouseReleased(MouseButtonEventArgs e);
+    public void HandleMouseReleased(MouseButtonEventArgs e)
+    {
+    }
 
     /// <summary>
     /// Handles mouse wheel scroll events.
     /// </summary>
     /// <param name="e">The mouse wheel event arguments.</param>
-    public void HandleMouseWheel(MouseWheelEventArgs e);
+    public void HandleMouseWheel(MouseWheelEventArgs e)
+    {
+    }
 
     /// <summary>
     /// Handles keyboard key press events.
     /// </summary>
     /// <param name="e">The keyboard event arguments.</param>
-    public void HandleKeyPressed(KeyboardEventArgs e);
+    public void HandleKeyPressed(KeyboardEventArgs e)
+    {
+    }
 
     /// <summary>
     /// Handles keyboard key release events.
     /// </summary>
     /// <param name="e">The keyboard event arguments.</param>
-    public void HandleKeyReleased(KeyboardEventArgs e);
+    public void HandleKeyReleased(KeyboardEventArgs e)
+    {
+    }
 }

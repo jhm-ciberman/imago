@@ -1,76 +1,61 @@
 using System;
 using System.Collections.Generic;
 using LifeSim.Imago.Input;
-using LifeSim.Imago.Rendering;
-using LifeSim.Imago.SceneGraph.Nodes;
-using LifeSim.Imago.SceneGraph.Picking;
+using LifeSim.Imago.SceneGraph.Cameras;
 using LifeSim.Imago.Textures;
+using LifeSim.Support.Drawing;
 
 namespace LifeSim.Imago.SceneGraph;
 
 /// <summary>
-/// Represents the main container for a <see cref="Scene"/> and manages the overall rendering state.
+/// Represents the root container that manages scenes and layers for rendering.
 /// </summary>
 /// <remarks>
-/// The Stage is responsible for holding the active scene, managing render queues, and handling the update and render loop.
-/// It also provides properties to control various rendering features like wireframe mode, fog, and shadows.
+/// Stage is the top-level container that:
+/// - Manages the current scene and its layers
+/// - Routes input events to layers
+/// - Coordinates rendering through the Renderer
+/// - Supports persistent layers that survive scene changes
 /// </remarks>
 public class Stage
 {
     /// <summary>
-    /// Occurs when the current <see cref="Scene"/> changes.
+    /// Occurs when the current scene changes.
     /// </summary>
     public event EventHandler<SceneChangedEventArgs>? SceneChanged;
 
     private class EmptyScene : Scene { }
 
-    private static readonly Scene _emptyScene = new EmptyScene()
-    {
-        Name = "Empty Scene",
-        DisposeOnDetach = false,
-    };
+    private static readonly Scene _emptyScene = new EmptyScene();
+
+    private readonly List<ILayer> _persistentLayers = new();
+    private readonly List<ILayer> _allLayers = new();
 
     /// <summary>
-    /// Gets the gizmos layer used to render debug and editor visuals.
+    /// Gets the current scene being displayed.
     /// </summary>
-    public GizmosLayer Gizmos { get; } = new GizmosLayer();
+    public Scene CurrentScene { get; private set; } = _emptyScene;
 
     /// <summary>
-    /// Gets the picking manager for object selection in the scene.
+    /// Gets the primary 3D layer from the current scene, if any.
     /// </summary>
-    public PickingManager Picking { get; } = PickingManager.Instance;
+    public Layer3D? Layer3D => this.CurrentScene.Layer3D;
 
     /// <summary>
-    /// Gets the currently active scene.
+    /// Gets all layers sorted by ZOrder (including persistent and scene layers).
     /// </summary>
-    public Scene Scene { get; private set; } = _emptyScene;
+    public IReadOnlyList<ILayer> Layers => this._allLayers;
 
-    private readonly List<Node3D> _transformDirtyList = new List<Node3D>();
-
-    internal RenderQueue PickingRenderQueue { get; } = new RenderQueue(RenderQueues.Picking);
-
-    internal RenderQueue OpaqueRenderQueue { get; } = new RenderQueue(RenderQueues.Opaque);
-
-    internal RenderQueue TransparentRenderQueue { get; } = new RenderQueue(RenderQueues.Transparent);
-
-    internal RenderQueue[] ShadowCasterRenderQueues { get; } = new RenderQueue[4];
-
-    private readonly List<Renderable> _renderables = new();
-    private readonly List<Renderable> _dirtyRenderables = new();
-    private readonly List<ImmediateRenderable3D> _immediateRenderables = new();
-    private readonly HashSet<Skeleton> _skeletons = new();
-
-    private bool _invalidateRendererPipelines = false;
+    /// <summary>
+    /// Gets the default clear color when no layer provides one.
+    /// </summary>
+    public Color DefaultClearColor { get; set; } = Color.CoolGray;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Stage"/> class.
     /// </summary>
     public Stage()
     {
-        for (int i = 0; i < this.ShadowCasterRenderQueues.Length; i++)
-        {
-            this.ShadowCasterRenderQueues[i] = new RenderQueue(RenderQueues.ShadowCaster);
-        }
     }
 
     /// <summary>
@@ -101,306 +86,228 @@ public class Stage
 
     private void Input_MouseButtonPressed(object? sender, MouseButtonEventArgs e)
     {
-        this.Scene.HandleMousePressed(e);
+        this.HandleMousePressed(e);
     }
 
     private void Input_MouseButtonReleased(object? sender, MouseButtonEventArgs e)
     {
-        this.Scene.HandleMouseReleased(e);
+        this.HandleMouseReleased(e);
     }
 
     private void Input_MouseWheelScrolled(object? sender, MouseWheelEventArgs e)
     {
-        this.Scene.HandleMouseWheelScrolled(e);
+        this.HandleMouseWheelScrolled(e);
     }
 
     private void Input_KeyPressed(object? sender, KeyboardEventArgs e)
     {
-        this.Scene.HandleKeyPressed(e);
+        this.HandleKeyPressed(e);
     }
 
     private void Input_KeyReleased(object? sender, KeyboardEventArgs e)
     {
-        this.Scene.HandleKeyReleased(e);
+        this.HandleKeyReleased(e);
     }
 
     /// <summary>
-    /// Changes the currently active scene, detaching the old one and attaching the new one.
+    /// Adds a persistent layer that survives scene changes.
+    /// </summary>
+    /// <param name="layer">The layer to add.</param>
+    public void AddPersistentLayer(ILayer layer)
+    {
+        this._persistentLayers.Add(layer);
+        this.RebuildLayerList();
+    }
+
+    /// <summary>
+    /// Removes a persistent layer.
+    /// </summary>
+    /// <param name="layer">The layer to remove.</param>
+    public void RemovePersistentLayer(ILayer layer)
+    {
+        this._persistentLayers.Remove(layer);
+        this.RebuildLayerList();
+    }
+
+    /// <summary>
+    /// Changes the current scene.
     /// </summary>
     /// <param name="scene">The new scene to display. If null, an empty scene is used.</param>
     public void ChangeScene(Scene? scene)
     {
-        if (this.Scene == scene) return;
-        var old = this.Scene;
-        old.DetachFromStage();
+        scene ??= _emptyScene;
+        if (this.CurrentScene == scene) return;
 
-        this.Scene = scene ?? _emptyScene;
-        this.Scene.AttachToStage(this);
+        var oldScene = this.CurrentScene;
 
-        this.SceneChanged?.Invoke(this, new SceneChangedEventArgs(old, this.Scene));
+        oldScene.LayerAdded -= this.Scene_LayerAdded;
+        oldScene.LayerRemoved -= this.Scene_LayerRemoved;
+        oldScene.OnDeactivated();
+
+        if (oldScene != _emptyScene)
+        {
+            oldScene.Dispose();
+        }
+
+        this.CurrentScene = scene;
+
+        scene.LayerAdded += this.Scene_LayerAdded;
+        scene.LayerRemoved += this.Scene_LayerRemoved;
+        scene.OnActivated();
+
+        this.RebuildLayerList();
+        this.SceneChanged?.Invoke(this, new SceneChangedEventArgs(oldScene, scene));
     }
 
-    /// <summary>
-    /// Prepares the stage for rendering by updating transforms, skeletons, and render queues.
-    /// </summary>
-    /// <remarks>
-    /// This method should be called by the renderer before executing the main render passes.
-    /// </remarks>
-    /// <param name="renderTexture">The render texture that will be used for rendering.</param>
-    public void PrepareForRender(RenderTexture renderTexture)
+    private void Scene_LayerAdded(object? sender, LayerChangedEventArgs e)
     {
-        if (this.MultiSampleCount != renderTexture.SampleCount)
+        this.RebuildLayerList();
+    }
+
+    private void Scene_LayerRemoved(object? sender, LayerChangedEventArgs e)
+    {
+        this.RebuildLayerList();
+    }
+
+    private void RebuildLayerList()
+    {
+        this._allLayers.Clear();
+        this._allLayers.AddRange(this._persistentLayers);
+        this._allLayers.AddRange(this.CurrentScene.Layers);
+        this._allLayers.Sort((a, b) => a.ZOrder.CompareTo(b.ZOrder));
+    }
+
+    /// <summary>
+    /// Handles mouse button press events by routing to layers in reverse Z-order.
+    /// </summary>
+    /// <param name="e">The mouse button event arguments.</param>
+    public void HandleMousePressed(MouseButtonEventArgs e)
+    {
+        for (int i = this._allLayers.Count - 1; i >= 0; i--)
         {
-            // This is a hack to invalidate the pipeline of all renderables, but whatever.
-            this.MultiSampleCount = renderTexture.SampleCount;
-        }
-
-        this.Scene.RenderImGui();
-
-        var camera = this.Scene.Camera;
-        if (camera == null) return;
-
-        this.Scene.PrepareForRender();
-
-        var shadowMap = this.Scene.Environment.MainLight.ShadowMap;
-        shadowMap.UpdateSplitDistances(camera, out int cascadesCount);
-        this.CascadesCount = cascadesCount;
-
-        if (this._invalidateRendererPipelines)
-        {
-            this._invalidateRendererPipelines = false;
-
-            for (int i = 0; i < this._renderables.Count; i++)
+            if (this._allLayers[i] is ILayer2D layer2D && layer2D.IsVisible)
             {
-                this._renderables[i].InvalidatePipeline();
+                layer2D.HandleMousePressed(e);
+                if (e.Handled) return;
             }
-        }
-
-        if (this._transformDirtyList.Count > 0)
-        {
-            for (int i = 0; i < this._transformDirtyList.Count; i++)
-            {
-                Node3D node = this._transformDirtyList[i];
-                if (!node.LocalTransformIsDirty) continue;
-
-                // Search for the top dirty node
-                Node3D topDirty = node;
-                while (true)
-                {
-                    if (node.LocalTransformIsDirty) topDirty = node;
-                    if (node.Parent == null) break;
-                    node = node.Parent;
-                }
-
-                topDirty.UpdateTransform();
-            }
-
-            this._transformDirtyList.Clear();
-        }
-
-        if (this._dirtyRenderables.Count > 0)
-        {
-            foreach (var renderable in this._dirtyRenderables)
-            {
-                renderable.Update(this);
-            }
-            this._dirtyRenderables.Clear();
-        }
-
-        foreach (var skeleton in this._skeletons)
-        {
-            skeleton.Update();
         }
     }
 
     /// <summary>
-    /// Updates the stage and the active scene's logic.
+    /// Handles mouse button release events by routing to layers in reverse Z-order.
+    /// </summary>
+    /// <param name="e">The mouse button event arguments.</param>
+    public void HandleMouseReleased(MouseButtonEventArgs e)
+    {
+        for (int i = this._allLayers.Count - 1; i >= 0; i--)
+        {
+            if (this._allLayers[i] is ILayer2D layer2D && layer2D.IsVisible)
+            {
+                layer2D.HandleMouseReleased(e);
+                if (e.Handled) return;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Handles mouse wheel scroll events by routing to layers in reverse Z-order.
+    /// </summary>
+    /// <param name="e">The mouse wheel event arguments.</param>
+    public void HandleMouseWheelScrolled(MouseWheelEventArgs e)
+    {
+        for (int i = this._allLayers.Count - 1; i >= 0; i--)
+        {
+            if (this._allLayers[i] is ILayer2D layer2D && layer2D.IsVisible)
+            {
+                layer2D.HandleMouseWheel(e);
+                if (e.Handled) return;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Handles key press events by routing to layers in reverse Z-order.
+    /// </summary>
+    /// <param name="e">The keyboard event arguments.</param>
+    public void HandleKeyPressed(KeyboardEventArgs e)
+    {
+        for (int i = this._allLayers.Count - 1; i >= 0; i--)
+        {
+            if (this._allLayers[i] is ILayer2D layer2D && layer2D.IsVisible)
+            {
+                layer2D.HandleKeyPressed(e);
+                if (e.Handled) return;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Handles key release events by routing to layers in reverse Z-order.
+    /// </summary>
+    /// <param name="e">The keyboard event arguments.</param>
+    public void HandleKeyReleased(KeyboardEventArgs e)
+    {
+        for (int i = this._allLayers.Count - 1; i >= 0; i--)
+        {
+            if (this._allLayers[i] is ILayer2D layer2D && layer2D.IsVisible)
+            {
+                layer2D.HandleKeyReleased(e);
+                if (e.Handled) return;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Updates all layers and the current scene.
     /// </summary>
     /// <param name="deltaTime">The time elapsed since the last update, in seconds.</param>
     public virtual void Update(float deltaTime)
     {
-        this.Gizmos.Update(deltaTime);
-
-        bool isCursorOverUi = this.Scene.GuiLayer?.IsCursorOverElement ?? false;
-        this.Picking.Update(this.Scene.Camera, isCursorOverUi);
-        this.Scene.Update(deltaTime);
-    }
-
-    /// <summary>
-    /// Notifies the stage that the transform of the specified node is not dirty.
-    /// </summary>
-    /// <param name="node">The node.</param>
-    internal void NotifyTransformNotDirty(Node3D node)
-    {
-        this._transformDirtyList.Remove(node);
-    }
-
-    /// <summary>
-    /// Notifies the stage that the transform of the specified node is dirty.
-    /// </summary>
-    /// <param name="node">The node.</param>
-    internal void NotifyTransformDirty(Node3D node)
-    {
-        this._transformDirtyList.Add(node);
-    }
-
-    /// <summary>
-    /// Notifies the stage that the renderable pipeline of the specified renderable is dirty.
-    /// </summary>
-    /// <param name="renderable">The renderable.</param>
-    internal void NotifyRenderablePipelineDirty(Renderable renderable)
-    {
-        this._dirtyRenderables.Add(renderable);
-    }
-
-    /// <summary>
-    /// Notifies the stage that the renderable queue render flags of the specified renderable have changed.
-    /// </summary>
-    /// <param name="renderable">The renderable.</param>
-    /// <param name="oldQueuesFlags">The old render flags.</param>
-    /// <param name="newQueuesFlags">The new render flags.</param>
-    internal void NotifyRenderableRenderQueueChanged(Renderable renderable, RenderQueues oldQueuesFlags, RenderQueues newQueuesFlags)
-    {
-        this.OpaqueRenderQueue.UpdateRenderableRenderFlags(renderable, oldQueuesFlags, newQueuesFlags);
-        this.TransparentRenderQueue.UpdateRenderableRenderFlags(renderable, oldQueuesFlags, newQueuesFlags);
-        this.PickingRenderQueue.UpdateRenderableRenderFlags(renderable, oldQueuesFlags, newQueuesFlags);
-
-        var queues = this.ShadowCasterRenderQueues;
-        for (int i = 0; i < queues.Length; i++)
+        // Update 3D layer with picking state
+        if (this.Layer3D != null)
         {
-            queues[i].UpdateRenderableRenderFlags(renderable, oldQueuesFlags, newQueuesFlags);
-        }
-    }
-
-    /// <summary>
-    /// Notifies the stage that the renderable skeleton of the specified renderable has changed.
-    /// </summary>
-    /// <param name="renderable">The renderable.</param>
-    /// <param name="oldSkeleton">The old skeleton.</param>
-    /// <param name="newSkeleton">The new skeleton.</param>
-    internal void NotifyRenderableSkeletonChanged(Renderable renderable, Skeleton? oldSkeleton, Skeleton? newSkeleton)
-    {
-        if (oldSkeleton != null)
-        {
-            this._skeletons.Remove(oldSkeleton);
+            var isCursorOverUi = this.IsCursorOverUi();
+            this.Layer3D.Picking.Update(this.Layer3D.Camera, isCursorOverUi);
         }
 
-        if (newSkeleton != null)
+        this.CurrentScene.Update(deltaTime);
+    }
+
+    /// <summary>
+    /// Gets the camera from the primary 3D layer.
+    /// </summary>
+    public Camera? Camera => this.Layer3D?.Camera;
+
+    /// <summary>
+    /// Determines if the cursor is over any UI element in any visible 2D layer.
+    /// </summary>
+    public bool IsCursorOverUi()
+    {
+        foreach (var layer in this._allLayers)
         {
-            this._skeletons.Add(newSkeleton);
+            if (layer is ILayer2D layer2D && layer2D.IsVisible && layer2D.IsCursorOverElement)
+            {
+                return true;
+            }
         }
+        return false;
     }
 
     /// <summary>
-    /// Gets the list of immediate-mode renderables.
+    /// Prepares all layers for rendering.
     /// </summary>
-    public IReadOnlyList<ImmediateRenderable3D> ImmediateRenderables => this._immediateRenderables;
-
-    /// <summary>
-    /// Adds an immediate-mode renderable to the stage.
-    /// </summary>
-    /// <param name="immediateRenderable">The immediate renderable to add.</param>
-    public void AddImmediateRenderable(ImmediateRenderable3D immediateRenderable)
+    /// <param name="renderTexture">The render texture that will be used for rendering.</param>
+    public void PrepareForRender(RenderTexture renderTexture)
     {
-        this._immediateRenderables.Add(immediateRenderable);
+        this.CurrentScene.RenderImGui();
+        this.Layer3D?.PrepareForRender(renderTexture);
     }
 
     /// <summary>
-    /// Removes an immediate-mode renderable from the stage.
+    /// Gets the clear color for the stage.
     /// </summary>
-    /// <param name="immediateRenderable">The immediate renderable to remove.</param>
-    public void RemoveImmediateRenderable(ImmediateRenderable3D immediateRenderable)
+    public Color? GetClearColor()
     {
-        this._immediateRenderables.Remove(immediateRenderable);
-    }
-
-    internal void AddRenderable(Renderable renderable)
-    {
-        this._renderables.Add(renderable);
-        this.NotifyRenderablePipelineDirty(renderable);
-        this.NotifyRenderableRenderQueueChanged(renderable, RenderQueues.None, renderable.RenderQueues);
-        this.NotifyRenderableSkeletonChanged(renderable, null, renderable.Skeleton);
-    }
-
-    internal void RemoveRenderable(Renderable renderable)
-    {
-        this._renderables.Remove(renderable);
-        this.NotifyRenderablePipelineDirty(renderable);
-        this.NotifyRenderableRenderQueueChanged(renderable, renderable.RenderQueues, RenderQueues.None);
-    }
-
-    private Veldrid.TextureSampleCount _multiSampleCount = Veldrid.TextureSampleCount.Count1;
-
-    /// <summary>
-    /// Gets or sets the multi-sample anti-aliasing (MSAA) count for rendering.
-    /// </summary>
-    public Veldrid.TextureSampleCount MultiSampleCount
-    {
-        get => this._multiSampleCount;
-        set => this.SetProperty(ref this._multiSampleCount, value);
-    }
-
-    private bool _forceWireframe = false;
-
-    /// <summary>
-    /// Gets or sets a value indicating whether to force wireframe rendering for all objects.
-    /// </summary>
-    public bool ForceWireframe
-    {
-        get => this._forceWireframe;
-        set => this.SetProperty(ref this._forceWireframe, value);
-    }
-
-    private bool _enableFog = true;
-
-    /// <summary>
-    /// Gets or sets a value indicating whether to enable fog.
-    /// </summary>
-    public bool EnableFog
-    {
-        get => this._enableFog;
-        set => this.SetProperty(ref this._enableFog, value);
-    }
-
-    private bool _enablePixelPerfectShadows = true;
-
-    /// <summary>
-    /// Gets or sets a value indicating whether to enable pixel-perfect shadows.
-    /// </summary>
-    public bool EnablePixelPerfectShadows
-    {
-        get => this._enablePixelPerfectShadows;
-        set => this.SetProperty(ref this._enablePixelPerfectShadows, value);
-    }
-
-    private bool _lightingHalfLambert = true;
-
-    /// <summary>
-    /// Gets or sets a value indicating whether to use Half-Lambert lighting model.
-    /// </summary>
-    public bool LightingHalfLambert
-    {
-        get => this._lightingHalfLambert;
-        set => this.SetProperty(ref this._lightingHalfLambert, value);
-    }
-
-    private int _cascadesCount = 4;
-
-    /// <summary>
-    /// Gets or sets the number of cascades for shadow mapping.
-    /// </summary>
-    public int CascadesCount
-    {
-        get => this._cascadesCount;
-        set => this.SetProperty(ref this._cascadesCount, value);
-    }
-
-    private bool SetProperty<T>(ref T field, T value)
-    {
-        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
-
-        field = value;
-        this._invalidateRendererPipelines = true;
-        return true;
+        return this.Layer3D?.ClearColor ?? this.DefaultClearColor;
     }
 }
