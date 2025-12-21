@@ -15,7 +15,7 @@ namespace LifeSim.Imago.Rendering;
 /// This class is responsible for setting up and executing the rendering pipeline for a scene,
 /// including shadow mapping, forward rendering, skybox, particles, and gizmos.
 /// </remarks>
-public class RenderContext : IDisposable
+public class Forward3DRenderer : IDisposable
 {
     private readonly ParticlesPass _particlesPass;
     private readonly SkyDomePass _skyDomePass;
@@ -26,10 +26,10 @@ public class RenderContext : IDisposable
     private readonly ImmediatePass _immediatePass;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="RenderContext"/> class.
+    /// Initializes a new instance of the <see cref="Forward3DRenderer"/> class.
     /// </summary>
     /// <param name="renderer">The main renderer instance.</param>
-    public RenderContext(Renderer renderer)
+    public Forward3DRenderer(Renderer renderer)
     {
         this._mousePickerPass = new MousePickingPass(renderer);
         this._gizmosPass = new GizmosPass(renderer);
@@ -50,7 +50,7 @@ public class RenderContext : IDisposable
     }
 
     /// <summary>
-    /// Updates the state of the render context before rendering.
+    /// Updates the state of the 3D renderer before rendering.
     /// </summary>
     /// <param name="inputSnapshot">The current input snapshot.</param>
     public void Update(InputSnapshot inputSnapshot)
@@ -101,7 +101,7 @@ public class RenderContext : IDisposable
     }
 
     /// <summary>
-    /// Disposes the render context and releases associated resources.
+    /// Disposes the 3D renderer and releases associated resources.
     /// </summary>
     public void Dispose()
     {

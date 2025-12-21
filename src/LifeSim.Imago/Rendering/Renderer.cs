@@ -88,7 +88,7 @@ public class Renderer : IDisposable
     private readonly DisposeCollector _disposeCollector;
     private readonly FullScreenPass _fullScreenPass;
     private readonly FullScreenPass _fullScreenPixelArtPass;
-    private readonly RenderContext _renderContext;
+    private readonly Forward3DRenderer _forward3DRenderer;
 
     private readonly SpritesPass _spritesPass;
     private readonly ImGuiPass _imGuiPass;
@@ -139,7 +139,7 @@ public class Renderer : IDisposable
 
         this._disposeCollector = new DisposeCollector();
 
-        this._renderContext = new RenderContext(this);
+        this._forward3DRenderer = new Forward3DRenderer(this);
         this._imGuiPass = new ImGuiPass(this);
         this._spritesPass = new SpritesPass(this);
         this._fullScreenPass = new FullScreenPass(this, isPixelArt: false);
@@ -159,7 +159,7 @@ public class Renderer : IDisposable
     public void Update(float deltaTime, InputSnapshot inputSnapshot)
     {
         this._imGuiPass.Update(deltaTime, inputSnapshot);
-        this._renderContext.Update(inputSnapshot);
+        this._forward3DRenderer.Update(inputSnapshot);
     }
 
     /// <summary>
@@ -218,7 +218,7 @@ public class Renderer : IDisposable
     /// <returns>A new <see cref="Material"/> instance.</returns>
     public Material MakeMaterial()
     {
-        return this._renderContext.MakeMaterial();
+        return this._forward3DRenderer.MakeMaterial();
     }
 
     /// <summary>
@@ -242,7 +242,7 @@ public class Renderer : IDisposable
         cl.Begin();
         this._rendererResources.Update(cl);
 
-        this._renderContext.Render(cl, stage, this.MainRenderTexture);
+        this._forward3DRenderer.Render(cl, stage, this.MainRenderTexture);
 
         if (stage.Scene.GuiLayer != null)
         {
@@ -280,7 +280,7 @@ public class Renderer : IDisposable
 
         cl.Begin();
         this._rendererResources.Update(cl);
-        this._renderContext.Render(cl, stage, renderTexture);
+        this._forward3DRenderer.Render(cl, stage, renderTexture);
 
         //if (renderTexture.SampleCount != TextureSampleCount.Count1 && resolvedTexture != null)
         //{
@@ -429,7 +429,7 @@ public class Renderer : IDisposable
             this._imGuiPass.Dispose();
             this._spritesPass.Dispose();
             this._fullScreenPass.Dispose();
-            this._renderContext.Dispose();
+            this._forward3DRenderer.Dispose();
             this._rendererResources.Dispose();
 
             Console.WriteLine("All resources disposed. Attempting to dispose graphics device.");
