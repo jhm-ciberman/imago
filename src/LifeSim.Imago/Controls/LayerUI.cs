@@ -13,7 +13,7 @@ namespace LifeSim.Imago.Controls;
 /// <summary>
 /// Represents the root of a 2D user interface, managing the layout, rendering, and input for a tree of <see cref="Control"/> objects.
 /// </summary>
-public class GuiLayer : ILayer2D
+public class LayerUI : ILayer2D
 {
     /// <inheritdoc />
     public int ZOrder { get; init; } = 100;
@@ -80,10 +80,10 @@ public class GuiLayer : ILayer2D
     private readonly Stopwatch _measureArrangeStopwatch = new Stopwatch();
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="GuiLayer"/> class.
+    /// Initializes a new instance of the <see cref="LayerUI"/> class.
     /// </summary>
     /// <param name="viewport">The viewport to render the GUI to. If null, the default GUI viewport is used.</param>
-    public GuiLayer(Viewport? viewport = null)
+    public LayerUI(Viewport? viewport = null)
     {
         this.Input = InputManager.Instance;
         this.Viewport = viewport ?? Renderer.Instance.GuiViewport;
@@ -107,11 +107,11 @@ public class GuiLayer : ILayer2D
         {
             if (this._content != value)
             {
-                this._content?.OnRemovedFromStage(this);
+                this._content?.OnRemovedFromLayer(this);
 
                 this._content = value;
 
-                this._content?.OnAddedToStage(this);
+                this._content?.OnAddedToLayer(this);
             }
         }
     }

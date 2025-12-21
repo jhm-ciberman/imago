@@ -179,7 +179,7 @@ public class ScrollViewer : ContentControl
     {
         base.Update(deltaTime);
 
-        float wheelDelta = -this.Stage?.Input.MouseScrollDelta ?? 0;
+        float wheelDelta = -this.Layer?.Input.MouseScrollDelta ?? 0;
 
         if (wheelDelta != 0)
         {
@@ -204,17 +204,17 @@ public class ScrollViewer : ContentControl
     }
 
     /// <inheritdoc/>
-    public override void OnAddedToStage(GuiLayer stage)
+    public override void OnAddedToLayer(LayerUI layer)
     {
-        base.OnAddedToStage(stage);
-        this.ScrollBarThumb.OnAddedToStage(stage);
+        base.OnAddedToLayer(layer);
+        this.ScrollBarThumb.OnAddedToLayer(layer);
     }
 
     /// <inheritdoc/>
-    public override void OnRemovedFromStage(GuiLayer stage)
+    public override void OnRemovedFromLayer(LayerUI layer)
     {
-        base.OnRemovedFromStage(stage);
-        this.ScrollBarThumb.OnRemovedFromStage(stage);
+        base.OnRemovedFromLayer(layer);
+        this.ScrollBarThumb.OnRemovedFromLayer(layer);
     }
 
     /// <summary>

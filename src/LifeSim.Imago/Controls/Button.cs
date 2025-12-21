@@ -134,7 +134,7 @@ public class Button : ContentControl
     /// <inheritdoc/>
     public override void Update(float deltaTime)
     {
-        if (this.Stage == null) return;
+        if (this.Layer == null) return;
 
         this.Content?.Update(deltaTime);
 
@@ -142,7 +142,7 @@ public class Button : ContentControl
 
         this.Appearance.Apply(this);
 
-        if (this.IsPressed && !this.IsMouseOver && this.Stage.Input.WasMouseButtonReleasedThisFrame(MouseButton.Left))
+        if (this.IsPressed && !this.IsMouseOver && this.Layer.Input.WasMouseButtonReleasedThisFrame(MouseButton.Left))
         {
             this.IsPressed = false;
         }

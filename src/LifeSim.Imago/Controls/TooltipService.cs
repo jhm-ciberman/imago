@@ -32,7 +32,7 @@ public class TooltipService : IDisposable
     /// <param name="control">The control that owns the tooltip.</param>
     public void ShowTooltip(Control control)
     {
-        if (control.Tooltip == null || control.Stage == null) return;
+        if (control.Tooltip == null || control.Layer == null) return;
 
         // Hide existing tooltip if different control
         if (this._currentTooltipOwner != null && this._currentTooltipOwner != control)
@@ -44,8 +44,8 @@ public class TooltipService : IDisposable
         if (this._activeTooltipPresenter == null)
         {
             this._activeTooltipPresenter = new TooltipPresenter();
-            // Ensure tooltip presenter has access to the stage
-            this._activeTooltipPresenter.OnAddedToStage(control.Stage);
+            // Ensure tooltip presenter has access to the layer
+            this._activeTooltipPresenter.OnAddedToLayer(control.Layer);
         }
 
         this._currentTooltipOwner = control;
@@ -128,11 +128,11 @@ public class TooltipService : IDisposable
     /// <param name="ctx">The drawing context to use.</param>
     public void Draw(DrawingContext ctx)
     {
-        if (this._activeTooltipPresenter != null && this._currentTooltipOwner?.Stage != null && this._currentTooltipOwner.Tooltip != null)
+        if (this._activeTooltipPresenter != null && this._currentTooltipOwner?.Layer != null && this._currentTooltipOwner.Tooltip != null)
         {
             // Ensure tooltip is properly measured and arranged before drawing
-            var stage = this._currentTooltipOwner.Stage;
-            var viewportSize = stage.Viewport.Size / stage.Zoom;
+            var layer = this._currentTooltipOwner.Layer;
+            var viewportSize = layer.Viewport.Size / layer.Zoom;
 
             // Measure to get desired size
             this._activeTooltipPresenter.Measure(viewportSize);
@@ -155,9 +155,9 @@ public class TooltipService : IDisposable
     /// </summary>
     public void Dispose()
     {
-        if (this._activeTooltipPresenter != null && this._currentTooltipOwner?.Stage != null)
+        if (this._activeTooltipPresenter != null && this._currentTooltipOwner?.Layer != null)
         {
-            this._activeTooltipPresenter.OnRemovedFromStage(this._currentTooltipOwner.Stage);
+            this._activeTooltipPresenter.OnRemovedFromLayer(this._currentTooltipOwner.Layer);
         }
         this._activeTooltipPresenter?.Dispose();
         this._activeTooltipPresenter = null;

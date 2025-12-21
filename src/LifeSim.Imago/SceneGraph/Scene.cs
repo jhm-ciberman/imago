@@ -40,7 +40,7 @@ public class Scene : IDisposable
     /// <summary>
     /// Gets the primary UI layer of the scene, if any.
     /// </summary>
-    public GuiLayer? GuiLayer { get; private set; }
+    public LayerUI? LayerUI { get; private set; }
 
     /// <summary>
     /// Gets or sets the clear color for the scene.
@@ -85,7 +85,7 @@ public class Scene : IDisposable
     /// </summary>
     /// <param name="layer">The layer to add.</param>
     /// <exception cref="InvalidOperationException">
-    /// Thrown when attempting to add a second Layer3D or GuiLayer.
+    /// Thrown when attempting to add a second Layer3D or LayerUI.
     /// </exception>
     public void AddLayer(ILayer layer)
     {
@@ -98,14 +98,14 @@ public class Scene : IDisposable
 
             this.Layer3D = layer3D;
         }
-        else if (layer is GuiLayer guiLayer)
+        else if (layer is LayerUI layerUI)
         {
-            if (this.GuiLayer != null)
+            if (this.LayerUI != null)
             {
-                throw new InvalidOperationException("Scene already has a GuiLayer. Only one GuiLayer per scene is supported.");
+                throw new InvalidOperationException("Scene already has a LayerUI. Only one LayerUI per scene is supported.");
             }
 
-            this.GuiLayer = guiLayer;
+            this.LayerUI = layerUI;
         }
 
         this._layers.Add(layer);
@@ -124,9 +124,9 @@ public class Scene : IDisposable
         {
             this.Layer3D = null;
         }
-        else if (layer == this.GuiLayer)
+        else if (layer == this.LayerUI)
         {
-            this.GuiLayer = null;
+            this.LayerUI = null;
         }
 
         this.LayerRemoved?.Invoke(this, new LayerChangedEventArgs(layer));

@@ -21,7 +21,7 @@ public abstract class Visual : ObservableObject, IDisposable
 
     private string _name = string.Empty;
     private Visibility _visibility = Visibility.Visible;
-    private GuiLayer? _stage;
+    private LayerUI? _layer;
     private float _opacity = 1f;
     private readonly List<Visual> _visualChildren = new List<Visual>();
     private bool _clipToBounds = false;
@@ -46,13 +46,13 @@ public abstract class Visual : ObservableObject, IDisposable
     }
 
     /// <summary>
-    /// Gets the stage the control is added to, or null if the control is not added yet to a stage.
+    /// Gets the layer the control is added to, or null if the control is not added yet to a layer.
     /// </summary>
 
-    public GuiLayer? Stage
+    public LayerUI? Layer
     {
-        get => this._stage;
-        private set => this.SetProperty(ref this._stage, value);
+        get => this._layer;
+        private set => this.SetProperty(ref this._layer, value);
     }
 
 
@@ -153,7 +153,7 @@ public abstract class Visual : ObservableObject, IDisposable
 
         if (this.ClipToBounds)
         {
-            ctx.PushScissorRectangle(this.GetBounds() * this.Stage!.Zoom);
+            ctx.PushScissorRectangle(this.GetBounds() * this.Layer!.Zoom);
             this.DrawCore(ctx);
             ctx.PopScissorRectangle();
         }
@@ -231,7 +231,7 @@ public abstract class Visual : ObservableObject, IDisposable
         var position = finalRect.Position;
         var size = finalRect.Size;
 
-        if (this.Stage!.SnapToPixels)
+        if (this.Layer!.SnapToPixels)
         {
             position.X = (float)Math.Round(position.X);
             position.Y = (float)Math.Round(position.Y);
@@ -258,30 +258,30 @@ public abstract class Visual : ObservableObject, IDisposable
     private IDisposable? _bindings = null;
 
     /// <summary>
-    /// Called when the control is added to the <see cref="GuiLayer"/>.
+    /// Called when the control is added to the <see cref="LayerUI"/>.
     /// </summary>
-    /// <param name="stage">The <see cref="GuiLayer"/> the control is added to.</param>
-    /// <exception cref="InvalidOperationException">Thrown if the control is already added to a stage.</exception>
-    public virtual void OnAddedToStage(GuiLayer stage)
+    /// <param name="layer">The <see cref="LayerUI"/> the control is added to.</param>
+    /// <exception cref="InvalidOperationException">Thrown if the control is already added to a layer.</exception>
+    public virtual void OnAddedToLayer(LayerUI layer)
     {
-        if (this.Stage != null)
+        if (this.Layer != null)
         {
-            throw new InvalidOperationException("The control is already added to a stage.");
+            throw new InvalidOperationException("The control is already added to a layer.");
         }
 
         this.IsArrangeValid = false;
         this.IsMeasureValid = false;
-        this.Stage = stage;
+        this.Layer = layer;
         foreach (var child in this.VisualChildren)
         {
-            child.OnAddedToStage(stage);
+            child.OnAddedToLayer(layer);
         }
 
         this._bindings = this.CreateBindings();
     }
 
     /// <summary>
-    /// This method can be overridden to create bindings when the control is added to a stage.
+    /// This method can be overridden to create bindings when the control is added to a layer.
     /// </summary>
     /// <returns>The created bindings.</returns>
     protected virtual IDisposable? CreateBindings()
@@ -290,21 +290,21 @@ public abstract class Visual : ObservableObject, IDisposable
     }
 
     /// <summary>
-    /// Called when the control is removed from the <see cref="GuiLayer"/>.
+    /// Called when the control is removed from the <see cref="LayerUI"/>.
     /// </summary>
-    /// <param name="stage">The <see cref="GuiLayer"/> the control is removed from.</param>
-    /// <exception cref="InvalidOperationException">Thrown if the control is not added to the specified stage.</exception>
-    public virtual void OnRemovedFromStage(GuiLayer stage)
+    /// <param name="layer">The <see cref="LayerUI"/> the control is removed from.</param>
+    /// <exception cref="InvalidOperationException">Thrown if the control is not added to the specified layer.</exception>
+    public virtual void OnRemovedFromLayer(LayerUI layer)
     {
-        if (this.Stage != stage)
+        if (this.Layer != layer)
         {
-            throw new InvalidOperationException("The control is not added to the specified stage.");
+            throw new InvalidOperationException("The control is not added to the specified layer.");
         }
 
-        this.Stage = null;
+        this.Layer = null;
         foreach (var child in this.VisualChildren)
         {
-            child.OnRemovedFromStage(stage);
+            child.OnRemovedFromLayer(layer);
         }
 
         this._bindings?.Dispose();
@@ -356,9 +356,9 @@ public abstract class Visual : ObservableObject, IDisposable
     {
         this._visualChildren.Add(child);
         child.Parent = this;
-        if (this.Stage != null)
+        if (this.Layer != null)
         {
-            child.OnAddedToStage(this.Stage);
+            child.OnAddedToLayer(this.Layer);
             this.InvalidateMeasure();
         }
     }
@@ -370,9 +370,9 @@ public abstract class Visual : ObservableObject, IDisposable
     protected virtual void RemoveVisualChild(Visual child)
     {
         this._visualChildren.Remove(child);
-        if (this.Stage != null)
+        if (this.Layer != null)
         {
-            child.OnRemovedFromStage(this.Stage);
+            child.OnRemovedFromLayer(this.Layer);
             this.InvalidateMeasure();
         }
     }

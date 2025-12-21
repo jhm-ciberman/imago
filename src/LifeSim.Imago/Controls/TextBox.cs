@@ -256,24 +256,24 @@ public class TextBox : Control
     }
 
     /// <inheritdoc/>
-    public override void OnAddedToStage(GuiLayer guiLayer)
+    public override void OnAddedToLayer(LayerUI layer)
     {
-        base.OnAddedToStage(guiLayer);
+        base.OnAddedToLayer(layer);
 
         this.IsFocused = true;
         this.CaretIndex = this.Text.Length;
 
-        guiLayer.Input.KeyPressed += this.InputManager_KeyPressed;
-        guiLayer.Input.TextEntered += this.InputManager_TextEntered;
+        layer.Input.KeyPressed += this.InputManager_KeyPressed;
+        layer.Input.TextEntered += this.InputManager_TextEntered;
     }
 
     /// <inheritdoc/>
-    public override void OnRemovedFromStage(GuiLayer stage)
+    public override void OnRemovedFromLayer(LayerUI layer)
     {
-        stage.Input.KeyPressed -= this.InputManager_KeyPressed;
-        stage.Input.TextEntered -= this.InputManager_TextEntered;
+        layer.Input.KeyPressed -= this.InputManager_KeyPressed;
+        layer.Input.TextEntered -= this.InputManager_TextEntered;
 
-        base.OnRemovedFromStage(stage);
+        base.OnRemovedFromLayer(layer);
     }
 }
 

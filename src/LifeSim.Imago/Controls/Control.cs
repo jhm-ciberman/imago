@@ -269,10 +269,10 @@ public class Control : Visual
     /// <param name="deltaTime">The time elapsed since the last frame, in seconds.</param>
     public virtual void Update(float deltaTime)
     {
-        if (this.Stage == null) return;
-        var input = this.Stage.Input;
+        if (this.Layer == null) return;
+        var input = this.Layer.Input;
 
-        var mousePosition = this.Stage.WindowToViewport(input.CursorPosition);
+        var mousePosition = this.Layer.WindowToViewport(input.CursorPosition);
         this.IsMouseOver = this.GetHitTestBounds().Contains(mousePosition);
     }
 
@@ -321,7 +321,7 @@ public class Control : Visual
     {
         this.MouseEnter?.Invoke(this, EventArgs.Empty);
 
-        if (this.Tooltip != null && this.Stage != null && this.Visibility == Visibility.Visible)
+        if (this.Tooltip != null && this.Layer != null && this.Visibility == Visibility.Visible)
         {
             TooltipService.Instance.ShowTooltip(this);
         }
