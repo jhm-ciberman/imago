@@ -31,6 +31,7 @@ dotnet_diagnostic.IDE0040.severity = warning # access modifier required
 dotnet_diagnostic.IDE0008.severity = none # Use explicit type instead of 'var'
 dotnet_diagnostic.IDE0007.severity = none # Use 'var' instead of explicit type
 dotnet_diagnostic.IDE0055.severity = suggestion # Fix Formating
+dotnet_style_namespace_match_folder = true
 dotnet_diagnostic.IDE0130.severity = warning # "Namespace 'Foo' does not match folder structure (https://github.com/dotnet/roslyn/issues/55014 is solved now so we can use this!)
 dotnet_diagnostic.IDE0036.severity = suggestion # "Modifiers are not ordered" (static public instead of public static)
 dotnet_diagnostic.IDE0048.severity = none # Parenthesis must be added for clarity (I know math, I'm an engineer, I don't need extra parenthesis)

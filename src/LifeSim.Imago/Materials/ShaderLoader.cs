@@ -2,7 +2,7 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace LifeSim.Imago.Graphics;
+namespace LifeSim.Imago.Materials;
 
 /// <summary>
 /// Provides static methods for loading GLSL shader code, including handling of #include directives.

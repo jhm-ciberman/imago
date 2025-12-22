@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using LifeSim.Imago.Graphics;
 using LifeSim.Imago.Materials;
 using LifeSim.Imago.Meshes;
 using LifeSim.Imago.Rendering.Shadows;
