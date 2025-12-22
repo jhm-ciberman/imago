@@ -7,7 +7,7 @@ namespace LifeSim.Imago;
 /// <summary>
 /// Provides data for the <see cref="Ticker.Ticked"/> event.
 /// </summary>
-public struct TickedEventArgs
+public readonly struct TickedEventArgs
 {
     /// <summary>
     /// Gets the time passed since the last frame in seconds.
