@@ -97,3 +97,7 @@ dotnet_naming_rule.const_pascal_case.severity = suggestion
 
 # Enable documentation warnings for 100% coverage
 dotnet_diagnostic.CS1591.severity = warning # Missing XML comment for publicly visible type or member
+
+# Ignore documentation warnings for test projects
+[tests/**.cs]
+dotnet_diagnostic.CS1591.severity = none
