@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using FontStashSharp;
-using LifeSim.Imago.Materials;
-using LifeSim.Imago.Meshes;
-using LifeSim.Imago.Textures;
+using LifeSim.Imago.Assets.Materials;
+using LifeSim.Imago.Assets.Meshes;
+using LifeSim.Imago.Assets.Textures;
 using LifeSim.Support.Drawing;
 using LifeSim.Support.Numerics;
 using Veldrid;
-using Shader = LifeSim.Imago.Materials.Shader;
-using Texture = LifeSim.Imago.Textures.Texture;
+using Shader = LifeSim.Imago.Assets.Materials.Shader;
+using Texture = LifeSim.Imago.Assets.Textures.Texture;
 
 namespace LifeSim.Imago.Rendering.Sprites;
 

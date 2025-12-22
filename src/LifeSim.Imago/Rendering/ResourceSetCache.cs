@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using LifeSim.Imago.Textures;
+using LifeSim.Imago.Assets.Textures;
 using Veldrid;
-using Shader = LifeSim.Imago.Materials.Shader;
+using Shader = LifeSim.Imago.Assets.Materials.Shader;
 
 namespace LifeSim.Imago.Rendering;
 

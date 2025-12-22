@@ -1,8 +1,8 @@
 using System;
-using LifeSim.Imago.Materials;
+using LifeSim.Imago.Assets.Materials;
 using LifeSim.Imago.Rendering.Shadows;
 using LifeSim.Imago.SceneGraph;
-using LifeSim.Imago.Textures;
+using LifeSim.Imago.Assets.Textures;
 using LifeSim.Support.Drawing;
 using Veldrid;
 

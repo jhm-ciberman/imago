@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using LifeSim.Imago.Materials;
-using LifeSim.Imago.Textures;
+using LifeSim.Imago.Assets.Materials;
+using LifeSim.Imago.Assets.Textures;
 using Veldrid;
 using VeldridTexture = Veldrid.Texture;
 

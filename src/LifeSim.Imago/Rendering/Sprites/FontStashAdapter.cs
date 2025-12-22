@@ -1,5 +1,5 @@
 using FontStashSharp.Interfaces;
-using LifeSim.Imago.Textures;
+using LifeSim.Imago.Assets.Textures;
 using Veldrid;
 
 namespace LifeSim.Imago.Rendering.Sprites;

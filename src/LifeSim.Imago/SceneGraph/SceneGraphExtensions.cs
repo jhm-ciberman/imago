@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using LifeSim.Imago.Materials;
+using LifeSim.Imago.Assets.Materials;
 using LifeSim.Imago.SceneGraph.Nodes;
-using LifeSim.Imago.TexturePacking;
+using LifeSim.Imago.Assets.TexturePacking;
 using LifeSim.Imago.Utilities;
 using LifeSim.Support.Collections;
 using LifeSim.Support.Numerics;

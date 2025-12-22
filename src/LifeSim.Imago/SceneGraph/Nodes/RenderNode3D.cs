@@ -1,7 +1,7 @@
 using System;
 using System.Numerics;
-using LifeSim.Imago.Materials;
-using LifeSim.Imago.Meshes;
+using LifeSim.Imago.Assets.Materials;
+using LifeSim.Imago.Assets.Meshes;
 using LifeSim.Imago.Rendering;
 using LifeSim.Imago.SceneGraph.Picking;
 using LifeSim.Support.Drawing;

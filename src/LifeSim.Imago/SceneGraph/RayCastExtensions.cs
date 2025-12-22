@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Numerics;
+using LifeSim.Imago.Assets.Meshes;
 using LifeSim.Imago.Utilities;
 
 namespace LifeSim.Imago.SceneGraph;
@@ -27,7 +28,7 @@ public struct HitInfo
     /// <summary>
     /// Gets or sets the mesh data that was hit.
     /// </summary>
-    public Meshes.MeshData Mesh { get; set; }
+    public MeshData Mesh { get; set; }
 
     /// <summary>
     /// Gets or sets the index of the triangle that was hit.
@@ -42,7 +43,7 @@ public struct HitInfo
     /// <param name="distance">The distance from the ray origin to the hit point.</param>
     /// <param name="normal">The surface normal at the hit point.</param>
     /// <param name="position">The world position of the hit point.</param>
-    public HitInfo(Meshes.MeshData mesh, int triangleIndex, float distance, Vector3 normal, Vector3 position)
+    public HitInfo(MeshData mesh, int triangleIndex, float distance, Vector3 normal, Vector3 position)
     {
         this.Mesh = mesh;
         this.TriangleIndex = triangleIndex;
@@ -65,7 +66,7 @@ public static class RayCastExtensions
     /// <param name="ray">The ray to use. This ray should be in object-local space.</param>
     /// <param name="hitInfo">If the RayCast is successful, contains the hit information.</param>
     /// <returns>True if the <see cref="Ray"/> intersects the mesh; false otherwise</returns>
-    public static bool RayCast(this Meshes.MeshData mesh, Ray ray, out HitInfo hitInfo)
+    public static bool RayCast(this MeshData mesh, Ray ray, out HitInfo hitInfo)
     {
         hitInfo = new HitInfo();
         hitInfo.Mesh = mesh;
@@ -102,7 +103,7 @@ public static class RayCastExtensions
     /// <param name="hitInfos">If the RayCast is successful, contains the hit
     /// information of every hit. The distances are not sorted.</param>
     /// <returns>True if the <see cref="Ray"/> intersects the mesh; false otherwise</returns>
-    public static bool RayCast(this Meshes.MeshData mesh, Ray ray, List<HitInfo> hitInfos)
+    public static bool RayCast(this MeshData mesh, Ray ray, List<HitInfo> hitInfos)
     {
         hitInfos.Clear();
         for (int i = 0; i < mesh.Indices.Length - 2; i += 3)

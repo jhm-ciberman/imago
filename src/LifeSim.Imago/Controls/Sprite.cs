@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using LifeSim.Imago.TexturePacking;
-using LifeSim.Imago.Textures;
+using LifeSim.Imago.Assets.TexturePacking;
+using LifeSim.Imago.Assets.Textures;
 using LifeSim.Support.Numerics;
 
 namespace LifeSim.Imago.Controls;

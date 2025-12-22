@@ -1,8 +1,8 @@
 using System;
 using ImGuiNET;
-using LifeSim.Imago.Textures;
+using LifeSim.Imago.Assets.Textures;
 using Veldrid;
-using Texture = LifeSim.Imago.Textures.Texture;
+using Texture = LifeSim.Imago.Assets.Textures.Texture;
 
 namespace LifeSim.Imago.Rendering;
 

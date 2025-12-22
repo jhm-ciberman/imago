@@ -2,17 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using LifeSim.Imago.Materials;
-using LifeSim.Imago.Meshes;
+using LifeSim.Imago.Assets.Materials;
+using LifeSim.Imago.Assets.Meshes;
 using LifeSim.Imago.Rendering.Shadows;
 using LifeSim.Imago.SceneGraph;
 using LifeSim.Imago.SceneGraph.Cameras;
 using LifeSim.Imago.SceneGraph.Lighting;
-using LifeSim.Imago.Textures;
+using LifeSim.Imago.Assets.Textures;
 using LifeSim.Imago.Utilities;
 using LifeSim.Support.Drawing;
 using Veldrid;
-using Shader = LifeSim.Imago.Materials.Shader;
+using Shader = LifeSim.Imago.Assets.Materials.Shader;
 
 namespace LifeSim.Imago.Rendering;
 

@@ -1,5 +1,5 @@
 using LifeSim.Imago.Controls.Drawing;
-using LifeSim.Imago.Textures;
+using LifeSim.Imago.Assets.Textures;
 using LifeSim.Support.Drawing;
 
 namespace LifeSim.Imago.Controls;

@@ -1,4 +1,4 @@
-using LifeSim.Imago.Meshes;
+using LifeSim.Imago.Assets.Meshes;
 using LifeSim.Imago.SceneGraph.Nodes;
 
 namespace LifeSim.Imago.SceneGraph.Prefabs;

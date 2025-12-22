@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using LifeSim.Imago.Assets.Meshes;
 using LifeSim.Imago.Utilities;
 using LifeSim.Support.Collections;
 using LifeSim.Support.Drawing;
@@ -374,7 +375,7 @@ public class GizmosLayer
     /// <param name="color">The color of the wireframe.</param>
     /// <param name="lifeTime">The amount of time the wireframe will be visible. A value of 0 means it will be drawn until the next frame.</param>
     /// <param name="drawInFront">Whether the wireframe should be drawn in front of other objects or using depth.</param>
-    public void DrawWireMesh(Meshes.MeshData mesh, ref Matrix4x4 transform, Color color, float lifeTime = 0, bool drawInFront = false)
+    public void DrawWireMesh(MeshData mesh, ref Matrix4x4 transform, Color color, float lifeTime = 0, bool drawInFront = false)
     {
         for (int i = 0; i < mesh.Indices.Length; i += 3)
         {

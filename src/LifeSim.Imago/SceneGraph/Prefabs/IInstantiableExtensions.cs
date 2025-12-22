@@ -1,5 +1,5 @@
 using System.Numerics;
-using LifeSim.Imago.Materials;
+using LifeSim.Imago.Assets.Materials;
 using LifeSim.Imago.SceneGraph.Nodes;
 
 namespace LifeSim.Imago.SceneGraph.Prefabs;
