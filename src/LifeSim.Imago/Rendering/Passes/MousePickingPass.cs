@@ -10,8 +10,9 @@ using LifeSim.Imago.Assets.Textures;
 using LifeSim.Imago.Utilities;
 using Veldrid;
 using Shader = LifeSim.Imago.Assets.Materials.Shader;
+using LifeSim.Imago.Rendering.Internals;
 
-namespace LifeSim.Imago.Rendering;
+namespace LifeSim.Imago.Rendering.Passes;
 
 /// <summary>
 /// The mouse picking pass is used to determine which object was clicked by the mouse.

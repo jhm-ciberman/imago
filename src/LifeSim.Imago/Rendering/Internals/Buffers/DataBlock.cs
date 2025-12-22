@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace LifeSim.Imago.Rendering.Buffers;
+namespace LifeSim.Imago.Rendering.Internals.Buffers;
 
 /// <summary>
 /// Represents a block of data in a <see cref="DataBuffer"/>.

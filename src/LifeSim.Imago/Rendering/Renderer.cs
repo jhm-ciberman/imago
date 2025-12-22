@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using LifeSim.Imago.Assets.Materials;
-using LifeSim.Imago.Rendering.Buffers;
 using LifeSim.Imago.Rendering.Sprites;
 using LifeSim.Imago.SceneGraph;
 using LifeSim.Imago.Startup;
@@ -13,6 +12,9 @@ using Veldrid;
 using Veldrid.Sdl2;
 using Texture = LifeSim.Imago.Assets.Textures.Texture;
 using Viewport = LifeSim.Imago.SceneGraph.Viewport;
+using LifeSim.Imago.Rendering.Internals.Buffers;
+using LifeSim.Imago.Rendering.Internals;
+using LifeSim.Imago.Rendering.Passes;
 
 namespace LifeSim.Imago.Rendering;
 

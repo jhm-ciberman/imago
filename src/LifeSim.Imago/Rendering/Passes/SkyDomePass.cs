@@ -8,7 +8,7 @@ using LifeSim.Imago.SceneGraph.Cameras;
 using LifeSim.Imago.Assets.Textures;
 using Veldrid;
 
-namespace LifeSim.Imago.Rendering;
+namespace LifeSim.Imago.Rendering.Passes;
 
 internal class SkyDomePass : IDisposable
 {

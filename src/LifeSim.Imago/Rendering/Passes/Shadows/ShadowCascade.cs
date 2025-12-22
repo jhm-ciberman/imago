@@ -4,7 +4,7 @@ using LifeSim.Imago.SceneGraph.Cameras;
 using LifeSim.Imago.SceneGraph.Lighting;
 using LifeSim.Imago.Utilities;
 
-namespace LifeSim.Imago.Rendering.Shadows;
+namespace LifeSim.Imago.Rendering.Passes.Shadows;
 
 internal class ShadowCascade
 {

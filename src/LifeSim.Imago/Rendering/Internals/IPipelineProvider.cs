@@ -1,7 +1,7 @@
 using LifeSim.Imago.Assets.Materials;
 using Veldrid;
 
-namespace LifeSim.Imago.Rendering;
+namespace LifeSim.Imago.Rendering.Internals;
 
 internal interface IPipelineProvider
 {

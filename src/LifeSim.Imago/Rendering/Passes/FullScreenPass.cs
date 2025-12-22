@@ -6,7 +6,7 @@ using LifeSim.Imago.Assets.Textures;
 using Veldrid;
 using VeldridTexture = Veldrid.Texture;
 
-namespace LifeSim.Imago.Rendering;
+namespace LifeSim.Imago.Rendering.Passes;
 
 internal class FullScreenPass : IDisposable
 {

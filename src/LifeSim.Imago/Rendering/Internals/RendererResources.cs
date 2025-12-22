@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using LifeSim.Imago.Assets.Materials;
-using LifeSim.Imago.Rendering.Buffers;
+using LifeSim.Imago.Rendering.Internals.Buffers;
 using LifeSim.Imago.SceneGraph;
 using Veldrid;
 using Texture = LifeSim.Imago.Assets.Textures.Texture;
 
-namespace LifeSim.Imago.Rendering;
+namespace LifeSim.Imago.Rendering.Internals;
 
 internal class RendererResources : IDisposable
 {

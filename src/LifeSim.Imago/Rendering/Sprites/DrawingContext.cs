@@ -6,6 +6,7 @@ using FontStashSharp;
 using LifeSim.Imago.Assets.Materials;
 using LifeSim.Imago.Assets.Meshes;
 using LifeSim.Imago.Assets.Textures;
+using LifeSim.Imago.Rendering.Internals;
 using LifeSim.Support.Drawing;
 using LifeSim.Support.Numerics;
 using Veldrid;

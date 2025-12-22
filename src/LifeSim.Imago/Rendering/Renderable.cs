@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using LifeSim.Imago.Assets.Materials;
 using LifeSim.Imago.Assets.Meshes;
-using LifeSim.Imago.Rendering.Buffers;
+using LifeSim.Imago.Rendering.Internals.Buffers;
 using LifeSim.Imago.SceneGraph;
 using LifeSim.Imago.Utilities;
 

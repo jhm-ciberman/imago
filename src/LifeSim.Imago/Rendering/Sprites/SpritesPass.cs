@@ -4,6 +4,7 @@ using LifeSim.Imago.SceneGraph;
 using LifeSim.Imago.Assets.Textures;
 using Veldrid;
 using Shader = LifeSim.Imago.Assets.Materials.Shader;
+using LifeSim.Imago.Rendering.Internals;
 
 namespace LifeSim.Imago.Rendering.Sprites;
 

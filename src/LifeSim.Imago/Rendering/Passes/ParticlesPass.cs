@@ -9,7 +9,7 @@ using LifeSim.Imago.Assets.Textures;
 using LifeSim.Support.Drawing;
 using Veldrid;
 
-namespace LifeSim.Imago.Rendering;
+namespace LifeSim.Imago.Rendering.Passes;
 
 internal class ParticlesPass : IDisposable
 {

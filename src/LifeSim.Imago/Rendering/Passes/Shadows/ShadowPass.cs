@@ -4,13 +4,14 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using LifeSim.Imago.Assets.Materials;
 using LifeSim.Imago.Assets.Meshes;
+using LifeSim.Imago.Rendering.Internals;
 using LifeSim.Imago.SceneGraph.Cameras;
 using LifeSim.Imago.SceneGraph.Lighting;
 using LifeSim.Imago.Utilities;
 using Veldrid;
 using Shader = LifeSim.Imago.Assets.Materials.Shader;
 
-namespace LifeSim.Imago.Rendering.Shadows;
+namespace LifeSim.Imago.Rendering.Passes.Shadows;
 
 internal class ShadowPass : IDisposable, IPipelineProvider
 {

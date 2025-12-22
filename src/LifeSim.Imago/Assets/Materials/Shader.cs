@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using LifeSim.Imago.Assets.Meshes;
 using LifeSim.Imago.Rendering;
+using LifeSim.Imago.Rendering.Internals;
 using Veldrid;
 
 namespace LifeSim.Imago.Assets.Materials;

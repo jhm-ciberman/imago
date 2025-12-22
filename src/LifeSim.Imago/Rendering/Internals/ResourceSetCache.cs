@@ -4,7 +4,7 @@ using LifeSim.Imago.Assets.Textures;
 using Veldrid;
 using Shader = LifeSim.Imago.Assets.Materials.Shader;
 
-namespace LifeSim.Imago.Rendering;
+namespace LifeSim.Imago.Rendering.Internals;
 
 /// <summary>
 /// A cache for resource sets used in rendering. This class provides a way to reuse resource sets

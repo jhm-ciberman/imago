@@ -4,7 +4,7 @@ using LifeSim.Imago.Assets.Textures;
 using Veldrid;
 using Texture = LifeSim.Imago.Assets.Textures.Texture;
 
-namespace LifeSim.Imago.Rendering;
+namespace LifeSim.Imago.Rendering.Passes;
 
 internal class ImGuiPass : IDisposable
 {

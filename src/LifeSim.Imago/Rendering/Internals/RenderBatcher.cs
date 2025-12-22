@@ -4,7 +4,7 @@ using System.Diagnostics;
 using LifeSim.Imago.Assets.Meshes;
 using Veldrid;
 
-namespace LifeSim.Imago.Rendering;
+namespace LifeSim.Imago.Rendering.Internals;
 
 internal enum RenderBatchPassType
 {

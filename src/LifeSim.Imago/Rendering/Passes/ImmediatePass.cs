@@ -11,8 +11,9 @@ using LifeSim.Support.Drawing;
 using Veldrid;
 using Shader = LifeSim.Imago.Assets.Materials.Shader;
 using Texture = LifeSim.Imago.Assets.Textures.Texture;
+using LifeSim.Imago.Rendering.Internals;
 
-namespace LifeSim.Imago.Rendering;
+namespace LifeSim.Imago.Rendering.Passes;
 
 /// <summary>
 /// This class is used to batch draw calls together in immediate mode.
