@@ -4,14 +4,14 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using LifeSim.Imago.Assets.Materials;
 using LifeSim.Imago.Assets.Meshes;
+using LifeSim.Imago.Assets.Textures;
+using LifeSim.Imago.Rendering.Internals;
 using LifeSim.Imago.SceneGraph.Cameras;
 using LifeSim.Imago.SceneGraph.Immediate;
-using LifeSim.Imago.Assets.Textures;
 using LifeSim.Support.Drawing;
 using Veldrid;
 using Shader = LifeSim.Imago.Assets.Materials.Shader;
 using Texture = LifeSim.Imago.Assets.Textures.Texture;
-using LifeSim.Imago.Rendering.Internals;
 
 namespace LifeSim.Imago.Rendering.Passes;
 

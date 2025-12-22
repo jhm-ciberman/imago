@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
+using LifeSim.Imago.Assets.Textures;
 using LifeSim.Imago.Input;
 using LifeSim.Imago.SceneGraph.Cameras;
-using LifeSim.Imago.Assets.Textures;
 using LifeSim.Support.Drawing;
 
 namespace LifeSim.Imago.SceneGraph;

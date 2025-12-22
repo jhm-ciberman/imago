@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
+using LifeSim.Imago.Assets.Textures;
 using LifeSim.Imago.Rendering;
 using LifeSim.Imago.SceneGraph.Cameras;
 using LifeSim.Imago.SceneGraph.Immediate;
 using LifeSim.Imago.SceneGraph.Nodes;
 using LifeSim.Imago.SceneGraph.Picking;
-using LifeSim.Imago.Assets.Textures;
 using LifeSim.Support.Drawing;
 using Veldrid;
 

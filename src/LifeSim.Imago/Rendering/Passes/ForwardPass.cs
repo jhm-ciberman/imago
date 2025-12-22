@@ -4,16 +4,16 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using LifeSim.Imago.Assets.Materials;
 using LifeSim.Imago.Assets.Meshes;
+using LifeSim.Imago.Assets.Textures;
+using LifeSim.Imago.Rendering.Internals;
+using LifeSim.Imago.Rendering.Passes.Shadows;
 using LifeSim.Imago.SceneGraph;
 using LifeSim.Imago.SceneGraph.Cameras;
 using LifeSim.Imago.SceneGraph.Lighting;
-using LifeSim.Imago.Assets.Textures;
 using LifeSim.Imago.Utilities;
 using LifeSim.Support.Drawing;
 using Veldrid;
 using Shader = LifeSim.Imago.Assets.Materials.Shader;
-using LifeSim.Imago.Rendering.Internals;
-using LifeSim.Imago.Rendering.Passes.Shadows;
 
 namespace LifeSim.Imago.Rendering.Passes;
 

@@ -1,10 +1,10 @@
 using System;
 using LifeSim.Imago.Assets.Materials;
-using LifeSim.Imago.SceneGraph;
 using LifeSim.Imago.Assets.Textures;
+using LifeSim.Imago.Rendering.Internals;
+using LifeSim.Imago.SceneGraph;
 using Veldrid;
 using Shader = LifeSim.Imago.Assets.Materials.Shader;
-using LifeSim.Imago.Rendering.Internals;
 
 namespace LifeSim.Imago.Rendering.Sprites;
 

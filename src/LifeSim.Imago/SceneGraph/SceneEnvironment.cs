@@ -1,5 +1,5 @@
-using LifeSim.Imago.SceneGraph.Lighting;
 using LifeSim.Imago.Assets.Textures;
+using LifeSim.Imago.SceneGraph.Lighting;
 using LifeSim.Support.Drawing;
 
 namespace LifeSim.Imago.SceneGraph;
