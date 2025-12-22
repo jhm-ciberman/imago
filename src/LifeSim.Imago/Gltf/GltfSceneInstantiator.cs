@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using LifeSim.Imago.Materials;
 using LifeSim.Imago.Meshes;
+using LifeSim.Imago.SceneGraph;
 using LifeSim.Imago.SceneGraph.Nodes;
 
 namespace LifeSim.Imago.Gltf;

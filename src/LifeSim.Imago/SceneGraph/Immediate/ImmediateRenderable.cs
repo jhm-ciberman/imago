@@ -1,6 +1,6 @@
 using LifeSim.Imago.SceneGraph.Nodes;
 
-namespace LifeSim.Imago.SceneGraph;
+namespace LifeSim.Imago.SceneGraph.Immediate;
 
 /// <summary>
 /// An object that can draw in the immediate mode using the <see cref="IImmediateRenderer"/>.

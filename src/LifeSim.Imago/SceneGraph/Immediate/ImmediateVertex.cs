@@ -1,7 +1,7 @@
 using System.Numerics;
 using LifeSim.Support.Drawing;
 
-namespace LifeSim.Imago.SceneGraph;
+namespace LifeSim.Imago.SceneGraph.Immediate;
 
 /// <summary>
 /// Represents a vertex used for immediate mode rendering.

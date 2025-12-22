@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using LifeSim.Imago.Materials;
 using LifeSim.Imago.Rendering.Buffers;
+using LifeSim.Imago.SceneGraph;
 using Veldrid;
 using Texture = LifeSim.Imago.Textures.Texture;
 

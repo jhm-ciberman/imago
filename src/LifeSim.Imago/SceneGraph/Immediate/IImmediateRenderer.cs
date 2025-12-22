@@ -4,7 +4,7 @@ using LifeSim.Imago.Materials;
 using LifeSim.Imago.Textures;
 using LifeSim.Support.Drawing;
 
-namespace LifeSim.Imago.SceneGraph;
+namespace LifeSim.Imago.SceneGraph.Immediate;
 
 /// <summary>
 /// Defines the contract for immediate mode rendering operations.

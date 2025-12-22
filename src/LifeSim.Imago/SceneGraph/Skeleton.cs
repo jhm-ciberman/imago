@@ -5,7 +5,7 @@ using LifeSim.Imago.Rendering;
 using LifeSim.Imago.Rendering.Buffers;
 using LifeSim.Imago.SceneGraph.Nodes;
 
-namespace LifeSim.Imago;
+namespace LifeSim.Imago.SceneGraph;
 
 /// <summary>
 /// Represents a skeleton for skeletal animation.
