@@ -23,8 +23,8 @@ public static class IInstantiableExtensions
     }
 
     /// <summary>
-    /// Wraps the instantiable in a <see cref="WrapingPrefab"/> if it is not already a <see cref="WrapingPrefab"/>.
-    /// If the instantiable is already a <see cref="WrapingPrefab"/> it is mutated to the new offset and scale.
+    /// Wraps the instantiable in a <see cref="WrappingPrefab"/> if it is not already a <see cref="WrappingPrefab"/>.
+    /// If the instantiable is already a <see cref="WrappingPrefab"/> it is mutated to the new offset and scale.
     /// </summary>
     /// <param name="instantiable">The instantiable resource.</param>
     /// <param name="offset">The offset to use.</param>
@@ -32,6 +32,6 @@ public static class IInstantiableExtensions
     /// <returns>The wrapped instantiable.</returns>
     public static IInstantiable Wrap(this IInstantiable instantiable, Vector3 offset, Vector3? scale = null)
     {
-        return WrapingPrefab.WrapIfNecessary(instantiable, offset, scale);
+        return WrappingPrefab.WrapIfNecessary(instantiable, offset, scale);
     }
 }

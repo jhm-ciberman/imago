@@ -4,7 +4,7 @@ using LifeSim.Imago.SceneGraph.Nodes;
 namespace LifeSim.Imago.SceneGraph.Prefabs;
 
 /// <summary>
-/// A <see cref="WrapingPrefab" /> for a single mesh.
+/// A <see cref="WrappingPrefab" /> for a single mesh.
 /// </summary>
 public class MeshPrefab : IInstantiable
 {

@@ -6,7 +6,7 @@ namespace LifeSim.Imago.SceneGraph.Prefabs;
 /// <summary>
 /// Represents a prefab that wraps an instantiable object with additional transformation properties.
 /// </summary>
-public class WrapingPrefab : IInstantiable
+public class WrappingPrefab : IInstantiable
 {
     /// <summary>
     /// Gets or sets the origin of the model.
@@ -21,10 +21,10 @@ public class WrapingPrefab : IInstantiable
     private readonly IInstantiable _prefab;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="WrapingPrefab"/> class.
+    /// Initializes a new instance of the <see cref="WrappingPrefab"/> class.
     /// </summary>
     /// <param name="prefab">The prefab to wrap.</param>
-    public WrapingPrefab(IInstantiable prefab)
+    public WrappingPrefab(IInstantiable prefab)
     {
         this._prefab = prefab;
     }
@@ -42,7 +42,7 @@ public class WrapingPrefab : IInstantiable
     }
 
     /// <summary>
-    /// Wraps the given prefab in an <see cref="WrapingPrefab"/> if necessary.
+    /// Wraps the given prefab in an <see cref="WrappingPrefab"/> if necessary.
     /// </summary>
     /// <param name="prefab">The prefab to wrap.</param>
     /// <param name="offset">The offset to apply.</param>
@@ -54,14 +54,14 @@ public class WrapingPrefab : IInstantiable
         if (offset == Vector3.Zero && scale == Vector3.One)
             return prefab;
 
-        if (prefab is WrapingPrefab offsetPrefab) // Mutable, but whatever.
+        if (prefab is WrappingPrefab offsetPrefab) // Mutable, but whatever.
         {
             offsetPrefab.Offset += offset;
             offsetPrefab.Scale *= scale.Value;
             return offsetPrefab;
         }
 
-        return new WrapingPrefab(prefab)
+        return new WrappingPrefab(prefab)
         {
             Offset = offset,
             Scale = scale.Value,
