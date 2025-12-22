@@ -6,7 +6,7 @@ using LifeSim.Imago.TexturePacking;
 using LifeSim.Imago.Textures;
 using LifeSim.Support.Numerics;
 
-namespace LifeSim.Imago;
+namespace LifeSim.Imago.Controls;
 
 /// <summary>
 /// A sprite is a container for one or more PackedTextures. The sprite can be animated.

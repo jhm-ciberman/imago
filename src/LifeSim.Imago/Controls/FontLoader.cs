@@ -1,8 +1,7 @@
 using System.IO;
 using FontStashSharp;
-using LifeSim.Imago.Controls;
 
-namespace LifeSim.Imago;
+namespace LifeSim.Imago.Controls;
 
 /// <summary>
 /// Provides functionality for loading fonts into FontStash font systems.
