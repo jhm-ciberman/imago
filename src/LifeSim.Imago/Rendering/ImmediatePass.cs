@@ -17,7 +17,7 @@ namespace LifeSim.Imago.Rendering;
 /// <summary>
 /// This class is used to batch draw calls together in immediate mode.
 /// </summary>
-internal class ImmediatePass : IPipelineProvider, IDisposable, IImediateRenderer
+internal class ImmediatePass : IPipelineProvider, IDisposable, IImmediateRenderer
 {
     private struct PassDataBuffer
     {

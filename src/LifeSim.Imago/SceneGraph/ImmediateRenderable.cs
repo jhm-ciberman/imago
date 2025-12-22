@@ -3,7 +3,7 @@ using LifeSim.Imago.SceneGraph.Nodes;
 namespace LifeSim.Imago.SceneGraph;
 
 /// <summary>
-/// An object that can draw in the immediate mode using the <see cref="IImediateRenderer"/>.
+/// An object that can draw in the immediate mode using the <see cref="IImmediateRenderer"/>.
 /// </summary>
 public class ImmediateRenderable3D : Node3D
 {
@@ -24,8 +24,8 @@ public class ImmediateRenderable3D : Node3D
     /// <summary>
     /// Draws the object in the immediate mode.
     /// </summary>
-    /// <param name="renderer">The <see cref="IImediateRenderer"/> to use.</param>
-    public virtual void Render(IImediateRenderer renderer)
+    /// <param name="renderer">The <see cref="IImmediateRenderer"/> to use.</param>
+    public virtual void Render(IImmediateRenderer renderer)
     {
         //
     }
