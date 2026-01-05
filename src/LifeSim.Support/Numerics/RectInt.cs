@@ -339,4 +339,16 @@ public struct RectInt : IEquatable<RectInt>
     {
         return $"RectInt({this.X}, {this.Y}, {this.Width}, {this.Height})";
     }
+
+    /// <summary>
+    /// Computes the octile distance from a point to the closest cell inside this rectangle.
+    /// </summary>
+    /// <param name="point">The point to measure from.</param>
+    /// <returns>The octile distance to the closest cell, or 0 if the point is inside the rectangle.</returns>
+    public float OctileDistanceTo(Vector2Int point)
+    {
+        int closestX = Math.Clamp(point.X, this.XMin, this.XMax - 1);
+        int closestY = Math.Clamp(point.Y, this.YMin, this.YMax - 1);
+        return Distance.OctileDistance(point, new Vector2Int(closestX, closestY));
+    }
 }

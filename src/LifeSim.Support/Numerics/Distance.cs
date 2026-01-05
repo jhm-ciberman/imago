@@ -36,4 +36,19 @@ public static class Distance
         Vector2 v = a - b;
         return float.Abs(v.X) + float.Abs(v.Y);
     }
+
+    /// <summary>
+    /// Computes the octile distance between two integer coordinate points.
+    /// </summary>
+    /// <param name="a">The first point.</param>
+    /// <param name="b">The second point.</param>
+    /// <returns>The octile distance between the two points.</returns>
+    public static float OctileDistance(Vector2Int a, Vector2Int b)
+    {
+        int dx = int.Abs(a.X - b.X);
+        int dy = int.Abs(a.Y - b.Y);
+        int diagonal = int.Min(dx, dy);
+        int orthogonal = int.Abs(dx - dy);
+        return orthogonal + diagonal * 1.4f;
+    }
 }
