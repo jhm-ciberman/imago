@@ -37,3 +37,6 @@ gdd.md
 
 # Claude Files
 .claude/settings.local.json
+
+# Local files
+*.local.*
