@@ -98,6 +98,7 @@ public class Renderer : IDisposable
     private readonly RendererResources _rendererResources;
     private readonly HashSet<IDisposable> _disposables = new HashSet<IDisposable>();
     private readonly Dictionary<ResourceLayoutDescription, ResourceLayout> _resourceLayoutCache = new();
+    private float _totalTime;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Renderer"/> class.
@@ -154,12 +155,18 @@ public class Renderer : IDisposable
     }
 
     /// <summary>
+    /// Gets the total elapsed time since the renderer was created, in seconds.
+    /// </summary>
+    internal float TotalTime => this._totalTime;
+
+    /// <summary>
     /// Updates the state of the renderer and its components.
     /// </summary>
     /// <param name="deltaTime">The time elapsed since the last frame, in seconds.</param>
     /// <param name="inputSnapshot">The current input snapshot.</param>
     public void Update(float deltaTime, InputSnapshot inputSnapshot)
     {
+        this._totalTime += deltaTime;
         this._imGuiPass.Update(deltaTime, inputSnapshot);
         this._forward3DRenderer.Update(inputSnapshot);
     }
@@ -215,12 +222,13 @@ public class Renderer : IDisposable
     }
 
     /// <summary>
-    /// Creates a new <see cref="Material"/> instance with default shaders.
+    /// Creates a new surface material of the specified type.
     /// </summary>
-    /// <returns>A new <see cref="Material"/> instance.</returns>
-    public Material MakeMaterial()
+    /// <typeparam name="T">The material type, must have a <see cref="SurfaceShaderAttribute"/>.</typeparam>
+    /// <returns>A new material instance.</returns>
+    public T MakeMaterial<T>() where T : Material, ICreateableMaterial<T>
     {
-        return this._forward3DRenderer.MakeMaterial();
+        return this._forward3DRenderer.MakeMaterial<T>();
     }
 
     /// <summary>

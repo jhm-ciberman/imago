@@ -9,7 +9,6 @@ using LifeSim.Imago.SceneGraph.Cameras;
 using LifeSim.Imago.SceneGraph.Lighting;
 using LifeSim.Imago.Utilities;
 using Veldrid;
-using Shader = LifeSim.Imago.Assets.Materials.Shader;
 
 namespace LifeSim.Imago.Rendering.Passes.Shadows;
 
@@ -25,9 +24,14 @@ internal class ShadowPass : IDisposable, IPipelineProvider
         private readonly float _padding1;
     }
 
-    public ShadowMapTexture ShadowmapTexture { get; private set; }
+    [StructLayout(LayoutKind.Sequential)]
+    private struct GlobalData
+    {
+        public Vector3 CameraPosition { get; set; }
+        public float Time { get; set; }
+    }
 
-    public Shader DefaultShader { get; }
+    public ShadowMapTexture ShadowmapTexture { get; private set; }
 
     private readonly ResourceLayout _resourceLayout;
 
@@ -38,6 +42,8 @@ internal class ShadowPass : IDisposable, IPipelineProvider
     private readonly Renderer _renderer;
 
     private readonly DeviceBuffer _shadowmapInfoBuffer;
+
+    private readonly DeviceBuffer _globalDataBuffer;
 
     private readonly RenderBatcher _renderBatcher;
 
@@ -52,14 +58,16 @@ internal class ShadowPass : IDisposable, IPipelineProvider
         var factory = this._gd.ResourceFactory;
 
         this._resourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
-            new ResourceLayoutElementDescription("ShadowMapDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
+            new ResourceLayoutElementDescription("ShadowMapDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex),
+            new ResourceLayoutElementDescription("GlobalDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
         ));
 
         this.ShadowmapTexture = new ShadowMapTexture(size: 16, cascadesCount: 1);
 
         this._shadowmapInfoBuffer = factory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<ShadowMapDataBuffer>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+        this._globalDataBuffer = factory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<GlobalData>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
-        this._resourceSet = factory.CreateResourceSet(new ResourceSetDescription(this._resourceLayout, this._shadowmapInfoBuffer));
+        this._resourceSet = factory.CreateResourceSet(new ResourceSetDescription(this._resourceLayout, this._shadowmapInfoBuffer, this._globalDataBuffer));
 
         this._renderBatcher = new RenderBatcher(this._gd, RenderBatchPassType.ShadowMap);
 
@@ -70,11 +78,6 @@ internal class ShadowPass : IDisposable, IPipelineProvider
         {
             this._cascades[i] = new ShadowCascade();
         }
-
-
-        var shadowmapVertex = ShaderLoader.Load("shadowmap.vert.glsl");
-        var shadowmapFragment = ShaderLoader.Load("shadowmap.frag.glsl");
-        this.DefaultShader = new Shader(renderer, this, shadowmapVertex, shadowmapFragment, new[] { "Surface" });
     }
 
     /// <summary>
@@ -110,7 +113,12 @@ internal class ShadowPass : IDisposable, IPipelineProvider
             data.ShadowBias = new Vector2(this._cascades[i].DepthBias, this._cascades[i].NormalOffset);
             data.LightDirection = mainLight.Direction;
 
+            GlobalData globalData = new GlobalData();
+            globalData.CameraPosition = camera.Position;
+            globalData.Time = this._renderer.TotalTime;
+
             cl.UpdateBuffer(this._shadowmapInfoBuffer, 0, data);
+            cl.UpdateBuffer(this._globalDataBuffer, 0, globalData);
             this._renderBatcher.DrawRenderList(cl, this._resourceSet, renderQueue);
         }
     }
@@ -144,6 +152,7 @@ internal class ShadowPass : IDisposable, IPipelineProvider
         this._resourceLayout.Dispose();
         this.ShadowmapTexture.Dispose();
         this._shadowmapInfoBuffer.Dispose();
+        this._globalDataBuffer.Dispose();
         this._renderBatcher.Dispose();
     }
 

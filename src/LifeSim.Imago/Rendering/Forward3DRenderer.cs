@@ -1,11 +1,16 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using LifeSim.Imago.Assets.Materials;
 using LifeSim.Imago.Assets.Textures;
+using LifeSim.Imago.Rendering.Internals;
 using LifeSim.Imago.Rendering.Passes;
 using LifeSim.Imago.Rendering.Passes.Shadows;
 using LifeSim.Imago.SceneGraph;
 using LifeSim.Support.Drawing;
 using Veldrid;
+using Shader = LifeSim.Imago.Assets.Materials.Shader;
 
 namespace LifeSim.Imago.Rendering;
 
@@ -18,6 +23,7 @@ namespace LifeSim.Imago.Rendering;
 /// </remarks>
 public class Forward3DRenderer : IDisposable
 {
+    private readonly Renderer _renderer;
     private readonly ParticlesPass _particlesPass;
     private readonly SkyDomePass _skyDomePass;
     private readonly GizmosPass _gizmosPass;
@@ -25,6 +31,7 @@ public class Forward3DRenderer : IDisposable
     private readonly ShadowPass _shadowPass;
     private readonly MousePickingPass _mousePickerPass;
     private readonly ImmediatePass _immediatePass;
+    private readonly Dictionary<Type, ShaderSet> _shaderCache = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Forward3DRenderer"/> class.
@@ -32,6 +39,7 @@ public class Forward3DRenderer : IDisposable
     /// <param name="renderer">The main renderer instance.</param>
     public Forward3DRenderer(Renderer renderer)
     {
+        this._renderer = renderer;
         this._mousePickerPass = new MousePickingPass(renderer);
         this._gizmosPass = new GizmosPass(renderer);
         this._particlesPass = new ParticlesPass(renderer);
@@ -42,12 +50,70 @@ public class Forward3DRenderer : IDisposable
     }
 
     /// <summary>
-    /// Creates a new <see cref="Material"/> instance with default shaders.
+    /// Creates a new surface material of the specified type.
     /// </summary>
-    /// <returns>A new <see cref="Material"/> instance.</returns>
-    public Material MakeMaterial()
+    /// <typeparam name="T">The material type, must have a <see cref="SurfaceShaderAttribute"/>.</typeparam>
+    /// <returns>A new material instance.</returns>
+    public T MakeMaterial<T>() where T : Material, ICreateableMaterial<T>
     {
-        return new Material(this._forwardPass.DefaultShader, this._shadowPass.DefaultShader, this._mousePickerPass.DefaultShader);
+        var shaders = this.GetOrCreateShaders<T>();
+        return T.Create(shaders);
+    }
+
+    private ShaderSet GetOrCreateShaders<T>() where T : Material
+    {
+        var type = typeof(T);
+        if (this._shaderCache.TryGetValue(type, out var cached))
+        {
+            return cached;
+        }
+
+        var attr = type.GetCustomAttribute<SurfaceShaderAttribute>()
+            ?? throw new InvalidOperationException($"{type.Name} is missing the [SurfaceShader] attribute.");
+
+        var textureNames = GetMaterialTextureNames(type);
+        var hasParams = HasMaterialParams(type);
+        var shaders = new ShaderSet
+        {
+            Forward = this.CreateShader(attr.FragmentPath, attr.VertexPath, textureNames, hasParams, ShaderPass.Forward, this._forwardPass),
+            Shadow = this.CreateShader(attr.FragmentPath, attr.VertexPath, textureNames, hasParams, ShaderPass.Shadow, this._shadowPass),
+            Picking = this.CreateShader(attr.FragmentPath, attr.VertexPath, textureNames, hasParams, ShaderPass.Picking, this._mousePickerPass)
+        };
+
+        this._shaderCache[type] = shaders;
+        return shaders;
+    }
+
+    private static string[] GetMaterialTextureNames(Type materialType)
+    {
+        return materialType.GetProperties()
+            .Select(p => (prop: p, attr: p.GetCustomAttribute<MaterialTextureAttribute>()))
+            .Where(x => x.attr != null)
+            .Select(x => x.attr!.Name ?? x.prop.Name)
+            .ToArray();
+    }
+
+    private static bool HasMaterialParams(Type materialType)
+    {
+        var baseType = materialType.BaseType;
+        while (baseType != null)
+        {
+            if (baseType.IsGenericType && baseType.GetGenericTypeDefinition() == typeof(Material<>))
+            {
+                return true;
+            }
+
+            baseType = baseType.BaseType;
+        }
+
+        return false;
+    }
+
+    private Shader CreateShader(string? fragmentPath, string? vertexPath, string[] textureNames, bool hasParams, ShaderPass pass, IPipelineProvider pipelineProvider)
+    {
+        var vertexCode = ShaderLoader.AssembleVertexShader(vertexPath, pass);
+        var fragmentCode = ShaderLoader.AssembleSurfaceShader(fragmentPath, pass);
+        return new Shader(this._renderer, pipelineProvider, vertexCode, fragmentCode, textureNames, hasParams);
     }
 
     /// <summary>

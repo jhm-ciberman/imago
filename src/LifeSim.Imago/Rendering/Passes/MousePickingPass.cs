@@ -10,7 +10,6 @@ using LifeSim.Imago.SceneGraph.Cameras;
 using LifeSim.Imago.SceneGraph.Picking;
 using LifeSim.Imago.Utilities;
 using Veldrid;
-using Shader = LifeSim.Imago.Assets.Materials.Shader;
 
 namespace LifeSim.Imago.Rendering.Passes;
 
@@ -25,14 +24,17 @@ internal class MousePickingPass : IDisposable, IPipelineProvider
         public Matrix4x4 ViewProjectionMatrix { get; set; }
     }
 
-    /// <summary>
-    /// Gets the default shader used for the mouse picking pass.
-    /// </summary>
-    public Shader DefaultShader { get; }
+    [StructLayout(LayoutKind.Sequential)]
+    private struct GlobalData
+    {
+        public Vector3 CameraPosition { get; set; }
+        public float Time { get; set; }
+    }
 
     private readonly Renderer _renderer;
     private readonly GraphicsDevice _gd;
     private readonly DeviceBuffer _camera3DInfoBuffer;
+    private readonly DeviceBuffer _globalDataBuffer;
     private readonly ResourceLayout _resourceLayout;
     private readonly ResourceSet _resourceSet;
     private readonly RenderTexture _renderTexture;
@@ -47,20 +49,18 @@ internal class MousePickingPass : IDisposable, IPipelineProvider
         var factory = this._gd.ResourceFactory;
 
         this._resourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
-            new ResourceLayoutElementDescription("CameraDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
+            new ResourceLayoutElementDescription("CameraDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex),
+            new ResourceLayoutElementDescription("GlobalDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
         ));
 
         this._camera3DInfoBuffer = factory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<CameraDataBuffer>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+        this._globalDataBuffer = factory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<GlobalData>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
-        this._resourceSet = this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(this._resourceLayout, this._camera3DInfoBuffer));
+        this._resourceSet = this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(this._resourceLayout, this._camera3DInfoBuffer, this._globalDataBuffer));
 
         this._renderTexture = renderer.MainRenderTexture;
 
         this._renderBatcher = new RenderBatcher(this._gd, RenderBatchPassType.Picking);
-
-        var baseVertex = ShaderLoader.Load("picking.vert.glsl");
-        var baseFragment = ShaderLoader.Load("picking.frag.glsl");
-        this.DefaultShader = new Shader(renderer, this, baseVertex, baseFragment, ["Surface"]);
 
         // This is a 1x1 texture that will be used to read the pixel color from the mouse picking pass.
         this._pixelTexture = factory.CreateTexture(new TextureDescription(
@@ -77,6 +77,7 @@ internal class MousePickingPass : IDisposable, IPipelineProvider
         this._resourceLayout.Dispose();
         this._resourceSet.Dispose();
         this._camera3DInfoBuffer.Dispose();
+        this._globalDataBuffer.Dispose();
         this._pixelTexture.Dispose();
         this._renderBatcher.Dispose();
     }
@@ -106,7 +107,12 @@ internal class MousePickingPass : IDisposable, IPipelineProvider
         CameraDataBuffer cameraInfo = new CameraDataBuffer();
         cameraInfo.ViewProjectionMatrix = camera.ViewProjectionMatrix;
 
+        GlobalData globalData = new GlobalData();
+        globalData.CameraPosition = camera.Position;
+        globalData.Time = this._renderer.TotalTime;
+
         cl.UpdateBuffer(this._camera3DInfoBuffer, 0, ref cameraInfo);
+        cl.UpdateBuffer(this._globalDataBuffer, 0, ref globalData);
 
         this._renderBatcher.DrawRenderList(cl, this._resourceSet, pickingRenderQueue);
     }

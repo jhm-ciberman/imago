@@ -13,7 +13,6 @@ using LifeSim.Imago.SceneGraph.Lighting;
 using LifeSim.Imago.Utilities;
 using LifeSim.Support.Drawing;
 using Veldrid;
-using Shader = LifeSim.Imago.Assets.Materials.Shader;
 
 namespace LifeSim.Imago.Rendering.Passes;
 
@@ -27,6 +26,13 @@ internal class ForwardPass : IDisposable, IPipelineProvider
         public Matrix4x4 ShadowMapMatrix1 { get; set; }
         public Matrix4x4 ShadowMapMatrix2 { get; set; }
         public Matrix4x4 ShadowMapMatrix3 { get; set; }
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct GlobalData
+    {
+        public Vector3 CameraPosition { get; set; }
+        public float Time { get; set; }
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -49,12 +55,11 @@ internal class ForwardPass : IDisposable, IPipelineProvider
     private readonly GraphicsDevice _gd;
     private readonly DeviceBuffer _lightInfoBuffer;
     private readonly DeviceBuffer _camera3DInfoBuffer;
+    private readonly DeviceBuffer _globalDataBuffer;
     private readonly ResourceLayout _resourceLayout;
     private ResourceSet _resourceSet;
     private readonly RenderBatcher _renderBatcher;
     private readonly ShadowPass _shadowPass;
-
-    public Shader DefaultShader { get; }
 
     public ForwardPass(Renderer renderer, ShadowPass shadowPass)
     {
@@ -67,21 +72,19 @@ internal class ForwardPass : IDisposable, IPipelineProvider
             new ResourceLayoutElementDescription("CameraDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex),
             new ResourceLayoutElementDescription("LightDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Fragment),
             new ResourceLayoutElementDescription("ShadowMapTexture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
-            new ResourceLayoutElementDescription("ShadowMapSampler", ResourceKind.Sampler, ShaderStages.Fragment)
+            new ResourceLayoutElementDescription("ShadowMapSampler", ResourceKind.Sampler, ShaderStages.Fragment),
+            new ResourceLayoutElementDescription("GlobalDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex | ShaderStages.Fragment)
         ));
 
         this._camera3DInfoBuffer = factory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<CameraDataBuffer>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
         this._lightInfoBuffer = factory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<LightInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+        this._globalDataBuffer = factory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<GlobalData>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
         this._resourceSet = this.CreatePassResourceSet();
 
         this._renderBatcher = new RenderBatcher(this._gd, RenderBatchPassType.Forward);
 
         this._shadowPass.ShadowmapTexture.Resized += this.Shadowmap_Resized;
-
-        var baseVertex = ShaderLoader.Load("base.vert.glsl");
-        var baseFragment = ShaderLoader.Load("base.frag.glsl");
-        this.DefaultShader = new Shader(renderer, this, baseVertex, baseFragment, new[] { "Surface" });
     }
 
     private void Shadowmap_Resized(object? sender, EventArgs e)
@@ -96,7 +99,8 @@ internal class ForwardPass : IDisposable, IPipelineProvider
             this._camera3DInfoBuffer,
             this._lightInfoBuffer,
             this._shadowPass.ShadowmapTexture.VeldridTexture,
-            this._shadowPass.ShadowmapTexture.ShadowSampler
+            this._shadowPass.ShadowmapTexture.ShadowSampler,
+            this._globalDataBuffer
         ));
     }
 
@@ -134,8 +138,13 @@ internal class ForwardPass : IDisposable, IPipelineProvider
         lightInfo.FogEnd = environment.FogEnd;
         lightInfo.ShadowMapDistances = GetShadowCascadeDistances(environment.MainLight.ShadowMap);
 
+        GlobalData globalData = new GlobalData();
+        globalData.CameraPosition = camera.Position;
+        globalData.Time = this._renderer.TotalTime;
+
         cl.UpdateBuffer(this._camera3DInfoBuffer, 0, ref cameraInfo);
         cl.UpdateBuffer(this._lightInfoBuffer, 0, ref lightInfo);
+        cl.UpdateBuffer(this._globalDataBuffer, 0, ref globalData);
 
         this._renderBatcher.DrawRenderList(cl, this._resourceSet, opaque);
 
@@ -153,6 +162,7 @@ internal class ForwardPass : IDisposable, IPipelineProvider
         this._resourceSet.Dispose();
         this._camera3DInfoBuffer.Dispose();
         this._lightInfoBuffer.Dispose();
+        this._globalDataBuffer.Dispose();
         this._renderBatcher.Dispose();
     }
 

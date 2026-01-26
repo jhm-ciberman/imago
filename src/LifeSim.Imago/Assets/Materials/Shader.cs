@@ -44,6 +44,8 @@ public class Shader : IDisposable
 
     private readonly Renderer _renderer;
 
+    private readonly bool _hasParams;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="Shader"/> class.
     /// </summary>
@@ -52,13 +54,15 @@ public class Shader : IDisposable
     /// <param name="vertexCode">The source vertex shader code.</param>
     /// <param name="fragmentCode">The source fragment shader code.</param>
     /// <param name="textures">The names of the textures used by this shader.</param>
-    internal Shader(Renderer renderer, IPipelineProvider pass, string vertexCode, string fragmentCode, string[]? textures = null)
+    /// <param name="hasParams">Whether the material has a custom parameters buffer.</param>
+    internal Shader(Renderer renderer, IPipelineProvider pass, string vertexCode, string fragmentCode, string[]? textures = null, bool hasParams = false)
     {
         this._renderer = renderer;
         this._pass = pass;
         this._vertexCode = vertexCode;
         this._fragmentCode = fragmentCode;
         this._usedRenderFlags = InferUsedRenderFlags(vertexCode) | InferUsedRenderFlags(fragmentCode);
+        this._hasParams = hasParams;
 
         this._gd = this._renderer.GraphicsDevice;
 
@@ -74,6 +78,11 @@ public class Shader : IDisposable
             var name = this.Textures[i];
             elements.Add(new ResourceLayoutElementDescription(name + "Texture", ResourceKind.TextureReadOnly, ShaderStages.Fragment));
             elements.Add(new ResourceLayoutElementDescription(name + "Sampler", ResourceKind.Sampler, ShaderStages.Fragment));
+        }
+
+        if (this._hasParams)
+        {
+            elements.Add(new ResourceLayoutElementDescription("MaterialParams", ResourceKind.UniformBuffer, ShaderStages.Vertex | ShaderStages.Fragment));
         }
 
         return new ResourceLayoutDescription(elements.ToArray());

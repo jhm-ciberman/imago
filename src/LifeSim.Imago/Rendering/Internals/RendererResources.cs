@@ -151,6 +151,7 @@ internal class RendererResources : IDisposable
         foreach (var material in dirtyMaterials)
         {
             material.Update();
+            material.UpdateResources(commandList);
         }
 
         foreach (var texture in dirtyTextures)

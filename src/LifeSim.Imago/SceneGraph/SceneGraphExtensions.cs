@@ -288,8 +288,8 @@ public static class SceneGraphExtensions
     {
         self.ForEachRecursive<RenderNode3D>((node) =>
         {
-            if (node.Material is null) return;
-            node.Material.Texture = packedTexture.Texture;
+            if (node.Material is not StandardMaterial material) return;
+            material.Texture = packedTexture.Texture;
             node.TextureST = packedTexture.GetTextureST();
         });
     }
