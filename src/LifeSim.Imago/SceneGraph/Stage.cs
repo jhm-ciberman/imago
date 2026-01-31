@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using LifeSim.Imago.Assets.Textures;
+using LifeSim.Imago.Controls;
 using LifeSim.Imago.Input;
 using LifeSim.Imago.SceneGraph.Cameras;
 using LifeSim.Support.Drawing;
@@ -52,10 +53,17 @@ public class Stage
     public Color DefaultClearColor { get; set; } = Color.CoolGray;
 
     /// <summary>
+    /// Gets the built-in tooltip layer for displaying tooltips above all other UI content.
+    /// </summary>
+    public TooltipLayer TooltipLayer { get; }
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="Stage"/> class.
     /// </summary>
     public Stage()
     {
+        this.TooltipLayer = new TooltipLayer();
+        this.AddPersistentLayer(this.TooltipLayer);
     }
 
     /// <summary>
@@ -115,6 +123,7 @@ public class Stage
     /// <param name="layer">The layer to add.</param>
     public void AddPersistentLayer(ILayer layer)
     {
+        layer.Stage = this;
         this._persistentLayers.Add(layer);
         this.RebuildLayerList();
     }
@@ -125,6 +134,7 @@ public class Stage
     /// <param name="layer">The layer to remove.</param>
     public void RemovePersistentLayer(ILayer layer)
     {
+        layer.Stage = null;
         this._persistentLayers.Remove(layer);
         this.RebuildLayerList();
     }
@@ -142,6 +152,12 @@ public class Stage
 
         oldScene.LayerAdded -= this.Scene_LayerAdded;
         oldScene.LayerRemoved -= this.Scene_LayerRemoved;
+
+        foreach (var layer in oldScene.Layers)
+        {
+            layer.Stage = null;
+        }
+
         oldScene.OnDeactivated();
 
         if (oldScene != _emptyScene)
@@ -153,6 +169,12 @@ public class Stage
 
         scene.LayerAdded += this.Scene_LayerAdded;
         scene.LayerRemoved += this.Scene_LayerRemoved;
+
+        foreach (var layer in scene.Layers)
+        {
+            layer.Stage = this;
+        }
+
         scene.OnActivated();
 
         this.RebuildLayerList();
@@ -161,11 +183,13 @@ public class Stage
 
     private void Scene_LayerAdded(object? sender, LayerChangedEventArgs e)
     {
+        e.Layer.Stage = this;
         this.RebuildLayerList();
     }
 
     private void Scene_LayerRemoved(object? sender, LayerChangedEventArgs e)
     {
+        e.Layer.Stage = null;
         this.RebuildLayerList();
     }
 
