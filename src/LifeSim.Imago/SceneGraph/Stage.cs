@@ -318,8 +318,8 @@ public class Stage
         // Update 3D layer with picking state
         if (this.Layer3D != null)
         {
-            var isCursorOverUi = this.IsCursorOverUi();
-            this.Layer3D.Picking.Update(this.Layer3D.Camera, isCursorOverUi);
+            var isCursorOverGui = this.IsCursorOverGui();
+            this.Layer3D.Picking.Update(this.Layer3D.Camera, isCursorOverGui);
         }
 
         this.CurrentScene.Update(deltaTime);
@@ -331,9 +331,9 @@ public class Stage
     public Camera? Camera => this.Layer3D?.Camera;
 
     /// <summary>
-    /// Determines if the cursor is over any UI element in any visible 2D layer.
+    /// Determines if the cursor is over any GUI element in any visible 2D layer.
     /// </summary>
-    public bool IsCursorOverUi()
+    public bool IsCursorOverGui()
     {
         foreach (var layer in this._allLayers)
         {

@@ -39,14 +39,14 @@ public class Scene : IDisposable
     public Layer3D? Layer3D { get; private set; }
 
     /// <summary>
-    /// Gets the primary UI layer of the scene (the first one added), if any.
+    /// Gets the primary GUI layer of the scene (the first one added), if any.
     /// </summary>
-    public LayerUI? LayerUI { get; private set; }
+    public GuiLayer? GuiLayer { get; private set; }
 
     /// <summary>
-    /// Gets all UI layers in the scene, ordered by ZOrder.
+    /// Gets all GUI layers in the scene, ordered by ZOrder.
     /// </summary>
-    public IEnumerable<LayerUI> UiLayers => this._layers.OfType<LayerUI>().OrderBy(l => l.ZOrder);
+    public IEnumerable<GuiLayer> GuiLayers => this._layers.OfType<GuiLayer>().OrderBy(l => l.ZOrder);
 
     /// <summary>
     /// Gets or sets the clear color for the scene.
@@ -104,9 +104,9 @@ public class Scene : IDisposable
 
             this.Layer3D = layer3D;
         }
-        else if (layer is LayerUI layerUI)
+        else if (layer is GuiLayer guiLayer)
         {
-            this.LayerUI ??= layerUI;
+            this.GuiLayer ??= guiLayer;
         }
 
         this._layers.Add(layer);
@@ -125,9 +125,9 @@ public class Scene : IDisposable
         {
             this.Layer3D = null;
         }
-        else if (layer == this.LayerUI)
+        else if (layer == this.GuiLayer)
         {
-            this.LayerUI = this._layers.OfType<LayerUI>().FirstOrDefault();
+            this.GuiLayer = this._layers.OfType<GuiLayer>().FirstOrDefault();
         }
 
         this.LayerRemoved?.Invoke(this, new LayerChangedEventArgs(layer));

@@ -204,14 +204,14 @@ public class ScrollViewer : ContentControl
     }
 
     /// <inheritdoc/>
-    public override void OnAddedToLayer(LayerUI layer)
+    public override void OnAddedToLayer(GuiLayer layer)
     {
         base.OnAddedToLayer(layer);
         this.ScrollBarThumb.OnAddedToLayer(layer);
     }
 
     /// <inheritdoc/>
-    public override void OnRemovedFromLayer(LayerUI layer)
+    public override void OnRemovedFromLayer(GuiLayer layer)
     {
         base.OnRemovedFromLayer(layer);
         this.ScrollBarThumb.OnRemovedFromLayer(layer);

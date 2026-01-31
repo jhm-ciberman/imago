@@ -256,7 +256,7 @@ public class TextBox : Control
     }
 
     /// <inheritdoc/>
-    public override void OnAddedToLayer(LayerUI layer)
+    public override void OnAddedToLayer(GuiLayer layer)
     {
         base.OnAddedToLayer(layer);
 
@@ -268,7 +268,7 @@ public class TextBox : Control
     }
 
     /// <inheritdoc/>
-    public override void OnRemovedFromLayer(LayerUI layer)
+    public override void OnRemovedFromLayer(GuiLayer layer)
     {
         layer.Input.KeyPressed -= this.InputManager_KeyPressed;
         layer.Input.TextEntered -= this.InputManager_TextEntered;

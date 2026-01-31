@@ -21,7 +21,7 @@ public abstract class Visual : ObservableObject, IDisposable
 
     private string _name = string.Empty;
     private Visibility _visibility = Visibility.Visible;
-    private LayerUI? _layer;
+    private GuiLayer? _layer;
     private float _opacity = 1f;
     private readonly List<Visual> _visualChildren = new List<Visual>();
     private bool _clipToBounds = false;
@@ -49,7 +49,7 @@ public abstract class Visual : ObservableObject, IDisposable
     /// Gets the layer the control is added to, or null if the control is not added yet to a layer.
     /// </summary>
 
-    public LayerUI? Layer
+    public GuiLayer? Layer
     {
         get => this._layer;
         private set => this.SetProperty(ref this._layer, value);
@@ -258,11 +258,11 @@ public abstract class Visual : ObservableObject, IDisposable
     private IDisposable? _bindings = null;
 
     /// <summary>
-    /// Called when the control is added to the <see cref="LayerUI"/>.
+    /// Called when the control is added to the <see cref="GuiLayer"/>.
     /// </summary>
-    /// <param name="layer">The <see cref="LayerUI"/> the control is added to.</param>
+    /// <param name="layer">The <see cref="GuiLayer"/> the control is added to.</param>
     /// <exception cref="InvalidOperationException">Thrown if the control is already added to a layer.</exception>
-    public virtual void OnAddedToLayer(LayerUI layer)
+    public virtual void OnAddedToLayer(GuiLayer layer)
     {
         if (this.Layer != null)
         {
@@ -290,11 +290,11 @@ public abstract class Visual : ObservableObject, IDisposable
     }
 
     /// <summary>
-    /// Called when the control is removed from the <see cref="LayerUI"/>.
+    /// Called when the control is removed from the <see cref="GuiLayer"/>.
     /// </summary>
-    /// <param name="layer">The <see cref="LayerUI"/> the control is removed from.</param>
+    /// <param name="layer">The <see cref="GuiLayer"/> the control is removed from.</param>
     /// <exception cref="InvalidOperationException">Thrown if the control is not added to the specified layer.</exception>
-    public virtual void OnRemovedFromLayer(LayerUI layer)
+    public virtual void OnRemovedFromLayer(GuiLayer layer)
     {
         if (this.Layer != layer)
         {
