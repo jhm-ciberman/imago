@@ -99,8 +99,6 @@ internal class SpritesPass : IDisposable, IPipelineProvider
     public void Render(CommandList cl, IRenderTexture renderTexture, ILayer2D layer)
     {
         cl.SetFramebuffer(renderTexture.Framebuffer);
-        cl.ClearColorTarget(0, RgbaFloat.Clear);
-        cl.ClearDepthStencil(1f);
 
         this._drawingContext.Begin(cl);
         layer.Draw(this._drawingContext);

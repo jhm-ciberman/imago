@@ -267,6 +267,11 @@ public class Renderer : IDisposable
             cl.ClearDepthStencil(1f);
         }
 
+        // Clear the GUI render texture once before rendering all 2D layers
+        cl.SetFramebuffer(this.GuiRenderTexture.Framebuffer);
+        cl.ClearColorTarget(0, RgbaFloat.Clear);
+        cl.ClearDepthStencil(1f);
+
         // Render all 2D layers sorted by ZOrder
         foreach (var layer in stage.Layers)
         {
