@@ -5,7 +5,6 @@ using LifeSim.Imago.Input;
 using LifeSim.Imago.Rendering;
 using LifeSim.Imago.Rendering.Sprites;
 using LifeSim.Imago.SceneGraph;
-using LifeSim.Support.Drawing;
 using LifeSim.Support.Numerics;
 
 namespace LifeSim.Imago.Controls;
@@ -46,29 +45,9 @@ public class LayerUI : ILayer2D
     }
 
     /// <summary>
-    /// Gets or sets the render scale, used to adjust for high-DPI displays.
-    /// </summary>
-    public Vector2 RenderScale { get; set; } = Vector2.One;
-
-    /// <summary>
     /// Gets or sets a value indicating whether control positions and sizes should be snapped to the nearest pixel.
     /// </summary>
     public bool SnapToPixels { get; set; } = true;
-
-    /// <summary>
-    /// Gets or sets the custom cursor to display when the mouse is over this layer.
-    /// </summary>
-    public Cursor? Cursor { get; set; } = null;
-
-    /// <summary>
-    /// Gets or sets the scale of the custom cursor.
-    /// </summary>
-    public float CursorScale { get; set; } = .5f;
-
-    /// <summary>
-    /// Gets or sets a value indicating whether the custom cursor is enabled.
-    /// </summary>
-    public bool IsCustomCursorEnabled { get; set; } = true;
 
     /// <summary>
     /// Gets the <see cref="InputManager"/> instance used by this layer.
@@ -140,25 +119,6 @@ public class LayerUI : ILayer2D
 
         ctx.SetViewProjectionMatrix(viewProjectionMatrix);
         this._content.Draw(ctx);
-
-        // Draw custom cursor if set and cursor is visible
-        if (this.IsCustomCursorEnabled)
-        {
-            this.DrawCursor(ctx);
-        }
-    }
-
-    private void DrawCursor(DrawingContext ctx)
-    {
-        if (this.Cursor == null) return;
-
-        var mousePosition = this.WindowToViewport(this.Input.CursorPosition);
-
-        // Draw the cursor texture
-        Vector2 cursorSize = this.Cursor.TextureSize * this.CursorScale;
-        Vector2 hotspot = this.Cursor.HotspotPixels * this.CursorScale;
-        var cursorPosition = mousePosition - hotspot;
-        ctx.DrawTexture(this.Cursor.Texture, cursorPosition, cursorSize, Vector2.Zero, Vector2.One, Color.White);
     }
 
     /// <summary>
@@ -264,6 +224,7 @@ public class LayerUI : ILayer2D
     /// <returns>The point in viewport space.</returns>
     public Vector2 WindowToViewport(Vector2 mousePosition)
     {
-        return (mousePosition - this.Viewport.Position) / this.RenderScale;
+        var guiScale = this.Stage?.GuiScale ?? Vector2.One;
+        return (mousePosition - this.Viewport.Position) / guiScale;
     }
 }

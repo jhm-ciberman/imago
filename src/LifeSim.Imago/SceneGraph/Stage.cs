@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using LifeSim.Imago.Assets.Textures;
 using LifeSim.Imago.Controls;
 using LifeSim.Imago.Input;
@@ -53,9 +54,19 @@ public class Stage
     public Color DefaultClearColor { get; set; } = Color.CoolGray;
 
     /// <summary>
+    /// Gets or sets the scale factor for 2D/GUI layers, used to adjust for high-DPI displays.
+    /// </summary>
+    public Vector2 GuiScale { get; set; } = Vector2.One;
+
+    /// <summary>
     /// Gets the built-in tooltip layer for displaying tooltips above all other UI content.
     /// </summary>
     public TooltipLayer TooltipLayer { get; }
+
+    /// <summary>
+    /// Gets the built-in cursor layer for displaying the mouse cursor above all other content.
+    /// </summary>
+    public CursorLayer CursorLayer { get; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Stage"/> class.
@@ -63,7 +74,9 @@ public class Stage
     public Stage()
     {
         this.TooltipLayer = new TooltipLayer();
+        this.CursorLayer = new CursorLayer();
         this.AddPersistentLayer(this.TooltipLayer);
+        this.AddPersistentLayer(this.CursorLayer);
     }
 
     /// <summary>
