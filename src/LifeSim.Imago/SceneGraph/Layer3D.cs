@@ -26,6 +26,9 @@ public class Layer3D : ILayer, IDisposable
     /// <inheritdoc />
     public bool IsVisible { get; set; } = true;
 
+    /// <inheritdoc />
+    public Stage? Stage { get; set; }
+
     /// <summary>
     /// Gets or sets the clear color of the layer. If null, the layer will not be cleared
     /// and the previous frame will be visible.

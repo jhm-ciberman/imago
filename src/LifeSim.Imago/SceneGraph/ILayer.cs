@@ -16,6 +16,11 @@ public interface ILayer
     public bool IsVisible { get; set; }
 
     /// <summary>
+    /// Gets or sets the stage this layer belongs to.
+    /// </summary>
+    public Stage? Stage { get; set; }
+
+    /// <summary>
     /// Updates the layer state.
     /// </summary>
     /// <param name="deltaTime">Time elapsed since last update in seconds.</param>
