@@ -214,14 +214,15 @@ public class TextBox : Control
     /// <inheritdoc/>
     protected override Vector2 MeasureOverride(Vector2 availableSize)
     {
-        if (this.Text.Length == 0)
-        {
-            return new Vector2(0f, this.TextBlock.ActualLineHeight) + this.Padding.Total;
-        }
-
         var padding = this.Padding.Total;
         availableSize -= padding;
         this.TextBlock.Measure(availableSize);
+
+        if (this.Text.Length == 0)
+        {
+            return new Vector2(0f, this.TextBlock.ActualLineHeight) + padding;
+        }
+
         return this.TextBlock.DesiredSize + padding;
     }
 
