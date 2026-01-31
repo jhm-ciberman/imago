@@ -323,6 +323,11 @@ public class Stage
         }
 
         this.CurrentScene.Update(deltaTime);
+
+        foreach (var layer in this._allLayers)
+        {
+            layer.Update(deltaTime);
+        }
     }
 
     /// <summary>

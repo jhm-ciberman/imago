@@ -148,15 +148,12 @@ public class Scene : IDisposable
     }
 
     /// <summary>
-    /// Updates the scene and all its layers.
+    /// Updates the scene. Override this method to add custom scene logic.
+    /// Layer updates are handled by the Stage.
     /// </summary>
     /// <param name="deltaTime">The time elapsed since the last update, in seconds.</param>
     public virtual void Update(float deltaTime)
     {
-        foreach (var layer in this._layers)
-        {
-            layer.Update(deltaTime);
-        }
     }
 
     /// <summary>
