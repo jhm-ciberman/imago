@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using LifeSim.Imago.Controls;
 using LifeSim.Imago.SceneGraph.Cameras;
 using LifeSim.Support.Drawing;
@@ -38,9 +39,14 @@ public class Scene : IDisposable
     public Layer3D? Layer3D { get; private set; }
 
     /// <summary>
-    /// Gets the primary UI layer of the scene, if any.
+    /// Gets the primary UI layer of the scene (the first one added), if any.
     /// </summary>
     public LayerUI? LayerUI { get; private set; }
+
+    /// <summary>
+    /// Gets all UI layers in the scene, ordered by ZOrder.
+    /// </summary>
+    public IEnumerable<LayerUI> UiLayers => this._layers.OfType<LayerUI>().OrderBy(l => l.ZOrder);
 
     /// <summary>
     /// Gets or sets the clear color for the scene.
@@ -85,7 +91,7 @@ public class Scene : IDisposable
     /// </summary>
     /// <param name="layer">The layer to add.</param>
     /// <exception cref="InvalidOperationException">
-    /// Thrown when attempting to add a second Layer3D or LayerUI.
+    /// Thrown when attempting to add a second Layer3D.
     /// </exception>
     public void AddLayer(ILayer layer)
     {
@@ -100,12 +106,7 @@ public class Scene : IDisposable
         }
         else if (layer is LayerUI layerUI)
         {
-            if (this.LayerUI != null)
-            {
-                throw new InvalidOperationException("Scene already has a LayerUI. Only one LayerUI per scene is supported.");
-            }
-
-            this.LayerUI = layerUI;
+            this.LayerUI ??= layerUI;
         }
 
         this._layers.Add(layer);
@@ -126,7 +127,7 @@ public class Scene : IDisposable
         }
         else if (layer == this.LayerUI)
         {
-            this.LayerUI = null;
+            this.LayerUI = this._layers.OfType<LayerUI>().FirstOrDefault();
         }
 
         this.LayerRemoved?.Invoke(this, new LayerChangedEventArgs(layer));

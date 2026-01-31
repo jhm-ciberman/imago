@@ -32,6 +32,7 @@ public class Stage
 
     private readonly List<ILayer> _persistentLayers = new();
     private readonly List<ILayer> _allLayers = new();
+    private readonly List<IInputHandler> _inputHandlers = new();
 
     /// <summary>
     /// Gets the current scene being displayed.
@@ -212,83 +213,97 @@ public class Stage
         this._allLayers.AddRange(this._persistentLayers);
         this._allLayers.AddRange(this.CurrentScene.Layers);
         this._allLayers.Sort((a, b) => a.ZOrder.CompareTo(b.ZOrder));
+
+        this._inputHandlers.Clear();
+        foreach (var layer in this._allLayers)
+        {
+            if (layer is IInputHandler handler)
+            {
+                this._inputHandlers.Add(handler);
+            }
+        }
     }
 
     /// <summary>
-    /// Handles mouse button press events by routing to layers in reverse Z-order.
+    /// Handles mouse button press events by routing to input handlers in reverse Z-order.
     /// </summary>
     /// <param name="e">The mouse button event arguments.</param>
     public void HandleMousePressed(MouseButtonEventArgs e)
     {
-        for (int i = this._allLayers.Count - 1; i >= 0; i--)
+        for (int i = this._inputHandlers.Count - 1; i >= 0; i--)
         {
-            if (this._allLayers[i] is ILayer2D layer2D && layer2D.IsVisible)
+            var handler = this._inputHandlers[i];
+            if (handler.IsVisible)
             {
-                layer2D.HandleMousePressed(e);
+                handler.HandleMousePressed(e);
                 if (e.Handled) return;
             }
         }
     }
 
     /// <summary>
-    /// Handles mouse button release events by routing to layers in reverse Z-order.
+    /// Handles mouse button release events by routing to input handlers in reverse Z-order.
     /// </summary>
     /// <param name="e">The mouse button event arguments.</param>
     public void HandleMouseReleased(MouseButtonEventArgs e)
     {
-        for (int i = this._allLayers.Count - 1; i >= 0; i--)
+        for (int i = this._inputHandlers.Count - 1; i >= 0; i--)
         {
-            if (this._allLayers[i] is ILayer2D layer2D && layer2D.IsVisible)
+            var handler = this._inputHandlers[i];
+            if (handler.IsVisible)
             {
-                layer2D.HandleMouseReleased(e);
+                handler.HandleMouseReleased(e);
                 if (e.Handled) return;
             }
         }
     }
 
     /// <summary>
-    /// Handles mouse wheel scroll events by routing to layers in reverse Z-order.
+    /// Handles mouse wheel scroll events by routing to input handlers in reverse Z-order.
     /// </summary>
     /// <param name="e">The mouse wheel event arguments.</param>
     public void HandleMouseWheelScrolled(MouseWheelEventArgs e)
     {
-        for (int i = this._allLayers.Count - 1; i >= 0; i--)
+        for (int i = this._inputHandlers.Count - 1; i >= 0; i--)
         {
-            if (this._allLayers[i] is ILayer2D layer2D && layer2D.IsVisible)
+            var handler = this._inputHandlers[i];
+            if (handler.IsVisible)
             {
-                layer2D.HandleMouseWheel(e);
+                handler.HandleMouseWheel(e);
                 if (e.Handled) return;
             }
         }
     }
 
     /// <summary>
-    /// Handles key press events by routing to layers in reverse Z-order.
+    /// Handles key press events by routing to input handlers in reverse Z-order.
     /// </summary>
     /// <param name="e">The keyboard event arguments.</param>
     public void HandleKeyPressed(KeyboardEventArgs e)
     {
-        for (int i = this._allLayers.Count - 1; i >= 0; i--)
+        for (int i = this._inputHandlers.Count - 1; i >= 0; i--)
         {
-            if (this._allLayers[i] is ILayer2D layer2D && layer2D.IsVisible)
+            var handler = this._inputHandlers[i];
+            if (handler.IsVisible)
             {
-                layer2D.HandleKeyPressed(e);
+                handler.HandleKeyPressed(e);
                 if (e.Handled) return;
             }
         }
     }
 
     /// <summary>
-    /// Handles key release events by routing to layers in reverse Z-order.
+    /// Handles key release events by routing to input handlers in reverse Z-order.
     /// </summary>
     /// <param name="e">The keyboard event arguments.</param>
     public void HandleKeyReleased(KeyboardEventArgs e)
     {
-        for (int i = this._allLayers.Count - 1; i >= 0; i--)
+        for (int i = this._inputHandlers.Count - 1; i >= 0; i--)
         {
-            if (this._allLayers[i] is ILayer2D layer2D && layer2D.IsVisible)
+            var handler = this._inputHandlers[i];
+            if (handler.IsVisible)
             {
-                layer2D.HandleKeyReleased(e);
+                handler.HandleKeyReleased(e);
                 if (e.Handled) return;
             }
         }

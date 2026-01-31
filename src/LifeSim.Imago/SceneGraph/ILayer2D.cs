@@ -1,10 +1,9 @@
-using LifeSim.Imago.Input;
 using LifeSim.Imago.Rendering.Sprites;
 
 namespace LifeSim.Imago.SceneGraph;
 
 /// <summary>
-/// Defines a contract for 2D layers that can be rendered and handle user input.
+/// Defines a contract for 2D layers that can be rendered.
 /// </summary>
 public interface ILayer2D : ILayer
 {
@@ -18,44 +17,4 @@ public interface ILayer2D : ILayer
     /// </summary>
     /// <param name="ctx">The drawing context to use for rendering.</param>
     public void Draw(DrawingContext ctx);
-
-    /// <summary>
-    /// Handles mouse button press events.
-    /// </summary>
-    /// <param name="e">The mouse button event arguments.</param>
-    public void HandleMousePressed(MouseButtonEventArgs e)
-    {
-    }
-
-    /// <summary>
-    /// Handles mouse button release events.
-    /// </summary>
-    /// <param name="e">The mouse button event arguments.</param>
-    public void HandleMouseReleased(MouseButtonEventArgs e)
-    {
-    }
-
-    /// <summary>
-    /// Handles mouse wheel scroll events.
-    /// </summary>
-    /// <param name="e">The mouse wheel event arguments.</param>
-    public void HandleMouseWheel(MouseWheelEventArgs e)
-    {
-    }
-
-    /// <summary>
-    /// Handles keyboard key press events.
-    /// </summary>
-    /// <param name="e">The keyboard event arguments.</param>
-    public void HandleKeyPressed(KeyboardEventArgs e)
-    {
-    }
-
-    /// <summary>
-    /// Handles keyboard key release events.
-    /// </summary>
-    /// <param name="e">The keyboard event arguments.</param>
-    public void HandleKeyReleased(KeyboardEventArgs e)
-    {
-    }
 }

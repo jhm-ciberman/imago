@@ -12,13 +12,18 @@ namespace LifeSim.Imago.Controls;
 /// <summary>
 /// Represents the root of a 2D user interface, managing the layout, rendering, and input for a tree of <see cref="Control"/> objects.
 /// </summary>
-public class LayerUI : ILayer2D
+public class LayerUI : ILayer2D, IInputHandler
 {
     /// <inheritdoc />
     public int ZOrder { get; init; } = 100;
 
     /// <inheritdoc />
     public bool IsVisible { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether this layer blocks input from reaching layers below it.
+    /// </summary>
+    public bool BlocksInputBelow { get; set; } = false;
 
     /// <inheritdoc />
     public Stage? Stage { get; set; }
@@ -154,6 +159,11 @@ public class LayerUI : ILayer2D
     public void HandleMousePressed(MouseButtonEventArgs e)
     {
         this.ControlUnderCursor?.HandleMousePressed(e);
+
+        if (this.BlocksInputBelow)
+        {
+            e.Handled = true;
+        }
     }
 
     /// <summary>
@@ -163,6 +173,11 @@ public class LayerUI : ILayer2D
     public void HandleMouseReleased(MouseButtonEventArgs e)
     {
         this.ControlUnderCursor?.HandleMouseReleased(e);
+
+        if (this.BlocksInputBelow)
+        {
+            e.Handled = true;
+        }
     }
 
     /// <summary>
@@ -172,6 +187,11 @@ public class LayerUI : ILayer2D
     public void HandleMouseWheel(MouseWheelEventArgs e)
     {
         this.ControlUnderCursor?.HandleMouseWheel(e);
+
+        if (this.BlocksInputBelow)
+        {
+            e.Handled = true;
+        }
     }
 
     /// <summary>
@@ -180,7 +200,10 @@ public class LayerUI : ILayer2D
     /// <param name="e">The event arguments.</param>
     public void HandleKeyPressed(KeyboardEventArgs e)
     {
-        //
+        if (this.BlocksInputBelow)
+        {
+            e.Handled = true;
+        }
     }
 
     /// <summary>
@@ -189,7 +212,10 @@ public class LayerUI : ILayer2D
     /// <param name="e">The event arguments.</param>
     public void HandleKeyReleased(KeyboardEventArgs e)
     {
-        //
+        if (this.BlocksInputBelow)
+        {
+            e.Handled = true;
+        }
     }
 
     /// <summary>
