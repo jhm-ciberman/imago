@@ -128,6 +128,8 @@ public class ScrollViewer : ContentControl
     public ScrollViewer() : base()
     {
         this.ClipToBounds = true;
+        this.HorizontalAlignment = HorizontalAlignment.Stretch;
+        this.VerticalAlignment = VerticalAlignment.Stretch;
     }
 
     /// <inheritdoc/>
@@ -152,7 +154,7 @@ public class ScrollViewer : ContentControl
     {
         if (this.Content != null)
         {
-            Rect rect = new Rect(finalRect.Position - this._scrollOffset, Vector2.Min(this.Content.DesiredSize, finalRect.Size));
+            Rect rect = new Rect(finalRect.Position - this._scrollOffset, this.Content.DesiredSize);
             this.Content.Arrange(rect);
             this.ActualSize = finalRect.Size; // I set up the ActualSize here so it can be used by "OnScrollChanged"
             this.ScrollBarThumb.Arrange(finalRect);
