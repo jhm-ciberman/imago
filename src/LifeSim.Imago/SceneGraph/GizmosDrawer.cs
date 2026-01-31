@@ -42,7 +42,7 @@ public struct DebugLine
 /// <summary>
 /// Provides functionality for drawing debug visualization elements such as lines, shapes, and wireframes.
 /// </summary>
-public class GizmosLayer
+public class GizmosDrawer
 {
     private readonly SwapPopList<DebugLine> _lines = new SwapPopList<DebugLine>();
 
@@ -52,14 +52,14 @@ public class GizmosLayer
     public IReadOnlyList<DebugLine> Lines => this._lines;
 
     /// <summary>
-    /// Gets the default gizmos layer instance used throughout the application.
+    /// Gets the default gizmos drawer instance used throughout the application.
     /// </summary>
-    public static GizmosLayer Default { get; private set; } = null!;
+    public static GizmosDrawer Default { get; private set; } = null!;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="GizmosLayer"/> class.
+    /// Initializes a new instance of the <see cref="GizmosDrawer"/> class.
     /// </summary>
-    public GizmosLayer()
+    public GizmosDrawer()
     {
         Default ??= this;
     }

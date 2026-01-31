@@ -20,7 +20,7 @@ public static class SkeletonHelper
         {
             var node = rootNode.Children[i];
             var childPosition = node.WorldMatrix.Translation;
-            GizmosLayer.Default.DrawLine(position, childPosition, Color.Red);
+            GizmosDrawer.Default.DrawLine(position, childPosition, Color.Red);
 
             DrawSkeleton(node);
         }

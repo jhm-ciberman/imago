@@ -85,7 +85,7 @@ internal class GizmosPass : IDisposable
     /// <param name="renderTexture">The render texture to render the gizmos to.</param>
     /// <param name="camera">The camera to use for rendering.</param>
     /// <param name="gizmos">The gizmos to render.</param>
-    public void Render(CommandList cl, RenderTexture renderTexture, Camera camera, GizmosLayer gizmos)
+    public void Render(CommandList cl, RenderTexture renderTexture, Camera camera, GizmosDrawer gizmos)
     {
         if (gizmos.Lines.Count == 0) return;
 

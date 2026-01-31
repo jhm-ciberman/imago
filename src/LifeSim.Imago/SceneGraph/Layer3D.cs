@@ -64,9 +64,9 @@ public class Layer3D : ILayer, IDisposable
     public SceneEnvironment Environment { get; set; } = new SceneEnvironment();
 
     /// <summary>
-    /// Gets the gizmos layer used to render debug and editor visuals.
+    /// Gets the gizmos drawer used to render debug and editor visuals.
     /// </summary>
-    public GizmosLayer Gizmos { get; } = new GizmosLayer();
+    public GizmosDrawer Gizmos { get; } = new GizmosDrawer();
 
     /// <summary>
     /// Gets the picking manager for object selection in this layer.
