@@ -334,7 +334,7 @@ public class DrawingContext : IDisposable
 
         var fsColor = new FSColor(color.R, color.G, color.B, color.A);
         var style = TextStyle.None;
-        font.DrawText(this._fontStashAdapter, text, position, fsColor, Vector2.One, 0, Vector2.Zero, 0, 0, 0, style, effect, effectAmount);
+        font.DrawText(this._fontStashAdapter, text, position, fsColor, 0, Vector2.Zero, Vector2.One, 0, 0, 0, style, effect, effectAmount);
     }
 
     /// <summary>
