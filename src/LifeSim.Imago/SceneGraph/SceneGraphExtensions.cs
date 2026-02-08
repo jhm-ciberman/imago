@@ -6,6 +6,7 @@ using LifeSim.Imago.Assets.TexturePacking;
 using LifeSim.Imago.SceneGraph.Nodes;
 using LifeSim.Imago.Utilities;
 using LifeSim.Support.Collections;
+using LifeSim.Support.Drawing;
 using LifeSim.Support.Numerics;
 
 namespace LifeSim.Imago.SceneGraph;
@@ -193,6 +194,16 @@ public static class SceneGraphExtensions
             node.Material = material;
             node.TextureST = textureST;
         });
+    }
+
+    /// <summary>
+    /// Sets the specified albedo color to all renderable nodes starting from the specified node.
+    /// </summary>
+    /// <param name="self">The node.</param>
+    /// <param name="color">The albedo color to set.</param>
+    public static void SetAlbedoColor(this Node3D self, Color color)
+    {
+        self.ForEachRecursive<RenderNode3D>((node) => node.AlbedoColor = color);
     }
 
     /// <summary>
