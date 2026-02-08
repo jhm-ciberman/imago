@@ -558,7 +558,7 @@ internal class Renderable : IDisposable
         if (layer.ForceWireframe) flags |= RenderFlags.Wireframe;
         if (this.RenderQueues.HasFlag(RenderQueues.Transparent)) flags |= RenderFlags.Transparent;
         if (layer.EnableFog) flags |= RenderFlags.Fog;
-        if (layer.EnablePixelPerfectShadows) flags |= RenderFlags.PixelPerfactShadows;
+        if (!layer.EnablePixelPerfectShadows) flags &= ~RenderFlags.PixelPerfectShadows;
         if (layer.LightingHalfLambert) flags |= RenderFlags.HalfLambert;
         if (layer.CascadesCount > 1) flags |= RenderFlags.ShadowCascades;
 

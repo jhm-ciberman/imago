@@ -142,7 +142,7 @@ public class Shader : IDisposable
         [RenderFlags.DepthWrite] = "ENABLE_DEPTH_WRITE",
         [RenderFlags.ReceiveShadows] = "ENABLE_RECEIVE_SHADOWS",
         [RenderFlags.Fog] = "ENABLE_FOG",
-        [RenderFlags.PixelPerfactShadows] = "ENABLE_PIXEL_PERFECT_SHADOWS",
+        [RenderFlags.PixelPerfectShadows] = "ENABLE_PIXEL_PERFECT_SHADOWS",
         [RenderFlags.ColorWrite] = "ENABLE_COLOR_WRITE",
         [RenderFlags.ShadowCascades] = "ENABLE_SHADOW_CASCADES",
         [RenderFlags.HalfLambert] = "ENABLE_HALF_LAMBERT",

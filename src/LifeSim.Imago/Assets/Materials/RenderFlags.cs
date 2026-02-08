@@ -45,7 +45,7 @@ internal enum RenderFlags : short
     /// <summary>
     /// Specifies that pixel-perfect shadows should be used for the material.
     /// </summary>
-    PixelPerfactShadows = 1 << 8,
+    PixelPerfectShadows = 1 << 8,
     /// <summary>
     /// Specifies that scissor testing should be enabled for the material.
     /// </summary>

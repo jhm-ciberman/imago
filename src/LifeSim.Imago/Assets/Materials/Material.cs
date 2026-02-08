@@ -25,7 +25,7 @@ public abstract class Material : IDisposable
 
     private bool _resourceSetDirty = false;
 
-    internal RenderFlags RenderFlags { get; set; } = RenderFlags.DepthTest | RenderFlags.DepthWrite | RenderFlags.ReceiveShadows | RenderFlags.ColorWrite;
+    internal RenderFlags RenderFlags { get; set; } = RenderFlags.DepthTest | RenderFlags.DepthWrite | RenderFlags.ReceiveShadows | RenderFlags.ColorWrite | RenderFlags.PixelPerfectShadows;
 
     /// <summary>
     /// Gets the shader used for the forward rendering pass.
@@ -116,6 +116,11 @@ public abstract class Material : IDisposable
     /// Gets or sets a value indicating whether this material can receive shadows.
     /// </summary>
     public bool ReceiveShadows { get => this.GetRenderFlag(RenderFlags.ReceiveShadows); set => this.SetRenderFlag(RenderFlags.ReceiveShadows, value); }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether pixel-perfect shadow sampling is enabled.
+    /// </summary>
+    public bool PixelPerfectShadows { get => this.GetRenderFlag(RenderFlags.PixelPerfectShadows); set => this.SetRenderFlag(RenderFlags.PixelPerfectShadows, value); }
 
     /// <summary>
     /// Gets the material parameters buffer, if any. Override in derived classes to provide custom parameters.
