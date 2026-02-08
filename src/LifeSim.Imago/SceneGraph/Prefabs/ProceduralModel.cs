@@ -1,6 +1,4 @@
 using System;
-using LifeSim.Imago.Assets.Meshes;
-using LifeSim.Imago.SceneGraph.Nodes;
 
 namespace LifeSim.Imago.SceneGraph.Prefabs;
 
@@ -26,35 +24,15 @@ public sealed class ProceduralModelAttribute : Attribute
 }
 
 /// <summary>
-/// Base class for code-defined 3D models that are discoverable via the <see cref="ProceduralModelAttribute"/>.
+/// A stateless factory that creates <see cref="IInstantiable"/> prefabs for code-defined 3D models.
+/// Implementations are discovered via the <see cref="ProceduralModelAttribute"/> and cached by the registry.
 /// </summary>
-/// <remarks>
-/// <para>For simple single-mesh models, override <see cref="BuildMesh"/>. The mesh is built once and cached
-/// automatically; each call to <see cref="Instantiate"/> returns a new <see cref="RenderNode3D"/> sharing the
-/// same GPU mesh.</para>
-/// <para>For complex scene graph hierarchies, override <see cref="Instantiate"/> directly and cache meshes
-/// as fields using the <c>??=</c> pattern.</para>
-/// </remarks>
-public abstract class ProceduralModel : IInstantiable
+public interface IProceduralModel
 {
-    private Mesh? _cachedMesh;
-
     /// <summary>
-    /// Builds the mesh for this model. Called once; the result is cached by the default <see cref="Instantiate"/>
-    /// implementation.
+    /// Creates a prefab for this model using the given request parameters.
     /// </summary>
-    /// <returns>The mesh for this model.</returns>
-    protected virtual Mesh BuildMesh()
-    {
-        throw new NotImplementedException(
-            $"{this.GetType().Name} must override BuildMesh() or Instantiate()."
-        );
-    }
-
-    /// <inheritdoc />
-    public virtual Node3D Instantiate()
-    {
-        this._cachedMesh ??= this.BuildMesh();
-        return new RenderNode3D(this._cachedMesh);
-    }
+    /// <param name="request">The request containing the model name and query parameters.</param>
+    /// <returns>An instantiable prefab.</returns>
+    public IInstantiable CreatePrefab(ProceduralModelRequest request);
 }
