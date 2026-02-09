@@ -231,6 +231,26 @@ public class RenderStatistics
     public PhaseTimer GpuSync { get; } = new(HistoryCapacity);
 
     /// <summary>
+    /// Gets the shadow mapping sub-phase time within the 3D pass.
+    /// </summary>
+    public PhaseTimer ShadowSubPass { get; } = new(HistoryCapacity);
+
+    /// <summary>
+    /// Gets the forward rendering sub-phase time within the 3D pass.
+    /// </summary>
+    public PhaseTimer ForwardSubPass { get; } = new(HistoryCapacity);
+
+    /// <summary>
+    /// Gets the mouse picking sub-phase time within the 3D pass.
+    /// </summary>
+    public PhaseTimer PickingSubPass { get; } = new(HistoryCapacity);
+
+    /// <summary>
+    /// Gets the combined time of minor 3D sub-phases (sky dome, immediate, particles, gizmos).
+    /// </summary>
+    public PhaseTimer OtherSubPass { get; } = new(HistoryCapacity);
+
+    /// <summary>
     /// Snapshots the current frame's statistics into the public properties
     /// and resets the accumulators for the next frame.
     /// </summary>
@@ -248,6 +268,10 @@ public class RenderStatistics
         this.Pass3D.BeginFrame();
         this.Pass2D.BeginFrame();
         this.GpuSync.BeginFrame();
+        this.ShadowSubPass.BeginFrame();
+        this.ForwardSubPass.BeginFrame();
+        this.PickingSubPass.BeginFrame();
+        this.OtherSubPass.BeginFrame();
 
         this.CurrentDrawCalls = 0;
         this.CurrentShadowDrawCalls = 0;

@@ -146,13 +146,29 @@ public class Forward3DRenderer : IDisposable
         var pickingRQ = layer.PickingRenderQueue;
         var shadowCasterRQs = new Span<RenderQueue>(layer.ShadowCasterRenderQueues, 0, layer.CascadesCount);
 
+        var stats = this._renderer.Statistics;
+
+        stats.ShadowSubPass.Begin();
         this._shadowPass.Render(cl, camera, layer.Environment.MainLight, shadowCasterRQs);
+        stats.ShadowSubPass.End();
+
+        stats.ForwardSubPass.Begin();
         this._forwardPass.Render(cl, renderTexture, camera, layer.Environment, opaqueRQ, transparentRQ);
+        stats.ForwardSubPass.End();
+
+        stats.OtherSubPass.Begin();
         this._skyDomePass.Render(cl, renderTexture, camera, layer.Environment);
         this._immediatePass.Render(cl, renderTexture, camera, immediateRQ);
+        stats.OtherSubPass.End();
+
+        stats.PickingSubPass.Begin();
         this._mousePickerPass.Render(cl, renderTexture, camera, layer.Picking, pickingRQ);
+        stats.PickingSubPass.End();
+
+        stats.OtherSubPass.Begin();
         this._particlesPass.Render(cl, renderTexture, camera, layer.ParticleSystems);
         this._gizmosPass.Render(cl, renderTexture, camera, layer.Gizmos);
+        stats.OtherSubPass.End();
     }
 
     private void ClearRenderTarget(CommandList cl, Layer3D layer)
