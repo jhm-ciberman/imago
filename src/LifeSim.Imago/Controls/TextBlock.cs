@@ -256,6 +256,8 @@ public class TextBlock : Control
         }
     }
 
+    private readonly List<InlineSegment> _segmentBuffer = new();
+
     /// <inheritdoc/>
     protected override Vector2 MeasureOverride(Vector2 availableSize)
     {
@@ -269,11 +271,10 @@ public class TextBlock : Control
             return Vector2.Zero;
         }
 
-        var font = this.Font;
         var maxWidth = 0f;
         for (var i = 0; i < this._textLines.Count; i++)
         {
-            var lineWidth = font.MeasureString(this._textLines[i]).X;
+            var lineWidth = this.MeasureLineWidth(this._textLines[i]);
             maxWidth = MathF.Max(maxWidth, lineWidth);
         }
 
@@ -286,11 +287,13 @@ public class TextBlock : Control
         base.DrawCore(ctx);
 
         var font = this.Font;
+        var provider = Visual.DefaultInlineObjectProvider;
         var offset = new Vector2(0f, MathF.Ceiling(this._lineSpacing / 2f));
+
         for (var i = 0; i < this._textLines.Count; i++)
         {
             var line = this._textLines[i];
-            var lineWidth = font.MeasureString(line).X;
+            var lineWidth = this.MeasureLineWidth(line);
 
             var xOffset = this._textHorizontalAlignment switch
             {
@@ -301,25 +304,99 @@ public class TextBlock : Control
             };
 
             Vector2 position = this.Position + offset + new Vector2(xOffset, i * this.ActualLineHeight);
-            if (this._textEffect == null)
+
+            if (provider == null)
             {
-                ctx.DrawText(font, line, position, this.Foreground);
+                this.DrawTextSegment(ctx, font, line, position);
             }
             else
             {
-                this._textEffect.Draw(ctx, line, font, position, this.Foreground);
+                provider.Parse(line, this.FontSize, this._segmentBuffer);
+                this.DrawSegments(ctx, font, line, position, this._segmentBuffer);
+            }
+        }
+    }
+
+    private float MeasureLineWidth(string line)
+    {
+        var provider = Visual.DefaultInlineObjectProvider;
+        var font = this.Font;
+
+        if (provider == null)
+        {
+            return font.MeasureString(line).X;
+        }
+
+        provider.Parse(line, this.FontSize, this._segmentBuffer);
+
+        var totalWidth = 0f;
+        foreach (var segment in this._segmentBuffer)
+        {
+            if (segment.IsInlineObject)
+            {
+                totalWidth += segment.Size.X;
+            }
+            else
+            {
+                totalWidth += font.MeasureString(line.Substring(segment.Start, segment.Length)).X;
+            }
+        }
+
+        return totalWidth;
+    }
+
+    private void DrawTextSegment(DrawingContext ctx, SpriteFontBase font, string text, Vector2 position)
+    {
+        if (this._textEffect == null)
+        {
+            ctx.DrawText(font, text, position, this.Foreground);
+        }
+        else
+        {
+            this._textEffect.Draw(ctx, text, font, position, this.Foreground);
+        }
+    }
+
+    private void DrawSegments(
+        DrawingContext ctx,
+        SpriteFontBase font,
+        string line,
+        Vector2 position,
+        List<InlineSegment> segments
+    )
+    {
+        var cursorX = position.X;
+
+        foreach (var segment in segments)
+        {
+            if (segment.IsInlineObject)
+            {
+                var yOffset = (this.ActualLineHeight - segment.Size.Y) / 2f;
+                ctx.DrawTexture(
+                    segment.Texture!,
+                    new Vector2(cursorX, position.Y + yOffset - this._lineSpacing / 2f),
+                    segment.Size
+                );
+                cursorX += segment.Size.X;
+            }
+            else
+            {
+                var text = line.Substring(segment.Start, segment.Length);
+                this.DrawTextSegment(ctx, font, text, new Vector2(cursorX, position.Y));
+                cursorX += font.MeasureString(text).X;
             }
         }
     }
 
     /// <summary>
-    /// Measures the size of a specified number of characters from the beginning of the text.
+    /// Measures the width of the first <paramref name="charNumber"/> characters of the text,
+    /// accounting for inline objects and surrogate pairs.
     /// </summary>
     /// <param name="charNumber">The number of characters to measure.</param>
     /// <returns>The size of the measured substring.</returns>
     internal Vector2 MeasureString(int charNumber)
     {
-        if (this.Text == string.Empty)
+        if (this.Text == string.Empty || charNumber <= 0)
         {
             return Vector2.Zero;
         }
@@ -329,11 +406,57 @@ public class TextBlock : Control
             this.RecomputeTextLines(this.ActualSize);
         }
 
+        var provider = Visual.DefaultInlineObjectProvider;
+        var font = this.Font;
         var size = Vector2.Zero;
+
         for (var i = 0; i < this._textLines.Count; i++)
         {
-            var span = this._textLines[i].AsSpan(0, charNumber);
-            size.X = Math.Max(size.X, this.Font.MeasureString(span.ToString()).X);
+            var line = this._textLines[i];
+            var measureTo = Math.Min(charNumber, line.Length);
+
+            float width;
+            if (provider != null)
+            {
+                provider.Parse(line, this.FontSize, this._segmentBuffer);
+                width = 0f;
+                int charsCounted = 0;
+                foreach (var seg in this._segmentBuffer)
+                {
+                    if (charsCounted >= measureTo)
+                    {
+                        break;
+                    }
+
+                    if (seg.IsInlineObject)
+                    {
+                        if (charsCounted + seg.Length <= measureTo)
+                        {
+                            width += seg.Size.X;
+                        }
+
+                        charsCounted += seg.Length;
+                    }
+                    else
+                    {
+                        int segChars = Math.Min(seg.Length, measureTo - charsCounted);
+                        width += font.MeasureString(line.Substring(seg.Start, segChars)).X;
+                        charsCounted += segChars;
+                    }
+                }
+            }
+            else
+            {
+                // Never split a surrogate pair.
+                if (measureTo > 0 && measureTo < line.Length && char.IsLowSurrogate(line[measureTo]))
+                {
+                    measureTo--;
+                }
+
+                width = font.MeasureString(line.Substring(0, measureTo)).X;
+            }
+
+            size.X = Math.Max(size.X, width);
         }
 
         return size;

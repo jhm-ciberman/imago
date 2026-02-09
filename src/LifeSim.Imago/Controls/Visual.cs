@@ -19,6 +19,13 @@ public abstract class Visual : ObservableObject, IDisposable
     /// </summary>
     public static FontSystem? DefaultFontSystem { get; set; } = null!;
 
+    /// <summary>
+    /// Gets or sets the default inline object provider used by text controls.
+    /// When set, <see cref="TextBlock"/> will query this provider to render inline
+    /// non-text objects (such as emoji) within text content.
+    /// </summary>
+    public static IInlineObjectProvider? DefaultInlineObjectProvider { get; set; }
+
     private string _name = string.Empty;
     private Visibility _visibility = Visibility.Visible;
     private GuiLayer? _layer;

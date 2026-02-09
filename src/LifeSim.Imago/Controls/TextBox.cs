@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Numerics;
 using LifeSim.Imago.Input;
@@ -81,6 +82,8 @@ public class TextBox : Control
 
     private bool _caretVisible = true;
 
+    private readonly List<InlineSegment> _segmentBuffer = new();
+
 
     private void TextBlock_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
@@ -148,17 +151,16 @@ public class TextBox : Control
         switch (e.Key)
         {
             case Key.BackSpace:
-                this.CaretIndex--;
-                this.RemoveCharacter(this.CaretIndex);
+                this.DeleteClusterBackward();
                 break;
             case Key.Delete:
-                this.RemoveCharacter(this.CaretIndex);
+                this.DeleteClusterForward();
                 break;
             case Key.Left:
-                this.CaretIndex--;
+                this.MoveCaretLeft();
                 break;
             case Key.Right:
-                this.CaretIndex++;
+                this.MoveCaretRight();
                 break;
             case Key.Home:
             case Key.Up:
@@ -199,16 +201,115 @@ public class TextBox : Control
     }
 
     /// <summary>
-    /// Removes a character from the text at the specified index, handling surrogate pairs.
+    /// Finds the inline object segment that contains the given index, if any.
     /// </summary>
-    /// <param name="index">The zero-based index of the character to remove.</param>
-    protected void RemoveCharacter(int index)
+    private bool TryGetInlineSegmentAt(int index, out InlineSegment segment)
     {
-        if (index >= this.Text.Length || index < 0) return;
+        segment = default;
+        var provider = Visual.DefaultInlineObjectProvider;
+        if (provider == null || this.Text.Length == 0)
+        {
+            return false;
+        }
 
-        this.Text = char.IsSurrogate(this.Text, index)
-            ? this.Text.Remove(index - 1, 2)
-            : this.Text.Remove(index, 1);
+        provider.Parse(this.Text, this.TextBlock.FontSize, this._segmentBuffer);
+        foreach (var seg in this._segmentBuffer)
+        {
+            if (seg.IsInlineObject && index >= seg.Start && index < seg.Start + seg.Length)
+            {
+                segment = seg;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void DeleteClusterForward()
+    {
+        if (this.CaretIndex >= this.Text.Length) return;
+
+        if (this.TryGetInlineSegmentAt(this.CaretIndex, out var seg))
+        {
+            this.Text = this.Text.Remove(seg.Start, seg.Length);
+            this.CaretIndex = seg.Start;
+        }
+        else if (char.IsHighSurrogate(this.Text[this.CaretIndex]))
+        {
+            this.Text = this.Text.Remove(this.CaretIndex, 2);
+        }
+        else
+        {
+            this.Text = this.Text.Remove(this.CaretIndex, 1);
+        }
+    }
+
+    private void DeleteClusterBackward()
+    {
+        if (this.CaretIndex <= 0) return;
+
+        // Compute the target caret position before changing text, because
+        // setting Text triggers PropertyChanged which clamps _caretIndex.
+        if (this.TryGetInlineSegmentAt(this.CaretIndex - 1, out var seg))
+        {
+            this.Text = this.Text.Remove(seg.Start, seg.Length);
+            this.CaretIndex = seg.Start;
+        }
+        else if (char.IsLowSurrogate(this.Text[this.CaretIndex - 1]) && this.CaretIndex >= 2)
+        {
+            int newCaret = this.CaretIndex - 2;
+            this.Text = this.Text.Remove(newCaret, 2);
+            this.CaretIndex = newCaret;
+        }
+        else
+        {
+            int newCaret = this.CaretIndex - 1;
+            this.Text = this.Text.Remove(newCaret, 1);
+            this.CaretIndex = newCaret;
+        }
+    }
+
+    private void MoveCaretLeft()
+    {
+        if (this.CaretIndex <= 0) return;
+
+        // Skip over entire inline object clusters.
+        if (this.TryGetInlineSegmentAt(this.CaretIndex - 1, out var seg))
+        {
+            this.CaretIndex = seg.Start;
+            return;
+        }
+
+        this.CaretIndex--;
+
+        // Skip over surrogate pairs so the caret never lands between them.
+        if (this.CaretIndex > 0 && this.CaretIndex < this.Text.Length
+            && char.IsLowSurrogate(this.Text[this.CaretIndex]))
+        {
+            this.CaretIndex--;
+        }
+    }
+
+    private void MoveCaretRight()
+    {
+        if (this.CaretIndex >= this.Text.Length) return;
+
+        // Skip over entire inline object clusters.
+        if (this.TryGetInlineSegmentAt(this.CaretIndex, out var seg))
+        {
+            this.CaretIndex = seg.Start + seg.Length;
+            return;
+        }
+
+        // Step over the entire surrogate pair at once.
+        if (char.IsHighSurrogate(this.Text[this.CaretIndex]))
+        {
+            this.CaretIndex += 2;
+        }
+        else
+        {
+            this.CaretIndex++;
+        }
     }
 
     /// <inheritdoc/>
