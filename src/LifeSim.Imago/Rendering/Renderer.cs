@@ -302,6 +302,8 @@ public class Renderer : IDisposable
         this._disposeCollector.DisposeAll();
         stats.GpuSync.End();
 
+        this._forward3DRenderer.ReadPickingResult(stage.Layer3D);
+
         stats.RenderTime.End();
 
         if (this.GraphicsDevice.MainSwapchain != null)

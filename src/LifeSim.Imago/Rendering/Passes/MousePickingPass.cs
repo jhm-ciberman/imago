@@ -39,7 +39,7 @@ internal class MousePickingPass : IDisposable, IPipelineProvider
     private readonly ResourceSet _resourceSet;
     private readonly RenderTexture _renderTexture;
     private readonly RenderBatcher _renderBatcher;
-    private readonly Veldrid.Texture _pixelTexture;
+    private readonly Veldrid.Texture _pixelStagingTexture;
     private Vector2 _mousePosition;
 
     public MousePickingPass(Renderer renderer)
@@ -62,8 +62,7 @@ internal class MousePickingPass : IDisposable, IPipelineProvider
 
         this._renderBatcher = new RenderBatcher(this._gd, RenderBatchPassType.Picking, renderer.Statistics);
 
-        // This is a 1x1 texture that will be used to read the pixel color from the mouse picking pass.
-        this._pixelTexture = factory.CreateTexture(new TextureDescription(
+        this._pixelStagingTexture = factory.CreateTexture(new TextureDescription(
             width: 1, height: 1, depth: 1, mipLevels: 1, arrayLayers: 1,
             PixelFormat.R32_UInt, TextureUsage.Staging, TextureType.Texture2D
         ));
@@ -78,7 +77,7 @@ internal class MousePickingPass : IDisposable, IPipelineProvider
         this._resourceSet.Dispose();
         this._camera3DInfoBuffer.Dispose();
         this._globalDataBuffer.Dispose();
-        this._pixelTexture.Dispose();
+        this._pixelStagingTexture.Dispose();
         this._renderBatcher.Dispose();
     }
 
@@ -88,15 +87,16 @@ internal class MousePickingPass : IDisposable, IPipelineProvider
     /// <param name="cl">The command list to use for rendering.</param>
     /// <param name="renderTexture">The render texture to render the scene to.</param>
     /// <param name="camera">The camera to use for rendering.</param>
-    /// <param name="pickingManger">The picking manager to use for picking.</param>
+    /// <param name="pickingManager">The picking manager to update with the result.</param>
     /// <param name="pickingRenderQueue">The render queue to use for rendering.</param>
-    public void Render(CommandList cl, RenderTexture renderTexture, Camera camera, PickingManager pickingManger, RenderQueue pickingRenderQueue)
+    public void Render(CommandList cl, RenderTexture renderTexture, Camera camera, PickingManager pickingManager, RenderQueue pickingRenderQueue)
     {
-        // Step 1: Read the pixel color from the previous frame.
-        uint objectID = this.ReadPixel(cl);
-        pickingManger.HighlightedPickable = pickingManger.GetPickable(objectID);
+        // Record a copy from the picking texture into a staging texture.
+        // The actual Map/read and PickingManager update happen in ReadStagingResult(),
+        // called after command submission.
+        this.RecordCopy(cl);
 
-        // Step 2: Render the scene to the picking texture.
+        // Render the scene to the picking texture.
         var frustumForCulling = new BoundingFrustum(camera.FrustumCullingCamera.ViewProjectionMatrix);
         pickingRenderQueue.Update(frustumForCulling, camera.Position);
 
@@ -127,6 +127,20 @@ internal class MousePickingPass : IDisposable, IPipelineProvider
         this._mousePosition = mousePos;
     }
 
+    /// <summary>
+    /// Reads the picking result from the staging texture and updates the picking manager.
+    /// Must be called after command submission so the copy has executed.
+    /// </summary>
+    /// <param name="pickingManager">The picking manager to update.</param>
+    public void ReadStagingResult(PickingManager pickingManager)
+    {
+        var mappedResource = this._gd.Map<uint>(this._pixelStagingTexture, MapMode.Read);
+        uint objectID = mappedResource[0, 0];
+        this._gd.Unmap(this._pixelStagingTexture);
+
+        pickingManager.HighlightedPickable = pickingManager.GetPickable(objectID);
+    }
+
     private bool MouseIsInside(Vector2 mousePos)
     {
         if (mousePos.X < 0 || mousePos.Y < 0) return false;
@@ -135,30 +149,24 @@ internal class MousePickingPass : IDisposable, IPipelineProvider
         return true;
     }
 
-    private uint ReadPixel(CommandList cl)
+    private void RecordCopy(CommandList cl)
     {
         var mousePos = this._mousePosition;
         if (this.MouseIsInside(mousePos))
         {
-            uint x = (uint) mousePos.X;
+            uint x = (uint)mousePos.X;
             uint y = this._gd.IsUvOriginTopLeft
-                ? (uint) mousePos.Y
-                : (uint) (this._renderTexture.PickingColorTexture.Height - 1 - mousePos.Y);
+                ? (uint)mousePos.Y
+                : (uint)(this._renderTexture.PickingColorTexture.Height - 1 - mousePos.Y);
 
             cl.CopyTexture(
                 source: this._renderTexture.PickingColorTexture,
                 srcX: x, srcY: y, srcZ: 0, srcMipLevel: 0, srcBaseArrayLayer: 0,
-                destination: this._pixelTexture,
+                destination: this._pixelStagingTexture,
                 dstX: 0, dstY: 0, dstZ: 0, dstMipLevel: 0, dstBaseArrayLayer: 0,
                 width: 1, height: 1, depth: 1, layerCount: 1
             );
         }
-
-        var mappedResource = this._gd.Map<uint>(this._pixelTexture, MapMode.Read);
-        uint objectID = mappedResource[0, 0];
-        this._gd.Unmap(this._pixelTexture);
-
-        return objectID;
     }
 
     Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant, RenderFlags flags, TextureSampleCount sampleCount)

@@ -126,6 +126,18 @@ public class Forward3DRenderer : IDisposable
     }
 
     /// <summary>
+    /// Reads the picking result from the staging texture and updates the picking manager.
+    /// Must be called after command submission.
+    /// </summary>
+    /// <param name="layer">The 3D layer whose picking manager should be updated, or null if no 3D layer is active.</param>
+    public void ReadPickingResult(Layer3D? layer)
+    {
+        if (layer == null) return;
+
+        this._mousePickerPass.ReadStagingResult(layer.Picking);
+    }
+
+    /// <summary>
     /// Renders a <see cref="Layer3D"/> to the specified <see cref="RenderTexture"/>.
     /// </summary>
     /// <param name="cl">The Veldrid command list.</param>
