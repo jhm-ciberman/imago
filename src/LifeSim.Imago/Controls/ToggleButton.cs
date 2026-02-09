@@ -13,6 +13,7 @@ public class ToggleButton : Button
     public event EventHandler? CheckedChanged;
 
     private bool _isChecked;
+    private bool _allowUncheck = true;
     private ButtonAppearance _checkedAppearance = ButtonAppearance.Default;
 
     /// <summary>
@@ -29,6 +30,16 @@ public class ToggleButton : Button
             this.OnPropertyChanged(nameof(this.IsChecked));
             this.CheckedChanged?.Invoke(this, EventArgs.Empty);
         }
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether clicking a checked toggle button will uncheck it.
+    /// When false, the button can only be unchecked programmatically. Defaults to true.
+    /// </summary>
+    public bool AllowUncheck
+    {
+        get => this._allowUncheck;
+        set => this._allowUncheck = value;
     }
 
     /// <summary>
@@ -88,6 +99,8 @@ public class ToggleButton : Button
 
     private void ToggleButton_Click(object? sender, EventArgs e)
     {
+        if (this.IsChecked && !this.AllowUncheck) return;
+
         this.IsChecked = !this.IsChecked;
     }
 }
