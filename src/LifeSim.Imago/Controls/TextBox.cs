@@ -244,7 +244,7 @@ public class TextBox : Control
     {
         if (this.CaretIndex <= 0) return;
 
-        // Skip over entire inline object clusters.
+        // Skip over entire inline content clusters.
         if (this.TextBlock.TryGetInlineSegmentAt(this.CaretIndex - 1, out var seg))
         {
             this.CaretIndex = seg.Start;
@@ -265,7 +265,7 @@ public class TextBox : Control
     {
         if (this.CaretIndex >= this.Text.Length) return;
 
-        // Skip over entire inline object clusters.
+        // Skip over entire inline content clusters.
         if (this.TextBlock.TryGetInlineSegmentAt(this.CaretIndex, out var seg))
         {
             this.CaretIndex = seg.Start + seg.Length;

@@ -23,7 +23,7 @@ public enum TextWrap
 
 /// <summary>
 /// A self-contained text layout engine that splits text into lines and segments,
-/// caches measurements, and supports inline objects. Setting any input property
+/// caches measurements, and supports inline contents. Setting any input property
 /// marks the layout dirty; reading any output triggers lazy recomputation.
 /// </summary>
 public class TextLayout
@@ -33,14 +33,14 @@ public class TextLayout
     private float _fontSize = 11f;
     private float _lineHeight = float.NaN;
     private TextWrap _textWrap = TextWrap.NoWrap;
-    private IInlineObjectProvider? _inlineObjectProvider;
+    private IInlineContentParser? _inlineContentParser;
     private float _availableWidth;
 
     /// <summary>
-    /// Gets or sets the default inline object provider used by all <see cref="TextLayout"/> instances.
-    /// When set, layouts without an explicit <see cref="InlineObjectProvider"/> will fall back to this.
+    /// Gets or sets the default inline content provider used by all <see cref="TextLayout"/> instances.
+    /// When set, layouts without an explicit <see cref="InlineContentParser"/> will fall back to this.
     /// </summary>
-    public static IInlineObjectProvider? DefaultInlineObjectProvider { get; set; }
+    public static IInlineContentParser? DefaultInlineContentParser { get; set; }
 
     private bool _isDirty = true;
     private float _actualLineHeight;
@@ -85,7 +85,7 @@ public class TextLayout
     }
 
     /// <summary>
-    /// Gets or sets the font size, passed to the inline object provider for sizing.
+    /// Gets or sets the font size, passed to the inline content provider for sizing.
     /// </summary>
     public float FontSize
     {
@@ -113,12 +113,12 @@ public class TextLayout
     }
 
     /// <summary>
-    /// Gets or sets the inline object provider used to detect and size inline objects within text.
+    /// Gets or sets the inline content provider used to detect and size inline contents within text.
     /// </summary>
-    public IInlineObjectProvider? InlineObjectProvider
+    public IInlineContentParser? InlineContentParser
     {
-        get => this._inlineObjectProvider;
-        set => this.SetProperty(ref this._inlineObjectProvider, value);
+        get => this._inlineContentParser;
+        set => this.SetProperty(ref this._inlineContentParser, value);
     }
 
     /// <summary>
@@ -195,7 +195,7 @@ public class TextLayout
         for (int s = segStart; s < segEnd; s++)
         {
             var seg = this._segments[s];
-            totalWidth += seg.IsInlineObject
+            totalWidth += seg.IsInlineContent
                 ? seg.Size.X
                 : this._font!.MeasureString(line.Substring(seg.Start, seg.Length)).X;
         }
@@ -228,7 +228,7 @@ public class TextLayout
 
     /// <summary>
     /// Measures the pixel width of the first <paramref name="charCount"/> characters,
-    /// accounting for inline objects and surrogate pairs.
+    /// accounting for inline contents and surrogate pairs.
     /// </summary>
     /// <param name="charCount">The number of characters to measure.</param>
     /// <returns>The width in pixels.</returns>
@@ -264,7 +264,7 @@ public class TextLayout
                 if (charsCounted >= measureTo) break;
 
                 var seg = this._segments[s];
-                if (seg.IsInlineObject)
+                if (seg.IsInlineContent)
                 {
                     if (charsCounted + seg.Length <= measureTo)
                     {
@@ -288,11 +288,11 @@ public class TextLayout
     }
 
     /// <summary>
-    /// Finds the inline object segment that contains the given character index, if any.
+    /// Finds the inline content segment that contains the given character index, if any.
     /// </summary>
     /// <param name="charIndex">The character index to test.</param>
     /// <param name="segment">When this method returns <c>true</c>, the matching inline segment.</param>
-    /// <returns><c>true</c> if the character is inside an inline object segment; otherwise <c>false</c>.</returns>
+    /// <returns><c>true</c> if the character is inside an inline content segment; otherwise <c>false</c>.</returns>
     public bool TryGetInlineSegmentAt(int charIndex, out InlineSegment segment)
     {
         this.EnsureUpToDate();
@@ -301,7 +301,7 @@ public class TextLayout
         for (int i = 0; i < this._segments.Count; i++)
         {
             var seg = this._segments[i];
-            if (seg.IsInlineObject && charIndex >= seg.Start && charIndex < seg.Start + seg.Length)
+            if (seg.IsInlineContent && charIndex >= seg.Start && charIndex < seg.Start + seg.Length)
             {
                 segment = seg;
                 return true;
@@ -429,7 +429,7 @@ public class TextLayout
         this._segments.Clear();
         this._segmentLineStarts.Clear();
 
-        var provider = this._inlineObjectProvider ?? DefaultInlineObjectProvider;
+        var provider = this._inlineContentParser ?? DefaultInlineContentParser;
 
         for (int i = 0; i < this._lines.Count; i++)
         {

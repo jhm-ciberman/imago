@@ -261,7 +261,7 @@ public class TextBlock : Control
             for (int s = 0; s < segCount; s++)
             {
                 var segment = layout.GetLineSegment(i, s);
-                if (segment.IsInlineObject)
+                if (segment.IsInlineContent)
                 {
                     var yOffset = (layout.ActualLineHeight - segment.Size.Y) / 2f;
                     ctx.DrawTexture(
@@ -295,7 +295,7 @@ public class TextBlock : Control
 
     /// <summary>
     /// Measures the width of the first <paramref name="charNumber"/> characters of the text,
-    /// accounting for inline objects and surrogate pairs.
+    /// accounting for inline contents and surrogate pairs.
     /// </summary>
     /// <param name="charNumber">The number of characters to measure.</param>
     /// <returns>The size of the measured substring.</returns>
@@ -306,11 +306,11 @@ public class TextBlock : Control
     }
 
     /// <summary>
-    /// Finds the inline object segment that contains the given character index, if any.
+    /// Finds the inline content segment that contains the given character index, if any.
     /// </summary>
     /// <param name="charIndex">The character index to test.</param>
     /// <param name="segment">When this method returns <c>true</c>, the matching inline segment.</param>
-    /// <returns><c>true</c> if the character is inside an inline object segment; otherwise <c>false</c>.</returns>
+    /// <returns><c>true</c> if the character is inside an inline content segment; otherwise <c>false</c>.</returns>
     internal bool TryGetInlineSegmentAt(int charIndex, out InlineSegment segment)
     {
         this.EnsureLayoutFont();
