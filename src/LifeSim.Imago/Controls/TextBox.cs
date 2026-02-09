@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Numerics;
 using LifeSim.Imago.Input;
@@ -81,9 +80,6 @@ public class TextBox : Control
     private float _caretBlinkTimer = 0f;
 
     private bool _caretVisible = true;
-
-    private readonly List<InlineSegment> _segmentBuffer = new();
-
 
     private void TextBlock_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
@@ -200,36 +196,11 @@ public class TextBox : Control
         }
     }
 
-    /// <summary>
-    /// Finds the inline object segment that contains the given index, if any.
-    /// </summary>
-    private bool TryGetInlineSegmentAt(int index, out InlineSegment segment)
-    {
-        segment = default;
-        var provider = Visual.DefaultInlineObjectProvider;
-        if (provider == null || this.Text.Length == 0)
-        {
-            return false;
-        }
-
-        provider.Parse(this.Text, this.TextBlock.FontSize, this._segmentBuffer);
-        foreach (var seg in this._segmentBuffer)
-        {
-            if (seg.IsInlineObject && index >= seg.Start && index < seg.Start + seg.Length)
-            {
-                segment = seg;
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     private void DeleteClusterForward()
     {
         if (this.CaretIndex >= this.Text.Length) return;
 
-        if (this.TryGetInlineSegmentAt(this.CaretIndex, out var seg))
+        if (this.TextBlock.TryGetInlineSegmentAt(this.CaretIndex, out var seg))
         {
             this.Text = this.Text.Remove(seg.Start, seg.Length);
             this.CaretIndex = seg.Start;
@@ -250,7 +221,7 @@ public class TextBox : Control
 
         // Compute the target caret position before changing text, because
         // setting Text triggers PropertyChanged which clamps _caretIndex.
-        if (this.TryGetInlineSegmentAt(this.CaretIndex - 1, out var seg))
+        if (this.TextBlock.TryGetInlineSegmentAt(this.CaretIndex - 1, out var seg))
         {
             this.Text = this.Text.Remove(seg.Start, seg.Length);
             this.CaretIndex = seg.Start;
@@ -274,7 +245,7 @@ public class TextBox : Control
         if (this.CaretIndex <= 0) return;
 
         // Skip over entire inline object clusters.
-        if (this.TryGetInlineSegmentAt(this.CaretIndex - 1, out var seg))
+        if (this.TextBlock.TryGetInlineSegmentAt(this.CaretIndex - 1, out var seg))
         {
             this.CaretIndex = seg.Start;
             return;
@@ -295,7 +266,7 @@ public class TextBox : Control
         if (this.CaretIndex >= this.Text.Length) return;
 
         // Skip over entire inline object clusters.
-        if (this.TryGetInlineSegmentAt(this.CaretIndex, out var seg))
+        if (this.TextBlock.TryGetInlineSegmentAt(this.CaretIndex, out var seg))
         {
             this.CaretIndex = seg.Start + seg.Length;
             return;

@@ -256,7 +256,9 @@ public class TextBlock : Control
         }
     }
 
-    private readonly List<InlineSegment> _segmentBuffer = new();
+    private readonly List<InlineSegment> _segments = new();
+    private readonly List<int> _segmentLineStarts = new();
+    private readonly List<InlineSegment> _parseBuffer = new();
 
     /// <inheritdoc/>
     protected override Vector2 MeasureOverride(Vector2 availableSize)
@@ -274,7 +276,7 @@ public class TextBlock : Control
         var maxWidth = 0f;
         for (var i = 0; i < this._textLines.Count; i++)
         {
-            var lineWidth = this.MeasureLineWidth(this._textLines[i]);
+            var lineWidth = this.MeasureLineWidth(i);
             maxWidth = MathF.Max(maxWidth, lineWidth);
         }
 
@@ -287,13 +289,12 @@ public class TextBlock : Control
         base.DrawCore(ctx);
 
         var font = this.Font;
-        var provider = Visual.DefaultInlineObjectProvider;
         var offset = new Vector2(0f, MathF.Ceiling(this._lineSpacing / 2f));
 
         for (var i = 0; i < this._textLines.Count; i++)
         {
             var line = this._textLines[i];
-            var lineWidth = this.MeasureLineWidth(line);
+            var lineWidth = this.MeasureLineWidth(i);
 
             var xOffset = this._textHorizontalAlignment switch
             {
@@ -304,42 +305,49 @@ public class TextBlock : Control
             };
 
             Vector2 position = this.Position + offset + new Vector2(xOffset, i * this.ActualLineHeight);
+            int segStart = this._segmentLineStarts[i];
+            int segEnd = this._segmentLineStarts[i + 1];
+            var cursorX = position.X;
 
-            if (provider == null)
+            for (int s = segStart; s < segEnd; s++)
             {
-                this.DrawTextSegment(ctx, font, line, position);
-            }
-            else
-            {
-                provider.Parse(line, this.FontSize, this._segmentBuffer);
-                this.DrawSegments(ctx, font, line, position, this._segmentBuffer);
+                var segment = this._segments[s];
+                if (segment.IsInlineObject)
+                {
+                    var yOffset = (this.ActualLineHeight - segment.Size.Y) / 2f;
+                    ctx.DrawTexture(
+                        segment.Texture!,
+                        new Vector2(cursorX, position.Y + yOffset - this._lineSpacing / 2f),
+                        segment.Size
+                    );
+                    cursorX += segment.Size.X;
+                }
+                else
+                {
+                    var text = line.Substring(segment.Start, segment.Length);
+                    this.DrawTextSegment(ctx, font, text, new Vector2(cursorX, position.Y));
+                    cursorX += font.MeasureString(text).X;
+                }
             }
         }
     }
 
-    private float MeasureLineWidth(string line)
+    private float MeasureLineWidth(int lineIndex)
     {
-        var provider = Visual.DefaultInlineObjectProvider;
+        var line = this._textLines[lineIndex];
+        if (line.Length == 0) return 0f;
+
         var font = this.Font;
-
-        if (provider == null)
-        {
-            return font.MeasureString(line).X;
-        }
-
-        provider.Parse(line, this.FontSize, this._segmentBuffer);
+        int segStart = this._segmentLineStarts[lineIndex];
+        int segEnd = this._segmentLineStarts[lineIndex + 1];
 
         var totalWidth = 0f;
-        foreach (var segment in this._segmentBuffer)
+        for (int s = segStart; s < segEnd; s++)
         {
-            if (segment.IsInlineObject)
-            {
-                totalWidth += segment.Size.X;
-            }
-            else
-            {
-                totalWidth += font.MeasureString(line.Substring(segment.Start, segment.Length)).X;
-            }
+            var seg = this._segments[s];
+            totalWidth += seg.IsInlineObject
+                ? seg.Size.X
+                : font.MeasureString(line.Substring(seg.Start, seg.Length)).X;
         }
 
         return totalWidth;
@@ -354,37 +362,6 @@ public class TextBlock : Control
         else
         {
             this._textEffect.Draw(ctx, text, font, position, this.Foreground);
-        }
-    }
-
-    private void DrawSegments(
-        DrawingContext ctx,
-        SpriteFontBase font,
-        string line,
-        Vector2 position,
-        List<InlineSegment> segments
-    )
-    {
-        var cursorX = position.X;
-
-        foreach (var segment in segments)
-        {
-            if (segment.IsInlineObject)
-            {
-                var yOffset = (this.ActualLineHeight - segment.Size.Y) / 2f;
-                ctx.DrawTexture(
-                    segment.Texture!,
-                    new Vector2(cursorX, position.Y + yOffset - this._lineSpacing / 2f),
-                    segment.Size
-                );
-                cursorX += segment.Size.X;
-            }
-            else
-            {
-                var text = line.Substring(segment.Start, segment.Length);
-                this.DrawTextSegment(ctx, font, text, new Vector2(cursorX, position.Y));
-                cursorX += font.MeasureString(text).X;
-            }
         }
     }
 
@@ -406,7 +383,6 @@ public class TextBlock : Control
             this.RecomputeTextLines(this.ActualSize);
         }
 
-        var provider = Visual.DefaultInlineObjectProvider;
         var font = this.Font;
         var size = Vector2.Zero;
 
@@ -415,45 +391,37 @@ public class TextBlock : Control
             var line = this._textLines[i];
             var measureTo = Math.Min(charNumber, line.Length);
 
-            float width;
-            if (provider != null)
+            // Never split a surrogate pair.
+            if (measureTo > 0 && measureTo < line.Length && char.IsLowSurrogate(line[measureTo]))
             {
-                provider.Parse(line, this.FontSize, this._segmentBuffer);
-                width = 0f;
-                int charsCounted = 0;
-                foreach (var seg in this._segmentBuffer)
-                {
-                    if (charsCounted >= measureTo)
-                    {
-                        break;
-                    }
-
-                    if (seg.IsInlineObject)
-                    {
-                        if (charsCounted + seg.Length <= measureTo)
-                        {
-                            width += seg.Size.X;
-                        }
-
-                        charsCounted += seg.Length;
-                    }
-                    else
-                    {
-                        int segChars = Math.Min(seg.Length, measureTo - charsCounted);
-                        width += font.MeasureString(line.Substring(seg.Start, segChars)).X;
-                        charsCounted += segChars;
-                    }
-                }
+                measureTo--;
             }
-            else
-            {
-                // Never split a surrogate pair.
-                if (measureTo > 0 && measureTo < line.Length && char.IsLowSurrogate(line[measureTo]))
-                {
-                    measureTo--;
-                }
 
-                width = font.MeasureString(line.Substring(0, measureTo)).X;
+            int segStart = this._segmentLineStarts[i];
+            int segEnd = this._segmentLineStarts[i + 1];
+            float width = 0f;
+            int charsCounted = 0;
+
+            for (int s = segStart; s < segEnd; s++)
+            {
+                if (charsCounted >= measureTo) break;
+
+                var seg = this._segments[s];
+                if (seg.IsInlineObject)
+                {
+                    if (charsCounted + seg.Length <= measureTo)
+                    {
+                        width += seg.Size.X;
+                    }
+
+                    charsCounted += seg.Length;
+                }
+                else
+                {
+                    int segChars = Math.Min(seg.Length, measureTo - charsCounted);
+                    width += font.MeasureString(line.Substring(seg.Start, segChars)).X;
+                    charsCounted += segChars;
+                }
             }
 
             size.X = Math.Max(size.X, width);
@@ -472,6 +440,10 @@ public class TextBlock : Control
         this._textLines.Clear();
         if (this.Text == string.Empty)
         {
+            this._segments.Clear();
+            this._segmentLineStarts.Clear();
+            this._segmentLineStarts.Add(0);
+            this._textLinesDirty = false;
             return;
         }
 
@@ -489,6 +461,7 @@ public class TextBlock : Control
                 throw new NotSupportedException();
         }
 
+        this.RecomputeSegments();
         this._textLinesDirty = false;
     }
 
@@ -510,7 +483,7 @@ public class TextBlock : Control
         }
     }
 
-    // FontBase.MeasureString do not LifeSim.Support ReadOnlySpan<char>, so we use this ugly StringBuilder to allocate a little less memory.
+    // FontBase.MeasureString do not support ReadOnlySpan<char>, so we use this ugly StringBuilder to allocate a little less memory.
     private static readonly StringBuilder _measureStringBuilder = new();
 
     /// <summary>
@@ -564,5 +537,64 @@ public class TextBlock : Control
         {
             this._textLines.Add(this.Text.AsSpan(lineStart).ToString());
         }
+    }
+
+    private void RecomputeSegments()
+    {
+        this._segments.Clear();
+        this._segmentLineStarts.Clear();
+
+        var provider = Visual.DefaultInlineObjectProvider;
+
+        for (int i = 0; i < this._textLines.Count; i++)
+        {
+            this._segmentLineStarts.Add(this._segments.Count);
+            var line = this._textLines[i];
+
+            if (line.Length == 0)
+            {
+                continue;
+            }
+
+            if (provider != null)
+            {
+                provider.Parse(line, this.FontSize, this._parseBuffer);
+                this._segments.AddRange(this._parseBuffer);
+            }
+            else
+            {
+                this._segments.Add(new InlineSegment(0, line.Length));
+            }
+        }
+
+        this._segmentLineStarts.Add(this._segments.Count);
+    }
+
+    /// <summary>
+    /// Finds the inline object segment that contains the given character index, if any.
+    /// </summary>
+    /// <param name="charIndex">The character index to test.</param>
+    /// <param name="segment">When this method returns <c>true</c>, the matching inline segment.</param>
+    /// <returns><c>true</c> if the character is inside an inline object segment; otherwise <c>false</c>.</returns>
+    internal bool TryGetInlineSegmentAt(int charIndex, out InlineSegment segment)
+    {
+        segment = default;
+
+        if (this._textLinesDirty)
+        {
+            this.RecomputeTextLines(this.ActualSize);
+        }
+
+        for (int i = 0; i < this._segments.Count; i++)
+        {
+            var seg = this._segments[i];
+            if (seg.IsInlineObject && charIndex >= seg.Start && charIndex < seg.Start + seg.Length)
+            {
+                segment = seg;
+                return true;
+            }
+        }
+
+        return false;
     }
 }
