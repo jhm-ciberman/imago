@@ -13,6 +13,8 @@ public class StackPanel : ItemsControl
 
     private Thickness _padding = new Thickness(0);
 
+    private float _gap = 0f;
+
     /// <summary>
     /// Gets or sets the orientation of the stack panel, which determines whether children are arranged horizontally or vertically.
     /// </summary>
@@ -29,6 +31,15 @@ public class StackPanel : ItemsControl
     {
         get => this._padding;
         set => this.SetPropertyAndInvalidateMeasure(ref this._padding, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the spacing between child elements.
+    /// </summary>
+    public float Gap
+    {
+        get => this._gap;
+        set => this.SetPropertyAndInvalidateMeasure(ref this._gap, value);
     }
 
     /// <summary>
@@ -55,6 +66,11 @@ public class StackPanel : ItemsControl
                 desiredSize.X += childDesiredSize.X;
                 desiredSize.Y = Math.Max(desiredSize.Y, childDesiredSize.Y);
             }
+
+            if (this.Items.Count > 1)
+            {
+                desiredSize.X += (this.Items.Count - 1) * this.Gap;
+            }
         }
         else
         {
@@ -65,6 +81,11 @@ public class StackPanel : ItemsControl
                 desiredSize.X = Math.Max(desiredSize.X, childDesiredSize.X);
                 desiredSize.Y += childDesiredSize.Y;
             }
+
+            if (this.Items.Count > 1)
+            {
+                desiredSize.Y += (this.Items.Count - 1) * this.Gap;
+            }
         }
 
         return desiredSize + this.Padding.Total;
@@ -73,9 +94,6 @@ public class StackPanel : ItemsControl
     /// <inheritdoc/>
     protected override Rect ArrangeOverride(Rect finalRect)
     {
-        // use DesiredSize to calculate the final rect
-        // and call Arrange on each child recursively
-
         Rect innerRect = finalRect.Deflate(this.Padding);
         var x = innerRect.X;
         var y = innerRect.Y;
@@ -86,7 +104,7 @@ public class StackPanel : ItemsControl
             {
                 var childDesiredSize = child.DesiredSize;
                 child.Arrange(new Rect(x, y, childDesiredSize.X, innerRect.Height));
-                x += childDesiredSize.X;
+                x += childDesiredSize.X + this.Gap;
             }
         }
         else
@@ -95,7 +113,7 @@ public class StackPanel : ItemsControl
             {
                 var childDesiredSize = child.DesiredSize;
                 child.Arrange(new Rect(x, y, innerRect.Width, childDesiredSize.Y));
-                y += childDesiredSize.Y;
+                y += childDesiredSize.Y + this.Gap;
             }
         }
 
