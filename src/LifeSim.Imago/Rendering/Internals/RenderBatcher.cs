@@ -29,16 +29,19 @@ internal class RenderBatcher : IDisposable
     private readonly List<RenderBatch> _batches;
     private readonly GraphicsDevice _gd;
     private readonly RenderBatchPassType _pass;
+    private readonly RenderStatistics _statistics;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RenderBatcher"/> class.
     /// </summary>
     /// <param name="gd">The <see cref="GraphicsDevice"/> to use for rendering.</param>
     /// <param name="pass">The <see cref="RenderBatchPassType"/> of the render pass.</param>
-    public RenderBatcher(GraphicsDevice gd, RenderBatchPassType pass)
+    /// <param name="statistics">The <see cref="RenderStatistics"/> to report draw call counts to.</param>
+    public RenderBatcher(GraphicsDevice gd, RenderBatchPassType pass, RenderStatistics statistics)
     {
         this._gd = gd;
         this._pass = pass;
+        this._statistics = statistics;
         this._offsetVertexData = new OffsetVertexData[1024];
         this._batches = new List<RenderBatch>(1024);
     }
@@ -122,6 +125,15 @@ internal class RenderBatcher : IDisposable
             );
 
             instanceIndex += batch.InstanceCount;
+        }
+
+        if (this._pass == RenderBatchPassType.Forward)
+        {
+            this._statistics.CurrentDrawCalls += batches.Count;
+        }
+        else if (this._pass == RenderBatchPassType.ShadowMap)
+        {
+            this._statistics.CurrentShadowDrawCalls += batches.Count;
         }
     }
 

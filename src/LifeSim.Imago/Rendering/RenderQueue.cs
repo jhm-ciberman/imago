@@ -35,9 +35,14 @@ internal class RenderQueue : IEnumerable<Renderable>, IReadOnlyList<Renderable>,
     private readonly Comparison<RenderIndex> _comparer;
 
     /// <summary>
-    /// Gets the number of <see cref="Renderable"/> objects in this <see cref="RenderQueue"/>.
+    /// Gets the number of visible <see cref="Renderable"/> objects after frustum culling.
     /// </summary>
     public int Count => this._culledIndices.Count;
+
+    /// <summary>
+    /// Gets the total number of <see cref="Renderable"/> objects before frustum culling.
+    /// </summary>
+    internal int TotalCount => this._allRenderables.Count;
 
     /// <summary>
     /// Gets the <see cref="Renderable"/> at the specified index.

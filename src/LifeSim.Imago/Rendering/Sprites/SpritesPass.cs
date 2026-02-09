@@ -103,6 +103,8 @@ internal class SpritesPass : IDisposable, IPipelineProvider
         this._drawingContext.Begin(cl);
         layer.Draw(this._drawingContext);
         this._drawingContext.End();
+
+        this._renderer.Statistics.CurrentGuiDrawCalls += this._drawingContext.DrawCallCount;
     }
 
     private static readonly string _fragmentShader = @"

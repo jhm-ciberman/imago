@@ -101,6 +101,11 @@ public class Renderer : IDisposable
     private float _totalTime;
 
     /// <summary>
+    /// Gets the per-frame rendering statistics.
+    /// </summary>
+    public RenderStatistics Statistics { get; } = new RenderStatistics();
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="Renderer"/> class.
     /// </summary>
     /// <param name="window">The window to render to.</param>
@@ -246,13 +251,18 @@ public class Renderer : IDisposable
     /// <param name="stage">The stage to render.</param>
     public void Render(Stage stage)
     {
-        stage.PrepareForRender(this.MainRenderTexture);
+        var stats = this.Statistics;
+        stats.RenderTime.Begin();
+        stats.BeginFrame();
 
+        stats.PreparePhase.Begin();
+        stage.PrepareForRender(this.MainRenderTexture);
         var cl = this._commandList;
         cl.Begin();
         this._rendererResources.Update(cl);
+        stats.PreparePhase.End();
 
-        // Render 3D layer if present
+        stats.Pass3D.Begin();
         var layer3D = stage.Layer3D;
         if (layer3D != null && layer3D.IsVisible)
         {
@@ -260,19 +270,18 @@ public class Renderer : IDisposable
         }
         else
         {
-            // No 3D layer - clear the render target using stage's default clear color
             cl.SetFramebuffer(this.MainRenderTexture.Framebuffer);
             var col = stage.DefaultClearColor;
             cl.ClearColorTarget(0, new RgbaFloat(col.R / 255f, col.G / 255f, col.B / 255f, col.A / 255f));
             cl.ClearDepthStencil(1f);
         }
+        stats.Pass3D.End();
 
-        // Clear the GUI render texture once before rendering all 2D layers
+        stats.Pass2D.Begin();
         cl.SetFramebuffer(this.GuiRenderTexture.Framebuffer);
         cl.ClearColorTarget(0, RgbaFloat.Clear);
         cl.ClearDepthStencil(1f);
 
-        // Render all 2D layers sorted by ZOrder
         foreach (var layer in stage.Layers)
         {
             if (layer is ILayer2D layer2D && layer2D.IsVisible)
@@ -285,11 +294,15 @@ public class Renderer : IDisposable
         this._fullScreenPixelArtPass.Render(cl, this.GuiRenderTexture);
         this._imGuiPass.Render(cl);
         cl.End();
+        stats.Pass2D.End();
 
+        stats.GpuSync.Begin();
         this.GraphicsDevice.WaitForIdle();
         this.GraphicsDevice.SubmitCommands(cl);
-
         this._disposeCollector.DisposeAll();
+        stats.GpuSync.End();
+
+        stats.RenderTime.End();
 
         if (this.GraphicsDevice.MainSwapchain != null)
         {

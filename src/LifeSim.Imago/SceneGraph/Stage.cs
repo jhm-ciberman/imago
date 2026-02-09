@@ -26,6 +26,12 @@ public class Stage
     /// </summary>
     public event EventHandler<SceneChangedEventArgs>? SceneChanged;
 
+    /// <summary>
+    /// Occurs after the current scene's ImGui rendering, allowing global overlays
+    /// to render regardless of the active scene.
+    /// </summary>
+    public event Action? ImGuiRendered;
+
     private class EmptyScene : Scene { }
 
     private static readonly Scene _emptyScene = new EmptyScene();
@@ -357,6 +363,7 @@ public class Stage
     public void PrepareForRender(RenderTexture renderTexture)
     {
         this.CurrentScene.RenderImGui();
+        this.ImGuiRendered?.Invoke();
         this.Layer3D?.PrepareForRender(renderTexture);
     }
 

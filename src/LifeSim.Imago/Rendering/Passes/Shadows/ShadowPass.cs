@@ -69,7 +69,7 @@ internal class ShadowPass : IDisposable, IPipelineProvider
 
         this._resourceSet = factory.CreateResourceSet(new ResourceSetDescription(this._resourceLayout, this._shadowmapInfoBuffer, this._globalDataBuffer));
 
-        this._renderBatcher = new RenderBatcher(this._gd, RenderBatchPassType.ShadowMap);
+        this._renderBatcher = new RenderBatcher(this._gd, RenderBatchPassType.ShadowMap, renderer.Statistics);
 
         float verticalFlip = this._gd.IsUvOriginTopLeft ? -1.0f : 1.0f;
         this._scalingMatrix = Matrix4x4.CreateScale(.5f, .5f * verticalFlip, 1f) * Matrix4x4.CreateTranslation(0.5f, 0.5f, 0f);

@@ -168,6 +168,8 @@ public abstract class Application : IDisposable
     {
         float deltaTime = (float)e.DeltaTime;
 
+        this.Renderer.Statistics.UpdateTime.Begin();
+
         this.Input.UpdateState();
         this.Renderer.Update(deltaTime, this.Input.InputSnapshot);
 
@@ -184,6 +186,8 @@ public abstract class Application : IDisposable
         this.OnPostUpdate(deltaTime);
 
         this.UpdateWindowTitle();
+
+        this.Renderer.Statistics.UpdateTime.End();
 
         this.Renderer.Render(this.Stage);
     }

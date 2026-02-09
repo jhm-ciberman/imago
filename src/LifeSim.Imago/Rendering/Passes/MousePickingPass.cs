@@ -60,7 +60,7 @@ internal class MousePickingPass : IDisposable, IPipelineProvider
 
         this._renderTexture = renderer.MainRenderTexture;
 
-        this._renderBatcher = new RenderBatcher(this._gd, RenderBatchPassType.Picking);
+        this._renderBatcher = new RenderBatcher(this._gd, RenderBatchPassType.Picking, renderer.Statistics);
 
         // This is a 1x1 texture that will be used to read the pixel color from the mouse picking pass.
         this._pixelTexture = factory.CreateTexture(new TextureDescription(
