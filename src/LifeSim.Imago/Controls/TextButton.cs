@@ -51,6 +51,15 @@ public class TextButton : Button
     }
 
     /// <summary>
+    /// Gets or sets the font of the text block.
+    /// </summary>
+    public TextFont? Font
+    {
+        get => this._textBlock.Font;
+        set => this._textBlock.Font = value;
+    }
+
+    /// <summary>
     /// Gets or sets the text effect of the text block.
     /// </summary>
     public ITextEffect? TextEffect

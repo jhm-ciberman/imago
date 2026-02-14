@@ -34,6 +34,7 @@ public class TextBlock : Control
 {
     private readonly TextLayout _layout = new();
     private ITextEffect? _textEffect;
+    private TextFont? _textFont;
     private FontSystem? _fontSystem = null;
     private SpriteFontBase? _font = null;
     private Color _foreground = Color.Black;
@@ -66,6 +67,42 @@ public class TextBlock : Control
     }
 
     /// <summary>
+    /// Gets or sets the font used to render the text. Setting this property
+    /// applies the font's <see cref="TextFont.System"/>, <see cref="TextFont.Size"/>,
+    /// and optionally <see cref="TextFont.LineHeight"/> to this control.
+    /// Setting <see cref="FontSystem"/> or <see cref="FontSize"/> individually
+    /// clears this property.
+    /// </summary>
+    public TextFont? Font
+    {
+        get => this._textFont;
+        set
+        {
+            if (this._textFont == value)
+            {
+                return;
+            }
+
+            this._textFont = value;
+
+            if (value != null)
+            {
+                this._fontSystem = value.System;
+                this._layout.FontSize = value.Size;
+
+                if (!float.IsNaN(value.LineHeight))
+                {
+                    this._layout.LineHeight = value.LineHeight;
+                }
+            }
+
+            this._font = null;
+            this.InvalidateMeasure();
+            this.OnPropertyChanged(nameof(this.Font));
+        }
+    }
+
+    /// <summary>
     /// Gets or sets the font system used to render the text.
     /// </summary>
     public FontSystem? FontSystem
@@ -75,6 +112,7 @@ public class TextBlock : Control
         {
             if (this.SetPropertyAndInvalidateMeasure(ref this._fontSystem, value))
             {
+                this._textFont = null;
                 this._font = null;
             }
         }
@@ -91,6 +129,7 @@ public class TextBlock : Control
             if (this._layout.FontSize != value)
             {
                 this._layout.FontSize = value;
+                this._textFont = null;
                 this._font = null;
                 this.InvalidateMeasure();
                 this.OnPropertyChanged(nameof(this.FontSize));
@@ -193,7 +232,7 @@ public class TextBlock : Control
     /// Gets the <see cref="SpriteFontBase"/> instance used for rendering the text,
     /// creating it from the <see cref="FontSystem"/> and <see cref="FontSize"/> if necessary.
     /// </summary>
-    protected SpriteFontBase Font
+    protected SpriteFontBase ResolvedFont
     {
         get
         {
@@ -237,7 +276,7 @@ public class TextBlock : Control
     {
         base.DrawCore(ctx);
 
-        var font = this.Font;
+        var font = this.ResolvedFont;
         var layout = this._layout;
         var offset = new Vector2(0f, MathF.Ceiling(layout.LineSpacing / 2f));
 
@@ -319,6 +358,6 @@ public class TextBlock : Control
 
     private void EnsureLayoutFont()
     {
-        this._layout.Font = this.Font;
+        this._layout.Font = this.ResolvedFont;
     }
 }

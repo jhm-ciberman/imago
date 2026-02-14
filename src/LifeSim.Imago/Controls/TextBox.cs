@@ -84,6 +84,7 @@ public class TextBox : Control
     private void TextBlock_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(this.TextBlock.Text)
+            || e.PropertyName == nameof(this.TextBlock.Font)
             || e.PropertyName == nameof(this.TextBlock.FontSize)
             || e.PropertyName == nameof(this.TextBlock.FontSystem))
         {

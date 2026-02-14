@@ -14,6 +14,7 @@ public class TooltipPresenter : ContentControl
     private Tooltip? _tooltip;
 
     // Text styling properties
+    private TextFont? _textFont;
     private FontSystem? _fontSystem;
     private float _fontSize = 12f;
     private float _lineHeight = 14f;
@@ -43,6 +44,29 @@ public class TooltipPresenter : ContentControl
             if (this._tooltip == value) return;
             this._tooltip = value;
             this.UpdateContent();
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the font for the tooltip text.
+    /// </summary>
+    public TextFont? Font
+    {
+        get => this._textFont;
+        set
+        {
+            this._textFont = value;
+
+            if (value != null)
+            {
+                this._fontSystem = value.System;
+                this._fontSize = value.Size;
+
+                if (!float.IsNaN(value.LineHeight))
+                {
+                    this._lineHeight = value.LineHeight;
+                }
+            }
         }
     }
 
@@ -129,17 +153,27 @@ public class TooltipPresenter : ContentControl
         }
         else if (!string.IsNullOrEmpty(this._tooltip.Text))
         {
-            this.Content = new TextBlock
+            var textBlock = new TextBlock
             {
                 Text = this._tooltip.Text,
-                FontSystem = this._fontSystem,
-                FontSize = this._fontSize,
-                LineHeight = this._lineHeight,
                 Foreground = this._foreground,
                 TextEffect = this._textEffect,
                 HorizontalAlignment = this._textHorizontalAlignment,
-                VerticalAlignment = this._textVerticalAlignment
+                VerticalAlignment = this._textVerticalAlignment,
             };
+
+            if (this._textFont != null)
+            {
+                textBlock.Font = this._textFont;
+            }
+            else
+            {
+                textBlock.FontSystem = this._fontSystem;
+                textBlock.FontSize = this._fontSize;
+                textBlock.LineHeight = this._lineHeight;
+            }
+
+            this.Content = textBlock;
         }
         else
         {
