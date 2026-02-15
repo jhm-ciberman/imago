@@ -20,6 +20,12 @@ public class GuiLayer : ILayer2D, IInputHandler
     /// <inheritdoc />
     public bool IsVisible { get; set; } = true;
 
+    /// <inheritdoc />
+    public bool IsInputBlocked { get; set; }
+
+    /// <inheritdoc />
+    public bool IsReceivingInput => this.IsVisible && !this.IsInputBlocked;
+
     /// <summary>
     /// Gets or sets a value indicating whether this layer blocks input from reaching layers below it.
     /// </summary>
@@ -141,10 +147,17 @@ public class GuiLayer : ILayer2D, IInputHandler
 
         this._content.Update(deltaTime);
 
-        var position = this.WindowToViewport(this.Input.CursorPosition);
-
-        this.ControlUnderCursor = this._content.HitTest(position);
-        this.IsCursorOverElement = this.ControlUnderCursor != null;
+        if (this.IsInputBlocked)
+        {
+            this.ControlUnderCursor = null;
+            this.IsCursorOverElement = false;
+        }
+        else
+        {
+            var position = this.WindowToViewport(this.Input.CursorPosition);
+            this.ControlUnderCursor = this._content.HitTest(position);
+            this.IsCursorOverElement = this.ControlUnderCursor != null;
+        }
     }
 
     /// <summary>

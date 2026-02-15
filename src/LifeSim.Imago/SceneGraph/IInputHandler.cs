@@ -12,6 +12,14 @@ namespace LifeSim.Imago.SceneGraph;
 public interface IInputHandler : ILayer
 {
     /// <summary>
+    /// Gets a value indicating whether this handler is actively receiving input.
+    /// </summary>
+    /// <remarks>
+    /// Returns false when the layer is invisible or when a higher layer blocks input to this layer.
+    /// </remarks>
+    public bool IsReceivingInput { get; }
+
+    /// <summary>
     /// Handles mouse button press events.
     /// </summary>
     /// <param name="e">The mouse button event arguments.</param>

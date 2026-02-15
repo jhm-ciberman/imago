@@ -321,11 +321,12 @@ public class Stage
     /// <param name="deltaTime">The time elapsed since the last update, in seconds.</param>
     public virtual void Update(float deltaTime)
     {
-        // Update 3D layer with picking state
+        this.UpdateInputBlocking();
+
         if (this.Layer3D != null)
         {
             var isCursorOverGui = this.IsCursorOverGui();
-            this.Layer3D.Picking.Update(this.Layer3D.Camera, isCursorOverGui);
+            this.Layer3D.Picking.Update(this.Layer3D.Camera, isCursorOverGui || this.Layer3D.IsInputBlocked);
         }
 
         this.CurrentScene.Update(deltaTime);
@@ -333,6 +334,21 @@ public class Stage
         foreach (var layer in this._allLayers)
         {
             layer.Update(deltaTime);
+        }
+    }
+
+    private void UpdateInputBlocking()
+    {
+        bool blocked = false;
+        for (int i = this._allLayers.Count - 1; i >= 0; i--)
+        {
+            var layer = this._allLayers[i];
+            layer.IsInputBlocked = blocked;
+
+            if (layer is GuiLayer { IsVisible: true, BlocksInputBelow: true })
+            {
+                blocked = true;
+            }
         }
     }
 

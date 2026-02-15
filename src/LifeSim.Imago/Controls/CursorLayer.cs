@@ -26,6 +26,9 @@ public class CursorLayer : ILayer2D
     public bool IsVisible { get; set; } = true;
 
     /// <inheritdoc />
+    public bool IsInputBlocked { get; set; }
+
+    /// <inheritdoc />
     public Stage? Stage { get; set; }
 
     /// <inheritdoc />

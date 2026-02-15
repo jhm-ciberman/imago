@@ -29,6 +29,9 @@ public class TooltipLayer : ILayer2D, IDisposable
     public bool IsVisible { get; set; } = true;
 
     /// <inheritdoc />
+    public bool IsInputBlocked { get; set; }
+
+    /// <inheritdoc />
     public Stage? Stage { get; set; }
 
     /// <inheritdoc />

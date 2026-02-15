@@ -21,6 +21,15 @@ public interface ILayer
     public Stage? Stage { get; set; }
 
     /// <summary>
+    /// Gets or sets a value indicating whether input to this layer is blocked by a higher layer.
+    /// </summary>
+    /// <remarks>
+    /// Computed by <see cref="Stage"/> each frame. When true, this layer should not process
+    /// input events or hit testing because a higher layer with input blocking is active.
+    /// </remarks>
+    public bool IsInputBlocked { get; set; }
+
+    /// <summary>
     /// Updates the layer state.
     /// </summary>
     /// <param name="deltaTime">Time elapsed since last update in seconds.</param>

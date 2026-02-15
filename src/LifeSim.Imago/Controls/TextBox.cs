@@ -143,7 +143,7 @@ public class TextBox : Control
 
     private void InputManager_KeyPressed(object? sender, KeyboardEventArgs e)
     {
-        if (e.Handled) return;
+        if (this.Layer?.IsReceivingInput != true) return;
         if (!this.IsFocused) return;
 
         switch (e.Key)
@@ -173,6 +173,8 @@ public class TextBox : Control
 
     private void InputManager_TextEntered(object? sender, TextEventArgs e)
     {
+        if (this.Layer?.IsReceivingInput != true) return;
+
         if (this.IsFocused && e.TypedCharacters.Count > 0)
         {
             string typedText = string.Join(string.Empty, e.TypedCharacters);

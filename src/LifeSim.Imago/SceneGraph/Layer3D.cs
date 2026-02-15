@@ -14,10 +14,6 @@ namespace LifeSim.Imago.SceneGraph;
 /// <summary>
 /// A layer that renders 3D content. Contains a scene graph, camera, and environment.
 /// </summary>
-/// <remarks>
-/// Layer3D absorbs the functionality of the old Stage class (render queues, dirty lists, etc.)
-/// and can be used standalone for off-screen rendering or attached to Stage for main rendering.
-/// </remarks>
 public class Layer3D : ILayer, IDisposable
 {
     /// <inheritdoc />
@@ -25,6 +21,9 @@ public class Layer3D : ILayer, IDisposable
 
     /// <inheritdoc />
     public bool IsVisible { get; set; } = true;
+
+    /// <inheritdoc />
+    public bool IsInputBlocked { get; set; }
 
     /// <inheritdoc />
     public Stage? Stage { get; set; }
