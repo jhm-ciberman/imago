@@ -143,6 +143,7 @@ public class TextBox : Control
 
     private void InputManager_KeyPressed(object? sender, KeyboardEventArgs e)
     {
+        if (e.Handled) return;
         if (!this.IsFocused) return;
 
         switch (e.Key)
