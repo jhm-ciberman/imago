@@ -269,9 +269,13 @@ public class Control : Visual
     /// <param name="deltaTime">The time elapsed since the last frame, in seconds.</param>
     public virtual void Update(float deltaTime)
     {
-        if (this.Layer == null) return;
-        var input = this.Layer.Input;
+        if (this.Layer?.IsReceivingInput != true)
+        {
+            this.IsMouseOver = false;
+            return;
+        }
 
+        var input = this.Layer.Input;
         var mousePosition = this.Layer.WindowToViewport(input.CursorPosition);
         this.IsMouseOver = this.GetHitTestBounds().Contains(mousePosition);
     }
