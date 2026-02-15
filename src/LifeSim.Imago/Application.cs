@@ -113,22 +113,9 @@ public abstract class Application : IDisposable
     }
 
     /// <summary>
-    /// Gets the desired GUI height in pixels. Override to customize.
+    /// Gets the GUI sizing mode. Override to opt in to a fixed virtual resolution for pixel art or retro-style rendering.
     /// </summary>
-    protected virtual float DesiredGuiHeight => 540f;
-
-    /// <summary>
-    /// Gets the desired GUI size based on the viewport aspect ratio.
-    /// </summary>
-    protected Vector2 DesiredGuiSize
-    {
-        get
-        {
-            float aspectRatio = this.Viewport.AspectRatio;
-            float desiredGuiWidth = MathF.Round(this.DesiredGuiHeight * aspectRatio);
-            return new Vector2(desiredGuiWidth, this.DesiredGuiHeight);
-        }
-    }
+    protected virtual GuiSizeMode GuiSizeMode => GuiSizeMode.Native;
 
     /// <summary>
     /// Runs the application main loop.
@@ -152,9 +139,10 @@ public abstract class Application : IDisposable
         this.Renderer.MainViewport.Resize(size);
         this.Renderer.Resize((uint)size.X, (uint)size.Y);
 
-        var guiSize = this.DesiredGuiSize;
+        var guiSize = this.GuiSizeMode.ComputeSize(size);
         this.Renderer.GuiViewport.Resize(guiSize);
         this.Renderer.ResizeGui((uint)guiSize.X, (uint)guiSize.Y);
+        this.Stage.GuiScale = size / guiSize;
 
         this.OnWindowResized();
     }
