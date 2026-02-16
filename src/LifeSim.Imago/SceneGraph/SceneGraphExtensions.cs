@@ -175,10 +175,17 @@ public static class SceneGraphExtensions
     /// <param name="material">The material to set.</param>
     public static void SetMaterial(this Node3D self, Material material)
     {
-        self.ForEachRecursive<RenderNode3D>((node) =>
-        {
-            node.Material = material;
-        });
+        self.ForEachRecursive<RenderNode3D>((node) => node.Material = material);
+    }
+
+    /// <summary>
+    /// Sets the pickable state of all renderable nodes starting from the specified node.
+    /// </summary>
+    /// <param name="self">The node.</param>
+    /// <param name="isPickable">The pickable state to set.</param>
+    public static void SetPickable(this Node3D self, bool isPickable)
+    {
+        self.ForEachRecursive<RenderNode3D>((node) => node.IsPickable = isPickable);
     }
 
     /// <summary>
