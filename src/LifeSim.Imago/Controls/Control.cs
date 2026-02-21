@@ -39,8 +39,8 @@ public class Control : Visual
     public EventHandler<MouseWheelEventArgs>? MouseWheel;
 
     private Thickness _margin = new Thickness(0);
-    private HorizontalAlignment _horizontalAlignment = HorizontalAlignment.Left;
-    private VerticalAlignment _verticalAlignment = VerticalAlignment.Top;
+    private HorizontalAlignment _horizontalAlignment = HorizontalAlignment.Stretch;
+    private VerticalAlignment _verticalAlignment = VerticalAlignment.Stretch;
     private Dock _dock = Dock.Left;
     private IBackground? _background = null;
     private float _width = float.NaN;
