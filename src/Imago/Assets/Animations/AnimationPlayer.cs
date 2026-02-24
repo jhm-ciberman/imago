@@ -1,0 +1,222 @@
+using System;
+using System.Collections.Generic;
+using Imago.SceneGraph.Nodes;
+
+namespace Imago.Assets.Animations;
+
+/// <summary>
+/// Controls the playback of an <see cref="Animation"/> on a scene graph node and its children.
+/// </summary>
+public class AnimationPlayer
+{
+    private record class BoundChannel(Node3D Target, List<IChannel> Channels);
+
+    private readonly List<BoundChannel> _boundChannels = new();
+
+    private readonly Dictionary<string, Node3D> _namesToNodes = new();
+
+    private Node3D? _root = null;
+
+    private Animation? _animation = null;
+
+    private float _currentTime = 0f;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AnimationPlayer"/> class.
+    /// </summary>
+    /// <param name="root">The root node of the hierarchy to be animated.</param>
+    /// <param name="animation">The animation to play.</param>
+    public AnimationPlayer(Node3D? root = null, Animation? animation = null)
+    {
+        this.Root = root;
+        this.Animation = animation;
+    }
+
+    /// <summary>
+    /// Gets or sets the root node of the hierarchy to be animated.
+    /// </summary>
+    public Node3D? Root
+    {
+        get => this._root;
+        set
+        {
+            if (this._root == value) return;
+            this._root = value;
+            this.Rebind();
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the current <see cref="Animation"/>.
+    /// </summary>
+    public Animation? Animation
+    {
+        get => this._animation;
+        set
+        {
+            if (this._animation == value) return;
+            this._animation = value;
+
+            if (this._animation == null)
+            {
+                this._currentTime = 0f;
+            }
+
+            this.RebuildChannelsList();
+        }
+    }
+
+    /// <summary>
+    /// Gets the duration of the current animation in seconds.
+    /// </summary>
+    public float Duration => this.Animation?.Duration ?? 0f;
+
+    /// <summary>
+    /// Gets or sets the current time of the animation in seconds.
+    /// The value will be clamped to the animation duration if not looping.
+    /// </summary>
+    public float CurrentTime
+    {
+        get => this._currentTime;
+        set
+        {
+            value = Math.Max(0f, Math.Min(this.Duration, value));
+            this._currentTime = value;
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the animation should loop.
+    /// </summary>
+    public bool IsLooping { get; set; } = true;
+
+
+    /// <summary>
+    /// Gets or sets the playback speed of the animation.
+    /// A value of 1 is normal speed, 2 is double speed, 0.5 is half speed, and a negative value plays the animation in reverse.
+    /// </summary>
+    public float PlaybackSpeed { get; set; } = 1f;
+
+    /// <summary>
+    /// Plays the given animation from the beginning.
+    /// </summary>
+    /// <param name="animation">The animation to play.</param>
+    public void Play(Animation animation)
+    {
+        this.Animation = animation;
+        this.CurrentTime = 0f;
+
+        if (this.PlaybackSpeed == 0f)
+        {
+            this.PlaybackSpeed = 1f;
+        }
+    }
+
+    /// <summary>
+    /// Plays the given animation from the beginning with a specific loop setting.
+    /// </summary>
+    /// <param name="animation">The animation to play.</param>
+    /// <param name="loop">A value indicating whether the animation should loop.</param>
+    public void Play(Animation animation, bool loop)
+    {
+        this.IsLooping = loop;
+        this.Play(animation);
+    }
+
+    /// <summary>
+    /// Pauses the animation playback.
+    /// </summary>
+    public void Pause()
+    {
+        this.PlaybackSpeed = 0f;
+    }
+
+    /// <summary>
+    /// Resumes the animation playback at the current time.
+    /// </summary>
+    public void Resume()
+    {
+        this.PlaybackSpeed = 1f;
+    }
+
+    /// <summary>
+    /// Advances the animation by a given time delta and applies the new state to the target nodes.
+    /// </summary>
+    /// <param name="deltaTime">The time elapsed since the last update, in seconds.</param>
+    public void Update(float deltaTime)
+    {
+        if (this._animation == null) return;
+
+        this._currentTime += deltaTime * this.PlaybackSpeed;
+
+        if (this.IsLooping)
+        {
+            this._currentTime %= this._animation.Duration;
+        }
+
+        for (int i = 0; i < this._boundChannels.Count; i++)
+        {
+            var bindedChannel = this._boundChannels[i];
+            for (int j = 0; j < bindedChannel.Channels.Count; j++)
+            {
+                bindedChannel.Channels[j].Update(bindedChannel.Target, this._currentTime);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Rebinds all animation channels to the nodes in the current root hierarchy.
+    /// This is useful if the scene graph has changed since the animation was first bound.
+    /// </summary>
+    public void Rebind()
+    {
+        this.RebuildNamesDictionary();
+        this.RebuildChannelsList();
+    }
+
+    private void RebuildNamesDictionary()
+    {
+        static void UpdateDict(Dictionary<string, Node3D> dict, Node3D node)
+        {
+            if (!string.IsNullOrEmpty(node.Name))
+            {
+                dict[node.Name] = node;
+            }
+
+            for (var i = 0; i < node.Children.Count; i++)
+            {
+                var child = node.Children[i];
+                UpdateDict(dict, child);
+            }
+        }
+
+        this._namesToNodes.Clear();
+
+        if (this._root != null)
+        {
+            UpdateDict(this._namesToNodes, this._root);
+        }
+    }
+
+    private void RebuildChannelsList()
+    {
+        this._boundChannels.Clear();
+        if (this._animation == null) return;
+
+        foreach (var channelName in this._animation.ChannelNames)
+        {
+            if (this._namesToNodes.TryGetValue(channelName, out Node3D? node))
+            {
+                var channels = this._animation.FindChannels(channelName);
+                if (channels != null)
+                {
+                    this._boundChannels.Add(new BoundChannel(node, channels));
+                }
+            }
+            else
+            {
+                Console.WriteLine("Unbound channel: " + channelName);
+            }
+        }
+    }
+}

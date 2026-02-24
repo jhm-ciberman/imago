@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup Condition="'$(CompileConfig)' == 'RELEASE'">
+        <PublishSingleFile>true</PublishSingleFile>
+        <DebugSymbols>false</DebugSymbols>
+    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="../Imago.Support/Imago.Support.csproj" />
+
+        <PackageReference Include="CommunityToolkit.Mvvm" />
+        <PackageReference Include="FontStashSharp.PlatformAgnostic" />
+        <PackageReference Include="SixLabors.ImageSharp" />
+        <PackageReference Include="Veldrid" />
+        <PackageReference Include="Veldrid.ImGui" />
+        <PackageReference Include="Veldrid.SDL2" />
+        <PackageReference Include="Veldrid.SPIRV" />
+        <PackageReference Include="glTF2Loader" />
+    </ItemGroup>
+</Project>
