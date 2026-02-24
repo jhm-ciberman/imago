@@ -5,14 +5,14 @@
     </PropertyGroup>
     <ItemGroup>
         <ProjectReference Include="../LifeSim.Support/LifeSim.Support.csproj" />
-        <PackageReference Include="FontStashSharp.PlatformAgnostic" Version="1.5.3" />
-        <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
-        <PackageReference Include="Veldrid" Version="4.9.0" />
-        <PackageReference Include="Veldrid.ImGui" Version="5.72.0" />
-        <PackageReference Include="Veldrid.SDL2" Version="4.9.0" />
-        <!-- Do NOT update Veldrid.SPIRV past 1.0.13. Version 1.0.14+ causes major lag spikes
-             during shader compilation and produces broken bytecode without debug mode enabled. -->
-        <PackageReference Include="Veldrid.SPIRV" Version="1.0.13" />
-        <PackageReference Include="glTF2Loader" Version="1.1.3-alpha" />
+
+        <PackageReference Include="CommunityToolkit.Mvvm" />
+        <PackageReference Include="FontStashSharp.PlatformAgnostic" />
+        <PackageReference Include="SixLabors.ImageSharp" />
+        <PackageReference Include="Veldrid" />
+        <PackageReference Include="Veldrid.ImGui" />
+        <PackageReference Include="Veldrid.SDL2" />
+        <PackageReference Include="Veldrid.SPIRV" />
+        <PackageReference Include="glTF2Loader" />
     </ItemGroup>
 </Project>
