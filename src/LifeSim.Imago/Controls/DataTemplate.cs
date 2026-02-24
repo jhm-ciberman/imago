@@ -19,6 +19,7 @@ public interface IDataTemplate
 /// Represents a generic data template that defines the appearance and behavior of an item in a user interface.
 /// </summary>
 /// <typeparam name="T">The type of the item.</typeparam>
+[FactoryTemplate]
 public class DataTemplate<T> : IDataTemplate
 {
     private readonly Func<T, Control> _factory;

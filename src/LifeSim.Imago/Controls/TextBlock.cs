@@ -30,6 +30,7 @@ public enum TextHorizontalAlignment
 /// <summary>
 /// Represents a control for displaying text.
 /// </summary>
+[TextProperty(nameof(Text))]
 public class TextBlock : Control
 {
     private readonly TextLayout _layout = new();

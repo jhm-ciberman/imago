@@ -8,6 +8,7 @@ namespace LifeSim.Imago.Controls;
 /// <summary>
 /// Represents a control that can contain a single child control.
 /// </summary>
+[ContentProperty(nameof(Content))]
 public class ContentControl : Control
 {
     private Thickness _padding = new Thickness(0);

@@ -11,6 +11,7 @@ namespace LifeSim.Imago.Controls;
 /// <summary>
 /// Represents a control that can display a collection of items.
 /// </summary>
+[ItemsProperty(nameof(Items))]
 public abstract class ItemsControl : Control
 {
     /// <summary>
@@ -148,11 +149,11 @@ public abstract class ItemsControl : Control
         }
     }
 
-    private IEnumerable<object>? _itemsSource;
+    private IEnumerable? _itemsSource;
     /// <summary>
     /// Gets or sets a collection that is used to generate the content of the <see cref="ItemsControl"/>.
     /// </summary>
-    public IEnumerable<object>? ItemsSource
+    public IEnumerable? ItemsSource
     {
         get => this._itemsSource;
         set
@@ -250,7 +251,7 @@ public abstract class ItemsControl : Control
         if (this.ItemsSource is null) return;
         if (this.ItemTemplate is null) return;
 
-        var list = this.ItemsSource is IList listSource ? listSource : this.ItemsSource.ToList();
+        var list = this.ItemsSource is IList listSource ? listSource : this.ItemsSource.Cast<object>().ToList();
         this.OnItemsAdded(list);
     }
 }

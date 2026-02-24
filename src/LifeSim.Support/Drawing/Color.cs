@@ -13,7 +13,7 @@ namespace LifeSim.Support.Drawing;
 /// Represents a color using 8-bit RGBA components.
 /// </summary>
 [StructLayout(LayoutKind.Sequential)]
-public readonly struct Color
+public readonly struct Color : IParsable<Color>
 {
     /// <summary>
     /// Gets the red component of the color.
@@ -66,7 +66,7 @@ public readonly struct Color
     /// Initializes a new instance of the <see cref="Color"/> struct.
     /// </summary>
     /// <param name="hexColor">The hex color of the color.</param>
-    /// <exception cref="ArgumentException">Thrown when the color string is invalid.</exception>
+    /// <exception cref="FormatException">Thrown when the color string is not a valid hex color.</exception>
     public Color(string hexColor)
     {
         this = FromHex(hexColor);
@@ -77,12 +77,13 @@ public readonly struct Color
     /// </summary>
     /// <param name="hexColor">The hex color string.</param>
     /// <returns>The <see cref="Color"/>.</returns>
+    /// <exception cref="FormatException">Thrown when the string is not a valid hex color.</exception>
     public static Color FromHex(string hexColor)
     {
         if (TryParse(hexColor, out Color color))
             return color;
 
-        throw new ArgumentException("Invalid hex color string.");
+        throw new FormatException($"The string '{hexColor}' is not a valid hex color.");
     }
 
     /// <summary>
@@ -138,6 +139,29 @@ public readonly struct Color
 
         color = default;
         return false;
+    }
+
+    /// <inheritdoc />
+    public static Color Parse(string s, IFormatProvider? provider = null)
+    {
+        if (TryParse(s.AsSpan(), out var color))
+        {
+            return color;
+        }
+
+        throw new FormatException($"The string '{s}' is not a valid color.");
+    }
+
+    /// <inheritdoc />
+    public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, out Color result)
+    {
+        if (s == null)
+        {
+            result = default;
+            return false;
+        }
+
+        return TryParse(s.AsSpan(), out result);
     }
 
     /// <summary>

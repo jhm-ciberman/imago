@@ -256,6 +256,7 @@ public abstract class Visual : ObservableObject, IDisposable
     protected abstract Rect ArrangeCore(Rect finalRect);
 
     private IDisposable? _bindings = null;
+    private IDisposable? _templateBindings = null;
 
     /// <summary>
     /// Called when the control is added to the <see cref="GuiLayer"/>.
@@ -278,6 +279,7 @@ public abstract class Visual : ObservableObject, IDisposable
         }
 
         this._bindings = this.CreateBindings();
+        this._templateBindings = this.ActivateTemplateBindings();
     }
 
     /// <summary>
@@ -285,6 +287,16 @@ public abstract class Visual : ObservableObject, IDisposable
     /// </summary>
     /// <returns>The created bindings.</returns>
     protected virtual IDisposable? CreateBindings()
+    {
+        return null;
+    }
+
+    /// <summary>
+    /// Activates template-declared bindings. Overridden by the template source generator.
+    /// </summary>
+    /// <returns>A disposable that unsubscribes all template bindings, or <see langword="null"/>.</returns>
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    protected virtual IDisposable? ActivateTemplateBindings()
     {
         return null;
     }
@@ -308,6 +320,9 @@ public abstract class Visual : ObservableObject, IDisposable
         }
 
         this._bindings?.Dispose();
+        this._bindings = null;
+        this._templateBindings?.Dispose();
+        this._templateBindings = null;
     }
 
     /// <summary>
