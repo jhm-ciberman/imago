@@ -1,5 +1,6 @@
 using System;
 using System.Numerics;
+using CommunityToolkit.Diagnostics;
 using Imago.Support.Drawing;
 
 namespace Imago.SceneGraph.Lighting;
@@ -14,15 +15,13 @@ public class DirectionalLight
     /// <summary>
     /// Gets or sets the light direction.
     /// </summary>
-    /// <exception cref="ArgumentOutOfRangeException">The direction cannot be zero.</exception>
+    /// <exception cref="ArgumentException">The direction cannot be zero.</exception>
     public Vector3 Direction
     {
         get => this._direction;
         set
         {
-            if (value == Vector3.Zero)
-                throw new ArgumentOutOfRangeException(nameof(value), "The light direction cannot be zero.");
-
+            Guard.IsNotEqualTo(value, Vector3.Zero);
             this._direction = Vector3.Normalize(value);
         }
     }

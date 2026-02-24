@@ -1,4 +1,5 @@
 using System;
+using CommunityToolkit.Diagnostics;
 using Imago.Rendering;
 using Veldrid;
 using BoundingBox = Imago.Utilities.BoundingBox;
@@ -58,8 +59,7 @@ public class Mesh : IDisposable
     /// <param name="meshData">The mesh data to upload to the GPU.</param>
     public Mesh(MeshData meshData)
     {
-        if (meshData.Indices.Length == 0)
-            throw new ArgumentException("The mesh data must contain at least one index.", nameof(meshData));
+        Guard.IsNotEmpty(meshData.Indices);
 
         var gd = Renderer.Instance.GraphicsDevice;
         this.Id = ++_count;

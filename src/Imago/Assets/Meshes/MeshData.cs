@@ -1,5 +1,5 @@
-using System;
 using System.Numerics;
+using CommunityToolkit.Diagnostics;
 using Veldrid;
 
 namespace Imago.Assets.Meshes;
@@ -33,9 +33,7 @@ public abstract class MeshData
     {
         this.Indices = indices;
         this.Positions = vertices;
-
-        if (this.Indices.Length % 3 != 0)
-            throw new ArgumentException("The number of indices must be a multiple of 3.");
+        Guard.IsTrue(this.Indices.Length % 3 == 0, nameof(indices), "The number of indices must be a multiple of 3.");
     }
 
     /// <summary>
@@ -43,8 +41,7 @@ public abstract class MeshData
     /// </summary>
     protected virtual void Validate()
     {
-        if (this.Indices.Length % 3 != 0)
-            throw new ArgumentException("The number of indices must be a multiple of 3.");
+        Guard.IsTrue(this.Indices.Length % 3 == 0, nameof(this.Indices), "The number of indices must be a multiple of 3.");
     }
 
     /// <summary>

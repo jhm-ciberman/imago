@@ -1,5 +1,5 @@
-using System;
 using System.Numerics;
+using CommunityToolkit.Diagnostics;
 
 namespace Imago.SceneGraph.Cameras;
 
@@ -27,8 +27,7 @@ public class OrthographicCamera : Camera
         get => this._width;
         set
         {
-            if (value < 0)
-                throw new ArgumentOutOfRangeException(nameof(value), "Width must be greater than 0.");
+            Guard.IsGreaterThanOrEqualTo(value, 0f);
 
             if (this._width != value)
             {

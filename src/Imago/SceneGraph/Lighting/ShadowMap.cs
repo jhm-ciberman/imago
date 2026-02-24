@@ -1,4 +1,5 @@
 using System;
+using CommunityToolkit.Diagnostics;
 using Imago.SceneGraph.Cameras;
 using Imago.Support.Drawing;
 
@@ -23,9 +24,7 @@ public class ShadowMap
         get => this._maximumShadowDistance;
         set
         {
-            if (this._maximumShadowDistance < 0)
-                throw new ArgumentOutOfRangeException(nameof(value), "The maximum shadow distance cannot be negative.");
-
+            Guard.IsGreaterThanOrEqualTo(value, 0f);
             this._maximumShadowDistance = value;
         }
     }
@@ -47,9 +46,7 @@ public class ShadowMap
         get => this._splitLambda;
         set
         {
-            if (value < 0 || value > 1)
-                throw new ArgumentOutOfRangeException(nameof(value), "Split lambda must be between 0 and 1.");
-
+            Guard.IsBetweenOrEqualTo(value, 0f, 1f);
             this._splitLambda = value;
         }
     }
@@ -68,9 +65,7 @@ public class ShadowMap
         get => this._cascadesCount;
         set
         {
-            if (value < 1 || value > 4)
-                throw new ArgumentOutOfRangeException(nameof(value), "The number of cascades must be between 1 and 4.");
-
+            Guard.IsBetweenOrEqualTo(value, (uint)1, (uint)4);
             this._cascadesCount = value;
         }
     }
@@ -94,12 +89,8 @@ public class ShadowMap
         get => this._size;
         set
         {
-            if ((value & value - 1) != 0)
-                throw new ArgumentOutOfRangeException(nameof(value), "The shadow map size must be a power of two.");
-
-            if (value == 0)
-                throw new ArgumentOutOfRangeException(nameof(value), "The shadow map size cannot be zero.");
-
+            Guard.IsGreaterThan(value, (uint)0);
+            Guard.IsTrue((value & (value - 1)) == 0, nameof(value), "The shadow map size must be a power of two.");
             this._size = value;
         }
     }

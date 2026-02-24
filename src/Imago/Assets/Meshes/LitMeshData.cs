@@ -2,6 +2,7 @@ using System;
 using System.Buffers;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using CommunityToolkit.Diagnostics;
 using Veldrid;
 
 namespace Imago.Assets.Meshes;
@@ -37,9 +38,7 @@ public class LitMeshData : BasicMeshData
     protected override void Validate()
     {
         base.Validate();
-
-        if (this.Lights.Length != this.Positions.Length)
-            throw new ArgumentException("The number of lights vertices must match the number of positions.");
+        Guard.HasSizeEqualTo(this.Lights, this.Positions.Length);
     }
 
     /// <inheritdoc/>

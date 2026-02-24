@@ -2,6 +2,7 @@ using System;
 using System.Buffers;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using CommunityToolkit.Diagnostics;
 using Veldrid;
 
 namespace Imago.Assets.Meshes;
@@ -44,12 +45,8 @@ public class BasicMeshData : MeshData
     protected override void Validate()
     {
         base.Validate();
-
-        if (this.Normals.Length != this.Positions.Length)
-            throw new ArgumentException("The number of normals must match the number of positions.");
-
-        if (this.TexCoords.Length != this.Positions.Length)
-            throw new ArgumentException("The number of texture coordinates must match the number of positions.");
+        Guard.HasSizeEqualTo(this.Normals, this.Positions.Length);
+        Guard.HasSizeEqualTo(this.TexCoords, this.Positions.Length);
     }
 
     /// <inheritdoc/>

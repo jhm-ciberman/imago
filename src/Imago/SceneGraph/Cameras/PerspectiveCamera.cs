@@ -1,5 +1,6 @@
 using System;
 using System.Numerics;
+using CommunityToolkit.Diagnostics;
 
 namespace Imago.SceneGraph.Cameras;
 
@@ -27,11 +28,8 @@ public class PerspectiveCamera : Camera
         get => this._fieldOfView;
         set
         {
-            if (value < 0)
-                throw new ArgumentOutOfRangeException(nameof(value), "Field of view must be greater than 0.");
-
-            if (value > MathF.PI)
-                throw new ArgumentOutOfRangeException(nameof(value), "Field of view must be less than 2 pi radians.");
+            Guard.IsGreaterThanOrEqualTo(value, 0f);
+            Guard.IsLessThanOrEqualTo(value, MathF.PI);
 
             if (this._fieldOfView != value)
             {
