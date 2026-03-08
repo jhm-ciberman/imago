@@ -51,10 +51,6 @@ public abstract class Application : IDisposable
     /// </summary>
     public SceneGraph.Viewport Viewport => this.Renderer.MainViewport;
 
-    /// <summary>
-    /// Gets the current screen.
-    /// </summary>
-    public Screen Screen => this.Stage.CurrentScreen;
 
     /// <summary>
     /// Gets a value indicating whether the application is running in debug mode.
@@ -89,7 +85,6 @@ public abstract class Application : IDisposable
 
         this.Window.Resized += this.HandleWindowResized;
         this.Ticker.Ticked += this.HandleTicked;
-        this.Stage.ScreenChanged += this.HandleScreenChanged;
 
         this.HandleWindowResized();
         this.Stage.EnableInputHandling();
@@ -147,11 +142,6 @@ public abstract class Application : IDisposable
         this.OnWindowResized();
     }
 
-    private void HandleScreenChanged(object? sender, ScreenChangedEventArgs e)
-    {
-        this.OnScreenChanged(e.OldScreen, e.NewScreen);
-    }
-
     private void HandleTicked(object? sender, TickedEventArgs e)
     {
         float deltaTime = (float)e.DeltaTime;
@@ -184,15 +174,6 @@ public abstract class Application : IDisposable
     /// Called when the window is resized. Override to handle resize events.
     /// </summary>
     protected virtual void OnWindowResized()
-    {
-    }
-
-    /// <summary>
-    /// Called when the screen changes. Override to handle screen transitions.
-    /// </summary>
-    /// <param name="oldScreen">The previous screen, or null if none.</param>
-    /// <param name="newScreen">The new screen, or null if none.</param>
-    protected virtual void OnScreenChanged(Screen? oldScreen, Screen? newScreen)
     {
     }
 

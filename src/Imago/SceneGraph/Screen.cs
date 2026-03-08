@@ -11,22 +11,13 @@ namespace Imago.SceneGraph;
 /// Represents a container for layers that are rendered and updated together.
 /// </summary>
 /// <remarks>
-/// A screen is a collection of layers (both 3D and 2D). When a screen is activated,
-/// its layers are added to the Stage. When deactivated, they are removed.
+/// A screen is a collection of layers (both 3D and 2D). When activated, its layers
+/// and Scene3D are pushed onto the Stage. When deactivated, they are removed.
 /// </remarks>
 public class Screen : IDisposable
 {
-    /// <summary>
-    /// Occurs when a layer is added to the screen.
-    /// </summary>
-    public event EventHandler<LayerChangedEventArgs>? LayerAdded;
-
-    /// <summary>
-    /// Occurs when a layer is removed from the screen.
-    /// </summary>
-    public event EventHandler<LayerChangedEventArgs>? LayerRemoved;
-
     private readonly List<ILayer> _layers = new();
+    private Stage? _activeStage;
 
     /// <summary>
     /// Gets the list of layers in the screen.
@@ -87,7 +78,7 @@ public class Screen : IDisposable
     }
 
     /// <summary>
-    /// Adds a layer to the screen.
+    /// Adds a layer to the screen. If the screen is active, the layer is also added to the stage.
     /// </summary>
     /// <param name="layer">The layer to add.</param>
     public void AddLayer(ILayer layer)
@@ -98,11 +89,11 @@ public class Screen : IDisposable
         }
 
         this._layers.Add(layer);
-        this.LayerAdded?.Invoke(this, new LayerChangedEventArgs(layer));
+        this._activeStage?.AddLayer(layer);
     }
 
     /// <summary>
-    /// Removes a layer from the screen.
+    /// Removes a layer from the screen. If the screen is active, the layer is also removed from the stage.
     /// </summary>
     /// <param name="layer">The layer to remove.</param>
     public void RemoveLayer(ILayer layer)
@@ -114,31 +105,57 @@ public class Screen : IDisposable
             this.GuiLayer = this._layers.OfType<GuiLayer>().FirstOrDefault();
         }
 
-        this.LayerRemoved?.Invoke(this, new LayerChangedEventArgs(layer));
+        this._activeStage?.RemoveLayer(layer);
+    }
+
+    /// <summary>
+    /// Activates this screen on the given stage, pushing its Scene3D and layers.
+    /// </summary>
+    /// <param name="stage">The stage to activate on.</param>
+    public void Activate(Stage stage)
+    {
+        this._activeStage = stage;
+        stage.Scene3D = this.Scene3D;
+
+        foreach (var layer in this._layers)
+        {
+            stage.AddLayer(layer);
+        }
+
+        stage.ImGuiRendering += this.RenderImGui;
+        this.OnActivated();
+    }
+
+    /// <summary>
+    /// Deactivates this screen from the given stage, removing its layers and Scene3D.
+    /// </summary>
+    /// <param name="stage">The stage to deactivate from.</param>
+    public void Deactivate(Stage stage)
+    {
+        this.OnDeactivated();
+        stage.ImGuiRendering -= this.RenderImGui;
+
+        foreach (var layer in this._layers)
+        {
+            stage.RemoveLayer(layer);
+        }
+
+        stage.Scene3D = null;
+        this._activeStage = null;
     }
 
     /// <summary>
     /// Called when the screen is activated (becomes the current screen).
     /// </summary>
-    /// <remarks>
-    /// Subclasses that override this method must call <c>base.OnActivated()</c> to ensure
-    /// the 3D scene graph is properly mounted.
-    /// </remarks>
     public virtual void OnActivated()
     {
-        this.Scene3D?.Mount();
     }
 
     /// <summary>
     /// Called when the screen is deactivated (no longer the current screen).
     /// </summary>
-    /// <remarks>
-    /// Subclasses that override this method must call <c>base.OnDeactivated()</c> to ensure
-    /// the 3D scene graph is properly unmounted.
-    /// </remarks>
     public virtual void OnDeactivated()
     {
-        this.Scene3D?.Unmount();
     }
 
     /// <summary>
