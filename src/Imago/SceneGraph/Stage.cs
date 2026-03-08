@@ -46,9 +46,9 @@ public class Stage
     public Screen CurrentScreen { get; private set; } = _emptyScreen;
 
     /// <summary>
-    /// Gets the primary 3D layer from the current screen, if any.
+    /// Gets the primary 3D scene from the current screen, if any.
     /// </summary>
-    public Layer3D? Layer3D => this.CurrentScreen.Layer3D;
+    public Scene3D? Scene3D => this.CurrentScreen.Scene3D;
 
     /// <summary>
     /// Gets all layers sorted by ZOrder (including persistent and screen layers).
@@ -323,13 +323,15 @@ public class Stage
     {
         this.UpdateInputBlocking();
 
-        if (this.Layer3D != null)
+        if (this.Scene3D != null)
         {
             var isCursorOverGui = this.IsCursorOverGui();
-            this.Layer3D.Picking.Update(this.Layer3D.Camera, isCursorOverGui || this.Layer3D.IsInputBlocked);
+            this.Scene3D.Picking.Update(this.Scene3D.Camera, isCursorOverGui || this.Scene3D.IsInputBlocked);
         }
 
         this.CurrentScreen.Update(deltaTime);
+
+        this.Scene3D?.Update(deltaTime);
 
         foreach (var layer in this._allLayers)
         {
@@ -350,12 +352,17 @@ public class Stage
                 blocked = true;
             }
         }
+
+        if (this.Scene3D != null)
+        {
+            this.Scene3D.IsInputBlocked = blocked;
+        }
     }
 
     /// <summary>
-    /// Gets the camera from the primary 3D layer.
+    /// Gets the camera from the primary 3D scene.
     /// </summary>
-    public Camera? Camera => this.Layer3D?.Camera;
+    public Camera? Camera => this.Scene3D?.Camera;
 
     /// <summary>
     /// Determines if the cursor is over any GUI element in any visible 2D layer.
@@ -380,7 +387,7 @@ public class Stage
     {
         this.CurrentScreen.RenderImGui();
         this.ImGuiRendered?.Invoke();
-        this.Layer3D?.PrepareForRender(renderTexture);
+        this.Scene3D?.PrepareForRender(renderTexture);
     }
 
     /// <summary>
@@ -388,6 +395,6 @@ public class Stage
     /// </summary>
     public Color? GetClearColor()
     {
-        return this.Layer3D?.ClearColor ?? this.DefaultClearColor;
+        return this.Scene3D?.ClearColor ?? this.DefaultClearColor;
     }
 }

@@ -141,7 +141,7 @@ internal class Renderable : IDisposable
             {
                 var oldFlags = this._renderQueueFlags;
                 this._renderQueueFlags = value;
-                this._layer3D?.NotifyRenderableRenderQueueChanged(this, oldFlags, value);
+                this._scene3D?.NotifyRenderableRenderQueueChanged(this, oldFlags, value);
             }
         }
     }
@@ -205,23 +205,23 @@ internal class Renderable : IDisposable
         renderer.RegisterDisposable(this);
     }
 
-    private Layer3D? _layer3D = null;
+    private Scene3D? _scene3D = null;
 
     /// <summary>
-    /// Gets or sets the 3D layer this renderable belongs to.
+    /// Gets or sets the 3D scene this renderable belongs to.
     /// </summary>
-    public Layer3D? Layer3D
+    public Scene3D? Scene3D
     {
-        get => this._layer3D;
+        get => this._scene3D;
         set
         {
-            if (this._layer3D == value) return;
+            if (this._scene3D == value) return;
 
-            this._layer3D?.RemoveRenderable(this);
+            this._scene3D?.RemoveRenderable(this);
 
-            this._layer3D = value;
+            this._scene3D = value;
 
-            this._layer3D?.AddRenderable(this);
+            this._scene3D?.AddRenderable(this);
         }
     }
 
@@ -279,7 +279,7 @@ internal class Renderable : IDisposable
             this.UpdateSkeletonTransform();
             this.RecomputeOffsetVertexData();
             this.InvalidatePipeline();
-            this.Layer3D?.NotifyRenderableSkeletonChanged(this, oldSkeleton, value);
+            this.Scene3D?.NotifyRenderableSkeletonChanged(this, oldSkeleton, value);
         }
     }
 
@@ -355,7 +355,7 @@ internal class Renderable : IDisposable
         if (this._pipelineDirty) return;
 
         this._pipelineDirty = true;
-        this._layer3D?.NotifyRenderablePipelineDirty(this);
+        this._scene3D?.NotifyRenderablePipelineDirty(this);
     }
 
     /// <summary>
@@ -398,8 +398,8 @@ internal class Renderable : IDisposable
     /// <summary>
     /// Updates the renderable.
     /// </summary>
-    /// <param name="layer">The 3D layer.</param>
-    public void Update(Layer3D layer)
+    /// <param name="scene">The 3D scene.</param>
+    public void Update(Scene3D scene)
     {
         if (this._pipelineDirty)
         {
@@ -554,7 +554,7 @@ internal class Renderable : IDisposable
         if (!isVisible) return null;
 
         RenderFlags flags = material.RenderFlags;
-        var layer = this.Layer3D!;
+        var layer = this.Scene3D!;
         if (layer.ForceWireframe) flags |= RenderFlags.Wireframe;
         if (this.RenderQueues.HasFlag(RenderQueues.Transparent)) flags |= RenderFlags.Transparent;
         if (layer.EnableFog) flags |= RenderFlags.Fog;
@@ -562,7 +562,7 @@ internal class Renderable : IDisposable
         if (layer.LightingHalfLambert) flags |= RenderFlags.HalfLambert;
         if (layer.CascadesCount > 1) flags |= RenderFlags.ShadowCascades;
 
-        return material.ForwardShader.GetPipeline(this._mesh!.VertexFormat, flags, this.Layer3D!.MultiSampleCount);
+        return material.ForwardShader.GetPipeline(this._mesh!.VertexFormat, flags, this.Scene3D!.MultiSampleCount);
     }
 
     private Veldrid.Pipeline? GetShadowmapPipeline(Material material)

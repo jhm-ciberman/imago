@@ -15,7 +15,7 @@ using Shader = Imago.Assets.Materials.Shader;
 namespace Imago.Rendering;
 
 /// <summary>
-/// Orchestrates the rendering of a <see cref="Layer3D"/> by coordinating various rendering passes.
+/// Orchestrates the rendering of a <see cref="Scene3D"/> by coordinating various rendering passes.
 /// </summary>
 /// <remarks>
 /// This class is responsible for setting up and executing the rendering pipeline for a 3D layer,
@@ -129,63 +129,63 @@ public class Forward3DRenderer : IDisposable
     /// Reads the picking result from the staging texture and updates the picking manager.
     /// Must be called after command submission.
     /// </summary>
-    /// <param name="layer">The 3D layer whose picking manager should be updated, or null if no 3D layer is active.</param>
-    public void ReadPickingResult(Layer3D? layer)
+    /// <param name="scene">The 3D scene whose picking manager should be updated, or null if no 3D scene is active.</param>
+    public void ReadPickingResult(Scene3D? scene)
     {
-        if (layer == null) return;
+        if (scene == null) return;
 
-        this._mousePickerPass.ReadStagingResult(layer.Picking);
+        this._mousePickerPass.ReadStagingResult(scene.Picking);
     }
 
     /// <summary>
-    /// Renders a <see cref="Layer3D"/> to the specified <see cref="RenderTexture"/>.
+    /// Renders a <see cref="Scene3D"/> to the specified <see cref="RenderTexture"/>.
     /// </summary>
     /// <param name="cl">The Veldrid command list.</param>
-    /// <param name="layer">The 3D layer to render.</param>
+    /// <param name="scene">The 3D scene to render.</param>
     /// <param name="renderTexture">The target render texture.</param>
-    public void Render(CommandList cl, Layer3D layer, RenderTexture renderTexture)
+    public void Render(CommandList cl, Scene3D scene, RenderTexture renderTexture)
     {
-        var camera = layer.Camera;
+        var camera = scene.Camera;
 
         cl.SetFramebuffer(renderTexture.Framebuffer);
-        this.ClearRenderTarget(cl, layer);
+        this.ClearRenderTarget(cl, scene);
 
         if (camera == null) return;
 
-        var opaqueRQ = layer.OpaqueRenderQueue;
-        var transparentRQ = layer.TransparentRenderQueue;
-        var immediateRQ = layer.ImmediateRenderables;
-        var pickingRQ = layer.PickingRenderQueue;
-        var shadowCasterRQs = new Span<RenderQueue>(layer.ShadowCasterRenderQueues, 0, layer.CascadesCount);
+        var opaqueRQ = scene.OpaqueRenderQueue;
+        var transparentRQ = scene.TransparentRenderQueue;
+        var immediateRQ = scene.ImmediateRenderables;
+        var pickingRQ = scene.PickingRenderQueue;
+        var shadowCasterRQs = new Span<RenderQueue>(scene.ShadowCasterRenderQueues, 0, scene.CascadesCount);
 
         var stats = this._renderer.Statistics;
 
         stats.ShadowSubPass.Begin();
-        this._shadowPass.Render(cl, camera, layer.Environment.MainLight, shadowCasterRQs);
+        this._shadowPass.Render(cl, camera, scene.Environment.MainLight, shadowCasterRQs);
         stats.ShadowSubPass.End();
 
         stats.ForwardSubPass.Begin();
-        this._forwardPass.Render(cl, renderTexture, camera, layer.Environment, opaqueRQ, transparentRQ);
+        this._forwardPass.Render(cl, renderTexture, camera, scene.Environment, opaqueRQ, transparentRQ);
         stats.ForwardSubPass.End();
 
         stats.OtherSubPass.Begin();
-        this._skyDomePass.Render(cl, renderTexture, camera, layer.Environment);
+        this._skyDomePass.Render(cl, renderTexture, camera, scene.Environment);
         this._immediatePass.Render(cl, renderTexture, camera, immediateRQ);
         stats.OtherSubPass.End();
 
         stats.PickingSubPass.Begin();
-        this._mousePickerPass.Render(cl, renderTexture, camera, layer.Picking, pickingRQ);
+        this._mousePickerPass.Render(cl, renderTexture, camera, scene.Picking, pickingRQ);
         stats.PickingSubPass.End();
 
         stats.OtherSubPass.Begin();
-        this._particlesPass.Render(cl, renderTexture, camera, layer.ParticleSystems);
-        this._gizmosPass.Render(cl, renderTexture, camera, layer.Gizmos);
+        this._particlesPass.Render(cl, renderTexture, camera, scene.ParticleSystems);
+        this._gizmosPass.Render(cl, renderTexture, camera, scene.Gizmos);
         stats.OtherSubPass.End();
     }
 
-    private void ClearRenderTarget(CommandList cl, Layer3D layer)
+    private void ClearRenderTarget(CommandList cl, Scene3D scene)
     {
-        ColorF? clearColor = layer.Camera?.ClearColor ?? layer.ClearColor;
+        ColorF? clearColor = scene.Camera?.ClearColor ?? scene.ClearColor;
         if (clearColor != null)
         {
             var col = clearColor.Value;

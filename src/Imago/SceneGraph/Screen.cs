@@ -34,9 +34,9 @@ public class Screen : IDisposable
     public IReadOnlyList<ILayer> Layers => this._layers;
 
     /// <summary>
-    /// Gets the primary 3D layer of the screen, if any.
+    /// Gets or sets the 3D scene of the screen, if any.
     /// </summary>
-    public Layer3D? Layer3D { get; private set; }
+    public Scene3D? Scene3D { get; set; }
 
     /// <summary>
     /// Gets the primary GUI layer of the screen (the first one added), if any.
@@ -50,27 +50,27 @@ public class Screen : IDisposable
 
     /// <summary>
     /// Gets or sets the clear color for the screen.
-    /// This is a convenience property that sets ClearColor on the primary Layer3D.
+    /// This is a convenience property that sets ClearColor on the primary Scene3D.
     /// </summary>
     public Color? ClearColor
     {
-        get => this.Layer3D?.ClearColor;
+        get => this.Scene3D?.ClearColor;
         set
         {
-            if (this.Layer3D != null)
-                this.Layer3D.ClearColor = value;
+            if (this.Scene3D != null)
+                this.Scene3D.ClearColor = value;
         }
     }
 
     /// <summary>
-    /// Gets the environment from the primary Layer3D, if any.
+    /// Gets the environment from the primary Scene3D, if any.
     /// </summary>
-    public SceneEnvironment? Environment => this.Layer3D?.Environment;
+    public SceneEnvironment? Environment => this.Scene3D?.Environment;
 
     /// <summary>
-    /// Gets the camera from the primary Layer3D, if any.
+    /// Gets the camera from the primary Scene3D, if any.
     /// </summary>
-    public Camera? Camera => this.Layer3D?.Camera;
+    public Camera? Camera => this.Scene3D?.Camera;
 
     private bool _disposedValue;
 
@@ -90,21 +90,9 @@ public class Screen : IDisposable
     /// Adds a layer to the screen.
     /// </summary>
     /// <param name="layer">The layer to add.</param>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown when attempting to add a second Layer3D.
-    /// </exception>
     public void AddLayer(ILayer layer)
     {
-        if (layer is Layer3D layer3D)
-        {
-            if (this.Layer3D != null)
-            {
-                throw new InvalidOperationException("Screen already has a Layer3D. Only one Layer3D per screen is supported.");
-            }
-
-            this.Layer3D = layer3D;
-        }
-        else if (layer is GuiLayer guiLayer)
+        if (layer is GuiLayer guiLayer)
         {
             this.GuiLayer ??= guiLayer;
         }
@@ -121,11 +109,7 @@ public class Screen : IDisposable
     {
         if (!this._layers.Remove(layer)) return;
 
-        if (layer == this.Layer3D)
-        {
-            this.Layer3D = null;
-        }
-        else if (layer == this.GuiLayer)
+        if (layer == this.GuiLayer)
         {
             this.GuiLayer = this._layers.OfType<GuiLayer>().FirstOrDefault();
         }
@@ -172,6 +156,8 @@ public class Screen : IDisposable
         {
             if (disposing)
             {
+                this.Scene3D?.Dispose();
+
                 foreach (var layer in this._layers)
                 {
                     if (layer is IDisposable disposable)

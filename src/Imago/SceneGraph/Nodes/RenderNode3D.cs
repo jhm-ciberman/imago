@@ -96,7 +96,7 @@ public class RenderNode3D : Node3D, IPickable
         {
             if (this._visible == value) return;
             this._visible = value;
-            this._renderable.Visible = value && this.Layer3D != null;
+            this._renderable.Visible = value && this.Scene3D != null;
         }
 
     }
@@ -169,24 +169,24 @@ public class RenderNode3D : Node3D, IPickable
     }
 
     /// <inheritdoc/>
-    public override void AttachToLayer(Layer3D layer)
+    public override void AttachToScene(Scene3D scene)
     {
-        base.AttachToLayer(layer);
+        base.AttachToScene(scene);
         this.UpdateRegistrationWithPickingManager();
         this._renderable.Visible = this._visible;
-        this._renderable.Layer3D = layer;
+        this._renderable.Scene3D = scene;
     }
 
     /// <inheritdoc/>
-    public override void DetachFromLayer()
+    public override void DetachFromScene()
     {
-        if (this.Layer3D is null)
-            throw new InvalidOperationException("Cannot detach from layer if not attached to one.");
+        if (this.Scene3D is null)
+            throw new InvalidOperationException("Cannot detach from scene if not attached to one.");
 
         this._renderable.Visible = false;
-        this._renderable.Layer3D = null;
+        this._renderable.Scene3D = null;
         this.UpdateRegistrationWithPickingManager();
-        base.DetachFromLayer();
+        base.DetachFromScene();
     }
 
     /// <summary>
@@ -194,17 +194,17 @@ public class RenderNode3D : Node3D, IPickable
     /// </summary>
     public void UpdateRegistrationWithPickingManager()
     {
-        if (this.Layer3D is null) return;
+        if (this.Scene3D is null) return;
 
         if (this._isPickable)
         {
             if (this._renderable.PickingId == 0)
-                this.Layer3D.Picking.RegisterPickable(this);
+                this.Scene3D.Picking.RegisterPickable(this);
         }
         else
         {
             if (this._renderable.PickingId != 0)
-                this.Layer3D.Picking.UnregisterPickable(this);
+                this.Scene3D.Picking.UnregisterPickable(this);
         }
     }
 

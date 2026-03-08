@@ -263,10 +263,10 @@ public class Renderer : IDisposable
         stats.PreparePhase.End();
 
         stats.Pass3D.Begin();
-        var layer3D = stage.Layer3D;
-        if (layer3D != null && layer3D.IsVisible)
+        var scene3D = stage.Scene3D;
+        if (scene3D != null && scene3D.IsVisible)
         {
-            this._forward3DRenderer.Render(cl, layer3D, this.MainRenderTexture);
+            this._forward3DRenderer.Render(cl, scene3D, this.MainRenderTexture);
         }
         else
         {
@@ -302,7 +302,7 @@ public class Renderer : IDisposable
         this._disposeCollector.DisposeAll();
         stats.GpuSync.End();
 
-        this._forward3DRenderer.ReadPickingResult(stage.Layer3D);
+        this._forward3DRenderer.ReadPickingResult(stage.Scene3D);
 
         stats.RenderTime.End();
 
@@ -314,20 +314,20 @@ public class Renderer : IDisposable
 
 
     /// <summary>
-    /// Renders a <see cref="Layer3D"/> to an off-screen texture.
+    /// Renders a <see cref="Scene3D"/> to an off-screen texture.
     /// </summary>
-    /// <param name="layer">The 3D layer to render.</param>
+    /// <param name="scene">The 3D scene to render.</param>
     /// <param name="renderTexture">The render texture to render to.</param>
     /// <param name="resolvedTexture">The texture to resolve the multisampled result to. If null, no resolving is performed.</param>
-    public void RenderToOffScreenTexture(Layer3D layer, RenderTexture renderTexture, Texture? resolvedTexture = null)
+    public void RenderToOffScreenTexture(Scene3D scene, RenderTexture renderTexture, Texture? resolvedTexture = null)
     {
         var cl = this._commandList;
 
-        layer.PrepareForRender(renderTexture);
+        scene.PrepareForRender(renderTexture);
 
         cl.Begin();
         this._rendererResources.Update(cl);
-        this._forward3DRenderer.Render(cl, layer, renderTexture);
+        this._forward3DRenderer.Render(cl, scene, renderTexture);
 
         //if (renderTexture.SampleCount != TextureSampleCount.Count1 && resolvedTexture != null)
         //{

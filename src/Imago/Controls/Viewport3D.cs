@@ -7,26 +7,26 @@ using Imago.SceneGraph;
 namespace Imago.Controls;
 
 /// <summary>
-/// A control that renders a <see cref="Layer3D"/> and displays the result as a 2D texture.
+/// A control that renders a <see cref="Scene3D"/> and displays the result as a 2D texture.
 /// </summary>
 public class Viewport3D : Control
 {
-    private Layer3D? _layer;
+    private Scene3D? _scene;
     private RenderTexture? _renderTexture;
     private Texture? _resolvedTexture;
     private bool _dirty;
     private bool _needsFlipY;
 
     /// <summary>
-    /// Gets or sets the 3D layer to render. The caller owns the layer and is responsible for its disposal.
+    /// Gets or sets the 3D scene to render. The caller owns the scene and is responsible for its disposal.
     /// </summary>
-    public Layer3D? Layer3D
+    public Scene3D? Scene3D
     {
-        get => this._layer;
+        get => this._scene;
         set
         {
-            if (this._layer == value) return;
-            this._layer = value;
+            if (this._scene == value) return;
+            this._scene = value;
             this._dirty = true;
         }
     }
@@ -34,7 +34,7 @@ public class Viewport3D : Control
     /// <summary>
     /// Gets or sets a value indicating whether the viewport re-renders every frame.
     /// When <c>false</c>, the viewport only renders when <see cref="Refresh"/> is called or
-    /// when the <see cref="Layer3D"/> property changes.
+    /// when the <see cref="Scene3D"/> property changes.
     /// </summary>
     public bool AutoRefresh { get; set; }
 
@@ -59,7 +59,7 @@ public class Viewport3D : Control
     {
         base.Update(deltaTime);
 
-        if (this._layer == null) return;
+        if (this._scene == null) return;
 
         uint width = (uint)this.ActualSize.X;
         uint height = (uint)this.ActualSize.Y;
@@ -75,7 +75,7 @@ public class Viewport3D : Control
 
         if (this._dirty)
         {
-            Renderer.Instance.RenderToOffScreenTexture(this._layer, this._renderTexture!);
+            Renderer.Instance.RenderToOffScreenTexture(this._scene, this._renderTexture!);
             Renderer.Instance.ResolveTexture(this._renderTexture!, this._resolvedTexture!);
             this._dirty = false;
         }

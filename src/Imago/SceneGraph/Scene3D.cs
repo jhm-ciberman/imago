@@ -12,24 +12,22 @@ using Veldrid;
 namespace Imago.SceneGraph;
 
 /// <summary>
-/// A layer that renders 3D content. Contains a scene graph, camera, and environment.
+/// Represents a 3D scene containing a scene graph, camera, and environment.
 /// </summary>
-public class Layer3D : ILayer, IDisposable
+public class Scene3D : IDisposable
 {
-    /// <inheritdoc />
-    public int ZOrder { get; init; } = 0;
-
-    /// <inheritdoc />
+    /// <summary>
+    /// Gets or sets a value indicating whether this scene is visible and should be rendered.
+    /// </summary>
     public bool IsVisible { get; set; } = true;
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Gets or sets a value indicating whether input to this scene is blocked.
+    /// </summary>
     public bool IsInputBlocked { get; set; }
 
-    /// <inheritdoc />
-    public Stage? Stage { get; set; }
-
     /// <summary>
-    /// Gets or sets the clear color of the layer. If null, the layer will not be cleared
+    /// Gets or sets the clear color of the scene. If null, the scene will not be cleared
     /// and the previous frame will be visible.
     /// </summary>
     public Color? ClearColor { get; set; } = Color.Black;
@@ -44,21 +42,21 @@ public class Layer3D : ILayer, IDisposable
         {
             if (this._root == value) return;
 
-            this._root?.DetachFromLayer();
+            this._root?.DetachFromScene();
             this._root = value;
-            this._root?.AttachToLayer(this);
+            this._root?.AttachToScene(this);
         }
     }
 
     private Node3D? _root;
 
     /// <summary>
-    /// Gets or sets the camera used to render the layer.
+    /// Gets or sets the camera used to render the scene.
     /// </summary>
     public Camera? Camera { get; set; } = null;
 
     /// <summary>
-    /// Gets or sets the environment of the layer.
+    /// Gets or sets the environment of the scene.
     /// </summary>
     public SceneEnvironment Environment { get; set; } = new SceneEnvironment();
 
@@ -68,7 +66,7 @@ public class Layer3D : ILayer, IDisposable
     public GizmosDrawer Gizmos { get; } = new GizmosDrawer();
 
     /// <summary>
-    /// Gets the picking manager for object selection in this layer.
+    /// Gets the picking manager for object selection in this scene.
     /// </summary>
     public PickingManager Picking { get; } = PickingManager.Instance;
 
@@ -87,12 +85,12 @@ public class Layer3D : ILayer, IDisposable
     private bool _invalidateRendererPipelines = false;
 
     /// <summary>
-    /// Gets the list of particle systems in the layer.
+    /// Gets the list of particle systems in the scene.
     /// </summary>
     public IReadOnlyList<IParticleSystem> ParticleSystems => this._particleSystems;
 
     /// <summary>
-    /// Adds a particle system to the layer.
+    /// Adds a particle system to the scene.
     /// </summary>
     /// <param name="particleSystem">The particle system to add.</param>
     public void AddParticleSystem(IParticleSystem particleSystem)
@@ -115,7 +113,7 @@ public class Layer3D : ILayer, IDisposable
     public IReadOnlyList<ImmediateRenderable3D> ImmediateRenderables => this._immediateRenderables;
 
     /// <summary>
-    /// Adds an immediate-mode renderable to the layer.
+    /// Adds an immediate-mode renderable to the scene.
     /// </summary>
     /// <param name="immediateRenderable">The immediate renderable to add.</param>
     public void AddImmediateRenderable(ImmediateRenderable3D immediateRenderable)
@@ -133,9 +131,9 @@ public class Layer3D : ILayer, IDisposable
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Layer3D"/> class.
+    /// Initializes a new instance of the <see cref="Scene3D"/> class.
     /// </summary>
-    public Layer3D()
+    public Scene3D()
     {
         for (int i = 0; i < this.ShadowCasterRenderQueues.Length; i++)
         {
@@ -218,7 +216,10 @@ public class Layer3D : ILayer, IDisposable
         return true;
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Updates the scene state.
+    /// </summary>
+    /// <param name="deltaTime">Time elapsed since last update in seconds.</param>
     public void Update(float deltaTime)
     {
         this.Gizmos.Update(deltaTime);
@@ -226,7 +227,7 @@ public class Layer3D : ILayer, IDisposable
     }
 
     /// <summary>
-    /// Prepares the layer for rendering by updating transforms, skeletons, and render queues.
+    /// Prepares the scene for rendering by updating transforms, skeletons, and render queues.
     /// </summary>
     /// <param name="renderTexture">The render texture that will be used for rendering.</param>
     public void PrepareForRender(RenderTexture renderTexture)
@@ -290,7 +291,7 @@ public class Layer3D : ILayer, IDisposable
     }
 
     /// <summary>
-    /// Notifies the layer that the transform of the specified node is not dirty.
+    /// Notifies the scene that the transform of the specified node is not dirty.
     /// </summary>
     /// <param name="node">The node.</param>
     internal void NotifyTransformNotDirty(Node3D node)
@@ -299,7 +300,7 @@ public class Layer3D : ILayer, IDisposable
     }
 
     /// <summary>
-    /// Notifies the layer that the transform of the specified node is dirty.
+    /// Notifies the scene that the transform of the specified node is dirty.
     /// </summary>
     /// <param name="node">The node.</param>
     internal void NotifyTransformDirty(Node3D node)
@@ -308,7 +309,7 @@ public class Layer3D : ILayer, IDisposable
     }
 
     /// <summary>
-    /// Notifies the layer that the renderable pipeline of the specified renderable is dirty.
+    /// Notifies the scene that the renderable pipeline of the specified renderable is dirty.
     /// </summary>
     /// <param name="renderable">The renderable.</param>
     internal void NotifyRenderablePipelineDirty(Renderable renderable)
@@ -317,7 +318,7 @@ public class Layer3D : ILayer, IDisposable
     }
 
     /// <summary>
-    /// Notifies the layer that the renderable queue render flags of the specified renderable have changed.
+    /// Notifies the scene that the renderable queue render flags of the specified renderable have changed.
     /// </summary>
     /// <param name="renderable">The renderable.</param>
     /// <param name="oldQueuesFlags">The old render flags.</param>
@@ -336,7 +337,7 @@ public class Layer3D : ILayer, IDisposable
     }
 
     /// <summary>
-    /// Notifies the layer that the renderable skeleton of the specified renderable has changed.
+    /// Notifies the scene that the renderable skeleton of the specified renderable has changed.
     /// </summary>
     /// <param name="renderable">The renderable.</param>
     /// <param name="oldSkeleton">The old skeleton.</param>
@@ -370,7 +371,7 @@ public class Layer3D : ILayer, IDisposable
     }
 
     /// <summary>
-    /// Disposes the layer and releases associated resources.
+    /// Disposes the scene and releases associated resources.
     /// </summary>
     public void Dispose()
     {
