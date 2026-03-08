@@ -26,9 +26,35 @@ public class Viewport3D : Control
         set
         {
             if (this._scene == value) return;
+
+            if (this.Layer != null)
+            {
+                this._scene?.Unmount();
+            }
+
             this._scene = value;
+
+            if (this.Layer != null)
+            {
+                this._scene?.Mount();
+            }
+
             this._dirty = true;
         }
+    }
+
+    /// <inheritdoc />
+    public override void OnMounted(GuiLayer layer)
+    {
+        base.OnMounted(layer);
+        this._scene?.Mount();
+    }
+
+    /// <inheritdoc />
+    public override void OnUnmounted()
+    {
+        this._scene?.Unmount();
+        base.OnUnmounted();
     }
 
     /// <summary>

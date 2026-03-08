@@ -31,8 +31,29 @@ public class GuiLayer : ILayer2D, IInputHandler
     /// </summary>
     public bool BlocksInputBelow { get; set; } = false;
 
+    private Stage? _stage;
+
     /// <inheritdoc />
-    public Stage? Stage { get; set; }
+    public Stage? Stage
+    {
+        get => this._stage;
+        set
+        {
+            if (this._stage == value) return;
+
+            if (this._stage != null)
+            {
+                this._content?.OnUnmounted();
+            }
+
+            this._stage = value;
+
+            if (this._stage != null)
+            {
+                this._content?.OnMounted(this);
+            }
+        }
+    }
 
     /// <summary>
     /// Gets the viewport that this GUI layer is rendered to.
@@ -100,11 +121,17 @@ public class GuiLayer : ILayer2D, IInputHandler
         {
             if (this._content != value)
             {
-                this._content?.OnRemovedFromLayer(this);
+                if (this._stage != null)
+                {
+                    this._content?.OnUnmounted();
+                }
 
                 this._content = value;
 
-                this._content?.OnAddedToLayer(this);
+                if (this._stage != null)
+                {
+                    this._content?.OnMounted(this);
+                }
             }
         }
     }

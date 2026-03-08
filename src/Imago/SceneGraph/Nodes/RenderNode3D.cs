@@ -1,4 +1,3 @@
-using System;
 using System.Numerics;
 using Imago.Assets.Materials;
 using Imago.Assets.Meshes;
@@ -169,24 +168,21 @@ public class RenderNode3D : Node3D, IPickable
     }
 
     /// <inheritdoc/>
-    public override void AttachToScene(Scene3D scene)
+    public override void OnMounted(Scene3D scene)
     {
-        base.AttachToScene(scene);
+        base.OnMounted(scene);
         this.UpdateRegistrationWithPickingManager();
         this._renderable.Visible = this._visible;
         this._renderable.Scene3D = scene;
     }
 
     /// <inheritdoc/>
-    public override void DetachFromScene()
+    public override void OnUnmounted()
     {
-        if (this.Scene3D is null)
-            throw new InvalidOperationException("Cannot detach from scene if not attached to one.");
-
         this._renderable.Visible = false;
         this._renderable.Scene3D = null;
         this.UpdateRegistrationWithPickingManager();
-        base.DetachFromScene();
+        base.OnUnmounted();
     }
 
     /// <summary>

@@ -120,15 +120,25 @@ public class Screen : IDisposable
     /// <summary>
     /// Called when the screen is activated (becomes the current screen).
     /// </summary>
+    /// <remarks>
+    /// Subclasses that override this method must call <c>base.OnActivated()</c> to ensure
+    /// the 3D scene graph is properly mounted.
+    /// </remarks>
     public virtual void OnActivated()
     {
+        this.Scene3D?.Mount();
     }
 
     /// <summary>
     /// Called when the screen is deactivated (no longer the current screen).
     /// </summary>
+    /// <remarks>
+    /// Subclasses that override this method must call <c>base.OnDeactivated()</c> to ensure
+    /// the 3D scene graph is properly unmounted.
+    /// </remarks>
     public virtual void OnDeactivated()
     {
+        this.Scene3D?.Unmount();
     }
 
     /// <summary>

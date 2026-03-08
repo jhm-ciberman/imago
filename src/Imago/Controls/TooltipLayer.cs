@@ -66,7 +66,7 @@ public class TooltipLayer : ILayer2D, IDisposable
         // Ensure presenter has access to a layer for resource loading and layout
         if (this._presenter.Layer == null)
         {
-            this._presenter.OnAddedToLayer(control.Layer);
+            this._presenter.OnMounted(control.Layer);
         }
 
         this._currentOwner = control;
@@ -182,7 +182,7 @@ public class TooltipLayer : ILayer2D, IDisposable
     {
         if (this._presenter.Layer != null)
         {
-            this._presenter.OnRemovedFromLayer(this._presenter.Layer);
+            this._presenter.OnUnmounted();
         }
 
         this._presenter.Dispose();

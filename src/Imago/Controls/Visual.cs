@@ -46,9 +46,8 @@ public abstract class Visual : ObservableObject, IDisposable
     }
 
     /// <summary>
-    /// Gets the layer the control is added to, or null if the control is not added yet to a layer.
+    /// Gets the layer the control belongs to, or <see langword="null"/> if the control is not mounted.
     /// </summary>
-
     public GuiLayer? Layer
     {
         get => this._layer;
@@ -259,15 +258,15 @@ public abstract class Visual : ObservableObject, IDisposable
     private IDisposable? _templateBindings = null;
 
     /// <summary>
-    /// Called when the control is added to the <see cref="GuiLayer"/>.
+    /// Called when the control becomes part of the live scene graph (transitively connected to the Stage).
     /// </summary>
-    /// <param name="layer">The <see cref="GuiLayer"/> the control is added to.</param>
-    /// <exception cref="InvalidOperationException">Thrown if the control is already added to a layer.</exception>
-    public virtual void OnAddedToLayer(GuiLayer layer)
+    /// <param name="layer">The <see cref="GuiLayer"/> the control is mounted in.</param>
+    /// <exception cref="InvalidOperationException">Thrown if the control is already mounted.</exception>
+    public virtual void OnMounted(GuiLayer layer)
     {
         if (this.Layer != null)
         {
-            throw new InvalidOperationException("The control is already added to a layer.");
+            throw new InvalidOperationException("The control is already mounted.");
         }
 
         this.IsArrangeValid = false;
@@ -275,7 +274,7 @@ public abstract class Visual : ObservableObject, IDisposable
         this.Layer = layer;
         foreach (var child in this.VisualChildren)
         {
-            child.OnAddedToLayer(layer);
+            child.OnMounted(layer);
         }
 
         this._bindings = this.CreateBindings();
@@ -283,7 +282,7 @@ public abstract class Visual : ObservableObject, IDisposable
     }
 
     /// <summary>
-    /// This method can be overridden to create bindings when the control is added to a layer.
+    /// This method can be overridden to create bindings when the control is mounted.
     /// </summary>
     /// <returns>The created bindings.</returns>
     protected virtual IDisposable? CreateBindings()
@@ -302,27 +301,30 @@ public abstract class Visual : ObservableObject, IDisposable
     }
 
     /// <summary>
-    /// Called when the control is removed from the <see cref="GuiLayer"/>.
+    /// Called when the control is removed from the live scene graph.
     /// </summary>
-    /// <param name="layer">The <see cref="GuiLayer"/> the control is removed from.</param>
-    /// <exception cref="InvalidOperationException">Thrown if the control is not added to the specified layer.</exception>
-    public virtual void OnRemovedFromLayer(GuiLayer layer)
+    /// <remarks>
+    /// The <see cref="Layer"/> reference remains valid throughout this method and its overrides.
+    /// It is cleared at the end of the base implementation after all children have been unmounted.
+    /// </remarks>
+    /// <exception cref="InvalidOperationException">Thrown if the control is not mounted.</exception>
+    public virtual void OnUnmounted()
     {
-        if (this.Layer != layer)
+        if (this.Layer == null)
         {
-            throw new InvalidOperationException("The control is not added to the specified layer.");
+            throw new InvalidOperationException("The control is not mounted.");
         }
 
-        this.Layer = null;
         foreach (var child in this.VisualChildren)
         {
-            child.OnRemovedFromLayer(layer);
+            child.OnUnmounted();
         }
 
         this._bindings?.Dispose();
         this._bindings = null;
         this._templateBindings?.Dispose();
         this._templateBindings = null;
+        this.Layer = null;
     }
 
     /// <summary>
@@ -373,7 +375,7 @@ public abstract class Visual : ObservableObject, IDisposable
         child.Parent = this;
         if (this.Layer != null)
         {
-            child.OnAddedToLayer(this.Layer);
+            child.OnMounted(this.Layer);
             this.InvalidateMeasure();
         }
     }
@@ -387,7 +389,7 @@ public abstract class Visual : ObservableObject, IDisposable
         this._visualChildren.Remove(child);
         if (this.Layer != null)
         {
-            child.OnRemovedFromLayer(this.Layer);
+            child.OnUnmounted();
             this.InvalidateMeasure();
         }
     }

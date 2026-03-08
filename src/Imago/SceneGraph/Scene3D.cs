@@ -33,6 +33,11 @@ public class Scene3D : IDisposable
     public Color? ClearColor { get; set; } = Color.Black;
 
     /// <summary>
+    /// Gets a value indicating whether this scene is currently mounted to the live Stage.
+    /// </summary>
+    public bool IsMounted { get; private set; }
+
+    /// <summary>
     /// Gets or sets the root node of the 3D scene graph.
     /// </summary>
     public Node3D? Root
@@ -42,13 +47,41 @@ public class Scene3D : IDisposable
         {
             if (this._root == value) return;
 
-            this._root?.DetachFromScene();
+            if (this.IsMounted)
+            {
+                this._root?.OnUnmounted();
+            }
+
             this._root = value;
-            this._root?.AttachToScene(this);
+
+            if (this.IsMounted)
+            {
+                this._root?.OnMounted(this);
+            }
         }
     }
 
     private Node3D? _root;
+
+    /// <summary>
+    /// Mounts this scene, propagating the mounted lifecycle to all nodes in the scene graph.
+    /// </summary>
+    public void Mount()
+    {
+        if (this.IsMounted) return;
+        this.IsMounted = true;
+        this._root?.OnMounted(this);
+    }
+
+    /// <summary>
+    /// Unmounts this scene, propagating the unmounted lifecycle to all nodes in the scene graph.
+    /// </summary>
+    public void Unmount()
+    {
+        if (!this.IsMounted) return;
+        this._root?.OnUnmounted();
+        this.IsMounted = false;
+    }
 
     /// <summary>
     /// Gets or sets the camera used to render the scene.

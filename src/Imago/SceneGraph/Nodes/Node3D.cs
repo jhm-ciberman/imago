@@ -87,7 +87,7 @@ public class Node3D : IDisposable, IFormattable
     }
 
     /// <summary>
-    /// Gets the 3D scene this node is attached to, or null if not attached.
+    /// Gets the 3D scene this node is mounted in, or <see langword="null"/> if not mounted.
     /// </summary>
     public Scene3D? Scene3D { get; protected set; } = null;
 
@@ -255,7 +255,7 @@ public class Node3D : IDisposable, IFormattable
 
         if (this.Scene3D != null)
         {
-            node.AttachToScene(this.Scene3D);
+            node.OnMounted(this.Scene3D);
         }
     }
 
@@ -273,7 +273,7 @@ public class Node3D : IDisposable, IFormattable
         node.Parent = null;
 
         if (node.Scene3D != null)
-            node.DetachFromScene();
+            node.OnUnmounted();
 
         if (dispose)
             node.Dispose();
@@ -290,37 +290,43 @@ public class Node3D : IDisposable, IFormattable
     }
 
     /// <summary>
-    /// Attaches this node to the given 3D scene.
+    /// Called when the node becomes part of the live scene graph (transitively connected to the Stage).
     /// </summary>
-    /// <param name="scene">The scene to attach to.</param>
-    public virtual void AttachToScene(Scene3D scene)
+    /// <param name="scene">The <see cref="SceneGraph.Scene3D"/> the node is mounted in.</param>
+    /// <exception cref="InvalidOperationException">Thrown if the node is already mounted.</exception>
+    public virtual void OnMounted(Scene3D scene)
     {
         if (this.Scene3D != null)
-            throw new InvalidOperationException("Cannot attach to scene if already attached to one. Please detach first.");
+            throw new InvalidOperationException("Cannot mount a node that is already mounted.");
 
         this.Scene3D = scene;
-        this.Scene3D.NotifyTransformDirty(this);
+        scene.NotifyTransformDirty(this);
 
         foreach (var child in this._children)
         {
-            child.AttachToScene(scene);
+            child.OnMounted(scene);
         }
     }
 
     /// <summary>
-    /// Detaches this node from the current 3D scene.
+    /// Called when the node is removed from the live scene graph.
     /// </summary>
-    public virtual void DetachFromScene()
+    /// <remarks>
+    /// The <see cref="Scene3D"/> reference remains valid throughout this method and its overrides.
+    /// It is cleared at the end of the base implementation after all children have been unmounted.
+    /// </remarks>
+    public virtual void OnUnmounted()
     {
         if (this.Scene3D == null) return;
 
         this.Scene3D.NotifyTransformNotDirty(this);
-        this.Scene3D = null;
 
         foreach (var child in this._children)
         {
-            child.DetachFromScene();
+            child.OnUnmounted();
         }
+
+        this.Scene3D = null;
     }
 
     /// <summary>
