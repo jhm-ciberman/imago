@@ -11,45 +11,45 @@ namespace Imago.SceneGraph;
 /// Represents a container for layers that are rendered and updated together.
 /// </summary>
 /// <remarks>
-/// A scene is a collection of layers (both 3D and 2D). When a scene is activated,
+/// A screen is a collection of layers (both 3D and 2D). When a screen is activated,
 /// its layers are added to the Stage. When deactivated, they are removed.
 /// </remarks>
-public class Scene : IDisposable
+public class Screen : IDisposable
 {
     /// <summary>
-    /// Occurs when a layer is added to the scene.
+    /// Occurs when a layer is added to the screen.
     /// </summary>
     public event EventHandler<LayerChangedEventArgs>? LayerAdded;
 
     /// <summary>
-    /// Occurs when a layer is removed from the scene.
+    /// Occurs when a layer is removed from the screen.
     /// </summary>
     public event EventHandler<LayerChangedEventArgs>? LayerRemoved;
 
     private readonly List<ILayer> _layers = new();
 
     /// <summary>
-    /// Gets the list of layers in the scene.
+    /// Gets the list of layers in the screen.
     /// </summary>
     public IReadOnlyList<ILayer> Layers => this._layers;
 
     /// <summary>
-    /// Gets the primary 3D layer of the scene, if any.
+    /// Gets the primary 3D layer of the screen, if any.
     /// </summary>
     public Layer3D? Layer3D { get; private set; }
 
     /// <summary>
-    /// Gets the primary GUI layer of the scene (the first one added), if any.
+    /// Gets the primary GUI layer of the screen (the first one added), if any.
     /// </summary>
     public GuiLayer? GuiLayer { get; private set; }
 
     /// <summary>
-    /// Gets all GUI layers in the scene, ordered by ZOrder.
+    /// Gets all GUI layers in the screen, ordered by ZOrder.
     /// </summary>
     public IEnumerable<GuiLayer> GuiLayers => this._layers.OfType<GuiLayer>().OrderBy(l => l.ZOrder);
 
     /// <summary>
-    /// Gets or sets the clear color for the scene.
+    /// Gets or sets the clear color for the screen.
     /// This is a convenience property that sets ClearColor on the primary Layer3D.
     /// </summary>
     public Color? ClearColor
@@ -75,19 +75,19 @@ public class Scene : IDisposable
     private bool _disposedValue;
 
     /// <summary>
-    /// Gets a value indicating whether this scene has been disposed.
+    /// Gets a value indicating whether this screen has been disposed.
     /// </summary>
     public bool IsDisposed => this._disposedValue;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Scene"/> class.
+    /// Initializes a new instance of the <see cref="Screen"/> class.
     /// </summary>
-    public Scene()
+    public Screen()
     {
     }
 
     /// <summary>
-    /// Adds a layer to the scene.
+    /// Adds a layer to the screen.
     /// </summary>
     /// <param name="layer">The layer to add.</param>
     /// <exception cref="InvalidOperationException">
@@ -99,7 +99,7 @@ public class Scene : IDisposable
         {
             if (this.Layer3D != null)
             {
-                throw new InvalidOperationException("Scene already has a Layer3D. Only one Layer3D per scene is supported.");
+                throw new InvalidOperationException("Screen already has a Layer3D. Only one Layer3D per screen is supported.");
             }
 
             this.Layer3D = layer3D;
@@ -114,7 +114,7 @@ public class Scene : IDisposable
     }
 
     /// <summary>
-    /// Removes a layer from the scene.
+    /// Removes a layer from the screen.
     /// </summary>
     /// <param name="layer">The layer to remove.</param>
     public void RemoveLayer(ILayer layer)
@@ -134,21 +134,21 @@ public class Scene : IDisposable
     }
 
     /// <summary>
-    /// Called when the scene is activated (becomes the current scene).
+    /// Called when the screen is activated (becomes the current screen).
     /// </summary>
     public virtual void OnActivated()
     {
     }
 
     /// <summary>
-    /// Called when the scene is deactivated (no longer the current scene).
+    /// Called when the screen is deactivated (no longer the current screen).
     /// </summary>
     public virtual void OnDeactivated()
     {
     }
 
     /// <summary>
-    /// Updates the scene. Override this method to add custom scene logic.
+    /// Updates the screen. Override this method to add custom screen logic.
     /// Layer updates are handled by the Stage.
     /// </summary>
     /// <param name="deltaTime">The time elapsed since the last update, in seconds.</param>
@@ -157,14 +157,14 @@ public class Scene : IDisposable
     }
 
     /// <summary>
-    /// Renders the ImGui user interface for this scene.
+    /// Renders the ImGui user interface for this screen.
     /// </summary>
     public virtual void RenderImGui()
     {
     }
 
     /// <summary>
-    /// Disposes the scene and all its layers.
+    /// Disposes the screen and all its layers.
     /// </summary>
     protected virtual void Dispose(bool disposing)
     {

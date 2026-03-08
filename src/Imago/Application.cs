@@ -52,9 +52,9 @@ public abstract class Application : IDisposable
     public SceneGraph.Viewport Viewport => this.Renderer.MainViewport;
 
     /// <summary>
-    /// Gets the current scene.
+    /// Gets the current screen.
     /// </summary>
-    public Scene Scene => this.Stage.CurrentScene;
+    public Screen Screen => this.Stage.CurrentScreen;
 
     /// <summary>
     /// Gets a value indicating whether the application is running in debug mode.
@@ -89,7 +89,7 @@ public abstract class Application : IDisposable
 
         this.Window.Resized += this.HandleWindowResized;
         this.Ticker.Ticked += this.HandleTicked;
-        this.Stage.SceneChanged += this.HandleSceneChanged;
+        this.Stage.ScreenChanged += this.HandleScreenChanged;
 
         this.HandleWindowResized();
         this.Stage.EnableInputHandling();
@@ -147,9 +147,9 @@ public abstract class Application : IDisposable
         this.OnWindowResized();
     }
 
-    private void HandleSceneChanged(object? sender, SceneChangedEventArgs e)
+    private void HandleScreenChanged(object? sender, ScreenChangedEventArgs e)
     {
-        this.OnSceneChanged(e.OldScene, e.NewScene);
+        this.OnScreenChanged(e.OldScreen, e.NewScreen);
     }
 
     private void HandleTicked(object? sender, TickedEventArgs e)
@@ -188,11 +188,11 @@ public abstract class Application : IDisposable
     }
 
     /// <summary>
-    /// Called when the scene changes. Override to handle scene transitions.
+    /// Called when the screen changes. Override to handle screen transitions.
     /// </summary>
-    /// <param name="oldScene">The previous scene, or null if none.</param>
-    /// <param name="newScene">The new scene, or null if none.</param>
-    protected virtual void OnSceneChanged(Scene? oldScene, Scene? newScene)
+    /// <param name="oldScreen">The previous screen, or null if none.</param>
+    /// <param name="newScreen">The new screen, or null if none.</param>
+    protected virtual void OnScreenChanged(Screen? oldScreen, Screen? newScreen)
     {
     }
 

@@ -10,48 +10,48 @@ using Imago.Support.Drawing;
 namespace Imago.SceneGraph;
 
 /// <summary>
-/// Represents the root container that manages scenes and layers for rendering.
+/// Represents the root container that manages screens and layers for rendering.
 /// </summary>
 /// <remarks>
 /// Stage is the top-level container that:
-/// - Manages the current scene and its layers
+/// - Manages the current screen and its layers
 /// - Routes input events to layers
 /// - Coordinates rendering through the Renderer
-/// - Supports persistent layers that survive scene changes
+/// - Supports persistent layers that survive screen changes
 /// </remarks>
 public class Stage
 {
     /// <summary>
-    /// Occurs when the current scene changes.
+    /// Occurs when the current screen changes.
     /// </summary>
-    public event EventHandler<SceneChangedEventArgs>? SceneChanged;
+    public event EventHandler<ScreenChangedEventArgs>? ScreenChanged;
 
     /// <summary>
-    /// Occurs after the current scene's ImGui rendering, allowing global overlays
-    /// to render regardless of the active scene.
+    /// Occurs after the current screen's ImGui rendering, allowing global overlays
+    /// to render regardless of the active screen.
     /// </summary>
     public event Action? ImGuiRendered;
 
-    private class EmptyScene : Scene { }
+    private class EmptyScreen : Screen { }
 
-    private static readonly Scene _emptyScene = new EmptyScene();
+    private static readonly Screen _emptyScreen = new EmptyScreen();
 
     private readonly List<ILayer> _persistentLayers = new();
     private readonly List<ILayer> _allLayers = new();
     private readonly List<IInputHandler> _inputHandlers = new();
 
     /// <summary>
-    /// Gets the current scene being displayed.
+    /// Gets the current screen being displayed.
     /// </summary>
-    public Scene CurrentScene { get; private set; } = _emptyScene;
+    public Screen CurrentScreen { get; private set; } = _emptyScreen;
 
     /// <summary>
-    /// Gets the primary 3D layer from the current scene, if any.
+    /// Gets the primary 3D layer from the current screen, if any.
     /// </summary>
-    public Layer3D? Layer3D => this.CurrentScene.Layer3D;
+    public Layer3D? Layer3D => this.CurrentScreen.Layer3D;
 
     /// <summary>
-    /// Gets all layers sorted by ZOrder (including persistent and scene layers).
+    /// Gets all layers sorted by ZOrder (including persistent and screen layers).
     /// </summary>
     public IReadOnlyList<ILayer> Layers => this._allLayers;
 
@@ -87,7 +87,7 @@ public class Stage
     }
 
     /// <summary>
-    /// Subscribes to input events to enable input handling for the current scene.
+    /// Subscribes to input events to enable input handling for the current screen.
     /// </summary>
     public void EnableInputHandling()
     {
@@ -100,7 +100,7 @@ public class Stage
     }
 
     /// <summary>
-    /// Unsubscribes from input events to disable input handling for the current scene.
+    /// Unsubscribes from input events to disable input handling for the current screen.
     /// </summary>
     public void DisableInputHandling()
     {
@@ -138,7 +138,7 @@ public class Stage
     }
 
     /// <summary>
-    /// Adds a persistent layer that survives scene changes.
+    /// Adds a persistent layer that survives screen changes.
     /// </summary>
     /// <param name="layer">The layer to add.</param>
     public void AddPersistentLayer(ILayer layer)
@@ -160,54 +160,54 @@ public class Stage
     }
 
     /// <summary>
-    /// Changes the current scene.
+    /// Changes the current screen.
     /// </summary>
-    /// <param name="scene">The new scene to display. If null, an empty scene is used.</param>
-    public void ChangeScene(Scene? scene)
+    /// <param name="screen">The new screen to display. If null, an empty screen is used.</param>
+    public void ChangeScreen(Screen? screen)
     {
-        scene ??= _emptyScene;
-        if (this.CurrentScene == scene) return;
+        screen ??= _emptyScreen;
+        if (this.CurrentScreen == screen) return;
 
-        var oldScene = this.CurrentScene;
+        var oldScreen = this.CurrentScreen;
 
-        oldScene.LayerAdded -= this.Scene_LayerAdded;
-        oldScene.LayerRemoved -= this.Scene_LayerRemoved;
+        oldScreen.LayerAdded -= this.Screen_LayerAdded;
+        oldScreen.LayerRemoved -= this.Screen_LayerRemoved;
 
-        foreach (var layer in oldScene.Layers)
+        foreach (var layer in oldScreen.Layers)
         {
             layer.Stage = null;
         }
 
-        oldScene.OnDeactivated();
+        oldScreen.OnDeactivated();
 
-        if (oldScene != _emptyScene)
+        if (oldScreen != _emptyScreen)
         {
-            oldScene.Dispose();
+            oldScreen.Dispose();
         }
 
-        this.CurrentScene = scene;
+        this.CurrentScreen = screen;
 
-        scene.LayerAdded += this.Scene_LayerAdded;
-        scene.LayerRemoved += this.Scene_LayerRemoved;
+        screen.LayerAdded += this.Screen_LayerAdded;
+        screen.LayerRemoved += this.Screen_LayerRemoved;
 
-        foreach (var layer in scene.Layers)
+        foreach (var layer in screen.Layers)
         {
             layer.Stage = this;
         }
 
-        scene.OnActivated();
+        screen.OnActivated();
 
         this.RebuildLayerList();
-        this.SceneChanged?.Invoke(this, new SceneChangedEventArgs(oldScene, scene));
+        this.ScreenChanged?.Invoke(this, new ScreenChangedEventArgs(oldScreen, screen));
     }
 
-    private void Scene_LayerAdded(object? sender, LayerChangedEventArgs e)
+    private void Screen_LayerAdded(object? sender, LayerChangedEventArgs e)
     {
         e.Layer.Stage = this;
         this.RebuildLayerList();
     }
 
-    private void Scene_LayerRemoved(object? sender, LayerChangedEventArgs e)
+    private void Screen_LayerRemoved(object? sender, LayerChangedEventArgs e)
     {
         e.Layer.Stage = null;
         this.RebuildLayerList();
@@ -217,7 +217,7 @@ public class Stage
     {
         this._allLayers.Clear();
         this._allLayers.AddRange(this._persistentLayers);
-        this._allLayers.AddRange(this.CurrentScene.Layers);
+        this._allLayers.AddRange(this.CurrentScreen.Layers);
         this._allLayers.Sort((a, b) => a.ZOrder.CompareTo(b.ZOrder));
 
         this._inputHandlers.Clear();
@@ -316,7 +316,7 @@ public class Stage
     }
 
     /// <summary>
-    /// Updates all layers and the current scene.
+    /// Updates all layers and the current screen.
     /// </summary>
     /// <param name="deltaTime">The time elapsed since the last update, in seconds.</param>
     public virtual void Update(float deltaTime)
@@ -329,7 +329,7 @@ public class Stage
             this.Layer3D.Picking.Update(this.Layer3D.Camera, isCursorOverGui || this.Layer3D.IsInputBlocked);
         }
 
-        this.CurrentScene.Update(deltaTime);
+        this.CurrentScreen.Update(deltaTime);
 
         foreach (var layer in this._allLayers)
         {
@@ -378,7 +378,7 @@ public class Stage
     /// <param name="renderTexture">The render texture that will be used for rendering.</param>
     public void PrepareForRender(RenderTexture renderTexture)
     {
-        this.CurrentScene.RenderImGui();
+        this.CurrentScreen.RenderImGui();
         this.ImGuiRendered?.Invoke();
         this.Layer3D?.PrepareForRender(renderTexture);
     }
