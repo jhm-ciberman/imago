@@ -94,6 +94,11 @@ internal static class CodeEmitter
             promotedFields.Add(node.VariableName);
         }
 
+        // Collect bindings early to know if we need the __templateBindings field
+        var allBindings = new List<AnalyzedBinding>();
+        CollectBindings(root, allBindings, isRoot: true);
+        var hasBindings = allBindings.Count > 0;
+
         // Field declarations
         foreach (var field in fields)
         {
@@ -105,7 +110,12 @@ internal static class CodeEmitter
             w.WriteLine($"private {node.ResolvedTypeName} {node.VariableName} = null!;");
         }
 
-        if (fields.Count > 0 || boundUnnamedNodes.Count > 0)
+        if (hasBindings)
+        {
+            w.WriteLine("private System.IDisposable? __templateBindings;");
+        }
+
+        if (fields.Count > 0 || boundUnnamedNodes.Count > 0 || hasBindings)
         {
             w.WriteLine();
         }
@@ -143,19 +153,24 @@ internal static class CodeEmitter
         // Child elements (post-order: leaves first)
         EmitStatements(w, root, isRoot: true, promotedFields);
 
+        // Event subscriptions for template bindings
+        if (hasBindings)
+        {
+            w.WriteLine();
+            w.WriteLine("this.Mounted += this.__ActivateTemplateBindings;");
+            w.WriteLine("this.Unmounted += this.__DeactivateTemplateBindings;");
+        }
+
         w.Indentation--;
         w.WriteLine("}");
 
         // Factory methods
         EmitFactoryMethods(w, factoryTemplates);
 
-        // Binding method
-        var allBindings = new List<AnalyzedBinding>();
-        CollectBindings(root, allBindings, isRoot: true);
-
-        if (allBindings.Count > 0)
+        // Binding methods
+        if (hasBindings)
         {
-            EmitActivateTemplateBindings(w, allBindings);
+            EmitBindingMethods(w, allBindings);
         }
     }
 
@@ -413,13 +428,18 @@ internal static class CodeEmitter
         }
     }
 
-    private static void EmitActivateTemplateBindings(SourceWriter w, List<AnalyzedBinding> bindings)
+    private static void EmitBindingMethods(SourceWriter w, List<AnalyzedBinding> bindings)
     {
+        // Group bindings by source key
+        var groups = bindings
+            .GroupBy(b => b.SourceKey)
+            .ToList();
+
+        // __ActivateTemplateBindings
         w.WriteLine();
-        w.WriteLine("/// <inheritdoc />");
         w.WriteLine("[System.Runtime.CompilerServices.CompilerGenerated]");
         w.WriteLine("[System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]");
-        w.WriteLine("protected override System.IDisposable? ActivateTemplateBindings()");
+        w.WriteLine("private void __ActivateTemplateBindings(object? __sender, System.EventArgs __e)");
         w.WriteLine("{");
         w.Indentation++;
 
@@ -431,34 +451,28 @@ internal static class CodeEmitter
 
         w.WriteLine();
 
-        // Group bindings by source key
-        var groups = bindings
-            .GroupBy(b => b.SourceKey)
-            .ToList();
-
         // Emit one handler per source
         foreach (var group in groups)
         {
             var sourceKey = group.Key;
             var handlerName = "__bind_" + SanitizeHandlerName(sourceKey);
-            var sourceExpr = group.First().SourceExpression;
             var groupBindings = group.ToList();
 
-            w.WriteLine($"void {handlerName}(object? __s, System.ComponentModel.PropertyChangedEventArgs __e)");
+            w.WriteLine($"void {handlerName}(object? __s, System.ComponentModel.PropertyChangedEventArgs __e2)");
             w.WriteLine("{");
             w.Indentation++;
 
             if (groupBindings.Count == 1)
             {
                 var b = groupBindings[0];
-                w.WriteLine($"if (__e.PropertyName is null or \"\" or nameof({b.AssignExpression}))");
+                w.WriteLine($"if (__e2.PropertyName is null or \"\" or nameof({b.AssignExpression}))");
                 w.Indentation++;
                 w.WriteLine(FormatBindingStatement(b));
                 w.Indentation--;
             }
             else
             {
-                w.WriteLine("if (string.IsNullOrEmpty(__e.PropertyName))");
+                w.WriteLine("if (string.IsNullOrEmpty(__e2.PropertyName))");
                 w.WriteLine("{");
                 w.Indentation++;
 
@@ -469,7 +483,7 @@ internal static class CodeEmitter
 
                 w.Indentation--;
                 w.WriteLine("}");
-                w.WriteLine("else switch (__e.PropertyName)");
+                w.WriteLine("else switch (__e2.PropertyName)");
                 w.WriteLine("{");
                 w.Indentation++;
 
@@ -497,8 +511,8 @@ internal static class CodeEmitter
 
         w.WriteLine();
 
-        // Return disposable
-        w.WriteLine("return new Imago.Controls.TemplateBindingDisposable(() =>");
+        // Store disposable in field
+        w.WriteLine("this.__templateBindings = new Imago.Controls.TemplateBindingDisposable(() =>");
         w.WriteLine("{");
         w.Indentation++;
 
@@ -512,6 +526,18 @@ internal static class CodeEmitter
         w.Indentation--;
         w.WriteLine("});");
 
+        w.Indentation--;
+        w.WriteLine("}");
+
+        // __DeactivateTemplateBindings
+        w.WriteLine();
+        w.WriteLine("[System.Runtime.CompilerServices.CompilerGenerated]");
+        w.WriteLine("[System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]");
+        w.WriteLine("private void __DeactivateTemplateBindings(object? __sender, System.EventArgs __e)");
+        w.WriteLine("{");
+        w.Indentation++;
+        w.WriteLine("this.__templateBindings?.Dispose();");
+        w.WriteLine("this.__templateBindings = null;");
         w.Indentation--;
         w.WriteLine("}");
     }

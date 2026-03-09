@@ -254,8 +254,17 @@ public abstract class Visual : ObservableObject, IDisposable
     /// </returns>
     protected abstract Rect ArrangeCore(Rect finalRect);
 
+    /// <summary>
+    /// Occurs when this control is being mounted to the root <see cref="SceneGraph.Stage"/>.
+    /// </summary>
+    public EventHandler? Mounted;
+
+    /// <summary>
+    /// Occurs when this control is being unmounted from the root <see cref="SceneGraph.Stage"/>.
+    /// </summary>
+    public EventHandler? Unmounted;
+
     private IDisposable? _bindings = null;
-    private IDisposable? _templateBindings = null;
 
     /// <summary>
     /// Mounts this control into the given layer, recursively mounting all children.
@@ -278,7 +287,7 @@ public abstract class Visual : ObservableObject, IDisposable
         }
 
         this._bindings = this.CreateBindings();
-        this._templateBindings = this.ActivateTemplateBindings();
+        this.Mounted?.Invoke(this, EventArgs.Empty);
     }
 
     /// <summary>
@@ -286,16 +295,6 @@ public abstract class Visual : ObservableObject, IDisposable
     /// </summary>
     /// <returns>The created bindings.</returns>
     protected virtual IDisposable? CreateBindings()
-    {
-        return null;
-    }
-
-    /// <summary>
-    /// Activates template-declared bindings. Overridden by the template source generator.
-    /// </summary>
-    /// <returns>A disposable that unsubscribes all template bindings, or <see langword="null"/>.</returns>
-    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    protected virtual IDisposable? ActivateTemplateBindings()
     {
         return null;
     }
@@ -322,8 +321,7 @@ public abstract class Visual : ObservableObject, IDisposable
 
         this._bindings?.Dispose();
         this._bindings = null;
-        this._templateBindings?.Dispose();
-        this._templateBindings = null;
+        this.Unmounted?.Invoke(this, EventArgs.Empty);
         this.Layer = null;
     }
 

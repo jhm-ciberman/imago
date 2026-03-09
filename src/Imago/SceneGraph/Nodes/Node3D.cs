@@ -106,6 +106,16 @@ public class Node3D : IDisposable, IFormattable
     /// </summary>
     public bool WorldTransformIsDirty => (this._dirtyFlags & DirtyFlags.WorldMatrix) != 0;
 
+    /// <summary>
+    /// Occurs when this node is being mounted to the root <see cref="Stage"/>.
+    /// </summary>
+    public EventHandler? Mounted;
+
+    /// <summary>
+    /// Occurs when this node is being unmounted from the root <see cref="Stage"/>.
+    /// </summary>
+    public EventHandler? Unmounted;
+
     private bool _disposedValue;
 
     /// <summary>
@@ -306,6 +316,8 @@ public class Node3D : IDisposable, IFormattable
         {
             child.Mount(scene);
         }
+
+        this.Mounted?.Invoke(this, EventArgs.Empty);
     }
 
     /// <summary>
@@ -326,6 +338,7 @@ public class Node3D : IDisposable, IFormattable
             child.Unmount();
         }
 
+        this.Unmounted?.Invoke(this, EventArgs.Empty);
         this.Scene3D = null;
     }
 
