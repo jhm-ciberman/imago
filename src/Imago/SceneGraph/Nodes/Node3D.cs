@@ -255,7 +255,7 @@ public class Node3D : IDisposable, IFormattable
 
         if (this.Scene3D != null)
         {
-            node.OnMounted(this.Scene3D);
+            node.Mount(this.Scene3D);
         }
     }
 
@@ -273,7 +273,7 @@ public class Node3D : IDisposable, IFormattable
         node.Parent = null;
 
         if (node.Scene3D != null)
-            node.OnUnmounted();
+            node.Unmount();
 
         if (dispose)
             node.Dispose();
@@ -290,11 +290,11 @@ public class Node3D : IDisposable, IFormattable
     }
 
     /// <summary>
-    /// Called when the node becomes part of the live scene graph (transitively connected to the Stage).
+    /// Mounts this node into the given scene, recursively mounting all children.
     /// </summary>
-    /// <param name="scene">The <see cref="SceneGraph.Scene3D"/> the node is mounted in.</param>
+    /// <param name="scene">The <see cref="SceneGraph.Scene3D"/> to mount into.</param>
     /// <exception cref="InvalidOperationException">Thrown if the node is already mounted.</exception>
-    public virtual void OnMounted(Scene3D scene)
+    public virtual void Mount(Scene3D scene)
     {
         if (this.Scene3D != null)
             throw new InvalidOperationException("Cannot mount a node that is already mounted.");
@@ -304,18 +304,18 @@ public class Node3D : IDisposable, IFormattable
 
         foreach (var child in this._children)
         {
-            child.OnMounted(scene);
+            child.Mount(scene);
         }
     }
 
     /// <summary>
-    /// Called when the node is removed from the live scene graph.
+    /// Unmounts this node from the scene graph, recursively unmounting all children.
     /// </summary>
     /// <remarks>
     /// The <see cref="Scene3D"/> reference remains valid throughout this method and its overrides.
     /// It is cleared at the end of the base implementation after all children have been unmounted.
     /// </remarks>
-    public virtual void OnUnmounted()
+    public virtual void Unmount()
     {
         if (this.Scene3D == null) return;
 
@@ -323,7 +323,7 @@ public class Node3D : IDisposable, IFormattable
 
         foreach (var child in this._children)
         {
-            child.OnUnmounted();
+            child.Unmount();
         }
 
         this.Scene3D = null;

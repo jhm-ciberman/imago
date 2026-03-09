@@ -333,9 +333,9 @@ public class TextBox : Control
     }
 
     /// <inheritdoc/>
-    public override void OnMounted(GuiLayer layer)
+    public override void Mount(GuiLayer layer)
     {
-        base.OnMounted(layer);
+        base.Mount(layer);
 
         this.IsFocused = true;
         this.CaretIndex = this.Text.Length;
@@ -345,12 +345,12 @@ public class TextBox : Control
     }
 
     /// <inheritdoc/>
-    public override void OnUnmounted()
+    public override void Unmount()
     {
         this.Layer!.Input.KeyPressed -= this.InputManager_KeyPressed;
         this.Layer!.Input.TextEntered -= this.InputManager_TextEntered;
 
-        base.OnUnmounted();
+        base.Unmount();
     }
 }
 

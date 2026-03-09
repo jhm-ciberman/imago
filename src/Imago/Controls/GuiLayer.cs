@@ -34,25 +34,20 @@ public class GuiLayer : ILayer2D, IInputHandler
     private Stage? _stage;
 
     /// <inheritdoc />
-    public Stage? Stage
+    public Stage? Stage => this._stage;
+
+    /// <inheritdoc />
+    public void Mount(Stage stage)
     {
-        get => this._stage;
-        set
-        {
-            if (this._stage == value) return;
+        this._stage = stage;
+        this._content?.Mount(this);
+    }
 
-            if (this._stage != null)
-            {
-                this._content?.OnUnmounted();
-            }
-
-            this._stage = value;
-
-            if (this._stage != null)
-            {
-                this._content?.OnMounted(this);
-            }
-        }
+    /// <inheritdoc />
+    public void Unmount()
+    {
+        this._content?.Unmount();
+        this._stage = null;
     }
 
     /// <summary>
@@ -123,14 +118,14 @@ public class GuiLayer : ILayer2D, IInputHandler
             {
                 if (this._stage != null)
                 {
-                    this._content?.OnUnmounted();
+                    this._content?.Unmount();
                 }
 
                 this._content = value;
 
                 if (this._stage != null)
                 {
-                    this._content?.OnMounted(this);
+                    this._content?.Mount(this);
                 }
             }
         }

@@ -29,14 +29,14 @@ public class Viewport3D : Control
 
             if (this.Layer != null)
             {
-                if (this._scene != null) this._scene.Stage = null;
+                this._scene?.Unmount();
             }
 
             this._scene = value;
 
             if (this.Layer != null)
             {
-                if (this._scene != null) this._scene.Stage = this.Layer.Stage;
+                this._scene?.Mount(this.Layer.Stage!);
             }
 
             this._dirty = true;
@@ -44,17 +44,17 @@ public class Viewport3D : Control
     }
 
     /// <inheritdoc />
-    public override void OnMounted(GuiLayer layer)
+    public override void Mount(GuiLayer layer)
     {
-        base.OnMounted(layer);
-        if (this._scene != null) this._scene.Stage = layer.Stage;
+        base.Mount(layer);
+        this._scene?.Mount(layer.Stage!);
     }
 
     /// <inheritdoc />
-    public override void OnUnmounted()
+    public override void Unmount()
     {
-        if (this._scene != null) this._scene.Stage = null;
-        base.OnUnmounted();
+        this._scene?.Unmount();
+        base.Unmount();
     }
 
     /// <summary>

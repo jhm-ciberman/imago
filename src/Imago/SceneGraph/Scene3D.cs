@@ -35,28 +35,27 @@ public class Scene3D : IDisposable
     private Stage? _stage;
 
     /// <summary>
-    /// Gets or sets the stage this scene belongs to. Setting this property automatically
-    /// mounts or unmounts the scene graph.
+    /// Gets the stage this scene belongs to, or <c>null</c> if unmounted.
     /// </summary>
-    public Stage? Stage
+    public Stage? Stage => this._stage;
+
+    /// <summary>
+    /// Mounts this scene to the given <see cref="Stage"/>, propagating to all nodes in the scene graph.
+    /// </summary>
+    /// <param name="stage">The stage to mount to.</param>
+    public void Mount(Stage stage)
     {
-        get => this._stage;
-        set
-        {
-            if (this._stage == value) return;
+        this._stage = stage;
+        this._root?.Mount(this);
+    }
 
-            if (this._stage != null)
-            {
-                this._root?.OnUnmounted();
-            }
-
-            this._stage = value;
-
-            if (this._stage != null)
-            {
-                this._root?.OnMounted(this);
-            }
-        }
+    /// <summary>
+    /// Unmounts this scene from its <see cref="Stage"/>, propagating to all nodes in the scene graph.
+    /// </summary>
+    public void Unmount()
+    {
+        this._root?.Unmount();
+        this._stage = null;
     }
 
     /// <summary>
@@ -76,14 +75,14 @@ public class Scene3D : IDisposable
 
             if (this._stage != null)
             {
-                this._root?.OnUnmounted();
+                this._root?.Unmount();
             }
 
             this._root = value;
 
             if (this._stage != null)
             {
-                this._root?.OnMounted(this);
+                this._root?.Mount(this);
             }
         }
     }

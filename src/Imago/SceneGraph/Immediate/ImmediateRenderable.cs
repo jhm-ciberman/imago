@@ -8,17 +8,17 @@ namespace Imago.SceneGraph.Immediate;
 public class ImmediateRenderable3D : Node3D
 {
     /// <inheritdoc/>
-    public override void OnMounted(Scene3D scene)
+    public override void Mount(Scene3D scene)
     {
         scene.AddImmediateRenderable(this);
-        base.OnMounted(scene);
+        base.Mount(scene);
     }
 
     /// <inheritdoc/>
-    public override void OnUnmounted()
+    public override void Unmount()
     {
         this.Scene3D!.RemoveImmediateRenderable(this);
-        base.OnUnmounted();
+        base.Unmount();
     }
 
     /// <summary>

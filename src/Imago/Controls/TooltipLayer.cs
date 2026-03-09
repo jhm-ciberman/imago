@@ -32,7 +32,19 @@ public class TooltipLayer : ILayer2D, IDisposable
     public bool IsInputBlocked { get; set; }
 
     /// <inheritdoc />
-    public Stage? Stage { get; set; }
+    public Stage? Stage { get; private set; }
+
+    /// <inheritdoc />
+    public void Mount(Stage stage)
+    {
+        this.Stage = stage;
+    }
+
+    /// <inheritdoc />
+    public void Unmount()
+    {
+        this.Stage = null;
+    }
 
     /// <inheritdoc />
     public bool IsCursorOverElement => false;
@@ -66,7 +78,7 @@ public class TooltipLayer : ILayer2D, IDisposable
         // Ensure presenter has access to a layer for resource loading and layout
         if (this._presenter.Layer == null)
         {
-            this._presenter.OnMounted(control.Layer);
+            this._presenter.Mount(control.Layer);
         }
 
         this._currentOwner = control;
@@ -182,7 +194,7 @@ public class TooltipLayer : ILayer2D, IDisposable
     {
         if (this._presenter.Layer != null)
         {
-            this._presenter.OnUnmounted();
+            this._presenter.Unmount();
         }
 
         this._presenter.Dispose();

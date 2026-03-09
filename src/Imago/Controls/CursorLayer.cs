@@ -29,7 +29,19 @@ public class CursorLayer : ILayer2D
     public bool IsInputBlocked { get; set; }
 
     /// <inheritdoc />
-    public Stage? Stage { get; set; }
+    public Stage? Stage { get; private set; }
+
+    /// <inheritdoc />
+    public void Mount(Stage stage)
+    {
+        this.Stage = stage;
+    }
+
+    /// <inheritdoc />
+    public void Unmount()
+    {
+        this.Stage = null;
+    }
 
     /// <inheritdoc />
     public bool IsCursorOverElement => false;

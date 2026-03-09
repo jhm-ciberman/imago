@@ -49,9 +49,9 @@ public class Stage
         set
         {
             if (this._scene3D == value) return;
-            if (this._scene3D != null) this._scene3D.Stage = null;
+            this._scene3D?.Unmount();
             this._scene3D = value;
-            if (this._scene3D != null) this._scene3D.Stage = this;
+            this._scene3D?.Mount(this);
         }
     }
 
@@ -148,8 +148,8 @@ public class Stage
     /// <param name="layer">The layer to add.</param>
     public void AddLayer(ILayer layer)
     {
-        layer.Stage = this;
         this._allLayers.Add(layer);
+        layer.Mount(this);
         this.RebuildLayerList();
     }
 
@@ -160,7 +160,7 @@ public class Stage
     public void RemoveLayer(ILayer layer)
     {
         if (!this._allLayers.Remove(layer)) return;
-        layer.Stage = null;
+        layer.Unmount();
         this.RebuildLayerList();
     }
 

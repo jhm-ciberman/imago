@@ -258,11 +258,11 @@ public abstract class Visual : ObservableObject, IDisposable
     private IDisposable? _templateBindings = null;
 
     /// <summary>
-    /// Called when the control becomes part of the live scene graph (transitively connected to the Stage).
+    /// Mounts this control into the given layer, recursively mounting all children.
     /// </summary>
-    /// <param name="layer">The <see cref="GuiLayer"/> the control is mounted in.</param>
+    /// <param name="layer">The <see cref="GuiLayer"/> to mount into.</param>
     /// <exception cref="InvalidOperationException">Thrown if the control is already mounted.</exception>
-    public virtual void OnMounted(GuiLayer layer)
+    public virtual void Mount(GuiLayer layer)
     {
         if (this.Layer != null)
         {
@@ -274,7 +274,7 @@ public abstract class Visual : ObservableObject, IDisposable
         this.Layer = layer;
         foreach (var child in this.VisualChildren)
         {
-            child.OnMounted(layer);
+            child.Mount(layer);
         }
 
         this._bindings = this.CreateBindings();
@@ -301,14 +301,14 @@ public abstract class Visual : ObservableObject, IDisposable
     }
 
     /// <summary>
-    /// Called when the control is removed from the live scene graph.
+    /// Unmounts this control from the scene graph, recursively unmounting all children.
     /// </summary>
     /// <remarks>
     /// The <see cref="Layer"/> reference remains valid throughout this method and its overrides.
     /// It is cleared at the end of the base implementation after all children have been unmounted.
     /// </remarks>
     /// <exception cref="InvalidOperationException">Thrown if the control is not mounted.</exception>
-    public virtual void OnUnmounted()
+    public virtual void Unmount()
     {
         if (this.Layer == null)
         {
@@ -317,7 +317,7 @@ public abstract class Visual : ObservableObject, IDisposable
 
         foreach (var child in this.VisualChildren)
         {
-            child.OnUnmounted();
+            child.Unmount();
         }
 
         this._bindings?.Dispose();
@@ -375,7 +375,7 @@ public abstract class Visual : ObservableObject, IDisposable
         child.Parent = this;
         if (this.Layer != null)
         {
-            child.OnMounted(this.Layer);
+            child.Mount(this.Layer);
             this.InvalidateMeasure();
         }
     }
@@ -389,7 +389,7 @@ public abstract class Visual : ObservableObject, IDisposable
         this._visualChildren.Remove(child);
         if (this.Layer != null)
         {
-            child.OnUnmounted();
+            child.Unmount();
             this.InvalidateMeasure();
         }
     }

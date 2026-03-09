@@ -16,9 +16,9 @@ public interface ILayer
     public bool IsVisible { get; set; }
 
     /// <summary>
-    /// Gets or sets the stage this layer belongs to.
+    /// Gets the stage this layer belongs to, or <c>null</c> if unmounted.
     /// </summary>
-    public Stage? Stage { get; set; }
+    public Stage? Stage { get; }
 
     /// <summary>
     /// Gets or sets a value indicating whether input to this layer is blocked by a higher layer.
@@ -28,6 +28,17 @@ public interface ILayer
     /// input events or hit testing because a higher layer with input blocking is active.
     /// </remarks>
     public bool IsInputBlocked { get; set; }
+
+    /// <summary>
+    /// Mounts this layer to the given <see cref="Stage"/>.
+    /// </summary>
+    /// <param name="stage">The stage to mount to.</param>
+    public void Mount(Stage stage);
+
+    /// <summary>
+    /// Unmounts this layer from its <see cref="Stage"/>.
+    /// </summary>
+    public void Unmount();
 
     /// <summary>
     /// Updates the layer state.

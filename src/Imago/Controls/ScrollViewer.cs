@@ -206,17 +206,17 @@ public class ScrollViewer : ContentControl
     }
 
     /// <inheritdoc/>
-    public override void OnMounted(GuiLayer layer)
+    public override void Mount(GuiLayer layer)
     {
-        base.OnMounted(layer);
-        this.ScrollBarThumb.OnMounted(layer);
+        base.Mount(layer);
+        this.ScrollBarThumb.Mount(layer);
     }
 
     /// <inheritdoc/>
-    public override void OnUnmounted()
+    public override void Unmount()
     {
-        this.ScrollBarThumb.OnUnmounted();
-        base.OnUnmounted();
+        this.ScrollBarThumb.Unmount();
+        base.Unmount();
     }
 
     /// <summary>

@@ -168,21 +168,21 @@ public class RenderNode3D : Node3D, IPickable
     }
 
     /// <inheritdoc/>
-    public override void OnMounted(Scene3D scene)
+    public override void Mount(Scene3D scene)
     {
-        base.OnMounted(scene);
+        base.Mount(scene);
         this.UpdateRegistrationWithPickingManager();
         this._renderable.Visible = this._visible;
         this._renderable.Scene3D = scene;
     }
 
     /// <inheritdoc/>
-    public override void OnUnmounted()
+    public override void Unmount()
     {
         this._renderable.Visible = false;
         this._renderable.Scene3D = null;
         this.UpdateRegistrationWithPickingManager();
-        base.OnUnmounted();
+        base.Unmount();
     }
 
     /// <summary>
