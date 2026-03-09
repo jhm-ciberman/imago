@@ -4,6 +4,7 @@ using System.Numerics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using FontStashSharp;
 using Imago.Rendering.Sprites;
+using Imago.SceneGraph;
 using Imago.Support.Numerics;
 
 namespace Imago.Controls;
@@ -11,7 +12,7 @@ namespace Imago.Controls;
 /// <summary>
 /// Represents the base class for all visual elements in the user interface.
 /// </summary>
-public abstract class Visual : ObservableObject, IDisposable
+public abstract class Visual : ObservableObject, IDisposable, IMountable
 {
     /// <summary>
     /// Gets or sets the default font system used by all controls.
@@ -257,12 +258,12 @@ public abstract class Visual : ObservableObject, IDisposable
     /// <summary>
     /// Occurs when this control is being mounted to the root <see cref="SceneGraph.Stage"/>.
     /// </summary>
-    public EventHandler? Mounted;
+    public event EventHandler? Mounted;
 
     /// <summary>
     /// Occurs when this control is being unmounted from the root <see cref="SceneGraph.Stage"/>.
     /// </summary>
-    public EventHandler? Unmounted;
+    public event EventHandler? Unmounted;
 
     private IDisposable? _bindings = null;
 

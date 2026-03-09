@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Imago.Assets.Textures;
+using Imago.Controls;
 using Imago.Rendering;
 using Imago.SceneGraph.Cameras;
 using Imago.SceneGraph.Immediate;
@@ -14,7 +15,8 @@ namespace Imago.SceneGraph;
 /// <summary>
 /// Represents a 3D scene containing a scene graph, camera, and environment.
 /// </summary>
-public class Scene3D : IDisposable
+[ContentProperty(nameof(Root))]
+public class Scene3D : IDisposable, IMountable
 {
     /// <summary>
     /// Gets or sets a value indicating whether this scene is visible and should be rendered.
@@ -40,6 +42,16 @@ public class Scene3D : IDisposable
     public Stage? Stage => this._stage;
 
     /// <summary>
+    /// Occurs when this scene has been mounted to a <see cref="Stage"/>.
+    /// </summary>
+    public event EventHandler? Mounted;
+
+    /// <summary>
+    /// Occurs when this scene is being unmounted from its <see cref="Stage"/>.
+    /// </summary>
+    public event EventHandler? Unmounted;
+
+    /// <summary>
     /// Mounts this scene to the given <see cref="Stage"/>, propagating to all nodes in the scene graph.
     /// </summary>
     /// <param name="stage">The stage to mount to.</param>
@@ -47,6 +59,7 @@ public class Scene3D : IDisposable
     {
         this._stage = stage;
         this._root?.Mount(this);
+        this.Mounted?.Invoke(this, EventArgs.Empty);
     }
 
     /// <summary>
@@ -54,6 +67,7 @@ public class Scene3D : IDisposable
     /// </summary>
     public void Unmount()
     {
+        this.Unmounted?.Invoke(this, EventArgs.Empty);
         this._root?.Unmount();
         this._stage = null;
     }

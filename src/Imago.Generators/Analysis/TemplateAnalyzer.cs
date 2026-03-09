@@ -26,12 +26,20 @@ internal static class TemplateAnalyzer
 
         ValidateUniqueNames(root);
 
+        var implementsIMountable = SymbolHelpers.ImplementsInterface(classType, "Imago.SceneGraph.IMountable");
+
+        if (HasAnyBindings(root) && !implementsIMountable)
+        {
+            throw new BindingRequiresIMountableException(className).At(tree.Root.ElementSpan);
+        }
+
         var result = new AnalyzedTree
         {
             Root = root,
             ClassName = className,
             NamespaceMap = tree.NamespaceMap,
             FilePath = tree.FilePath,
+            ImplementsIMountable = implementsIMountable,
         };
 
         // Analyze nested class definitions
@@ -373,6 +381,35 @@ internal static class TemplateAnalyzer
         }
 
         throw new CodeBehindNotFoundException(shortClassName).At(span);
+    }
+
+    private static bool HasAnyBindings(AnalyzedNode node)
+    {
+        if (node.Bindings.Count > 0)
+        {
+            return true;
+        }
+
+        foreach (var child in node.Children)
+        {
+            if (HasAnyBindings(child))
+            {
+                return true;
+            }
+        }
+
+        foreach (var propChildren in node.PropertyElements.Values)
+        {
+            foreach (var child in propChildren)
+            {
+                if (HasAnyBindings(child))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private static void ValidateUniqueNames(AnalyzedNode root)

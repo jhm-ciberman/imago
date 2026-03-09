@@ -237,3 +237,11 @@ internal sealed class BindingInDataTemplateException()
     : TemplateDiagnosticException(DiagnosticDescriptors.BindingInDataTemplate)
 {
 }
+
+// --- Lifecycle ---
+
+internal sealed class BindingRequiresIMountableException(string className)
+    : TemplateDiagnosticException(DiagnosticDescriptors.BindingRequiresIMountable, className)
+{
+    public string ClassName => className;
+}

@@ -12,7 +12,8 @@ namespace Imago.Controls;
 /// <summary>
 /// Represents the root of a 2D user interface, managing the layout, rendering, and input for a tree of <see cref="Control"/> objects.
 /// </summary>
-public class GuiLayer : ILayer2D, IInputHandler
+[ContentProperty(nameof(Content))]
+public class GuiLayer : ILayer2D, IInputHandler, IMountable
 {
     /// <inheritdoc />
     public int ZOrder { get; init; } = 100;
@@ -36,16 +37,28 @@ public class GuiLayer : ILayer2D, IInputHandler
     /// <inheritdoc />
     public Stage? Stage => this._stage;
 
+    /// <summary>
+    /// Occurs when this layer has been mounted to a <see cref="Stage"/>.
+    /// </summary>
+    public event EventHandler? Mounted;
+
+    /// <summary>
+    /// Occurs when this layer is being unmounted from its <see cref="Stage"/>.
+    /// </summary>
+    public event EventHandler? Unmounted;
+
     /// <inheritdoc />
     public void Mount(Stage stage)
     {
         this._stage = stage;
         this._content?.Mount(this);
+        this.Mounted?.Invoke(this, EventArgs.Empty);
     }
 
     /// <inheritdoc />
     public void Unmount()
     {
+        this.Unmounted?.Invoke(this, EventArgs.Empty);
         this._content?.Unmount();
         this._stage = null;
     }

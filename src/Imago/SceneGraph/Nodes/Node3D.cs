@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using CommunityToolkit.Diagnostics;
+using Imago.Controls;
 using Imago.Support.Collections;
 
 namespace Imago.SceneGraph.Nodes;
@@ -10,7 +11,8 @@ namespace Imago.SceneGraph.Nodes;
 /// <summary>
 /// Represents a 3D node in the scene graph with transformation, hierarchy, and lifecycle management.
 /// </summary>
-public class Node3D : IDisposable, IFormattable
+[ItemsMethod(nameof(AddChild))]
+public class Node3D : IDisposable, IFormattable, IMountable
 {
     [Flags]
     private enum DirtyFlags : byte
@@ -109,12 +111,12 @@ public class Node3D : IDisposable, IFormattable
     /// <summary>
     /// Occurs when this node is being mounted to the root <see cref="Stage"/>.
     /// </summary>
-    public EventHandler? Mounted;
+    public event EventHandler? Mounted;
 
     /// <summary>
     /// Occurs when this node is being unmounted from the root <see cref="Stage"/>.
     /// </summary>
-    public EventHandler? Unmounted;
+    public event EventHandler? Unmounted;
 
     private bool _disposedValue;
 

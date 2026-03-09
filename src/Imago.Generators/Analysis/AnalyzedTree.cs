@@ -39,6 +39,11 @@ internal sealed class AnalyzedTree
     public string FilePath { get; set; } = "";
 
     /// <summary>
+    /// Gets or sets a value indicating whether the code-behind class implements <c>IMountable</c>.
+    /// </summary>
+    public bool ImplementsIMountable { get; set; }
+
+    /// <summary>
     /// Gets analyzed nested class definitions declared via x:Class on child elements.
     /// </summary>
     public List<AnalyzedTree> NestedClasses { get; } = new List<AnalyzedTree>();
@@ -243,6 +248,9 @@ internal enum ChildSlot
 
     /// <summary>Single child assigned via Content property.</summary>
     Content,
+
+    /// <summary>Children added via a method call (e.g., AddChild()).</summary>
+    ItemsMethod,
 }
 
 /// <summary>

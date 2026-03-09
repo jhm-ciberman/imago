@@ -313,6 +313,13 @@ internal static class CodeEmitter
                     w.WriteLine(child.ElementSpan, $"{prefix}.{parent.ChildSlotPropertyName}.Add({child.VariableName});");
                 }
             }
+            else if (parent.ChildSlot == ChildSlot.ItemsMethod)
+            {
+                foreach (var child in parent.Children)
+                {
+                    w.WriteLine(child.ElementSpan, $"{prefix}.{parent.ChildSlotPropertyName}({child.VariableName});");
+                }
+            }
             else if (parent.ChildSlot == ChildSlot.Content)
             {
                 w.WriteLine(parent.Children[0].ElementSpan, $"{prefix}.{parent.ChildSlotPropertyName} = {parent.Children[0].VariableName};");
@@ -487,9 +494,29 @@ internal static class CodeEmitter
                 w.WriteLine("{");
                 w.Indentation++;
 
-                foreach (var b in groupBindings)
+                // Group by property name to avoid duplicate case labels
+                var byProperty = groupBindings
+                    .GroupBy(b => b.PropertyName)
+                    .ToList();
+
+                foreach (var propGroup in byProperty)
                 {
-                    w.WriteLine($"case nameof({b.AssignExpression}): {FormatBindingStatement(b)} break;");
+                    var propBindings = propGroup.ToList();
+                    if (propBindings.Count == 1)
+                    {
+                        w.WriteLine($"case nameof({propBindings[0].AssignExpression}): {FormatBindingStatement(propBindings[0])} break;");
+                    }
+                    else
+                    {
+                        w.WriteLine($"case nameof({propBindings[0].AssignExpression}):");
+                        w.Indentation++;
+                        foreach (var b in propBindings)
+                        {
+                            w.WriteLine(FormatBindingStatement(b));
+                        }
+                        w.WriteLine("break;");
+                        w.Indentation--;
+                    }
                 }
 
                 w.Indentation--;

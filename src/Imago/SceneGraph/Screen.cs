@@ -14,7 +14,8 @@ namespace Imago.SceneGraph;
 /// A screen is a collection of layers (both 3D and 2D). When activated, its layers
 /// and Scene3D are pushed onto the Stage. When deactivated, they are removed.
 /// </remarks>
-public class Screen : IDisposable
+[ItemsMethod(nameof(AddLayer))]
+public class Screen : IDisposable, IMountable
 {
     private readonly List<ILayer> _layers = new();
     private Stage? _activeStage;
@@ -62,6 +63,16 @@ public class Screen : IDisposable
     /// Gets the camera from the primary Scene3D, if any.
     /// </summary>
     public Camera? Camera => this.Scene3D?.Camera;
+
+    /// <summary>
+    /// Occurs when this screen has been activated on a <see cref="Stage"/>.
+    /// </summary>
+    public event EventHandler? Mounted;
+
+    /// <summary>
+    /// Occurs when this screen is being deactivated from its <see cref="Stage"/>.
+    /// </summary>
+    public event EventHandler? Unmounted;
 
     private bool _disposedValue;
 
@@ -124,6 +135,7 @@ public class Screen : IDisposable
 
         stage.ImGuiRendering += this.RenderImGui;
         this.OnActivated();
+        this.Mounted?.Invoke(this, EventArgs.Empty);
     }
 
     /// <summary>
@@ -132,6 +144,7 @@ public class Screen : IDisposable
     /// <param name="stage">The stage to deactivate from.</param>
     public void Deactivate(Stage stage)
     {
+        this.Unmounted?.Invoke(this, EventArgs.Empty);
         this.OnDeactivated();
         stage.ImGuiRendering -= this.RenderImGui;
 

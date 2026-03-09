@@ -268,6 +268,17 @@ internal static class DiagnosticDescriptors
         DiagnosticSeverity.Error,
         isEnabledByDefault: true);
 
+    // --- Lifecycle ---
+
+    /// <summary>Class with bindings does not implement IMountable.</summary>
+    public static readonly DiagnosticDescriptor BindingRequiresIMountable = new DiagnosticDescriptor(
+        "IMAGO0040",
+        "Bindings require IMountable",
+        "Class '{0}' has template bindings but does not implement IMountable",
+        Category,
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
     // --- Internal ---
 
     /// <summary>Unexpected internal generator error.</summary>

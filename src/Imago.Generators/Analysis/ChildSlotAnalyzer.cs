@@ -8,11 +8,13 @@ namespace Imago.Generators.Analysis;
 internal static class ChildSlotAnalyzer
 {
     private const string ItemsPropertyAttributeName = "Imago.Controls.ItemsPropertyAttribute";
+    private const string ItemsMethodAttributeName = "Imago.Controls.ItemsMethodAttribute";
     private const string ContentPropertyAttributeName = "Imago.Controls.ContentPropertyAttribute";
     private const string TextPropertyAttributeName = "Imago.Controls.TextPropertyAttribute";
 
     /// <summary>
-    /// Inspects the type hierarchy for <c>[ItemsProperty]</c> or <c>[ContentProperty]</c> attributes.
+    /// Inspects the type hierarchy for <c>[ItemsProperty]</c>, <c>[ItemsMethod]</c>,
+    /// or <c>[ContentProperty]</c> attributes.
     /// </summary>
     /// <param name="type">The type to inspect.</param>
     /// <returns>The child slot kind and property name.</returns>
@@ -22,6 +24,12 @@ internal static class ChildSlotAnalyzer
         if (itemsName != null)
         {
             return new ChildSlotInfo(ChildSlot.Items, itemsName);
+        }
+
+        var methodName = GetAttributeArg(type, ItemsMethodAttributeName);
+        if (methodName != null)
+        {
+            return new ChildSlotInfo(ChildSlot.ItemsMethod, methodName);
         }
 
         var contentName = GetAttributeArg(type, ContentPropertyAttributeName);

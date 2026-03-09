@@ -89,6 +89,26 @@ internal static class SymbolHelpers
     }
 
     /// <summary>
+    /// Checks whether a type implements the specified interface by fully qualified name,
+    /// including interfaces inherited from base types.
+    /// </summary>
+    /// <param name="type">The type to check.</param>
+    /// <param name="interfaceFullName">The fully qualified interface name.</param>
+    /// <returns><see langword="true"/> if the type implements the interface.</returns>
+    public static bool ImplementsInterface(ITypeSymbol type, string interfaceFullName)
+    {
+        foreach (var iface in type.AllInterfaces)
+        {
+            if (iface.ToDisplayString() == interfaceFullName)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
     /// Escapes a string for use inside a C# string literal.
     /// </summary>
     /// <param name="s">The string to escape.</param>
