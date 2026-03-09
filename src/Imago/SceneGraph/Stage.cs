@@ -49,9 +49,9 @@ public class Stage
         set
         {
             if (this._scene3D == value) return;
-            this._scene3D?.Unmount();
+            if (this._scene3D != null) this._scene3D.Stage = null;
             this._scene3D = value;
-            this._scene3D?.Mount();
+            if (this._scene3D != null) this._scene3D.Stage = this;
         }
     }
 

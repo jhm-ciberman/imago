@@ -32,10 +32,37 @@ public class Scene3D : IDisposable
     /// </summary>
     public Color? ClearColor { get; set; } = Color.Black;
 
+    private Stage? _stage;
+
     /// <summary>
-    /// Gets a value indicating whether this scene is currently mounted to the live Stage.
+    /// Gets or sets the stage this scene belongs to. Setting this property automatically
+    /// mounts or unmounts the scene graph.
     /// </summary>
-    public bool IsMounted { get; private set; }
+    public Stage? Stage
+    {
+        get => this._stage;
+        set
+        {
+            if (this._stage == value) return;
+
+            if (this._stage != null)
+            {
+                this._root?.OnUnmounted();
+            }
+
+            this._stage = value;
+
+            if (this._stage != null)
+            {
+                this._root?.OnMounted(this);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether this scene is currently mounted.
+    /// </summary>
+    public bool IsMounted => this._stage != null;
 
     /// <summary>
     /// Gets or sets the root node of the 3D scene graph.
@@ -47,14 +74,14 @@ public class Scene3D : IDisposable
         {
             if (this._root == value) return;
 
-            if (this.IsMounted)
+            if (this._stage != null)
             {
                 this._root?.OnUnmounted();
             }
 
             this._root = value;
 
-            if (this.IsMounted)
+            if (this._stage != null)
             {
                 this._root?.OnMounted(this);
             }
@@ -62,26 +89,6 @@ public class Scene3D : IDisposable
     }
 
     private Node3D? _root;
-
-    /// <summary>
-    /// Mounts this scene, propagating the mounted lifecycle to all nodes in the scene graph.
-    /// </summary>
-    public void Mount()
-    {
-        if (this.IsMounted) return;
-        this.IsMounted = true;
-        this._root?.OnMounted(this);
-    }
-
-    /// <summary>
-    /// Unmounts this scene, propagating the unmounted lifecycle to all nodes in the scene graph.
-    /// </summary>
-    public void Unmount()
-    {
-        if (!this.IsMounted) return;
-        this._root?.OnUnmounted();
-        this.IsMounted = false;
-    }
 
     /// <summary>
     /// Gets or sets the camera used to render the scene.
