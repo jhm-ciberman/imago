@@ -45,7 +45,7 @@ public class GuiLayer : ILayer2D, IInputHandler, IMountable
     /// <summary>
     /// Occurs when this layer is being unmounted from its <see cref="Stage"/>.
     /// </summary>
-    public event EventHandler? Unmounted;
+    public event EventHandler? Unmounting;
 
     /// <inheritdoc />
     public void Mount(Stage stage)
@@ -58,7 +58,7 @@ public class GuiLayer : ILayer2D, IInputHandler, IMountable
     /// <inheritdoc />
     public void Unmount()
     {
-        this.Unmounted?.Invoke(this, EventArgs.Empty);
+        this.Unmounting?.Invoke(this, EventArgs.Empty);
         this._content?.Unmount();
         this._stage = null;
     }

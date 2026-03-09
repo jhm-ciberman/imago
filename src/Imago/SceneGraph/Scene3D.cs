@@ -49,7 +49,7 @@ public class Scene3D : IDisposable, IMountable
     /// <summary>
     /// Occurs when this scene is being unmounted from its <see cref="Stage"/>.
     /// </summary>
-    public event EventHandler? Unmounted;
+    public event EventHandler? Unmounting;
 
     /// <summary>
     /// Mounts this scene to the given <see cref="Stage"/>, propagating to all nodes in the scene graph.
@@ -67,7 +67,7 @@ public class Scene3D : IDisposable, IMountable
     /// </summary>
     public void Unmount()
     {
-        this.Unmounted?.Invoke(this, EventArgs.Empty);
+        this.Unmounting?.Invoke(this, EventArgs.Empty);
         this._root?.Unmount();
         this._stage = null;
     }

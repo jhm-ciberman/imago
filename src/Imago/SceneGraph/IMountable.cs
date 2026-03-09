@@ -15,5 +15,5 @@ public interface IMountable
     /// <summary>
     /// Occurs when this element is being unmounted from the scene graph.
     /// </summary>
-    public event EventHandler? Unmounted;
+    public event EventHandler? Unmounting;
 }

@@ -72,7 +72,7 @@ public class Screen : IDisposable, IMountable
     /// <summary>
     /// Occurs when this screen is being deactivated from its <see cref="Stage"/>.
     /// </summary>
-    public event EventHandler? Unmounted;
+    public event EventHandler? Unmounting;
 
     private bool _disposedValue;
 
@@ -144,7 +144,7 @@ public class Screen : IDisposable, IMountable
     /// <param name="stage">The stage to deactivate from.</param>
     public void Deactivate(Stage stage)
     {
-        this.Unmounted?.Invoke(this, EventArgs.Empty);
+        this.Unmounting?.Invoke(this, EventArgs.Empty);
         this.OnDeactivated();
         stage.ImGuiRendering -= this.RenderImGui;
 

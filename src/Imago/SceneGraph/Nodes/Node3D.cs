@@ -116,7 +116,7 @@ public class Node3D : IDisposable, IFormattable, IMountable
     /// <summary>
     /// Occurs when this node is being unmounted from the root <see cref="Stage"/>.
     /// </summary>
-    public event EventHandler? Unmounted;
+    public event EventHandler? Unmounting;
 
     private bool _disposedValue;
 
@@ -340,7 +340,7 @@ public class Node3D : IDisposable, IFormattable, IMountable
             child.Unmount();
         }
 
-        this.Unmounted?.Invoke(this, EventArgs.Empty);
+        this.Unmounting?.Invoke(this, EventArgs.Empty);
         this.Scene3D = null;
     }
 

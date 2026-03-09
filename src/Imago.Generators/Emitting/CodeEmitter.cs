@@ -158,7 +158,7 @@ internal static class CodeEmitter
         {
             w.WriteLine();
             w.WriteLine("this.Mounted += this.__ActivateTemplateBindings;");
-            w.WriteLine("this.Unmounted += this.__DeactivateTemplateBindings;");
+            w.WriteLine("this.Unmounting += this.__DeactivateTemplateBindings;");
         }
 
         w.Indentation--;

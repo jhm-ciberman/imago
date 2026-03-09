@@ -263,7 +263,7 @@ public abstract class Visual : ObservableObject, IDisposable, IMountable
     /// <summary>
     /// Occurs when this control is being unmounted from the root <see cref="SceneGraph.Stage"/>.
     /// </summary>
-    public event EventHandler? Unmounted;
+    public event EventHandler? Unmounting;
 
     private IDisposable? _bindings = null;
 
@@ -322,7 +322,7 @@ public abstract class Visual : ObservableObject, IDisposable, IMountable
 
         this._bindings?.Dispose();
         this._bindings = null;
-        this.Unmounted?.Invoke(this, EventArgs.Empty);
+        this.Unmounting?.Invoke(this, EventArgs.Empty);
         this.Layer = null;
     }
 
