@@ -3,7 +3,7 @@ namespace Imago.SceneGraph;
 /// <summary>
 /// Base interface for anything that can be composed into the render pipeline.
 /// </summary>
-public interface ILayer
+public interface ILayer : IMountable
 {
     /// <summary>
     /// Gets the Z-order of this layer. Lower values render first (behind higher values).

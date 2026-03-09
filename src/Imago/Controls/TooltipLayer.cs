@@ -35,14 +35,22 @@ public class TooltipLayer : ILayer2D, IDisposable
     public Stage? Stage { get; private set; }
 
     /// <inheritdoc />
+    public event EventHandler? Mounted;
+
+    /// <inheritdoc />
+    public event EventHandler? Unmounting;
+
+    /// <inheritdoc />
     public void Mount(Stage stage)
     {
         this.Stage = stage;
+        this.Mounted?.Invoke(this, EventArgs.Empty);
     }
 
     /// <inheritdoc />
     public void Unmount()
     {
+        this.Unmounting?.Invoke(this, EventArgs.Empty);
         this.Stage = null;
     }
 

@@ -13,7 +13,7 @@ namespace Imago.Controls;
 /// Represents the root of a 2D user interface, managing the layout, rendering, and input for a tree of <see cref="Control"/> objects.
 /// </summary>
 [ContentProperty(nameof(Content))]
-public class GuiLayer : ILayer2D, IInputHandler, IMountable
+public class GuiLayer : ILayer2D, IInputHandler
 {
     /// <inheritdoc />
     public int ZOrder { get; init; } = 100;

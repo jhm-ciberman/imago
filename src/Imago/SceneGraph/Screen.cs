@@ -18,7 +18,7 @@ namespace Imago.SceneGraph;
 public class Screen : IDisposable, IMountable
 {
     private readonly List<ILayer> _layers = new();
-    private Stage? _activeStage;
+    private Stage? _stage;
 
     /// <summary>
     /// Gets the list of layers in the screen.
@@ -100,7 +100,7 @@ public class Screen : IDisposable, IMountable
         }
 
         this._layers.Add(layer);
-        this._activeStage?.AddLayer(layer);
+        this._stage?.AddLayer(layer);
     }
 
     /// <summary>
@@ -116,16 +116,16 @@ public class Screen : IDisposable, IMountable
             this.GuiLayer = this._layers.OfType<GuiLayer>().FirstOrDefault();
         }
 
-        this._activeStage?.RemoveLayer(layer);
+        this._stage?.RemoveLayer(layer);
     }
 
     /// <summary>
-    /// Activates this screen on the given stage, pushing its Scene3D and layers.
+    /// Mounts this screen on the given stage, pushing its Scene3D and layers.
     /// </summary>
-    /// <param name="stage">The stage to activate on.</param>
-    public void Activate(Stage stage)
+    /// <param name="stage">The stage to mount to.</param>
+    public void Mount(Stage stage)
     {
-        this._activeStage = stage;
+        this._stage = stage;
         stage.Scene3D = this.Scene3D;
 
         foreach (var layer in this._layers)
@@ -134,40 +134,39 @@ public class Screen : IDisposable, IMountable
         }
 
         stage.ImGuiRendering += this.RenderImGui;
-        this.OnActivated();
+        this.OnMounted();
         this.Mounted?.Invoke(this, EventArgs.Empty);
     }
 
     /// <summary>
-    /// Deactivates this screen from the given stage, removing its layers and Scene3D.
+    /// Unmounts this screen from its stage, removing its layers and Scene3D.
     /// </summary>
-    /// <param name="stage">The stage to deactivate from.</param>
-    public void Deactivate(Stage stage)
+    public void Unmount()
     {
         this.Unmounting?.Invoke(this, EventArgs.Empty);
-        this.OnDeactivated();
-        stage.ImGuiRendering -= this.RenderImGui;
+        this.OnUnmounted();
+        this._stage!.ImGuiRendering -= this.RenderImGui;
 
         foreach (var layer in this._layers)
         {
-            stage.RemoveLayer(layer);
+            this._stage.RemoveLayer(layer);
         }
 
-        stage.Scene3D = null;
-        this._activeStage = null;
+        this._stage.Scene3D = null;
+        this._stage = null;
     }
 
     /// <summary>
-    /// Called when the screen is activated (becomes the current screen).
+    /// Called after the screen has been mounted to its stage.
     /// </summary>
-    public virtual void OnActivated()
+    protected virtual void OnMounted()
     {
     }
 
     /// <summary>
-    /// Called when the screen is deactivated (no longer the current screen).
+    /// Called before the screen is unmounted from its stage.
     /// </summary>
-    public virtual void OnDeactivated()
+    protected virtual void OnUnmounted()
     {
     }
 
