@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Imago.Assets.Materials;
+using Imago.Input;
 using Imago.Assets.Textures;
 using Imago.Rendering.Internals;
 using Imago.Rendering.Passes;
@@ -119,10 +120,9 @@ public class Forward3DRenderer : IDisposable
     /// <summary>
     /// Updates the state of the 3D renderer before rendering.
     /// </summary>
-    /// <param name="inputSnapshot">The current input snapshot.</param>
-    public void Update(InputSnapshot inputSnapshot)
+    public void Update()
     {
-        this._mousePickerPass.SetMousePosition(inputSnapshot.MousePosition);
+        this._mousePickerPass.SetMousePosition(InputManager.Instance.CursorPosition);
     }
 
     /// <summary>

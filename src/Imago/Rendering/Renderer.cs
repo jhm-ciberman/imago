@@ -173,7 +173,7 @@ public class Renderer : IDisposable
     {
         this._totalTime += deltaTime;
         this._imGuiPass.Update(deltaTime, inputSnapshot);
-        this._forward3DRenderer.Update(inputSnapshot);
+        this._forward3DRenderer.Update();
     }
 
     /// <summary>

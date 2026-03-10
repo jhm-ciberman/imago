@@ -142,6 +142,8 @@ public class InputManager : IDisposable
 
     private Vector2 _cursorPosition;
 
+    private bool _relativeMouseMode;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="InputManager"/> class.
     /// </summary>
@@ -169,6 +171,11 @@ public class InputManager : IDisposable
 
     private void Window_MouseMove(MouseMoveEventArgs args)
     {
+        if (this._relativeMouseMode)
+        {
+            return;
+        }
+
         // Why using this event instead of InputSnapshot.MousePosition?
         // Well, there is a bug in which InputSnapshot.MousePosition is updated 2 frames after the mouse is moved with this._window.SetMousePosition().
         // I don't know if it's a bug in Veldrid or if I'm doing something wrong, but this event is a workaround and it works. ¯\_(ツ)_/¯
@@ -253,6 +260,22 @@ public class InputManager : IDisposable
     /// Gets the current mouse position in window client space.
     /// </summary>
     public Vector2 CursorPosition => this._cursorPosition;
+
+    /// <summary>
+    /// Gets the mouse movement delta for the current frame. Only meaningful when relative mouse mode is enabled.
+    /// </summary>
+    public Vector2 MouseDelta => this._window.MouseDelta;
+
+    /// <summary>
+    /// Enables or disables relative mouse mode. When enabled, the cursor is hidden and confined to the window,
+    /// and only movement deltas are reported. The mode is automatically released when the window loses focus.
+    /// </summary>
+    /// <param name="enabled">Whether to enable relative mouse mode.</param>
+    public void SetRelativeMouseMode(bool enabled)
+    {
+        this._relativeMouseMode = enabled;
+        Sdl2Native.SDL_SetRelativeMouseMode(enabled);
+    }
 
     /// <summary>
     /// Gets a value indicating whether the specified key is currently held down.
