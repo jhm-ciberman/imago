@@ -16,15 +16,15 @@ namespace Imago.DevConsole;
 /// </summary>
 public class DeveloperConsoleView : DockPanel
 {
-    private static readonly Color BackgroundColor = TailwindColors.Slate900.WithAlpha(230f / 255f);
-    private static readonly Color InputBackgroundColor = TailwindColors.Slate800;
-    private static readonly Color SeparatorColor = TailwindColors.Slate700;
-    private static readonly Color OutputTextColor = TailwindColors.Slate300;
-    private static readonly Color CommandTextColor = TailwindColors.Slate100;
-    private static readonly Color PromptColor = TailwindColors.Emerald400;
-    private static readonly Color ErrorTextColor = TailwindColors.Red400;
+    private static readonly Color _backgroundColor = TailwindColors.Slate900.WithAlpha(230f / 255f);
+    private static readonly Color _inputBackgroundColor = TailwindColors.Slate800;
+    private static readonly Color _separatorColor = TailwindColors.Slate700;
+    private static readonly Color _outputTextColor = TailwindColors.Slate300;
+    private static readonly Color _commandTextColor = TailwindColors.Slate100;
+    private static readonly Color _promptColor = TailwindColors.Emerald400;
+    private static readonly Color _errorTextColor = TailwindColors.Red400;
 
-    private static readonly TextFont ConsoleFont = new(FontLoader.Load("res/fonts/basis33.ttf"), 16f, 16f);
+    private static readonly TextFont _consoleFont = new(FontLoader.Load("res/fonts/basis33.ttf"), 16f, 16f);
     private const float OutputPadding = 8f;
     private const float InputRowHeight = 28f;
     private const string PromptSymbol = "> ";
@@ -49,13 +49,13 @@ public class DeveloperConsoleView : DockPanel
         this.VerticalAlignment = VerticalAlignment.Top;
         this.HorizontalAlignment = HorizontalAlignment.Stretch;
         this.Height = 300;
-        this.Background = new ColorBackground(BackgroundColor);
+        this.Background = new ColorBackground(_backgroundColor);
         this.LastChildFill = true;
 
         var promptLabel = new TextBlock(PromptSymbol)
         {
-            Font = ConsoleFont,
-            Foreground = PromptColor,
+            Font = _consoleFont,
+            Foreground = _promptColor,
             Dock = Dock.Left,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(8, 0, 0, 0),
@@ -66,16 +66,16 @@ public class DeveloperConsoleView : DockPanel
             HorizontalAlignment = HorizontalAlignment.Stretch,
             Padding = new Thickness(2, 4, 8, 4),
         };
-        this._inputBox.TextBlock.Font = ConsoleFont;
-        this._inputBox.TextBlock.Foreground = CommandTextColor;
-        this._inputBox.CaretColor = PromptColor;
+        this._inputBox.TextBlock.Font = _consoleFont;
+        this._inputBox.TextBlock.Foreground = _commandTextColor;
+        this._inputBox.CaretColor = _promptColor;
 
         var inputRow = new DockPanel
         {
             Dock = Dock.Bottom,
             Height = InputRowHeight,
             HorizontalAlignment = HorizontalAlignment.Stretch,
-            Background = new ColorBackground(InputBackgroundColor),
+            Background = new ColorBackground(_inputBackgroundColor),
             LastChildFill = true,
         };
         inputRow.Items.Add(promptLabel);
@@ -85,7 +85,7 @@ public class DeveloperConsoleView : DockPanel
         {
             Dock = Dock.Bottom,
             Height = 1,
-            Background = new ColorBackground(SeparatorColor),
+            Background = new ColorBackground(_separatorColor),
         };
 
         var outputPanel = new ConsoleOutputControl(this)
@@ -113,7 +113,7 @@ public class DeveloperConsoleView : DockPanel
         {
             const float separatorHeight = 1f;
             float availableHeight = this.ActualSize.Y - InputRowHeight - separatorHeight - (OutputPadding * 2);
-            return Math.Max(1, (int)(availableHeight / ConsoleFont.LineHeight));
+            return Math.Max(1, (int)(availableHeight / _consoleFont.LineHeight));
         }
     }
 
@@ -246,8 +246,8 @@ public class DeveloperConsoleView : DockPanel
         private readonly DeveloperConsoleView _owner;
         private readonly TextLayout _layout = new()
         {
-            FontSize = ConsoleFont.Size,
-            LineHeight = ConsoleFont.LineHeight,
+            FontSize = _consoleFont.Size,
+            LineHeight = _consoleFont.LineHeight,
         };
 
         private float _promptWidth = -1f;
@@ -269,7 +269,7 @@ public class DeveloperConsoleView : DockPanel
             int startLine = Math.Clamp(this._owner._scrollOffset, 0, Math.Max(0, lines.Count - 1));
             int endLine = Math.Min(startLine + this._owner.VisibleLineCount, lines.Count);
 
-            var font = ConsoleFont.System.GetFont(ConsoleFont.Size);
+            var font = _consoleFont.System.GetFont(_consoleFont.Size);
             this._layout.Font = font;
 
             if (this._promptWidth < 0f)
@@ -282,21 +282,21 @@ public class DeveloperConsoleView : DockPanel
             {
                 var line = lines[i];
                 float x = this.Position.X;
-                float y = this.Position.Y + (i - startLine) * ConsoleFont.LineHeight;
+                float y = this.Position.Y + (i - startLine) * _consoleFont.LineHeight;
 
                 switch (line.Kind)
                 {
                     case ConsoleLineKind.Command:
-                        this.DrawSegmentedText(ctx, font, PromptSymbol, x, y, PromptColor);
-                        this.DrawSegmentedText(ctx, font, line.Text, x + this._promptWidth, y, CommandTextColor);
+                        this.DrawSegmentedText(ctx, font, PromptSymbol, x, y, _promptColor);
+                        this.DrawSegmentedText(ctx, font, line.Text, x + this._promptWidth, y, _commandTextColor);
                         break;
 
                     case ConsoleLineKind.Error:
-                        this.DrawSegmentedText(ctx, font, line.Text, x, y, ErrorTextColor);
+                        this.DrawSegmentedText(ctx, font, line.Text, x, y, _errorTextColor);
                         break;
 
                     default:
-                        this.DrawSegmentedText(ctx, font, line.Text, x, y, OutputTextColor);
+                        this.DrawSegmentedText(ctx, font, line.Text, x, y, _outputTextColor);
                         break;
                 }
             }
