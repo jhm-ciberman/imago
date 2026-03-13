@@ -1,14 +1,21 @@
 <Project>
     <PropertyGroup>
         <Nullable>enable</Nullable>
-        <TargetFramework>net9</TargetFramework>
-        <LangVersion>12.0</LangVersion>
+        <TargetFramework>net10.0</TargetFramework>
+        <LangVersion>14.0</LangVersion>
         <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
         <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)\bin\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
         <BaseOutputPath>$(MSBuildThisFileDirectory)\bin\$(MSBuildProjectName)\</BaseOutputPath>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
         <Disabletransitiveprojectreferences>true</Disabletransitiveprojectreferences>
     </PropertyGroup>
+
+    <!-- Suppress Newtonsoft.Json vulnerability warning from glTF2Loader transitive dependency -->
+    <ItemGroup>
+        <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-5crp-9r3c-p9vr" />
+    </ItemGroup>
 
     <!-- Workaround for https://github.com/dotnet/roslyn/issues/41640 -->
     <PropertyGroup>
