@@ -235,6 +235,63 @@ public class PrimitiveMeshBuilder
         return new MeshPrefab(this.BuildMesh());
     }
 
+    /// <summary>
+    /// Adds a rectangular frustum (tapered box). The shape is centered on XZ at both the bottom
+    /// and top, with independently sized ends. Useful for tapered posts, table legs, pedestals, etc.
+    /// </summary>
+    /// <param name="bottomWidth">The width (X axis) at the bottom.</param>
+    /// <param name="bottomDepth">The depth (Z axis) at the bottom.</param>
+    /// <param name="topWidth">The width (X axis) at the top.</param>
+    /// <param name="topDepth">The depth (Z axis) at the top.</param>
+    /// <param name="height">The height (Y axis).</param>
+    /// <param name="position">An offset applied to all vertices.</param>
+    /// <returns>This builder, for chaining.</returns>
+    public PrimitiveMeshBuilder AddFrustum(
+        float bottomWidth, float bottomDepth,
+        float topWidth, float topDepth,
+        float height, Vector3 position = default
+    )
+    {
+        float bhw = bottomWidth / 2f;
+        float bhd = bottomDepth / 2f;
+        float thw = topWidth / 2f;
+        float thd = topDepth / 2f;
+
+        Vector3 bfl = new Vector3(-bhw, 0, bhd) + position;
+        Vector3 bfr = new Vector3(bhw, 0, bhd) + position;
+        Vector3 bbl = new Vector3(-bhw, 0, -bhd) + position;
+        Vector3 bbr = new Vector3(bhw, 0, -bhd) + position;
+        Vector3 tfl = new Vector3(-thw, height, thd) + position;
+        Vector3 tfr = new Vector3(thw, height, thd) + position;
+        Vector3 tbl = new Vector3(-thw, height, -thd) + position;
+        Vector3 tbr = new Vector3(thw, height, -thd) + position;
+
+        this.AddQuad(bfl, bfr, tfr, tfl); // front (+Z)
+        this.AddQuad(bbr, bbl, tbl, tbr); // back (-Z)
+        this.AddQuad(bfr, bbr, tbr, tfr); // right (+X)
+        this.AddQuad(bbl, bfl, tfl, tbl); // left (-X)
+        this.AddQuad(tfl, tfr, tbr, tbl); // top (+Y)
+        this.AddQuad(bbl, bbr, bfr, bfl); // bottom (-Y)
+
+        return this;
+    }
+
+    /// <summary>
+    /// Adds a quad defined by four explicit vertices. The normal is computed automatically
+    /// from the winding order (counter-clockwise when viewed from the front).
+    /// </summary>
+    /// <param name="a">Bottom-left vertex.</param>
+    /// <param name="b">Bottom-right vertex.</param>
+    /// <param name="c">Top-right vertex.</param>
+    /// <param name="d">Top-left vertex.</param>
+    /// <returns>This builder, for chaining.</returns>
+    public PrimitiveMeshBuilder AddQuad(Vector3 a, Vector3 b, Vector3 c, Vector3 d)
+    {
+        var normal = Vector3.Normalize(Vector3.Cross(b - a, d - a));
+        this.AddFace(a, b, c, d, normal);
+        return this;
+    }
+
     private void AddFace(Vector3 a, Vector3 b, Vector3 c, Vector3 d, Vector3 normal)
     {
         ushort baseIndex = (ushort)this._positions.Count;
