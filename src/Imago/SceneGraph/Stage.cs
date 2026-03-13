@@ -34,6 +34,8 @@ public class Stage
     public event Action? ImGuiRendered;
 
     private readonly List<ILayer> _allLayers = new();
+    private readonly List<ILayer2D> _guiLayers = new();
+    private readonly List<ILayer2D> _overlayLayers = new();
     private readonly List<IInputHandler> _inputHandlers = new();
     private Scene3D? _scene3D;
 
@@ -59,6 +61,16 @@ public class Stage
     /// Gets all layers sorted by ZOrder.
     /// </summary>
     public IReadOnlyList<ILayer> Layers => this._allLayers;
+
+    /// <summary>
+    /// Gets 2D layers that render to the GUI render texture, sorted by ZOrder.
+    /// </summary>
+    public IReadOnlyList<ILayer2D> GuiLayers => this._guiLayers;
+
+    /// <summary>
+    /// Gets 2D layers that render as overlays on top of ImGui, sorted by ZOrder.
+    /// </summary>
+    public IReadOnlyList<ILayer2D> OverlayLayers => this._overlayLayers;
 
     /// <summary>
     /// Gets the default clear color when no layer provides one.
@@ -169,11 +181,26 @@ public class Stage
         this._allLayers.Sort((a, b) => a.ZOrder.CompareTo(b.ZOrder));
 
         this._inputHandlers.Clear();
+        this._guiLayers.Clear();
+        this._overlayLayers.Clear();
+
         foreach (var layer in this._allLayers)
         {
             if (layer is IInputHandler handler)
             {
                 this._inputHandlers.Add(handler);
+            }
+
+            if (layer is ILayer2D layer2D)
+            {
+                if (layer2D.RenderTarget == LayerRenderTarget.Overlay)
+                {
+                    this._overlayLayers.Add(layer2D);
+                }
+                else
+                {
+                    this._guiLayers.Add(layer2D);
+                }
             }
         }
     }

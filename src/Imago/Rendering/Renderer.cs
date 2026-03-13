@@ -284,12 +284,11 @@ public class Renderer : IDisposable
         cl.ClearColorTarget(0, RgbaFloat.Clear);
         cl.ClearDepthStencil(1f);
 
-        var cursorLayer = stage.CursorLayer;
-        foreach (var layer in stage.Layers)
+        foreach (var layer in stage.GuiLayers)
         {
-            if (layer is ILayer2D layer2D && layer2D.IsVisible && layer2D != cursorLayer)
+            if (layer.IsVisible)
             {
-                this._spritesPass.Render(cl, this.GuiRenderTexture, layer2D);
+                this._spritesPass.Render(cl, this.GuiRenderTexture, layer);
             }
         }
 
@@ -297,9 +296,12 @@ public class Renderer : IDisposable
         this._fullScreenPixelArtPass.Render(cl, this.GuiRenderTexture);
         this._imGuiPass.Render(cl);
 
-        if (cursorLayer.IsVisible)
+        foreach (var layer in stage.OverlayLayers)
         {
-            this._overlaySpritesPass.Render(cl, this.FullScreenRenderTexture, cursorLayer);
+            if (layer.IsVisible)
+            {
+                this._overlaySpritesPass.Render(cl, this.FullScreenRenderTexture, layer);
+            }
         }
 
         cl.End();

@@ -24,6 +24,9 @@ public class CursorLayer : ILayer2D
     public int ZOrder => 20000;
 
     /// <inheritdoc />
+    public LayerRenderTarget RenderTarget => LayerRenderTarget.Overlay;
+
+    /// <inheritdoc />
     public bool IsVisible { get; set; } = true;
 
     /// <inheritdoc />

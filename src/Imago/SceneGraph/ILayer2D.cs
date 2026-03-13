@@ -8,6 +8,11 @@ namespace Imago.SceneGraph;
 public interface ILayer2D : ILayer
 {
     /// <summary>
+    /// Gets the render target this layer should be drawn to.
+    /// </summary>
+    public LayerRenderTarget RenderTarget => LayerRenderTarget.Gui;
+
+    /// <summary>
     /// Gets a value indicating whether the cursor is currently over any element in this layer.
     /// </summary>
     public bool IsCursorOverElement { get; }
