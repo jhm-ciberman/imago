@@ -48,7 +48,7 @@ public class DrawingContext : IDisposable
 
     private readonly DeviceBuffer _indexBuffer;
 
-    private readonly int _capacity = 1000;
+    private readonly int _capacity;
 
     private readonly SpriteBatch _batch;
 
@@ -75,8 +75,10 @@ public class DrawingContext : IDisposable
     /// </summary>
     /// <param name="gd">The graphics device.</param>
     /// <param name="defaultShader">The default shader to use.</param>
-    internal DrawingContext(GraphicsDevice gd, Shader defaultShader)
+    /// <param name="capacity">The maximum number of sprites that can be batched in a single draw call.</param>
+    internal DrawingContext(GraphicsDevice gd, Shader defaultShader, int capacity = 1000)
     {
+        this._capacity = capacity;
         this._gd = gd;
         this._defaultShader = defaultShader;
         var factory = gd.ResourceFactory;

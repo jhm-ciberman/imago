@@ -63,7 +63,7 @@ public class CursorLayer : ILayer2D
     /// <summary>
     /// Gets or sets the scale of the cursor.
     /// </summary>
-    public float CursorScale { get; set; } = 0.5f;
+    public float CursorScale { get; set; } = 1f;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CursorLayer"/> class.
@@ -106,6 +106,7 @@ public class CursorLayer : ILayer2D
         var cursorSize = this.Cursor.TextureSize * this.CursorScale;
         var hotspot = this.Cursor.HotspotPixels * this.CursorScale;
         var cursorPosition = mousePosition - hotspot;
+        cursorPosition = new Vector2(MathF.Floor(cursorPosition.X), MathF.Floor(cursorPosition.Y));
 
         ctx.DrawTexture(this.Cursor.Texture, cursorPosition, cursorSize, Vector2.Zero, Vector2.One, Color.White);
     }

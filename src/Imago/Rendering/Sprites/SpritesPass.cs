@@ -18,17 +18,22 @@ internal class SpritesPass : IDisposable, IPipelineProvider
 
     private readonly Renderer _renderer;
 
+    private readonly OutputDescription _outputDescription;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="SpritesPass"/> class.
     /// </summary>
     /// <param name="renderer">The renderer.</param>
-    public SpritesPass(Renderer renderer)
+    /// <param name="outputTarget">The render texture whose output description determines pipeline compatibility. If null, uses the main render texture.</param>
+    /// <param name="capacity">The maximum number of sprites that can be batched in a single draw call.</param>
+    public SpritesPass(Renderer renderer, IRenderTexture? outputTarget = null, int capacity = 1000)
     {
         this._renderer = renderer;
         this._gd = renderer.GraphicsDevice;
+        this._outputDescription = (outputTarget ?? renderer.MainRenderTexture).OutputDescription;
         this._defaultShader = new Shader(renderer, this, _vertexShader, _fragmentShader, ["Main"]);
 
-        this._drawingContext = new DrawingContext(this._gd, this._defaultShader);
+        this._drawingContext = new DrawingContext(this._gd, this._defaultShader, capacity);
     }
 
     /// <summary>
@@ -56,7 +61,7 @@ internal class SpritesPass : IDisposable, IPipelineProvider
                 depthClipEnabled: true,
                 scissorTestEnabled
             ),
-            Outputs = this._renderer.MainRenderTexture.OutputDescription,
+            Outputs = this._outputDescription,
             ResourceLayouts =
             [
                 this._drawingContext.PassResourceLayout,
@@ -99,6 +104,8 @@ internal class SpritesPass : IDisposable, IPipelineProvider
     public void Render(CommandList cl, IRenderTexture renderTexture, ILayer2D layer)
     {
         cl.SetFramebuffer(renderTexture.Framebuffer);
+        cl.SetFullViewports();
+        cl.SetFullScissorRects();
 
         this._drawingContext.Begin(cl);
         layer.Draw(this._drawingContext);

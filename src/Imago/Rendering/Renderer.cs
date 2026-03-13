@@ -93,6 +93,7 @@ public class Renderer : IDisposable
     private readonly Forward3DRenderer _forward3DRenderer;
 
     private readonly SpritesPass _spritesPass;
+    private readonly SpritesPass _overlaySpritesPass;
     private readonly ImGuiPass _imGuiPass;
 
     private readonly RendererResources _rendererResources;
@@ -150,6 +151,7 @@ public class Renderer : IDisposable
         this._forward3DRenderer = new Forward3DRenderer(this);
         this._imGuiPass = new ImGuiPass(this);
         this._spritesPass = new SpritesPass(this);
+        this._overlaySpritesPass = new SpritesPass(this, this.FullScreenRenderTexture, capacity: 64);
         this._fullScreenPass = new FullScreenPass(this, isPixelArt: false);
         this._fullScreenPixelArtPass = new FullScreenPass(this, isPixelArt: true);
 
@@ -282,9 +284,10 @@ public class Renderer : IDisposable
         cl.ClearColorTarget(0, RgbaFloat.Clear);
         cl.ClearDepthStencil(1f);
 
+        var cursorLayer = stage.CursorLayer;
         foreach (var layer in stage.Layers)
         {
-            if (layer is ILayer2D layer2D && layer2D.IsVisible)
+            if (layer is ILayer2D layer2D && layer2D.IsVisible && layer2D != cursorLayer)
             {
                 this._spritesPass.Render(cl, this.GuiRenderTexture, layer2D);
             }
@@ -293,6 +296,12 @@ public class Renderer : IDisposable
         this._fullScreenPass.Render(cl, this.MainRenderTexture);
         this._fullScreenPixelArtPass.Render(cl, this.GuiRenderTexture);
         this._imGuiPass.Render(cl);
+
+        if (cursorLayer.IsVisible)
+        {
+            this._overlaySpritesPass.Render(cl, this.FullScreenRenderTexture, cursorLayer);
+        }
+
         cl.End();
         stats.Pass2D.End();
 
@@ -475,6 +484,7 @@ public class Renderer : IDisposable
             // Passes
             this._imGuiPass.Dispose();
             this._spritesPass.Dispose();
+            this._overlaySpritesPass.Dispose();
             this._fullScreenPass.Dispose();
             this._forward3DRenderer.Dispose();
             this._rendererResources.Dispose();
