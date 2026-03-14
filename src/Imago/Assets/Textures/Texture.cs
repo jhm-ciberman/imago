@@ -1,6 +1,5 @@
 using System;
 using System.Numerics;
-using System.Runtime.InteropServices;
 using Imago.Rendering;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -165,13 +164,7 @@ public class Texture : ITexture, ITextureRegion, IDisposable
         if (image.Width != this.Width || image.Height != this.Height)
             throw new ArgumentException("Image size does not match texture size.");
 
-        if (!image.DangerousTryGetSinglePixelMemory(out Memory<Rgba32> memory))
-            throw new InvalidOperationException("Image is not in RGBA32 format.");
-
-        var span = memory.Span;
-
-        var dest = new Span<byte>(this._data);
-        MemoryMarshal.Cast<Rgba32, byte>(span).CopyTo(dest);
+        image.CopyPixelDataTo(this._data);
 
         this.OnTextureDirty();
     }

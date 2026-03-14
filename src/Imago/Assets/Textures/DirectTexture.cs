@@ -78,15 +78,17 @@ public class DirectTexture : ITexture
         if (image.Width != this.Width || image.Height != this.Height)
             throw new ArgumentException("Image size does not match texture size.");
 
-        if (!image.DangerousTryGetSinglePixelMemory(out Memory<Rgba32> memory))
-            throw new InvalidOperationException("Image is not in RGBA32 format.");
+        byte[] buffer = new byte[image.Width * image.Height * sizeof(Rgba32)];
+        image.CopyPixelDataTo(buffer);
 
-        var span = memory.Span;
-
-        fixed (void* ptr = &span.GetPinnableReference())
+        fixed (void* ptr = buffer)
         {
-            this._gd.UpdateTexture(this.VeldridTexture, (nint)ptr, (uint)(span.Length * sizeof(Rgba32)),
-                x: 0, y: 0, z: 0, width: this.Width, height: this.Height, depth: 1, mipLevel: 0, arrayLayer: 0);
+            this._gd.UpdateTexture(
+                this.VeldridTexture, (nint)ptr, (uint)buffer.Length,
+                x: 0, y: 0, z: 0,
+                width: this.Width, height: this.Height, depth: 1,
+                mipLevel: 0, arrayLayer: 0
+            );
         }
 
         this.RegenerateMipMaps();
@@ -103,15 +105,17 @@ public class DirectTexture : ITexture
         if (x + image.Width > this.Width || y + image.Height > this.Height)
             throw new ArgumentException($"The size of the rectangle to update is larger than the texture. The area to update is ({x}, {y}) to ({x + image.Width}, {y + image.Height}) and the texture is {this.Width}x{this.Height}.");
 
-        if (!image.DangerousTryGetSinglePixelMemory(out Memory<Rgba32> memory))
-            throw new InvalidOperationException("Image is not in RGBA32 format.");
+        byte[] buffer = new byte[image.Width * image.Height * sizeof(Rgba32)];
+        image.CopyPixelDataTo(buffer);
 
-        var span = memory.Span;
-
-        fixed (void* ptr = &span.GetPinnableReference())
+        fixed (void* ptr = buffer)
         {
-            this._gd.UpdateTexture(this.VeldridTexture, (nint)ptr, (uint)(span.Length * sizeof(Rgba32)),
-                x: x, y: y, z: 0, width: (uint)image.Width, height: (uint)image.Height, depth: 1, mipLevel: 0, arrayLayer: 0);
+            this._gd.UpdateTexture(
+                this.VeldridTexture, (nint)ptr, (uint)buffer.Length,
+                x: x, y: y, z: 0,
+                width: (uint)image.Width, height: (uint)image.Height, depth: 1,
+                mipLevel: 0, arrayLayer: 0
+            );
         }
 
         this.RegenerateMipMaps();
