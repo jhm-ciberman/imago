@@ -130,7 +130,6 @@ public abstract class ItemsControl : Control
         base.Update(deltaTime);
     }
 
-    private Dictionary<object, Control>? _itemControls;
     private IDataTemplate? _itemItemplate;
 
     /// <summary>
@@ -184,14 +183,14 @@ public abstract class ItemsControl : Control
         switch (e.Action)
         {
             case NotifyCollectionChangedAction.Add:
-                this.OnItemsAdded(e.NewItems!);
+                this.OnItemsInserted(e.NewStartingIndex, e.NewItems!);
                 break;
             case NotifyCollectionChangedAction.Remove:
-                this.OnItemsRemoved(e.OldItems!);
+                this.OnItemsRemovedAt(e.OldStartingIndex, e.OldItems!.Count);
                 break;
             case NotifyCollectionChangedAction.Replace:
-                this.OnItemsRemoved(e.OldItems!);
-                this.OnItemsAdded(e.NewItems!);
+                this.OnItemsRemovedAt(e.OldStartingIndex, e.OldItems!.Count);
+                this.OnItemsInserted(e.NewStartingIndex, e.NewItems!);
                 break;
             case NotifyCollectionChangedAction.Move:
                 break;
@@ -207,36 +206,30 @@ public abstract class ItemsControl : Control
     {
         if (this.Items.Count == 0) return;
 
-        foreach (var disposable in this.Items)
+        foreach (var item in this.Items)
         {
-            disposable.Dispose();
+            item.Dispose();
         }
 
         this.Items.Clear();
-        this._itemControls?.Clear();
     }
 
-    private void OnItemsAdded(IList items)
+    private void OnItemsInserted(int startIndex, IList items)
     {
-        this._itemControls ??= new();
-
-        foreach (var item in items)
+        for (int i = 0; i < items.Count; i++)
         {
-            var control = this.ItemTemplate!.CreateItem(item);
-            this.Items.Add(control);
-            this._itemControls.Add(item, control);
+            var control = this.ItemTemplate!.CreateItem(items[i]!);
+            this.Items.Insert(startIndex + i, control);
         }
     }
 
-    private void OnItemsRemoved(IList items)
+    private void OnItemsRemovedAt(int startIndex, int count)
     {
-        foreach (var item in items)
+        for (int i = count - 1; i >= 0; i--)
         {
-            var control = this._itemControls![item];
+            var control = this.Items[startIndex + i];
             control.Dispose();
-
-            this.Items.Remove(control);
-            this._itemControls.Remove(item);
+            this.Items.RemoveAt(startIndex + i);
         }
     }
 
@@ -252,6 +245,6 @@ public abstract class ItemsControl : Control
         if (this.ItemTemplate is null) return;
 
         var list = this.ItemsSource is IList listSource ? listSource : this.ItemsSource.Cast<object>().ToList();
-        this.OnItemsAdded(list);
+        this.OnItemsInserted(0, list);
     }
 }
