@@ -167,16 +167,19 @@ public class TextureGroup : IDisposable
     /// <exception cref="InvalidOperationException">Thrown if the texture is not part of this group.</exception>
     public void Release(PackedTexture packedTexture)
     {
-        if (!this._packedTexturesPages.TryGetValue(packedTexture, out var page))
+        lock (this._packLock)
         {
-            throw new InvalidOperationException("Texture not found in any page.");
+            if (!this._packedTexturesPages.TryGetValue(packedTexture, out var page))
+            {
+                throw new InvalidOperationException("Texture not found in any page.");
+            }
+
+            page.Release(packedTexture);
+            this._packedTexturesPages.Remove(packedTexture);
+
+            // No need to flush changes. We will keep the old texture pixels
+            // in the atlas until it's overwritten by a new texture.
         }
-
-        page.Release(packedTexture);
-        this._packedTexturesPages.Remove(packedTexture);
-
-        // No need to flush changes. We will keep the old texture pixels
-        // in the atlas until it's overwritten by a new texture.
     }
 
 

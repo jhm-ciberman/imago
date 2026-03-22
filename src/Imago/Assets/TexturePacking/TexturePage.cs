@@ -138,6 +138,18 @@ public class TexturePage : IDisposable
         var h = (int)MathF.Ceiling(size.Y / this._tileSize);
 
         this._binPacker.Release(new Vector2Int(x, y), new Vector2Int(w, h));
+
+        // Clear the released region so freed slots are visible in atlas dumps
+        var pixelTopLeft = packedTexture.PixelTopLeft;
+        for (int py = pixelTopLeft.Y; py < pixelTopLeft.Y + size.Y; py++)
+        {
+            for (int px = pixelTopLeft.X; px < pixelTopLeft.X + size.X; px++)
+            {
+                this.Image[px, py] = new Rgba32(255, 0, 255, 255);
+            }
+        }
+
+        this.IsDirty = true;
     }
 
 
