@@ -50,7 +50,9 @@ internal class SpritesPass : IDisposable, IPipelineProvider
         var scissorTestEnabled = flags.HasFlag(RenderFlags.ScisorTest);
         return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
         {
-            DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
+            DepthStencilState = this._outputDescription.DepthAttachment.HasValue
+                ? DepthStencilStateDescription.DepthOnlyLessEqual
+                : DepthStencilStateDescription.Disabled,
             PrimitiveTopology = PrimitiveTopology.TriangleList,
             ShaderSet = shaderVariant.ShaderSetDescription,
             BlendState = GetBlendState(),

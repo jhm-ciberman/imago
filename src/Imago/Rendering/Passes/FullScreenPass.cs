@@ -45,7 +45,9 @@ internal class FullScreenPass : IDisposable
 
         this._pipeline = this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription
         {
-            DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
+            DepthStencilState = this._destinationTexture.OutputDescription.DepthAttachment.HasValue
+                ? DepthStencilStateDescription.DepthOnlyLessEqual
+                : DepthStencilStateDescription.Disabled,
             PrimitiveTopology = PrimitiveTopology.TriangleList,
             ShaderSet = new ShaderSetDescription([vertexLayouts], shaders),
             BlendState = BlendStateDescription.SingleAlphaBlend,
