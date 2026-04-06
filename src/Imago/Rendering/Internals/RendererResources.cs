@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Imago.Assets.Materials;
 using Imago.Rendering.Internals.Buffers;
 using Imago.SceneGraph;
-using Veldrid;
+using NeoVeldrid;
 using Texture = Imago.Assets.Textures.Texture;
 
 namespace Imago.Rendering.Internals;

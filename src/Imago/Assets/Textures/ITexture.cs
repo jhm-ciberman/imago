@@ -18,14 +18,14 @@ public interface ITexture : IDisposable
     public uint Height { get; }
 
     /// <summary>
-    /// Gets the underlying Veldrid texture.
+    /// Gets the underlying NeoVeldrid texture.
     /// </summary>
-    public Veldrid.Texture VeldridTexture { get; }
+    public NeoVeldrid.Texture NativeTexture { get; }
 
     /// <summary>
-    /// Gets the underlying Veldrid sampler.
+    /// Gets the underlying NeoVeldrid sampler.
     /// </summary>
-    public Veldrid.Sampler VeldridSampler { get; }
+    public NeoVeldrid.Sampler NativeSampler { get; }
 
     /// <summary>
     /// Raised when the render texture is resized.

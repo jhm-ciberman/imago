@@ -1,9 +1,9 @@
 using System;
 using System.Numerics;
 using Imago.Rendering;
+using NeoVeldrid;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using Veldrid;
 
 namespace Imago.Assets.Textures;
 
@@ -23,14 +23,14 @@ public class DirectTexture : ITexture
     public uint Height { get; }
 
     /// <summary>
-    /// Gets the underlying Veldrid texture resource.
+    /// Gets the underlying NeoVeldrid texture resource.
     /// </summary>
-    public Veldrid.Texture VeldridTexture { get; private set; }
+    public NeoVeldrid.Texture NativeTexture { get; private set; }
 
     /// <summary>
-    /// Gets the Veldrid sampler used for texture sampling.
+    /// Gets the NeoVeldrid sampler used for texture sampling.
     /// </summary>
-    public Sampler VeldridSampler { get; }
+    public Sampler NativeSampler { get; }
 
     /// <summary>
     /// Gets the number of mip levels in the texture.
@@ -61,12 +61,12 @@ public class DirectTexture : ITexture
             ? (uint)Math.Max(1, BitOperations.Log2(Math.Min(width, height)))
             : mipLevels;
 
-        this.VeldridTexture = this._gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(
+        this.NativeTexture = this._gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(
             this.Width, this.Height, this.MipLevels, 1,
             srgb ? PixelFormat.R8_G8_B8_A8_UNorm_SRgb : PixelFormat.R8_G8_B8_A8_UNorm,
             TextureUsage.Sampled | TextureUsage.GenerateMipmaps
         ));
-        this.VeldridSampler = this._gd.PointSampler;
+        this.NativeSampler = this._gd.PointSampler;
     }
 
     /// <summary>
@@ -84,7 +84,7 @@ public class DirectTexture : ITexture
         fixed (void* ptr = buffer)
         {
             this._gd.UpdateTexture(
-                this.VeldridTexture, (nint)ptr, (uint)buffer.Length,
+                this.NativeTexture, (nint)ptr, (uint)buffer.Length,
                 x: 0, y: 0, z: 0,
                 width: this.Width, height: this.Height, depth: 1,
                 mipLevel: 0, arrayLayer: 0
@@ -111,7 +111,7 @@ public class DirectTexture : ITexture
         fixed (void* ptr = buffer)
         {
             this._gd.UpdateTexture(
-                this.VeldridTexture, (nint)ptr, (uint)buffer.Length,
+                this.NativeTexture, (nint)ptr, (uint)buffer.Length,
                 x: x, y: y, z: 0,
                 width: (uint)image.Width, height: (uint)image.Height, depth: 1,
                 mipLevel: 0, arrayLayer: 0
@@ -136,7 +136,7 @@ public class DirectTexture : ITexture
 
         fixed (void* ptr = &bytes[0])
         {
-            this._gd.UpdateTexture(this.VeldridTexture, (nint)ptr, (uint)bytes.Length,
+            this._gd.UpdateTexture(this.NativeTexture, (nint)ptr, (uint)bytes.Length,
                 x: (uint)x, y: (uint)y, z: 0, width: (uint)width, height: (uint)height, depth: 1, mipLevel: 0, arrayLayer: 0);
         }
 
@@ -153,7 +153,7 @@ public class DirectTexture : ITexture
         {
             var cl = this._gd.ResourceFactory.CreateCommandList();
             cl.Begin();
-            cl.GenerateMipmaps(this.VeldridTexture);
+            cl.GenerateMipmaps(this.NativeTexture);
             cl.End();
             this._gd.SubmitCommands(cl);
             cl.Dispose();
@@ -167,8 +167,8 @@ public class DirectTexture : ITexture
     /// <param name="height">The new height of the texture.</param>
     public void Resize(uint width, uint height)
     {
-        Renderer.Instance.DisposeWhenIdle(this.VeldridTexture);
-        this.VeldridTexture = this._gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(
+        Renderer.Instance.DisposeWhenIdle(this.NativeTexture);
+        this.NativeTexture = this._gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(
             width, height, this.MipLevels, 1,
             PixelFormat.R8_G8_B8_A8_UNorm_SRgb,
             TextureUsage.Sampled | TextureUsage.GenerateMipmaps
@@ -181,6 +181,6 @@ public class DirectTexture : ITexture
     /// </summary>
     public void Dispose()
     {
-        this.VeldridTexture.Dispose();
+        this.NativeTexture.Dispose();
     }
 }

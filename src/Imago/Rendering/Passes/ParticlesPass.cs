@@ -7,7 +7,7 @@ using Imago.Assets.Textures;
 using Imago.SceneGraph;
 using Imago.SceneGraph.Cameras;
 using Imago.Support.Drawing;
-using Veldrid;
+using NeoVeldrid;
 
 namespace Imago.Rendering.Passes;
 
@@ -216,7 +216,7 @@ internal class ParticlesPass : IDisposable
         if (this._textures.TryGetValue(texture, out var resourceSet))
             return resourceSet;
 
-        resourceSet = this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(this._materialResourceLayout, texture.VeldridTexture, texture.VeldridSampler));
+        resourceSet = this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(this._materialResourceLayout, texture.NativeTexture, texture.NativeSampler));
         this._textures.Add(texture, resourceSet);
         return resourceSet;
     }

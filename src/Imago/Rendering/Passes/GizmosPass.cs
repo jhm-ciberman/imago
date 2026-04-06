@@ -6,7 +6,7 @@ using Imago.Assets.Materials;
 using Imago.Assets.Textures;
 using Imago.SceneGraph;
 using Imago.SceneGraph.Cameras;
-using Veldrid;
+using NeoVeldrid;
 
 namespace Imago.Rendering.Passes;
 

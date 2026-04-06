@@ -1,5 +1,5 @@
 using Imago.Assets.Materials;
-using Veldrid;
+using NeoVeldrid;
 
 namespace Imago.Rendering.Internals;
 

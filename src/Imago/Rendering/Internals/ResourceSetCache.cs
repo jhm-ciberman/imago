@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Imago.Assets.Textures;
-using Veldrid;
+using NeoVeldrid;
 using Shader = Imago.Assets.Materials.Shader;
 
 namespace Imago.Rendering.Internals;
@@ -41,7 +41,7 @@ internal class ResourceSetCache : IDisposable
             return resourceSet;
 
         resourceSet = this._factory.CreateResourceSet(new ResourceSetDescription(
-            shader.MaterialResourceLayout, texture.VeldridTexture, texture.VeldridSampler));
+            shader.MaterialResourceLayout, texture.NativeTexture, texture.NativeSampler));
 
         this._cachedResourceSets.Add(key, resourceSet);
 

@@ -1,7 +1,7 @@
 using System;
 using CommunityToolkit.Diagnostics;
 using Imago.Assets.Textures;
-using Veldrid;
+using NeoVeldrid;
 
 namespace Imago.Rendering.Passes.Shadows;
 
@@ -20,9 +20,9 @@ internal class ShadowMapTexture : ITexture, IDisposable
 
     public uint CascadesCount { get; private set; }
 
-    public Veldrid.Texture VeldridTexture { get; private set; }
+    public NeoVeldrid.Texture NativeTexture { get; private set; }
 
-    public Sampler VeldridSampler { get; private set; }
+    public Sampler NativeSampler { get; private set; }
 
     public Sampler ShadowSampler { get; private set; }
 
@@ -36,9 +36,9 @@ internal class ShadowMapTexture : ITexture, IDisposable
         this._renderer = Renderer.Instance;
         this.Size = size;
         this.CascadesCount = cascadesCount;
-        this.VeldridTexture = gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(this.Size, this.Size, 1, this.CascadesCount, PixelFormat.R32_Float, TextureUsage.DepthStencil | TextureUsage.Sampled));
+        this.NativeTexture = gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(this.Size, this.Size, 1, this.CascadesCount, PixelFormat.R32_Float, TextureUsage.DepthStencil | TextureUsage.Sampled));
 
-        this.VeldridSampler = gd.LinearSampler;
+        this.NativeSampler = gd.LinearSampler;
 
         this.ShadowSampler = gd.ResourceFactory.CreateSampler(new SamplerDescription(
             SamplerAddressMode.Border, SamplerAddressMode.Border, SamplerAddressMode.Border,
@@ -52,7 +52,7 @@ internal class ShadowMapTexture : ITexture, IDisposable
         for (uint i = 0; i < this.CascadesCount; i++)
         {
             this.Framebuffers[i] = gd.ResourceFactory.CreateFramebuffer(new FramebufferDescription(
-                new FramebufferAttachmentDescription(this.VeldridTexture, i),
+                new FramebufferAttachmentDescription(this.NativeTexture, i),
                 Array.Empty<FramebufferAttachmentDescription>()
             ));
         }
@@ -60,8 +60,8 @@ internal class ShadowMapTexture : ITexture, IDisposable
 
     public void Dispose()
     {
-        this.VeldridTexture.Dispose();
-        this.VeldridSampler.Dispose();
+        this.NativeTexture.Dispose();
+        this.NativeSampler.Dispose();
 
         foreach (Framebuffer fb in this.Framebuffers)
         {
@@ -87,16 +87,16 @@ internal class ShadowMapTexture : ITexture, IDisposable
         {
             this._renderer.DisposeWhenIdle(framebuffer);
         }
-        this._renderer.DisposeWhenIdle(this.VeldridTexture);
+        this._renderer.DisposeWhenIdle(this.NativeTexture);
         var factory = this._renderer.GraphicsDevice.ResourceFactory;
-        this.VeldridTexture = factory.CreateTexture(TextureDescription.Texture2D(width, height, 1, this.CascadesCount, PixelFormat.R32_Float, TextureUsage.DepthStencil | TextureUsage.Sampled));
+        this.NativeTexture = factory.CreateTexture(TextureDescription.Texture2D(width, height, 1, this.CascadesCount, PixelFormat.R32_Float, TextureUsage.DepthStencil | TextureUsage.Sampled));
 
         this.Framebuffers = new Framebuffer[this.CascadesCount];
 
         for (uint i = 0; i < this.CascadesCount; i++)
         {
             this.Framebuffers[i] = factory.CreateFramebuffer(new FramebufferDescription(
-                new FramebufferAttachmentDescription(this.VeldridTexture, i), []
+                new FramebufferAttachmentDescription(this.NativeTexture, i), []
             ));
         }
 

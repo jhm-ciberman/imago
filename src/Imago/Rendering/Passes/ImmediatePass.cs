@@ -9,7 +9,7 @@ using Imago.Rendering.Internals;
 using Imago.SceneGraph.Cameras;
 using Imago.SceneGraph.Immediate;
 using Imago.Support.Drawing;
-using Veldrid;
+using NeoVeldrid;
 using Shader = Imago.Assets.Materials.Shader;
 using Texture = Imago.Assets.Textures.Texture;
 

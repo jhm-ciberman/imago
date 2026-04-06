@@ -4,9 +4,9 @@ using System.Runtime;
 using Imago.Input;
 using Imago.Rendering;
 using Imago.SceneGraph;
-using Imago.Startup;
-using Veldrid;
-using Veldrid.Sdl2;
+using NeoVeldrid;
+using NeoVeldrid.Sdl2;
+using NeoVeldrid.StartupUtilities;
 
 namespace Imago;
 
@@ -96,7 +96,7 @@ public abstract class Application : IDisposable
     /// <returns>The created window.</returns>
     protected virtual Sdl2Window CreateWindow()
     {
-        return VeldridStartup.CreateWindow(new WindowCreateInfo
+        return NeoVeldridStartup.CreateWindow(new WindowCreateInfo
         {
             X = 100,
             Y = 100,

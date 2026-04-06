@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Numerics;
 using Imago.Support.Numerics;
-using Veldrid;
-using Veldrid.Sdl2;
+using NeoVeldrid;
+using NeoVeldrid.Sdl2;
 
 namespace Imago.Input;
 
@@ -274,7 +274,7 @@ public class InputManager : IDisposable
     public void SetRelativeMouseMode(bool enabled)
     {
         this._relativeMouseMode = enabled;
-        Sdl2Native.SDL_SetRelativeMouseMode(enabled);
+        this._window.CursorRelativeMode = enabled;
     }
 
     /// <summary>

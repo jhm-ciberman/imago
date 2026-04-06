@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Imago.Assets.Meshes;
 using Imago.Rendering;
 using Imago.Rendering.Internals;
-using Veldrid;
+using NeoVeldrid;
 
 namespace Imago.Assets.Materials;
 
@@ -12,7 +12,7 @@ namespace Imago.Assets.Materials;
 /// </summary>
 /// <remarks>
 /// A Shader object is responsible for taking GLSL source code, compiling it into variants based on
-/// required features (RenderFlags), and providing the appropriate Veldrid Pipeline for rendering.
+/// required features (RenderFlags), and providing the appropriate NeoVeldrid Pipeline for rendering.
 /// </remarks>
 public class Shader : IDisposable
 {
@@ -148,12 +148,12 @@ public class Shader : IDisposable
         [RenderFlags.HalfLambert] = "ENABLE_HALF_LAMBERT",
     };
 
-    private static void AddFlagsMacros(List<Veldrid.SPIRV.MacroDefinition> macros, RenderFlags flags)
+    private static void AddFlagsMacros(List<NeoVeldrid.SPIRV.MacroDefinition> macros, RenderFlags flags)
     {
         foreach (var flag in _renderFlagMacros)
         {
             if (flags.HasFlag(flag.Key))
-                macros.Add(new Veldrid.SPIRV.MacroDefinition(flag.Value, "1"));
+                macros.Add(new NeoVeldrid.SPIRV.MacroDefinition(flag.Value, "1"));
         }
     }
 

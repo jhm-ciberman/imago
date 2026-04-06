@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Imago.Rendering;
-using Veldrid;
+using NeoVeldrid;
 using Texture = Imago.Assets.Textures.Texture;
 
 namespace Imago.Assets.Materials;
@@ -43,7 +43,7 @@ public abstract class Material : IDisposable
     public Shader PickingShader { get; }
 
     /// <summary>
-    /// Gets the Veldrid resource set for this material.
+    /// Gets the NeoVeldrid resource set for this material.
     /// </summary>
     public ResourceSet ResourceSet { get; internal set; } = null!;
 
@@ -69,8 +69,8 @@ public abstract class Material : IDisposable
         this._resources = new BindableResource[shaders.Forward.Textures.Length * 2];
         for (int i = 0; i < shaders.Forward.Textures.Length; i++)
         {
-            this._resources[i * 2 + 0] = Texture.Magenta.VeldridTexture;
-            this._resources[i * 2 + 1] = Texture.Magenta.VeldridSampler;
+            this._resources[i * 2 + 0] = Texture.Magenta.NativeTexture;
+            this._resources[i * 2 + 1] = Texture.Magenta.NativeSampler;
         }
 
         this._renderer.RegisterDisposable(this);
@@ -195,8 +195,8 @@ public abstract class Material : IDisposable
         field = value;
 
         var tex = value ?? Texture.Magenta;
-        this._resources[index * 2 + 0] = tex.VeldridTexture;
-        this._resources[index * 2 + 1] = tex.VeldridSampler;
+        this._resources[index * 2 + 0] = tex.NativeTexture;
+        this._resources[index * 2 + 1] = tex.NativeSampler;
         this.NotifyResourcesDirty();
     }
 

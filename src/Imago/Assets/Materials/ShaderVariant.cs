@@ -1,6 +1,6 @@
 using System;
 using Imago.Assets.Meshes;
-using Veldrid;
+using NeoVeldrid;
 
 namespace Imago.Assets.Materials;
 
@@ -20,9 +20,9 @@ internal class ShaderVariant : IDisposable
     public VertexFormat VertexFormat { get; }
 
     /// <summary>
-    /// Gets the compiled Veldrid <see cref="Veldrid.Shader"/> objects for this variant.
+    /// Gets the compiled NeoVeldrid <see cref="NeoVeldrid.Shader"/> objects for this variant.
     /// </summary>
-    public Veldrid.Shader[] VeldridShaders { get; }
+    public NeoVeldrid.Shader[] NativeShaders { get; }
 
     /// <summary>
     /// Gets the <see cref="ShaderSetDescription"/> for this shader variant.
@@ -44,23 +44,23 @@ internal class ShaderVariant : IDisposable
     /// </summary>
     /// <param name="shader">The parent <see cref="Shader"/>.</param>
     /// <param name="vertexFormat">The vertex format for this variant.</param>
-    /// <param name="shaders">The compiled Veldrid <see cref="Veldrid.Shader"/> objects.</param>
+    /// <param name="shaders">The compiled NeoVeldrid <see cref="NeoVeldrid.Shader"/> objects.</param>
     /// <param name="flags">The <see cref="RenderFlags"/> for this variant.</param>
-    internal ShaderVariant(Shader shader, VertexFormat vertexFormat, Veldrid.Shader[] shaders, RenderFlags flags)
+    internal ShaderVariant(Shader shader, VertexFormat vertexFormat, NeoVeldrid.Shader[] shaders, RenderFlags flags)
     {
         this.Shader = shader;
         this.VertexFormat = vertexFormat;
-        this.VeldridShaders = shaders;
+        this.NativeShaders = shaders;
         this.Flags = flags;
         this.ShaderSetDescription = new ShaderSetDescription(vertexFormat.Layouts, shaders);
     }
 
     /// <summary>
-    /// Disposes the shader variant and its associated Veldrid shader resources.
+    /// Disposes the shader variant and its associated NeoVeldrid shader resources.
     /// </summary>
     public void Dispose()
     {
-        foreach (var shader in this.VeldridShaders)
+        foreach (var shader in this.NativeShaders)
         {
             shader.Dispose();
         }

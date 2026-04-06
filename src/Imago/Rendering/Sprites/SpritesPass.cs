@@ -3,7 +3,7 @@ using Imago.Assets.Materials;
 using Imago.Assets.Textures;
 using Imago.Rendering.Internals;
 using Imago.SceneGraph;
-using Veldrid;
+using NeoVeldrid;
 using Shader = Imago.Assets.Materials.Shader;
 
 namespace Imago.Rendering.Sprites;

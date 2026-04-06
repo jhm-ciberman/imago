@@ -10,7 +10,7 @@ using Imago.Input;
 using Imago.Rendering.Sprites;
 using Imago.Support.Drawing;
 using Imago.Support.Numerics;
-using Veldrid;
+using NeoVeldrid;
 
 namespace Imago.DevConsole;
 

@@ -1,7 +1,7 @@
 using System;
 using CommunityToolkit.Diagnostics;
 using Imago.Rendering;
-using Veldrid;
+using NeoVeldrid;
 using BoundingBox = Imago.Utilities.BoundingBox;
 
 namespace Imago.Assets.Meshes;
@@ -29,12 +29,12 @@ public class Mesh : IDisposable
     public VertexFormat VertexFormat { get; private set; }
 
     /// <summary>
-    /// Gets the Veldrid device buffer containing the vertex data.
+    /// Gets the NeoVeldrid device buffer containing the vertex data.
     /// </summary>
     public DeviceBuffer VeldridVertexBuffer { get; private set; }
 
     /// <summary>
-    /// Gets the Veldrid device buffer containing the index data.
+    /// Gets the NeoVeldrid device buffer containing the index data.
     /// </summary>
     public DeviceBuffer VeldridIndexBuffer { get; private set; }
 

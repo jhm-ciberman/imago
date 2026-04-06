@@ -9,7 +9,7 @@ using Imago.Assets.Textures;
 using Imago.Rendering.Internals;
 using Imago.Support.Drawing;
 using Imago.Support.Numerics;
-using Veldrid;
+using NeoVeldrid;
 using Shader = Imago.Assets.Materials.Shader;
 using Texture = Imago.Assets.Textures.Texture;
 
@@ -26,7 +26,7 @@ public class DrawingContext : IDisposable
     public int TotalSpritesToDraw { get; private set; } = 0;
 
     /// <summary>
-    /// Gets the Veldrid vertex buffer.
+    /// Gets the NeoVeldrid vertex buffer.
     /// </summary>
     public DeviceBuffer VertexBuffer { get; private set; }
 

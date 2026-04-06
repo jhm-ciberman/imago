@@ -8,7 +8,7 @@ using Imago.Rendering.Internals;
 using Imago.SceneGraph.Cameras;
 using Imago.SceneGraph.Lighting;
 using Imago.Utilities;
-using Veldrid;
+using NeoVeldrid;
 
 namespace Imago.Rendering.Passes.Shadows;
 
@@ -168,7 +168,7 @@ internal class ShadowPass : IDisposable, IPipelineProvider
         {
             DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
             PrimitiveTopology = PrimitiveTopology.TriangleList,
-            ShaderSet = new ShaderSetDescription(GetVertexLayout(shaderVariant.VertexFormat), shaderVariant.VeldridShaders),
+            ShaderSet = new ShaderSetDescription(GetVertexLayout(shaderVariant.VertexFormat), shaderVariant.NativeShaders),
             BlendState = BlendStateDescription.Empty,
             RasterizerState = new RasterizerStateDescription(
                 FaceCullMode.None, // Shadows are two-sided

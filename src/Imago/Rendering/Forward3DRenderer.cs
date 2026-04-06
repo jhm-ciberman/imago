@@ -10,7 +10,7 @@ using Imago.Rendering.Passes;
 using Imago.Rendering.Passes.Shadows;
 using Imago.SceneGraph;
 using Imago.Support.Drawing;
-using Veldrid;
+using NeoVeldrid;
 using Shader = Imago.Assets.Materials.Shader;
 
 namespace Imago.Rendering;
@@ -140,7 +140,7 @@ public class Forward3DRenderer : IDisposable
     /// <summary>
     /// Renders a <see cref="Scene3D"/> to the specified <see cref="RenderTexture"/>.
     /// </summary>
-    /// <param name="cl">The Veldrid command list.</param>
+    /// <param name="cl">The command list.</param>
     /// <param name="scene">The 3D scene to render.</param>
     /// <param name="renderTexture">The target render texture.</param>
     public void Render(CommandList cl, Scene3D scene, RenderTexture renderTexture)

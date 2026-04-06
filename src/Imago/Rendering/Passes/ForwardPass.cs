@@ -12,7 +12,7 @@ using Imago.SceneGraph.Cameras;
 using Imago.SceneGraph.Lighting;
 using Imago.Support.Drawing;
 using Imago.Utilities;
-using Veldrid;
+using NeoVeldrid;
 
 namespace Imago.Rendering.Passes;
 
@@ -98,7 +98,7 @@ internal class ForwardPass : IDisposable, IPipelineProvider
         return this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(this._resourceLayout,
             this._camera3DInfoBuffer,
             this._lightInfoBuffer,
-            this._shadowPass.ShadowmapTexture.VeldridTexture,
+            this._shadowPass.ShadowmapTexture.NativeTexture,
             this._shadowPass.ShadowmapTexture.ShadowSampler,
             this._globalDataBuffer
         ));
@@ -191,7 +191,7 @@ internal class ForwardPass : IDisposable, IPipelineProvider
                 depthTestEnabled, depthWriteEnabled, ComparisonKind.LessEqual
             ),
             PrimitiveTopology = PrimitiveTopology.TriangleList,
-            ShaderSet = new ShaderSetDescription(GetVertexLayout(shaderVariant.VertexFormat), shaderVariant.VeldridShaders),
+            ShaderSet = new ShaderSetDescription(GetVertexLayout(shaderVariant.VertexFormat), shaderVariant.NativeShaders),
             BlendState = new BlendStateDescription(RgbaFloat.Black, blendDescription),
             RasterizerState = new RasterizerStateDescription(
                 cullMode,

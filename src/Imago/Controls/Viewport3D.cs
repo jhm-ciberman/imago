@@ -133,7 +133,7 @@ public class Viewport3D : Control
 
         this.DisposeResources();
 
-        this._renderTexture = new RenderTexture(width, height, Veldrid.TextureSampleCount.Count1);
+        this._renderTexture = new RenderTexture(width, height, NeoVeldrid.TextureSampleCount.Count1);
         this._resolvedTexture = new Texture(width, height, mipLevels: 1, srgb: false);
         this._needsFlipY = !Renderer.Instance.IsUvOriginTopLeft;
         this._dirty = true;

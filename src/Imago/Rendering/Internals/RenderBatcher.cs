@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Imago.Assets.Meshes;
-using Veldrid;
+using NeoVeldrid;
 
 namespace Imago.Rendering.Internals;
 

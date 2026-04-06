@@ -1,6 +1,6 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
-using Veldrid;
+using NeoVeldrid;
 
 namespace Imago.Assets.Meshes;
 

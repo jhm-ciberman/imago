@@ -9,10 +9,10 @@ using Imago.Rendering.Internals.Buffers;
 using Imago.Rendering.Passes;
 using Imago.Rendering.Sprites;
 using Imago.SceneGraph;
-using Imago.Startup;
 using Imago.Utilities;
-using Veldrid;
-using Veldrid.Sdl2;
+using NeoVeldrid;
+using NeoVeldrid.Sdl2;
+using NeoVeldrid.StartupUtilities;
 using Texture = Imago.Assets.Textures.Texture;
 using Viewport = Imago.SceneGraph.Viewport;
 
@@ -48,7 +48,7 @@ public class Renderer : IDisposable
             swapchainSrgbFormat: false
         );
 
-        return VeldridStartup.CreateGraphicsDevice(window, options, graphicsBackend ?? VeldridStartup.GetPlatformDefaultBackend());
+        return NeoVeldridStartup.CreateGraphicsDevice(window, options, graphicsBackend ?? NeoVeldridStartup.GetPlatformDefaultBackend());
     }
 
     /// <summary>
@@ -67,7 +67,7 @@ public class Renderer : IDisposable
     public Viewport GuiViewport { get; }
 
     /// <summary>
-    /// Gets the current Veldrid's GraphicsDevice.
+    /// Gets the current GraphicsDevice.
     /// </summary>
     internal GraphicsDevice GraphicsDevice { get; }
 
@@ -342,7 +342,7 @@ public class Renderer : IDisposable
 
         //if (renderTexture.SampleCount != TextureSampleCount.Count1 && resolvedTexture != null)
         //{
-        //    cl.ResolveTexture(renderTexture.ForwardColorTexture, resolvedTexture!.VeldridTexture);
+        //    cl.ResolveTexture(renderTexture.ForwardColorTexture, resolvedTexture!.NativeTexture);
         //}
 
         cl.End();
@@ -369,11 +369,11 @@ public class Renderer : IDisposable
         if (renderTexture.SampleCount == TextureSampleCount.Count1)
         {
             // Nothing to resolve, just copy the texture.
-            cl.CopyTexture(renderTexture.ForwardColorTexture, resolvedTexture.VeldridTexture);
+            cl.CopyTexture(renderTexture.ForwardColorTexture, resolvedTexture.NativeTexture);
         }
         else
         {
-            cl.ResolveTexture(renderTexture.ForwardColorTexture, resolvedTexture.VeldridTexture);
+            cl.ResolveTexture(renderTexture.ForwardColorTexture, resolvedTexture.NativeTexture);
         }
 
         cl.End();

@@ -1,5 +1,5 @@
 using System.Numerics;
-using Veldrid;
+using NeoVeldrid;
 
 namespace Imago.Assets.Meshes;
 

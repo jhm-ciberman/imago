@@ -1,6 +1,6 @@
 using System;
 using Imago.Rendering;
-using Veldrid;
+using NeoVeldrid;
 
 namespace Imago.Assets.Textures;
 
@@ -35,27 +35,27 @@ public class RenderTexture : IRenderTexture
     public event EventHandler? Resized;
 
 
-    Veldrid.Texture ITexture.VeldridTexture => this.ForwardColorTexture;
+    NeoVeldrid.Texture ITexture.NativeTexture => this.ForwardColorTexture;
 
     /// <summary>
     /// Gets the color texture for the main forward rendering pass.
     /// </summary>
-    public Veldrid.Texture ForwardColorTexture { get; private set; } = null!;
+    public NeoVeldrid.Texture ForwardColorTexture { get; private set; } = null!;
 
     /// <summary>
     /// Gets the depth texture for the main forward rendering pass.
     /// </summary>
-    public Veldrid.Texture ForwardDepthTexture { get; private set; } = null!;
+    public NeoVeldrid.Texture ForwardDepthTexture { get; private set; } = null!;
 
     /// <summary>
     /// Gets the color texture used for the mouse picking pass.
     /// </summary>
-    public Veldrid.Texture PickingColorTexture { get; private set; } = null!;
+    public NeoVeldrid.Texture PickingColorTexture { get; private set; } = null!;
 
     /// <summary>
     /// Gets the depth texture used for the mouse picking pass.
     /// </summary>
-    public Veldrid.Texture PickingDepthTexture { get; private set; } = null!;
+    public NeoVeldrid.Texture PickingDepthTexture { get; private set; } = null!;
 
     /// <summary>
     /// Gets the framebuffer for the main forward rendering pass.
@@ -90,7 +90,7 @@ public class RenderTexture : IRenderTexture
     /// <summary>
     /// Gets the sampler used for sampling the render texture.
     /// </summary>
-    public Sampler VeldridSampler { get; private set; }
+    public Sampler NativeSampler { get; private set; }
 
     /// <summary>
     /// Gets the multi-sample count for the render texture.
@@ -122,7 +122,7 @@ public class RenderTexture : IRenderTexture
 
         this.RecreateResources();
 
-        this.VeldridSampler = this._gd.LinearSampler;
+        this.NativeSampler = this._gd.LinearSampler;
         this._renderer.RegisterDisposable(this);
     }
 
@@ -222,7 +222,7 @@ public class RenderTexture : IRenderTexture
         {
             if (this._interpolation == value) return;
             this._interpolation = value;
-            this.VeldridSampler = this._interpolation switch
+            this.NativeSampler = this._interpolation switch
             {
                 TextureInterpolation.Nearest => this._gd.PointSampler,
                 TextureInterpolation.Linear => this._gd.LinearSampler,

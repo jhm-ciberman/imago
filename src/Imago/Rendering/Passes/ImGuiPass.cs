@@ -1,7 +1,7 @@
 using System;
 using Imago.Assets.Textures;
 using ImGuiNET;
-using Veldrid;
+using NeoVeldrid;
 using Texture = Imago.Assets.Textures.Texture;
 
 namespace Imago.Rendering.Passes;
@@ -43,7 +43,7 @@ internal class ImGuiPass : IDisposable
 
     public nint GetOrCreateBinding(Texture texture)
     {
-        return this._imguiRenderer.GetOrCreateImGuiBinding(this._gd.ResourceFactory, texture.VeldridTexture);
+        return this._imguiRenderer.GetOrCreateImGuiBinding(this._gd.ResourceFactory, texture.NativeTexture);
     }
 
     public void Render(CommandList cl)

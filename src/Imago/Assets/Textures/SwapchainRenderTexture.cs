@@ -1,5 +1,5 @@
 using System;
-using Veldrid;
+using NeoVeldrid;
 
 namespace Imago.Assets.Textures;
 
@@ -12,7 +12,7 @@ internal class SwapchainRenderTexture : IRenderTexture, ITexture
 
     public Framebuffer Framebuffer => this._swapchain.Framebuffer;
 
-    public Veldrid.Texture VeldridTexture => this.Framebuffer.ColorTargets[0].Target;
+    public NeoVeldrid.Texture NativeTexture => this.Framebuffer.ColorTargets[0].Target;
 
     public OutputDescription OutputDescription => this.Framebuffer.OutputDescription;
 
@@ -20,13 +20,13 @@ internal class SwapchainRenderTexture : IRenderTexture, ITexture
 
     public uint Height => this.Framebuffer.Height;
 
-    public Sampler VeldridSampler { get; }
+    public Sampler NativeSampler { get; }
 
     private readonly Swapchain _swapchain;
 
     internal SwapchainRenderTexture(GraphicsDevice gd, Swapchain swapchain)
     {
-        this.VeldridSampler = gd.LinearSampler;
+        this.NativeSampler = gd.LinearSampler;
         this._swapchain = swapchain;
     }
 

@@ -15,12 +15,11 @@
         <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.2" />
         <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
         <PackageVersion Include="SixLabors.ImageSharp" Version="3.1.12" />
-        <PackageVersion Include="Veldrid" Version="4.9.0" />
-        <PackageVersion Include="Veldrid.ImGui" Version="5.72.0" />
-        <PackageVersion Include="Veldrid.SDL2" Version="4.9.0" />
-        <!-- Do NOT update Veldrid.SPIRV past 1.0.13. Version 1.0.14+ causes major lag spikes
-             during shader compilation and produces broken bytecode without debug mode enabled. -->
-        <PackageVersion Include="Veldrid.SPIRV" Version="1.0.13" />
+        <PackageVersion Include="NeoVeldrid" Version="1.0.0-rc.1" />
+        <PackageVersion Include="NeoVeldrid.ImGui" Version="1.0.0-rc.1" />
+        <PackageVersion Include="NeoVeldrid.SDL2" Version="1.0.0-rc.1" />
+        <PackageVersion Include="NeoVeldrid.SPIRV" Version="1.0.0-rc.1" />
+        <PackageVersion Include="NeoVeldrid.StartupUtilities" Version="1.0.0-rc.1" />
         <PackageVersion Include="xunit" Version="2.9.3" />
         <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
     </ItemGroup>

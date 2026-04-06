@@ -6,7 +6,7 @@ using Imago.Assets.Materials;
 using Imago.Assets.Textures;
 using Imago.SceneGraph;
 using Imago.SceneGraph.Cameras;
-using Veldrid;
+using NeoVeldrid;
 
 namespace Imago.Rendering.Passes;
 
@@ -109,7 +109,7 @@ internal class SkyDomePass : IDisposable
             resourceSet = this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(
                 this._resourceLayout,
                 this._passDataBuffer,
-                texture.VeldridTexture,
+                texture.NativeTexture,
                 this._sampler
             ));
 

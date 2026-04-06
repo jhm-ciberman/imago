@@ -9,10 +9,11 @@
         <PackageReference Include="CommunityToolkit.Mvvm" />
         <PackageReference Include="FontStashSharp.PlatformAgnostic" />
         <PackageReference Include="SixLabors.ImageSharp" />
-        <PackageReference Include="Veldrid" />
-        <PackageReference Include="Veldrid.ImGui" />
-        <PackageReference Include="Veldrid.SDL2" />
-        <PackageReference Include="Veldrid.SPIRV" />
+        <PackageReference Include="NeoVeldrid" />
+        <PackageReference Include="NeoVeldrid.ImGui" />
+        <PackageReference Include="NeoVeldrid.SDL2" />
+        <PackageReference Include="NeoVeldrid.SPIRV" />
+        <PackageReference Include="NeoVeldrid.StartupUtilities" />
         <PackageReference Include="glTF2Loader" />
     </ItemGroup>
 </Project>

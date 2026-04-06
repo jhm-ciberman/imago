@@ -110,17 +110,17 @@ internal class Renderable : IDisposable
     /// <summary>
     /// Gets the resource set for the transform data.
     /// </summary>
-    public Veldrid.ResourceSet TransformResourceSet { get; private set; }
+    public NeoVeldrid.ResourceSet TransformResourceSet { get; private set; }
 
     /// <summary>
     /// Gets the resource set for the instance data.
     /// </summary>
-    public Veldrid.ResourceSet InstanceResourceSet { get; private set; }
+    public NeoVeldrid.ResourceSet InstanceResourceSet { get; private set; }
 
     /// <summary>
     /// Gets the resource set for the skeleton data.
     /// </summary>
-    public Veldrid.ResourceSet? SkeletonResourceSet { get; private set; } = null;
+    public NeoVeldrid.ResourceSet? SkeletonResourceSet { get; private set; } = null;
 
     /// <summary>
     /// Gets the data for the "offset" vertex attribute.
@@ -167,17 +167,17 @@ internal class Renderable : IDisposable
     /// <summary>
     /// Gets the forward rendering pipeline for this renderable.
     /// </summary>
-    public Veldrid.Pipeline? ForwardPipeline { get; private set; }
+    public NeoVeldrid.Pipeline? ForwardPipeline { get; private set; }
 
     /// <summary>
     /// Gets the shadow mapping pipeline for this renderable.
     /// </summary>
-    public Veldrid.Pipeline? ShadowMapPipeline { get; private set; }
+    public NeoVeldrid.Pipeline? ShadowMapPipeline { get; private set; }
 
     /// <summary>
     /// Gets the picking pipeline for this renderable.
     /// </summary>
-    public Veldrid.Pipeline? PickingPipeline { get; private set; }
+    public NeoVeldrid.Pipeline? PickingPipeline { get; private set; }
 
     private bool _pipelineDirty = false;
 
@@ -548,7 +548,7 @@ internal class Renderable : IDisposable
         this.PickingPipeline = this.GetPickingPipeline(this._material);
     }
 
-    private Veldrid.Pipeline? GetForwardPipeline(Material material)
+    private NeoVeldrid.Pipeline? GetForwardPipeline(Material material)
     {
         bool isVisible = (this.RenderQueues & RenderQueues.OpaqueOrTransparent) != 0;
         if (!isVisible) return null;
@@ -565,7 +565,7 @@ internal class Renderable : IDisposable
         return material.ForwardShader.GetPipeline(this._mesh!.VertexFormat, flags, this.Scene3D!.MultiSampleCount);
     }
 
-    private Veldrid.Pipeline? GetShadowmapPipeline(Material material)
+    private NeoVeldrid.Pipeline? GetShadowmapPipeline(Material material)
     {
         bool isShadowcaster = (this.RenderQueues & RenderQueues.ShadowCaster) != 0;
         if (!isShadowcaster) return null;
@@ -575,7 +575,7 @@ internal class Renderable : IDisposable
         return material.ShadowMapShader.GetPipeline(this._mesh!.VertexFormat, flags);
     }
 
-    private Veldrid.Pipeline? GetPickingPipeline(Material material)
+    private NeoVeldrid.Pipeline? GetPickingPipeline(Material material)
     {
         bool isPicking = (this.RenderQueues & RenderQueues.Picking) != 0;
         if (!isPicking) return null;

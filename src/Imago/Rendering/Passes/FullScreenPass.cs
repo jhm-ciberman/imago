@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Numerics;
 using Imago.Assets.Materials;
 using Imago.Assets.Textures;
-using Veldrid;
-using VeldridTexture = Veldrid.Texture;
+using NeoVeldrid;
+using NativeTexture = NeoVeldrid.Texture;
 
 namespace Imago.Rendering.Passes;
 
@@ -20,7 +20,7 @@ internal class FullScreenPass : IDisposable
 
     private readonly ResourceLayout _resourceLayout;
 
-    private readonly Dictionary<VeldridTexture, ResourceSet> _resourceSets = new();
+    private readonly Dictionary<NativeTexture, ResourceSet> _resourceSets = new();
 
     public FullScreenPass(Renderer renderer, bool isPixelArt = false)
     {
@@ -93,12 +93,12 @@ internal class FullScreenPass : IDisposable
         cl.SetPipeline(this._pipeline);
         cl.SetVertexBuffer(0, this._vertexBuffer);
 
-        var resourceSet = this.GetResourceSet(source.VeldridTexture);
+        var resourceSet = this.GetResourceSet(source.NativeTexture);
         cl.SetGraphicsResourceSet(0, resourceSet);
         cl.Draw(6);
     }
 
-    private ResourceSet GetResourceSet(VeldridTexture texture)
+    private ResourceSet GetResourceSet(NativeTexture texture)
     {
         if (!this._resourceSets.TryGetValue(texture, out var resourceSet))
         {

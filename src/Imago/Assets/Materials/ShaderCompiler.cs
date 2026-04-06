@@ -1,24 +1,24 @@
 using System;
 using System.Collections.Generic;
-using Veldrid;
-using Veldrid.SPIRV;
+using NeoVeldrid;
+using NeoVeldrid.SPIRV;
 
 namespace Imago.Assets.Materials;
 
 /// <summary>
-/// Provides static methods for compiling GLSL shader code into Veldrid-compatible shader objects.
+/// Provides static methods for compiling GLSL shader code into NeoVeldrid-compatible shader objects.
 /// </summary>
 public static class ShaderCompiler
 {
     /// <summary>
-    /// Compiles vertex and fragment GLSL shader code into Veldrid <see cref="Veldrid.Shader"/> objects.
+    /// Compiles vertex and fragment GLSL shader code into NeoVeldrid <see cref="NeoVeldrid.Shader"/> objects.
     /// </summary>
     /// <param name="gd">The <see cref="GraphicsDevice"/> used for creating shader resources.</param>
     /// <param name="vertexCode">The GLSL source code for the vertex shader.</param>
     /// <param name="fragmentCode">The GLSL source code for the fragment shader.</param>
     /// <param name="macros">Optional: A collection of <see cref="MacroDefinition"/> to apply during compilation.</param>
-    /// <returns>An array containing the compiled vertex and fragment <see cref="Veldrid.Shader"/> objects.</returns>
-    public static Veldrid.Shader[] CompileShaders(GraphicsDevice gd, string vertexCode, string fragmentCode, IEnumerable<MacroDefinition>? macros = null)
+    /// <returns>An array containing the compiled vertex and fragment <see cref="NeoVeldrid.Shader"/> objects.</returns>
+    public static NeoVeldrid.Shader[] CompileShaders(GraphicsDevice gd, string vertexCode, string fragmentCode, IEnumerable<MacroDefinition>? macros = null)
     {
         var macroDefinitions = GetMacroDefinitions(macros, gd.BackendType);
         var debug = IsDebug(gd.BackendType);
@@ -47,13 +47,10 @@ public static class ShaderCompiler
                 list.Add(new MacroDefinition("D3D11"));
                 break;
             case GraphicsBackend.Vulkan:
-                // The "VULKAN" macro is defined automatically by Veldrid SPIRVCompiler.
+                // The "VULKAN" macro is defined automatically by NeoVeldrid SPIRVCompiler.
                 break;
             case GraphicsBackend.OpenGL:
                 list.Add(new MacroDefinition("OPENGL"));
-                break;
-            case GraphicsBackend.Metal:
-                list.Add(new MacroDefinition("METAL"));
                 break;
             case GraphicsBackend.OpenGLES:
                 list.Add(new MacroDefinition("OPENGLES"));

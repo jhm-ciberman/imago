@@ -1,9 +1,9 @@
 using System;
 using System.Numerics;
 using Imago.Rendering;
+using NeoVeldrid;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using Veldrid;
 using Color = Imago.Support.Drawing.Color;
 using Vector2Int = Imago.Support.Numerics.Vector2Int;
 
@@ -11,7 +11,7 @@ namespace Imago.Assets.Textures;
 
 /// <summary>
 /// Represents a 2D texture that can be used for rendering.
-/// Wraps a Veldrid texture and provides methods for updating its content.
+/// Wraps a NeoVeldrid texture and provides methods for updating its content.
 /// </summary>
 public class Texture : ITexture, ITextureRegion, IDisposable
 {
@@ -47,14 +47,14 @@ public class Texture : ITexture, ITextureRegion, IDisposable
     public event EventHandler? Resized;
 
     /// <summary>
-    /// Gets the underlying Veldrid texture object.
+    /// Gets the underlying NeoVeldrid texture object.
     /// </summary>
-    public Veldrid.Texture VeldridTexture { get; protected set; }
+    public NeoVeldrid.Texture NativeTexture { get; protected set; }
 
     /// <summary>
-    /// Gets the Veldrid sampler object used for sampling this texture.
+    /// Gets the NeoVeldrid sampler object used for sampling this texture.
     /// </summary>
-    public Sampler VeldridSampler { get; private set; }
+    public Sampler NativeSampler { get; private set; }
 
     /// <summary>
     /// Gets the width of the texture in pixels.
@@ -98,11 +98,11 @@ public class Texture : ITexture, ITextureRegion, IDisposable
         PixelFormat pixelFormat = srgb ? PixelFormat.R8_G8_B8_A8_UNorm_SRgb : PixelFormat.R8_G8_B8_A8_UNorm;
 
         var gd = this._renderer.GraphicsDevice;
-        this.VeldridTexture = gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(
+        this.NativeTexture = gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(
             this.Width, this.Height, this.MipLevels, 1,
             pixelFormat, TextureUsage.Sampled | TextureUsage.GenerateMipmaps
         ));
-        this.VeldridSampler = gd.PointSampler;
+        this.NativeSampler = gd.PointSampler;
         this.OnTextureDirty();
 
         this._renderer.RegisterDisposable(this);
@@ -126,7 +126,7 @@ public class Texture : ITexture, ITextureRegion, IDisposable
     /// <summary>
     /// Gets a value indicating whether this texture has been disposed.
     /// </summary>
-    public bool IsDisposed => this.VeldridTexture.IsDisposed;
+    public bool IsDisposed => this.NativeTexture.IsDisposed;
 
     /// <summary>
     /// Marks the texture as dirty, indicating that its data needs to be re-uploaded to the GPU.
@@ -210,22 +210,22 @@ public class Texture : ITexture, ITextureRegion, IDisposable
         this._isDirty = false;
 
         var gd = Renderer.Instance.GraphicsDevice;
-        if (this.Width != this.VeldridTexture.Width || this.Height != this.VeldridTexture.Height)
+        if (this.Width != this.NativeTexture.Width || this.Height != this.NativeTexture.Height)
         {
-            this.VeldridTexture.Dispose();
-            this.VeldridTexture = gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(
+            this.NativeTexture.Dispose();
+            this.NativeTexture = gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(
                 this.Width, this.Height, this.MipLevels, 1,
                 PixelFormat.R8_G8_B8_A8_UNorm, TextureUsage.Sampled | TextureUsage.GenerateMipmaps
             ));
         }
 
-        gd.UpdateTexture(this.VeldridTexture, this._data,
+        gd.UpdateTexture(this.NativeTexture, this._data,
             x: 0, y: 0, z: 0,
             width: this.Width, height: this.Height, depth: 1,
             arrayLayer: 0, mipLevel: 0);
 
         if (this.MipLevels > 1)
-            cl.GenerateMipmaps(this.VeldridTexture);
+            cl.GenerateMipmaps(this.NativeTexture);
     }
 
     /// <summary>
@@ -252,7 +252,7 @@ public class Texture : ITexture, ITextureRegion, IDisposable
     {
         if (this.IsDisposed) return;
 
-        Renderer.Instance.DisposeWhenIdle(this.VeldridTexture);
+        Renderer.Instance.DisposeWhenIdle(this.NativeTexture);
         Renderer.Instance.UnregisterDisposable(this);
     }
 

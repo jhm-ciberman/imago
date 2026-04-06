@@ -35,7 +35,7 @@ public class Skeleton : IDisposable
     /// <summary>
     /// Gets the resource set of the buffer containing the bone data.
     /// </summary>
-    public Veldrid.ResourceSet ResourceSet { get; }
+    public NeoVeldrid.ResourceSet ResourceSet { get; }
 
     /// <summary>
     /// Gets the offset of the bone data in the buffer.

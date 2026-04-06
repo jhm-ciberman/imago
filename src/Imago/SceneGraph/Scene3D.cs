@@ -8,7 +8,7 @@ using Imago.SceneGraph.Immediate;
 using Imago.SceneGraph.Nodes;
 using Imago.SceneGraph.Picking;
 using Imago.Support.Drawing;
-using Veldrid;
+using NeoVeldrid;
 
 namespace Imago.SceneGraph;
 

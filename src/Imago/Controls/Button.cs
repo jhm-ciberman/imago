@@ -2,7 +2,7 @@ using System;
 using System.Windows.Input;
 using Imago.Input;
 using Imago.Rendering.Sprites;
-using Veldrid;
+using NeoVeldrid;
 
 namespace Imago.Controls;
 

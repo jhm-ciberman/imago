@@ -9,7 +9,7 @@ using Imago.Rendering.Internals;
 using Imago.SceneGraph.Cameras;
 using Imago.SceneGraph.Picking;
 using Imago.Utilities;
-using Veldrid;
+using NeoVeldrid;
 
 namespace Imago.Rendering.Passes;
 
@@ -39,7 +39,7 @@ internal class MousePickingPass : IDisposable, IPipelineProvider
     private readonly ResourceSet _resourceSet;
     private readonly RenderTexture _renderTexture;
     private readonly RenderBatcher _renderBatcher;
-    private readonly Veldrid.Texture _pixelStagingTexture;
+    private readonly NeoVeldrid.Texture _pixelStagingTexture;
     private Vector2 _mousePosition;
 
     public MousePickingPass(Renderer renderer)
@@ -183,7 +183,7 @@ internal class MousePickingPass : IDisposable, IPipelineProvider
                 depthTestEnabled, depthWriteEnabled, ComparisonKind.LessEqual
             ),
             PrimitiveTopology = PrimitiveTopology.TriangleList,
-            ShaderSet = new ShaderSetDescription(GetVertexLayout(shaderVariant.VertexFormat), shaderVariant.VeldridShaders),
+            ShaderSet = new ShaderSetDescription(GetVertexLayout(shaderVariant.VertexFormat), shaderVariant.NativeShaders),
             BlendState = new BlendStateDescription(RgbaFloat.Black, BlendAttachmentDescription.Disabled),
             RasterizerState = new RasterizerStateDescription(
                 cullMode,

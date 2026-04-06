@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using Veldrid;
-using Veldrid.SPIRV;
+using NeoVeldrid;
+using NeoVeldrid.SPIRV;
 
 namespace Imago.Assets.Meshes;
 
