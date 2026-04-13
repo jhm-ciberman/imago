@@ -242,9 +242,7 @@ public class TextBlock : Control
                 return this._font;
             }
 
-            var system = this.FontSystem
-                ?? Visual.DefaultFontSystem
-                ?? throw new InvalidOperationException("FontSystem is not set.");
+            var system = this.FontSystem ?? Visual.GetDefaultFontSystemOrFail();
 
             this._font = system.GetFont(this.FontSize);
 

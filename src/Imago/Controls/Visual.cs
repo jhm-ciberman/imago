@@ -15,10 +15,27 @@ namespace Imago.Controls;
 public abstract class Visual : ObservableObject, IDisposable, IMountable
 {
     /// <summary>
-    /// Gets or sets the default font system used by all controls.
-    /// If not set, controls must manually define a font system to use for text rendering.
+    /// Gets or sets the application-wide default font system used by controls that
+    /// do not specify their own font. Must be set once at startup before rendering text.
     /// </summary>
-    public static FontSystem? DefaultFontSystem { get; set; } = null!;
+    public static FontSystem? DefaultFontSystem { get; set; }
+
+    /// <summary>
+    /// Returns <see cref="DefaultFontSystem"/>, or throws a descriptive exception
+    /// if it has not been set.
+    /// </summary>
+    /// <returns>The non-null default font system.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when <see cref="DefaultFontSystem"/> is <see langword="null"/>.
+    /// </exception>
+    public static FontSystem GetDefaultFontSystemOrFail()
+    {
+        return DefaultFontSystem ?? throw new InvalidOperationException(
+            $"{nameof(Visual)}.{nameof(DefaultFontSystem)} has not been set. " +
+            $"Assign it once at application startup, for example: " +
+            $"`{nameof(Visual)}.{nameof(DefaultFontSystem)} = {nameof(FontLoader)}.{nameof(FontLoader.Load)}(\"path/to/font.ttf\");`."
+        );
+    }
 
     private string _name = string.Empty;
     private Visibility _visibility = Visibility.Visible;

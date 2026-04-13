@@ -5,6 +5,7 @@
     </PropertyGroup>
     <ItemGroup>
         <EmbeddedResource Include="Resources/Shaders/**/*.glsl" />
+        <EmbeddedResource Include="Resources/Fonts/**/*.ttf" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="../Imago.Support/Imago.Support.csproj" />

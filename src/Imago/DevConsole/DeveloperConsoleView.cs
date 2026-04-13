@@ -31,7 +31,32 @@ public class DeveloperConsoleView : DockPanel
     private static readonly Color _popupSelectedColor = TailwindColors.Slate700;
     private static readonly Color _popupDescriptionColor = TailwindColors.Slate500;
 
-    private static readonly TextFont _consoleFont = new(FontLoader.Load("res/fonts/basis33.ttf"), 16f, 16f);
+    private const string EmbeddedConsoleFontResource = "Imago.Resources.Fonts.basis33.ttf";
+    private static TextFont? _consoleFont;
+
+    /// <summary>
+    /// Gets or sets the font used by the developer console.
+    /// </summary>
+    /// <remarks>
+    /// Defaults to a pixel bitmap font (basis33) embedded in the Imago assembly,
+    /// intended for small sizes. Set this before the first console view is created
+    /// to use a different font.
+    /// </remarks>
+    public static TextFont ConsoleFont
+    {
+        get => _consoleFont ??= LoadDefaultConsoleFont();
+        set => _consoleFont = value ?? throw new ArgumentNullException(nameof(value));
+    }
+
+    private static TextFont LoadDefaultConsoleFont()
+    {
+        var fontSystem = FontLoader.LoadEmbedded(
+            typeof(DeveloperConsoleView).Assembly,
+            EmbeddedConsoleFontResource
+        );
+        return new TextFont(fontSystem, 16f, 16f);
+    }
+
     private const float OutputPadding = 8f;
     private const float InputRowHeight = 28f;
     private const string PromptSymbol = "> ";
@@ -63,7 +88,7 @@ public class DeveloperConsoleView : DockPanel
 
         var promptLabel = new TextBlock(PromptSymbol)
         {
-            Font = _consoleFont,
+            Font = ConsoleFont,
             Foreground = _promptColor,
             Dock = Dock.Left,
             VerticalAlignment = VerticalAlignment.Center,
@@ -75,7 +100,7 @@ public class DeveloperConsoleView : DockPanel
             HorizontalAlignment = HorizontalAlignment.Stretch,
             Padding = new Thickness(2, 4, 8, 4),
         };
-        this._inputBox.TextBlock.Font = _consoleFont;
+        this._inputBox.TextBlock.Font = ConsoleFont;
         this._inputBox.TextBlock.Foreground = _commandTextColor;
         this._inputBox.CaretColor = _promptColor;
         this._inputBox.TextBlock.PropertyChanged += this.InputBox_TextChanged;
@@ -123,7 +148,7 @@ public class DeveloperConsoleView : DockPanel
         {
             const float separatorHeight = 1f;
             float availableHeight = this.ActualSize.Y - InputRowHeight - separatorHeight - (OutputPadding * 2);
-            return Math.Max(1, (int)(availableHeight / _consoleFont.LineHeight));
+            return Math.Max(1, (int)(availableHeight / ConsoleFont.LineHeight));
         }
     }
 
@@ -323,7 +348,7 @@ public class DeveloperConsoleView : DockPanel
     {
         base.DrawCore(ctx);
 
-        var font = _consoleFont.System.GetFont(_consoleFont.Size);
+        var font = ConsoleFont.System.GetFont(ConsoleFont.Size);
         float popupBottomY = this.Position.Y + this.ActualSize.Y - InputRowHeight - 1f;
         this._autocomplete.Draw(ctx, font, new Vector2(this.Position.X, popupBottomY), this.ActualSize.X);
     }
@@ -492,7 +517,7 @@ public class DeveloperConsoleView : DockPanel
                 _popupBorderColor
             );
 
-            float textOffsetY = (ItemHeight - _consoleFont.LineHeight) / 2f;
+            float textOffsetY = (ItemHeight - ConsoleFont.LineHeight) / 2f;
 
             for (int i = 0; i < visibleCount; i++)
             {
@@ -547,7 +572,7 @@ public class DeveloperConsoleView : DockPanel
                 _popupBorderColor
             );
 
-            float textOffsetY = (ItemHeight - _consoleFont.LineHeight) / 2f;
+            float textOffsetY = (ItemHeight - ConsoleFont.LineHeight) / 2f;
             float textY = popupTop + textOffsetY;
 
             string usage = this._argumentHint!.GetUsage();
@@ -575,8 +600,8 @@ public class DeveloperConsoleView : DockPanel
         private readonly DeveloperConsoleView _owner;
         private readonly TextLayout _layout = new()
         {
-            FontSize = _consoleFont.Size,
-            LineHeight = _consoleFont.LineHeight,
+            FontSize = ConsoleFont.Size,
+            LineHeight = ConsoleFont.LineHeight,
         };
 
         private float _promptWidth = -1f;
@@ -598,7 +623,7 @@ public class DeveloperConsoleView : DockPanel
             int startLine = Math.Clamp(this._owner._scrollOffset, 0, Math.Max(0, lines.Count - 1));
             int endLine = Math.Min(startLine + this._owner.VisibleLineCount, lines.Count);
 
-            var font = _consoleFont.System.GetFont(_consoleFont.Size);
+            var font = ConsoleFont.System.GetFont(ConsoleFont.Size);
             this._layout.Font = font;
 
             if (this._promptWidth < 0f)
@@ -611,7 +636,7 @@ public class DeveloperConsoleView : DockPanel
             {
                 var line = lines[i];
                 float x = this.Position.X;
-                float y = this.Position.Y + (i - startLine) * _consoleFont.LineHeight;
+                float y = this.Position.Y + (i - startLine) * ConsoleFont.LineHeight;
 
                 switch (line.Kind)
                 {
