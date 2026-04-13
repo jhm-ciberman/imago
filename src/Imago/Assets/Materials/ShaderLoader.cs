@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -27,15 +28,29 @@ public enum ShaderPass
 }
 
 /// <summary>
-/// Provides static methods for loading GLSL shader code, including handling of #include directives.
+/// Loads GLSL shader source files and resolves <c>#include</c> directives.
 /// </summary>
+/// <remarks>
+/// All shader paths must begin with an explicit namespace prefix:
+/// <list type="bullet">
+/// <item><description><c>@imago/</c> resolves to shader files embedded in the Imago assembly.</description></item>
+/// <item><description><c>@app/</c> resolves to shader files on disk under <see cref="AppShadersPath"/>.</description></item>
+/// </list>
+/// Paths without a namespace prefix are rejected. This applies to both the top-level
+/// path passed to <see cref="AssembleSurfaceShader"/> or <see cref="AssembleVertexShader"/>
+/// and to every <c>#include</c> directive inside a shader file.
+/// </remarks>
 public static partial class ShaderLoader
 {
     private const string UserCodePlaceholder = "{{USER_CODE}}";
-    private const string DefaultVertexShader = "surfaces/standard.vert.glsl";
-    private const string DefaultFragmentShader = "surfaces/standard.frag.glsl";
+    private const string ImagoNamespace = "@imago/";
+    private const string AppNamespace = "@app/";
+    private const string EmbeddedResourcePrefix = "Imago.Resources.Shaders.";
 
-    private static readonly string _shadersBasePath = "./res/shaders/";
+    private const string DefaultFragmentShader = "@imago/surfaces/standard.frag.glsl";
+    private const string DefaultVertexShader = "@imago/surfaces/standard.vert.glsl";
+
+    private static readonly Assembly _imagoAssembly = typeof(ShaderLoader).Assembly;
 
     [GeneratedRegex("^#include\\s+\"([^\"]+)\"")]
     private static partial Regex IncludeRegex();
@@ -43,84 +58,82 @@ public static partial class ShaderLoader
     private static readonly Regex _includeRegex = IncludeRegex();
 
     /// <summary>
-    /// Loads the content of a shader file, resolving its path and processing any `#include` directives.
+    /// Gets or sets the filesystem path used to resolve <c>@app/</c> shader references.
+    /// Defaults to <c>"shaders/"</c> relative to the current working directory.
     /// </summary>
-    /// <param name="filename">The name of the shader file to load.</param>
-    /// <returns>The full GLSL source code with all includes resolved.</returns>
-    public static string Load(string filename)
-    {
-        var fullPath = ResolvePath(filename);
-        return GetGlsl(fullPath);
-    }
+    /// <remarks>
+    /// Set this at application startup if your project stores shaders in a non-default
+    /// location (for example, Medieval Life would set it to <c>"res/shaders/"</c>).
+    /// The path may be absolute or relative to the working directory.
+    /// </remarks>
+    public static string AppShadersPath { get; set; } = "shaders/";
 
     /// <summary>
-    /// Assembles a surface (fragment) shader by combining a template with user code.
+    /// Assembles a fragment shader by combining a pass-specific template with user surface code.
     /// </summary>
-    /// <param name="userCodePath">Path to the user's surface shader code, or null for default.</param>
-    /// <param name="pass">The render pass to assemble the shader for.</param>
-    /// <returns>The assembled GLSL source code with all includes resolved.</returns>
+    /// <param name="userCodePath">
+    /// Namespaced path (<c>@imago/</c> or <c>@app/</c>) to the user's fragment surface code,
+    /// or <see langword="null"/> to use the built-in standard surface shader.
+    /// </param>
+    /// <param name="pass">The render pass to assemble for.</param>
+    /// <returns>The assembled GLSL source with all <c>#include</c> directives resolved.</returns>
     public static string AssembleSurfaceShader(string? userCodePath, ShaderPass pass)
     {
         var templatePath = pass switch
         {
-            ShaderPass.Forward => "include/templates/forward.frag.glsl",
-            ShaderPass.Shadow => "include/templates/shadow.frag.glsl",
-            ShaderPass.Picking => "include/templates/picking.frag.glsl",
-            _ => throw new ArgumentOutOfRangeException(nameof(pass), pass, "Unknown vertex shader pass")
+            ShaderPass.Forward => "@imago/include/templates/forward.frag.glsl",
+            ShaderPass.Shadow => "@imago/include/templates/shadow.frag.glsl",
+            ShaderPass.Picking => "@imago/include/templates/picking.frag.glsl",
+            _ => throw new ArgumentOutOfRangeException(nameof(pass), pass, "Unknown shader pass")
         };
 
-        var template = Load(templatePath);
-        var userCode = LoadRaw(userCodePath ?? DefaultFragmentShader);
+        var template = LoadAndResolveIncludes(templatePath);
+        var userCode = ReadShaderSource(userCodePath ?? DefaultFragmentShader);
         return template.Replace(UserCodePlaceholder, userCode);
     }
 
     /// <summary>
-    /// Assembles a vertex shader by combining a pass-specific template with user code.
+    /// Assembles a vertex shader by combining a pass-specific template with user vertex code.
     /// </summary>
-    /// <param name="userCodePath">Path to the user's vertex shader code, or null for default.</param>
-    /// <param name="pass">The render pass to assemble the shader for.</param>
-    /// <returns>The assembled GLSL source code with all includes resolved.</returns>
+    /// <param name="userCodePath">
+    /// Namespaced path (<c>@imago/</c> or <c>@app/</c>) to the user's vertex code,
+    /// or <see langword="null"/> to use the built-in standard vertex shader.
+    /// </param>
+    /// <param name="pass">The render pass to assemble for.</param>
+    /// <returns>The assembled GLSL source with all <c>#include</c> directives resolved.</returns>
     public static string AssembleVertexShader(string? userCodePath, ShaderPass pass)
     {
         var templatePath = pass switch
         {
-            ShaderPass.Forward => "include/templates/forward.vert.glsl",
-            ShaderPass.Shadow => "include/templates/shadow.vert.glsl",
-            ShaderPass.Picking => "include/templates/picking.vert.glsl",
-            _ => throw new ArgumentOutOfRangeException(nameof(pass), pass, "Unknown vertex shader pass")
+            ShaderPass.Forward => "@imago/include/templates/forward.vert.glsl",
+            ShaderPass.Shadow => "@imago/include/templates/shadow.vert.glsl",
+            ShaderPass.Picking => "@imago/include/templates/picking.vert.glsl",
+            _ => throw new ArgumentOutOfRangeException(nameof(pass), pass, "Unknown shader pass")
         };
 
-        var template = Load(templatePath);
-        var userCode = LoadRaw(userCodePath ?? DefaultVertexShader);
+        var template = LoadAndResolveIncludes(templatePath);
+        var userCode = ReadShaderSource(userCodePath ?? DefaultVertexShader);
         return template.Replace(UserCodePlaceholder, userCode);
     }
 
-    /// <summary>
-    /// Loads a shader file without processing includes. Used for user shader fragments
-    /// that will be injected into templates.
-    /// </summary>
-    /// <param name="filename">The name of the shader file to load.</param>
-    /// <returns>The raw file contents.</returns>
-    private static string LoadRaw(string filename)
+    private static string LoadAndResolveIncludes(string path)
     {
-        var fullPath = ResolvePath(filename);
-        return File.ReadAllText(fullPath);
+        var source = ReadShaderSource(path);
+        return ResolveIncludes(source);
     }
 
-    private static string GetGlsl(string path)
+    private static string ResolveIncludes(string source)
     {
-        using StreamReader reader = new StreamReader(path);
         var sb = new StringBuilder();
-        while (!reader.EndOfStream)
+        using var reader = new StringReader(source);
+        string? line;
+        while ((line = reader.ReadLine()) != null)
         {
-            var line = reader.ReadLine();
-            if (line == null) break;
             var match = _includeRegex.Match(line);
             if (match.Success)
             {
-                var filename = match.Groups[1].Value;
-                var fullFilePath = ResolvePath(filename);
-                var includedContent = GetGlsl(fullFilePath);
+                var includePath = match.Groups[1].Value;
+                var includedContent = LoadAndResolveIncludes(includePath);
                 sb.AppendLine(includedContent);
             }
             else
@@ -132,11 +145,42 @@ public static partial class ShaderLoader
         return sb.ToString();
     }
 
-    private static string ResolvePath(string filename)
+    private static string ReadShaderSource(string path)
     {
-        var fullFilePath = Path.Combine(_shadersBasePath, filename);
-        if (!File.Exists(fullFilePath))
-            throw new FileNotFoundException($"Could not find shader file {filename}");
-        return fullFilePath;
+        if (path.StartsWith(ImagoNamespace, StringComparison.Ordinal))
+        {
+            var relative = path.Substring(ImagoNamespace.Length);
+            var resourceName = EmbeddedResourcePrefix + relative.Replace('/', '.');
+            using var stream = _imagoAssembly.GetManifestResourceStream(resourceName);
+            if (stream == null)
+            {
+                throw new FileNotFoundException(
+                    $"Could not find embedded engine shader '{path}' (expected manifest resource '{resourceName}')."
+                );
+            }
+
+            using var reader = new StreamReader(stream);
+            return reader.ReadToEnd();
+        }
+
+        if (path.StartsWith(AppNamespace, StringComparison.Ordinal))
+        {
+            var relative = path.Substring(AppNamespace.Length);
+            var fullPath = Path.Combine(AppShadersPath, relative);
+            if (!File.Exists(fullPath))
+            {
+                throw new FileNotFoundException(
+                    $"Could not find application shader '{path}' at '{fullPath}'. " +
+                    $"Set {nameof(ShaderLoader)}.{nameof(AppShadersPath)} to configure the shader directory."
+                );
+            }
+
+            return File.ReadAllText(fullPath);
+        }
+
+        throw new ArgumentException(
+            $"Shader path must begin with a known namespace ({ImagoNamespace} or {AppNamespace}): '{path}'.",
+            nameof(path)
+        );
     }
 }

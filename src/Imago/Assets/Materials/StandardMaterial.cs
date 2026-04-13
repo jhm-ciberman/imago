@@ -5,7 +5,7 @@ namespace Imago.Assets.Materials;
 /// <summary>
 /// The default surface material using standard lighting.
 /// </summary>
-[SurfaceShader(fragmentPath: "surfaces/standard.frag.glsl", vertexPath: "surfaces/standard.vert.glsl")]
+[SurfaceShader(fragmentPath: "@imago/surfaces/standard.frag.glsl", vertexPath: "@imago/surfaces/standard.vert.glsl")]
 public sealed class StandardMaterial : Material, ICreateableMaterial<StandardMaterial>
 {
     private Texture? _texture;

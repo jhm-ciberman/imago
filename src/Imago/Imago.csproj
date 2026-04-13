@@ -4,6 +4,9 @@
         <DebugSymbols>false</DebugSymbols>
     </PropertyGroup>
     <ItemGroup>
+        <EmbeddedResource Include="Resources/Shaders/**/*.glsl" />
+    </ItemGroup>
+    <ItemGroup>
         <ProjectReference Include="../Imago.Support/Imago.Support.csproj" />
 
         <PackageReference Include="CommunityToolkit.Mvvm" />
