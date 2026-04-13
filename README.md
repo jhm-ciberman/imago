@@ -66,4 +66,4 @@ It also stands on other people's work:
 
 ## License
 
-To be decided.
+Imago is released under the [MIT license](LICENSE).
