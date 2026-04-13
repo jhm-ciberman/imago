@@ -6,10 +6,11 @@
 *.user
 *.sln.docstates
 
-# Release files
+# Legacy output folders
 bin/
+obj/
 
-# LifeSim artifacts folder
+# .NET artifacts output layout (UseArtifactsOutput)
 artifacts/
 
 # Save files

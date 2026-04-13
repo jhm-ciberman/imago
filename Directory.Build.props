@@ -4,11 +4,8 @@
         <TargetFramework>net10.0</TargetFramework>
         <LangVersion>14.0</LangVersion>
         <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-        <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)\bin\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
-        <BaseOutputPath>$(MSBuildThisFileDirectory)\bin\$(MSBuildProjectName)\</BaseOutputPath>
+        <UseArtifactsOutput>true</UseArtifactsOutput>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-        <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
         <Disabletransitiveprojectreferences>true</Disabletransitiveprojectreferences>
     </PropertyGroup>
 
