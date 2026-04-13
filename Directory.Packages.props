@@ -15,11 +15,11 @@
         <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.2" />
         <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
         <PackageVersion Include="SixLabors.ImageSharp" Version="3.1.12" />
-        <PackageVersion Include="NeoVeldrid" Version="1.0.0-rc.1" />
-        <PackageVersion Include="NeoVeldrid.ImGui" Version="1.0.0-rc.1" />
-        <PackageVersion Include="NeoVeldrid.SDL2" Version="1.0.0-rc.1" />
-        <PackageVersion Include="NeoVeldrid.SPIRV" Version="1.0.0-rc.1" />
-        <PackageVersion Include="NeoVeldrid.StartupUtilities" Version="1.0.0-rc.1" />
+        <PackageVersion Include="NeoVeldrid" Version="1.0.0-rc.2" />
+        <PackageVersion Include="NeoVeldrid.ImGui" Version="1.0.0-rc.2" />
+        <PackageVersion Include="NeoVeldrid.SDL2" Version="1.0.0-rc.2" />
+        <PackageVersion Include="NeoVeldrid.SPIRV" Version="1.0.0-rc.2" />
+        <PackageVersion Include="NeoVeldrid.StartupUtilities" Version="1.0.0-rc.2" />
         <PackageVersion Include="xunit" Version="2.9.3" />
         <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
     </ItemGroup>
