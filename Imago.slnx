@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Imago.Generators/Imago.Generators.csproj" />
+    <Project Path="src/Imago.Support/Imago.Support.csproj" />
+    <Project Path="src/Imago/Imago.csproj" />
+  </Folder>
+</Solution>
