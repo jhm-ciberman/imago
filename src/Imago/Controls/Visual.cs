@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using CommunityToolkit.Mvvm.ComponentModel;
 using FontStashSharp;
 using Imago.Rendering.Sprites;
 using Imago.SceneGraph;

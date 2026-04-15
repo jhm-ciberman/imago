@@ -10,7 +10,6 @@
     <ItemGroup>
         <ProjectReference Include="../Imago.Support/Imago.Support.csproj" />
 
-        <PackageReference Include="CommunityToolkit.Mvvm" />
         <PackageReference Include="FontStashSharp.PlatformAgnostic" />
         <PackageReference Include="SixLabors.ImageSharp" />
         <PackageReference Include="NeoVeldrid" />
