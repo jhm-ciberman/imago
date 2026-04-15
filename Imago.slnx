@@ -4,4 +4,7 @@
     <Project Path="src/Imago.Support/Imago.Support.csproj" />
     <Project Path="src/Imago/Imago.csproj" />
   </Folder>
+  <Folder Name="/examples/">
+    <Project Path="examples/HelloWorld/HelloWorld.csproj" />
+  </Folder>
 </Solution>
