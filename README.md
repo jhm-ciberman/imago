@@ -61,7 +61,6 @@ It also stands on other people's work:
 - [Veldrid](https://github.com/mellinoe/veldrid) by Eric Mellino, the cross-platform graphics library that shaped how I think about rendering in .NET.
 - [FontStashSharp](https://github.com/FontStashSharp/FontStashSharp) for font rendering and text layout.
 - [SixLabors.ImageSharp](https://github.com/SixLabors/ImageSharp) for image loading.
-- [CommunityToolkit.Mvvm](https://github.com/CommunityToolkit/dotnet) for the MVVM patterns Imago leans on.
 - [glTF2Loader](https://github.com/KhronosGroup/glTF-CSharp-Loader) for glTF parsing.
 
 ## License
