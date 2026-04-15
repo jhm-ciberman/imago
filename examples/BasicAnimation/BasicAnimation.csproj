@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <RootNamespace>BasicAnimation</RootNamespace>
+    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="../../src/Imago/Imago.csproj" />
+        <ProjectReference Include="../../src/Imago.Support/Imago.Support.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="Assets/**">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+</Project>

@@ -5,6 +5,7 @@
     <Project Path="src/Imago/Imago.csproj" />
   </Folder>
   <Folder Name="/examples/">
+    <Project Path="examples/BasicAnimation/BasicAnimation.csproj" />
     <Project Path="examples/HelloWorld/HelloWorld.csproj" />
   </Folder>
 </Solution>
