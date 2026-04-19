@@ -157,6 +157,7 @@ public class InputManager : IDisposable
         Instance = this;
         this._window = window;
         this.InputSnapshot = window.PumpEvents();
+        this._cursorPosition = this.InputSnapshot.MousePosition;
         this._window.MouseMove += this.Window_MouseMove;
     }
 
