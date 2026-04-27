@@ -83,10 +83,10 @@ public abstract class Application : IDisposable
         this.Ticker = new Ticker();
         this.Stage = new Stage();
 
-        this.Window.Resized += this.HandleWindowResized;
-        this.Ticker.Ticked += this.HandleTicked;
+        this.Window.Resized += this.Window_Resized;
+        this.Ticker.Ticked += this.Ticker_Ticked;
 
-        this.HandleWindowResized();
+        this.Window_Resized();
         this.Stage.EnableInputHandling();
     }
 
@@ -130,7 +130,7 @@ public abstract class Application : IDisposable
         this.Ticker.Stop();
     }
 
-    private void HandleWindowResized()
+    private void Window_Resized()
     {
         var size = new Vector2(this.Window.Width, this.Window.Height);
         this.Renderer.MainViewport.Resize(size);
@@ -144,7 +144,7 @@ public abstract class Application : IDisposable
         this.OnWindowResized();
     }
 
-    private void HandleTicked(object? sender, TickedEventArgs e)
+    private void Ticker_Ticked(object? sender, TickedEventArgs e)
     {
         float deltaTime = (float)e.DeltaTime;
 
