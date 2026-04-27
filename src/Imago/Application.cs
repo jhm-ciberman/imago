@@ -113,19 +113,21 @@ public abstract class Application : IDisposable
     protected virtual GuiSizeMode GuiSizeMode => GuiSizeMode.Native;
 
     /// <summary>
-    /// Runs the application main loop.
+    /// Runs the application main loop. Returns once the application has been quit and fully disposed.
     /// </summary>
     public void Run()
     {
         this.Ticker.Start();
+        this.Dispose();
     }
 
     /// <summary>
-    /// Quits the application.
+    /// Signals the application to quit. The actual disposal happens once the current frame completes,
+    /// so it is safe to call this from input handlers, GUI callbacks, or any other tick-time code.
     /// </summary>
     public virtual void Quit()
     {
-        this.Dispose();
+        this.Ticker.Stop();
     }
 
     private void HandleWindowResized()
