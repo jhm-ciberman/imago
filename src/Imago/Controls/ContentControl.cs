@@ -54,6 +54,65 @@ public class ContentControl : Control
         }
     }
 
+    private object? _contentSource;
+
+    /// <summary>
+    /// Gets or sets the data item rendered by this <see cref="ContentControl"/> through <see cref="ContentTemplate"/>.
+    /// </summary>
+    /// <remarks>
+    /// When this property changes, the previous <see cref="Content"/> is disposed and a new control is built
+    /// by invoking <see cref="ContentTemplate"/> on the new value. Setting <see langword="null"/> clears the content.
+    /// If <see cref="ContentTemplate"/> is also <see langword="null"/>, no control is built.
+    /// </remarks>
+    public object? ContentSource
+    {
+        get => this._contentSource;
+        set
+        {
+            if (this._contentSource == value) return;
+            this._contentSource = value;
+            this.RebuildContentFromSource();
+        }
+    }
+
+    private IDataTemplate? _contentTemplate;
+
+    /// <summary>
+    /// Gets or sets the data template used to build a control from <see cref="ContentSource"/>.
+    /// </summary>
+    /// <remarks>
+    /// Assigning a new template rebuilds the current content from <see cref="ContentSource"/>.
+    /// Use <see cref="DataTemplates"/> to dispatch to different controls based on the source's runtime type.
+    /// </remarks>
+    public IDataTemplate? ContentTemplate
+    {
+        get => this._contentTemplate;
+        set
+        {
+            if (this._contentTemplate == value) return;
+            this._contentTemplate = value;
+            this.RebuildContentFromSource();
+        }
+    }
+
+    private void RebuildContentFromSource()
+    {
+        var oldContent = this._content;
+
+        Control? newContent = null;
+        if (this._contentSource != null && this._contentTemplate != null)
+        {
+            newContent = this._contentTemplate.CreateItem(this._contentSource);
+        }
+
+        this.Content = newContent;
+
+        if (oldContent != null && oldContent != newContent)
+        {
+            oldContent.Dispose();
+        }
+    }
+
     /// <inheritdoc/>
     protected override IReadOnlyList<Control> HitTestingChildren
     {

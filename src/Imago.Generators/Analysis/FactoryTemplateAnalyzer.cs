@@ -7,8 +7,6 @@ namespace Imago.Generators.Analysis;
 /// </summary>
 internal static class FactoryTemplateAnalyzer
 {
-    private const string FactoryTemplateAttributeName = "Imago.Controls.FactoryTemplateAttribute";
-
     /// <summary>
     /// Checks whether the given type (or any base type) is marked with <c>[FactoryTemplate]</c>.
     /// For generic types, checks the original (open) definition.
@@ -18,7 +16,7 @@ internal static class FactoryTemplateAnalyzer
     public static bool IsFactoryTemplate(INamedTypeSymbol type)
     {
         var definition = type.IsGenericType ? type.OriginalDefinition : type;
-        return SymbolHelpers.FindAttribute(definition, FactoryTemplateAttributeName) != null;
+        return SymbolHelpers.FindAttribute(definition, KnownSymbols.FactoryTemplateAttribute) != null;
     }
 
     /// <summary>

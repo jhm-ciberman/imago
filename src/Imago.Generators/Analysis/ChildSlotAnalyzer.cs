@@ -7,11 +7,6 @@ namespace Imago.Generators.Analysis;
 /// </summary>
 internal static class ChildSlotAnalyzer
 {
-    private const string ItemsPropertyAttributeName = "Imago.Controls.ItemsPropertyAttribute";
-    private const string ItemsMethodAttributeName = "Imago.Controls.ItemsMethodAttribute";
-    private const string ContentPropertyAttributeName = "Imago.Controls.ContentPropertyAttribute";
-    private const string TextPropertyAttributeName = "Imago.Controls.TextPropertyAttribute";
-
     /// <summary>
     /// Inspects the type hierarchy for <c>[ItemsProperty]</c>, <c>[ItemsMethod]</c>,
     /// or <c>[ContentProperty]</c> attributes.
@@ -20,19 +15,19 @@ internal static class ChildSlotAnalyzer
     /// <returns>The child slot kind and property name.</returns>
     public static ChildSlotInfo Analyze(INamedTypeSymbol type)
     {
-        var itemsName = GetAttributeArg(type, ItemsPropertyAttributeName);
+        var itemsName = GetAttributeArg(type, KnownSymbols.ItemsPropertyAttribute);
         if (itemsName != null)
         {
             return new ChildSlotInfo(ChildSlot.Items, itemsName);
         }
 
-        var methodName = GetAttributeArg(type, ItemsMethodAttributeName);
+        var methodName = GetAttributeArg(type, KnownSymbols.ItemsMethodAttribute);
         if (methodName != null)
         {
             return new ChildSlotInfo(ChildSlot.ItemsMethod, methodName);
         }
 
-        var contentName = GetAttributeArg(type, ContentPropertyAttributeName);
+        var contentName = GetAttributeArg(type, KnownSymbols.ContentPropertyAttribute);
         if (contentName != null)
         {
             return new ChildSlotInfo(ChildSlot.Content, contentName);
@@ -48,7 +43,7 @@ internal static class ChildSlotAnalyzer
     /// <returns>The text property name, or null if not found.</returns>
     public static string? AnalyzeTextProperty(INamedTypeSymbol type)
     {
-        return GetAttributeArg(type, TextPropertyAttributeName);
+        return GetAttributeArg(type, KnownSymbols.TextPropertyAttribute);
     }
 
     private static string? GetAttributeArg(INamedTypeSymbol type, string attributeFullName)

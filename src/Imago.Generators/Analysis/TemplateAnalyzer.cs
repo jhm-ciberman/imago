@@ -26,7 +26,7 @@ internal static class TemplateAnalyzer
 
         ValidateUniqueNames(root);
 
-        var implementsIMountable = SymbolHelpers.ImplementsInterface(classType, "Imago.SceneGraph.IMountable");
+        var implementsIMountable = SymbolHelpers.ImplementsInterface(classType, KnownSymbols.MountableInterface);
 
         if (HasAnyBindings(root) && !implementsIMountable)
         {
@@ -239,13 +239,17 @@ internal static class TemplateAnalyzer
             var propSymbol = SymbolHelpers.FindProperty(effectiveType, propertyName)
                 ?? throw new UnknownPropertyException(propertyName, node.ResolvedTypeName).At(parsed.ElementSpan);
 
-            var analyzedChildren = new List<AnalyzedNode>();
+            var propElement = new AnalyzedPropertyElement
+            {
+                IsDataTemplateSlot = IsDataTemplateType(propSymbol.Type),
+            };
+
             foreach (var child in parsedChildren)
             {
-                analyzedChildren.Add(AnalyzeNode(child, namespaceMap, compilation, classType, isRoot: false, insideFactory));
+                propElement.Children.Add(AnalyzeNode(child, namespaceMap, compilation, classType, isRoot: false, insideFactory));
             }
 
-            node.PropertyElements[propertyName] = analyzedChildren;
+            node.PropertyElements[propertyName] = propElement;
         }
 
         // Recursively analyze children (factory template body children are "inside factory")
@@ -383,6 +387,18 @@ internal static class TemplateAnalyzer
         throw new CodeBehindNotFoundException(shortClassName).At(span);
     }
 
+    private static bool IsDataTemplateType(ITypeSymbol type)
+    {
+        var unannotated = type.WithNullableAnnotation(NullableAnnotation.None);
+
+        if (unannotated.TypeKind == TypeKind.Interface && unannotated.ToDisplayString() == KnownSymbols.DataTemplateInterface)
+        {
+            return true;
+        }
+
+        return SymbolHelpers.ImplementsInterface(unannotated, KnownSymbols.DataTemplateInterface);
+    }
+
     private static bool HasAnyBindings(AnalyzedNode node)
     {
         if (node.Bindings.Count > 0)
@@ -398,9 +414,9 @@ internal static class TemplateAnalyzer
             }
         }
 
-        foreach (var propChildren in node.PropertyElements.Values)
+        foreach (var propElement in node.PropertyElements.Values)
         {
-            foreach (var child in propChildren)
+            foreach (var child in propElement.Children)
             {
                 if (HasAnyBindings(child))
                 {

@@ -190,9 +190,9 @@ internal static class CodeEmitter
             }
         }
 
-        foreach (var propChildren in node.PropertyElements.Values)
+        foreach (var propElement in node.PropertyElements.Values)
         {
-            foreach (var child in propChildren)
+            foreach (var child in propElement.Children)
             {
                 AssignVariableNames(child, ref counter, isRoot: false, factoryTemplates);
             }
@@ -221,9 +221,9 @@ internal static class CodeEmitter
             }
         }
 
-        foreach (var propChildren in node.PropertyElements.Values)
+        foreach (var propElement in node.PropertyElements.Values)
         {
-            foreach (var child in propChildren)
+            foreach (var child in propElement.Children)
             {
                 EmitStatements(w, child, isRoot: false, promotedFields);
             }
@@ -288,11 +288,28 @@ internal static class CodeEmitter
         foreach (var kvp in parent.PropertyElements)
         {
             var propertyName = kvp.Key;
-            var children = kvp.Value;
+            var propElement = kvp.Value;
+            var children = propElement.Children;
 
-            if (children.Count == 1)
+            if (children.Count == 0)
+            {
+                continue;
+            }
+            else if (children.Count == 1)
             {
                 w.WriteLine(children[0].ElementSpan, $"{prefix}.{propertyName} = {children[0].VariableName};");
+            }
+            else if (propElement.IsDataTemplateSlot)
+            {
+                w.WriteLine(children[0].ElementSpan, $"{prefix}.{propertyName} = new {KnownSymbols.DataTemplatesType}");
+                w.WriteLine("{");
+                w.Indentation++;
+                foreach (var child in children)
+                {
+                    w.WriteLine(child.ElementSpan, $"{child.VariableName},");
+                }
+                w.Indentation--;
+                w.WriteLine("};");
             }
             else
             {
@@ -396,9 +413,9 @@ internal static class CodeEmitter
             }
         }
 
-        foreach (var propChildren in node.PropertyElements.Values)
+        foreach (var propElement in node.PropertyElements.Values)
         {
-            foreach (var child in propChildren)
+            foreach (var child in propElement.Children)
             {
                 if (!child.IsFactoryTemplate)
                 {
@@ -423,9 +440,9 @@ internal static class CodeEmitter
             }
         }
 
-        foreach (var propChildren in node.PropertyElements.Values)
+        foreach (var propElement in node.PropertyElements.Values)
         {
-            foreach (var child in propChildren)
+            foreach (var child in propElement.Children)
             {
                 if (!child.IsFactoryTemplate)
                 {
@@ -539,7 +556,7 @@ internal static class CodeEmitter
         w.WriteLine();
 
         // Store disposable in field
-        w.WriteLine("this.__templateBindings = new Imago.Controls.TemplateBindingDisposable(() =>");
+        w.WriteLine($"this.__templateBindings = new {KnownSymbols.TemplateBindingDisposableType}(() =>");
         w.WriteLine("{");
         w.Indentation++;
 

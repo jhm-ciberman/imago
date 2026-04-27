@@ -21,6 +21,7 @@
     - [Method Targets](#method-targets)
 - [Advanced Bindings](#advanced-bindings)
 - [Data Templates](#data-templates)
+    - [Polymorphic Templates](#polymorphic-templates)
 - [Nested Classes](#nested-classes)
 - [The Code-Behind](#the-code-behind)
     - [Dynamic Content](#dynamic-content)
@@ -510,7 +511,7 @@ protected override IDisposable? CreateBindings()
 <a name="data-templates"></a>
 ## Data Templates
 
-When a panel uses `ItemsSource` to render a dynamic collection, each item needs a `DataTemplate` that defines how to turn it into a control. You can declare this directly in the template using `x:TypeArguments` to specify the item type:
+A `DataTemplate` defines how to turn a data item into a control. It's used by `ItemsControl` to render each entry of a collection, and by `ContentControl` to render a single bound item. Declare the template inline using `x:TypeArguments` to specify the data type:
 
 ```xml
 <StackPanel ItemsSource="{this._vm.Presets}">
@@ -527,7 +528,21 @@ When a panel uses `ItemsSource` to render a dynamic collection, each item needs 
 </StackPanel>
 ```
 
-Inside the `<DataTemplate>` body, `item` refers to the current data item, typed as `PresetVM` in this example. You can use it in any `{expression}`, including `x:Arguments`. The compiler generates a private factory method that receives `item` as a parameter, so `{item.Name}`, `{item}`, and `{this._vm.SomeCommand}` all work.
+The same template syntax works on `ContentControl.ContentTemplate`, which renders a single item bound to `ContentSource`:
+
+```xml
+<ContentControl bind:ContentSource="this._vm.SelectedDocument">
+    <ContentControl.ContentTemplate>
+        <DataTemplate x:TypeArguments="DocumentVM">
+            <DocumentView x:Arguments="{item}" />
+        </DataTemplate>
+    </ContentControl.ContentTemplate>
+</ContentControl>
+```
+
+When `ContentSource` changes, the previous content is disposed and a new control is built from the template. Setting `ContentSource` to `null` clears the content.
+
+Inside the `<DataTemplate>` body, `item` refers to the current data item, typed as the `x:TypeArguments` value. You can use it in any `{expression}`, including `x:Arguments`. The compiler generates a private factory method that receives `item` as a parameter, so `{item.Name}`, `{item}`, and `{this._vm.SomeCommand}` all work.
 
 The `DataTemplate` must contain exactly one child element, which becomes the root of the generated control tree. The type passed to `x:TypeArguments` is resolved through the same namespace imports and aliases as element names:
 
@@ -548,6 +563,39 @@ For cases where the factory logic requires conditionals or multi-step computatio
 this.LoadTemplate();
 this._itemsPanel.ItemTemplate = new DataTemplate<PresetItem>(this.ButtonFactory);
 ```
+
+
+<a name="polymorphic-templates"></a>
+### Polymorphic Templates
+
+When the items in a list (or the source of a single content area) can be different runtime types, declare one `DataTemplate` per type as siblings. Each item is paired with the template whose type fits it:
+
+```xml
+<ItemsControl ItemsSource="{this._vm.Messages}">
+    <ItemsControl.ItemTemplate>
+        <DataTemplate x:TypeArguments="TextMessageVM">
+            <TextMessageView x:Arguments="{item}" />
+        </DataTemplate>
+        <DataTemplate x:TypeArguments="ImageMessageVM">
+            <ImageMessageView x:Arguments="{item}" />
+        </DataTemplate>
+    </ItemsControl.ItemTemplate>
+</ItemsControl>
+```
+
+Each branch is its own typed `DataTemplate<T>`, so `item` inside a branch is typed to that branch's `x:TypeArguments`. Templates are matched in declaration order; the first one whose type fits the item wins. If no branch matches, the framework throws.
+
+When each branch needs to capture state from the surrounding code-behind, build the same shape programmatically with a `DataTemplates` composite instead. It accepts any `IDataTemplate`, so custom matching logic lives alongside typed entries:
+
+```csharp
+this._tabContent.ContentTemplate = new DataTemplates
+{
+    new DataTemplate<TextMessageVM>(m => new TextMessageView(m)),
+    new DataTemplate<ImageMessageVM>(m => new ImageMessageView(m)),
+};
+```
+
+Markup factories only see `this` and `item`, so reach for the programmatic form whenever a branch needs to thread other dependencies through.
 
 
 <a name="nested-classes"></a>
@@ -646,7 +694,7 @@ public SettingsPopup(SettingsViewModel vm)
 }
 ```
 
-This keeps the static layout in the template while the code-behind builds the dynamic parts.
+This keeps the static layout in the template while the code-behind builds the dynamic parts. When the dynamic content follows the runtime type of a bound view model, use a [Data Template](#data-templates) on `ContentControl.ContentTemplate` instead.
 
 
 <a name="custom-controls"></a>

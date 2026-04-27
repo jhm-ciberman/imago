@@ -60,7 +60,7 @@ All controls inherit from `Control`, which provides the shared properties for si
 
 | Control | Purpose |
 |---------|---------|
-| `ContentControl` | Wraps a single child. Useful as a [slot](templates.md#dynamic-content) for dynamic content. |
+| `ContentControl` | Wraps a single child. Acts as a [slot](templates.md#dynamic-content) for dynamic content, or as a [data-driven host](#data-bound-collections) when combined with `ContentSource` and `ContentTemplate`. |
 | `ScrollViewer` | Wraps content that may overflow. Set `ScrollDirection` to `Horizontal` or `Vertical`. |
 | `ItemsControl` | Renders a collection of items using a data template. See [Data-Bound Collections](#data-bound-collections). |
 
@@ -229,3 +229,22 @@ var list = new ItemsControl
 ```
 
 `RadioStackPanel` combines this with radio-group behavior, automatically treating `ToggleButton` children as mutually exclusive. It exposes `SelectedIndex` and `SelectionChanged` for tracking the selection.
+
+`ContentControl` mirrors the same pattern for a single content area. Set `ContentSource` to your data item and `ContentTemplate` to a template that turns it into a control:
+
+```csharp
+this._messageView.ContentSource = vm.SelectedMessage;
+this._messageView.ContentTemplate = new DataTemplate<MessageVM>(m => new MessageView(m));
+```
+
+When the source can be different runtime types, list one template per type in a `DataTemplates`. Items are paired with the first template whose type fits:
+
+```csharp
+this._messageView.ContentTemplate = new DataTemplates
+{
+    new DataTemplate<TextMessageVM>(m => new TextMessageView(m)),
+    new DataTemplate<ImageMessageVM>(m => new ImageMessageView(m)),
+};
+```
+
+Whenever `ContentSource` changes, the previous content is disposed and a new control is built from the matching template. Setting `ContentSource` to `null` clears the content. The same shape works on `ItemsControl.ItemTemplate` for heterogeneous collections, and the markup form is documented under [Polymorphic Templates](templates.md#polymorphic-templates).

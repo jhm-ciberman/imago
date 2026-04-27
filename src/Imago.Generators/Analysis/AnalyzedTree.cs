@@ -116,7 +116,7 @@ internal sealed class AnalyzedNode
     /// <summary>
     /// Gets the property element children (e.g., Button.Tooltip mapped as "Tooltip" key).
     /// </summary>
-    public Dictionary<string, List<AnalyzedNode>> PropertyElements { get; } = new Dictionary<string, List<AnalyzedNode>>();
+    public Dictionary<string, AnalyzedPropertyElement> PropertyElements { get; } = new Dictionary<string, AnalyzedPropertyElement>();
 
     /// <summary>
     /// Gets or sets how children are added to this control.
@@ -176,9 +176,9 @@ internal sealed class AnalyzedNode
             CollectNamed(child, result);
         }
 
-        foreach (var propChildren in node.PropertyElements.Values)
+        foreach (var propElement in node.PropertyElements.Values)
         {
-            foreach (var child in propChildren)
+            foreach (var child in propElement.Children)
             {
                 // Factory template children are emitted in a separate method scope,
                 // so their named descendants should not become class fields.
@@ -191,6 +191,25 @@ internal sealed class AnalyzedNode
             }
         }
     }
+}
+
+/// <summary>
+/// A property element slot (e.g., <c>&lt;Button.Tooltip&gt;...&lt;/Button.Tooltip&gt;</c>) with its children
+/// and metadata about how to assign them to the target property.
+/// </summary>
+internal sealed class AnalyzedPropertyElement
+{
+    /// <summary>
+    /// Gets the child nodes inside the property element.
+    /// </summary>
+    public List<AnalyzedNode> Children { get; } = new List<AnalyzedNode>();
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the target property's type is <c>Imago.Controls.IDataTemplate</c>.
+    /// When true and <see cref="Children"/> has more than one entry, the emitter wraps them in a
+    /// <c>DataTemplates</c> composite instead of treating the property as a collection.
+    /// </summary>
+    public bool IsDataTemplateSlot { get; set; }
 }
 
 /// <summary>
