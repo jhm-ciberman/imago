@@ -1,26 +1,28 @@
-using Imago.SceneGraph.Nodes;
-
 namespace Imago.Assets.Animations;
 
 /// <summary>
-/// Represents an animation channel that animates a specific property of a target node.
+/// Represents an animation channel that animates a specific component of a single bone.
 /// </summary>
 public interface IChannel
 {
     /// <summary>
-    /// Gets the name of the target node that this channel animates.
+    /// Gets the name of the bone this channel animates.
     /// </summary>
     public string TargetName { get; }
 
     /// <summary>
-    /// Gets the duration of the animation channel in seconds.
+    /// Gets the duration of this channel in seconds.
     /// </summary>
     public float Duration { get; }
 
     /// <summary>
-    /// Updates the target node's property based on the current animation time.
+    /// Samples this channel at the given time and writes the result into <paramref name="pose"/>.
     /// </summary>
-    /// <param name="target">The target node to update.</param>
+    /// <remarks>
+    /// Only the component of the target bone that this channel animates is overwritten;
+    /// other components are read from the existing entry (or <see cref="BoneTransform.Identity"/> if none).
+    /// </remarks>
+    /// <param name="pose">The destination pose.</param>
     /// <param name="time">The current animation time in seconds.</param>
-    public void Update(Node3D target, float time);
+    public void Sample(Pose pose, float time);
 }

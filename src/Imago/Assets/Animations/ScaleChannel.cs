@@ -1,10 +1,9 @@
 using System.Numerics;
-using Imago.SceneGraph.Nodes;
 
 namespace Imago.Assets.Animations;
 
 /// <summary>
-/// Represents an animation channel that animates the scale of a <see cref="Node3D"/>.
+/// Animates the local scale component of a bone.
 /// </summary>
 public class ScaleChannel : ChannelBase<Vector3>
 {
@@ -13,7 +12,7 @@ public class ScaleChannel : ChannelBase<Vector3>
     /// <summary>
     /// Initializes a new instance of the <see cref="ScaleChannel"/> class.
     /// </summary>
-    /// <param name="targetName">The name of the target node to animate.</param>
+    /// <param name="targetName">The name of the bone to animate.</param>
     /// <param name="times">An array of keyframe times.</param>
     /// <param name="values">An array of scale values corresponding to the keyframe times.</param>
     /// <param name="interpolation">The interpolation mode to use between keyframes.</param>
@@ -26,8 +25,10 @@ public class ScaleChannel : ChannelBase<Vector3>
     public override float Duration => this._sampler.Duration;
 
     /// <inheritdoc/>
-    public override void Update(Node3D target, float time)
+    public override void Sample(Pose pose, float time)
     {
-        target.Scale = this._sampler.Sample(time);
+        BoneTransform transform = pose.GetOrAdd(this.TargetName);
+        transform.Scale = this._sampler.Sample(time);
+        pose.Set(this.TargetName, transform);
     }
 }

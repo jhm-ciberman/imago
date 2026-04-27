@@ -1,38 +1,26 @@
-using Imago.SceneGraph.Nodes;
-
 namespace Imago.Assets.Animations;
 
 /// <summary>
-/// Provides a base implementation for animation channels that target scene nodes.
+/// Provides a base implementation for animation channels.
 /// </summary>
 /// <typeparam name="T">The type of value this channel animates.</typeparam>
 public abstract class ChannelBase<T> : IChannel where T : struct
 {
-    /// <summary>
-    /// Gets the target node name of the channel.
-    /// </summary>
+    /// <inheritdoc />
     public string TargetName { get; }
 
     /// <summary>
-    /// Creates a new instance of the <see cref="ChannelBase{T}"/> class.
+    /// Initializes a new instance of the <see cref="ChannelBase{T}"/> class.
     /// </summary>
-    /// <param name="targetName">The target node name of the channel.</param>
+    /// <param name="targetName">The name of the bone this channel animates.</param>
     public ChannelBase(string targetName)
     {
         this.TargetName = targetName;
     }
 
-    /// <summary>
-    /// Gets the duration of the channel in seconds.
-    /// </summary>
+    /// <inheritdoc />
     public abstract float Duration { get; }
 
-    /// <summary>
-    /// Updates the target node according to the given time. This method
-    /// should be overriden by derived classes.
-    /// </summary>
-    /// <param name="target">The target node.</param>
-    /// <param name="time">The time in seconds.</param>
-    public abstract void Update(Node3D target, float time);
-
+    /// <inheritdoc />
+    public abstract void Sample(Pose pose, float time);
 }

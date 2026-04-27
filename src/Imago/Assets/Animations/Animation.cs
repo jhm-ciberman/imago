@@ -78,4 +78,25 @@ public class Animation : IDisposable
         this._channels.TryGetValue(targetName, out List<IChannel>? list);
         return list;
     }
+
+    /// <summary>
+    /// Samples every channel of this animation at the given time and writes the result into <paramref name="pose"/>.
+    /// </summary>
+    /// <remarks>
+    /// Channels overlay existing pose contents component-by-component. Bones this clip does not animate retain whatever
+    /// values were already in the pose; callers that need a clean slate should clear the pose first.
+    /// </remarks>
+    /// <param name="pose">The destination pose.</param>
+    /// <param name="time">The absolute animation time in seconds.</param>
+    public void Sample(Pose pose, float time)
+    {
+        foreach (var pair in this._channels)
+        {
+            var list = pair.Value;
+            for (int i = 0; i < list.Count; i++)
+            {
+                list[i].Sample(pose, time);
+            }
+        }
+    }
 }
