@@ -435,10 +435,12 @@ public class Control : Visual
         // Early exit if the position is outside the bounds of this control
         if (this.ClipToBounds && !hits) return null;
 
-        // Recursively check child controls
-        foreach (var child in this.HitTestingChildren)
+        // Iterate in reverse: children are drawn front-to-back in collection order,
+        // so the last child renders on top and must be hit tested first.
+        var children = this.HitTestingChildren;
+        for (int i = children.Count - 1; i >= 0; i--)
         {
-            var hitControl = child.HitTest(position);
+            var hitControl = children[i].HitTest(position);
             if (hitControl != null)
             {
                 return hitControl;
