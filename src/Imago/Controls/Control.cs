@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Numerics;
 using Imago.Controls.Drawing;
 using Imago.Input;
@@ -406,15 +405,6 @@ public class Control : Visual
     }
 
     /// <summary>
-    /// Gets the children of this control that should be considered for hit testing.
-    /// </summary>
-    /// <summary>
-    /// Gets a read-only list of child controls that should be considered when performing hit testing. Derived classes can override this property to specify which children participate in hit testing.
-    /// </summary>
-    protected virtual IReadOnlyList<Control> HitTestingChildren => [];
-
-
-    /// <summary>
     /// Gets or sets a value indicating whether this control can be hit by input events.
     /// </summary>
     public bool IsHitTestVisible { get; set; } = true;
@@ -435,12 +425,14 @@ public class Control : Visual
         // Early exit if the position is outside the bounds of this control
         if (this.ClipToBounds && !hits) return null;
 
-        // Iterate in reverse: children are drawn front-to-back in collection order,
+        // Iterate in reverse: VisualChildren is in stacking order (back to front),
         // so the last child renders on top and must be hit tested first.
-        var children = this.HitTestingChildren;
+        var children = this.VisualChildren;
         for (int i = children.Count - 1; i >= 0; i--)
         {
-            var hitControl = children[i].HitTest(position);
+            if (children[i] is not Control control) continue;
+
+            var hitControl = control.HitTest(position);
             if (hitControl != null)
             {
                 return hitControl;

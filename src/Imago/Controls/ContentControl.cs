@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Numerics;
 using Imago.Rendering.Sprites;
 using Imago.Support.Numerics;
@@ -23,7 +22,6 @@ public class ContentControl : Control
     }
 
     private Control? _content;
-    private readonly Control[] _hitTestChildren = [null!];
 
     /// <summary>
     /// Gets or sets the single child control contained within this <see cref="ContentControl"/>.
@@ -42,7 +40,6 @@ public class ContentControl : Control
                 }
 
                 this._content = value;
-                this._hitTestChildren[0] = value!;
 
                 if (this._content != null)
                 {
@@ -111,12 +108,6 @@ public class ContentControl : Control
         {
             oldContent.Dispose();
         }
-    }
-
-    /// <inheritdoc/>
-    protected override IReadOnlyList<Control> HitTestingChildren
-    {
-        get => this.Content != null ? this._hitTestChildren : [];
     }
 
     /// <inheritdoc/>

@@ -41,6 +41,10 @@ public abstract class Visual : ObservableObject, IDisposable, IMountable
     private GuiLayer? _layer;
     private float _opacity = 1f;
     private readonly List<Visual> _visualChildren = new List<Visual>();
+    private List<Visual>? _sortedVisualChildren;
+    private int _nonZeroZIndexCount = 0;
+    private bool _sortedDirty = false;
+    private int _zIndex = 0;
     private bool _clipToBounds = false;
     private IStyle? _style;
 
@@ -82,9 +86,80 @@ public abstract class Visual : ObservableObject, IDisposable, IMountable
     }
 
     /// <summary>
-    /// Gets an enumerable collection of the control's visual children.
+    /// Gets the control's visual children in their effective stacking order
+    /// (lowest <see cref="ZIndex"/> first, with insertion order as a stable tiebreaker).
+    /// Children are drawn in this order; later items render on top.
     /// </summary>
-    public virtual IReadOnlyList<Visual> VisualChildren => this._visualChildren;
+    public virtual IReadOnlyList<Visual> VisualChildren
+    {
+        get
+        {
+            if (this._nonZeroZIndexCount == 0)
+            {
+                return this._visualChildren;
+            }
+
+            if (this._sortedDirty || this._sortedVisualChildren == null)
+            {
+                this.RebuildSortedVisualChildren();
+            }
+
+            return this._sortedVisualChildren!;
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the stacking order of this control within its parent. Higher values render on top of lower values.
+    /// Children with the same <see cref="ZIndex"/> retain their relative insertion order.
+    /// </summary>
+    public int ZIndex
+    {
+        get => this._zIndex;
+        set
+        {
+            if (this._zIndex == value) return;
+            int old = this._zIndex;
+            this._zIndex = value;
+            this.Parent?.OnChildZIndexChanged(old, value);
+            this.OnPropertyChanged(nameof(this.ZIndex));
+        }
+    }
+
+    private void OnChildZIndexChanged(int oldZIndex, int newZIndex)
+    {
+        if (oldZIndex == 0 && newZIndex != 0)
+        {
+            this._nonZeroZIndexCount++;
+        }
+        else if (oldZIndex != 0 && newZIndex == 0)
+        {
+            this._nonZeroZIndexCount--;
+        }
+
+        this._sortedDirty = true;
+    }
+
+    private void RebuildSortedVisualChildren()
+    {
+        this._sortedVisualChildren ??= new List<Visual>(this._visualChildren.Count);
+        this._sortedVisualChildren.Clear();
+
+        // Insertion sort over a copy. Stable, simple, and child counts are small.
+        for (int i = 0; i < this._visualChildren.Count; i++)
+        {
+            var item = this._visualChildren[i];
+            int z = item.ZIndex;
+            int j = this._sortedVisualChildren.Count - 1;
+            while (j >= 0 && this._sortedVisualChildren[j].ZIndex > z)
+            {
+                j--;
+            }
+
+            this._sortedVisualChildren.Insert(j + 1, item);
+        }
+
+        this._sortedDirty = false;
+    }
 
     /// <summary>
     /// Gets or sets whether the content is clipped to the control's bounds.
@@ -298,7 +373,7 @@ public abstract class Visual : ObservableObject, IDisposable, IMountable
         this.IsArrangeValid = false;
         this.IsMeasureValid = false;
         this.Layer = layer;
-        foreach (var child in this.VisualChildren)
+        foreach (var child in this._visualChildren)
         {
             child.Mount(layer);
         }
@@ -331,7 +406,7 @@ public abstract class Visual : ObservableObject, IDisposable, IMountable
             throw new InvalidOperationException("The control is not mounted.");
         }
 
-        foreach (var child in this.VisualChildren)
+        foreach (var child in this._visualChildren)
         {
             child.Unmount();
         }
@@ -355,7 +430,7 @@ public abstract class Visual : ObservableObject, IDisposable, IMountable
             return (T)this;
         }
 
-        foreach (var child in this.VisualChildren)
+        foreach (var child in this._visualChildren)
         {
             var result = child.Find<T>(name);
 
@@ -387,6 +462,12 @@ public abstract class Visual : ObservableObject, IDisposable, IMountable
     protected virtual void AddVisualChild(Visual child)
     {
         this._visualChildren.Add(child);
+        if (child.ZIndex != 0)
+        {
+            this._nonZeroZIndexCount++;
+        }
+
+        this._sortedDirty = true;
         child.Parent = this;
         if (this.Layer != null)
         {
@@ -402,6 +483,12 @@ public abstract class Visual : ObservableObject, IDisposable, IMountable
     protected virtual void RemoveVisualChild(Visual child)
     {
         this._visualChildren.Remove(child);
+        if (child.ZIndex != 0)
+        {
+            this._nonZeroZIndexCount--;
+        }
+
+        this._sortedDirty = true;
         if (this.Layer != null)
         {
             child.Unmount();
@@ -457,7 +544,7 @@ public abstract class Visual : ObservableObject, IDisposable, IMountable
 
     private void PropagateInvalidMeasureToChildren()
     {
-        foreach (var child in this.VisualChildren)
+        foreach (var child in this._visualChildren)
         {
             if (!child.IsMeasureValid) continue;
 
@@ -488,7 +575,7 @@ public abstract class Visual : ObservableObject, IDisposable, IMountable
 
     private void PropagateInvalidArrangeToChildren()
     {
-        foreach (var child in this.VisualChildren)
+        foreach (var child in this._visualChildren)
         {
             if (!child.IsArrangeValid) continue;
 
@@ -519,7 +606,7 @@ public abstract class Visual : ObservableObject, IDisposable, IMountable
         if (this.IsDisposed) return;
         this.IsDisposed = true;
 
-        foreach (var child in this.VisualChildren)
+        foreach (var child in this._visualChildren)
         {
             child.Dispose();
         }

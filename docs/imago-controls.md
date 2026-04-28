@@ -80,6 +80,7 @@ All controls inherit these from `Control`:
 | `Style` | `IStyle?` | See [Styles](#styles). |
 | `Tooltip` | `Tooltip?` | See [Tooltips](#tooltips). |
 | `IsHitTestVisible` | `bool` | Whether the control receives mouse input. |
+| `ZIndex` | `int` | Stacking order within the parent. Higher renders on top. Ties keep insertion order. Default `0`. |
 
 In a template, you set these as attributes:
 

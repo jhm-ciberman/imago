@@ -126,7 +126,7 @@ Controls receive input through overridable methods:
 | `OnMouseEnter()` | Mouse enters the control's bounds. |
 | `OnMouseLeave()` | Mouse leaves the control's bounds. |
 
-For containers, you may also need to override `HitTest` or `HitTestingChildren` to return the correct child for input dispatch. `ItemsControl` does this automatically.
+Hit testing is automatic: `Control.HitTest` walks `VisualChildren` (front-to-back stacking order) and returns the topmost hit. To exclude a control from hit testing without hiding it, set `IsHitTestVisible = false`.
 
 Controls also expose events for external subscribers: `MouseDown`, `MouseUp`, `MouseWheel`, `MouseEnter`, `MouseLeave`.
 

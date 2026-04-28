@@ -97,9 +97,6 @@ public abstract class ItemsControl : Control
     /// </summary>
     public ItemCollection Items { get; }
 
-    /// <inheritdoc/>
-    protected override IReadOnlyList<Control> HitTestingChildren => this.Items;
-
     /// <summary>
     /// Initializes a new instance of the <see cref="ItemsControl"/> class.
     /// </summary>
@@ -113,9 +110,10 @@ public abstract class ItemsControl : Control
     {
         base.DrawCore(ctx);
 
-        for (var i = 0; i < this.Items.Count; i++)
+        var children = this.VisualChildren;
+        for (var i = 0; i < children.Count; i++)
         {
-            this.Items[i].Draw(ctx);
+            children[i].Draw(ctx);
         }
     }
 
