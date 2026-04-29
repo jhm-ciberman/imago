@@ -57,6 +57,17 @@ public abstract class ItemsControl : Control
             this.Owner.AddVisualChild(item);
         }
 
+        /// <inheritdoc/>
+        protected override void ClearItems()
+        {
+            foreach (var item in this)
+            {
+                this.Owner.RemoveVisualChild(item);
+            }
+
+            base.ClearItems();
+        }
+
         /// <summary>
         /// Replaces an existing item in the collection with a new item.
         /// </summary>
