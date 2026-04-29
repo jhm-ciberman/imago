@@ -122,7 +122,7 @@ Aliases are also handy for giving shorter names to deeply nested types, even whe
 <a name="the-root-element"></a>
 ### The Root Element
 
-The root element represents the control class you're defining. Properties set on it apply to `this`, and its tag name must match the base class:
+The root element represents the class you're defining. Properties set on it apply to `this`, and its tag name must match the base class:
 
 ```xml
 <Canvas
@@ -138,6 +138,24 @@ public partial class MainMenu : Canvas { ... }
 ```
 
 You can set properties, subscribe to events, and even use `bind:` on the root element. The only thing you cannot do is use `x:Arguments` on it, since the root represents `this` and is never instantiated by the template.
+
+Templates aren't restricted to GUI controls. Any class that implements `IMountable` can be templated, including custom ones you write. That covers `Control` and its subclasses (`StackPanel`, `Canvas`, `Button`, …), `Screen`, `GuiLayer`, `Node3D` and its subclasses (`RenderNode3D` and `MultiMeshRenderNode3D`), and `Scene3D`.
+
+```xml
+<Screen xmlns="urn:imago:controls" xmlns:bind="urn:imago:bindings">
+    <GuiLayer>
+        <TextBlock bind:Text="this._vm.ProgressText" />
+    </GuiLayer>
+</Screen>
+
+<Node3D xmlns="urn:imago:controls">
+    <Node3D Name="Avatar" />
+</Node3D>
+
+<Scene3D xmlns="urn:imago:controls">
+    <Node3D Name="Root" />
+</Scene3D>
+```
 
 
 <a name="setting-properties"></a>
