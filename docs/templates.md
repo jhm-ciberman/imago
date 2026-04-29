@@ -495,35 +495,79 @@ Both property and method targets follow the same lifecycle: called once immediat
 <a name="advanced-bindings"></a>
 ## Advanced Bindings
 
-Template bindings are limited to a single `source.Property` path. When you need more expressive bindings, override `CreateBindings()` in the code-behind and use [EBind](https://github.com/SIDOVSKY/EBind). EBind supports nested paths, conditionals, method calls, and string interpolation.
+Template bindings are limited to a single `source.Property` path. When you need more (nested paths, conditionals, string interpolation, multiple side effects per change, or subscribing to plain `+=`/`-=` events), override `CreateBindings()` in the code-behind and return an `IDisposable`. The framework calls it when the control mounts and disposes the result on unmount.
 
-Like template bindings, `CreateBindings()` is called when the control is added to a layer and disposed automatically when removed:
+Three primitives in `Imago.Support.ComponentModel` cover the common cases:
+
+- `PropertyBindings<TSource>`: a group of `INotifyPropertyChanged` subscriptions on a single source.
+- `EventBinding<TArgs>` (plus the non-generic `EventBinding`): a single subscription to a plain `EventHandler` / `EventHandler<T>` event.
+- `Bindings`: a composite that bundles any number of `IDisposable` items into one.
+
+All three are themselves `IDisposable`, so they all return cleanly from `CreateBindings()`.
+
+### Property bindings
+
+`PropertyBindings<T>` watches one `INotifyPropertyChanged` source. Each `Watch(propertyName, callback)` runs the callback once immediately and again whenever the property fires `PropertyChanged`:
 
 ```csharp
 protected override IDisposable? CreateBindings()
 {
-    return new EBinding
+    return new PropertyBindings<MyViewModel>(this._vm)
+        .Watch(nameof(MyViewModel.PlayerName), vm => this._title.Text = vm.PlayerName)
+        .Watch(nameof(MyViewModel.IsActive),   vm => this._panel.Opacity = vm.IsActive ? 1f : 0.5f)
+        .Watch(nameof(MyViewModel.CurrentTab), vm => this.UpdateTabContent(vm.CurrentTab));
+}
+```
+
+The lambda body can do anything: nested paths, ternaries, string interpolation, method calls. The only constraint is one source property per `Watch`; if a callback depends on two properties, register a `Watch` for each.
+
+`Watch` accepts either an `Action` or `Action<TSource>`; the typed overload passes the source in so the callback doesn't have to capture it via closure.
+
+### Event bindings
+
+For plain `+=`/`-=` events, use `EventBinding<TArgs>`. The constructor takes the add/remove operations as lambdas, plus the handler:
+
+```csharp
+new EventBinding<Item>(
+    h => world.ItemAdded += h,
+    h => world.ItemAdded -= h,
+    _ => this._dirty = true
+);
+```
+
+The two lambdas are the price of C# events not being first-class values. There's no way to pass `world.ItemAdded` itself, so the binding needs the subscribe and unsubscribe shapes spelled out. The handler can be `Action`, `Action<TArgs>`, or `EventHandler<TArgs>`; overloads pick whichever fits.
+
+For events declared as plain `EventHandler` (no generic argument), use the non-generic `EventBinding`.
+
+### Composing them
+
+`Bindings` is a collection that holds any `IDisposable`. Use it when one control needs to mix property bindings, event bindings, and anything else that follows the dispose-to-unsubscribe contract:
+
+```csharp
+protected override IDisposable? CreateBindings()
+{
+    return new Bindings
     {
-        // Property binding with expression
-        () => this._title.Text == $"{this._vm.FirstName} {this._vm.LastName}",
+        new PropertyBindings<MyViewModel>(this._vm)
+            .Watch(nameof(MyViewModel.Title),  vm => this._title.Text = vm.Title)
+            .Watch(nameof(MyViewModel.Health), vm => this._healthBar.Value = vm.Health),
 
-        // Conditional binding
-        () => this._panel.Opacity == (this._vm.IsActive ? 1f : 0.5f),
+        new EventBinding<Item>(
+            h => this._world.ItemAdded += h,
+            h => this._world.ItemAdded -= h,
+            _ => this._dirty = true
+        ),
 
-        // Action binding: called whenever CurrentTab changes
-        () => this.UpdateTabContent(this._vm.CurrentTab),
-
-        // Event binding
-        (this._vm.Character, nameof(Character.ItemInHandChanged), this.UpdateItemInHand),
+        new EventBinding<MapChangedEventArgs>(
+            h => this._world.MapChanged += h,
+            h => this._world.MapChanged -= h,
+            this.OnMapChanged
+        ),
     };
 }
 ```
 
-**Property bindings** use `==` to declare a one-way sync from right to left. Any property or field referenced on the right side triggers an update when it changes.
-
-**Action bindings** call a method whenever any referenced property changes. Useful for side effects that don't map to a single property assignment.
-
-**Event bindings** take a source object, an event name, and a handler. Unlike the other two, they don't fire on construction.
+`Bindings` disposes each item in order when the control unmounts. Any custom binding type you write yourself slots in too, as long as it implements `IDisposable`.
 
 
 <a name="data-templates"></a>

@@ -76,6 +76,8 @@ public class Screen : IDisposable, IMountable
 
     private bool _disposedValue;
 
+    private IDisposable? _bindings;
+
     /// <summary>
     /// Gets a value indicating whether this screen has been disposed.
     /// </summary>
@@ -134,8 +136,20 @@ public class Screen : IDisposable, IMountable
         }
 
         stage.ImGuiRendering += this.RenderImGui;
+        this._bindings = this.CreateBindings();
         this.OnMounted();
         this.Mounted?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>
+    /// Called when the screen is mounted to a <see cref="Stage"/>. Override to set up
+    /// reactive bindings whose lifetime should match the screen's mount/unmount cycle.
+    /// The returned disposable is disposed automatically when the screen is unmounted.
+    /// </summary>
+    /// <returns>The bindings, or <see langword="null"/> if there are none.</returns>
+    protected virtual IDisposable? CreateBindings()
+    {
+        return null;
     }
 
     /// <summary>
@@ -145,6 +159,8 @@ public class Screen : IDisposable, IMountable
     {
         this.Unmounting?.Invoke(this, EventArgs.Empty);
         this.OnUnmounted();
+        this._bindings?.Dispose();
+        this._bindings = null;
         this._stage!.ImGuiRendering -= this.RenderImGui;
 
         foreach (var layer in this._layers)
