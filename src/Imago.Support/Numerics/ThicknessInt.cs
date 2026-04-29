@@ -85,7 +85,7 @@ public struct ThicknessInt : IEquatable<ThicknessInt>
     /// </summary>
     /// <param name="horizontal">The horizontal thickness of the frame.</param>
     /// <param name="vertical">The vertical thickness of the frame.</param>
-    public ThicknessInt(int horizontal, int vertical)
+    public ThicknessInt(int horizontal = 0, int vertical = 0)
     {
         this.Left = horizontal;
         this.Top = vertical;
@@ -100,7 +100,7 @@ public struct ThicknessInt : IEquatable<ThicknessInt>
     /// <param name="top">The top thickness of the frame.</param>
     /// <param name="right">The right thickness of the frame.</param>
     /// <param name="bottom">The bottom thickness of the frame.</param>
-    public ThicknessInt(int left, int top, int right, int bottom)
+    public ThicknessInt(int left = 0, int top = 0, int right = 0, int bottom = 0)
     {
         this.Left = left;
         this.Top = top;
