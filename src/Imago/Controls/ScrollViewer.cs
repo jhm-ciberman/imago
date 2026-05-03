@@ -1,3 +1,4 @@
+using System;
 using System.Numerics;
 using Imago.Controls.Drawing;
 using Imago.Rendering.Sprites;
@@ -154,7 +155,24 @@ public class ScrollViewer : ContentControl
     {
         if (this.Content != null)
         {
-            Rect rect = new Rect(finalRect.Position - this._scrollOffset, this.Content.DesiredSize);
+            // Content keeps its desired size on the scrolling axis (so it can overflow and scroll),
+            // but expands to the viewport on the non-scrolling axis when it asks to stretch.
+            Vector2 contentSize = this.Content.DesiredSize;
+
+            bool xIsScrollable = this.ScrollDirection == ScrollDirection.Horizontal;
+            bool yIsScrollable = this.ScrollDirection == ScrollDirection.Vertical;
+
+            if (!xIsScrollable && this.Content.HorizontalAlignment == HorizontalAlignment.Stretch)
+            {
+                contentSize.X = Math.Max(contentSize.X, finalRect.Width);
+            }
+
+            if (!yIsScrollable && this.Content.VerticalAlignment == VerticalAlignment.Stretch)
+            {
+                contentSize.Y = Math.Max(contentSize.Y, finalRect.Height);
+            }
+
+            Rect rect = new Rect(finalRect.Position - this._scrollOffset, contentSize);
             this.Content.Arrange(rect);
             this.ActualSize = finalRect.Size; // I set up the ActualSize here so it can be used by "OnScrollChanged"
             this.ScrollBarThumb.Arrange(finalRect);
