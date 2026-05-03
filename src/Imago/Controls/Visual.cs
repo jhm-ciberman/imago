@@ -20,6 +20,20 @@ public abstract class Visual : ObservableObject, IDisposable, IMountable
     public static FontSystem? DefaultFontSystem { get; set; }
 
     /// <summary>
+    /// Gets or sets the application-wide default font (system, size, and optional line height)
+    /// used by text controls that do not specify a <see cref="TextBlock.Font"/> or
+    /// <see cref="TextBlock.FontSystem"/>. Set this once at startup to give every unconfigured
+    /// text control a sensible size instead of falling back to engine internals.
+    /// </summary>
+    /// <remarks>
+    /// Useful for projects that ship a single canonical body font (for example, pixel-art games
+    /// where text size cannot be picked freely). Modern games that vary font size per control
+    /// can leave this null and rely on <see cref="DefaultFontSystem"/> plus per-control
+    /// <see cref="TextBlock.FontSize"/>.
+    /// </remarks>
+    public static TextFont? DefaultFont { get; set; }
+
+    /// <summary>
     /// Returns <see cref="DefaultFontSystem"/>, or throws a descriptive exception
     /// if it has not been set.
     /// </summary>

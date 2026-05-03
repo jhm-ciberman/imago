@@ -233,6 +233,12 @@ public class TextBlock : Control
     /// Gets the <see cref="SpriteFontBase"/> instance used for rendering the text,
     /// creating it from the <see cref="FontSystem"/> and <see cref="FontSize"/> if necessary.
     /// </summary>
+    /// <remarks>
+    /// When neither <see cref="Font"/> nor <see cref="FontSystem"/> has been set on this
+    /// control and <see cref="Visual.DefaultFont"/> is non-null, the default font's system,
+    /// size, and line height are applied here. This lets a project provide a sensible
+    /// fallback for unconfigured text without imposing a specific style at the engine level.
+    /// </remarks>
     protected SpriteFontBase ResolvedFont
     {
         get
@@ -242,7 +248,17 @@ public class TextBlock : Control
                 return this._font;
             }
 
-            var system = this.FontSystem ?? Visual.GetDefaultFontSystemOrFail();
+            if (this._textFont == null && this._fontSystem == null && Visual.DefaultFont is { } defaultFont)
+            {
+                this._fontSystem = defaultFont.System;
+                this._layout.FontSize = defaultFont.Size;
+                if (!float.IsNaN(defaultFont.LineHeight))
+                {
+                    this._layout.LineHeight = defaultFont.LineHeight;
+                }
+            }
+
+            var system = this._fontSystem ?? Visual.GetDefaultFontSystemOrFail();
 
             this._font = system.GetFont(this.FontSize);
 
