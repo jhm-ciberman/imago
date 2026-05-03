@@ -105,7 +105,7 @@ internal class ForwardPass : IDisposable, IPipelineProvider
     }
 
     /// <summary>
-    /// Renders the scene using a forward rendering pass.
+    /// Prepares the forward pass for the current frame. Culls the given queues and uploads camera, lighting, and global uniforms.
     /// </summary>
     /// <param name="cl">The command list to use for rendering.</param>
     /// <param name="renderTexture">The render texture to render the scene to.</param>
@@ -113,7 +113,7 @@ internal class ForwardPass : IDisposable, IPipelineProvider
     /// <param name="environment">The scene environment to use for rendering.</param>
     /// <param name="opaque">The render queue for opaque objects.</param>
     /// <param name="transparent">The render queue for transparent objects.</param>
-    public void Render(CommandList cl, RenderTexture renderTexture, Camera camera, SceneEnvironment environment, RenderQueue opaque, RenderQueue transparent)
+    public void Prepare(CommandList cl, RenderTexture renderTexture, Camera camera, SceneEnvironment environment, RenderQueue opaque, RenderQueue transparent)
     {
         var frustumForCulling = new BoundingFrustum(camera.FrustumCullingCamera.ViewProjectionMatrix);
         opaque.Update(frustumForCulling, camera.Position);
@@ -149,10 +149,16 @@ internal class ForwardPass : IDisposable, IPipelineProvider
         cl.UpdateBuffer(this._camera3DInfoBuffer, 0, ref cameraInfo);
         cl.UpdateBuffer(this._lightInfoBuffer, 0, ref lightInfo);
         cl.UpdateBuffer(this._globalDataBuffer, 0, ref globalData);
+    }
 
-        this._renderBatcher.DrawRenderList(cl, this._resourceSet, opaque);
-
-        this._renderBatcher.DrawRenderList(cl, this._resourceSet, transparent);
+    /// <summary>
+    /// Draws a render queue. Must be called after <see cref="Prepare"/> in the same frame.
+    /// </summary>
+    /// <param name="cl">The command list to use for rendering.</param>
+    /// <param name="queue">The render queue to draw.</param>
+    public void Draw(CommandList cl, RenderQueue queue)
+    {
+        this._renderBatcher.DrawRenderList(cl, this._resourceSet, queue);
     }
 
     private static Vector4 GetShadowCascadeDistances(ShadowMap shadowMap)

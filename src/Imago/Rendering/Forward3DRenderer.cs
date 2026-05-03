@@ -165,11 +165,19 @@ public class Forward3DRenderer : IDisposable
         stats.ShadowSubPass.End();
 
         stats.ForwardSubPass.Begin();
-        this._forwardPass.Render(cl, renderTexture, camera, scene.Environment, opaqueRQ, transparentRQ);
+        this._forwardPass.Prepare(cl, renderTexture, camera, scene.Environment, opaqueRQ, transparentRQ);
+        this._forwardPass.Draw(cl, opaqueRQ);
         stats.ForwardSubPass.End();
 
         stats.OtherSubPass.Begin();
         this._skyDomePass.Render(cl, renderTexture, camera, scene.Environment);
+        stats.OtherSubPass.End();
+
+        stats.ForwardSubPass.Begin();
+        this._forwardPass.Draw(cl, transparentRQ);
+        stats.ForwardSubPass.End();
+
+        stats.OtherSubPass.Begin();
         this._immediatePass.Render(cl, renderTexture, camera, immediateRQ);
         stats.OtherSubPass.End();
 
