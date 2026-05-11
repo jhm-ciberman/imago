@@ -1,7 +1,6 @@
-using Imago.Support.Collections;
 using Imago.Support.Numerics;
 
-namespace Imago.Assets.TexturePacking;
+namespace Imago.Support.Collections;
 
 // Based in "A Thousand Ways to Pack the Bin - A Practical Approach to Two-Dimensional Rectangle Bin Packing" (2010)
 // It uses a GUILLOTINE-MINAS-BAF heuristic (Guillotine algorithm, Min area split, Best Area fit)
