@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Imago.Support;
 
 namespace Imago.Assets.TexturePacking;
@@ -88,34 +89,67 @@ public class TextureGroup : IDisposable
     {
         lock (this._packLock)
         {
-            PackedTexture? packedTexture;
+            return this.PackInternal(unpackedTexture);
+        }
+    }
 
-            // Try to find any already allocated page that can fit the request
-            foreach (var currentPage in this._pages)
+    /// <summary>
+    /// Packs many textures into the group at once, producing a tighter atlas layout than calling
+    /// <see cref="Pack(IDrawOperation)"/> for each one individually.
+    /// </summary>
+    /// <param name="unpackedTextures">The draw operations to pack.</param>
+    /// <returns>A dictionary mapping each input draw operation to its packed texture region.</returns>
+    /// <exception cref="InvalidOperationException">Thrown if any texture is too large to fit in any page.</exception>
+    public IReadOnlyDictionary<IDrawOperation, PackedTexture> PackMany(IEnumerable<IDrawOperation> unpackedTextures)
+    {
+        // BAF is sensitive to insertion order; feeding the biggest rectangles first lets small ones
+        // fall into the offcuts left behind, which packs noticeably tighter than arbitrary order.
+        var ordered = unpackedTextures
+            .OrderByDescending(op => Math.Max(op.Size.X, op.Size.Y))
+            .ToList();
+
+        var result = new Dictionary<IDrawOperation, PackedTexture>(ordered.Count);
+
+        lock (this._packLock)
+        {
+            foreach (var op in ordered)
             {
-                if (currentPage.TryPack(unpackedTexture, out packedTexture))
-                {
-                    this._packedTexturesPages.Add(packedTexture, currentPage);
-                    this.RequestFlush();
-                    return packedTexture;
-                }
+                result[op] = this.PackInternal(op);
             }
+        }
 
-            // If any page can't fit the request, we will need to create a new page and fit the request.
-            var page = new TexturePage(this);
-            this._pages.Add(page);
-            this.PageAdded?.Invoke(this, page);
-            if (page.TryPack(unpackedTexture, out packedTexture))
+        return result;
+    }
+
+    private PackedTexture PackInternal(IDrawOperation unpackedTexture)
+    {
+        PackedTexture? packedTexture;
+
+        // Try to find any already allocated page that can fit the request
+        foreach (var currentPage in this._pages)
+        {
+            if (currentPage.TryPack(unpackedTexture, out packedTexture))
             {
-                this._packedTexturesPages.Add(packedTexture, page);
+                this._packedTexturesPages.Add(packedTexture, currentPage);
                 this.RequestFlush();
                 return packedTexture;
             }
-
-            // If the request cannot fit even in the newly empty page, then it's a fatal error
-            // probably because the request is too big.
-            throw new InvalidOperationException("Cannot pack texture in any texture page");
         }
+
+        // If any page can't fit the request, we will need to create a new page and fit the request.
+        var page = new TexturePage(this);
+        this._pages.Add(page);
+        this.PageAdded?.Invoke(this, page);
+        if (page.TryPack(unpackedTexture, out packedTexture))
+        {
+            this._packedTexturesPages.Add(packedTexture, page);
+            this.RequestFlush();
+            return packedTexture;
+        }
+
+        // If the request cannot fit even in the newly empty page, then it's a fatal error
+        // probably because the request is too big.
+        throw new InvalidOperationException("Cannot pack texture in any texture page");
     }
 
     /// <summary>
