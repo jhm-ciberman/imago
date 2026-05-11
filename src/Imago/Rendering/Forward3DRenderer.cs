@@ -61,6 +61,15 @@ public class Forward3DRenderer : IDisposable
         return T.Create(shaders);
     }
 
+    /// <summary>
+    /// Populates the internal shader cache for <typeparamref name="T"/> so subsequent material creation is allocation-only.
+    /// </summary>
+    /// <typeparam name="T">The material type, must have a <see cref="SurfaceShaderAttribute"/>.</typeparam>
+    internal void PreloadMaterial<T>() where T : Material
+    {
+        this.GetOrCreateShaders<T>();
+    }
+
     private ShaderSet GetOrCreateShaders<T>() where T : Material
     {
         var type = typeof(T);

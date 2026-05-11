@@ -239,6 +239,16 @@ public class Renderer : IDisposable
     }
 
     /// <summary>
+    /// Forces the shader set for <typeparamref name="T"/> to be assembled and cached so the first runtime
+    /// <see cref="MakeMaterial{T}"/> call is allocation-only. SPIR-V variant compilation remains lazy on first draw.
+    /// </summary>
+    /// <typeparam name="T">The material type, must have a <see cref="SurfaceShaderAttribute"/>.</typeparam>
+    public void PreloadMaterial<T>() where T : Material, ICreateableMaterial<T>
+    {
+        this._forward3DRenderer.PreloadMaterial<T>();
+    }
+
+    /// <summary>
     /// Schedules a disposable resource to be released when the GPU is idle.
     /// </summary>
     /// <param name="disposable">The object to dispose.</param>
