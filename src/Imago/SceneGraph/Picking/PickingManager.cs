@@ -80,6 +80,15 @@ public class PickingManager
 
         this._pickables.Remove(pickable.PickId);
         pickable.PickId = 0;
+
+        // If the unregistered pickable was the current pick target, fire MouseLeave synchronously
+        // so consumers can clean up hover state without waiting for the next GPU readback.
+        if (ReferenceEquals(this.HighlightedPickable, pickable))
+        {
+            this.HighlightedPickable = null;
+            this.PickableTarget?.MouseLeave();
+            this.PickableTarget = null;
+        }
     }
 
     /// <summary>
