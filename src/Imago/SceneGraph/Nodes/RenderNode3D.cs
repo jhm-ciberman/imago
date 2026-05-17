@@ -181,7 +181,10 @@ public class RenderNode3D : Node3D, IPickable
     {
         this._renderable.Visible = false;
         this._renderable.Scene3D = null;
-        this.UpdateRegistrationWithPickingManager();
+        if (this.Scene3D != null && this._renderable.PickingId != 0)
+        {
+            this.Scene3D.Picking.UnregisterPickable(this);
+        }
         base.Unmount();
     }
 
