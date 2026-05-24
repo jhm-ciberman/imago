@@ -32,6 +32,7 @@ public class Forward3DRenderer : IDisposable
     private readonly ShadowPass _shadowPass;
     private readonly MousePickingPass _mousePickerPass;
     private readonly ImmediatePass _immediatePass;
+    private readonly AmbientOcclusionPass _ambientOcclusionPass;
     private readonly Dictionary<Type, ShaderSet> _shaderCache = new();
 
     /// <summary>
@@ -48,6 +49,7 @@ public class Forward3DRenderer : IDisposable
         this._forwardPass = new ForwardPass(renderer, this._shadowPass);
         this._immediatePass = new ImmediatePass(renderer);
         this._skyDomePass = new SkyDomePass(renderer);
+        this._ambientOcclusionPass = new AmbientOcclusionPass(renderer);
     }
 
     /// <summary>
@@ -180,6 +182,11 @@ public class Forward3DRenderer : IDisposable
 
         stats.OtherSubPass.Begin();
         this._skyDomePass.Render(cl, renderTexture, camera, scene.Environment);
+        if (scene.AmbientOcclusion.Enabled)
+        {
+            this._ambientOcclusionPass.Render(cl, renderTexture, camera, scene.AmbientOcclusion);
+            cl.SetFramebuffer(renderTexture.Framebuffer);
+        }
         stats.OtherSubPass.End();
 
         stats.ForwardSubPass.Begin();
@@ -223,5 +230,6 @@ public class Forward3DRenderer : IDisposable
         this._forwardPass.Dispose();
         this._skyDomePass.Dispose();
         this._immediatePass.Dispose();
+        this._ambientOcclusionPass.Dispose();
     }
 }

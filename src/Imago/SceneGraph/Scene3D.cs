@@ -249,6 +249,11 @@ public class Scene3D : IDisposable, IMountable
         set => this.SetProperty(ref this._lightingHalfLambert, value);
     }
 
+    /// <summary>
+    /// Gets the screen-space ambient occlusion settings for the scene.
+    /// </summary>
+    public AmbientOcclusionSettings AmbientOcclusion { get; } = new AmbientOcclusionSettings();
+
     private int _cascadesCount = 4;
 
     /// <summary>
