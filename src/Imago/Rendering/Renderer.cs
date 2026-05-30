@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using CommunityToolkit.Diagnostics;
 using Imago.Assets.Materials;
 using Imago.Assets.Textures;
 using Imago.Rendering.Internals;
@@ -394,7 +395,7 @@ public class Renderer : IDisposable
     }
 
     /// <summary>
-    /// Copies the color contents of a render texture back into a CPU-side image.
+    /// Copies the color contents of a render texture back into a newly allocated CPU-side image.
     /// </summary>
     /// <remarks>
     /// Issues a GPU copy into a staging texture and blocks until it completes, so this is meant for
@@ -405,6 +406,27 @@ public class Renderer : IDisposable
     /// <returns>A new image holding a copy of the render texture's color contents.</returns>
     public Image<Rgba32> ReadColorToImage(RenderTexture renderTexture)
     {
+        var image = new Image<Rgba32>((int)renderTexture.Width, (int)renderTexture.Height);
+        this.ReadColorToImage(renderTexture, image);
+        return image;
+    }
+
+    /// <summary>
+    /// Copies the color contents of a render texture back into an existing CPU-side image.
+    /// </summary>
+    /// <remarks>
+    /// Lets the caller reuse a single image across captures instead of allocating one each time.
+    /// Issues a GPU copy into a staging texture and blocks until it completes, so this is meant for
+    /// occasional offscreen captures (thumbnails, atlas bakes), not per-frame use. The destination
+    /// receives the pixels with a top-left origin regardless of the backend's framebuffer orientation.
+    /// </remarks>
+    /// <param name="renderTexture">The render texture whose color target is read back.</param>
+    /// <param name="destination">The image to fill. Its dimensions must match the render texture.</param>
+    public void ReadColorToImage(RenderTexture renderTexture, Image<Rgba32> destination)
+    {
+        Guard.IsEqualTo(destination.Width, (int)renderTexture.Width);
+        Guard.IsEqualTo(destination.Height, (int)renderTexture.Height);
+
         var source = renderTexture.ForwardColorTexture;
         uint width = renderTexture.Width;
         uint height = renderTexture.Height;
@@ -422,7 +444,6 @@ public class Renderer : IDisposable
         gd.SubmitCommands(cl);
         gd.WaitForIdle();
 
-        var image = new Image<Rgba32>((int)width, (int)height);
         bool flipY = !gd.IsUvOriginTopLeft;
 
         var view = gd.Map<Rgba32>(staging, MapMode.Read);
@@ -433,7 +454,7 @@ public class Renderer : IDisposable
                 int sourceY = flipY ? (int)height - 1 - y : y;
                 for (int x = 0; x < width; x++)
                 {
-                    image[x, y] = view[x, sourceY];
+                    destination[x, y] = view[x, sourceY];
                 }
             }
         }
@@ -443,7 +464,6 @@ public class Renderer : IDisposable
         }
 
         staging.Dispose();
-        return image;
     }
 
     /// <summary>
