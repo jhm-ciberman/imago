@@ -13,6 +13,8 @@ using Imago.Utilities;
 using NeoVeldrid;
 using NeoVeldrid.Sdl2;
 using NeoVeldrid.StartupUtilities;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using Texture = Imago.Assets.Textures.Texture;
 using Viewport = Imago.SceneGraph.Viewport;
 
@@ -389,6 +391,59 @@ public class Renderer : IDisposable
         cl.End();
 
         this.GraphicsDevice.SubmitCommands(cl);
+    }
+
+    /// <summary>
+    /// Copies the color contents of a render texture back into a CPU-side image.
+    /// </summary>
+    /// <remarks>
+    /// Issues a GPU copy into a staging texture and blocks until it completes, so this is meant for
+    /// occasional offscreen captures (thumbnails, atlas bakes), not per-frame use. The returned image
+    /// has a top-left origin regardless of the backend's framebuffer orientation.
+    /// </remarks>
+    /// <param name="renderTexture">The render texture whose color target is read back.</param>
+    /// <returns>A new image holding a copy of the render texture's color contents.</returns>
+    public Image<Rgba32> ReadColorToImage(RenderTexture renderTexture)
+    {
+        var source = renderTexture.ForwardColorTexture;
+        uint width = renderTexture.Width;
+        uint height = renderTexture.Height;
+        var gd = this.GraphicsDevice;
+
+        var staging = gd.ResourceFactory.CreateTexture(new TextureDescription(
+            width, height, depth: 1, mipLevels: 1, arrayLayers: 1,
+            source.Format, TextureUsage.Staging, TextureType.Texture2D
+        ));
+
+        var cl = this._commandList;
+        cl.Begin();
+        cl.CopyTexture(source, staging);
+        cl.End();
+        gd.SubmitCommands(cl);
+        gd.WaitForIdle();
+
+        var image = new Image<Rgba32>((int)width, (int)height);
+        bool flipY = !gd.IsUvOriginTopLeft;
+
+        var view = gd.Map<Rgba32>(staging, MapMode.Read);
+        try
+        {
+            for (int y = 0; y < height; y++)
+            {
+                int sourceY = flipY ? (int)height - 1 - y : y;
+                for (int x = 0; x < width; x++)
+                {
+                    image[x, y] = view[x, sourceY];
+                }
+            }
+        }
+        finally
+        {
+            gd.Unmap(staging);
+        }
+
+        staging.Dispose();
+        return image;
     }
 
     /// <summary>
