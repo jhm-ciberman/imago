@@ -13,6 +13,6 @@
         <PackageVersion Include="NeoVeldrid.SDL2" Version="1.1.0" />
         <PackageVersion Include="NeoVeldrid.SPIRV" Version="1.1.0" />
         <PackageVersion Include="NeoVeldrid.StartupUtilities" Version="1.1.0" />
-        <PackageVersion Include="SixLabors.ImageSharp" Version="3.1.12" />
+        <PackageVersion Include="SixLabors.ImageSharp" Version="4.0.0" />
     </ItemGroup>
 </Project>
