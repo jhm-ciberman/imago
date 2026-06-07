@@ -131,11 +131,11 @@ public class Pose
         }
     }
 
-    private static void CaptureRecursive(Pose pose, Node3D node)
+    private static void CaptureRecursive(Pose pose, Node node)
     {
-        if (!string.IsNullOrEmpty(node.Name))
+        if (node is Node3D node3D && !string.IsNullOrEmpty(node.Name))
         {
-            pose._bones[node.Name] = new BoneTransform(node.Position, node.Rotation, node.Scale);
+            pose._bones[node.Name] = new BoneTransform(node3D.Position, node3D.Rotation, node3D.Scale);
         }
 
         for (int i = 0; i < node.Children.Count; i++)
@@ -144,13 +144,13 @@ public class Pose
         }
     }
 
-    private static void ApplyRecursive(Pose pose, Node3D node)
+    private static void ApplyRecursive(Pose pose, Node node)
     {
-        if (!string.IsNullOrEmpty(node.Name) && pose._bones.TryGetValue(node.Name, out BoneTransform value))
+        if (node is Node3D node3D && !string.IsNullOrEmpty(node.Name) && pose._bones.TryGetValue(node.Name, out BoneTransform value))
         {
-            node.Position = value.Position;
-            node.Rotation = value.Rotation;
-            node.Scale = value.Scale;
+            node3D.Position = value.Position;
+            node3D.Rotation = value.Rotation;
+            node3D.Scale = value.Scale;
         }
 
         for (int i = 0; i < node.Children.Count; i++)

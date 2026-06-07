@@ -266,11 +266,11 @@ public class AnimationPlayer
         }
     }
 
-    private static void BuildNamesDictionary(Node3D node, Dictionary<string, Node3D> namesToNodes)
+    private static void BuildNamesDictionary(Node node, Dictionary<string, Node3D> namesToNodes)
     {
-        if (!string.IsNullOrEmpty(node.Name) && !namesToNodes.ContainsKey(node.Name))
+        if (node is Node3D node3D && !string.IsNullOrEmpty(node.Name) && !namesToNodes.ContainsKey(node.Name))
         {
-            namesToNodes[node.Name] = node;
+            namesToNodes[node.Name] = node3D;
         }
 
         for (int i = 0; i < node.Children.Count; i++)

@@ -1,18 +1,14 @@
 using System;
-using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using CommunityToolkit.Diagnostics;
-using Imago.Controls;
-using Imago.Support.Collections;
+using System.Text;
 
 namespace Imago.SceneGraph.Nodes;
 
 /// <summary>
-/// Represents a 3D node in the scene graph with transformation, hierarchy, and lifecycle management.
+/// Represents a <see cref="Node"/> with a local transform and a position in the scene's transform hierarchy.
 /// </summary>
-[ItemsMethod(nameof(AddChild))]
-public class Node3D : IDisposable, IFormattable, IMountable
+public class Node3D : Node
 {
     [Flags]
     private enum DirtyFlags : byte
@@ -23,28 +19,13 @@ public class Node3D : IDisposable, IFormattable, IMountable
         All = LocalMatrix | WorldMatrix
     }
 
-
-    /// <summary>
-    /// Gets the name of the node.
-    /// </summary>
-    public string Name { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Gets the parent of this node.
-    /// </summary>
-    public Node3D? Parent { get; protected set; } = null;
-
     private Vector3 _position = Vector3.Zero;
     private Quaternion _rotation = Quaternion.Identity;
     private Vector3 _scale = Vector3.One;
 
-    private readonly SwapPopList<Node3D> _children = new SwapPopList<Node3D>();
-
-
-    /// <summary>
-    /// Gets a list of all children of this node.
-    /// </summary>
-    public IReadOnlyList<Node3D> Children => this._children;
+    private Matrix4x4 _localMatrix = Matrix4x4.Identity;
+    private Matrix4x4 _worldMatrix = Matrix4x4.Identity;
+    private DirtyFlags _dirtyFlags = DirtyFlags.All;
 
     /// <summary>
     /// Gets or sets the position of the node.
@@ -89,16 +70,6 @@ public class Node3D : IDisposable, IFormattable, IMountable
     }
 
     /// <summary>
-    /// Gets the 3D scene this node is mounted in, or <see langword="null"/> if not mounted.
-    /// </summary>
-    public Scene3D? Scene3D { get; protected set; } = null;
-
-    private Matrix4x4 _localMatrix = Matrix4x4.Identity;
-    private Matrix4x4 _worldMatrix = Matrix4x4.Identity;
-    private DirtyFlags _dirtyFlags = DirtyFlags.All;
-
-
-    /// <summary>
     /// Gets whether the local transform of this node is dirty.
     /// </summary>
     public bool LocalTransformIsDirty => (this._dirtyFlags & DirtyFlags.LocalMatrix) != 0;
@@ -108,32 +79,6 @@ public class Node3D : IDisposable, IFormattable, IMountable
     /// </summary>
     public bool WorldTransformIsDirty => (this._dirtyFlags & DirtyFlags.WorldMatrix) != 0;
 
-    /// <summary>
-    /// Occurs when this node is being mounted to the root <see cref="Stage"/>.
-    /// </summary>
-    public event EventHandler? Mounted;
-
-    /// <summary>
-    /// Occurs when this node is being unmounted from the root <see cref="Stage"/>.
-    /// </summary>
-    public event EventHandler? Unmounting;
-
-    private bool _disposedValue;
-
-    /// <summary>
-    /// Gets whether this node is disposed.
-    /// </summary>
-    public bool IsDisposed => this._disposedValue;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="Node3D"/> class.
-    /// </summary>
-    public Node3D()
-    {
-        //
-    }
-
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void NotifyLocalTransformDirty()
     {
@@ -141,23 +86,20 @@ public class Node3D : IDisposable, IFormattable, IMountable
         this._dirtyFlags |= DirtyFlags.LocalMatrix | DirtyFlags.WorldMatrix;
         this.Scene3D?.NotifyTransformDirty(this);
 
-        foreach (var child in this._children)
+        foreach (var child in this.Children)
         {
-            child.NotifyWorldTransformDirty();
+            child.PropagateWorldTransformDirty();
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void NotifyWorldTransformDirty()
+    /// <inheritdoc />
+    internal override void PropagateWorldTransformDirty()
     {
         if (this.WorldTransformIsDirty) return;
         this._dirtyFlags |= DirtyFlags.WorldMatrix;
         this.Scene3D?.NotifyTransformDirty(this);
 
-        foreach (var child in this._children)
-        {
-            child.NotifyWorldTransformDirty();
-        }
+        base.PropagateWorldTransformDirty();
     }
 
     /// <summary>
@@ -178,11 +120,8 @@ public class Node3D : IDisposable, IFormattable, IMountable
         }
     }
 
-    /// <summary>
-    /// Recursively updates the world transform of this node and all its children.
-    /// </summary>
-    /// <param name="parentMatrix">The world transform of the parent node.</param>
-    public virtual void UpdateTransform(ref Matrix4x4 parentMatrix)
+    /// <inheritdoc />
+    public override void UpdateTransform(ref Matrix4x4 parentMatrix)
     {
         this._dirtyFlags &= ~DirtyFlags.WorldMatrix;
 
@@ -200,20 +139,18 @@ public class Node3D : IDisposable, IFormattable, IMountable
     /// </summary>
     public void UpdateTransform()
     {
-        Matrix4x4 mat = this.Parent == null ? Matrix4x4.Identity : this.Parent.WorldMatrix;
+        Matrix4x4 mat = this.Parent?.WorldMatrix ?? Matrix4x4.Identity;
         this.UpdateTransform(ref mat);
     }
 
-    /// <summary>
-    /// Gets the world transform of this node.
-    /// </summary>
-    public ref Matrix4x4 WorldMatrix
+    /// <inheritdoc />
+    public override Matrix4x4 WorldMatrix
     {
         get
         {
             if (this.WorldTransformIsDirty)
                 this.UpdateTransform();
-            return ref this._worldMatrix;
+            return this._worldMatrix;
         }
     }
 
@@ -245,179 +182,39 @@ public class Node3D : IDisposable, IFormattable, IMountable
         }
     }
 
-    /// <summary>
-    /// Adds a child node to this node.
-    /// </summary>
-    /// <param name="node">The node to add.</param>
-    public void AddChild(Node3D node)
+    /// <inheritdoc />
+    public override void Mount(Scene3D scene)
     {
-        // Already a child
-        if (node.Parent == this) return;
-
-        // Prevent adding self as child
-        if (node == this) ThrowHelper.ThrowArgumentException(nameof(node), "Cannot add self as child");
-
-        // Remove from old parent
-        node.Parent?.RemoveChild(node, dispose: false);
-
-        // Set node's parent to this
-        this._children.Add(node);
-
-        node.Parent = this;
-
-        if (this.Scene3D != null)
-        {
-            node.Mount(this.Scene3D);
-        }
-    }
-
-    /// <summary>
-    /// Removes a child node from this node.
-    /// </summary>
-    /// <param name="node">The node to remove.</param>
-    /// <param name="dispose">if set to <c>true</c> the node will be disposed.</param>
-    public void RemoveChild(Node3D node, bool dispose = true)
-    {
-        if (node.Parent != this) throw new ArgumentException("Node is not a child of this node.", nameof(node));
-
-        this._children.Remove(node);
-
-        node.Parent = null;
-
-        if (node.Scene3D != null)
-            node.Unmount();
-
-        if (dispose)
-            node.Dispose();
-    }
-
-    /// <summary>
-    /// Removes a child node from this node and disposes it.
-    /// </summary>
-    /// <param name="node">The node to remove and dispose.</param>
-    public void RemoveAndDisposeChild(Node3D node)
-    {
-        this.RemoveChild(node);
-        node.Dispose();
-    }
-
-    /// <summary>
-    /// Mounts this node into the given scene, recursively mounting all children.
-    /// </summary>
-    /// <param name="scene">The <see cref="SceneGraph.Scene3D"/> to mount into.</param>
-    /// <exception cref="InvalidOperationException">Thrown if the node is already mounted.</exception>
-    public virtual void Mount(Scene3D scene)
-    {
-        if (this.Scene3D != null)
-            throw new InvalidOperationException("Cannot mount a node that is already mounted.");
-
-        this.Scene3D = scene;
+        base.Mount(scene);
         scene.NotifyTransformDirty(this);
-
-        foreach (var child in this._children)
-        {
-            child.Mount(scene);
-        }
-
-        this.Mounted?.Invoke(this, EventArgs.Empty);
     }
 
-    /// <summary>
-    /// Unmounts this node from the scene graph, recursively unmounting all children.
-    /// </summary>
-    /// <remarks>
-    /// The <see cref="Scene3D"/> reference remains valid throughout this method and its overrides.
-    /// It is cleared at the end of the base implementation after all children have been unmounted.
-    /// </remarks>
-    public virtual void Unmount()
+    /// <inheritdoc />
+    public override void Unmount()
     {
         if (this.Scene3D == null) return;
 
         this.Scene3D.NotifyTransformNotDirty(this);
-
-        foreach (var child in this._children)
-        {
-            child.Unmount();
-        }
-
-        this.Unmounting?.Invoke(this, EventArgs.Empty);
-        this.Scene3D = null;
+        base.Unmount();
     }
 
-    /// <summary>
-    /// Disposes the node and releases associated resources.
-    /// </summary>
-    /// <param name="disposing">True if disposing managed resources; otherwise, false.</param>
-    protected virtual void Dispose(bool disposing)
+    /// <inheritdoc />
+    protected override void AppendFormat(StringBuilder sb, char format)
     {
-        if (!this._disposedValue)
+        switch (format)
         {
-            if (disposing)
-            {
-                foreach (var child in this._children)
-                {
-                    child.Dispose();
-                }
-            }
-
-            this._disposedValue = true;
+            case 'P':
+                sb.Append(this.Position);
+                break;
+            case 'R':
+                sb.Append(this.Rotation);
+                break;
+            case 'S':
+                sb.Append(this.Scale);
+                break;
+            default:
+                base.AppendFormat(sb, format);
+                break;
         }
-    }
-
-    /// <summary>
-    /// Disposes the node and releases associated resources.
-    /// </summary>
-    public void Dispose()
-    {
-        this.Dispose(disposing: true);
-        GC.SuppressFinalize(this);
-    }
-
-    /// <summary>
-    /// Returns a string representation of this node.
-    /// </summary>
-    /// <param name="format">The format string.</param>
-    /// <param name="formatProvider">The format provider.</param>
-    /// <returns>A string representation of this node.</returns>
-    /// <remarks>
-    /// Available formats:
-    /// "G": General (same as "N")
-    /// "N": Name
-    /// "P": Position
-    /// "R": Rotation
-    /// "S": Scale
-    /// Can be combined, e.g. "NPRS" for name, position, rotation and scale
-    /// </remarks>
-    public string ToString(string? format = null, IFormatProvider? formatProvider = null)
-    {
-        if (string.IsNullOrEmpty(format))
-            return this.Name;
-
-        var sb = new System.Text.StringBuilder();
-
-        foreach (var c in format)
-        {
-            switch (c)
-            {
-                case 'G': // General
-                case 'N':
-                    sb.Append(this.Name);
-                    break;
-                case 'P':
-                    sb.Append(this.Position);
-                    break;
-                case 'R':
-                    sb.Append(this.Rotation);
-                    break;
-                case 'S':
-                    sb.Append(this.Scale);
-                    break;
-                default:
-                    sb.Append(c); // Unknown format character, just append it
-                    break;
-            }
-        }
-
-        return sb.ToString();
     }
 }

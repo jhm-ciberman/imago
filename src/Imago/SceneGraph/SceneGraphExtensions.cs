@@ -23,7 +23,7 @@ public static class SceneGraphExtensions
     /// <param name="self">The node.</param>
     /// <param name="name">The name of the node to find.</param>
     /// <returns>The node with the specified name or null if no node with the specified name was found.</returns>
-    public static T? FindChild<T>(this Node3D self, string name) where T : Node3D
+    public static T? FindChild<T>(this Node self, string name) where T : Node
     {
         if (self is T tNode && self.Name == name) return tNode;
 
@@ -45,7 +45,7 @@ public static class SceneGraphExtensions
     /// <param name="name">The name of the node to find.</param>
     /// <returns>The node with the specified name.</returns>
     /// <exception cref="InvalidOperationException">No node with the specified name was not found.</exception>
-    public static T FindChildOrFail<T>(this Node3D self, string name) where T : Node3D
+    public static T FindChildOrFail<T>(this Node self, string name) where T : Node
     {
         return self.FindChild<T>(name) ?? throw new InvalidOperationException($"Child with name '{name}' not found.");
     }
@@ -58,7 +58,7 @@ public static class SceneGraphExtensions
     /// <param name="self">The node.</param>
     /// <param name="name">The name of the node to find.</param>
     /// <returns>The node with the specified name or null if no node with the specified name was found.</returns>
-    public static T? GetDirectChildByName<T>(this Node3D self, string name) where T : Node3D
+    public static T? GetDirectChildByName<T>(this Node self, string name) where T : Node
     {
         for (var i = 0; i < self.Children.Count; i++)
         {
@@ -78,9 +78,9 @@ public static class SceneGraphExtensions
     /// <param name="self">The node.</param>
     /// <param name="name">The name of the node to find.</param>
     /// <returns>The node with the specified name or null if no node with the specified name was found.</returns>
-    public static Node3D? GetDirectChildByName(this Node3D self, string name)
+    public static Node? GetDirectChildByName(this Node self, string name)
     {
-        var children = (SwapPopList<Node3D>)self.Children; // Prevents allocation of IEnumerable
+        var children = (SwapPopList<Node>)self.Children; // Prevents allocation of IEnumerable
         foreach (var child in children)
         {
             if (child.Name == name) return child;
@@ -96,7 +96,7 @@ public static class SceneGraphExtensions
     /// <param name="self">The node.</param>
     /// <param name="path">The path to the node to find.</param>
     /// <returns>The node with the specified path or null if no node with the specified path was found.</returns>
-    public static T? FindPath<T>(this Node3D self, string path) where T : Node3D
+    public static T? FindPath<T>(this Node self, string path) where T : Node
     {
         if (string.IsNullOrEmpty(path)) return null;
 
@@ -120,7 +120,7 @@ public static class SceneGraphExtensions
     /// <param name="path">The path to the node to find.</param>
     /// <returns>The node with the specified path.</returns>
     /// <exception cref="InvalidOperationException">No node with the specified path was not found.</exception>
-    public static T FindPathOrFail<T>(this Node3D self, string path) where T : Node3D
+    public static T FindPathOrFail<T>(this Node self, string path) where T : Node
     {
         return self.FindPath<T>(path) ?? throw new InvalidOperationException($"Path '{path}' not found.");
     }
@@ -133,7 +133,7 @@ public static class SceneGraphExtensions
     /// <typeparam name="T">The type of node to find.</typeparam>
     /// <param name="self">The node.</param>
     /// <param name="action">The action to execute for each node.</param>
-    public static void ForEachRecursive<T>(this Node3D self, Action<T> action)
+    public static void ForEachRecursive<T>(this Node self, Action<T> action)
     {
         if (self is T node)
         {
@@ -152,7 +152,7 @@ public static class SceneGraphExtensions
     /// <typeparam name="T">The type of node to find.</typeparam>
     /// <param name="self">The node.</param>
     /// <returns></returns>
-    public static IEnumerable<T> GetChildrenOfType<T>(this Node3D self)
+    public static IEnumerable<T> GetChildrenOfType<T>(this Node self)
     {
         if (self is T tNode)
         {
@@ -173,7 +173,7 @@ public static class SceneGraphExtensions
     /// </summary>
     /// <param name="self">The node.</param>
     /// <param name="material">The material to set.</param>
-    public static void SetMaterial(this Node3D self, Material material)
+    public static void SetMaterial(this Node self, Material material)
     {
         self.ForEachRecursive<RenderNode3D>((node) => node.Material = material);
     }
@@ -183,7 +183,7 @@ public static class SceneGraphExtensions
     /// </summary>
     /// <param name="self">The node.</param>
     /// <param name="isPickable">The pickable state to set.</param>
-    public static void SetPickable(this Node3D self, bool isPickable)
+    public static void SetPickable(this Node self, bool isPickable)
     {
         self.ForEachRecursive<RenderNode3D>((node) => node.IsPickable = isPickable);
     }
@@ -194,7 +194,7 @@ public static class SceneGraphExtensions
     /// <param name="self">The node.</param>
     /// <param name="material">The material to set.</param>
     /// <param name="textureST">The texture size and offset.</param>
-    public static void SetMaterial(this Node3D self, Material material, Vector4 textureST)
+    public static void SetMaterial(this Node self, Material material, Vector4 textureST)
     {
         self.ForEachRecursive<RenderNode3D>((node) =>
         {
@@ -208,7 +208,7 @@ public static class SceneGraphExtensions
     /// </summary>
     /// <param name="self">The node.</param>
     /// <param name="color">The albedo color to set.</param>
-    public static void SetAlbedoColor(this Node3D self, Color color)
+    public static void SetAlbedoColor(this Node self, Color color)
     {
         self.ForEachRecursive<RenderNode3D>((node) => node.AlbedoColor = color);
     }
@@ -220,7 +220,7 @@ public static class SceneGraphExtensions
     /// <param name="oldName">The node name to rename.</param>
     /// <param name="newName">The new name for the node.</param>
     /// <returns>True if the node was renamed, false otherwise.</returns>
-    public static bool RenameNode(this Node3D self, string oldName, string newName)
+    public static bool RenameNode(this Node self, string oldName, string newName)
     {
         if (self.Name == oldName)
         {
@@ -236,7 +236,7 @@ public static class SceneGraphExtensions
         return false;
     }
 
-    private static void PrintHierarchyToConsoleCore(Node3D node, string indent, bool isLast, string? format = null)
+    private static void PrintHierarchyToConsoleCore(Node node, string indent, bool isLast, string? format = null)
     {
         var label = node.ToString(format);
         var c = indent.Length == 0 ? '─' : (isLast ? '└' : '├');
@@ -254,7 +254,7 @@ public static class SceneGraphExtensions
     /// </summary>
     /// <param name="self">The node.</param>
     /// <param name="format">The format string to use for each node.</param>
-    public static void PrintHierarchyToConsole(this Node3D self, string? format = null)
+    public static void PrintHierarchyToConsole(this Node self, string? format = null)
     {
         PrintHierarchyToConsoleCore(self, "", true, format);
     }
@@ -302,7 +302,7 @@ public static class SceneGraphExtensions
     /// </summary>
     /// <param name="self">The node.</param>
     /// <param name="packedTexture">The texture to apply.</param>
-    public static void SetPackedTexture(this Node3D self, PackedTexture packedTexture)
+    public static void SetPackedTexture(this Node self, PackedTexture packedTexture)
     {
         self.ForEachRecursive<RenderNode3D>((node) =>
         {
@@ -406,7 +406,7 @@ public static class SceneGraphExtensions
     /// <param name="next">The new value for the child node.</param>
     /// <param name="dispose">If true, the current child node will be disposed.</param>
     /// <returns>True if the child was swapped, false otherwise.</returns>
-    public static bool SwapChild(this Node3D self, ref Node3D? current, Node3D? next, bool dispose = true)
+    public static bool SwapChild<T>(this Node self, ref T? current, T? next, bool dispose = true) where T : Node
     {
         if (current == next) return false;
 

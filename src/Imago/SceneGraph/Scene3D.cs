@@ -80,7 +80,7 @@ public class Scene3D : IDisposable, IMountable
     /// <summary>
     /// Gets or sets the root node of the 3D scene graph.
     /// </summary>
-    public Node3D? Root
+    public Node? Root
     {
         get => this._root;
         set
@@ -101,7 +101,7 @@ public class Scene3D : IDisposable, IMountable
         }
     }
 
-    private Node3D? _root;
+    private Node? _root;
 
     /// <summary>
     /// Gets or sets the camera used to render the scene.
@@ -316,15 +316,17 @@ public class Scene3D : IDisposable, IMountable
         {
             for (int i = 0; i < this._transformDirtyList.Count; i++)
             {
-                Node3D node = this._transformDirtyList[i];
-                if (!node.LocalTransformIsDirty) continue;
+                Node3D dirtyNode = this._transformDirtyList[i];
+                if (!dirtyNode.LocalTransformIsDirty) continue;
 
-                Node3D topDirty = node;
-                while (true)
+                // Walk up through transform-bearing ancestors to the topmost dirty one. A plain
+                // Node has no transform, so it acts as a boundary that ends the chain.
+                Node3D topDirty = dirtyNode;
+                Node? ancestor = dirtyNode.Parent;
+                while (ancestor is Node3D ancestor3D)
                 {
-                    if (node.LocalTransformIsDirty) topDirty = node;
-                    if (node.Parent == null) break;
-                    node = node.Parent;
+                    if (ancestor3D.LocalTransformIsDirty) topDirty = ancestor3D;
+                    ancestor = ancestor3D.Parent;
                 }
 
                 topDirty.UpdateTransform();
