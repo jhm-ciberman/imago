@@ -154,7 +154,7 @@ public class PickingManager
         if (!selectedRenderNode.RayCast(ray, out hitInfo))
             return null;
 
-        Node? node = selectedRenderNode;
+        Node3D? node = selectedRenderNode;
         while (node != null) // Traverse the scene graph to find the selected object.
         {
             if (node is IPickableTarget pickableView)
