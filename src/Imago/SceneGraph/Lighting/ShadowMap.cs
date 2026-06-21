@@ -16,9 +16,9 @@ public class ShadowMap
     /// Gets or sets the maximum distance that the light will cast shadows.
     /// The value is measured in world units.
     /// </summary>
-    /// <throws cref="ArgumentOutOfRangeException">
+    /// <exception cref="ArgumentOutOfRangeException">
     /// Thrown if the value is less than 0.
-    /// </throws>
+    /// </exception>
     public float MaximumShadowsDistance
     {
         get => this._maximumShadowDistance;
@@ -32,15 +32,15 @@ public class ShadowMap
     private float _splitLambda = 0.15f;
 
     /// <summary>
-    /// Gets or sets the split lamda used to calculate the cascade splits.
+    /// Gets or sets the split lambda used to calculate the cascade splits.
     /// A value of zero will make the shadow maps to be distributed evenly and
     /// a value of 1 will make the shadow maps to be distributed with a
     /// logarithmic distribution. A value between 0 and 1 will
     /// use a mix of the two methods.
     /// </summary>
-    /// <throws cref="ArgumentOutOfRangeException">
+    /// <exception cref="ArgumentOutOfRangeException">
     /// Thrown if the value is less than zero or greater than one.
-    /// </throws>
+    /// </exception>
     public float SplitLambda
     {
         get => this._splitLambda;
@@ -118,7 +118,7 @@ public class ShadowMap
     public float NormalOffset { get; set; } = 0.0f;
 
     /// <summary>
-    /// Gets or set the shadow color.
+    /// Gets or sets the shadow color.
     /// </summary>
     public ColorF Color { get; set; } = new ColorF(0.0f, 0.0f, 0.0f, .8f);
 

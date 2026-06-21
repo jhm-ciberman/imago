@@ -52,7 +52,7 @@ public abstract class MeshData
     public abstract DeviceBuffer CreateVertexBuffer(GraphicsDevice gd);
 
     /// <summary>
-    /// Constructs a <see cref="DeviceBuffer"/> to use as undex buffer from this <see cref="MeshData"/>.
+    /// Constructs a <see cref="DeviceBuffer"/> to use as index buffer from this <see cref="MeshData"/>.
     /// </summary>
     /// <param name="gd">The <see cref="GraphicsDevice"/> to use for device resource creation.</param>
     /// <returns>The constructed <see cref="DeviceBuffer"/>.</returns>

@@ -6,9 +6,6 @@ namespace Imago.Rendering.Internals.Buffers;
 /// <summary>
 /// Represents a block of data in a <see cref="DataBuffer"/>.
 /// </summary>
-/// <summary>
-/// Represents a block of data in a <see cref="DataBuffer"/>.
-/// </summary>
 internal struct DataBlock : IDisposable
 {
     /// <summary>

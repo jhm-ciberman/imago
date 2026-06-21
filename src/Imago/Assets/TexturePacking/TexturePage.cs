@@ -164,7 +164,7 @@ public class TexturePage : IDisposable
     /// </remarks>
     /// <param name="packedTexture">The packed texture to redraw.</param>
     /// <param name="operation">The operation that will be used to redraw the texture.</param>
-    /// <throws cref="InvalidOperationException">Thrown when the packed texture has not enough size to contain the operation.</throws>
+    /// <exception cref="InvalidOperationException">Thrown when the packed texture has not enough size to contain the operation.</exception>
     public void Redraw(PackedTexture packedTexture, IDrawOperation operation)
     {
         var availableSize = packedTexture.PixelSize;

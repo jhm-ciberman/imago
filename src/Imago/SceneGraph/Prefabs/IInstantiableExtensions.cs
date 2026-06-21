@@ -15,6 +15,7 @@ public static class IInstantiableExtensions
     /// <param name="instantiable">The instantiable resource.</param>
     /// <param name="material">The material to set.</param>
     /// <param name="textureST">The texture ST vector.</param>
+    /// <returns>The root node of the instantiated scene.</returns>
     public static Node3D Instantiate(this IInstantiable instantiable, Material material, Vector4? textureST = null)
     {
         var node = instantiable.Instantiate();

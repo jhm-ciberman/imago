@@ -36,7 +36,7 @@ public readonly struct InlineSegment
     public bool IsInlineContent => this.Texture != null;
 
     /// <summary>
-    /// Initializes a new text segment.
+    /// Initializes a new instance of the <see cref="InlineSegment"/> struct.
     /// </summary>
     /// <param name="start">The start index in the source string.</param>
     /// <param name="length">The number of characters in this text run.</param>
@@ -49,7 +49,7 @@ public readonly struct InlineSegment
     }
 
     /// <summary>
-    /// Initializes a new inline content segment.
+    /// Initializes a new instance of the <see cref="InlineSegment"/> struct.
     /// </summary>
     /// <param name="start">The start index in the source string.</param>
     /// <param name="length">The number of characters consumed by this inline content.</param>

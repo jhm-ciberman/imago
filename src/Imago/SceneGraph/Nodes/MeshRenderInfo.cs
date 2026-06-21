@@ -25,7 +25,7 @@ public class MeshRenderInfo
     public Vector4 TextureST { get; }
 
     /// <summary>
-    /// Creates a new instance of the <see cref="MeshRenderInfo"/> class.
+    /// Initializes a new instance of the <see cref="MeshRenderInfo"/> class.
     /// </summary>
     /// <param name="material">The material to use for rendering.</param>
     /// <param name="mesh">The mesh to render.</param>
@@ -37,7 +37,7 @@ public class MeshRenderInfo
     }
 
     /// <summary>
-    /// Creates a new instance of the <see cref="MeshRenderInfo"/> class.
+    /// Initializes a new instance of the <see cref="MeshRenderInfo"/> class.
     /// </summary>
     /// <param name="material">The material to use for rendering.</param>
     /// <param name="mesh">The mesh to render.</param>

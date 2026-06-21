@@ -13,7 +13,7 @@ namespace Imago.SceneGraph;
 public class Skeleton : IDisposable
 {
     /// <summary>
-    /// Gets the maximum number of bones in a skeleton.
+    /// The maximum number of bones in a skeleton.
     /// </summary>
     public const int MaxNumberOfBones = 64;
 

@@ -266,6 +266,7 @@ public class TextureGroup : IDisposable
     /// Saves all texture atlases of all existing texture groups to PNG files in the specified directory
     /// with filenames based on the group names.
     /// </summary>
+    /// <param name="directory">The directory to save the PNG files to.</param>
     public static void SaveAllGroupsToPng(string directory)
     {
         foreach (var group in _allGroups)

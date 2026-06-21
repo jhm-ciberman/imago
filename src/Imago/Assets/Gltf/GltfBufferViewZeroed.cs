@@ -9,6 +9,9 @@ namespace Imago.Assets.Gltf;
 /// </summary>
 internal class GltfBufferViewZeroed : IGltfBufferView
 {
+    /// <summary>
+    /// Gets the singleton instance of the zeroed buffer view.
+    /// </summary>
     public static GltfBufferViewZeroed Instance { get; } = new GltfBufferViewZeroed();
 
     private GltfBufferViewZeroed()

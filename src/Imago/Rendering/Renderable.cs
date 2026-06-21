@@ -123,7 +123,7 @@ internal class Renderable : IDisposable
     public NeoVeldrid.ResourceSet? SkeletonResourceSet { get; private set; } = null;
 
     /// <summary>
-    /// Gets the data for the "offset" vertex attribute.
+    /// Gets or sets the data for the "offset" vertex attribute.
     /// </summary>
     public OffsetVertexData OffsetVertexData { get; set; }
 
@@ -149,7 +149,7 @@ internal class Renderable : IDisposable
     private uint _pickingId = 0;
 
     /// <summary>
-    /// Gets the picking ID of this renderable.
+    /// Gets or sets the picking ID of this renderable.
     /// </summary>
     public uint PickingId
     {

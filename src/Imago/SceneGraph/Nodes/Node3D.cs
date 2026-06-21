@@ -25,7 +25,7 @@ public class Node3D : IDisposable, IFormattable, IMountable
 
 
     /// <summary>
-    /// Gets the name of the node.
+    /// Gets or sets the name of the node.
     /// </summary>
     public string Name { get; set; } = string.Empty;
 

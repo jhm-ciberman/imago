@@ -20,7 +20,7 @@ public readonly struct TickedEventArgs
     public double ElapsedTime { get; }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="TickedEventArgs"/> class.
+    /// Initializes a new instance of the <see cref="TickedEventArgs"/> struct.
     /// </summary>
     /// <param name="deltaTime">The time passed since the last frame in seconds.</param>
     /// <param name="elapsedTime">The total time passed since the start of the application in seconds.</param>

@@ -28,7 +28,7 @@ public interface ITexture : IDisposable
     public NeoVeldrid.Sampler NativeSampler { get; }
 
     /// <summary>
-    /// Raised when the render texture is resized.
+    /// Occurs when the render texture is resized.
     /// </summary>
     public event EventHandler? Resized;
 

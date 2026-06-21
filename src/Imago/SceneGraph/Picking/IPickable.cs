@@ -6,7 +6,7 @@ namespace Imago.SceneGraph.Picking;
 public interface IPickable
 {
     /// <summary>
-    /// Gets the ID of the pickable object.
+    /// Gets or sets the ID of the pickable object.
     /// </summary>
     public uint PickId { get; set; }
 }

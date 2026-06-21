@@ -48,7 +48,7 @@ public static class TextureRegionExtensions
     /// <param name="region">The packed texture.</param>
     /// <param name="topLeft">The top left corner of the sub texture in texture space coordinates.</param>
     /// <param name="bottomRight">The bottom right corner of the sub texture in texture space coordinates.</param>
-    /// <returns></returns>
+    /// <returns>The sub texture region.</returns>
     public static ITextureRegion SubTexture(this ITextureRegion region, Vector2 topLeft, Vector2 bottomRight)
     {
         var tl = Vector2.Lerp(region.TopLeft, region.BottomRight, topLeft);
@@ -62,7 +62,7 @@ public static class TextureRegionExtensions
     /// </summary>
     /// <param name="texture">The texture.</param>
     /// <param name="frameCount">The number of frames in the flip book.</param>
-    /// <returns></returns>
+    /// <returns>An array of texture regions, one per frame.</returns>
     public static ITextureRegion[] MakeFlipBook(this ITextureRegion texture, int frameCount)
     {
         if (frameCount == 1) return [texture];

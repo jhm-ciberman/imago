@@ -151,7 +151,7 @@ public static class SceneGraphExtensions
     /// </summary>
     /// <typeparam name="T">The type of node to find.</typeparam>
     /// <param name="self">The node.</param>
-    /// <returns></returns>
+    /// <returns>The node itself and all its descendants that are of the specified type.</returns>
     public static IEnumerable<T> GetChildrenOfType<T>(this Node3D self)
     {
         if (self is T tNode)

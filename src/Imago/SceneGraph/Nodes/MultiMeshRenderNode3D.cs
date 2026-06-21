@@ -13,7 +13,7 @@ public class MultiMeshRenderNode3D : Node3D
     private MeshRenderInfo[] _meshes = System.Array.Empty<MeshRenderInfo>();
 
     /// <summary>
-    /// Creates an instance of the <see cref="MultiMeshRenderNode3D"/> class.
+    /// Initializes a new instance of the <see cref="MultiMeshRenderNode3D"/> class.
     /// </summary>
     public MultiMeshRenderNode3D()
     {

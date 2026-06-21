@@ -8,12 +8,12 @@ namespace Imago.Controls;
 public interface IStyle
 {
     /// <summary>
-    /// Gets or sets the name of the style.
+    /// Gets the name of the style.
     /// </summary>
     public string? Name { get; }
 
     /// <summary>
-    /// Gets or sets the parent style. All the properties of the parent style are also available in this style.
+    /// Gets the parent style. All the properties of the parent style are also available in this style.
     /// </summary>
     public IStyle? BaseStyle { get; }
 
