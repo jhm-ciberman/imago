@@ -1,7 +1,7 @@
 namespace Imago.Support.Drawing;
 
 /// <summary>
-/// Provides access to the colors in the official Tailwind CSS color palette from v3.4.13.
+/// Provides access to the colors in the official Tailwind CSS v4 color palette.
 /// </summary>
 public static class TailwindColors
 {
@@ -38,44 +38,44 @@ public static class TailwindColors
     public static Color Slate200 { get; } = GetColor("#e2e8f0");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #cbd5e1.
+    /// Gets the Tailwind color with the value of #cad5e2.
     /// </summary>
-    public static Color Slate300 { get; } = GetColor("#cbd5e1");
+    public static Color Slate300 { get; } = GetColor("#cad5e2");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #94a3b8.
+    /// Gets the Tailwind color with the value of #90a1b9.
     /// </summary>
-    public static Color Slate400 { get; } = GetColor("#94a3b8");
+    public static Color Slate400 { get; } = GetColor("#90a1b9");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #64748b.
+    /// Gets the Tailwind color with the value of #62748e.
     /// </summary>
-    public static Color Slate500 { get; } = GetColor("#64748b");
+    public static Color Slate500 { get; } = GetColor("#62748e");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #475569.
+    /// Gets the Tailwind color with the value of #45556c.
     /// </summary>
-    public static Color Slate600 { get; } = GetColor("#475569");
+    public static Color Slate600 { get; } = GetColor("#45556c");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #334155.
+    /// Gets the Tailwind color with the value of #314158.
     /// </summary>
-    public static Color Slate700 { get; } = GetColor("#334155");
+    public static Color Slate700 { get; } = GetColor("#314158");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #1e293b.
+    /// Gets the Tailwind color with the value of #1d293d.
     /// </summary>
-    public static Color Slate800 { get; } = GetColor("#1e293b");
+    public static Color Slate800 { get; } = GetColor("#1d293d");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #0f172a.
+    /// Gets the Tailwind color with the value of #0f172b.
     /// </summary>
-    public static Color Slate900 { get; } = GetColor("#0f172a");
+    public static Color Slate900 { get; } = GetColor("#0f172b");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #020617.
+    /// Gets the Tailwind color with the value of #020618.
     /// </summary>
-    public static Color Slate950 { get; } = GetColor("#020617");
+    public static Color Slate950 { get; } = GetColor("#020618");
 
     /// <summary>
     /// Gets the Tailwind color with the value of #f9fafb.
@@ -93,39 +93,39 @@ public static class TailwindColors
     public static Color Gray200 { get; } = GetColor("#e5e7eb");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #d1d5db.
+    /// Gets the Tailwind color with the value of #d1d5dc.
     /// </summary>
-    public static Color Gray300 { get; } = GetColor("#d1d5db");
+    public static Color Gray300 { get; } = GetColor("#d1d5dc");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #9ca3af.
+    /// Gets the Tailwind color with the value of #99a1af.
     /// </summary>
-    public static Color Gray400 { get; } = GetColor("#9ca3af");
+    public static Color Gray400 { get; } = GetColor("#99a1af");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #6b7280.
+    /// Gets the Tailwind color with the value of #6a7282.
     /// </summary>
-    public static Color Gray500 { get; } = GetColor("#6b7280");
+    public static Color Gray500 { get; } = GetColor("#6a7282");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #4b5563.
+    /// Gets the Tailwind color with the value of #4a5565.
     /// </summary>
-    public static Color Gray600 { get; } = GetColor("#4b5563");
+    public static Color Gray600 { get; } = GetColor("#4a5565");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #374151.
+    /// Gets the Tailwind color with the value of #364153.
     /// </summary>
-    public static Color Gray700 { get; } = GetColor("#374151");
+    public static Color Gray700 { get; } = GetColor("#364153");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #1f2937.
+    /// Gets the Tailwind color with the value of #1e2939.
     /// </summary>
-    public static Color Gray800 { get; } = GetColor("#1f2937");
+    public static Color Gray800 { get; } = GetColor("#1e2939");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #111827.
+    /// Gets the Tailwind color with the value of #101828.
     /// </summary>
-    public static Color Gray900 { get; } = GetColor("#111827");
+    public static Color Gray900 { get; } = GetColor("#101828");
 
     /// <summary>
     /// Gets the Tailwind color with the value of #030712.
@@ -153,19 +153,19 @@ public static class TailwindColors
     public static Color Zinc300 { get; } = GetColor("#d4d4d8");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #a1a1aa.
+    /// Gets the Tailwind color with the value of #9f9fa9.
     /// </summary>
-    public static Color Zinc400 { get; } = GetColor("#a1a1aa");
+    public static Color Zinc400 { get; } = GetColor("#9f9fa9");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #71717a.
+    /// Gets the Tailwind color with the value of #71717b.
     /// </summary>
-    public static Color Zinc500 { get; } = GetColor("#71717a");
+    public static Color Zinc500 { get; } = GetColor("#71717b");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #52525b.
+    /// Gets the Tailwind color with the value of #52525c.
     /// </summary>
-    public static Color Zinc600 { get; } = GetColor("#52525b");
+    public static Color Zinc600 { get; } = GetColor("#52525c");
 
     /// <summary>
     /// Gets the Tailwind color with the value of #3f3f46.
@@ -208,9 +208,9 @@ public static class TailwindColors
     public static Color Neutral300 { get; } = GetColor("#d4d4d4");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #a3a3a3.
+    /// Gets the Tailwind color with the value of #a1a1a1.
     /// </summary>
-    public static Color Neutral400 { get; } = GetColor("#a3a3a3");
+    public static Color Neutral400 { get; } = GetColor("#a1a1a1");
 
     /// <summary>
     /// Gets the Tailwind color with the value of #737373.
@@ -263,24 +263,24 @@ public static class TailwindColors
     public static Color Stone300 { get; } = GetColor("#d6d3d1");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #a8a29e.
+    /// Gets the Tailwind color with the value of #a6a09b.
     /// </summary>
-    public static Color Stone400 { get; } = GetColor("#a8a29e");
+    public static Color Stone400 { get; } = GetColor("#a6a09b");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #78716c.
+    /// Gets the Tailwind color with the value of #79716b.
     /// </summary>
-    public static Color Stone500 { get; } = GetColor("#78716c");
+    public static Color Stone500 { get; } = GetColor("#79716b");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #57534e.
+    /// Gets the Tailwind color with the value of #57534d.
     /// </summary>
-    public static Color Stone600 { get; } = GetColor("#57534e");
+    public static Color Stone600 { get; } = GetColor("#57534d");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #44403c.
+    /// Gets the Tailwind color with the value of #44403b.
     /// </summary>
-    public static Color Stone700 { get; } = GetColor("#44403c");
+    public static Color Stone700 { get; } = GetColor("#44403b");
 
     /// <summary>
     /// Gets the Tailwind color with the value of #292524.
@@ -303,54 +303,54 @@ public static class TailwindColors
     public static Color Red50 { get; } = GetColor("#fef2f2");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #fee2e2.
+    /// Gets the Tailwind color with the value of #ffe2e2.
     /// </summary>
-    public static Color Red100 { get; } = GetColor("#fee2e2");
+    public static Color Red100 { get; } = GetColor("#ffe2e2");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #fecaca.
+    /// Gets the Tailwind color with the value of #ffc9c9.
     /// </summary>
-    public static Color Red200 { get; } = GetColor("#fecaca");
+    public static Color Red200 { get; } = GetColor("#ffc9c9");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #fca5a5.
+    /// Gets the Tailwind color with the value of #ffa2a2.
     /// </summary>
-    public static Color Red300 { get; } = GetColor("#fca5a5");
+    public static Color Red300 { get; } = GetColor("#ffa2a2");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #f87171.
+    /// Gets the Tailwind color with the value of #ff6467.
     /// </summary>
-    public static Color Red400 { get; } = GetColor("#f87171");
+    public static Color Red400 { get; } = GetColor("#ff6467");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #ef4444.
+    /// Gets the Tailwind color with the value of #fb2c36.
     /// </summary>
-    public static Color Red500 { get; } = GetColor("#ef4444");
+    public static Color Red500 { get; } = GetColor("#fb2c36");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #dc2626.
+    /// Gets the Tailwind color with the value of #e7000b.
     /// </summary>
-    public static Color Red600 { get; } = GetColor("#dc2626");
+    public static Color Red600 { get; } = GetColor("#e7000b");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #b91c1c.
+    /// Gets the Tailwind color with the value of #c10007.
     /// </summary>
-    public static Color Red700 { get; } = GetColor("#b91c1c");
+    public static Color Red700 { get; } = GetColor("#c10007");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #991b1b.
+    /// Gets the Tailwind color with the value of #9f0712.
     /// </summary>
-    public static Color Red800 { get; } = GetColor("#991b1b");
+    public static Color Red800 { get; } = GetColor("#9f0712");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #7f1d1d.
+    /// Gets the Tailwind color with the value of #82181a.
     /// </summary>
-    public static Color Red900 { get; } = GetColor("#7f1d1d");
+    public static Color Red900 { get; } = GetColor("#82181a");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #450a0a.
+    /// Gets the Tailwind color with the value of #460809.
     /// </summary>
-    public static Color Red950 { get; } = GetColor("#450a0a");
+    public static Color Red950 { get; } = GetColor("#460809");
 
     /// <summary>
     /// Gets the Tailwind color with the value of #fff7ed.
@@ -358,54 +358,54 @@ public static class TailwindColors
     public static Color Orange50 { get; } = GetColor("#fff7ed");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #ffedd5.
+    /// Gets the Tailwind color with the value of #ffedd4.
     /// </summary>
-    public static Color Orange100 { get; } = GetColor("#ffedd5");
+    public static Color Orange100 { get; } = GetColor("#ffedd4");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #fed7aa.
+    /// Gets the Tailwind color with the value of #ffd6a7.
     /// </summary>
-    public static Color Orange200 { get; } = GetColor("#fed7aa");
+    public static Color Orange200 { get; } = GetColor("#ffd6a7");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #fdba74.
+    /// Gets the Tailwind color with the value of #ffb86a.
     /// </summary>
-    public static Color Orange300 { get; } = GetColor("#fdba74");
+    public static Color Orange300 { get; } = GetColor("#ffb86a");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #fb923c.
+    /// Gets the Tailwind color with the value of #ff8904.
     /// </summary>
-    public static Color Orange400 { get; } = GetColor("#fb923c");
+    public static Color Orange400 { get; } = GetColor("#ff8904");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #f97316.
+    /// Gets the Tailwind color with the value of #ff6900.
     /// </summary>
-    public static Color Orange500 { get; } = GetColor("#f97316");
+    public static Color Orange500 { get; } = GetColor("#ff6900");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #ea580c.
+    /// Gets the Tailwind color with the value of #f54900.
     /// </summary>
-    public static Color Orange600 { get; } = GetColor("#ea580c");
+    public static Color Orange600 { get; } = GetColor("#f54900");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #c2410c.
+    /// Gets the Tailwind color with the value of #ca3500.
     /// </summary>
-    public static Color Orange700 { get; } = GetColor("#c2410c");
+    public static Color Orange700 { get; } = GetColor("#ca3500");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #9a3412.
+    /// Gets the Tailwind color with the value of #9f2d00.
     /// </summary>
-    public static Color Orange800 { get; } = GetColor("#9a3412");
+    public static Color Orange800 { get; } = GetColor("#9f2d00");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #7c2d12.
+    /// Gets the Tailwind color with the value of #7e2a0c.
     /// </summary>
-    public static Color Orange900 { get; } = GetColor("#7c2d12");
+    public static Color Orange900 { get; } = GetColor("#7e2a0c");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #431407.
+    /// Gets the Tailwind color with the value of #441306.
     /// </summary>
-    public static Color Orange950 { get; } = GetColor("#431407");
+    public static Color Orange950 { get; } = GetColor("#441306");
 
     /// <summary>
     /// Gets the Tailwind color with the value of #fffbeb.
@@ -413,54 +413,54 @@ public static class TailwindColors
     public static Color Amber50 { get; } = GetColor("#fffbeb");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #fef3c7.
+    /// Gets the Tailwind color with the value of #fef3c6.
     /// </summary>
-    public static Color Amber100 { get; } = GetColor("#fef3c7");
+    public static Color Amber100 { get; } = GetColor("#fef3c6");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #fde68a.
+    /// Gets the Tailwind color with the value of #fee685.
     /// </summary>
-    public static Color Amber200 { get; } = GetColor("#fde68a");
+    public static Color Amber200 { get; } = GetColor("#fee685");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #fcd34d.
+    /// Gets the Tailwind color with the value of #ffd230.
     /// </summary>
-    public static Color Amber300 { get; } = GetColor("#fcd34d");
+    public static Color Amber300 { get; } = GetColor("#ffd230");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #fbbf24.
+    /// Gets the Tailwind color with the value of #ffb900.
     /// </summary>
-    public static Color Amber400 { get; } = GetColor("#fbbf24");
+    public static Color Amber400 { get; } = GetColor("#ffb900");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #f59e0b.
+    /// Gets the Tailwind color with the value of #fe9a00.
     /// </summary>
-    public static Color Amber500 { get; } = GetColor("#f59e0b");
+    public static Color Amber500 { get; } = GetColor("#fe9a00");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #d97706.
+    /// Gets the Tailwind color with the value of #e17100.
     /// </summary>
-    public static Color Amber600 { get; } = GetColor("#d97706");
+    public static Color Amber600 { get; } = GetColor("#e17100");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #b45309.
+    /// Gets the Tailwind color with the value of #bb4d00.
     /// </summary>
-    public static Color Amber700 { get; } = GetColor("#b45309");
+    public static Color Amber700 { get; } = GetColor("#bb4d00");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #92400e.
+    /// Gets the Tailwind color with the value of #973c00.
     /// </summary>
-    public static Color Amber800 { get; } = GetColor("#92400e");
+    public static Color Amber800 { get; } = GetColor("#973c00");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #78350f.
+    /// Gets the Tailwind color with the value of #7b3306.
     /// </summary>
-    public static Color Amber900 { get; } = GetColor("#78350f");
+    public static Color Amber900 { get; } = GetColor("#7b3306");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #451a03.
+    /// Gets the Tailwind color with the value of #461901.
     /// </summary>
-    public static Color Amber950 { get; } = GetColor("#451a03");
+    public static Color Amber950 { get; } = GetColor("#461901");
 
     /// <summary>
     /// Gets the Tailwind color with the value of #fefce8.
@@ -468,54 +468,54 @@ public static class TailwindColors
     public static Color Yellow50 { get; } = GetColor("#fefce8");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #fef9c3.
+    /// Gets the Tailwind color with the value of #fef9c2.
     /// </summary>
-    public static Color Yellow100 { get; } = GetColor("#fef9c3");
+    public static Color Yellow100 { get; } = GetColor("#fef9c2");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #fef08a.
+    /// Gets the Tailwind color with the value of #fff085.
     /// </summary>
-    public static Color Yellow200 { get; } = GetColor("#fef08a");
+    public static Color Yellow200 { get; } = GetColor("#fff085");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #fde047.
+    /// Gets the Tailwind color with the value of #ffdf20.
     /// </summary>
-    public static Color Yellow300 { get; } = GetColor("#fde047");
+    public static Color Yellow300 { get; } = GetColor("#ffdf20");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #facc15.
+    /// Gets the Tailwind color with the value of #fdc700.
     /// </summary>
-    public static Color Yellow400 { get; } = GetColor("#facc15");
+    public static Color Yellow400 { get; } = GetColor("#fdc700");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #eab308.
+    /// Gets the Tailwind color with the value of #f0b100.
     /// </summary>
-    public static Color Yellow500 { get; } = GetColor("#eab308");
+    public static Color Yellow500 { get; } = GetColor("#f0b100");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #ca8a04.
+    /// Gets the Tailwind color with the value of #d08700.
     /// </summary>
-    public static Color Yellow600 { get; } = GetColor("#ca8a04");
+    public static Color Yellow600 { get; } = GetColor("#d08700");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #a16207.
+    /// Gets the Tailwind color with the value of #a65f00.
     /// </summary>
-    public static Color Yellow700 { get; } = GetColor("#a16207");
+    public static Color Yellow700 { get; } = GetColor("#a65f00");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #854d0e.
+    /// Gets the Tailwind color with the value of #894b00.
     /// </summary>
-    public static Color Yellow800 { get; } = GetColor("#854d0e");
+    public static Color Yellow800 { get; } = GetColor("#894b00");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #713f12.
+    /// Gets the Tailwind color with the value of #733e0a.
     /// </summary>
-    public static Color Yellow900 { get; } = GetColor("#713f12");
+    public static Color Yellow900 { get; } = GetColor("#733e0a");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #422006.
+    /// Gets the Tailwind color with the value of #432004.
     /// </summary>
-    public static Color Yellow950 { get; } = GetColor("#422006");
+    public static Color Yellow950 { get; } = GetColor("#432004");
 
     /// <summary>
     /// Gets the Tailwind color with the value of #f7fee7.
@@ -523,54 +523,54 @@ public static class TailwindColors
     public static Color Lime50 { get; } = GetColor("#f7fee7");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #ecfccb.
+    /// Gets the Tailwind color with the value of #ecfcca.
     /// </summary>
-    public static Color Lime100 { get; } = GetColor("#ecfccb");
+    public static Color Lime100 { get; } = GetColor("#ecfcca");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #d9f99d.
+    /// Gets the Tailwind color with the value of #d8f999.
     /// </summary>
-    public static Color Lime200 { get; } = GetColor("#d9f99d");
+    public static Color Lime200 { get; } = GetColor("#d8f999");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #bef264.
+    /// Gets the Tailwind color with the value of #bbf451.
     /// </summary>
-    public static Color Lime300 { get; } = GetColor("#bef264");
+    public static Color Lime300 { get; } = GetColor("#bbf451");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #a3e635.
+    /// Gets the Tailwind color with the value of #9ae600.
     /// </summary>
-    public static Color Lime400 { get; } = GetColor("#a3e635");
+    public static Color Lime400 { get; } = GetColor("#9ae600");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #84cc16.
+    /// Gets the Tailwind color with the value of #7ccf00.
     /// </summary>
-    public static Color Lime500 { get; } = GetColor("#84cc16");
+    public static Color Lime500 { get; } = GetColor("#7ccf00");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #65a30d.
+    /// Gets the Tailwind color with the value of #5ea500.
     /// </summary>
-    public static Color Lime600 { get; } = GetColor("#65a30d");
+    public static Color Lime600 { get; } = GetColor("#5ea500");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #4d7c0f.
+    /// Gets the Tailwind color with the value of #497d00.
     /// </summary>
-    public static Color Lime700 { get; } = GetColor("#4d7c0f");
+    public static Color Lime700 { get; } = GetColor("#497d00");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #3f6212.
+    /// Gets the Tailwind color with the value of #3c6300.
     /// </summary>
-    public static Color Lime800 { get; } = GetColor("#3f6212");
+    public static Color Lime800 { get; } = GetColor("#3c6300");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #365314.
+    /// Gets the Tailwind color with the value of #35530e.
     /// </summary>
-    public static Color Lime900 { get; } = GetColor("#365314");
+    public static Color Lime900 { get; } = GetColor("#35530e");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #1a2e05.
+    /// Gets the Tailwind color with the value of #192e03.
     /// </summary>
-    public static Color Lime950 { get; } = GetColor("#1a2e05");
+    public static Color Lime950 { get; } = GetColor("#192e03");
 
     /// <summary>
     /// Gets the Tailwind color with the value of #f0fdf4.
@@ -583,49 +583,49 @@ public static class TailwindColors
     public static Color Green100 { get; } = GetColor("#dcfce7");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #bbf7d0.
+    /// Gets the Tailwind color with the value of #b9f8cf.
     /// </summary>
-    public static Color Green200 { get; } = GetColor("#bbf7d0");
+    public static Color Green200 { get; } = GetColor("#b9f8cf");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #86efac.
+    /// Gets the Tailwind color with the value of #7bf1a8.
     /// </summary>
-    public static Color Green300 { get; } = GetColor("#86efac");
+    public static Color Green300 { get; } = GetColor("#7bf1a8");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #4ade80.
+    /// Gets the Tailwind color with the value of #05df72.
     /// </summary>
-    public static Color Green400 { get; } = GetColor("#4ade80");
+    public static Color Green400 { get; } = GetColor("#05df72");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #22c55e.
+    /// Gets the Tailwind color with the value of #00c950.
     /// </summary>
-    public static Color Green500 { get; } = GetColor("#22c55e");
+    public static Color Green500 { get; } = GetColor("#00c950");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #16a34a.
+    /// Gets the Tailwind color with the value of #00a63e.
     /// </summary>
-    public static Color Green600 { get; } = GetColor("#16a34a");
+    public static Color Green600 { get; } = GetColor("#00a63e");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #15803d.
+    /// Gets the Tailwind color with the value of #008236.
     /// </summary>
-    public static Color Green700 { get; } = GetColor("#15803d");
+    public static Color Green700 { get; } = GetColor("#008236");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #166534.
+    /// Gets the Tailwind color with the value of #016630.
     /// </summary>
-    public static Color Green800 { get; } = GetColor("#166534");
+    public static Color Green800 { get; } = GetColor("#016630");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #14532d.
+    /// Gets the Tailwind color with the value of #0d542b.
     /// </summary>
-    public static Color Green900 { get; } = GetColor("#14532d");
+    public static Color Green900 { get; } = GetColor("#0d542b");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #052e16.
+    /// Gets the Tailwind color with the value of #032e15.
     /// </summary>
-    public static Color Green950 { get; } = GetColor("#052e16");
+    public static Color Green950 { get; } = GetColor("#032e15");
 
     /// <summary>
     /// Gets the Tailwind color with the value of #ecfdf5.
@@ -633,54 +633,54 @@ public static class TailwindColors
     public static Color Emerald50 { get; } = GetColor("#ecfdf5");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #d1fae5.
+    /// Gets the Tailwind color with the value of #d0fae5.
     /// </summary>
-    public static Color Emerald100 { get; } = GetColor("#d1fae5");
+    public static Color Emerald100 { get; } = GetColor("#d0fae5");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #a7f3d0.
+    /// Gets the Tailwind color with the value of #a4f4cf.
     /// </summary>
-    public static Color Emerald200 { get; } = GetColor("#a7f3d0");
+    public static Color Emerald200 { get; } = GetColor("#a4f4cf");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #6ee7b7.
+    /// Gets the Tailwind color with the value of #5ee9b5.
     /// </summary>
-    public static Color Emerald300 { get; } = GetColor("#6ee7b7");
+    public static Color Emerald300 { get; } = GetColor("#5ee9b5");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #34d399.
+    /// Gets the Tailwind color with the value of #00d492.
     /// </summary>
-    public static Color Emerald400 { get; } = GetColor("#34d399");
+    public static Color Emerald400 { get; } = GetColor("#00d492");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #10b981.
+    /// Gets the Tailwind color with the value of #00bc7d.
     /// </summary>
-    public static Color Emerald500 { get; } = GetColor("#10b981");
+    public static Color Emerald500 { get; } = GetColor("#00bc7d");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #059669.
+    /// Gets the Tailwind color with the value of #009966.
     /// </summary>
-    public static Color Emerald600 { get; } = GetColor("#059669");
+    public static Color Emerald600 { get; } = GetColor("#009966");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #047857.
+    /// Gets the Tailwind color with the value of #007a55.
     /// </summary>
-    public static Color Emerald700 { get; } = GetColor("#047857");
+    public static Color Emerald700 { get; } = GetColor("#007a55");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #065f46.
+    /// Gets the Tailwind color with the value of #006045.
     /// </summary>
-    public static Color Emerald800 { get; } = GetColor("#065f46");
+    public static Color Emerald800 { get; } = GetColor("#006045");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #064e3b.
+    /// Gets the Tailwind color with the value of #004f3b.
     /// </summary>
-    public static Color Emerald900 { get; } = GetColor("#064e3b");
+    public static Color Emerald900 { get; } = GetColor("#004f3b");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #022c22.
+    /// Gets the Tailwind color with the value of #002c22.
     /// </summary>
-    public static Color Emerald950 { get; } = GetColor("#022c22");
+    public static Color Emerald950 { get; } = GetColor("#002c22");
 
     /// <summary>
     /// Gets the Tailwind color with the value of #f0fdfa.
@@ -688,54 +688,54 @@ public static class TailwindColors
     public static Color Teal50 { get; } = GetColor("#f0fdfa");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #ccfbf1.
+    /// Gets the Tailwind color with the value of #cbfbf1.
     /// </summary>
-    public static Color Teal100 { get; } = GetColor("#ccfbf1");
+    public static Color Teal100 { get; } = GetColor("#cbfbf1");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #99f6e4.
+    /// Gets the Tailwind color with the value of #96f7e4.
     /// </summary>
-    public static Color Teal200 { get; } = GetColor("#99f6e4");
+    public static Color Teal200 { get; } = GetColor("#96f7e4");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #5eead4.
+    /// Gets the Tailwind color with the value of #46ecd5.
     /// </summary>
-    public static Color Teal300 { get; } = GetColor("#5eead4");
+    public static Color Teal300 { get; } = GetColor("#46ecd5");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #2dd4bf.
+    /// Gets the Tailwind color with the value of #00d5be.
     /// </summary>
-    public static Color Teal400 { get; } = GetColor("#2dd4bf");
+    public static Color Teal400 { get; } = GetColor("#00d5be");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #14b8a6.
+    /// Gets the Tailwind color with the value of #00bba7.
     /// </summary>
-    public static Color Teal500 { get; } = GetColor("#14b8a6");
+    public static Color Teal500 { get; } = GetColor("#00bba7");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #0d9488.
+    /// Gets the Tailwind color with the value of #009689.
     /// </summary>
-    public static Color Teal600 { get; } = GetColor("#0d9488");
+    public static Color Teal600 { get; } = GetColor("#009689");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #0f766e.
+    /// Gets the Tailwind color with the value of #00786f.
     /// </summary>
-    public static Color Teal700 { get; } = GetColor("#0f766e");
+    public static Color Teal700 { get; } = GetColor("#00786f");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #115e59.
+    /// Gets the Tailwind color with the value of #005f5a.
     /// </summary>
-    public static Color Teal800 { get; } = GetColor("#115e59");
+    public static Color Teal800 { get; } = GetColor("#005f5a");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #134e4a.
+    /// Gets the Tailwind color with the value of #0b4f4a.
     /// </summary>
-    public static Color Teal900 { get; } = GetColor("#134e4a");
+    public static Color Teal900 { get; } = GetColor("#0b4f4a");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #042f2e.
+    /// Gets the Tailwind color with the value of #022f2e.
     /// </summary>
-    public static Color Teal950 { get; } = GetColor("#042f2e");
+    public static Color Teal950 { get; } = GetColor("#022f2e");
 
     /// <summary>
     /// Gets the Tailwind color with the value of #ecfeff.
@@ -743,54 +743,54 @@ public static class TailwindColors
     public static Color Cyan50 { get; } = GetColor("#ecfeff");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #cffafe.
+    /// Gets the Tailwind color with the value of #cefafe.
     /// </summary>
-    public static Color Cyan100 { get; } = GetColor("#cffafe");
+    public static Color Cyan100 { get; } = GetColor("#cefafe");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #a5f3fc.
+    /// Gets the Tailwind color with the value of #a2f4fd.
     /// </summary>
-    public static Color Cyan200 { get; } = GetColor("#a5f3fc");
+    public static Color Cyan200 { get; } = GetColor("#a2f4fd");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #67e8f9.
+    /// Gets the Tailwind color with the value of #53eafd.
     /// </summary>
-    public static Color Cyan300 { get; } = GetColor("#67e8f9");
+    public static Color Cyan300 { get; } = GetColor("#53eafd");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #22d3ee.
+    /// Gets the Tailwind color with the value of #00d3f2.
     /// </summary>
-    public static Color Cyan400 { get; } = GetColor("#22d3ee");
+    public static Color Cyan400 { get; } = GetColor("#00d3f2");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #06b6d4.
+    /// Gets the Tailwind color with the value of #00b8db.
     /// </summary>
-    public static Color Cyan500 { get; } = GetColor("#06b6d4");
+    public static Color Cyan500 { get; } = GetColor("#00b8db");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #0891b2.
+    /// Gets the Tailwind color with the value of #0092b8.
     /// </summary>
-    public static Color Cyan600 { get; } = GetColor("#0891b2");
+    public static Color Cyan600 { get; } = GetColor("#0092b8");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #0e7490.
+    /// Gets the Tailwind color with the value of #007595.
     /// </summary>
-    public static Color Cyan700 { get; } = GetColor("#0e7490");
+    public static Color Cyan700 { get; } = GetColor("#007595");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #155e75.
+    /// Gets the Tailwind color with the value of #005f78.
     /// </summary>
-    public static Color Cyan800 { get; } = GetColor("#155e75");
+    public static Color Cyan800 { get; } = GetColor("#005f78");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #164e63.
+    /// Gets the Tailwind color with the value of #104e64.
     /// </summary>
-    public static Color Cyan900 { get; } = GetColor("#164e63");
+    public static Color Cyan900 { get; } = GetColor("#104e64");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #083344.
+    /// Gets the Tailwind color with the value of #053345.
     /// </summary>
-    public static Color Cyan950 { get; } = GetColor("#083344");
+    public static Color Cyan950 { get; } = GetColor("#053345");
 
     /// <summary>
     /// Gets the Tailwind color with the value of #f0f9ff.
@@ -798,54 +798,54 @@ public static class TailwindColors
     public static Color Sky50 { get; } = GetColor("#f0f9ff");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #e0f2fe.
+    /// Gets the Tailwind color with the value of #dff2fe.
     /// </summary>
-    public static Color Sky100 { get; } = GetColor("#e0f2fe");
+    public static Color Sky100 { get; } = GetColor("#dff2fe");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #bae6fd.
+    /// Gets the Tailwind color with the value of #b8e6fe.
     /// </summary>
-    public static Color Sky200 { get; } = GetColor("#bae6fd");
+    public static Color Sky200 { get; } = GetColor("#b8e6fe");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #7dd3fc.
+    /// Gets the Tailwind color with the value of #74d4ff.
     /// </summary>
-    public static Color Sky300 { get; } = GetColor("#7dd3fc");
+    public static Color Sky300 { get; } = GetColor("#74d4ff");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #38bdf8.
+    /// Gets the Tailwind color with the value of #00bcff.
     /// </summary>
-    public static Color Sky400 { get; } = GetColor("#38bdf8");
+    public static Color Sky400 { get; } = GetColor("#00bcff");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #0ea5e9.
+    /// Gets the Tailwind color with the value of #00a6f4.
     /// </summary>
-    public static Color Sky500 { get; } = GetColor("#0ea5e9");
+    public static Color Sky500 { get; } = GetColor("#00a6f4");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #0284c7.
+    /// Gets the Tailwind color with the value of #0084d1.
     /// </summary>
-    public static Color Sky600 { get; } = GetColor("#0284c7");
+    public static Color Sky600 { get; } = GetColor("#0084d1");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #0369a1.
+    /// Gets the Tailwind color with the value of #0069a8.
     /// </summary>
-    public static Color Sky700 { get; } = GetColor("#0369a1");
+    public static Color Sky700 { get; } = GetColor("#0069a8");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #075985.
+    /// Gets the Tailwind color with the value of #00598a.
     /// </summary>
-    public static Color Sky800 { get; } = GetColor("#075985");
+    public static Color Sky800 { get; } = GetColor("#00598a");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #0c4a6e.
+    /// Gets the Tailwind color with the value of #024a70.
     /// </summary>
-    public static Color Sky900 { get; } = GetColor("#0c4a6e");
+    public static Color Sky900 { get; } = GetColor("#024a70");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #082f49.
+    /// Gets the Tailwind color with the value of #052f4a.
     /// </summary>
-    public static Color Sky950 { get; } = GetColor("#082f49");
+    public static Color Sky950 { get; } = GetColor("#052f4a");
 
     /// <summary>
     /// Gets the Tailwind color with the value of #eff6ff.
@@ -858,49 +858,49 @@ public static class TailwindColors
     public static Color Blue100 { get; } = GetColor("#dbeafe");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #bfdbfe.
+    /// Gets the Tailwind color with the value of #bedbff.
     /// </summary>
-    public static Color Blue200 { get; } = GetColor("#bfdbfe");
+    public static Color Blue200 { get; } = GetColor("#bedbff");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #93c5fd.
+    /// Gets the Tailwind color with the value of #8ec5ff.
     /// </summary>
-    public static Color Blue300 { get; } = GetColor("#93c5fd");
+    public static Color Blue300 { get; } = GetColor("#8ec5ff");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #60a5fa.
+    /// Gets the Tailwind color with the value of #51a2ff.
     /// </summary>
-    public static Color Blue400 { get; } = GetColor("#60a5fa");
+    public static Color Blue400 { get; } = GetColor("#51a2ff");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #3b82f6.
+    /// Gets the Tailwind color with the value of #2b7fff.
     /// </summary>
-    public static Color Blue500 { get; } = GetColor("#3b82f6");
+    public static Color Blue500 { get; } = GetColor("#2b7fff");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #2563eb.
+    /// Gets the Tailwind color with the value of #155dfc.
     /// </summary>
-    public static Color Blue600 { get; } = GetColor("#2563eb");
+    public static Color Blue600 { get; } = GetColor("#155dfc");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #1d4ed8.
+    /// Gets the Tailwind color with the value of #1447e6.
     /// </summary>
-    public static Color Blue700 { get; } = GetColor("#1d4ed8");
+    public static Color Blue700 { get; } = GetColor("#1447e6");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #1e40af.
+    /// Gets the Tailwind color with the value of #193cb8.
     /// </summary>
-    public static Color Blue800 { get; } = GetColor("#1e40af");
+    public static Color Blue800 { get; } = GetColor("#193cb8");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #1e3a8a.
+    /// Gets the Tailwind color with the value of #1c398e.
     /// </summary>
-    public static Color Blue900 { get; } = GetColor("#1e3a8a");
+    public static Color Blue900 { get; } = GetColor("#1c398e");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #172554.
+    /// Gets the Tailwind color with the value of #162456.
     /// </summary>
-    public static Color Blue950 { get; } = GetColor("#172554");
+    public static Color Blue950 { get; } = GetColor("#162456");
 
     /// <summary>
     /// Gets the Tailwind color with the value of #eef2ff.
@@ -913,49 +913,49 @@ public static class TailwindColors
     public static Color Indigo100 { get; } = GetColor("#e0e7ff");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #c7d2fe.
+    /// Gets the Tailwind color with the value of #c6d2ff.
     /// </summary>
-    public static Color Indigo200 { get; } = GetColor("#c7d2fe");
+    public static Color Indigo200 { get; } = GetColor("#c6d2ff");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #a5b4fc.
+    /// Gets the Tailwind color with the value of #a3b3ff.
     /// </summary>
-    public static Color Indigo300 { get; } = GetColor("#a5b4fc");
+    public static Color Indigo300 { get; } = GetColor("#a3b3ff");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #818cf8.
+    /// Gets the Tailwind color with the value of #7c86ff.
     /// </summary>
-    public static Color Indigo400 { get; } = GetColor("#818cf8");
+    public static Color Indigo400 { get; } = GetColor("#7c86ff");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #6366f1.
+    /// Gets the Tailwind color with the value of #615fff.
     /// </summary>
-    public static Color Indigo500 { get; } = GetColor("#6366f1");
+    public static Color Indigo500 { get; } = GetColor("#615fff");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #4f46e5.
+    /// Gets the Tailwind color with the value of #4f39f6.
     /// </summary>
-    public static Color Indigo600 { get; } = GetColor("#4f46e5");
+    public static Color Indigo600 { get; } = GetColor("#4f39f6");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #4338ca.
+    /// Gets the Tailwind color with the value of #432dd7.
     /// </summary>
-    public static Color Indigo700 { get; } = GetColor("#4338ca");
+    public static Color Indigo700 { get; } = GetColor("#432dd7");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #3730a3.
+    /// Gets the Tailwind color with the value of #372aac.
     /// </summary>
-    public static Color Indigo800 { get; } = GetColor("#3730a3");
+    public static Color Indigo800 { get; } = GetColor("#372aac");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #312e81.
+    /// Gets the Tailwind color with the value of #312c85.
     /// </summary>
-    public static Color Indigo900 { get; } = GetColor("#312e81");
+    public static Color Indigo900 { get; } = GetColor("#312c85");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #1e1b4b.
+    /// Gets the Tailwind color with the value of #1e1a4d.
     /// </summary>
-    public static Color Indigo950 { get; } = GetColor("#1e1b4b");
+    public static Color Indigo950 { get; } = GetColor("#1e1a4d");
 
     /// <summary>
     /// Gets the Tailwind color with the value of #f5f3ff.
@@ -968,49 +968,49 @@ public static class TailwindColors
     public static Color Violet100 { get; } = GetColor("#ede9fe");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #ddd6fe.
+    /// Gets the Tailwind color with the value of #ddd6ff.
     /// </summary>
-    public static Color Violet200 { get; } = GetColor("#ddd6fe");
+    public static Color Violet200 { get; } = GetColor("#ddd6ff");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #c4b5fd.
+    /// Gets the Tailwind color with the value of #c4b4ff.
     /// </summary>
-    public static Color Violet300 { get; } = GetColor("#c4b5fd");
+    public static Color Violet300 { get; } = GetColor("#c4b4ff");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #a78bfa.
+    /// Gets the Tailwind color with the value of #a684ff.
     /// </summary>
-    public static Color Violet400 { get; } = GetColor("#a78bfa");
+    public static Color Violet400 { get; } = GetColor("#a684ff");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #8b5cf6.
+    /// Gets the Tailwind color with the value of #8e51ff.
     /// </summary>
-    public static Color Violet500 { get; } = GetColor("#8b5cf6");
+    public static Color Violet500 { get; } = GetColor("#8e51ff");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #7c3aed.
+    /// Gets the Tailwind color with the value of #7f22fe.
     /// </summary>
-    public static Color Violet600 { get; } = GetColor("#7c3aed");
+    public static Color Violet600 { get; } = GetColor("#7f22fe");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #6d28d9.
+    /// Gets the Tailwind color with the value of #7008e7.
     /// </summary>
-    public static Color Violet700 { get; } = GetColor("#6d28d9");
+    public static Color Violet700 { get; } = GetColor("#7008e7");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #5b21b6.
+    /// Gets the Tailwind color with the value of #5d0ec0.
     /// </summary>
-    public static Color Violet800 { get; } = GetColor("#5b21b6");
+    public static Color Violet800 { get; } = GetColor("#5d0ec0");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #4c1d95.
+    /// Gets the Tailwind color with the value of #4d179a.
     /// </summary>
-    public static Color Violet900 { get; } = GetColor("#4c1d95");
+    public static Color Violet900 { get; } = GetColor("#4d179a");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #2e1065.
+    /// Gets the Tailwind color with the value of #2f0d68.
     /// </summary>
-    public static Color Violet950 { get; } = GetColor("#2e1065");
+    public static Color Violet950 { get; } = GetColor("#2f0d68");
 
     /// <summary>
     /// Gets the Tailwind color with the value of #faf5ff.
@@ -1023,49 +1023,49 @@ public static class TailwindColors
     public static Color Purple100 { get; } = GetColor("#f3e8ff");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #e9d5ff.
+    /// Gets the Tailwind color with the value of #e9d4ff.
     /// </summary>
-    public static Color Purple200 { get; } = GetColor("#e9d5ff");
+    public static Color Purple200 { get; } = GetColor("#e9d4ff");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #d8b4fe.
+    /// Gets the Tailwind color with the value of #dab2ff.
     /// </summary>
-    public static Color Purple300 { get; } = GetColor("#d8b4fe");
+    public static Color Purple300 { get; } = GetColor("#dab2ff");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #c084fc.
+    /// Gets the Tailwind color with the value of #c27aff.
     /// </summary>
-    public static Color Purple400 { get; } = GetColor("#c084fc");
+    public static Color Purple400 { get; } = GetColor("#c27aff");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #a855f7.
+    /// Gets the Tailwind color with the value of #ad46ff.
     /// </summary>
-    public static Color Purple500 { get; } = GetColor("#a855f7");
+    public static Color Purple500 { get; } = GetColor("#ad46ff");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #9333ea.
+    /// Gets the Tailwind color with the value of #9810fa.
     /// </summary>
-    public static Color Purple600 { get; } = GetColor("#9333ea");
+    public static Color Purple600 { get; } = GetColor("#9810fa");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #7e22ce.
+    /// Gets the Tailwind color with the value of #8200db.
     /// </summary>
-    public static Color Purple700 { get; } = GetColor("#7e22ce");
+    public static Color Purple700 { get; } = GetColor("#8200db");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #6b21a8.
+    /// Gets the Tailwind color with the value of #6e11b0.
     /// </summary>
-    public static Color Purple800 { get; } = GetColor("#6b21a8");
+    public static Color Purple800 { get; } = GetColor("#6e11b0");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #581c87.
+    /// Gets the Tailwind color with the value of #59168b.
     /// </summary>
-    public static Color Purple900 { get; } = GetColor("#581c87");
+    public static Color Purple900 { get; } = GetColor("#59168b");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #3b0764.
+    /// Gets the Tailwind color with the value of #3c0366.
     /// </summary>
-    public static Color Purple950 { get; } = GetColor("#3b0764");
+    public static Color Purple950 { get; } = GetColor("#3c0366");
 
     /// <summary>
     /// Gets the Tailwind color with the value of #fdf4ff.
@@ -1078,49 +1078,49 @@ public static class TailwindColors
     public static Color Fuchsia100 { get; } = GetColor("#fae8ff");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #f5d0fe.
+    /// Gets the Tailwind color with the value of #f6cfff.
     /// </summary>
-    public static Color Fuchsia200 { get; } = GetColor("#f5d0fe");
+    public static Color Fuchsia200 { get; } = GetColor("#f6cfff");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #f0abfc.
+    /// Gets the Tailwind color with the value of #f4a8ff.
     /// </summary>
-    public static Color Fuchsia300 { get; } = GetColor("#f0abfc");
+    public static Color Fuchsia300 { get; } = GetColor("#f4a8ff");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #e879f9.
+    /// Gets the Tailwind color with the value of #ed6aff.
     /// </summary>
-    public static Color Fuchsia400 { get; } = GetColor("#e879f9");
+    public static Color Fuchsia400 { get; } = GetColor("#ed6aff");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #d946ef.
+    /// Gets the Tailwind color with the value of #e12afb.
     /// </summary>
-    public static Color Fuchsia500 { get; } = GetColor("#d946ef");
+    public static Color Fuchsia500 { get; } = GetColor("#e12afb");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #c026d3.
+    /// Gets the Tailwind color with the value of #c800de.
     /// </summary>
-    public static Color Fuchsia600 { get; } = GetColor("#c026d3");
+    public static Color Fuchsia600 { get; } = GetColor("#c800de");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #a21caf.
+    /// Gets the Tailwind color with the value of #a800b7.
     /// </summary>
-    public static Color Fuchsia700 { get; } = GetColor("#a21caf");
+    public static Color Fuchsia700 { get; } = GetColor("#a800b7");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #86198f.
+    /// Gets the Tailwind color with the value of #8a0194.
     /// </summary>
-    public static Color Fuchsia800 { get; } = GetColor("#86198f");
+    public static Color Fuchsia800 { get; } = GetColor("#8a0194");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #701a75.
+    /// Gets the Tailwind color with the value of #721378.
     /// </summary>
-    public static Color Fuchsia900 { get; } = GetColor("#701a75");
+    public static Color Fuchsia900 { get; } = GetColor("#721378");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #4a044e.
+    /// Gets the Tailwind color with the value of #4b004f.
     /// </summary>
-    public static Color Fuchsia950 { get; } = GetColor("#4a044e");
+    public static Color Fuchsia950 { get; } = GetColor("#4b004f");
 
     /// <summary>
     /// Gets the Tailwind color with the value of #fdf2f8.
@@ -1133,49 +1133,49 @@ public static class TailwindColors
     public static Color Pink100 { get; } = GetColor("#fce7f3");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #fbcfe8.
+    /// Gets the Tailwind color with the value of #fccee8.
     /// </summary>
-    public static Color Pink200 { get; } = GetColor("#fbcfe8");
+    public static Color Pink200 { get; } = GetColor("#fccee8");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #f9a8d4.
+    /// Gets the Tailwind color with the value of #fda5d5.
     /// </summary>
-    public static Color Pink300 { get; } = GetColor("#f9a8d4");
+    public static Color Pink300 { get; } = GetColor("#fda5d5");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #f472b6.
+    /// Gets the Tailwind color with the value of #fb64b6.
     /// </summary>
-    public static Color Pink400 { get; } = GetColor("#f472b6");
+    public static Color Pink400 { get; } = GetColor("#fb64b6");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #ec4899.
+    /// Gets the Tailwind color with the value of #f6339a.
     /// </summary>
-    public static Color Pink500 { get; } = GetColor("#ec4899");
+    public static Color Pink500 { get; } = GetColor("#f6339a");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #db2777.
+    /// Gets the Tailwind color with the value of #e60076.
     /// </summary>
-    public static Color Pink600 { get; } = GetColor("#db2777");
+    public static Color Pink600 { get; } = GetColor("#e60076");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #be185d.
+    /// Gets the Tailwind color with the value of #c6005c.
     /// </summary>
-    public static Color Pink700 { get; } = GetColor("#be185d");
+    public static Color Pink700 { get; } = GetColor("#c6005c");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #9d174d.
+    /// Gets the Tailwind color with the value of #a3004c.
     /// </summary>
-    public static Color Pink800 { get; } = GetColor("#9d174d");
+    public static Color Pink800 { get; } = GetColor("#a3004c");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #831843.
+    /// Gets the Tailwind color with the value of #861043.
     /// </summary>
-    public static Color Pink900 { get; } = GetColor("#831843");
+    public static Color Pink900 { get; } = GetColor("#861043");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #500724.
+    /// Gets the Tailwind color with the value of #510424.
     /// </summary>
-    public static Color Pink950 { get; } = GetColor("#500724");
+    public static Color Pink950 { get; } = GetColor("#510424");
 
     /// <summary>
     /// Gets the Tailwind color with the value of #fff1f2.
@@ -1188,47 +1188,47 @@ public static class TailwindColors
     public static Color Rose100 { get; } = GetColor("#ffe4e6");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #fecdd3.
+    /// Gets the Tailwind color with the value of #ffccd3.
     /// </summary>
-    public static Color Rose200 { get; } = GetColor("#fecdd3");
+    public static Color Rose200 { get; } = GetColor("#ffccd3");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #fda4af.
+    /// Gets the Tailwind color with the value of #ffa1ad.
     /// </summary>
-    public static Color Rose300 { get; } = GetColor("#fda4af");
+    public static Color Rose300 { get; } = GetColor("#ffa1ad");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #fb7185.
+    /// Gets the Tailwind color with the value of #ff637e.
     /// </summary>
-    public static Color Rose400 { get; } = GetColor("#fb7185");
+    public static Color Rose400 { get; } = GetColor("#ff637e");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #f43f5e.
+    /// Gets the Tailwind color with the value of #ff2056.
     /// </summary>
-    public static Color Rose500 { get; } = GetColor("#f43f5e");
+    public static Color Rose500 { get; } = GetColor("#ff2056");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #e11d48.
+    /// Gets the Tailwind color with the value of #ec003f.
     /// </summary>
-    public static Color Rose600 { get; } = GetColor("#e11d48");
+    public static Color Rose600 { get; } = GetColor("#ec003f");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #be123c.
+    /// Gets the Tailwind color with the value of #c70036.
     /// </summary>
-    public static Color Rose700 { get; } = GetColor("#be123c");
+    public static Color Rose700 { get; } = GetColor("#c70036");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #9f1239.
+    /// Gets the Tailwind color with the value of #a50036.
     /// </summary>
-    public static Color Rose800 { get; } = GetColor("#9f1239");
+    public static Color Rose800 { get; } = GetColor("#a50036");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #881337.
+    /// Gets the Tailwind color with the value of #8b0836.
     /// </summary>
-    public static Color Rose900 { get; } = GetColor("#881337");
+    public static Color Rose900 { get; } = GetColor("#8b0836");
 
     /// <summary>
-    /// Gets the Tailwind color with the value of #4c0519.
+    /// Gets the Tailwind color with the value of #4d0218.
     /// </summary>
-    public static Color Rose950 { get; } = GetColor("#4c0519");
+    public static Color Rose950 { get; } = GetColor("#4d0218");
 }
