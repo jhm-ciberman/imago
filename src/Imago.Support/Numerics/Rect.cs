@@ -107,22 +107,22 @@ public struct Rect : IEquatable<Rect>
     }
 
     /// <summary>
-    /// Get or sets the rightmost position of the rectangle.
+    /// Gets or sets the rightmost position of the rectangle.
     /// </summary>
     public float Right { get => this.X + this.Width; set => this.Width = value - this.X; }
 
     /// <summary>
-    /// Get or sets the bottommost position of the rectangle.
+    /// Gets or sets the bottommost position of the rectangle.
     /// </summary>
     public float Bottom { get => this.Y + this.Height; set => this.Height = value - this.Y; }
 
     /// <summary>
-    /// Get or sets the leftmost position of the rectangle.
+    /// Gets or sets the leftmost position of the rectangle.
     /// </summary>
     public float Left { get => this.X; set => this.X = value; }
 
     /// <summary>
-    /// Get or sets the topmost position of the rectangle.
+    /// Gets or sets the topmost position of the rectangle.
     /// </summary>
     public float Top { get => this.Y; set => this.Y = value; }
 

@@ -33,7 +33,7 @@ public struct RectInt : IEquatable<RectInt>
     public int Height { get; set; }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Rect"/> struct.
+    /// Initializes a new instance of the <see cref="RectInt"/> struct.
     /// </summary>
     /// <param name="coords">The position of the rectangle.</param>
     /// <param name="size">The size of the rectangle.</param>
@@ -46,7 +46,7 @@ public struct RectInt : IEquatable<RectInt>
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Rect"/> struct.
+    /// Initializes a new instance of the <see cref="RectInt"/> struct.
     /// </summary>
     /// <param name="x">The X position of the rectangle.</param>
     /// <param name="y">The Y position of the rectangle.</param>
@@ -102,17 +102,17 @@ public struct RectInt : IEquatable<RectInt>
     }
 
     /// <summary>
-    /// Get or sets the rightmost position of the rectangle.
+    /// Gets or sets the rightmost position of the rectangle.
     /// </summary>
     public int Right { get => this.X + this.Width; set => this.Width = value - this.X; }
 
     /// <summary>
-    /// Get or sets the bottommost position of the rectangle.
+    /// Gets or sets the bottommost position of the rectangle.
     /// </summary>
     public int Bottom { get => this.Y + this.Height; set => this.Height = value - this.Y; }
 
     /// <summary>
-    /// Get or sets the leftmost position of the rectangle.
+    /// Gets or sets the leftmost position of the rectangle.
     /// </summary>
     public int Left
     {
@@ -126,7 +126,7 @@ public struct RectInt : IEquatable<RectInt>
     }
 
     /// <summary>
-    /// Get or sets the topmost position of the rectangle.
+    /// Gets or sets the topmost position of the rectangle.
     /// </summary>
     public int Top
     {

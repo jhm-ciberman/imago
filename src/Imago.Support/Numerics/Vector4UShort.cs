@@ -31,7 +31,7 @@ public struct Vector4UShort
     public ushort W;
 
     /// <summary>
-    /// Constructs a new Vector4UShort.
+    /// Initializes a new instance of the <see cref="Vector4UShort"/> struct.
     /// </summary>
     /// <param name="x">The X component of the vector.</param>
     /// <param name="y">The Y component of the vector.</param>

@@ -32,11 +32,11 @@ public class BinPacker
     public bool IsFull => this._freeArea == 0;
 
     /// <summary>
-    /// Try to insert a rectangle into the bin. Returns whether the rectangle was successfully inserted.
+    /// Try to insert a rectangle into the bin.
     /// </summary>
     /// <param name="width">The width of the rectangle.</param>
     /// <param name="height">The height of the rectangle.</param>
-    /// <param name="coords">The coorddinates where the rectangle was inserted.</param>
+    /// <param name="coords">The coordinates where the rectangle was inserted.</param>
     /// <returns>Whether the rectangle was successfully inserted.</returns>
     public bool TryFit(uint width, uint height, out Vector2Int coords)
     {
