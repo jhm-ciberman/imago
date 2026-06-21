@@ -356,10 +356,15 @@ public class Stage
     /// Prepares all layers for rendering.
     /// </summary>
     /// <param name="renderTexture">The render texture that will be used for rendering.</param>
-    public void PrepareForRender(RenderTexture renderTexture)
+    /// <param name="includeImGui">Whether to let the active screen submit its ImGui overlay for this frame.</param>
+    public void PrepareForRender(RenderTexture renderTexture, bool includeImGui)
     {
-        this.ImGuiRendering?.Invoke();
-        this.ImGuiRendered?.Invoke();
+        if (includeImGui)
+        {
+            this.ImGuiRendering?.Invoke();
+            this.ImGuiRendered?.Invoke();
+        }
+
         this.Scene3D?.PrepareForRender(renderTexture);
     }
 

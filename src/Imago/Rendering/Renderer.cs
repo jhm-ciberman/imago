@@ -96,7 +96,7 @@ public class Renderer : IDisposable
     private readonly Forward3DRenderer _forward3DRenderer;
 
     private readonly SpritesPass _spritesPass;
-    private readonly SpritesPass _overlaySpritesPass;
+    private readonly Dictionary<OutputDescription, SpritesPass> _overlaySpritesPasses = new();
     private readonly ImGuiPass _imGuiPass;
 
     private readonly RendererResources _rendererResources;
@@ -154,7 +154,7 @@ public class Renderer : IDisposable
         this._forward3DRenderer = new Forward3DRenderer(this);
         this._imGuiPass = new ImGuiPass(this);
         this._spritesPass = new SpritesPass(this);
-        this._overlaySpritesPass = new SpritesPass(this, this.FullScreenRenderTexture, capacity: 64);
+        this._overlaySpritesPasses[this.FullScreenRenderTexture.OutputDescription] = new SpritesPass(this, this.FullScreenRenderTexture, capacity: 64);
         this._fullScreenPass = new FullScreenPass(this, isPixelArt: false);
         this._fullScreenPixelArtPass = new FullScreenPass(this, isPixelArt: true);
 
@@ -261,7 +261,7 @@ public class Renderer : IDisposable
     }
 
     /// <summary>
-    /// Renders a <see cref="Stage"/> to the main swapchain.
+    /// Renders a <see cref="Stage"/> to the screen.
     /// </summary>
     /// <param name="stage">The stage to render.</param>
     public void Render(Stage stage)
@@ -270,8 +270,33 @@ public class Renderer : IDisposable
         stats.RenderTime.Begin();
         stats.BeginFrame();
 
+        this.RenderStage(stage, this.FullScreenRenderTexture, includeImGui: true);
+
+        this._forward3DRenderer.ReadPickingResult(stage.Scene3D);
+        stats.RenderTime.End();
+
+        if (this.GraphicsDevice.MainSwapchain != null)
+        {
+            this.GraphicsDevice.SwapBuffers();
+        }
+    }
+
+    /// <summary>
+    /// Renders a <see cref="Stage"/> into the given render target.
+    /// </summary>
+    /// <remarks>
+    /// Honors the visibility of the scene and every layer, so hiding UI first yields a clean capture.
+    /// The result is left in <paramref name="target"/> for read-back or compositing rather than shown on screen.
+    /// </remarks>
+    /// <param name="stage">The stage to render.</param>
+    /// <param name="target">The target to render into.</param>
+    /// <param name="includeImGui">Whether to draw the ImGui overlay, which only appears when rendering to the screen.</param>
+    public void RenderStage(Stage stage, IRenderTexture target, bool includeImGui)
+    {
+        var stats = this.Statistics;
+
         stats.PreparePhase.Begin();
-        stage.PrepareForRender(this.MainRenderTexture);
+        stage.PrepareForRender(this.MainRenderTexture, includeImGui);
         var cl = this._commandList;
         cl.Begin();
         this._rendererResources.Update(cl);
@@ -305,15 +330,20 @@ public class Renderer : IDisposable
             }
         }
 
-        this._fullScreenPass.Render(cl, this.MainRenderTexture);
-        this._fullScreenPixelArtPass.Render(cl, this.GuiRenderTexture);
-        this._imGuiPass.Render(cl);
+        this._fullScreenPass.Render(cl, this.MainRenderTexture, target);
+        this._fullScreenPixelArtPass.Render(cl, this.GuiRenderTexture, target);
 
+        if (includeImGui)
+        {
+            this._imGuiPass.Render(cl);
+        }
+
+        var overlayPass = this.GetOverlaySpritesPass(target);
         foreach (var layer in stage.OverlayLayers)
         {
             if (layer.IsVisible)
             {
-                this._overlaySpritesPass.Render(cl, this.FullScreenRenderTexture, layer);
+                overlayPass.Render(cl, target, layer);
             }
         }
 
@@ -325,15 +355,17 @@ public class Renderer : IDisposable
         this.GraphicsDevice.SubmitCommands(cl);
         this._disposeCollector.DisposeAll();
         stats.GpuSync.End();
+    }
 
-        this._forward3DRenderer.ReadPickingResult(stage.Scene3D);
-
-        stats.RenderTime.End();
-
-        if (this.GraphicsDevice.MainSwapchain != null)
+    private SpritesPass GetOverlaySpritesPass(IRenderTexture target)
+    {
+        if (!this._overlaySpritesPasses.TryGetValue(target.OutputDescription, out var pass))
         {
-            this.GraphicsDevice.SwapBuffers();
+            pass = new SpritesPass(this, target, capacity: 64);
+            this._overlaySpritesPasses.Add(target.OutputDescription, pass);
         }
+
+        return pass;
     }
 
 
@@ -571,7 +603,10 @@ public class Renderer : IDisposable
             // Passes
             this._imGuiPass.Dispose();
             this._spritesPass.Dispose();
-            this._overlaySpritesPass.Dispose();
+            foreach (var pass in this._overlaySpritesPasses.Values)
+            {
+                pass.Dispose();
+            }
             this._fullScreenPass.Dispose();
             this._forward3DRenderer.Dispose();
             this._rendererResources.Dispose();

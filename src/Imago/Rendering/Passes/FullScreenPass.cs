@@ -10,15 +10,17 @@ namespace Imago.Rendering.Passes;
 
 internal class FullScreenPass : IDisposable
 {
-    private readonly IRenderTexture _destinationTexture;
-
     private readonly GraphicsDevice _gd;
-
-    private readonly Pipeline _pipeline;
 
     private readonly DeviceBuffer _vertexBuffer;
 
     private readonly ResourceLayout _resourceLayout;
+
+    private readonly VertexLayoutDescription _vertexLayout;
+
+    private readonly NeoVeldrid.Shader[] _shaders;
+
+    private readonly Dictionary<OutputDescription, Pipeline> _pipelines = new();
 
     private readonly Dictionary<NativeTexture, ResourceSet> _resourceSets = new();
 
@@ -27,12 +29,7 @@ internal class FullScreenPass : IDisposable
         this._gd = renderer.GraphicsDevice;
         var factory = this._gd.ResourceFactory;
 
-        //this._sourceTexture = renderer.MainRenderTexture;
-        //this._sourceTexture.Resized += (sender, args) => this.RegenerateResourceSet();
-
-        this._destinationTexture = renderer.FullScreenRenderTexture;
-
-        var vertexLayouts = new VertexLayoutDescription(
+        this._vertexLayout = new VertexLayoutDescription(
             new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float4)
         );
 
@@ -41,24 +38,34 @@ internal class FullScreenPass : IDisposable
             new ResourceLayoutElementDescription("MainSampler", ResourceKind.Sampler, ShaderStages.Fragment)
         ));
 
-        var shaders = ShaderCompiler.CompileShaders(this._gd, _vertexCode, isPixelArt ? _pixelArtfragmentCode : _fragmentCode);
-
-        this._pipeline = this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription
-        {
-            DepthStencilState = this._destinationTexture.OutputDescription.DepthAttachment.HasValue
-                ? DepthStencilStateDescription.DepthOnlyLessEqual
-                : DepthStencilStateDescription.Disabled,
-            PrimitiveTopology = PrimitiveTopology.TriangleList,
-            ShaderSet = new ShaderSetDescription([vertexLayouts], shaders),
-            BlendState = BlendStateDescription.SingleAlphaBlend,
-            RasterizerState = RasterizerStateDescription.CullNone,
-            Outputs = this._destinationTexture.OutputDescription,
-            ResourceLayouts = [this._resourceLayout],
-        });
+        this._shaders = ShaderCompiler.CompileShaders(this._gd, _vertexCode, isPixelArt ? _pixelArtfragmentCode : _fragmentCode);
 
         this._vertexBuffer = factory.CreateBuffer(new BufferDescription(16 * 6, BufferUsage.VertexBuffer));
         var quadVertices = GetQuadVertices(this._gd.IsUvOriginTopLeft);
         this._gd.UpdateBuffer(this._vertexBuffer, 0, quadVertices);
+    }
+
+    private Pipeline GetPipeline(OutputDescription output)
+    {
+        if (!this._pipelines.TryGetValue(output, out var pipeline))
+        {
+            pipeline = this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription
+            {
+                DepthStencilState = output.DepthAttachment.HasValue
+                    ? DepthStencilStateDescription.DepthOnlyLessEqual
+                    : DepthStencilStateDescription.Disabled,
+                PrimitiveTopology = PrimitiveTopology.TriangleList,
+                ShaderSet = new ShaderSetDescription([this._vertexLayout], this._shaders),
+                BlendState = BlendStateDescription.SingleAlphaBlend,
+                RasterizerState = RasterizerStateDescription.CullNone,
+                Outputs = output,
+                ResourceLayouts = [this._resourceLayout],
+            });
+
+            this._pipelines.Add(output, pipeline);
+        }
+
+        return pipeline;
     }
 
     private static Vector4[] GetQuadVertices(bool isUvOriginTopLeft)
@@ -79,7 +86,11 @@ internal class FullScreenPass : IDisposable
     {
         this._vertexBuffer.Dispose();
         this._resourceLayout.Dispose();
-        this._pipeline.Dispose();
+
+        foreach (var pipeline in this._pipelines.Values)
+        {
+            pipeline.Dispose();
+        }
 
         foreach (var resourceSet in this._resourceSets.Values)
         {
@@ -87,10 +98,10 @@ internal class FullScreenPass : IDisposable
         }
     }
 
-    public void Render(CommandList cl, IRenderTexture source)
+    public void Render(CommandList cl, IRenderTexture source, IRenderTexture destination)
     {
-        cl.SetFramebuffer(this._destinationTexture.Framebuffer);
-        cl.SetPipeline(this._pipeline);
+        cl.SetFramebuffer(destination.Framebuffer);
+        cl.SetPipeline(this.GetPipeline(destination.OutputDescription));
         cl.SetVertexBuffer(0, this._vertexBuffer);
 
         var resourceSet = this.GetResourceSet(source.NativeTexture);
