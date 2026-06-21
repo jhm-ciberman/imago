@@ -65,9 +65,9 @@ public class LitMeshBuilder
     /// <summary>
     /// Sets the texture rect of the mesh.
     /// </summary>
-    /// <param name="uv1"></param>
-    /// <param name="uv2"></param>
-    /// <returns></returns>
+    /// <param name="uv1">The top-left corner of the texture rectangle, in texture-space coordinates.</param>
+    /// <param name="uv2">The bottom-right corner of the texture rectangle, in texture-space coordinates.</param>
+    /// <returns>This builder, for chaining.</returns>
     public LitMeshBuilder SetTextureRect(Vector2 uv1, Vector2 uv2)
     {
         this._uv1 = uv1;
@@ -78,12 +78,12 @@ public class LitMeshBuilder
     /// <summary>
     /// Adds a quad to the mesh with a quad diagonal from top-left to bottom-right.
     /// </summary>
-    /// <param name="tl"></param>
-    /// <param name="tr"></param>
-    /// <param name="bl"></param>
-    /// <param name="br"></param>
-    /// <param name="horizontalMirrorUV"></param>
-    /// <param name="normalPointsNegative"></param>
+    /// <param name="tl">The top-left vertex.</param>
+    /// <param name="tr">The top-right vertex.</param>
+    /// <param name="bl">The bottom-left vertex.</param>
+    /// <param name="br">The bottom-right vertex.</param>
+    /// <param name="horizontalMirrorUV">Whether to mirror the texture coordinates horizontally.</param>
+    /// <param name="normalPointsNegative">Whether to reverse the triangle winding so the face points the opposite way.</param>
     public void AddQuadTLBR(LitVertex tl, LitVertex tr, LitVertex bl, LitVertex br, bool horizontalMirrorUV = false, bool normalPointsNegative = false)
     {
         ReadOnlySpan<LitVertex> verts = [tl, tr, bl, br];
@@ -93,12 +93,12 @@ public class LitMeshBuilder
     /// <summary>
     /// Adds a quad to the mesh with a quad diagonal from bottom-left to top-right.
     /// </summary>
-    /// <param name="tl"></param>
-    /// <param name="tr"></param>
-    /// <param name="bl"></param>
-    /// <param name="br"></param>
-    /// <param name="horizontalMirrorUV"></param>
-    /// <param name="normalPointsNegative"></param>
+    /// <param name="tl">The top-left vertex.</param>
+    /// <param name="tr">The top-right vertex.</param>
+    /// <param name="bl">The bottom-left vertex.</param>
+    /// <param name="br">The bottom-right vertex.</param>
+    /// <param name="horizontalMirrorUV">Whether to mirror the texture coordinates horizontally.</param>
+    /// <param name="normalPointsNegative">Whether to reverse the triangle winding so the face points the opposite way.</param>
     public void AddQuadBLTR(LitVertex tl, LitVertex tr, LitVertex bl, LitVertex br, bool horizontalMirrorUV = false, bool normalPointsNegative = false)
     {
         ReadOnlySpan<LitVertex> verts = [tl, tr, bl, br];
@@ -108,11 +108,11 @@ public class LitMeshBuilder
     /// <summary>
     /// Adds a triangle to the mesh.
     /// </summary>
-    /// <param name="a"></param>
-    /// <param name="b"></param>
-    /// <param name="c"></param>
-    /// <param name="horizontalMirrorUV"></param>
-    /// <param name="normalPointsNegative"></param>
+    /// <param name="a">The first vertex.</param>
+    /// <param name="b">The second vertex.</param>
+    /// <param name="c">The third vertex.</param>
+    /// <param name="horizontalMirrorUV">Whether to mirror the texture coordinates horizontally.</param>
+    /// <param name="normalPointsNegative">Whether to reverse the triangle winding so the face points the opposite way.</param>
     public void AddTriangle(LitVertex a, LitVertex b, LitVertex c, bool horizontalMirrorUV = false, bool normalPointsNegative = false)
     {
         ReadOnlySpan<LitVertex> verts = [a, b, c];
@@ -122,10 +122,10 @@ public class LitMeshBuilder
     /// <summary>
     /// Adds a range of vertices and triangles to the mesh.
     /// </summary>
-    /// <param name="verts"></param>
-    /// <param name="tris"></param>
-    /// <param name="horizontalMirrorUV"></param>
-    /// <param name="normalPointsNegative"></param>
+    /// <param name="verts">The vertices to add.</param>
+    /// <param name="tris">The triangle indices relative to the start of the vertex range.</param>
+    /// <param name="horizontalMirrorUV">Whether to mirror the texture coordinates horizontally.</param>
+    /// <param name="normalPointsNegative">Whether to reverse the triangle winding so the face points the opposite way.</param>
     public void AddRange(ReadOnlySpan<LitVertex> verts, ReadOnlySpan<ushort> tris, bool horizontalMirrorUV = false, bool normalPointsNegative = false)
     {
         var startIndex = this.VerticesCount;

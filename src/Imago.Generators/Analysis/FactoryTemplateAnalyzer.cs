@@ -58,7 +58,7 @@ internal static class FactoryTemplateAnalyzer
     }
 
     /// <summary>
-    /// Checks whether any descendant node has an <c>x:Name</c> directive set.
+    /// Finds the name of the first node in the subtree that has an <c>x:Name</c> directive set.
     /// </summary>
     /// <param name="node">The root node to check (typically the factory body root).</param>
     /// <returns>The name of the first named descendant found, or <see langword="null"/>.</returns>

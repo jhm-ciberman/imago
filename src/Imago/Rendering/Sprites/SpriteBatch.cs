@@ -167,7 +167,7 @@ internal class SpriteBatch
     }
 
     /// <summary>
-    /// Draws a sprite at the specified position with the specified size, UV coordinates, transform, color, and depth.
+    /// Draws a sprite from its four corner vertices.
     /// </summary>
     /// <param name="topLeft">The top-left vertex of the sprite.</param>
     /// <param name="topRight">The top-right vertex of the sprite.</param>
