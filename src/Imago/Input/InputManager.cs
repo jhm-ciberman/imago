@@ -85,6 +85,18 @@ public class InputManager : IDisposable
     public static InputManager Instance { get; private set; } = null!;
 
     /// <summary>
+    /// Gets or sets a value indicating whether the engine ignores the physical mouse and keyboard and uses a
+    /// software cursor instead. Enable it for headless or automated runs so a person can move the real mouse
+    /// and type freely while the run proceeds, with none of it taking effect and the real cursor left untouched.
+    /// </summary>
+    /// <remarks>
+    /// When enabled, the physical keyboard and mouse buttons are ignored, real mouse movement no longer moves
+    /// the cursor (<see cref="CursorPosition"/> is driven solely by <see cref="SetCursorPosition"/>), and
+    /// neither warping nor relative mode touches the OS cursor.
+    /// </remarks>
+    public static bool UseVirtualInput { get; set; } = false;
+
+    /// <summary>
     /// Occurs when a keyboard key is pressed.
     /// </summary>
     public event EventHandler<KeyboardEventArgs>? KeyPressed;
@@ -172,7 +184,7 @@ public class InputManager : IDisposable
 
     private void Window_MouseMove(MouseMoveEventArgs args)
     {
-        if (this._relativeMouseMode)
+        if (this._relativeMouseMode || UseVirtualInput)
         {
             return;
         }
@@ -190,12 +202,21 @@ public class InputManager : IDisposable
     {
         this.InputSnapshot = this._window.PumpEvents();
 
-        this.MouseScrollDelta = this.InputSnapshot.WheelDelta;
-
         this._keysPressedThisFrame.Clear();
         this._keysReleasedThisFrame.Clear();
         this._mouseButtonsPressedThisFrame.Clear();
         this._mouseButtonsReleasedThisFrame.Clear();
+
+        if (UseVirtualInput)
+        {
+            // The run is driven programmatically, so ignore the physical keyboard and mouse buttons. PumpEvents
+            // above still runs, so the window stays responsive while a person moves the real mouse or types.
+            this.MouseScrollDelta = 0f;
+            this._charactersTypedThisFrame = Array.Empty<char>();
+            return;
+        }
+
+        this.MouseScrollDelta = this.InputSnapshot.WheelDelta;
 
         for (int i = 0; i < this.InputSnapshot.KeyEvents.Count; i++)
         {
@@ -253,7 +274,11 @@ public class InputManager : IDisposable
     {
         position.X = (int)position.X;
         position.Y = (int)position.Y;
-        this._window.SetMousePosition(position);
+        if (!UseVirtualInput)
+        {
+            this._window.SetMousePosition(position);
+        }
+
         this._cursorPosition = position;
     }
 
@@ -265,7 +290,7 @@ public class InputManager : IDisposable
     /// <summary>
     /// Gets the mouse movement delta for the current frame. Only meaningful when relative mouse mode is enabled.
     /// </summary>
-    public Vector2 MouseDelta => this._window.MouseDelta;
+    public Vector2 MouseDelta => UseVirtualInput ? Vector2.Zero : this._window.MouseDelta;
 
     /// <summary>
     /// Enables or disables relative mouse mode. When enabled, the cursor is hidden and confined to the window,
@@ -275,7 +300,10 @@ public class InputManager : IDisposable
     public void SetRelativeMouseMode(bool enabled)
     {
         this._relativeMouseMode = enabled;
-        this._window.CursorRelativeMode = enabled;
+        if (!UseVirtualInput)
+        {
+            this._window.CursorRelativeMode = enabled;
+        }
     }
 
     /// <summary>
