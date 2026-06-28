@@ -22,6 +22,26 @@ public abstract class Application : IDisposable
     public static Application Instance { get; private set; } = null!;
 
     /// <summary>
+    /// Gets a value indicating whether the application is running in debug mode.
+    /// </summary>
+#if DEBUG
+    public static bool IsDebug => true;
+#else
+    public static bool IsDebug => false;
+#endif
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the application window is created hidden. Set this before
+    /// constructing the application.
+    /// </summary>
+    /// <remarks>
+    /// A hidden window still provides a render context, so off-screen rendering and capture work without a window
+    /// ever appearing. The window is hidden, not absent: a windowing system is still required (an X or Wayland
+    /// server on Linux, or Xvfb), so this is not true display-less rendering.
+    /// </remarks>
+    public static bool Headless { get; set; }
+
+    /// <summary>
     /// Gets the SDL2 window.
     /// </summary>
     public Sdl2Window Window { get; }
@@ -50,16 +70,6 @@ public abstract class Application : IDisposable
     /// Gets the main viewport.
     /// </summary>
     public SceneGraph.Viewport Viewport => this.Renderer.MainViewport;
-
-
-    /// <summary>
-    /// Gets a value indicating whether the application is running in debug mode.
-    /// </summary>
-#if DEBUG
-    public static bool IsDebug => true;
-#else
-    public static bool IsDebug => false;
-#endif
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Application"/> class.
@@ -90,13 +100,25 @@ public abstract class Application : IDisposable
         this.Stage.EnableInputHandling();
     }
 
-    /// <summary>
-    /// Creates the application window. Override to customize window settings.
-    /// </summary>
-    /// <returns>The created window.</returns>
-    protected virtual Sdl2Window CreateWindow()
+    private Sdl2Window CreateWindow()
     {
-        return NeoVeldridStartup.CreateWindow(new WindowCreateInfo
+        var info = this.CreateWindowInfo();
+        if (Headless)
+        {
+            info.WindowInitialState = WindowState.Hidden;
+        }
+
+        return NeoVeldridStartup.CreateWindow(info);
+    }
+
+    /// <summary>
+    /// Describes the application window. Override to customize its size, title, and on-screen state. In headless
+    /// mode the window is created hidden regardless of the returned state.
+    /// </summary>
+    /// <returns>The settings used to create the window.</returns>
+    protected virtual WindowCreateInfo CreateWindowInfo()
+    {
+        return new WindowCreateInfo
         {
             X = 100,
             Y = 100,
@@ -104,7 +126,7 @@ public abstract class Application : IDisposable
             WindowHeight = 600,
             WindowTitle = "Application",
             WindowInitialState = IsDebug ? WindowState.Maximized : WindowState.Normal,
-        });
+        };
     }
 
     /// <summary>

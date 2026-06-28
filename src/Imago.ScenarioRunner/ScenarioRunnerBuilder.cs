@@ -85,7 +85,7 @@ public sealed class ScenarioRunnerBuilder<TGame> where TGame : Application
 
     /// <summary>
     /// Runs the scenarios according to the given command line. Accepts an optional scenario name,
-    /// <c>--filter &lt;text&gt;</c>, <c>--backend &lt;name&gt;</c>, and <c>--list</c>.
+    /// <c>--filter &lt;text&gt;</c>, <c>--backend &lt;name&gt;</c>, <c>--show</c>, and <c>--list</c>.
     /// </summary>
     /// <param name="args">The command-line arguments.</param>
     /// <returns>Zero when every scenario ran without error, or a non-zero exit code otherwise.</returns>
@@ -107,7 +107,7 @@ public sealed class ScenarioRunnerBuilder<TGame> where TGame : Application
             return 2;
         }
 
-        var (name, filter, backendName, showList) = ParseArgs(args);
+        var (name, filter, backendName, showList, showWindow) = ParseArgs(args);
 
         if (showList)
         {
@@ -138,7 +138,7 @@ public sealed class ScenarioRunnerBuilder<TGame> where TGame : Application
                 return 2;
             }
 
-            return this.RunSingle(scenario, cliBackend);
+            return this.RunSingle(scenario, cliBackend, showWindow);
         }
 
         var selected = filter == null
@@ -151,10 +151,10 @@ public sealed class ScenarioRunnerBuilder<TGame> where TGame : Application
             return 2;
         }
 
-        return RunAll(selected, backendName);
+        return RunAll(selected, backendName, showWindow);
     }
 
-    private int RunSingle(ScenarioDescriptor scenario, GraphicsBackend? cliBackend)
+    private int RunSingle(ScenarioDescriptor scenario, GraphicsBackend? cliBackend, bool showWindow)
     {
         string outputDirectory = Path.Combine("artifacts", "scenarios", scenario.Name);
         Directory.CreateDirectory(outputDirectory);
@@ -167,13 +167,17 @@ public sealed class ScenarioRunnerBuilder<TGame> where TGame : Application
 
         Console.WriteLine($"Running scenario '{scenario.Name}': {scenario.Description}");
 
+        // Capture is off-screen, so by default the window is created hidden and never appears. Pass --show to
+        // watch a scenario run in a real window.
+        Application.Headless = !showWindow;
+
         GraphicsBackend? backend = scenario.Backend ?? cliBackend ?? this._backend;
         TGame app = this.CreateApp(backend);
 
         (int Width, int Height)? windowSize = scenario.WindowSize ?? this._windowSize;
         if (windowSize is { } size)
         {
-            app.Window.WindowState = WindowState.Normal;
+            app.Window.WindowState = showWindow ? WindowState.Normal : WindowState.Hidden;
             app.Window.Width = size.Width;
             app.Window.Height = size.Height;
         }
@@ -213,7 +217,7 @@ public sealed class ScenarioRunnerBuilder<TGame> where TGame : Application
             $"{typeof(TGame).Name} needs a public constructor taking a single GraphicsBackend? or no parameters, or a factory via WithFactory.");
     }
 
-    private static int RunAll(IReadOnlyList<ScenarioDescriptor> scenarios, string? backendName)
+    private static int RunAll(IReadOnlyList<ScenarioDescriptor> scenarios, string? backendName, bool showWindow)
     {
         string? executable = Environment.ProcessPath;
         if (executable == null)
@@ -231,7 +235,7 @@ public sealed class ScenarioRunnerBuilder<TGame> where TGame : Application
             Console.Out.Write($"  {scenario.Name,-20} ");
             Console.Out.Flush();
 
-            var (exitCode, output) = RunChild(executable, scenario.Name, backendName);
+            var (exitCode, output) = RunChild(executable, scenario.Name, backendName, showWindow);
             if (exitCode == 0)
             {
                 Console.WriteLine($"ran    -> artifacts/scenarios/{scenario.Name}/");
@@ -249,7 +253,7 @@ public sealed class ScenarioRunnerBuilder<TGame> where TGame : Application
         return errored == 0 ? 0 : 1;
     }
 
-    private static (int ExitCode, string Output) RunChild(string executable, string scenarioName, string? backendName)
+    private static (int ExitCode, string Output) RunChild(string executable, string scenarioName, string? backendName, bool showWindow)
     {
         var startInfo = new ProcessStartInfo(executable)
         {
@@ -263,6 +267,11 @@ public sealed class ScenarioRunnerBuilder<TGame> where TGame : Application
         {
             startInfo.ArgumentList.Add("--backend");
             startInfo.ArgumentList.Add(backendName);
+        }
+
+        if (showWindow)
+        {
+            startInfo.ArgumentList.Add("--show");
         }
 
         using var process = Process.Start(startInfo)!;
@@ -279,12 +288,13 @@ public sealed class ScenarioRunnerBuilder<TGame> where TGame : Application
         return (process.ExitCode, output);
     }
 
-    private static (string? Name, string? Filter, string? BackendName, bool ShowList) ParseArgs(string[] args)
+    private static CommandLine ParseArgs(string[] args)
     {
         string? name = null;
         string? filter = null;
         string? backendName = null;
         bool showList = false;
+        bool showWindow = false;
 
         for (int i = 0; i < args.Length; i++)
         {
@@ -292,6 +302,9 @@ public sealed class ScenarioRunnerBuilder<TGame> where TGame : Application
             {
                 case "--list":
                     showList = true;
+                    break;
+                case "--show":
+                    showWindow = true;
                     break;
                 case "--filter" when i + 1 < args.Length:
                     filter = args[++i];
@@ -309,13 +322,13 @@ public sealed class ScenarioRunnerBuilder<TGame> where TGame : Application
             }
         }
 
-        return (name, filter, backendName, showList);
+        return new CommandLine(name, filter, backendName, showList, showWindow);
     }
 
     private static void PrintList(IReadOnlyList<ScenarioDescriptor> scenarios)
     {
         string executable = Path.GetFileNameWithoutExtension(Environment.ProcessPath) ?? "scenarios";
-        Console.WriteLine($"Usage: {executable} [scenario] [--filter <text>] [--backend <name>] [--list]");
+        Console.WriteLine($"Usage: {executable} [scenario] [--filter <text>] [--backend <name>] [--show] [--list]");
         Console.WriteLine("  With no scenario name, every scenario runs, each in its own process.");
         Console.WriteLine();
         Console.WriteLine("Scenarios:");
@@ -366,4 +379,6 @@ public sealed class ScenarioRunnerBuilder<TGame> where TGame : Application
     {
         return string.Join('\n', text.Split('\n').Select(line => "      " + line));
     }
+
+    private sealed record CommandLine(string? Name, string? Filter, string? BackendName, bool ShowList, bool ShowWindow);
 }
