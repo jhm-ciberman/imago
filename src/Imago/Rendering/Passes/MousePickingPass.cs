@@ -41,6 +41,7 @@ internal class MousePickingPass : IDisposable, IPipelineProvider
     private readonly RenderBatcher _renderBatcher;
     private readonly NeoVeldrid.Texture _pixelStagingTexture;
     private Vector2 _mousePosition;
+    private bool _mouseInside;
 
     public MousePickingPass(Renderer renderer)
     {
@@ -134,6 +135,14 @@ internal class MousePickingPass : IDisposable, IPipelineProvider
     /// <param name="pickingManager">The picking manager to update.</param>
     public void ReadStagingResult(PickingManager pickingManager)
     {
+        if (!this._mouseInside)
+        {
+            // The cursor is outside the window, so nothing is under it. The staging texture still holds the
+            // pixel from the last frame the cursor was inside, and reading it would highlight a stale object.
+            pickingManager.HighlightedPickable = null;
+            return;
+        }
+
         var mappedResource = this._gd.Map<uint>(this._pixelStagingTexture, MapMode.Read);
         uint objectID = mappedResource[0, 0];
         this._gd.Unmap(this._pixelStagingTexture);
@@ -152,7 +161,8 @@ internal class MousePickingPass : IDisposable, IPipelineProvider
     private void RecordCopy(CommandList cl)
     {
         var mousePos = this._mousePosition;
-        if (this.MouseIsInside(mousePos))
+        this._mouseInside = this.MouseIsInside(mousePos);
+        if (this._mouseInside)
         {
             uint x = (uint)mousePos.X;
             uint y = this._gd.IsUvOriginTopLeft

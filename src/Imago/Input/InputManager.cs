@@ -169,7 +169,11 @@ public class InputManager : IDisposable
         Instance = this;
         this._window = window;
         this.InputSnapshot = window.PumpEvents();
-        this._cursorPosition = this.InputSnapshot.MousePosition;
+
+        // Virtual input has no physical cursor, so start it off-screen: nothing is hovered and the software
+        // cursor is not drawn until a caller positions it with SetCursorPosition.
+        this._cursorPosition = UseVirtualInput ? new Vector2(-1, -1) : this.InputSnapshot.MousePosition;
+
         this._window.MouseMove += this.Window_MouseMove;
     }
 
