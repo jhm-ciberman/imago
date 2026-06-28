@@ -125,4 +125,23 @@ public static partial class StringExtensions
         return distance[currentRow, m];
     }
 
+    /// <summary>
+    /// Converts a string into a file-name-safe slug: trimmed, lowercased, with every character that is not a
+    /// letter or digit replaced by a hyphen.
+    /// </summary>
+    /// <param name="value">The string to convert.</param>
+    /// <returns>The slugified string.</returns>
+    public static string Slug(this string value)
+    {
+        var chars = value.Trim().ToLowerInvariant().ToCharArray();
+        for (int i = 0; i < chars.Length; i++)
+        {
+            if (!char.IsLetterOrDigit(chars[i]))
+            {
+                chars[i] = '-';
+            }
+        }
+
+        return new string(chars);
+    }
 }
