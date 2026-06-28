@@ -112,8 +112,11 @@ public class ObjParser
             case "s":
                 break; // Ignored. Smoothing groups are not supported. Just use normals.
             default:
-                Console.WriteLine($"Unsupported line: {line}");
+#if DEBUG
+                throw new NotSupportedException($"Unsupported OBJ directive '{parts[0]}' on line: {line}");
+#else
                 break;
+#endif
         }
     }
 

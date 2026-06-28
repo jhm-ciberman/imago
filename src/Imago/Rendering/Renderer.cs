@@ -586,7 +586,6 @@ public class Renderer : IDisposable
     {
         if (Instance == null) return;
 
-        Console.WriteLine("Disposing renderer.");
         try
         {
             this.GraphicsDevice.WaitForIdle();
@@ -611,7 +610,6 @@ public class Renderer : IDisposable
             this._forward3DRenderer.Dispose();
             this._rendererResources.Dispose();
 
-            Console.WriteLine("All resources disposed. Attempting to dispose graphics device.");
             // The last thing to dispose is the graphics device.
             // Otherwise AccessViolationException is thrown.
             this.GraphicsDevice.Dispose();
