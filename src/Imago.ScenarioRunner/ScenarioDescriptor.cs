@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Imago.Support.Numerics;
 using NeoVeldrid;
 
 namespace Imago.ScenarioRunner;
@@ -14,7 +15,7 @@ internal sealed class ScenarioDescriptor
         string name,
         string description,
         Func<ScenarioContext, Task> run,
-        (int Width, int Height)? windowSize,
+        Vector2Int? windowSize,
         GraphicsBackend? backend,
         bool isolated)
     {
@@ -32,7 +33,7 @@ internal sealed class ScenarioDescriptor
 
     public Func<ScenarioContext, Task> Run { get; }
 
-    public (int Width, int Height)? WindowSize { get; }
+    public Vector2Int? WindowSize { get; }
 
     public GraphicsBackend? Backend { get; }
 

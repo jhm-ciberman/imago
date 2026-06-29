@@ -2,8 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
+using Imago.Support;
+using Imago.Support.Numerics;
 
 namespace Imago.ScenarioRunner;
 
@@ -35,7 +36,7 @@ internal static class ScenarioRegistry
 
                 Validate(type, method);
 
-                string name = attribute.Name ?? ToKebabCase(method.Name);
+                string name = attribute.Name ?? method.Name.ToKebabCase();
                 if (namesSeen.TryGetValue(name, out var existing))
                 {
                     throw new InvalidOperationException(
@@ -45,8 +46,8 @@ internal static class ScenarioRegistry
                 namesSeen.Add(name, method);
 
                 var windowSizeAttribute = method.GetCustomAttribute<WindowSizeAttribute>();
-                (int Width, int Height)? windowSize = windowSizeAttribute != null
-                    ? (windowSizeAttribute.Width, windowSizeAttribute.Height)
+                Vector2Int? windowSize = windowSizeAttribute != null
+                    ? new Vector2Int(windowSizeAttribute.Width, windowSizeAttribute.Height)
                     : null;
                 var backend = method.GetCustomAttribute<BackendAttribute>()?.Backend;
                 bool isolated = method.GetCustomAttribute<IsolatedAttribute>() != null;
@@ -92,29 +93,5 @@ internal static class ScenarioRegistry
     private static string Describe(MethodInfo method)
     {
         return $"{method.DeclaringType!.Name}.{method.Name}";
-    }
-
-    private static string ToKebabCase(string name)
-    {
-        var builder = new StringBuilder(name.Length + 4);
-        for (int i = 0; i < name.Length; i++)
-        {
-            char c = name[i];
-            if (char.IsUpper(c))
-            {
-                if (i > 0)
-                {
-                    builder.Append('-');
-                }
-
-                builder.Append(char.ToLowerInvariant(c));
-            }
-            else
-            {
-                builder.Append(c);
-            }
-        }
-
-        return builder.ToString();
     }
 }

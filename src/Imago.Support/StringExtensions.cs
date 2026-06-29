@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Imago.Support;
@@ -27,6 +28,35 @@ public static partial class StringExtensions
     {
         // from snake_case to PascalCase
         return GetPascalCaseRegex().Replace(value, m => m.Groups[1].Value.ToUpper());
+    }
+
+    /// <summary>
+    /// Converts a string from PascalCase or camelCase to kebab-case.
+    /// </summary>
+    /// <param name="value">The string to convert.</param>
+    /// <returns>The string converted to kebab-case.</returns>
+    public static string ToKebabCase(this string value)
+    {
+        var builder = new StringBuilder(value.Length + 4);
+        for (int i = 0; i < value.Length; i++)
+        {
+            char c = value[i];
+            if (char.IsUpper(c))
+            {
+                if (i > 0)
+                {
+                    builder.Append('-');
+                }
+
+                builder.Append(char.ToLowerInvariant(c));
+            }
+            else
+            {
+                builder.Append(c);
+            }
+        }
+
+        return builder.ToString();
     }
 
 

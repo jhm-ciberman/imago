@@ -3,7 +3,7 @@ using System;
 namespace Imago.ScenarioRunner;
 
 /// <summary>
-/// Overrides the window size for a single scenario, taking precedence over the suite-wide default.
+/// Overrides the window size for a single scenario, taking precedence over the size its host gives the window.
 /// </summary>
 [AttributeUsage(AttributeTargets.Method)]
 public sealed class WindowSizeAttribute : Attribute

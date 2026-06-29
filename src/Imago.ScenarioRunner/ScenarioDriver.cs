@@ -4,6 +4,7 @@ using System.IO;
 using System.Numerics;
 using System.Threading.Tasks;
 using Imago.Input;
+using Imago.Support.Numerics;
 
 namespace Imago.ScenarioRunner;
 
@@ -21,26 +22,20 @@ internal sealed class ScenarioDriver : IDisposable
     private readonly Application _app;
     private readonly IReadOnlyList<ScenarioDescriptor> _scenarios;
     private readonly Action? _reset;
-    private readonly (int Width, int Height)? _defaultWindowSize;
 
     private int _index;
     private ScenarioScheduler? _scheduler;
     private ScenarioContext? _context;
     private Task? _task;
     private bool _finished;
-    private (int Width, int Height)? _windowSize;
+    private Vector2Int? _baselineWindowSize;
+    private Vector2Int _windowSize;
 
-    public ScenarioDriver(
-        Application app,
-        IReadOnlyList<ScenarioDescriptor> scenarios,
-        Action? reset,
-        (int Width, int Height)? defaultWindowSize)
+    public ScenarioDriver(Application app, IReadOnlyList<ScenarioDescriptor> scenarios, Action? reset)
     {
         this._app = app;
         this._scenarios = scenarios;
         this._reset = reset;
-        this._defaultWindowSize = defaultWindowSize;
-        this._windowSize = defaultWindowSize;
     }
 
     public int ExitCode { get; private set; }
@@ -121,15 +116,24 @@ internal sealed class ScenarioDriver : IDisposable
 
     private void ApplyWindowSize(ScenarioDescriptor scenario)
     {
-        var target = scenario.WindowSize ?? this._defaultWindowSize;
-        if (target is not { } size || this._windowSize == size)
+        // The size the host gave the booted window is the baseline; a scenario's own size overrides it and the
+        // next scenario without one falls back to it.
+        if (this._baselineWindowSize is not { } baseline)
+        {
+            baseline = new Vector2Int(this._app.Window.Width, this._app.Window.Height);
+            this._baselineWindowSize = baseline;
+            this._windowSize = baseline;
+        }
+
+        var target = scenario.WindowSize ?? baseline;
+        if (this._windowSize == target)
         {
             return;
         }
 
-        this._app.Window.Width = size.Width;
-        this._app.Window.Height = size.Height;
-        this._windowSize = size;
+        this._app.Window.Width = target.X;
+        this._app.Window.Height = target.Y;
+        this._windowSize = target;
     }
 
     public void Dispose()
