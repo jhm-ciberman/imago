@@ -49,13 +49,15 @@ internal static class ScenarioRegistry
                     ? (windowSizeAttribute.Width, windowSizeAttribute.Height)
                     : null;
                 var backend = method.GetCustomAttribute<BackendAttribute>()?.Backend;
+                bool isolated = method.GetCustomAttribute<IsolatedAttribute>() != null;
 
                 descriptors.Add(new ScenarioDescriptor(
                     name,
                     attribute.Description ?? string.Empty,
                     Invoker(type, method),
                     windowSize,
-                    backend));
+                    backend,
+                    isolated));
             }
         }
 

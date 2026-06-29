@@ -21,6 +21,7 @@ public sealed class ScenarioRunnerBuilder<TGame> where TGame : Application
     private (int Width, int Height)? _windowSize;
     private GraphicsBackend? _backend;
     private Func<GraphicsBackend?, TGame>? _factory;
+    private Action? _reset;
 
     internal ScenarioRunnerBuilder()
     {
@@ -75,6 +76,20 @@ public sealed class ScenarioRunnerBuilder<TGame> where TGame : Application
     }
 
     /// <summary>
+    /// Sets the action that returns the game to a clean baseline between scenarios when several share a process,
+    /// such as navigating to a neutral screen and dismissing popups. Runs on the game loop thread. Without it,
+    /// each scenario simply inherits whatever the previous one left, relying on the game's own navigation to
+    /// reset state.
+    /// </summary>
+    /// <param name="reset">A delegate that returns the game to its baseline.</param>
+    /// <returns>This builder, for chaining.</returns>
+    public ScenarioRunnerBuilder<TGame> WithReset(Action reset)
+    {
+        this._reset = reset;
+        return this;
+    }
+
+    /// <summary>
     /// Runs the scenarios using the process command line.
     /// </summary>
     /// <returns>Zero when every scenario ran without error, or a non-zero exit code otherwise.</returns>
@@ -84,8 +99,8 @@ public sealed class ScenarioRunnerBuilder<TGame> where TGame : Application
     }
 
     /// <summary>
-    /// Runs the scenarios according to the given command line. Accepts an optional scenario name,
-    /// <c>--filter &lt;text&gt;</c>, <c>--backend &lt;name&gt;</c>, <c>--show</c>, and <c>--list</c>.
+    /// Runs the scenarios according to the given command line. Accepts any number of scenario names,
+    /// <c>--filter &lt;text&gt;</c>, <c>--backend &lt;name&gt;</c>, <c>--isolated</c>, <c>--show</c>, and <c>--list</c>.
     /// </summary>
     /// <param name="args">The command-line arguments.</param>
     /// <returns>Zero when every scenario ran without error, or a non-zero exit code otherwise.</returns>
@@ -107,89 +122,98 @@ public sealed class ScenarioRunnerBuilder<TGame> where TGame : Application
             return 2;
         }
 
-        var (name, filter, backendName, showList, showWindow) = ParseArgs(args);
+        var command = ParseArgs(args);
 
-        if (showList)
+        if (command.ShowList)
         {
             PrintList(scenarios);
             return 0;
         }
 
         GraphicsBackend? cliBackend = null;
-        if (backendName != null)
+        if (command.BackendName != null)
         {
-            if (!Enum.TryParse(backendName, ignoreCase: true, out GraphicsBackend parsed))
+            if (!Enum.TryParse(command.BackendName, ignoreCase: true, out GraphicsBackend parsed))
             {
-                Console.Error.WriteLine($"Unknown backend '{backendName}'. Valid backends: {string.Join(", ", Enum.GetNames<GraphicsBackend>())}.");
+                Console.Error.WriteLine($"Unknown backend '{command.BackendName}'. Valid backends: {string.Join(", ", Enum.GetNames<GraphicsBackend>())}.");
                 return 2;
             }
 
             cliBackend = parsed;
         }
 
-        if (name != null)
+        IReadOnlyList<ScenarioDescriptor> selected;
+        if (command.Names.Count > 0)
         {
-            var scenario = scenarios.FirstOrDefault(s => string.Equals(s.Name, name, StringComparison.OrdinalIgnoreCase));
-            if (scenario == null)
+            var resolved = new List<ScenarioDescriptor>(command.Names.Count);
+            foreach (var name in command.Names)
             {
-                Console.Error.WriteLine($"Unknown scenario: '{name}'.");
-                Console.Error.WriteLine();
-                PrintList(scenarios);
-                return 2;
+                var scenario = scenarios.FirstOrDefault(s => string.Equals(s.Name, name, StringComparison.OrdinalIgnoreCase));
+                if (scenario == null)
+                {
+                    Console.Error.WriteLine($"Unknown scenario: '{name}'.");
+                    Console.Error.WriteLine();
+                    PrintList(scenarios);
+                    return 2;
+                }
+
+                resolved.Add(scenario);
             }
 
-            return this.RunSingle(scenario, cliBackend, showWindow);
+            selected = resolved;
         }
-
-        var selected = filter == null
-            ? scenarios
-            : scenarios.Where(s => s.Name.Contains(filter, StringComparison.OrdinalIgnoreCase)).ToList();
-
-        if (selected.Count == 0)
+        else if (command.Filter != null)
         {
-            Console.Error.WriteLine($"No scenarios match filter '{filter}'.");
-            return 2;
+            selected = scenarios.Where(s => s.Name.Contains(command.Filter, StringComparison.OrdinalIgnoreCase)).ToList();
+            if (selected.Count == 0)
+            {
+                Console.Error.WriteLine($"No scenarios match filter '{command.Filter}'.");
+                return 2;
+            }
+        }
+        else
+        {
+            selected = scenarios;
         }
 
-        return RunAll(selected, backendName, showWindow);
+        // A worker runs the batch it was handed in one process. A lone scenario does too, since isolating it
+        // from a one-item batch would change nothing. Everything else is the orchestrator: it groups the
+        // scenarios into batches and launches a worker process for each.
+        if (command.Worker || selected.Count == 1)
+        {
+            return this.RunInProcess(selected, cliBackend, command.ShowWindow);
+        }
+
+        return this.Orchestrate(selected, command.BackendName, cliBackend, command.ShowWindow, command.Isolated);
     }
 
-    private int RunSingle(ScenarioDescriptor scenario, GraphicsBackend? cliBackend, bool showWindow)
+    private int RunInProcess(IReadOnlyList<ScenarioDescriptor> scenarios, GraphicsBackend? cliBackend, bool showWindow)
     {
-        string outputDirectory = Path.Combine("artifacts", "scenarios", scenario.Name);
-        Directory.CreateDirectory(outputDirectory);
-
-        StartWatchdog(TimeSpan.FromSeconds(120));
+        StartWatchdog(TimeSpan.FromSeconds(120.0 * scenarios.Count));
 
         // Scenario runs use a virtual mouse and keyboard, so a person can move the real mouse and type freely
         // while a run is in progress without affecting it, and the real cursor is never moved or captured.
         InputManager.UseVirtualInput = true;
 
-        Console.WriteLine($"Running scenario '{scenario.Name}': {scenario.Description}");
-
         // Capture is off-screen, so by default the window is created hidden and never appears. Pass --show to
-        // watch a scenario run in a real window.
+        // watch the scenarios run in a real window.
         Application.Headless = !showWindow;
 
-        GraphicsBackend? backend = scenario.Backend ?? cliBackend ?? this._backend;
+        // The backend is fixed for the life of the process, so a batch shares one; the orchestrator only ever
+        // groups same-backend scenarios together. Window size, by contrast, can change between scenarios.
+        GraphicsBackend? backend = scenarios[0].Backend ?? cliBackend ?? this._backend;
         TGame app = this.CreateApp(backend);
 
-        (int Width, int Height)? windowSize = scenario.WindowSize ?? this._windowSize;
-        if (windowSize is { } size)
+        app.Window.WindowState = showWindow ? WindowState.Normal : WindowState.Hidden;
+        if (this._windowSize is { } size)
         {
-            app.Window.WindowState = showWindow ? WindowState.Normal : WindowState.Hidden;
             app.Window.Width = size.Width;
             app.Window.Height = size.Height;
         }
 
-        using var driver = new ScenarioDriver(app, scenario, outputDirectory);
+        using var driver = new ScenarioDriver(app, scenarios, this._reset, this._windowSize);
         app.Ticker.Ticked += (sender, e) => driver.Tick((float)e.DeltaTime);
         app.Run();
-
-        if (driver.ExitCode == 0)
-        {
-            Console.WriteLine($"Executed. Review the screenshots in {Path.GetFullPath(outputDirectory)}");
-        }
 
         return driver.ExitCode;
     }
@@ -217,7 +241,12 @@ public sealed class ScenarioRunnerBuilder<TGame> where TGame : Application
             $"{typeof(TGame).Name} needs a public constructor taking a single GraphicsBackend? or no parameters, or a factory via WithFactory.");
     }
 
-    private static int RunAll(IReadOnlyList<ScenarioDescriptor> scenarios, string? backendName, bool showWindow)
+    private int Orchestrate(
+        IReadOnlyList<ScenarioDescriptor> scenarios,
+        string? backendName,
+        GraphicsBackend? cliBackend,
+        bool showWindow,
+        bool forceIsolated)
     {
         string? executable = Environment.ProcessPath;
         if (executable == null)
@@ -226,43 +255,75 @@ public sealed class ScenarioRunnerBuilder<TGame> where TGame : Application
             return 2;
         }
 
-        Console.WriteLine($"Running {scenarios.Count} scenario(s), each in its own process.");
+        var batches = this.GroupIntoBatches(scenarios, cliBackend, forceIsolated);
+
+        Console.WriteLine($"Running {scenarios.Count} scenario(s) in {batches.Count} process(es).");
         Console.WriteLine();
 
-        int errored = 0;
-        foreach (var scenario in scenarios)
+        int erroredProcesses = 0;
+        foreach (var batch in batches)
         {
-            Console.Out.Write($"  {scenario.Name,-20} ");
-            Console.Out.Flush();
+            Console.WriteLine($"-- {batch.Count} scenario(s): {string.Join(", ", batch.Select(s => s.Name))}");
 
-            var (exitCode, output) = RunChild(executable, scenario.Name, backendName, showWindow);
-            if (exitCode == 0)
+            int exitCode = RunWorker(executable, batch, backendName, showWindow);
+            if (exitCode != 0)
             {
-                Console.WriteLine($"ran    -> artifacts/scenarios/{scenario.Name}/");
+                erroredProcesses++;
+                Console.Error.WriteLine($"  Process exited with code {exitCode}.");
             }
-            else
-            {
-                errored++;
-                Console.WriteLine($"ERROR  (exit {exitCode})");
-                Console.Error.WriteLine(Indent(Tail(output, 12)));
-            }
+
+            Console.WriteLine();
         }
 
-        Console.WriteLine();
-        Console.WriteLine($"{scenarios.Count} scenario(s) ran, {errored} errored. Review the screenshots under artifacts/scenarios/.");
-        return errored == 0 ? 0 : 1;
+        Console.WriteLine($"{scenarios.Count} scenario(s) across {batches.Count} process(es), {erroredProcesses} errored. Review the screenshots under artifacts/scenarios/.");
+        return erroredProcesses == 0 ? 0 : 1;
     }
 
-    private static (int ExitCode, string Output) RunChild(string executable, string scenarioName, string? backendName, bool showWindow)
+    private List<List<ScenarioDescriptor>> GroupIntoBatches(
+        IReadOnlyList<ScenarioDescriptor> scenarios,
+        GraphicsBackend? cliBackend,
+        bool forceIsolated)
     {
-        var startInfo = new ProcessStartInfo(executable)
-        {
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-        };
+        var batches = new List<List<ScenarioDescriptor>>();
+        var byBackend = new Dictionary<string, List<ScenarioDescriptor>>();
 
-        startInfo.ArgumentList.Add(scenarioName);
+        foreach (var scenario in scenarios)
+        {
+            if (forceIsolated || scenario.Isolated)
+            {
+                batches.Add([scenario]);
+                continue;
+            }
+
+            // Scenarios that share a backend can share a process; a differing backend can't, since the renderer
+            // is built once per process. Window size differences are fine and handled live by the driver. A null
+            // backend means "let the app pick", which resolves to the same choice for all of them, so they group.
+            GraphicsBackend? backend = scenario.Backend ?? cliBackend ?? this._backend;
+            string key = backend?.ToString() ?? string.Empty;
+            if (!byBackend.TryGetValue(key, out var batch))
+            {
+                batch = [];
+                byBackend[key] = batch;
+                batches.Add(batch);
+            }
+
+            batch.Add(scenario);
+        }
+
+        return batches;
+    }
+
+    private static int RunWorker(string executable, IReadOnlyList<ScenarioDescriptor> batch, string? backendName, bool showWindow)
+    {
+        // No stream redirection: the worker writes its per-scenario progress straight to this console, live.
+        var startInfo = new ProcessStartInfo(executable) { UseShellExecute = false };
+
+        startInfo.ArgumentList.Add("--worker");
+        foreach (var scenario in batch)
+        {
+            startInfo.ArgumentList.Add(scenario.Name);
+        }
+
         if (backendName != null)
         {
             startInfo.ArgumentList.Add("--backend");
@@ -275,26 +336,24 @@ public sealed class ScenarioRunnerBuilder<TGame> where TGame : Application
         }
 
         using var process = Process.Start(startInfo)!;
-        var outputTask = process.StandardOutput.ReadToEndAsync();
-        var errorTask = process.StandardError.ReadToEndAsync();
-
-        if (!process.WaitForExit(180_000))
+        if (!process.WaitForExit((120_000 * batch.Count) + 60_000))
         {
             process.Kill(entireProcessTree: true);
-            return (124, "Timed out.");
+            return 124;
         }
 
-        string output = outputTask.GetAwaiter().GetResult() + errorTask.GetAwaiter().GetResult();
-        return (process.ExitCode, output);
+        return process.ExitCode;
     }
 
     private static CommandLine ParseArgs(string[] args)
     {
-        string? name = null;
+        var names = new List<string>();
         string? filter = null;
         string? backendName = null;
         bool showList = false;
         bool showWindow = false;
+        bool isolated = false;
+        bool worker = false;
 
         for (int i = 0; i < args.Length; i++)
         {
@@ -306,6 +365,12 @@ public sealed class ScenarioRunnerBuilder<TGame> where TGame : Application
                 case "--show":
                     showWindow = true;
                     break;
+                case "--isolated":
+                    isolated = true;
+                    break;
+                case "--worker":
+                    worker = true;
+                    break;
                 case "--filter" when i + 1 < args.Length:
                     filter = args[++i];
                     break;
@@ -313,28 +378,30 @@ public sealed class ScenarioRunnerBuilder<TGame> where TGame : Application
                     backendName = args[++i];
                     break;
                 default:
-                    if (!args[i].StartsWith('-') && name == null)
+                    if (!args[i].StartsWith('-'))
                     {
-                        name = args[i];
+                        names.Add(args[i]);
                     }
 
                     break;
             }
         }
 
-        return new CommandLine(name, filter, backendName, showList, showWindow);
+        return new CommandLine(names, filter, backendName, showList, showWindow, isolated, worker);
     }
 
     private static void PrintList(IReadOnlyList<ScenarioDescriptor> scenarios)
     {
         string executable = Path.GetFileNameWithoutExtension(Environment.ProcessPath) ?? "scenarios";
-        Console.WriteLine($"Usage: {executable} [scenario] [--filter <text>] [--backend <name>] [--show] [--list]");
-        Console.WriteLine("  With no scenario name, every scenario runs, each in its own process.");
+        Console.WriteLine($"Usage: {executable} [scenario...] [--filter <text>] [--backend <name>] [--isolated] [--show] [--list]");
+        Console.WriteLine("  With no scenario name, every scenario runs. Scenarios sharing a backend share a process;");
+        Console.WriteLine("  pass --isolated to run each in its own process instead.");
         Console.WriteLine();
         Console.WriteLine("Scenarios:");
         foreach (var scenario in scenarios)
         {
-            Console.WriteLine($"  {scenario.Name,-18} {scenario.Description}");
+            string isolated = scenario.Isolated ? "  [isolated]" : string.Empty;
+            Console.WriteLine($"  {scenario.Name,-18} {scenario.Description}{isolated}");
         }
     }
 
@@ -369,16 +436,12 @@ public sealed class ScenarioRunnerBuilder<TGame> where TGame : Application
         thread.Start();
     }
 
-    private static string Tail(string text, int lines)
-    {
-        var split = text.TrimEnd().Replace("\r\n", "\n").Split('\n');
-        return string.Join('\n', split.Skip(Math.Max(0, split.Length - lines)));
-    }
-
-    private static string Indent(string text)
-    {
-        return string.Join('\n', text.Split('\n').Select(line => "      " + line));
-    }
-
-    private sealed record CommandLine(string? Name, string? Filter, string? BackendName, bool ShowList, bool ShowWindow);
+    private sealed record CommandLine(
+        IReadOnlyList<string> Names,
+        string? Filter,
+        string? BackendName,
+        bool ShowList,
+        bool ShowWindow,
+        bool Isolated,
+        bool Worker);
 }
