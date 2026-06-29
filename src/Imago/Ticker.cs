@@ -76,6 +76,13 @@ public class Ticker
     }
 
     /// <summary>
+    /// Gets or sets a fixed delta time, in seconds, reported to every tick regardless of how long the frame
+    /// actually took. When set, the simulation advances by the same amount each frame, which makes animated
+    /// content reproducible. Leave null to report real elapsed time.
+    /// </summary>
+    public double? FixedDeltaTime { get; set; }
+
+    /// <summary>
     /// Gets a value indicating whether the ticker is running.
     /// </summary>
     public bool IsRunning { get; private set; }
@@ -120,8 +127,8 @@ public class Ticker
             }
 
             this._elapsedTime = currentTime;
-            this._deltaTime = this._elapsedTime - previousElapsed;
-            previousElapsed = this._elapsedTime;
+            this._deltaTime = this.FixedDeltaTime ?? (this._elapsedTime - previousElapsed);
+            previousElapsed = currentTime;
 
             if (this._deltaTime > 0.0)
             {

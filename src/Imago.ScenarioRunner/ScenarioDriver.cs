@@ -85,7 +85,7 @@ internal sealed class ScenarioDriver : IDisposable
     private void StartCurrent()
     {
         var scenario = this._scenarios[this._index];
-        string outputDirectory = Path.Combine("artifacts", "scenarios", scenario.Name);
+        string outputDirectory = Path.Combine(ScenarioPaths.Shots, scenario.Name);
         Directory.CreateDirectory(outputDirectory);
 
         this.ApplyWindowSize(scenario);

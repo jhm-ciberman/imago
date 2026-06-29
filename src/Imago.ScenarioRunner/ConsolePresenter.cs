@@ -16,7 +16,6 @@ namespace Imago.ScenarioRunner;
 internal sealed class ConsolePresenter
 {
     private const int LineWidth = 56;
-    private const string OutputRoot = "artifacts/scenarios/";
 
     private readonly TextWriter _out;
     private readonly bool _color = !Console.IsOutputRedirected;
@@ -120,7 +119,7 @@ internal sealed class ConsolePresenter
 
         this.Label("Shots");
         this._out.Write(shots);
-        this.Write($"  →  {OutputRoot}", ConsoleColor.DarkGray);
+        this.Write($"  →  {ScenarioPaths.Shots}", ConsoleColor.DarkGray);
         this._out.WriteLine();
 
         this.Label("Backend");
@@ -136,6 +135,80 @@ internal sealed class ConsolePresenter
 
         this.Label("Duration");
         this._out.WriteLine($"{seconds:0.0}s");
+    }
+
+    /// <summary>
+    /// Reports that this run was saved as the baseline.
+    /// </summary>
+    /// <param name="baselineDir">The directory the baseline was written to.</param>
+    public void BaselineSaved(string baselineDir)
+    {
+        this._out.WriteLine();
+        this.Write($"  Baseline saved to {baselineDir}", ConsoleColor.DarkGray);
+        this._out.WriteLine();
+    }
+
+    /// <summary>
+    /// Reports how this run's shots differ from the baseline.
+    /// </summary>
+    /// <param name="changes">The shots that changed, are new, or were removed.</param>
+    /// <param name="diffDir">The directory the highlight images were written to.</param>
+    public void Changes(IReadOnlyList<ShotChange> changes, string diffDir)
+    {
+        this._out.WriteLine();
+
+        if (changes.Count == 0)
+        {
+            this.Write("  No visual changes from the baseline.", ConsoleColor.Green);
+            this._out.WriteLine();
+            return;
+        }
+
+        this.Write("  Changes from baseline", ConsoleColor.DarkGray);
+        this._out.WriteLine();
+
+        int changed = 0;
+        int added = 0;
+        int removed = 0;
+        foreach (var change in changes)
+        {
+            switch (change.Kind)
+            {
+                case ShotChangeKind.Changed:
+                    changed++;
+                    this.ResultLine('~', ConsoleColor.Yellow, change.RelativePath, $"{change.ChangedFraction * 100:0.0}%", ConsoleColor.Yellow);
+                    break;
+                case ShotChangeKind.New:
+                    added++;
+                    this.ResultLine('+', ConsoleColor.Green, change.RelativePath, "new", ConsoleColor.Green);
+                    break;
+                case ShotChangeKind.Removed:
+                    removed++;
+                    this.ResultLine('-', ConsoleColor.Red, change.RelativePath, "removed", ConsoleColor.Red);
+                    break;
+            }
+        }
+
+        this._out.WriteLine();
+        var parts = new List<string>();
+        if (changed > 0)
+        {
+            parts.Add($"{changed} changed");
+        }
+
+        if (added > 0)
+        {
+            parts.Add($"{added} new");
+        }
+
+        if (removed > 0)
+        {
+            parts.Add($"{removed} removed");
+        }
+
+        this.Write($"  {string.Join(" · ", parts)}", ConsoleColor.Yellow);
+        this.Write($"  →  {diffDir}/", ConsoleColor.DarkGray);
+        this._out.WriteLine();
     }
 
     /// <summary>

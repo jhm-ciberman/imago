@@ -9,34 +9,42 @@ namespace Imago.ScenarioRunner;
 /// </summary>
 internal sealed record ScenarioCommandLine(
     IReadOnlyList<string> Names,
-    string? Filter,
     string? BackendName,
+    string? ReportPath,
+    bool ShowHelp,
     bool ShowList,
     bool ShowWindow,
     bool Isolated,
     bool Worker,
-    string? ReportPath)
+    bool Baseline,
+    IReadOnlyList<string> UnknownOptions)
 {
     /// <summary>
-    /// Parses the runner's command-line arguments. Unknown leading tokens are taken as scenario names.
+    /// Parses the runner's command-line arguments. Bare tokens are scenario names; an unrecognized token that
+    /// starts with a dash is collected in <see cref="UnknownOptions"/>.
     /// </summary>
     /// <param name="args">The command-line arguments.</param>
     /// <returns>The parsed command line.</returns>
     public static ScenarioCommandLine Parse(string[] args)
     {
         var names = new List<string>();
-        string? filter = null;
+        var unknown = new List<string>();
         string? backendName = null;
+        string? reportPath = null;
+        bool showHelp = false;
         bool showList = false;
         bool showWindow = false;
         bool isolated = false;
         bool worker = false;
-        string? reportPath = null;
+        bool baseline = false;
 
         for (int i = 0; i < args.Length; i++)
         {
             switch (args[i])
             {
+                case "--help" or "-h":
+                    showHelp = true;
+                    break;
                 case "--list":
                     showList = true;
                     break;
@@ -49,8 +57,8 @@ internal sealed record ScenarioCommandLine(
                 case "--worker":
                     worker = true;
                     break;
-                case "--filter" when i + 1 < args.Length:
-                    filter = args[++i];
+                case "--baseline":
+                    baseline = true;
                     break;
                 case "--backend" when i + 1 < args.Length:
                     backendName = args[++i];
@@ -59,7 +67,11 @@ internal sealed record ScenarioCommandLine(
                     reportPath = args[++i];
                     break;
                 default:
-                    if (!args[i].StartsWith('-'))
+                    if (args[i].StartsWith('-'))
+                    {
+                        unknown.Add(args[i]);
+                    }
+                    else
                     {
                         names.Add(args[i]);
                     }
@@ -68,20 +80,43 @@ internal sealed record ScenarioCommandLine(
             }
         }
 
-        return new ScenarioCommandLine(names, filter, backendName, showList, showWindow, isolated, worker, reportPath);
+        return new ScenarioCommandLine(names, backendName, reportPath, showHelp, showList, showWindow, isolated, worker, baseline, unknown);
     }
 
     /// <summary>
-    /// Prints the usage line and every discovered scenario, marking the ones that always run on their own.
+    /// Prints the usage, the options, and the scenario list.
     /// </summary>
     /// <param name="scenarios">The scenarios to list.</param>
-    public static void PrintList(IReadOnlyList<ScenarioDescriptor> scenarios)
+    public static void PrintHelp(IReadOnlyList<ScenarioDescriptor> scenarios)
+    {
+        PrintUsage();
+        Console.WriteLine();
+        PrintScenarios(scenarios);
+    }
+
+    private static void PrintUsage()
     {
         string executable = Path.GetFileNameWithoutExtension(Environment.ProcessPath) ?? "scenarios";
-        Console.WriteLine($"Usage: {executable} [scenario...] [--filter <text>] [--backend <name>] [--isolated] [--show] [--list]");
-        Console.WriteLine("  With no scenario name, every scenario runs. Scenarios sharing a backend share a process;");
-        Console.WriteLine("  pass --isolated to run each in its own process instead.");
+        Console.WriteLine($"Usage: {executable} [scenario...] [options]");
         Console.WriteLine();
+        Console.WriteLine("  Runs the named scenarios, or every scenario when none are named. Scenarios that share a");
+        Console.WriteLine("  backend run together in one process.");
+        Console.WriteLine();
+        Console.WriteLine("Options:");
+        Console.WriteLine("  --baseline         save this run as the baseline for later runs to compare against");
+        Console.WriteLine("  --isolated         run each scenario in its own process");
+        Console.WriteLine("  --backend <name>   force a graphics backend");
+        Console.WriteLine("  --show             open a real window instead of running hidden");
+        Console.WriteLine("  --list             list the scenarios and exit");
+        Console.WriteLine("  --help, -h         show this help");
+    }
+
+    /// <summary>
+    /// Prints every discovered scenario, marking the ones that always run on their own.
+    /// </summary>
+    /// <param name="scenarios">The scenarios to list.</param>
+    public static void PrintScenarios(IReadOnlyList<ScenarioDescriptor> scenarios)
+    {
         Console.WriteLine("Scenarios:");
         foreach (var scenario in scenarios)
         {

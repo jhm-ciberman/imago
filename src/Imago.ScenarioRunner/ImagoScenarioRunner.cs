@@ -62,9 +62,26 @@ public abstract class ImagoScenarioRunner
 
         var command = ScenarioCommandLine.Parse(args);
 
+        if (command.ShowHelp)
+        {
+            ScenarioCommandLine.PrintHelp(scenarios);
+            return 0;
+        }
+
+        if (command.UnknownOptions.Count > 0)
+        {
+            foreach (var option in command.UnknownOptions)
+            {
+                Console.Error.WriteLine($"Unknown option '{option}'.");
+            }
+
+            Console.Error.WriteLine("Run with --help to see the available options.");
+            return 2;
+        }
+
         if (command.ShowList)
         {
-            ScenarioCommandLine.PrintList(scenarios);
+            ScenarioCommandLine.PrintScenarios(scenarios);
             return 0;
         }
 
@@ -99,12 +116,43 @@ public abstract class ImagoScenarioRunner
         // A single batch (the common case) runs in this process, where all the data for the summary already
         // lives. Only several batches, isolation or differing backends, are spread across worker processes.
         var batches = ScenarioBatcher.Group(selected, cliBackend, command.Isolated);
-        if (batches.Count == 1)
+        int exitCode = batches.Count == 1
+            ? this.RunInProcess(batches[0], cliBackend, command.ShowWindow, reportPath: null, presenter)
+            : ScenarioOrchestrator.Run(batches, command.BackendName, command.ShowWindow, presenter);
+
+        HandleBaseline(command, presenter);
+        return exitCode;
+    }
+
+    private static void HandleBaseline(ScenarioCommandLine command, ConsolePresenter presenter)
+    {
+        if (command.Baseline)
         {
-            return this.RunInProcess(batches[0], cliBackend, command.ShowWindow, reportPath: null, presenter);
+            SaveBaseline(ScenarioPaths.Shots, ScenarioPaths.Baseline);
+            presenter.BaselineSaved(ScenarioPaths.Baseline);
+            return;
         }
 
-        return ScenarioOrchestrator.Run(batches, command.BackendName, command.ShowWindow, presenter);
+        if (Directory.Exists(ScenarioPaths.Baseline))
+        {
+            var changes = ScenarioComparer.Compare(ScenarioPaths.Baseline, ScenarioPaths.Shots, ScenarioPaths.Diff);
+            presenter.Changes(changes, ScenarioPaths.Diff);
+        }
+    }
+
+    private static void SaveBaseline(string currentDir, string baselineDir)
+    {
+        if (Directory.Exists(baselineDir))
+        {
+            Directory.Delete(baselineDir, recursive: true);
+        }
+
+        foreach (string file in Directory.EnumerateFiles(currentDir, "*.png", SearchOption.AllDirectories))
+        {
+            string destination = Path.Combine(baselineDir, Path.GetRelativePath(currentDir, file));
+            Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
+            File.Copy(file, destination, overwrite: true);
+        }
     }
 
     private int RunInProcess(
@@ -139,6 +187,10 @@ public abstract class ImagoScenarioRunner
         app.Window.WindowState = showWindow ? WindowState.Normal : WindowState.Hidden;
         string backendName = app.Renderer.BackendType.ToString().ToLowerInvariant();
 
+        // Advance the simulation by a fixed step each frame so animated content lands at the same phase every
+        // run; without this, captures drift with frame timing and the baseline comparison sees false changes.
+        app.Ticker.FixedDeltaTime = 1.0 / 60.0;
+
         using var driver = new ScenarioDriver(app, scenarios, presenter, () => this.Reset(app));
         app.Ticker.Ticked += (sender, e) => driver.Tick((float)e.DeltaTime);
         app.Run();
@@ -158,48 +210,35 @@ public abstract class ImagoScenarioRunner
 
     private static IReadOnlyList<ScenarioDescriptor>? Select(IReadOnlyList<ScenarioDescriptor> scenarios, ScenarioCommandLine command)
     {
-        if (command.Names.Count > 0)
+        if (command.Names.Count == 0)
         {
-            var resolved = new List<ScenarioDescriptor>(command.Names.Count);
-            foreach (var name in command.Names)
-            {
-                var scenario = scenarios.FirstOrDefault(s => string.Equals(s.Name, name, StringComparison.OrdinalIgnoreCase));
-                if (scenario == null)
-                {
-                    Console.Error.WriteLine($"Unknown scenario: '{name}'.");
-                    Console.Error.WriteLine();
-                    ScenarioCommandLine.PrintList(scenarios);
-                    return null;
-                }
-
-                resolved.Add(scenario);
-            }
-
-            return resolved;
+            return scenarios;
         }
 
-        if (command.Filter != null)
+        var resolved = new List<ScenarioDescriptor>(command.Names.Count);
+        foreach (var name in command.Names)
         {
-            var matches = scenarios.Where(s => s.Name.Contains(command.Filter, StringComparison.OrdinalIgnoreCase)).ToList();
-            if (matches.Count == 0)
+            var scenario = scenarios.FirstOrDefault(s => string.Equals(s.Name, name, StringComparison.OrdinalIgnoreCase));
+            if (scenario == null)
             {
-                Console.Error.WriteLine($"No scenarios match filter '{command.Filter}'.");
+                Console.Error.WriteLine($"Unknown scenario: '{name}'.");
+                Console.Error.WriteLine();
+                ScenarioCommandLine.PrintScenarios(scenarios);
                 return null;
             }
 
-            return matches;
+            resolved.Add(scenario);
         }
 
-        return scenarios;
+        return resolved;
     }
 
     private static void RedirectGameConsole()
     {
         // The game logs to the console as it boots and loads content. Send that to a file so the run's output
         // stays clean; the presenter keeps writing to the real output it captured earlier.
-        string directory = Path.Combine("artifacts", "scenarios");
-        Directory.CreateDirectory(directory);
-        Console.SetOut(new StreamWriter(Path.Combine(directory, "run.log"), append: false) { AutoFlush = true });
+        Directory.CreateDirectory(ScenarioPaths.Root);
+        Console.SetOut(new StreamWriter(ScenarioPaths.Log, append: false) { AutoFlush = true });
     }
 
     private static void SetAutoCwd()
