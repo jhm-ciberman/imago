@@ -14,7 +14,8 @@ internal sealed record ScenarioCommandLine(
     bool ShowList,
     bool ShowWindow,
     bool Isolated,
-    bool Worker)
+    bool Worker,
+    string? ReportPath)
 {
     /// <summary>
     /// Parses the runner's command-line arguments. Unknown leading tokens are taken as scenario names.
@@ -30,6 +31,7 @@ internal sealed record ScenarioCommandLine(
         bool showWindow = false;
         bool isolated = false;
         bool worker = false;
+        string? reportPath = null;
 
         for (int i = 0; i < args.Length; i++)
         {
@@ -53,6 +55,9 @@ internal sealed record ScenarioCommandLine(
                 case "--backend" when i + 1 < args.Length:
                     backendName = args[++i];
                     break;
+                case "--report" when i + 1 < args.Length:
+                    reportPath = args[++i];
+                    break;
                 default:
                     if (!args[i].StartsWith('-'))
                     {
@@ -63,7 +68,7 @@ internal sealed record ScenarioCommandLine(
             }
         }
 
-        return new ScenarioCommandLine(names, filter, backendName, showList, showWindow, isolated, worker);
+        return new ScenarioCommandLine(names, filter, backendName, showList, showWindow, isolated, worker, reportPath);
     }
 
     /// <summary>

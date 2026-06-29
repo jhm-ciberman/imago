@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -85,18 +86,35 @@ public abstract class ImagoScenarioRunner
             return 2;
         }
 
-        // A worker runs the batch it was handed in one process. A lone scenario does too, since isolating it from
-        // a one-item batch would change nothing. Everything else is orchestrated across worker processes.
-        if (command.Worker || selected.Count == 1)
+        // Capture the real output before any redirect, so the presenter keeps writing here while the game's
+        // own console output is sent elsewhere.
+        var presenter = new ConsolePresenter(Console.Out);
+
+        // A worker runs in this process the batch it was handed, writing its results to the report file.
+        if (command.Worker)
         {
-            return this.RunInProcess(selected, cliBackend, command.ShowWindow);
+            return this.RunInProcess(selected, cliBackend, command.ShowWindow, command.ReportPath, presenter);
         }
 
-        return ScenarioOrchestrator.Run(selected, command.BackendName, cliBackend, command.ShowWindow, command.Isolated);
+        // A single batch (the common case) runs in this process, where all the data for the summary already
+        // lives. Only several batches, isolation or differing backends, are spread across worker processes.
+        var batches = ScenarioBatcher.Group(selected, cliBackend, command.Isolated);
+        if (batches.Count == 1)
+        {
+            return this.RunInProcess(batches[0], cliBackend, command.ShowWindow, reportPath: null, presenter);
+        }
+
+        return ScenarioOrchestrator.Run(batches, command.BackendName, command.ShowWindow, presenter);
     }
 
-    private int RunInProcess(IReadOnlyList<ScenarioDescriptor> scenarios, GraphicsBackend? cliBackend, bool showWindow)
+    private int RunInProcess(
+        IReadOnlyList<ScenarioDescriptor> scenarios,
+        GraphicsBackend? cliBackend,
+        bool showWindow,
+        string? reportPath,
+        ConsolePresenter presenter)
     {
+        var stopwatch = Stopwatch.StartNew();
         StartWatchdog(TimeSpan.FromSeconds(120.0 * scenarios.Count));
 
         // Scenario runs use a virtual mouse and keyboard, so a person can move the real mouse and type freely
@@ -107,15 +125,35 @@ public abstract class ImagoScenarioRunner
         // watch the scenarios run in a real window.
         Application.Headless = !showWindow;
 
+        // A worker streams its lines but leaves the header and summary to the orchestrating parent.
+        bool standalone = reportPath == null;
+        if (standalone)
+        {
+            presenter.RunStarted(scenarios.Count, 1);
+        }
+
+        RedirectGameConsole();
+
         GraphicsBackend? backend = scenarios[0].Backend ?? cliBackend;
         Application app = this.CreateApp(backend);
         app.Window.WindowState = showWindow ? WindowState.Normal : WindowState.Hidden;
+        string backendName = app.Renderer.BackendType.ToString().ToLowerInvariant();
 
-        using var driver = new ScenarioDriver(app, scenarios, () => this.Reset(app));
+        using var driver = new ScenarioDriver(app, scenarios, presenter, () => this.Reset(app));
         app.Ticker.Ticked += (sender, e) => driver.Tick((float)e.DeltaTime);
         app.Run();
+        stopwatch.Stop();
 
-        return driver.ExitCode;
+        if (standalone)
+        {
+            presenter.RunFinished(driver.Passed, driver.Failed, driver.Shots, stopwatch.Elapsed.TotalSeconds, backendName, driver.WindowSize, 1);
+        }
+        else
+        {
+            new ScenarioReport(driver.Passed, driver.Failed, driver.Shots, backendName, driver.WindowSize).Write(reportPath!);
+        }
+
+        return driver.Failed > 0 ? 1 : 0;
     }
 
     private static IReadOnlyList<ScenarioDescriptor>? Select(IReadOnlyList<ScenarioDescriptor> scenarios, ScenarioCommandLine command)
@@ -153,6 +191,15 @@ public abstract class ImagoScenarioRunner
         }
 
         return scenarios;
+    }
+
+    private static void RedirectGameConsole()
+    {
+        // The game logs to the console as it boots and loads content. Send that to a file so the run's output
+        // stays clean; the presenter keeps writing to the real output it captured earlier.
+        string directory = Path.Combine("artifacts", "scenarios");
+        Directory.CreateDirectory(directory);
+        Console.SetOut(new StreamWriter(Path.Combine(directory, "run.log"), append: false) { AutoFlush = true });
     }
 
     private static void SetAutoCwd()

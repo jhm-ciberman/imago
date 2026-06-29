@@ -71,7 +71,7 @@ public abstract class ScenarioBase
     /// <param name="message">The message to write.</param>
     protected void Log(string message)
     {
-        Console.WriteLine($"  [scenario] {message}");
+        this._context.Presenter.Progress(message);
     }
 
     /// <summary>
@@ -113,7 +113,7 @@ public abstract class ScenarioBase
 
             string path = Path.Combine(this._context.OutputDirectory, fileName);
             image.SaveAsPng(path);
-            this.Log($"captured {fileName} ({image.Width}x{image.Height})");
+            this._context.Shots.Add(label);
         }
         finally
         {

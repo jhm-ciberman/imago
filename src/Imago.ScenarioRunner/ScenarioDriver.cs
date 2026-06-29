@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Numerics;
 using System.Threading.Tasks;
@@ -21,7 +22,9 @@ internal sealed class ScenarioDriver : IDisposable
 {
     private readonly Application _app;
     private readonly IReadOnlyList<ScenarioDescriptor> _scenarios;
+    private readonly ConsolePresenter _presenter;
     private readonly Action? _reset;
+    private readonly Stopwatch _stopwatch = new();
 
     private int _index;
     private ScenarioScheduler? _scheduler;
@@ -31,14 +34,33 @@ internal sealed class ScenarioDriver : IDisposable
     private Vector2Int? _baselineWindowSize;
     private Vector2Int _windowSize;
 
-    public ScenarioDriver(Application app, IReadOnlyList<ScenarioDescriptor> scenarios, Action? reset)
+    public ScenarioDriver(Application app, IReadOnlyList<ScenarioDescriptor> scenarios, ConsolePresenter presenter, Action? reset)
     {
         this._app = app;
         this._scenarios = scenarios;
+        this._presenter = presenter;
         this._reset = reset;
     }
 
-    public int ExitCode { get; private set; }
+    /// <summary>
+    /// Gets the number of scenarios that passed.
+    /// </summary>
+    public int Passed { get; private set; }
+
+    /// <summary>
+    /// Gets the number of scenarios that failed.
+    /// </summary>
+    public int Failed { get; private set; }
+
+    /// <summary>
+    /// Gets the total number of shots captured across all scenarios.
+    /// </summary>
+    public int Shots { get; private set; }
+
+    /// <summary>
+    /// Gets the size the booted window settled at, which scenarios render and capture at unless they override it.
+    /// </summary>
+    public Vector2Int WindowSize => this._baselineWindowSize ?? Vector2Int.Zero;
 
     public void Tick(float deltaTime)
     {
@@ -66,27 +88,32 @@ internal sealed class ScenarioDriver : IDisposable
         string outputDirectory = Path.Combine("artifacts", "scenarios", scenario.Name);
         Directory.CreateDirectory(outputDirectory);
 
-        Console.WriteLine($"Running scenario '{scenario.Name}': {scenario.Description}");
         this.ApplyWindowSize(scenario);
 
         this._scheduler = new ScenarioScheduler();
-        this._context = new ScenarioContext(this._app, this._scheduler, outputDirectory, scenario.Name);
+        this._context = new ScenarioContext(this._app, this._scheduler, this._presenter, outputDirectory, scenario.Name);
+        this._stopwatch.Restart();
         this._task = scenario.Run(this._context);
     }
 
     private void FinishCurrent()
     {
+        double seconds = this._stopwatch.Elapsed.TotalSeconds;
         var scenario = this._scenarios[this._index];
-        string outputDirectory = this._context!.OutputDirectory;
+        var shots = this._context!.Shots;
+        this.Shots += shots.Count;
 
         if (this._task!.IsFaulted)
         {
-            this.ExitCode = 1;
-            Console.Error.WriteLine($"Scenario '{scenario.Name}' failed: {this._task.Exception?.GetBaseException()}");
+            this.Failed++;
+            var error = this._task.Exception?.GetBaseException() ?? new Exception("Unknown error.");
+            this._presenter.ScenarioFailed(scenario.Name, seconds, error);
+            Console.Error.WriteLine(error);
         }
         else
         {
-            Console.WriteLine($"  Executed. Review the screenshots in {Path.GetFullPath(outputDirectory)}");
+            this.Passed++;
+            this._presenter.ScenarioPassed(scenario.Name, shots, seconds);
         }
 
         // Release the capturer's GPU texture while the renderer is still alive, before the run is torn down.
