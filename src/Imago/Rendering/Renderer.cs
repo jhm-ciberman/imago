@@ -154,7 +154,7 @@ public class Renderer : IDisposable
         this._forward3DRenderer = new Forward3DRenderer(this);
         this._imGuiPass = new ImGuiPass(this);
         this._spritesPass = new SpritesPass(this);
-        this._overlaySpritesPasses[this.FullScreenRenderTexture.OutputDescription] = new SpritesPass(this, this.FullScreenRenderTexture, capacity: 64);
+        this._overlaySpritesPasses[this.FullScreenRenderTexture.OutputDescription] = new SpritesPass(this, this.FullScreenRenderTexture, capacity: 64, depthTested: false);
         this._fullScreenPass = new FullScreenPass(this, isPixelArt: false);
         this._fullScreenPixelArtPass = new FullScreenPass(this, isPixelArt: true);
 
@@ -361,7 +361,7 @@ public class Renderer : IDisposable
     {
         if (!this._overlaySpritesPasses.TryGetValue(target.OutputDescription, out var pass))
         {
-            pass = new SpritesPass(this, target, capacity: 64);
+            pass = new SpritesPass(this, target, capacity: 64, depthTested: false);
             this._overlaySpritesPasses.Add(target.OutputDescription, pass);
         }
 

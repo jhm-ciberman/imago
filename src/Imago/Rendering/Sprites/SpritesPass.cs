@@ -20,17 +20,21 @@ internal class SpritesPass : IDisposable, IPipelineProvider
 
     private readonly OutputDescription _outputDescription;
 
+    private readonly bool _depthTested;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="SpritesPass"/> class.
     /// </summary>
     /// <param name="renderer">The renderer.</param>
     /// <param name="outputTarget">The render texture whose output description determines pipeline compatibility. If null, uses the main render texture.</param>
     /// <param name="capacity">The maximum number of sprites that can be batched in a single draw call.</param>
-    public SpritesPass(Renderer renderer, IRenderTexture? outputTarget = null, int capacity = 1000)
+    /// <param name="depthTested">Whether sprites test and write depth. Pass false for overlays that must draw on top of everything regardless of the target's depth buffer.</param>
+    public SpritesPass(Renderer renderer, IRenderTexture? outputTarget = null, int capacity = 1000, bool depthTested = true)
     {
         this._renderer = renderer;
         this._gd = renderer.GraphicsDevice;
         this._outputDescription = (outputTarget ?? renderer.MainRenderTexture).OutputDescription;
+        this._depthTested = depthTested;
         this._defaultShader = new Shader(renderer, this, _vertexShader, _fragmentShader, ["Main"]);
 
         this._drawingContext = new DrawingContext(this._gd, this._defaultShader, capacity);
@@ -50,7 +54,7 @@ internal class SpritesPass : IDisposable, IPipelineProvider
         var scissorTestEnabled = flags.HasFlag(RenderFlags.ScisorTest);
         return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
         {
-            DepthStencilState = this._outputDescription.DepthAttachment.HasValue
+            DepthStencilState = (this._depthTested && this._outputDescription.DepthAttachment.HasValue)
                 ? DepthStencilStateDescription.DepthOnlyLessEqual
                 : DepthStencilStateDescription.Disabled,
             PrimitiveTopology = PrimitiveTopology.TriangleList,
