@@ -37,11 +37,21 @@ public abstract class ScenarioBase
     /// <summary>
     /// Waits the given number of frames, letting pending changes render before continuing.
     /// </summary>
-    /// <param name="count">The number of frames to wait.</param>
+    /// <param name="frames">The number of frames to wait.</param>
     /// <returns>A task that completes once the frames have elapsed.</returns>
-    protected Task Frames(int count)
+    protected Task Wait(int frames)
     {
-        return this._context.Scheduler.WaitFrames(count, DefaultTimeoutSeconds);
+        return this._context.Scheduler.WaitFrames(frames, DefaultTimeoutSeconds);
+    }
+
+    /// <summary>
+    /// Waits the given number of seconds of advanced time, letting pending changes render before continuing.
+    /// </summary>
+    /// <param name="seconds">The number of seconds to wait.</param>
+    /// <returns>A task that completes once the time has elapsed.</returns>
+    protected Task Wait(double seconds)
+    {
+        return this._context.Scheduler.WaitSeconds(seconds, seconds + DefaultTimeoutSeconds);
     }
 
     /// <summary>
@@ -75,20 +85,39 @@ public abstract class ScenarioBase
     }
 
     /// <summary>
-    /// Saves a screenshot of the current frame to the scenario's output folder.
+    /// Waits the given number of frames, then saves a screenshot of the current frame to the scenario's output folder.
     /// </summary>
     /// <remarks>
-    /// Waits <paramref name="settleFrames"/> frames first so the latest changes are rendered before the capture.
-    /// Files are numbered in capture order.
+    /// The wait lets the latest changes render before the capture. Files are numbered in capture order.
     /// </remarks>
     /// <param name="label">A short label included in the file name, or null to use the scenario name.</param>
     /// <param name="includeUi">Whether to keep the GUI, cursor, and tooltips, or capture only the 3D world.</param>
-    /// <param name="settleFrames">The number of frames to wait before capturing.</param>
+    /// <param name="waitFrames">The number of frames to wait before capturing.</param>
     /// <returns>A task that completes once the screenshot is written.</returns>
-    protected async Task Capture(string? label = null, bool includeUi = true, int settleFrames = 2)
+    protected async Task Capture(string? label = null, bool includeUi = true, int waitFrames = 2)
     {
-        await this.Frames(settleFrames);
+        await this.Wait(waitFrames);
+        await this.CaptureFrame(label, includeUi);
+    }
 
+    /// <summary>
+    /// Waits the given number of seconds, then saves a screenshot of the current frame to the scenario's output folder.
+    /// </summary>
+    /// <remarks>
+    /// The wait lets the latest changes render before the capture. Files are numbered in capture order.
+    /// </remarks>
+    /// <param name="waitSeconds">The number of seconds to wait before capturing.</param>
+    /// <param name="label">A short label included in the file name, or null to use the scenario name.</param>
+    /// <param name="includeUi">Whether to keep the GUI, cursor, and tooltips, or capture only the 3D world.</param>
+    /// <returns>A task that completes once the screenshot is written.</returns>
+    protected async Task Capture(double waitSeconds, string? label = null, bool includeUi = true)
+    {
+        await this.Wait(waitSeconds);
+        await this.CaptureFrame(label, includeUi);
+    }
+
+    private async Task CaptureFrame(string? label, bool includeUi)
+    {
         label ??= this._context.Name;
 
         var stage = this._context.App.Stage;

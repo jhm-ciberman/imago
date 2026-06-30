@@ -63,6 +63,18 @@ internal sealed class ScenarioScheduler
     }
 
     /// <summary>
+    /// Returns a task that completes after <paramref name="seconds"/> further seconds of advanced time.
+    /// </summary>
+    /// <param name="seconds">The number of seconds to wait. Negative values are treated as zero.</param>
+    /// <param name="timeoutSeconds">How long to wait before the task fails with a <see cref="TimeoutException"/>.</param>
+    /// <returns>A task that completes once the target time is reached.</returns>
+    public Task WaitSeconds(double seconds, double timeoutSeconds)
+    {
+        double target = this._elapsedSeconds + Math.Max(0.0, seconds);
+        return this.WaitUntil(() => this._elapsedSeconds >= target, $"{seconds:0.##}s", timeoutSeconds);
+    }
+
+    /// <summary>
     /// Advances the scheduler by one frame, resuming waits whose condition is met and failing any that timed out.
     /// </summary>
     /// <param name="deltaTime">The time elapsed since the previous frame, in seconds.</param>
