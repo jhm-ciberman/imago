@@ -39,6 +39,11 @@ public class InterpolationCamera : Camera
     public float Progress { get; private set; } = 1f;
 
     /// <summary>
+    /// Gets a value indicating whether a camera transition is currently in progress.
+    /// </summary>
+    public bool IsTransitioning => this.Progress < 1f;
+
+    /// <summary>
     /// Gets the duration of camera transitions in seconds.
     /// </summary>
     public float TransitionDuration { get; private set; } = 0.5f;
