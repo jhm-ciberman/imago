@@ -85,38 +85,15 @@ public abstract class ScenarioBase
     }
 
     /// <summary>
-    /// Waits the given number of frames, then saves a screenshot of the current frame to the scenario's output folder.
+    /// Saves a screenshot of the current frame to the scenario's output folder.
     /// </summary>
     /// <remarks>
-    /// The wait lets the latest changes render before the capture. Files are numbered in capture order.
+    /// Captures whatever is currently on screen; wait for the state you want before calling. Files are numbered
+    /// in capture order.
     /// </remarks>
     /// <param name="label">A short label included in the file name, or null to use the scenario name.</param>
     /// <param name="includeUi">Whether to keep the GUI, cursor, and tooltips, or capture only the 3D world.</param>
-    /// <param name="waitFrames">The number of frames to wait before capturing.</param>
-    /// <returns>A task that completes once the screenshot is written.</returns>
-    protected async Task Capture(string? label = null, bool includeUi = true, int waitFrames = 2)
-    {
-        await this.Wait(waitFrames);
-        await this.CaptureFrame(label, includeUi);
-    }
-
-    /// <summary>
-    /// Waits the given number of seconds, then saves a screenshot of the current frame to the scenario's output folder.
-    /// </summary>
-    /// <remarks>
-    /// The wait lets the latest changes render before the capture. Files are numbered in capture order.
-    /// </remarks>
-    /// <param name="waitSeconds">The number of seconds to wait before capturing.</param>
-    /// <param name="label">A short label included in the file name, or null to use the scenario name.</param>
-    /// <param name="includeUi">Whether to keep the GUI, cursor, and tooltips, or capture only the 3D world.</param>
-    /// <returns>A task that completes once the screenshot is written.</returns>
-    protected async Task Capture(double waitSeconds, string? label = null, bool includeUi = true)
-    {
-        await this.Wait(waitSeconds);
-        await this.CaptureFrame(label, includeUi);
-    }
-
-    private async Task CaptureFrame(string? label, bool includeUi)
+    protected void Capture(string? label = null, bool includeUi = true)
     {
         label ??= this._context.Name;
 
