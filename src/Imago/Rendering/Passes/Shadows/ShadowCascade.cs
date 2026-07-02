@@ -34,7 +34,10 @@ internal class ShadowCascade
 
         sphereDiameter = MathF.Round(sphereDiameter * 16) / 16;
 
-        Matrix4x4 lightViewMatrix = Matrix4x4.CreateLookAt(lightDirection, Vector3.Zero, Vector3.UnitY);
+        // A fixed UnitY up vector degenerates when the light points near straight up or down.
+        Vector3 up = MathF.Abs(Vector3.Dot(lightDirection, Vector3.UnitY)) < 0.99f ? Vector3.UnitY : Vector3.UnitZ;
+
+        Matrix4x4 lightViewMatrix = Matrix4x4.CreateLookAt(lightDirection, Vector3.Zero, up);
         Matrix4x4.Invert(lightViewMatrix, out Matrix4x4 lightViewMatrixInverse);
 
         Span<Vector3> frustumCornersWS = stackalloc Vector3[8];
@@ -68,7 +71,7 @@ internal class ShadowCascade
         Vector3 centerWS = Vector3.Transform(centerLS, lightViewMatrixInverse);
 
         float orthoDepth = maxLS.Z - minLS.Z + config.CullingZPadding;
-        lightViewMatrix = Matrix4x4.CreateLookAt(centerWS, centerWS - lightDirection, Vector3.UnitY);
+        lightViewMatrix = Matrix4x4.CreateLookAt(centerWS, centerWS - lightDirection, up);
 
         Matrix4x4 lightProjectionMatrix = Matrix4x4.CreateOrthographic(sphereDiameter, sphereDiameter, 0.0f, orthoDepth);
 
