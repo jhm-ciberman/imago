@@ -383,7 +383,7 @@ internal class ImmediatePass : IPipelineProvider, IDisposable, IImmediateRendere
 
     private static readonly string _vertexShader = @"
         #version 450
-        layout(set = 0, binding = 0, std140) uniform CameraDataBuffer {
+        layout(set = 0, binding = 0, std140) uniform PassDataBuffer {
             mat4 ViewProjection;
         };
 
