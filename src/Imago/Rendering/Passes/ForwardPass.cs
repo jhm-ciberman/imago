@@ -26,6 +26,8 @@ internal class ForwardPass : IDisposable, IPipelineProvider
         public Matrix4x4 ShadowMapMatrix1 { get; set; }
         public Matrix4x4 ShadowMapMatrix2 { get; set; }
         public Matrix4x4 ShadowMapMatrix3 { get; set; }
+        public Vector4 ShadowNormalOffsets { get; set; } // world-space receiver offset, one per cascade
+        public Vector4 MainLightDirection { get; set; }
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -131,6 +133,8 @@ internal class ForwardPass : IDisposable, IPipelineProvider
         cameraInfo.ShadowMapMatrix1 = this._shadowPass.GetShadowCascadeViewProjectionMatrix(1);
         cameraInfo.ShadowMapMatrix2 = this._shadowPass.GetShadowCascadeViewProjectionMatrix(2);
         cameraInfo.ShadowMapMatrix3 = this._shadowPass.GetShadowCascadeViewProjectionMatrix(3);
+        cameraInfo.ShadowNormalOffsets = this._shadowPass.GetShadowNormalOffsets();
+        cameraInfo.MainLightDirection = new Vector4(environment.MainLight.Direction, 0f);
 
         LightInfo lightInfo = new LightInfo();
         lightInfo.AmbientColor = environment.AmbientColor;

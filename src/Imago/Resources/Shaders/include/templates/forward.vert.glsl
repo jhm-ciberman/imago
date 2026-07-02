@@ -13,6 +13,8 @@ layout(set = RENDER_PASS_UNIFORM_SET, binding = 0, std140) uniform CameraDataBuf
 {
     mat4 ViewProjection;
     mat4 ShadowMapMatrices[4];
+    vec4 ShadowNormalOffsets; // world-space receiver offset, one per cascade
+    vec4 MainLightDirection;
 } pass;
 
 #define SHADOWMAP_CASCADE_COUNT 4
@@ -63,8 +65,14 @@ void main()
     fsin_LightLevel = Light;
 #endif
 
+    // Normal offset bias: look up the shadow map slightly off the surface, along the receiver's
+    // normal, so a surface never depth-compares against itself. Scaled by the angle to the light,
+    // where the depth error across a shadow texel grows.
+    float invNdotL = 1.0 - clamp(dot(pass.MainLightDirection.xyz, v.Normal), 0.0, 1.0);
+
     for (uint i = 0; i < SHADOWMAP_CASCADE_COUNT; i++)
     {
-        fsin_ShadowMapCoords[i] = pass.ShadowMapMatrices[i] * vec4(v.Position, 1.0);
+        vec3 samplePos = v.Position + v.Normal * (invNdotL * pass.ShadowNormalOffsets[i]);
+        fsin_ShadowMapCoords[i] = pass.ShadowMapMatrices[i] * vec4(samplePos, 1.0);
     }
 }

@@ -115,7 +115,7 @@ public class ShadowMap
     /// in the direction of the normal by 0.1 texels.
     /// This way the same value works independent of the shadow map resolution.
     /// </summary>
-    public float NormalOffset { get; set; } = 0.0f;
+    public float NormalOffset { get; set; } = 2.0f;
 
     /// <summary>
     /// Gets or sets the shadow color.

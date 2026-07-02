@@ -11,8 +11,7 @@
 layout(set = RENDER_PASS_UNIFORM_SET, binding = 0, std140) uniform ShadowMapDataBuffer
 {
     mat4 ShadowMapMatrix;
-    vec4 ShadowBias;
-    vec4 LightDirection;
+    vec4 LightDirection; // xyz = light direction, w = depth bias
 };
 
 layout(set = RENDER_PASS_UNIFORM_SET, binding = 1, std140) uniform GlobalDataBuffer
@@ -40,16 +39,12 @@ VertexInput BuildVertexInput()
     return i;
 }
 
-vec3 ApplyShadowBias(vec3 positionWS, vec3 normalWS)
+// The normal offset bias is applied on the receiver side (see the forward vertex template):
+// offsetting caster geometry along its normals warps silhouettes, so casters only get the
+// depth bias, which pushes them away from the light without deforming them.
+vec3 ApplyShadowBias(vec3 positionWS)
 {
-    float depthBias = ShadowBias.x;
-    float normalOffset = ShadowBias.y;
-    vec3 lightDir = LightDirection.xyz;
-
-    float invNdotL = 1.0 - clamp(dot(lightDir, normalWS), 0.0, 1.0);
-    float scale = invNdotL * normalOffset;
-
-    return positionWS + lightDir * depthBias + normalWS * scale;
+    return positionWS + LightDirection.xyz * LightDirection.w;
 }
 
 // ========== USER CODE ==========
@@ -61,7 +56,7 @@ void main()
     VertexInput vertexInput = BuildVertexInput();
     VertexOutput v = Vertex(vertexInput);
 
-    vec3 biasedPos = ApplyShadowBias(v.Position, v.Normal);
+    vec3 biasedPos = ApplyShadowBias(v.Position);
     gl_Position = ShadowMapMatrix * vec4(biasedPos, 1.0);
 
 #ifdef ENABLE_ALPHA_TEST

@@ -18,10 +18,7 @@ internal class ShadowPass : IDisposable, IPipelineProvider
     private struct ShadowMapDataBuffer
     {
         public Matrix4x4 ShadowMapMatrix { get; set; }
-        public Vector2 ShadowBias { get; set; } // x = depth bias, y = normal bias
-        private readonly Vector2 _padding0;
-        public Vector3 LightDirection { get; set; } // xyz = light direction
-        private readonly float _padding1;
+        public Vector4 LightDirection { get; set; } // xyz = light direction, w = depth bias
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -110,8 +107,7 @@ internal class ShadowPass : IDisposable, IPipelineProvider
 
             ShadowMapDataBuffer data = new ShadowMapDataBuffer();
             data.ShadowMapMatrix = this._cascades[i].ViewProjectionMatrix;
-            data.ShadowBias = new Vector2(this._cascades[i].DepthBias, this._cascades[i].NormalOffset);
-            data.LightDirection = mainLight.Direction;
+            data.LightDirection = new Vector4(mainLight.Direction, this._cascades[i].DepthBias);
 
             GlobalData globalData = new GlobalData();
             globalData.CameraPosition = camera.Position;
@@ -156,10 +152,17 @@ internal class ShadowPass : IDisposable, IPipelineProvider
         this._renderBatcher.Dispose();
     }
 
-    internal Vector4 GetShadowBiasData(int index)
+    /// <summary>
+    /// Returns the world-space normal offset bias of each shadow cascade, one per component.
+    /// </summary>
+    internal Vector4 GetShadowNormalOffsets()
     {
-        var cascade = this._cascades[index];
-        return new Vector4(cascade.DepthBias, cascade.NormalOffset, 0.0f, 0.0f);
+        return new Vector4(
+            this._cascades[0].NormalOffset,
+            this._cascades[1].NormalOffset,
+            this._cascades[2].NormalOffset,
+            this._cascades[3].NormalOffset
+        );
     }
 
     Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant, RenderFlags flags, TextureSampleCount sampleCount)
