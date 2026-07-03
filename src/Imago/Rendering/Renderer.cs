@@ -155,8 +155,8 @@ public class Renderer : IDisposable
         this._imGuiPass = new ImGuiPass(this);
         this._spritesPass = new SpritesPass(this);
         this._overlaySpritesPasses[this.FullScreenRenderTexture.OutputDescription] = new SpritesPass(this, this.FullScreenRenderTexture, capacity: 64, depthTested: false);
-        this._fullScreenPass = new FullScreenPass(this, isPixelArt: false);
-        this._fullScreenPixelArtPass = new FullScreenPass(this, isPixelArt: true);
+        this._fullScreenPass = new FullScreenPass(this, isPixelArt: false, isOverlay: false);
+        this._fullScreenPixelArtPass = new FullScreenPass(this, isPixelArt: true, isOverlay: true);
 
 
 

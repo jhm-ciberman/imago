@@ -24,8 +24,15 @@ internal class FullScreenPass : IDisposable
 
     private readonly Dictionary<NativeTexture, ResourceSet> _resourceSets = new();
 
-    public FullScreenPass(Renderer renderer, bool isPixelArt = false)
+    private readonly BlendStateDescription _blendState;
+
+    public FullScreenPass(Renderer renderer, bool isPixelArt = false, bool isOverlay = false)
     {
+        // An overlay blends over whatever is already on the target. A base layer instead replaces the
+        // target outright, so its alpha (which transparent draws may have pushed below 1) never lets the
+        // target's previous contents bleed through.
+        this._blendState = isOverlay ? BlendStateDescription.SingleAlphaBlend : BlendStateDescription.SingleOverrideBlend;
+
         this._gd = renderer.GraphicsDevice;
         var factory = this._gd.ResourceFactory;
 
@@ -56,7 +63,7 @@ internal class FullScreenPass : IDisposable
                     : DepthStencilStateDescription.Disabled,
                 PrimitiveTopology = PrimitiveTopology.TriangleList,
                 ShaderSet = new ShaderSetDescription([this._vertexLayout], this._shaders),
-                BlendState = BlendStateDescription.SingleAlphaBlend,
+                BlendState = this._blendState,
                 RasterizerState = RasterizerStateDescription.CullNone,
                 Outputs = output,
                 ResourceLayouts = [this._resourceLayout],
