@@ -154,7 +154,7 @@ internal class ImmediatePass : IPipelineProvider, IDisposable, IImmediateRendere
         this._shader = null!;
         this._currentBatchTexture = null!;
         this._currentShaderInUse = null!;
-        this._renderFlags = RenderFlags.None;
+        this._renderFlags = RenderFlags.DepthWrite;
         this._currentRenderFlagsInUse = RenderFlags.None;
 
         cl.UpdateBuffer(this._passDataBuffer, 0, new PassDataBuffer { ViewProjection = viewProjectionMatrix });
@@ -210,17 +210,30 @@ internal class ImmediatePass : IPipelineProvider, IDisposable, IImmediateRendere
     public bool IsTransparencyEnabled
     {
         get => this._renderFlags.HasFlag(RenderFlags.Transparent);
-        set
+        set => this.SetRenderFlag(RenderFlags.Transparent, value);
+    }
+
+    /// <summary>
+    /// Gets or sets whether the next batch of draw calls writes to the depth buffer. Enabled by default.
+    /// Depth testing always stays enabled. Disable it to layer overlapping geometry purely by draw
+    /// order, like a 2D composition, instead of having it intersect in 3D.
+    /// </summary>
+    public bool IsDepthWriteEnabled
+    {
+        get => this._renderFlags.HasFlag(RenderFlags.DepthWrite);
+        set => this.SetRenderFlag(RenderFlags.DepthWrite, value);
+    }
+
+    private void SetRenderFlag(RenderFlags flag, bool value)
+    {
+        var renderFlags = this._renderFlags;
+        var newRenderFlags = value
+            ? renderFlags | flag
+            : renderFlags & ~flag;
+        if (renderFlags != newRenderFlags)
         {
-            var renderFlags = this._renderFlags;
-            var newRenderFlags = value
-                ? renderFlags | RenderFlags.Transparent
-                : renderFlags & ~RenderFlags.Transparent;
-            if (renderFlags != newRenderFlags)
-            {
-                this.Flush();
-                this._renderFlags = newRenderFlags;
-            }
+            this.Flush();
+            this._renderFlags = newRenderFlags;
         }
     }
 
@@ -353,7 +366,11 @@ internal class ImmediatePass : IPipelineProvider, IDisposable, IImmediateRendere
 
         return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
         {
-            DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
+            DepthStencilState = new DepthStencilStateDescription(
+                depthTestEnabled: true,
+                depthWriteEnabled: flags.HasFlag(RenderFlags.DepthWrite),
+                ComparisonKind.LessEqual
+            ),
             PrimitiveTopology = PrimitiveTopology.TriangleList,
             ShaderSet = shaderVariant.ShaderSetDescription,
             BlendState = new BlendStateDescription(RgbaFloat.Black, blend),

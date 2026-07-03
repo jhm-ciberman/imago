@@ -18,6 +18,13 @@ public interface IImmediateRenderer
     public bool IsTransparencyEnabled { get; set; }
 
     /// <summary>
+    /// Gets or sets whether the next batch of draw calls writes to the depth buffer. Enabled by default.
+    /// Depth testing always stays enabled. Disable it to layer overlapping geometry purely by draw
+    /// order, like a 2D composition, instead of having it intersect in 3D.
+    /// </summary>
+    public bool IsDepthWriteEnabled { get; set; }
+
+    /// <summary>
     /// Sets the shader to use for the next subsequent draw calls.
     /// </summary>
     /// <param name="shader">The shader to use or null to use the default shader.</param>
