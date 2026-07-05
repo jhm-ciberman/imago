@@ -32,7 +32,7 @@ public class Cursor
     {
         this.TexturePath = texturePath;
         this.Hotspot = hotspot;
-        this.Texture = new ImageTexture(this.TexturePath, srgb: false);
+        this.Texture = ImageTexture.Load(this.TexturePath, srgb: false);
     }
 
     /// <summary>

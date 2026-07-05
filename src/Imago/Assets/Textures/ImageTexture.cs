@@ -4,41 +4,31 @@ using SixLabors.ImageSharp.PixelFormats;
 namespace Imago.Assets.Textures;
 
 /// <summary>
-/// Represents a texture created from an image file or Image instance.
+/// Represents a texture created from an image.
 /// </summary>
 public class ImageTexture : Texture
 {
-    private readonly Image<Rgba32> _image;
-
     /// <summary>
     /// Initializes a new instance of the <see cref="ImageTexture"/> class from an existing image.
+    /// The pixel data is copied, so the image remains owned by the caller.
     /// </summary>
     /// <param name="image">The image to create the texture from.</param>
     /// <param name="srgb">Whether to treat the image data as sRGB color space.</param>
     public ImageTexture(Image<Rgba32> image, bool srgb = true)
         : base((uint)image.Width, (uint)image.Height, 0, srgb)
     {
-        this._image = image;
         this.SetDataFromImage(image);
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ImageTexture"/> class from an image file.
+    /// Loads an image texture from an image file.
     /// </summary>
     /// <param name="path">The path to the image file to load.</param>
     /// <param name="srgb">Whether to treat the image data as sRGB color space.</param>
-    public ImageTexture(string path, bool srgb = true)
-        : this(Image.Load<Rgba32>(path), srgb)
+    /// <returns>The loaded texture.</returns>
+    public static ImageTexture Load(string path, bool srgb = true)
     {
-    }
-
-    /// <summary>
-    /// Disposes the texture and releases associated resources.
-    /// </summary>
-    public override void Dispose()
-    {
-        base.Dispose();
-
-        this._image.Dispose();
+        using var image = Image.Load<Rgba32>(path);
+        return new ImageTexture(image, srgb);
     }
 }

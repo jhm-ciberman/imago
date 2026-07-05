@@ -75,7 +75,7 @@ internal sealed class BasicAnimationApp : Application
 
         var assetsDir = Path.Combine(AppContext.BaseDirectory, "Assets");
 
-        var foxTexture = new ImageTexture(Path.Combine(assetsDir, "fox.png"));
+        var foxTexture = ImageTexture.Load(Path.Combine(assetsDir, "fox.png"));
         var foxMaterial = Renderer.Instance.MakeMaterial<StandardMaterial>();
         foxMaterial.Texture = foxTexture;
         foxMaterial.PixelPerfectShadows = false;

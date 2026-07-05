@@ -24,22 +24,28 @@ public class Texture : ITexture, ITextureRegion, IDisposable
     /// <summary>
     /// Gets a singleton 2x2 white texture.
     /// </summary>
-    public static Texture White => _white ??= new ImageTexture(new Image<Rgba32>(2, 2, new Rgba32(255, 255, 255, 255)));
+    public static Texture White => _white ??= MakeSolid(new Rgba32(255, 255, 255, 255));
 
     /// <summary>
     /// Gets a singleton 2x2 black texture.
     /// </summary>
-    public static Texture Black => _black ??= new ImageTexture(new Image<Rgba32>(2, 2, new Rgba32(0, 0, 0, 255)));
+    public static Texture Black => _black ??= MakeSolid(new Rgba32(0, 0, 0, 255));
 
     /// <summary>
     /// Gets a singleton 2x2 transparent texture.
     /// </summary>
-    public static Texture Transparent => _transparent ??= new ImageTexture(new Image<Rgba32>(2, 2, new Rgba32(0, 0, 0, 0)));
+    public static Texture Transparent => _transparent ??= MakeSolid(new Rgba32(0, 0, 0, 0));
 
     /// <summary>
     /// Gets a singleton 2x2 magenta texture, often used to indicate missing textures.
     /// </summary>
-    public static Texture Magenta => _magenta ??= new ImageTexture(new Image<Rgba32>(2, 2, new Rgba32(255, 0, 255, 255)));
+    public static Texture Magenta => _magenta ??= MakeSolid(new Rgba32(255, 0, 255, 255));
+
+    private static Texture MakeSolid(Rgba32 color)
+    {
+        using var image = new Image<Rgba32>(2, 2, color);
+        return new ImageTexture(image);
+    }
 
     /// <summary>
     /// Occurs when the texture is resized.
