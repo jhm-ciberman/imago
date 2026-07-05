@@ -195,6 +195,17 @@ public class TextureGroup : IDisposable
     }
 
     /// <summary>
+    /// Applies the pending packing and redraw operations of every existing texture group to the GPU textures.
+    /// </summary>
+    public static void FlushAll()
+    {
+        foreach (var group in _allGroups)
+        {
+            group.FlushChanges();
+        }
+    }
+
+    /// <summary>
     /// Releases a packed texture, making its space available for new textures.
     /// </summary>
     /// <param name="packedTexture">The packed texture to release.</param>
