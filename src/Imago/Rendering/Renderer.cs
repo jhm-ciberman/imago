@@ -51,7 +51,7 @@ public class Renderer : IDisposable
             swapchainSrgbFormat: false
         );
 
-        return NeoVeldridStartup.CreateGraphicsDevice(window, options, graphicsBackend ?? NeoVeldridStartup.GetPlatformDefaultBackend());
+        return NeoVeldridStartup.CreateGraphicsDevice(window, options, graphicsBackend ?? GraphicsDevice.GetPlatformDefaultBackend());
     }
 
     /// <summary>
