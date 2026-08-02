@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using Imago.SceneGraph.Nodes;
 
 namespace Imago.Assets.Animations;
@@ -25,6 +26,9 @@ public class AnimationPlayer
 
     private float _blendDuration = 0f;
     private float _blendElapsed = 0f;
+
+    private Vector3 _rootOrigin = Vector3.Zero;
+    private bool _hasRootOrigin = false;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AnimationPlayer"/> class.
@@ -84,6 +88,22 @@ public class AnimationPlayer
     public float PlaybackSpeed { get; set; } = 1f;
 
     /// <summary>
+    /// Gets or sets the name of the bone that carries the animation's travel rather than its pose. Null applies
+    /// every bone as pose, which is the default.
+    /// </summary>
+    /// <remarks>
+    /// The named bone's translation is withheld from the hierarchy and reported as <see cref="RootMotion"/> for the
+    /// caller to place the animated subject with. Its rotation and scale still pose the hierarchy as usual.
+    /// </remarks>
+    public string? RootBoneName { get; set; } = null;
+
+    /// <summary>
+    /// Gets how far <see cref="RootBoneName"/> has travelled, in its parent's space, since the active clip began.
+    /// Zero when no root bone is set, and back to zero as soon as another clip takes over.
+    /// </summary>
+    public Vector3 RootMotion { get; private set; } = Vector3.Zero;
+
+    /// <summary>
     /// Gets a value indicating whether the player is currently fading in a new clip.
     /// </summary>
     public bool IsBlending { get; private set; } = false;
@@ -123,6 +143,9 @@ public class AnimationPlayer
         this.IsBlending = false;
         this._blendDuration = 0f;
         this._blendElapsed = 0f;
+
+        this.RootMotion = Vector3.Zero;
+        this._hasRootOrigin = false;
 
         if (this.PlaybackSpeed == 0f)
         {
@@ -165,6 +188,9 @@ public class AnimationPlayer
         this.IsBlending = true;
         this._blendDuration = blendDuration;
         this._blendElapsed = 0f;
+
+        this.RootMotion = Vector3.Zero;
+        this._hasRootOrigin = false;
 
         if (this.PlaybackSpeed == 0f)
         {
@@ -236,6 +262,7 @@ public class AnimationPlayer
             poseToApply = this._finalPose;
         }
 
+        this.UpdateRootMotion();
         this.ApplyPose(poseToApply);
         this._hasAppliedPose = true;
     }
@@ -253,13 +280,34 @@ public class AnimationPlayer
         BuildNamesDictionary(this._root, this._namesToNodes);
     }
 
+    private void UpdateRootMotion()
+    {
+        if (this.RootBoneName == null || !this._currentPose.TryGet(this.RootBoneName, out BoneTransform root))
+        {
+            this.RootMotion = Vector3.Zero;
+            return;
+        }
+
+        if (!this._hasRootOrigin)
+        {
+            this._rootOrigin = root.Position;
+            this._hasRootOrigin = true;
+        }
+
+        this.RootMotion = root.Position - this._rootOrigin;
+    }
+
     private void ApplyPose(Pose pose)
     {
         foreach (string boneName in pose.BoneNames)
         {
             if (this._namesToNodes.TryGetValue(boneName, out Node3D? node) && pose.TryGet(boneName, out BoneTransform value))
             {
-                node.Position = value.Position;
+                if (boneName != this.RootBoneName)
+                {
+                    node.Position = value.Position;
+                }
+
                 node.Rotation = value.Rotation;
                 node.Scale = value.Scale;
             }
