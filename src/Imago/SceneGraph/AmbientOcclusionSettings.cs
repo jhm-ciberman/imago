@@ -13,7 +13,7 @@ public class AmbientOcclusionSettings
     /// <summary>
     /// Gets or sets how strongly occlusion darkens the scene.
     /// </summary>
-    public float Intensity { get; set; } = 0.37f;
+    public float Intensity { get; set; } = 0.48f;
 
     /// <summary>
     /// Gets or sets the sampling radius in world units. Larger values capture broader occlusion.
