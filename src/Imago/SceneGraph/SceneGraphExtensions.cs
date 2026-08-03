@@ -236,6 +236,26 @@ public static class SceneGraphExtensions
         return false;
     }
 
+    /// <summary>
+    /// Returns the node named <paramref name="name"/>, and disposes every other node in this subtree.
+    /// </summary>
+    /// <param name="self">The node to search in.</param>
+    /// <param name="name">The name of the node to keep.</param>
+    /// <returns>The node with that name, detached from its parent.</returns>
+    /// <exception cref="InvalidOperationException">No node with this name was found.</exception>
+    public static Node3D UnwrapTo(this Node3D self, string name)
+    {
+        var newRoot = self.FindChildOrFail<Node3D>(name);
+        if (newRoot == self) return self;
+
+        newRoot.Parent!.RemoveChild(newRoot, dispose: false);
+
+        self.Parent?.RemoveChild(self, dispose: false);
+        self.Dispose();
+
+        return newRoot;
+    }
+
     private static void PrintHierarchyToConsoleCore(Node3D node, string indent, bool isLast, string? format = null)
     {
         var label = node.ToString(format);
