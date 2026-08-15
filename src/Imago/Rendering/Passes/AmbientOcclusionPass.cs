@@ -214,7 +214,7 @@ internal class AmbientOcclusionPass : IDisposable
 
         float SampleDepth(vec2 uv)
         {
-            return texture(sampler2D(DepthTexture, DepthSampler), uv).r;
+            return textureLod(sampler2D(DepthTexture, DepthSampler), uv, 0.0).r;
         }
 
         // Reconstructs a view-space position from a uv and an NDC depth value.
