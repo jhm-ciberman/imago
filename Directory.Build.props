@@ -9,6 +9,13 @@
         <Disabletransitiveprojectreferences>true</Disabletransitiveprojectreferences>
     </PropertyGroup>
 
+    <!-- Debug with compiler optimizations: fast like Release, but keeps the DEBUG constant and asserts -->
+    <PropertyGroup Condition="'$(Configuration)' == 'DebugOptimized'">
+        <Optimize>true</Optimize>
+        <DebugSymbols>true</DebugSymbols>
+        <DefineConstants>$(DefineConstants);DEBUG;TRACE</DefineConstants>
+    </PropertyGroup>
+
     <!-- Suppress Newtonsoft.Json vulnerability warning from glTF2Loader transitive dependency -->
     <ItemGroup>
         <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-5crp-9r3c-p9vr" />
