@@ -45,6 +45,7 @@ All controls inherit from `Control`, which provides the shared properties for si
 | `TextBox` | Editable text input with a blinking caret. Handles emoji, surrogate pairs, and cluster-aware editing. |
 | `RadioGroup` | Non-visual coordinator that enforces mutual exclusivity among `ToggleButton` instances. Useful when toggles live in different containers. |
 | `RadioStackPanel` | A `StackPanel` that auto-manages its `ToggleButton` children as a radio group. Preferred when all toggles are siblings. |
+| `RadioWrapPanel` | A `WrapPanel` with the same radio-group behavior as `RadioStackPanel`, for grids of toggles. |
 
 ### Layout Panels
 
