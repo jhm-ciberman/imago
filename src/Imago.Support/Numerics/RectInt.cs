@@ -351,4 +351,16 @@ public struct RectInt : IEquatable<RectInt>
         int closestY = Math.Clamp(point.Y, this.YMin, this.YMax - 1);
         return Distance.OctileDistance(point, new Vector2Int(closestX, closestY));
     }
+
+    /// <summary>
+    /// Computes the Chebyshev distance from a point to the closest cell inside this rectangle.
+    /// </summary>
+    /// <param name="point">The point to measure from.</param>
+    /// <returns>The Chebyshev distance to the closest cell, or 0 if the point is inside the rectangle.</returns>
+    public int ChebyshevDistanceTo(Vector2Int point)
+    {
+        int closestX = Math.Clamp(point.X, this.XMin, this.XMax - 1);
+        int closestY = Math.Clamp(point.Y, this.YMin, this.YMax - 1);
+        return Distance.ChebyshevDistance(point, new Vector2Int(closestX, closestY));
+    }
 }

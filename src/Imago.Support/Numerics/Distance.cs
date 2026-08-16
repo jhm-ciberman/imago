@@ -51,4 +51,18 @@ public static class Distance
         int orthogonal = int.Abs(dx - dy);
         return orthogonal + diagonal * 1.4f;
     }
+
+    /// <summary>
+    /// Computes the Chebyshev distance between two integer coordinate points. This is the distance between
+    /// two points if a diagonal move costs the same as an orthogonal move, so equal distances form square rings.
+    /// </summary>
+    /// <param name="a">The first point.</param>
+    /// <param name="b">The second point.</param>
+    /// <returns>The Chebyshev distance between the two points.</returns>
+    public static int ChebyshevDistance(Vector2Int a, Vector2Int b)
+    {
+        int dx = int.Abs(a.X - b.X);
+        int dy = int.Abs(a.Y - b.Y);
+        return int.Max(dx, dy);
+    }
 }
