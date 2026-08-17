@@ -145,6 +145,7 @@ public class TextBox : Control
     {
         if (this.Layer?.IsReceivingInput != true) return;
         if (!this.IsFocused) return;
+        if (e.Handled) return;
 
         switch (e.Key)
         {
