@@ -248,10 +248,7 @@ public class GuiLayer : ILayer2D, IInputHandler
     /// <param name="e">The event arguments.</param>
     public void HandleKeyPressed(KeyboardEventArgs e)
     {
-        if (this.BlocksInputBelow)
-        {
-            e.Handled = true;
-        }
+        //
     }
 
     /// <summary>
@@ -260,10 +257,7 @@ public class GuiLayer : ILayer2D, IInputHandler
     /// <param name="e">The event arguments.</param>
     public void HandleKeyReleased(KeyboardEventArgs e)
     {
-        if (this.BlocksInputBelow)
-        {
-            e.Handled = true;
-        }
+        //
     }
 
     /// <summary>

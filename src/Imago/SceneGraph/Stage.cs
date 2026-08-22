@@ -268,7 +268,7 @@ public class Stage
             if (handler.IsVisible)
             {
                 handler.HandleKeyPressed(e);
-                if (e.Handled) return;
+                if (e.Handled || BlocksInputBelow(handler)) return;
             }
         }
     }
@@ -285,9 +285,14 @@ public class Stage
             if (handler.IsVisible)
             {
                 handler.HandleKeyReleased(e);
-                if (e.Handled) return;
+                if (e.Handled || BlocksInputBelow(handler)) return;
             }
         }
+    }
+
+    private static bool BlocksInputBelow(IInputHandler handler)
+    {
+        return handler is GuiLayer { BlocksInputBelow: true };
     }
 
     /// <summary>
