@@ -2,36 +2,65 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
+using System.Threading;
 using System.Threading.Tasks;
 using Imago.Input;
+using Imago.Rendering;
 using Imago.SceneGraph;
 using Imago.Support;
+using NeoVeldrid;
 using SixLabors.ImageSharp;
 
 namespace Imago.ScenarioRunner;
 
 /// <summary>
-/// Base class for scenario classes. Methods marked with <see cref="ScenarioAttribute"/> use these inherited
-/// helpers to wait for frames, move the cursor, and capture screenshots.
+/// Runs an <see cref="Application"/> from a script and saves the screenshots it captures. A game derives from
+/// this to add helpers for its own screens and state.
 /// </summary>
 /// <remarks>
-/// This base knows only about the engine. A game typically derives its own base from this to add helpers that
-/// navigate that game's screens and wait for its state.
+/// Every await in the script resumes on the game loop thread, so the script can touch the game freely.
 /// </remarks>
-public abstract class ScenarioBase
+public abstract class ScenarioBase : IDisposable
 {
     private const double DefaultTimeoutSeconds = 20.0;
+    private static readonly TimeSpan WatchdogTimeout = TimeSpan.FromMinutes(5.0);
 
-    private ScenarioContext _context = null!;
-    private int _captureCount;
+    private readonly ScenarioScheduler _scheduler = new();
+    private readonly LoopSynchronizationContext _loop = new();
+    private readonly List<string> _shots = new();
+
+    private Application? _app;
+    private StageCapturer? _capturer;
+    private TextWriter? _log;
+    private TextWriter? _console;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ScenarioBase"/> class.
+    /// </summary>
+    /// <param name="outputDirectory">The folder the screenshots and the log are written to.</param>
+    protected ScenarioBase(string outputDirectory)
+    {
+        this.OutputDirectory = outputDirectory;
+    }
+
+    /// <summary>
+    /// Gets the folder the screenshots and the log are written to.
+    /// </summary>
+    public string OutputDirectory { get; }
+
+    /// <summary>
+    /// Gets the application being driven.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown when no run is in progress.</exception>
+    public Application App => this._app ?? throw new InvalidOperationException("No run is in progress.");
 
     /// <summary>
     /// Waits until the next frame has been rendered.
     /// </summary>
     /// <returns>A task that completes on the next frame.</returns>
-    protected Task NextFrame()
+    public Task NextFrame()
     {
-        return this._context.Scheduler.WaitFrames(1, DefaultTimeoutSeconds);
+        return this._scheduler.WaitFrames(1, DefaultTimeoutSeconds);
     }
 
     /// <summary>
@@ -39,9 +68,9 @@ public abstract class ScenarioBase
     /// </summary>
     /// <param name="frames">The number of frames to wait.</param>
     /// <returns>A task that completes once the frames have elapsed.</returns>
-    protected Task Wait(int frames)
+    public Task Wait(int frames)
     {
-        return this._context.Scheduler.WaitFrames(frames, DefaultTimeoutSeconds);
+        return this._scheduler.WaitFrames(frames, DefaultTimeoutSeconds);
     }
 
     /// <summary>
@@ -49,9 +78,9 @@ public abstract class ScenarioBase
     /// </summary>
     /// <param name="seconds">The number of seconds to wait.</param>
     /// <returns>A task that completes once the time has elapsed.</returns>
-    protected Task Wait(double seconds)
+    public Task Wait(double seconds)
     {
-        return this._context.Scheduler.WaitSeconds(seconds, seconds + DefaultTimeoutSeconds);
+        return this._scheduler.WaitSeconds(seconds, seconds + DefaultTimeoutSeconds);
     }
 
     /// <summary>
@@ -61,43 +90,42 @@ public abstract class ScenarioBase
     /// <param name="because">A description of what is awaited, shown if the wait times out.</param>
     /// <param name="timeoutSeconds">The maximum time to wait, in seconds.</param>
     /// <returns>A task that completes when the condition holds.</returns>
-    protected Task WaitUntil(Func<bool> condition, string because, double timeoutSeconds = DefaultTimeoutSeconds)
+    public Task WaitUntil(Func<bool> condition, string because, double timeoutSeconds = DefaultTimeoutSeconds)
     {
-        return this._context.Scheduler.WaitUntil(condition, because, timeoutSeconds);
+        return this._scheduler.WaitUntil(condition, because, timeoutSeconds);
     }
 
     /// <summary>
     /// Moves the virtual cursor to a screen position, in window pixels, so hover and picking follow it.
     /// </summary>
     /// <param name="screenPosition">The cursor position in window pixels.</param>
-    protected void MoveCursor(Vector2 screenPosition)
+    public void MoveCursor(Vector2 screenPosition)
     {
         InputManager.Instance.SetCursorPosition(screenPosition);
     }
 
     /// <summary>
-    /// Writes a progress line to the console.
+    /// Writes a line to the console and to the log file in the output folder.
     /// </summary>
     /// <param name="message">The message to write.</param>
-    protected void Log(string message)
+    public void Log(string message)
     {
-        this._context.Presenter.Progress(message);
+        this._console?.WriteLine($"  · {message}");
+        this._log?.WriteLine(message);
     }
 
     /// <summary>
-    /// Saves a screenshot of the current frame to the scenario's output folder.
+    /// Renders the next frame and saves it as a numbered screenshot in the output folder.
     /// </summary>
-    /// <remarks>
-    /// Captures whatever is currently on screen; wait for the state you want before calling. Files are numbered
-    /// in capture order.
-    /// </remarks>
-    /// <param name="label">A short label included in the file name, or null to use the scenario name.</param>
+    /// <param name="label">A short label included in the file name.</param>
     /// <param name="includeUi">Whether to keep the GUI, cursor, and tooltips, or capture only the 3D world.</param>
-    protected void Capture(string? label = null, bool includeUi = true)
+    /// <returns>A task that completes once the file is written.</returns>
+    public async Task Capture(string label = "shot", bool includeUi = true)
     {
-        label ??= this._context.Name;
+        // A screen changed this frame is not laid out and has no glyphs in the atlas until the next update.
+        await this.NextFrame();
 
-        var stage = this._context.App.Stage;
+        var stage = this.App.Stage;
         var hiddenLayers = new List<ILayer2D>();
         if (!includeUi)
         {
@@ -113,13 +141,11 @@ public abstract class ScenarioBase
 
         try
         {
-            using var image = this._context.Capturer.Capture(stage);
-            string fileName = $"{this._captureCount:D2}_{label.Slug()}.png";
-            this._captureCount++;
-
-            string path = Path.Combine(this._context.OutputDirectory, fileName);
-            image.SaveAsPng(path);
-            this._context.Shots.Add(label);
+            using var image = this._capturer!.Capture(stage);
+            string fileName = $"{this._shots.Count:D2}_{label.Slug()}.png";
+            image.SaveAsPng(Path.Combine(this.OutputDirectory, fileName));
+            this._shots.Add(fileName);
+            this.Log($"captured {fileName}");
         }
         finally
         {
@@ -130,8 +156,113 @@ public abstract class ScenarioBase
         }
     }
 
-    internal void Bind(ScenarioContext context)
+    /// <summary>
+    /// Boots the application and deletes the screenshots of a previous run. <see cref="Dispose"/> quits it.
+    /// </summary>
+    /// <typeparam name="TSelf">The type of this scenario, handed back to the caller.</typeparam>
+    /// <param name="createApp">Builds the application to drive, with its window size already set.</param>
+    /// <param name="show">Whether to open a real window instead of running hidden.</param>
+    /// <returns>An awaitable that yields this scenario on the game loop thread once the application is running.</returns>
+    protected ScenarioStart<TSelf> Start<TSelf>(Func<Application> createApp, bool show) where TSelf : ScenarioBase
     {
-        this._context = context;
+        this.PrepareOutputDirectory();
+
+        // The game's own console output goes to the log file, so the console only shows the script's Log lines.
+        this._console = Console.Out;
+        this._log = new StreamWriter(Path.Combine(this.OutputDirectory, "log.txt"), append: false) { AutoFlush = true };
+        Console.SetOut(this._log);
+
+        StartWatchdog();
+
+        InputManager.UseVirtualInput = true;
+        Application.Headless = !show;
+
+        var start = new ScenarioStart<TSelf>((TSelf)this, this._loop);
+
+        // The graphics context belongs to the thread that creates it, so the app is built on the loop thread too.
+        var thread = new Thread(() =>
+        {
+            SynchronizationContext.SetSynchronizationContext(this._loop);
+
+            var app = createApp();
+            this._app = app;
+            app.Window.WindowState = show ? WindowState.Normal : WindowState.Hidden;
+
+            // Advance the simulation by a fixed step each frame so animated content lands at the same phase every run.
+            app.Ticker.FixedDeltaTime = 1.0 / 60.0;
+
+            app.Ticker.Ticked += (sender, e) =>
+            {
+                if (this._capturer == null)
+                {
+                    this._capturer = new StageCapturer(app.Renderer);
+                    InputManager.Instance.SetCursorPosition(new Vector2(-1, -1));
+                    start.MarkStarted();
+                }
+
+                this._loop.Drain();
+                this._scheduler.Tick(e.DeltaTime);
+            };
+
+            app.Run();
+        })
+        {
+            IsBackground = true,
+            Name = "game-loop",
+        };
+
+        thread.Start();
+        return start;
+    }
+
+    /// <summary>
+    /// Quits the application.
+    /// </summary>
+    public void Dispose()
+    {
+        if (this._app == null)
+        {
+            return;
+        }
+
+        // The capturer's GPU texture must go while the renderer is still alive.
+        this._capturer?.Dispose();
+        this._capturer = null;
+
+        this._app.Quit();
+        this._app = null;
+
+        Console.SetOut(this._console!);
+        this._log?.Dispose();
+        this._log = null;
+
+        Console.WriteLine($"  {this._shots.Count} shot(s) -> {this.OutputDirectory}");
+    }
+
+    private void PrepareOutputDirectory()
+    {
+        Directory.CreateDirectory(this.OutputDirectory);
+
+        // The script itself lives in this folder, so only the shots go.
+        foreach (string file in Directory.EnumerateFiles(this.OutputDirectory, "*.png"))
+        {
+            File.Delete(file);
+        }
+    }
+
+    private static void StartWatchdog()
+    {
+        var thread = new Thread(() =>
+        {
+            Thread.Sleep(WatchdogTimeout);
+            Console.Error.WriteLine($"Watchdog fired after {WatchdogTimeout.TotalSeconds:0}s. Forcing exit.");
+            Environment.Exit(124);
+        })
+        {
+            IsBackground = true,
+            Name = "scenario-watchdog",
+        };
+
+        thread.Start();
     }
 }

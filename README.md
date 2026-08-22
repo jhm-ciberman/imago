@@ -20,7 +20,7 @@ I built Imago for my game Medieval Life over several years. I'm extracting it so
 - **Assets**: glTF 2.0 and Wavefront OBJ with skeletal animation, PNG and JPG textures with runtime atlasing, TTF and OTF fonts.
 - **Input**: keyboard, mouse, and gamepad with event and polling APIs. Events route front-to-back through the UI so modal dialogs block input from the scene behind them.
 - **In-game developer console** with commands, autocomplete, and history. Attribute-based command registration. One line to add it to your game.
-- **Screenshot-based automated visual testing** with `Imago.ScenarioRunner`.
+- **Scripted screenshots** with `Imago.ScenarioRunner`: drive the game from a script, headless, and save what it shows.
 
 ## Platforms
 
@@ -39,7 +39,7 @@ Projects:
 - **Imago**: the framework itself. Application, rendering, scene graph, input, UI controls, assets, dev console.
 - **Imago.Support**: foundational types shared with consumers. Math primitives (`Vector2Int`, `Rect`, etc.), collections, colors, tweening, extensions.
 - **Imago.Generators**: compile-time Roslyn source generators used internally.
-- **Imago.ScenarioRunner**: an opt-in visual-testing harness.
+- **Imago.ScenarioRunner**: an opt-in host that runs a game from a script and captures screenshots.
 
 ## Requirements
 

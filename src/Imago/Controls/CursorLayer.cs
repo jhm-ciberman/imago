@@ -93,6 +93,12 @@ public class CursorLayer : ILayer2D
 
         var viewportSize = this._viewport.Size;
         var position = this._viewport.Position;
+        var cursor = this._input.CursorPosition;
+        if (cursor.X < position.X || cursor.Y < position.Y || cursor.X >= viewportSize.X || cursor.Y >= viewportSize.Y)
+        {
+            return;
+        }
+
         var viewProjectionMatrix = Matrix4x4.CreateOrthographicOffCenter(
             position.X,
             viewportSize.X,

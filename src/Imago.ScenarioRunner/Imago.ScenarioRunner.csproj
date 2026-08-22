@@ -1,7 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-    <!-- Engine-level visual-testing harness: drives any Imago application frame by frame, captures screenshots,
-         and discovers and runs scenarios. A game references this from a test project; it is never part of a
-         shipping build. -->
+    <!-- Runs any Imago application from a script and captures screenshots. Never part of a shipping build. -->
     <ItemGroup>
         <ProjectReference Include="../Imago/Imago.csproj" />
         <ProjectReference Include="../Imago.Support/Imago.Support.csproj" />
