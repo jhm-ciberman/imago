@@ -87,7 +87,7 @@ public class CursorLayer : ILayer2D
     /// <inheritdoc />
     public void Draw(DrawingContext ctx)
     {
-        if (this.Cursor == null)
+        if (this.Cursor == null || !this._input.IsCursorInsideWindow)
         {
             return;
         }

@@ -156,6 +156,8 @@ public class InputManager : IDisposable
 
     private bool _relativeMouseMode;
 
+    private bool _isCursorInsideWindow = true;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="InputManager"/> class.
     /// </summary>
@@ -175,6 +177,8 @@ public class InputManager : IDisposable
         this._cursorPosition = UseVirtualInput ? new Vector2(-1, -1) : this.InputSnapshot.MousePosition;
 
         this._window.MouseMove += this.Window_MouseMove;
+        this._window.MouseEntered += this.Window_MouseEntered;
+        this._window.MouseLeft += this.Window_MouseLeft;
     }
 
     /// <summary>
@@ -183,7 +187,19 @@ public class InputManager : IDisposable
     public void Dispose()
     {
         this._window.MouseMove -= this.Window_MouseMove;
+        this._window.MouseEntered -= this.Window_MouseEntered;
+        this._window.MouseLeft -= this.Window_MouseLeft;
         Instance = null!;
+    }
+
+    private void Window_MouseEntered()
+    {
+        this._isCursorInsideWindow = true;
+    }
+
+    private void Window_MouseLeft()
+    {
+        this._isCursorInsideWindow = false;
     }
 
     private void Window_MouseMove(MouseMoveEventArgs args)
@@ -290,6 +306,12 @@ public class InputManager : IDisposable
     /// Gets the current mouse position in window client space.
     /// </summary>
     public Vector2 CursorPosition => this._cursorPosition;
+
+    /// <summary>
+    /// Gets a value indicating whether the cursor is over the window. Always true when
+    /// <see cref="UseVirtualInput"/> is enabled.
+    /// </summary>
+    public bool IsCursorInsideWindow => UseVirtualInput || this._isCursorInsideWindow;
 
     /// <summary>
     /// Gets the mouse movement delta for the current frame. Only meaningful when relative mouse mode is enabled.
