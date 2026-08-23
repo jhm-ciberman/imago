@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using Imago.Support.Drawing;
 
 namespace Imago.Support.Tweening;
 
@@ -37,6 +38,20 @@ public class TweenLine
     }
 
     /// <summary>
+    /// Creates and adds a Vector2 tween from one value to another.
+    /// </summary>
+    /// <param name="duration">The duration of the tween in seconds.</param>
+    /// <param name="from">The starting Vector2 value.</param>
+    /// <param name="to">The ending Vector2 value.</param>
+    /// <param name="setter">The action to call with interpolated values.</param>
+    /// <param name="easing">The easing function to use (optional).</param>
+    /// <returns>The created tween.</returns>
+    public ITween FromTo(float duration, Vector2 from, Vector2 to, Action<Vector2> setter, EasingFunction? easing = null)
+    {
+        return this.AddTween(new Tween<Vector2>(duration, from, to, setter, Vector2.Lerp, easing));
+    }
+
+    /// <summary>
     /// Creates and adds a Vector3 tween from one value to another.
     /// </summary>
     /// <param name="duration">The duration of the tween in seconds.</param>
@@ -62,6 +77,34 @@ public class TweenLine
     public ITween FromTo(float duration, float from, float to, Action<float> setter, EasingFunction? easing = null)
     {
         return this.AddTween(new Tween<float>(duration, from, to, setter, Lerp, easing));
+    }
+
+    /// <summary>
+    /// Creates and adds a color tween from one value to another.
+    /// </summary>
+    /// <param name="duration">The duration of the tween in seconds.</param>
+    /// <param name="from">The starting color.</param>
+    /// <param name="to">The ending color.</param>
+    /// <param name="setter">The action to call with interpolated values.</param>
+    /// <param name="easing">The easing function to use (optional).</param>
+    /// <returns>The created tween.</returns>
+    public ITween FromTo(float duration, Color from, Color to, Action<Color> setter, EasingFunction? easing = null)
+    {
+        return this.AddTween(new Tween<Color>(duration, from, to, setter, Color.Lerp, easing));
+    }
+
+    /// <summary>
+    /// Creates and adds a floating point color tween from one value to another.
+    /// </summary>
+    /// <param name="duration">The duration of the tween in seconds.</param>
+    /// <param name="from">The starting color.</param>
+    /// <param name="to">The ending color.</param>
+    /// <param name="setter">The action to call with interpolated values.</param>
+    /// <param name="easing">The easing function to use (optional).</param>
+    /// <returns>The created tween.</returns>
+    public ITween FromTo(float duration, ColorF from, ColorF to, Action<ColorF> setter, EasingFunction? easing = null)
+    {
+        return this.AddTween(new Tween<ColorF>(duration, from, to, setter, ColorF.Lerp, easing));
     }
 
     private static float Lerp(float start, float end, float t)
