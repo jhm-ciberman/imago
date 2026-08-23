@@ -5,6 +5,7 @@ using Imago.Rendering;
 using Imago.Rendering.Sprites;
 using Imago.SceneGraph;
 using Imago.Support.Drawing;
+using Imago.Support.Numerics;
 
 namespace Imago.Controls;
 
@@ -93,8 +94,9 @@ public class CursorLayer : ILayer2D
 
         var viewportSize = this._viewport.Size;
         var position = this._viewport.Position;
-        var cursor = this._input.CursorPosition;
-        if (cursor.X < position.X || cursor.Y < position.Y || cursor.X >= viewportSize.X || cursor.Y >= viewportSize.Y)
+        var guiScale = this.Stage?.GuiScale ?? Vector2.One;
+        var mousePosition = (this._input.CursorPosition - position) / guiScale;
+        if (!new Rect(Vector2.Zero, viewportSize).Contains(mousePosition))
         {
             return;
         }
@@ -110,8 +112,6 @@ public class CursorLayer : ILayer2D
 
         ctx.SetViewProjectionMatrix(viewProjectionMatrix);
 
-        var guiScale = this.Stage?.GuiScale ?? Vector2.One;
-        var mousePosition = (this._input.CursorPosition - position) / guiScale;
         var cursorSize = this.Cursor.TextureSize * this.CursorScale;
         var hotspot = this.Cursor.HotspotPixels * this.CursorScale;
         var cursorPosition = mousePosition - hotspot;
