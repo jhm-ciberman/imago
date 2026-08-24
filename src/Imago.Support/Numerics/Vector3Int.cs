@@ -36,6 +36,31 @@ public struct Vector3Int : IEquatable<Vector3Int>
     public static Vector3Int Zero => new Vector3Int(0, 0, 0);
 
     /// <summary>
+    /// Gets a vector with the the value (1, 0, 0)
+    /// </summary>
+    public static Vector3Int UnitX => new Vector3Int(1, 0, 0);
+
+    /// <summary>
+    /// Gets a vector with the the value (0, 1, 0)
+    /// </summary>
+    public static Vector3Int UnitY => new Vector3Int(0, 1, 0);
+
+    /// <summary>
+    /// Gets a vector with the the value (0, 0, 1)
+    /// </summary>
+    public static Vector3Int UnitZ => new Vector3Int(0, 0, 1);
+
+    /// <summary>
+    /// Gets the vector with all components set to <see cref="int.MinValue"/>.
+    /// </summary>
+    public static Vector3Int MinValue => new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
+
+    /// <summary>
+    /// Gets the vector with all components set to <see cref="int.MaxValue"/>.
+    /// </summary>
+    public static Vector3Int MaxValue => new Vector3Int(int.MaxValue, int.MaxValue, int.MaxValue);
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="Vector3Int"/> struct.
     /// </summary>
     /// <param name="x">The X component of the vector.</param>

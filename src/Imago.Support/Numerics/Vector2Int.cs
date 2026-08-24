@@ -31,14 +31,24 @@ public struct Vector2Int : IEquatable<Vector2Int>
     public static Vector2Int Zero => new Vector2Int(0, 0);
 
     /// <summary>
-    /// Gets a vector with the X component set to 1 and the Y component set to 0.
+    /// Gets a vector the the value (1, 0)
     /// </summary>
     public static Vector2Int UnitX => new Vector2Int(1, 0);
 
     /// <summary>
-    /// Gets a vector with the X component set to 0 and the Y component set to 1.
+    /// Gets a vector the the value (0, 1)
     /// </summary>
     public static Vector2Int UnitY => new Vector2Int(0, 1);
+
+    /// <summary>
+    /// Gets the vector with both components set to <see cref="int.MinValue"/>.
+    /// </summary>
+    public static Vector2Int MinValue => new Vector2Int(int.MinValue, int.MinValue);
+
+    /// <summary>
+    /// Gets the vector with both components set to <see cref="int.MaxValue"/>.
+    /// </summary>
+    public static Vector2Int MaxValue => new Vector2Int(int.MaxValue, int.MaxValue);
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Vector2Int"/> struct.
