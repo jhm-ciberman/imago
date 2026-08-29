@@ -62,6 +62,41 @@ public struct Rect : IEquatable<Rect>
     }
 
     /// <summary>
+    /// Creates a rectangle from two corners.
+    /// </summary>
+    /// <param name="corner1">The first corner of the rectangle.</param>
+    /// <param name="corner2">The second corner of the rectangle.</param>
+    /// <returns>A new rectangle defined by the two corners.</returns>
+    public static Rect FromCorners(Vector2 corner1, Vector2 corner2)
+    {
+        float x = MathF.Min(corner1.X, corner2.X);
+        float y = MathF.Min(corner1.Y, corner2.Y);
+        float width = MathF.Abs(corner2.X - corner1.X);
+        float height = MathF.Abs(corner2.Y - corner1.Y);
+        return new Rect(x, y, width, height);
+    }
+
+    /// <summary>
+    /// Deflates the rectangle by the specified padding.
+    /// </summary>
+    /// <param name="padding">The padding to deflate the rectangle by.</param>
+    /// <returns>The deflated rectangle.</returns>
+    public Rect Deflate(float padding)
+    {
+        return this.Deflate(new Vector2(padding, padding));
+    }
+
+    /// <summary>
+    /// Deflates the rectangle by the specified padding.
+    /// </summary>
+    /// <param name="padding">The padding to deflate the rectangle by.</param>
+    /// <returns>The deflated rectangle.</returns>
+    public Rect Deflate(Vector2 padding)
+    {
+        return new Rect(this.Position + padding, this.Size - padding * 2);
+    }
+
+    /// <summary>
     /// Deflates the rectangle by the specified amount.
     /// </summary>
     /// <param name="padding">The amount to deflate the rectangle.</param>
@@ -69,6 +104,26 @@ public struct Rect : IEquatable<Rect>
     public Rect Deflate(Thickness padding)
     {
         return new Rect(this.X + padding.Left, this.Y + padding.Top, this.Width - padding.Horizontal, this.Height - padding.Vertical);
+    }
+
+    /// <summary>
+    /// Inflates the rectangle by the specified padding.
+    /// </summary>
+    /// <param name="padding">The padding to inflate the rectangle by.</param>
+    /// <returns>The inflated rectangle.</returns>
+    public Rect Inflate(float padding)
+    {
+        return this.Inflate(new Vector2(padding, padding));
+    }
+
+    /// <summary>
+    /// Inflates the rectangle by the specified padding.
+    /// </summary>
+    /// <param name="padding">The padding to inflate the rectangle by.</param>
+    /// <returns>The inflated rectangle.</returns>
+    public Rect Inflate(Vector2 padding)
+    {
+        return new Rect(this.Position - padding, this.Size + padding * 2);
     }
 
     /// <summary>
@@ -127,6 +182,36 @@ public struct Rect : IEquatable<Rect>
     public float Top { get => this.Y; set => this.Y = value; }
 
     /// <summary>
+    /// Gets the minimum corner of the rectangle.
+    /// </summary>
+    public Vector2 Min => new Vector2(this.XMin, this.YMin);
+
+    /// <summary>
+    /// Gets the maximum corner of the rectangle.
+    /// </summary>
+    public Vector2 Max => new Vector2(this.XMax, this.YMax);
+
+    /// <summary>
+    /// Gets or sets the minimum X coordinate of the rectangle.
+    /// </summary>
+    public float XMin { get => MathF.Min(this.X, this.X + this.Width); set { float oldxmax = this.XMax; this.X = value; this.Width = oldxmax - this.X; } }
+
+    /// <summary>
+    /// Gets or sets the minimum Y coordinate of the rectangle.
+    /// </summary>
+    public float YMin { get => MathF.Min(this.Y, this.Y + this.Height); set { float oldymax = this.YMax; this.Y = value; this.Height = oldymax - this.Y; } }
+
+    /// <summary>
+    /// Gets or sets the maximum X coordinate of the rectangle.
+    /// </summary>
+    public float XMax { get => MathF.Max(this.X, this.X + this.Width); set { this.Width = value - this.X; } }
+
+    /// <summary>
+    /// Gets or sets the maximum Y coordinate of the rectangle.
+    /// </summary>
+    public float YMax { get => MathF.Max(this.Y, this.Y + this.Height); set { this.Height = value - this.Y; } }
+
+    /// <summary>
     /// Gets whether the rectangle is empty (i.e., has no width or height).
     /// </summary>
     public bool IsEmpty => this.Width <= 0f || this.Height <= 0f;
@@ -142,6 +227,42 @@ public struct Rect : IEquatable<Rect>
             && point.Y >= this.Top
             && point.X < this.Right
             && point.Y < this.Bottom;
+    }
+
+    /// <summary>
+    /// Checks if the rectangle fully contains the specified rectangle.
+    /// </summary>
+    /// <param name="other">The rectangle to test.</param>
+    /// <returns>True if the rectangle contains the other rectangle, otherwise false.</returns>
+    public bool Contains(Rect other)
+    {
+        return other.XMin >= this.XMin
+            && other.YMin >= this.YMin
+            && other.XMax <= this.XMax
+            && other.YMax <= this.YMax;
+    }
+
+    /// <summary>
+    /// Checks if this rectangle intersects with the given rectangle.
+    /// </summary>
+    /// <param name="bounds">The rectangle to test.</param>
+    /// <param name="intersection">The intersection rectangle.</param>
+    /// <returns>True if the rectangles intersect, otherwise false.</returns>
+    public bool IntersectionTest(Rect bounds, out Rect intersection)
+    {
+        float xMin = MathF.Max(this.X, bounds.X);
+        float yMin = MathF.Max(this.Y, bounds.Y);
+        float xMax = MathF.Min(this.X + this.Width, bounds.X + bounds.Width);
+        float yMax = MathF.Min(this.Y + this.Height, bounds.Y + bounds.Height);
+
+        if (xMin < xMax && yMin < yMax)
+        {
+            intersection = new Rect(xMin, yMin, xMax - xMin, yMax - yMin);
+            return true;
+        }
+
+        intersection = default;
+        return false;
     }
 
     /// <summary>
@@ -330,5 +451,29 @@ public struct Rect : IEquatable<Rect>
     public static implicit operator Rect(RectInt rect)
     {
         return new Rect(rect.X, rect.Y, rect.Width, rect.Height);
+    }
+
+    /// <summary>
+    /// Computes the octile distance from a point to the closest point inside this rectangle.
+    /// </summary>
+    /// <param name="point">The point to measure from.</param>
+    /// <returns>The octile distance to the closest point, or 0 if the point is inside the rectangle.</returns>
+    public float OctileDistanceTo(Vector2 point)
+    {
+        float closestX = Math.Clamp(point.X, this.Left, this.Right);
+        float closestY = Math.Clamp(point.Y, this.Top, this.Bottom);
+        return Distance.OctileDistance(point, new Vector2(closestX, closestY));
+    }
+
+    /// <summary>
+    /// Computes the Chebyshev distance from a point to the closest point inside this rectangle.
+    /// </summary>
+    /// <param name="point">The point to measure from.</param>
+    /// <returns>The Chebyshev distance to the closest point, or 0 if the point is inside the rectangle.</returns>
+    public float ChebyshevDistanceTo(Vector2 point)
+    {
+        float closestX = Math.Clamp(point.X, this.Left, this.Right);
+        float closestY = Math.Clamp(point.Y, this.Top, this.Bottom);
+        return Distance.ChebyshevDistance(point, new Vector2(closestX, closestY));
     }
 }

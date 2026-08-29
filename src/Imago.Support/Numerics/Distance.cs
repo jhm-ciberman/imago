@@ -33,8 +33,20 @@ public static class Distance
     /// <returns>The Manhattan distance between the two points.</returns>
     public static float ManhattanDistance(Vector2 a, Vector2 b)
     {
+        return float.Abs(a.X - b.X) + float.Abs(a.Y - b.Y);
+    }
+
+    /// <summary>
+    /// Computes the Chebyshev distance between two points. This is the distance between
+    /// two points if a diagonal move costs the same as an orthogonal move, so equal distances form square rings.
+    /// </summary>
+    /// <param name="a">The first point.</param>
+    /// <param name="b">The second point.</param>
+    /// <returns>The Chebyshev distance between the two points.</returns>
+    public static float ChebyshevDistance(Vector2 a, Vector2 b)
+    {
         Vector2 v = a - b;
-        return float.Abs(v.X) + float.Abs(v.Y);
+        return float.Max(float.Abs(v.X), float.Abs(v.Y));
     }
 
     /// <summary>
@@ -50,6 +62,18 @@ public static class Distance
         int diagonal = int.Min(dx, dy);
         int orthogonal = int.Abs(dx - dy);
         return orthogonal + diagonal * 1.4f;
+    }
+
+    /// <summary>
+    /// Computes the Manhattan distance between two integer coordinate points. This is the distance between
+    /// two points if only moving orthogonally is allowed.
+    /// </summary>
+    /// <param name="a">The first point.</param>
+    /// <param name="b">The second point.</param>
+    /// <returns>The Manhattan distance between the two points.</returns>
+    public static int ManhattanDistance(Vector2Int a, Vector2Int b)
+    {
+        return int.Abs(a.X - b.X) + int.Abs(a.Y - b.Y);
     }
 
     /// <summary>

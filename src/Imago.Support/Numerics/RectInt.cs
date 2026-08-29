@@ -313,6 +313,64 @@ public struct RectInt : IEquatable<RectInt>
     }
 
     /// <summary>
+    /// Expands the rectangle by the specified amount.
+    /// </summary>
+    /// <param name="point">The amount to expand the rectangle.</param>
+    public RectInt Expand(Vector2Int point)
+    {
+        RectInt result = this;
+        if (point.X < result.X)
+        {
+            result.Width += result.X - point.X;
+            result.X = point.X;
+        }
+        else if (point.X > result.Right)
+        {
+            result.Width = point.X - result.X;
+        }
+
+        if (point.Y < result.Y)
+        {
+            result.Height += result.Y - point.Y;
+            result.Y = point.Y;
+        }
+        else if (point.Y > result.Bottom)
+        {
+            result.Height = point.Y - result.Y;
+        }
+        return result;
+    }
+
+    /// <summary>
+    /// Expands the rectangle in order to contain the specified rectangle.
+    /// </summary>
+    /// <param name="rect">The rectangle to contain.</param>
+    public RectInt Expand(RectInt rect)
+    {
+        RectInt result = this;
+        if (rect.X < result.X)
+        {
+            result.Width += result.X - rect.X;
+            result.X = rect.X;
+        }
+        else if (rect.Right > result.Right)
+        {
+            result.Width = rect.Right - result.X;
+        }
+
+        if (rect.Y < result.Y)
+        {
+            result.Height += result.Y - rect.Y;
+            result.Y = rect.Y;
+        }
+        else if (rect.Bottom > result.Bottom)
+        {
+            result.Height = rect.Bottom - result.Y;
+        }
+        return result;
+    }
+
+    /// <summary>
     /// Checks if the given object is equal to this rectangle.
     /// </summary>
     /// <param name="obj">The object to test.</param>
@@ -338,6 +396,21 @@ public struct RectInt : IEquatable<RectInt>
     public override string ToString()
     {
         return $"RectInt({this.X}, {this.Y}, {this.Width}, {this.Height})";
+    }
+
+    /// <summary>
+    /// Creates a rectangle that contains both specified rectangles.
+    /// </summary>
+    /// <param name="rectA">The first rectangle.</param>
+    /// <param name="rectB">The second rectangle.</param>
+    /// <returns>A rectangle that contains both input rectangles.</returns>
+    public static RectInt Union(RectInt rectA, RectInt rectB)
+    {
+        var x = Math.Min(rectA.X, rectB.X);
+        var y = Math.Min(rectA.Y, rectB.Y);
+        var width = Math.Max(rectA.Right, rectB.Right) - x;
+        var height = Math.Max(rectA.Bottom, rectB.Bottom) - y;
+        return new RectInt(x, y, width, height);
     }
 
     /// <summary>
