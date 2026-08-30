@@ -13,10 +13,21 @@ public class TextureGroup : IDisposable
 {
     private static readonly List<TextureGroup> _allGroups = new();
 
+    private static readonly object _allGroupsLock = new();
+
     /// <summary>
-    /// Gets a read-only list of all existing <see cref="TextureGroup"/> instances.
+    /// Gets a snapshot of all existing <see cref="TextureGroup"/> instances.
     /// </summary>
-    public static IReadOnlyList<TextureGroup> AllGroups => _allGroups;
+    public static IReadOnlyList<TextureGroup> AllGroups
+    {
+        get
+        {
+            lock (_allGroupsLock)
+            {
+                return _allGroups.ToArray();
+            }
+        }
+    }
 
     /// <summary>
     /// Occurs when a new <see cref="TexturePage"/> is added to the group to accommodate more textures.
@@ -76,7 +87,10 @@ public class TextureGroup : IDisposable
         this.TileSize = tileSize;
         this.IsSrgb = srgb;
 
-        _allGroups.Add(this);
+        lock (_allGroupsLock)
+        {
+            _allGroups.Add(this);
+        }
     }
 
     /// <summary>
@@ -199,9 +213,12 @@ public class TextureGroup : IDisposable
     /// </summary>
     public static void FlushAll()
     {
-        foreach (var group in _allGroups)
+        lock (_allGroupsLock)
         {
-            group.FlushChanges();
+            foreach (var group in _allGroups)
+            {
+                group.FlushChanges();
+            }
         }
     }
 
@@ -255,7 +272,10 @@ public class TextureGroup : IDisposable
             page.Dispose();
         }
 
-        _allGroups.Remove(this);
+        lock (_allGroupsLock)
+        {
+            _allGroups.Remove(this);
+        }
     }
 
     /// <summary>
@@ -280,7 +300,7 @@ public class TextureGroup : IDisposable
     /// <param name="directory">The directory to save the PNG files to.</param>
     public static void SaveAllGroupsToPng(string directory)
     {
-        foreach (var group in _allGroups)
+        foreach (var group in AllGroups)
         {
             var safeGroupName = string.IsNullOrWhiteSpace(group.Name) ? "texture_group" : group.Name.ToSnakeCase();
             group.SaveToPng(Path.Combine(directory, $"{safeGroupName}.png"));
