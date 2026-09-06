@@ -92,9 +92,9 @@ public interface ITween
     public ITween WithFrameCount(int frameCount);
 
     /// <summary>
-    /// Immediately stops the tween and sets it to its end value.
+    /// Jumps the tween to its end value and finishes it.
     /// </summary>
-    public void Stop();
+    public void Complete();
 }
 
 /// <summary>
@@ -204,7 +204,7 @@ public class Tween<T> : ITween where T : struct
     }
 
     /// <inheritdoc />
-    public void Stop()
+    public void Complete()
     {
         if (this.IsFinished) return;
         this.CurrentTime = this.Duration;
