@@ -513,6 +513,7 @@ public class InputManager : IDisposable
     protected void OnMouseWheelScrolled(float delta)
     {
         this._mouseWheelEventArgs.WheelDelta = delta;
+        this._mouseWheelEventArgs.Handled = false;
         this.MouseWheelScrolled?.Invoke(this, this._mouseWheelEventArgs);
     }
 }
