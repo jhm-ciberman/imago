@@ -101,8 +101,9 @@ void main()
     float ambientIntensity = AmbientColor.a;
     float shadowIntensity = ShadowColor.a;
     shadow = 1.0 - shadow * shadowIntensity;
+    vec3 shadowTint = mix(vec3(1.0), ShadowColor.rgb, 1.0 - shadow);
 
-    vec3 result = ambientIntensity * AmbientColor.rgb + diffuse * MainLightColor.rgb * MainLightColor.a * shadow;
+    vec3 result = ambientIntensity * AmbientColor.rgb + diffuse * MainLightColor.rgb * MainLightColor.a * shadowTint;
     result = result * surface.Albedo;
     result = result * sunlight * sunlight;
     result += surface.Emission;
