@@ -257,7 +257,7 @@ public class Tween<T> : ITween where T : struct
         float currentTime = this.CurrentTime;
 
         if (this.FrameTime > 0f)
-            currentTime = (float)Math.Floor(currentTime / this.FrameTime) * this.FrameTime;
+            currentTime = float.Floor(currentTime / this.FrameTime) * this.FrameTime;
 
         float t = this._easing(currentTime / this.Duration);
         T value = this._interpolation(this.StartValue, this.EndValue, t);

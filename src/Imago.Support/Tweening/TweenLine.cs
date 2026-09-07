@@ -1,16 +1,16 @@
 using System;
-using System.Collections.Generic;
 using System.Numerics;
+using Imago.Support.Collections;
 using Imago.Support.Drawing;
 
 namespace Imago.Support.Tweening;
 
 /// <summary>
-/// Manages a collection of tweens that can be updated together.
+/// Manages a collection of tweens that can be updated together. Tweens run in no particular order.
 /// </summary>
 public class TweenLine
 {
-    private readonly List<ITween> _tweens = new();
+    private readonly SwapPopList<ITween> _tweens = new();
 
     /// <summary>
     /// Adds a tween to the collection.
