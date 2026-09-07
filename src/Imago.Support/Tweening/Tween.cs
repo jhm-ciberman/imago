@@ -95,6 +95,11 @@ public interface ITween
     /// Jumps the tween to its end value and finishes it.
     /// </summary>
     public void Complete();
+
+    /// <summary>
+    /// Finishes the tween where it is. The end value is not applied.
+    /// </summary>
+    public void Cancel();
 }
 
 /// <summary>
@@ -209,6 +214,12 @@ public class Tween<T> : ITween where T : struct
         if (this.IsFinished) return;
         this.CurrentTime = this.Duration;
         this._setter(this.EndValue);
+    }
+
+    /// <inheritdoc />
+    public void Cancel()
+    {
+        this.CurrentTime = this.Duration;
     }
 
     /// <summary>
