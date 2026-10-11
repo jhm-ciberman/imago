@@ -56,9 +56,6 @@ public class CursorLayer : ILayer2D
         this.Stage = null;
     }
 
-    /// <inheritdoc />
-    public bool IsCursorOverElement => false;
-
     /// <summary>
     /// Gets or sets the cursor to display.
     /// </summary>

@@ -20,6 +20,11 @@ public interface IInputHandler : ILayer
     public bool IsReceivingInput { get; }
 
     /// <summary>
+    /// Gets a value indicating whether the cursor is currently over any element in this layer.
+    /// </summary>
+    public bool IsCursorOverElement { get; }
+
+    /// <summary>
     /// Handles mouse button press events.
     /// </summary>
     /// <param name="e">The mouse button event arguments.</param>

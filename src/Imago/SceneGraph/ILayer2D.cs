@@ -13,11 +13,6 @@ public interface ILayer2D : ILayer
     public LayerRenderTarget RenderTarget => LayerRenderTarget.Gui;
 
     /// <summary>
-    /// Gets a value indicating whether the cursor is currently over any element in this layer.
-    /// </summary>
-    public bool IsCursorOverElement { get; }
-
-    /// <summary>
     /// Draws the 2D layer using the specified drawing context.
     /// </summary>
     /// <param name="ctx">The drawing context to use for rendering.</param>

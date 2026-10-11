@@ -54,9 +54,6 @@ public class TooltipLayer : ILayer2D, IDisposable
         this.Stage = null;
     }
 
-    /// <inheritdoc />
-    public bool IsCursorOverElement => false;
-
     /// <summary>
     /// Initializes a new instance of the <see cref="TooltipLayer"/> class.
     /// </summary>

@@ -343,13 +343,13 @@ public class Stage
     public Camera? Camera => this.Scene3D?.Camera;
 
     /// <summary>
-    /// Determines if the cursor is over any GUI element in any visible 2D layer.
+    /// Determines if the cursor is over any element in any visible layer that handles input.
     /// </summary>
     public bool IsCursorOverGui()
     {
-        foreach (var layer in this._allLayers)
+        foreach (var handler in this._inputHandlers)
         {
-            if (layer is ILayer2D layer2D && layer2D.IsVisible && layer2D.IsCursorOverElement)
+            if (handler.IsVisible && handler.IsCursorOverElement)
             {
                 return true;
             }
