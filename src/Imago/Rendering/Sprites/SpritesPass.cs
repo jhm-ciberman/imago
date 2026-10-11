@@ -77,7 +77,7 @@ internal class SpritesPass : IDisposable, IPipelineProvider
         this._defaultShader = new Shader(renderer, this, _vertexShader, _fragmentShader, ["Main"]);
         var factory = this._gd.ResourceFactory;
 
-        var vertexBufferSize = (uint) (Marshal.SizeOf<SpriteQuad>() * 4 * capacity);
+        var vertexBufferSize = (uint) (Marshal.SizeOf<SpriteQuad>() * capacity);
         this._vertexBuffer = factory.CreateBuffer(new BufferDescription(vertexBufferSize, BufferUsage.VertexBuffer | BufferUsage.Dynamic));
 
         var indexBufferSize = (uint) (sizeof(ushort) * 6 * capacity);
@@ -264,7 +264,7 @@ internal class SpritesPass : IDisposable, IPipelineProvider
         if (this._quadCount == 0 || this._texture == null)
             return;
 
-        this._commandList.UpdateBuffer(this._vertexBuffer, 0, this._quads);
+        this._commandList.UpdateBuffer(this._vertexBuffer, 0, this._quads.AsSpan(0, this._quadCount));
 
         if (this._defaultShader != this._currentShaderInUse || this._renderFlags != this._currentPipelineFlags)
         {
