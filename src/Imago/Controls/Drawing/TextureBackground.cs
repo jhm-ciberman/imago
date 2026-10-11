@@ -35,7 +35,7 @@ public class TextureBackground : IBackground
     {
         if (this.Texture != null)
         {
-            batch.DrawTexture(this.Texture.Texture, position, size, this.Texture.TopLeft, this.Texture.BottomRight, this.Color);
+            batch.DrawTexture(this.Texture, position, size, this.Color);
         }
     }
 

@@ -90,7 +90,7 @@ public class SpriteBackground : IBackground
         }
         else
         {
-            batch.DrawTexture(frame.Texture, position, size, frame.TopLeft, frame.BottomRight, this.Color);
+            batch.DrawTexture(frame, position, size, this.Color);
         }
     }
 

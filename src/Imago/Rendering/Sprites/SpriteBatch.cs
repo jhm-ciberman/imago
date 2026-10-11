@@ -116,6 +116,19 @@ public class SpriteBatch
     }
 
     /// <summary>
+    /// Draws a texture at the specified position.
+    /// </summary>
+    /// <param name="texture">The texture to draw.</param>
+    /// <param name="position">The position to draw the texture at.</param>
+    /// <param name="size">The size of the texture to draw.</param>
+    /// <param name="color">The color to draw the texture with.</param>
+    /// <exception cref="InvalidOperationException">Thrown if <see cref="Begin"/> has not been called.</exception>
+    public void DrawTexture(ITextureRegion texture, Vector2 position, Vector2 size, Color color)
+    {
+        this.DrawTexture(texture.Texture, position, size, texture.TopLeft, texture.BottomRight, color);
+    }
+
+    /// <summary>
     /// Draws a texture at the specified position with a transformation matrix.
     /// </summary>
     /// <param name="texture">The texture to draw.</param>
@@ -271,22 +284,27 @@ public class SpriteBatch
     /// <param name="texture">The texture to use.</param>
     /// <param name="topLeft">The top left vertex of the quad.</param>
     /// <param name="topRight">The top right vertex of the quad.</param>
-    /// <param name="bottomLeft">The bottom left vertex of the quad.</param>
     /// <param name="bottomRight">The bottom right vertex of the quad.</param>
+    /// <param name="bottomLeft">The bottom left vertex of the quad.</param>
     /// <exception cref="InvalidOperationException">Thrown if <see cref="Begin"/> has not been called.</exception>
-    public void DrawQuad(ITexture texture, ref SpriteVertex topLeft, ref SpriteVertex topRight, ref SpriteVertex bottomLeft, ref SpriteVertex bottomRight)
+    public void DrawQuad(ITexture texture, in SpriteVertex topLeft, in SpriteVertex topRight, in SpriteVertex bottomRight, in SpriteVertex bottomLeft)
     {
         this.EnsureBegun();
 
+        var tl = topLeft;
+        var tr = topRight;
+        var br = bottomRight;
+        var bl = bottomLeft;
+
         if (this._opacityStack.Peek() < 1f)
         {
-            this.ApplyOpacity(ref topLeft.Color);
-            this.ApplyOpacity(ref topRight.Color);
-            this.ApplyOpacity(ref bottomLeft.Color);
-            this.ApplyOpacity(ref bottomRight.Color);
+            this.ApplyOpacity(ref tl.Color);
+            this.ApplyOpacity(ref tr.Color);
+            this.ApplyOpacity(ref br.Color);
+            this.ApplyOpacity(ref bl.Color);
         }
 
-        this._pass.Draw(texture, new SpriteQuad(topLeft, topRight, bottomRight, bottomLeft));
+        this._pass.Draw(texture, new SpriteQuad(tl, tr, br, bl));
     }
 
     /// <summary>
@@ -314,8 +332,14 @@ public class SpriteBatch
     /// <summary>
     /// Ends drawing with the current opacity value.
     /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if there is no opacity value to pop.</exception>
     public void PopOpacity()
     {
+        if (this._opacityStack.Count <= 1)
+        {
+            throw new InvalidOperationException("PopOpacity was called more times than PushOpacity.");
+        }
+
         this._opacityStack.Pop();
     }
 
@@ -340,9 +364,13 @@ public class SpriteBatch
     /// <summary>
     /// Ends drawing with the current scissor rectangle mask applied.
     /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if there is no scissor rectangle to pop.</exception>
     public void PopScissorRectangle()
     {
-        if (this._clipRectStack.Count == 0) return;
+        if (this._clipRectStack.Count == 0)
+        {
+            throw new InvalidOperationException("PopScissorRectangle was called more times than PushScissorRectangle.");
+        }
 
         this._clipRectStack.Pop();
         if (this._clipRectStack.Count > 0)

@@ -38,8 +38,8 @@ internal class FontStashAdapter : ITexture2DManager, IFontStashRenderer2
     {
         var v1 = new SpriteVertex(topLeft.Position, topLeft.TextureCoordinate, topLeft.Color.PackedValue);
         var v2 = new SpriteVertex(topRight.Position, topRight.TextureCoordinate, topRight.Color.PackedValue);
-        var v3 = new SpriteVertex(bottomLeft.Position, bottomLeft.TextureCoordinate, bottomLeft.Color.PackedValue);
-        var v4 = new SpriteVertex(bottomRight.Position, bottomRight.TextureCoordinate, bottomRight.Color.PackedValue);
-        this._spriteBatch.DrawQuad((ITexture)texture, ref v1, ref v2, ref v3, ref v4);
+        var v3 = new SpriteVertex(bottomRight.Position, bottomRight.TextureCoordinate, bottomRight.Color.PackedValue);
+        var v4 = new SpriteVertex(bottomLeft.Position, bottomLeft.TextureCoordinate, bottomLeft.Color.PackedValue);
+        this._spriteBatch.DrawQuad((ITexture)texture, in v1, in v2, in v3, in v4);
     }
 }
