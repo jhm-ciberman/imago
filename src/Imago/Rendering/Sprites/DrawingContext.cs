@@ -133,8 +133,8 @@ public class DrawingContext
     {
         var sizeTL = new Vector2(patchMargin.Left, patchMargin.Top);
         var sizeBR = new Vector2(patchMargin.Right, patchMargin.Bottom);
-        var sizeTR = new Vector2(patchMargin.Top, patchMargin.Right);
-        var sizeBL = new Vector2(patchMargin.Left, patchMargin.Bottom) ;
+        var sizeTR = new Vector2(patchMargin.Right, patchMargin.Top);
+        var sizeBL = new Vector2(patchMargin.Left, patchMargin.Bottom);
 
         var texelUV = Vector2.One / texture.Texture.Size;
         var uvExtTL = texture.TopLeft;
@@ -148,7 +148,7 @@ public class DrawingContext
         {
             if (size.X < minimumRequiredSize.X || size.Y < minimumRequiredSize.Y)
             {
-                scale *= MathF.Min(size.X, size.Y) / MathF.Min(minimumRequiredSize.X, minimumRequiredSize.Y);
+                scale *= float.Min(size.X / minimumRequiredSize.X, size.Y / minimumRequiredSize.Y);
             }
         }
 
@@ -168,9 +168,9 @@ public class DrawingContext
         }
 
         var posTL = new Vector2(0f, 0f);
-        var posTR = new Vector2(size.X - sizeTL.X, 0f);
-        var posBR = new Vector2(size.X - sizeTL.X, size.Y - sizeTL.Y);
-        var posBL = new Vector2(0f, size.Y - sizeTL.Y);
+        var posTR = new Vector2(size.X - sizeTR.X, 0f);
+        var posBR = size - sizeBR;
+        var posBL = new Vector2(0f, size.Y - sizeBL.Y);
 
         // Corner Top Left
         quads[count++] = SpriteQuad.FromRectangle(position + posTL, sizeTL,
@@ -187,8 +187,6 @@ public class DrawingContext
         // Corner Bottom Right
         quads[count++] = SpriteQuad.FromRectangle(position + posBR, sizeBR,
             uvIntBR, uvExtBR, color);
-
-
 
         var sizeTop = new Vector2(size.X - sizeTL.X - sizeTR.X, sizeTL.Y);
         var sizeBottom = new Vector2(size.X - sizeBL.X - sizeBR.X, sizeBL.Y);
