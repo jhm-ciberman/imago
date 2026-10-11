@@ -14,7 +14,7 @@ namespace Imago.Controls;
 /// This layer is automatically created and managed by <see cref="Stage"/>.
 /// Access it via <see cref="Stage.TooltipLayer"/>.
 /// </remarks>
-public class TooltipLayer : ILayer2D, IDisposable
+public class TooltipLayer : IRenderLayer, IDisposable
 {
     private readonly TooltipPresenter _presenter;
     private readonly Viewport _viewport;
@@ -125,7 +125,14 @@ public class TooltipLayer : ILayer2D, IDisposable
     }
 
     /// <inheritdoc />
-    public void Draw(DrawingContext ctx)
+    public void Render(RenderContext ctx)
+    {
+        ctx.Sprites.Begin(ctx.CommandList, ctx.Target);
+        this.Draw(ctx.Sprites);
+        ctx.Sprites.End();
+    }
+
+    private void Draw(DrawingContext ctx)
     {
         if (this._currentOwner?.Layer == null || this._currentOwner.Tooltip == null)
         {

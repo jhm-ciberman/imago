@@ -211,7 +211,7 @@ public class RenderStatistics
     public PhaseTimer UpdateTime { get; } = new(HistoryCapacity);
 
     /// <summary>
-    /// Gets the scene preparation phase time (scene graph traversal, ImGui building, resource uploads).
+    /// Gets the scene preparation phase time (scene graph traversal, resource uploads).
     /// </summary>
     public PhaseTimer PreparePhase { get; } = new(HistoryCapacity);
 
@@ -221,7 +221,7 @@ public class RenderStatistics
     public PhaseTimer Pass3D { get; } = new(HistoryCapacity);
 
     /// <summary>
-    /// Gets the 2D rendering phase time (sprite layers, fullscreen compositing, ImGui).
+    /// Gets the 2D rendering phase time (GUI and overlay layers, fullscreen compositing).
     /// </summary>
     public PhaseTimer Pass2D { get; } = new(HistoryCapacity);
 

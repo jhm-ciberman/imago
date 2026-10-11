@@ -126,15 +126,15 @@ public abstract class ScenarioBase : IDisposable
         await this.NextFrame();
 
         var stage = this.App.Stage;
-        var hiddenLayers = new List<ILayer2D>();
+        var hiddenLayers = new List<IRenderLayer>();
         if (!includeUi)
         {
             foreach (var layer in stage.Layers)
             {
-                if (layer is ILayer2D layer2D && layer2D.IsVisible)
+                if (layer is IRenderLayer renderLayer && renderLayer.IsVisible)
                 {
-                    layer2D.IsVisible = false;
-                    hiddenLayers.Add(layer2D);
+                    renderLayer.IsVisible = false;
+                    hiddenLayers.Add(renderLayer);
                 }
             }
         }

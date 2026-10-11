@@ -22,20 +22,9 @@ namespace Imago.SceneGraph;
 /// </remarks>
 public class Stage
 {
-    /// <summary>
-    /// Occurs during the render preparation phase, allowing the active screen to submit ImGui draw calls.
-    /// </summary>
-    public event Action? ImGuiRendering;
-
-    /// <summary>
-    /// Occurs after ImGui rendering, allowing global overlays
-    /// to render regardless of the active screen.
-    /// </summary>
-    public event Action? ImGuiRendered;
-
     private readonly List<ILayer> _allLayers = new();
-    private readonly List<ILayer2D> _guiLayers = new();
-    private readonly List<ILayer2D> _overlayLayers = new();
+    private readonly List<IRenderLayer> _guiLayers = new();
+    private readonly List<IRenderLayer> _overlayLayers = new();
     private readonly List<IInputHandler> _inputHandlers = new();
     private Scene3D? _scene3D;
 
@@ -58,19 +47,24 @@ public class Stage
     }
 
     /// <summary>
+    /// Gets the screen that is mounted on this stage, or null if there is none.
+    /// </summary>
+    public Screen? Screen { get; internal set; }
+
+    /// <summary>
     /// Gets all layers sorted by ZOrder.
     /// </summary>
     public IReadOnlyList<ILayer> Layers => this._allLayers;
 
     /// <summary>
-    /// Gets 2D layers that render to the GUI render texture, sorted by ZOrder.
+    /// Gets the layers that render to the GUI render texture, sorted by ZOrder.
     /// </summary>
-    public IReadOnlyList<ILayer2D> GuiLayers => this._guiLayers;
+    public IReadOnlyList<IRenderLayer> GuiLayers => this._guiLayers;
 
     /// <summary>
-    /// Gets 2D layers that render as overlays on top of ImGui, sorted by ZOrder.
+    /// Gets the layers that render on top of all other content, sorted by ZOrder.
     /// </summary>
-    public IReadOnlyList<ILayer2D> OverlayLayers => this._overlayLayers;
+    public IReadOnlyList<IRenderLayer> OverlayLayers => this._overlayLayers;
 
     /// <summary>
     /// Gets the default clear color when no layer provides one.
@@ -191,16 +185,16 @@ public class Stage
                 this._inputHandlers.Add(handler);
             }
 
-            if (layer is ILayer2D layer2D)
+            if (layer is IRenderLayer renderLayer)
             {
-                if (layer2D.RenderTarget == LayerRenderTarget.Overlay)
+                var layers = renderLayer.RenderTarget switch
                 {
-                    this._overlayLayers.Add(layer2D);
-                }
-                else
-                {
-                    this._guiLayers.Add(layer2D);
-                }
+                    LayerRenderTarget.Gui => this._guiLayers,
+                    LayerRenderTarget.Overlay => this._overlayLayers,
+                    _ => throw new ArgumentOutOfRangeException(nameof(layer), renderLayer.RenderTarget, null),
+                };
+
+                layers.Add(renderLayer);
             }
         }
     }
@@ -361,15 +355,8 @@ public class Stage
     /// Prepares all layers for rendering.
     /// </summary>
     /// <param name="renderTexture">The render texture that will be used for rendering.</param>
-    /// <param name="includeImGui">Whether to let the active screen submit its ImGui overlay for this frame.</param>
-    public void PrepareForRender(RenderTexture renderTexture, bool includeImGui)
+    public void PrepareForRender(RenderTexture renderTexture)
     {
-        if (includeImGui)
-        {
-            this.ImGuiRendering?.Invoke();
-            this.ImGuiRendered?.Invoke();
-        }
-
         this.Scene3D?.PrepareForRender(renderTexture);
     }
 

@@ -7,6 +7,7 @@ using Imago.Assets.Materials;
 using Imago.Assets.Meshes;
 using Imago.Assets.Textures;
 using Imago.Rendering.Internals;
+using Imago.SceneGraph;
 using Imago.Support.Drawing;
 using Imago.Support.Numerics;
 using NeoVeldrid;
@@ -70,15 +71,19 @@ public class DrawingContext : IDisposable
 
     private CommandList _commandList = null!;
 
+    private readonly RenderStatistics _statistics;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="DrawingContext"/> class.
     /// </summary>
     /// <param name="gd">The graphics device.</param>
     /// <param name="defaultShader">The default shader to use.</param>
+    /// <param name="statistics">The statistics that receive the draw call count.</param>
     /// <param name="capacity">The maximum number of sprites that can be batched in a single draw call.</param>
-    internal DrawingContext(GraphicsDevice gd, Shader defaultShader, int capacity = 1000)
+    internal DrawingContext(GraphicsDevice gd, Shader defaultShader, RenderStatistics statistics, int capacity = 1000)
     {
         this._capacity = capacity;
+        this._statistics = statistics;
         this._gd = gd;
         this._defaultShader = defaultShader;
         var factory = gd.ResourceFactory;
@@ -146,9 +151,17 @@ public class DrawingContext : IDisposable
     /// Begins the frame and sets up the sprite batcher for drawing.
     /// This method should be called before any drawing.
     /// </summary>
+    /// <remarks>
+    /// The target must be the one from the same <see cref="RenderContext"/> that gave this drawing context.
+    /// </remarks>
     /// <param name="cl">The command list to use.</param>
-    public void Begin(CommandList cl)
+    /// <param name="target">The render texture to draw into.</param>
+    public void Begin(CommandList cl, IRenderTexture target)
     {
+        cl.SetFramebuffer(target.Framebuffer);
+        cl.SetFullViewports();
+        cl.SetFullScissorRects();
+
         this._commandList = cl;
         this.TotalSpritesToDraw = 0;
         this._batch.Reset();
@@ -175,6 +188,7 @@ public class DrawingContext : IDisposable
     public void End()
     {
         this.FlushBatch();
+        this._statistics.CurrentGuiDrawCalls += this.DrawCallCount;
     }
 
     /// <summary>

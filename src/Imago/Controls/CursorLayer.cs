@@ -16,7 +16,7 @@ namespace Imago.Controls;
 /// This layer is automatically created and managed by <see cref="Stage"/>.
 /// Access it via <see cref="Stage.CursorLayer"/>.
 /// </remarks>
-public class CursorLayer : ILayer2D
+public class CursorLayer : IRenderLayer
 {
     private readonly Viewport _viewport;
     private readonly InputManager _input;
@@ -82,7 +82,14 @@ public class CursorLayer : ILayer2D
     }
 
     /// <inheritdoc />
-    public void Draw(DrawingContext ctx)
+    public void Render(RenderContext ctx)
+    {
+        ctx.Sprites.Begin(ctx.CommandList, ctx.Target);
+        this.Draw(ctx.Sprites);
+        ctx.Sprites.End();
+    }
+
+    private void Draw(DrawingContext ctx)
     {
         if (this.Cursor == null || !this._input.IsCursorInsideWindow)
         {

@@ -173,7 +173,7 @@ public abstract class Application : IDisposable
         this.Renderer.Statistics.UpdateTime.Begin();
 
         this.Input.UpdateState();
-        this.Renderer.Update(deltaTime, this.Input.InputSnapshot);
+        this.Renderer.Update(deltaTime);
 
         this.OnUpdate(deltaTime);
 

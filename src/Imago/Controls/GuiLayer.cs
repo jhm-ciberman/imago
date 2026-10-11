@@ -13,7 +13,7 @@ namespace Imago.Controls;
 /// Represents the root of a 2D user interface, managing the layout, rendering, and input for a tree of <see cref="Control"/> objects.
 /// </summary>
 [ContentProperty(nameof(Content))]
-public class GuiLayer : ILayer2D, IInputHandler
+public class GuiLayer : IRenderLayer, IInputHandler
 {
     /// <inheritdoc />
     public int ZOrder { get; init; } = 100;
@@ -144,11 +144,15 @@ public class GuiLayer : ILayer2D, IInputHandler
         }
     }
 
-    /// <summary>
-    /// Draws the GUI layer and all its visible controls.
-    /// </summary>
-    /// <param name="ctx">The drawing context to use.</param>
-    public void Draw(DrawingContext ctx)
+    /// <inheritdoc />
+    public void Render(RenderContext ctx)
+    {
+        ctx.Sprites.Begin(ctx.CommandList, ctx.Target);
+        this.Draw(ctx.Sprites);
+        ctx.Sprites.End();
+    }
+
+    private void Draw(DrawingContext ctx)
     {
         if (this._content is null) return;
 

@@ -2,7 +2,6 @@ using System;
 using Imago.Assets.Materials;
 using Imago.Assets.Textures;
 using Imago.Rendering.Internals;
-using Imago.SceneGraph;
 using NeoVeldrid;
 using Shader = Imago.Assets.Materials.Shader;
 
@@ -10,13 +9,14 @@ namespace Imago.Rendering.Sprites;
 
 internal class SpritesPass : IDisposable, IPipelineProvider
 {
+    /// <summary>
+    /// Gets the drawing context that draws sprites with this pass.
+    /// </summary>
+    public DrawingContext DrawingContext { get; }
+
     private readonly GraphicsDevice _gd;
 
     private readonly Shader _defaultShader;
-
-    private readonly DrawingContext _drawingContext;
-
-    private readonly Renderer _renderer;
 
     private readonly OutputDescription _outputDescription;
 
@@ -31,13 +31,12 @@ internal class SpritesPass : IDisposable, IPipelineProvider
     /// <param name="depthTested">Whether sprites test and write depth. Pass false for overlays that must draw on top of everything regardless of the target's depth buffer.</param>
     public SpritesPass(Renderer renderer, IRenderTexture? outputTarget = null, int capacity = 1000, bool depthTested = true)
     {
-        this._renderer = renderer;
         this._gd = renderer.GraphicsDevice;
         this._outputDescription = (outputTarget ?? renderer.MainRenderTexture).OutputDescription;
         this._depthTested = depthTested;
         this._defaultShader = new Shader(renderer, this, _vertexShader, _fragmentShader, ["Main"]);
 
-        this._drawingContext = new DrawingContext(this._gd, this._defaultShader, capacity);
+        this.DrawingContext = new DrawingContext(this._gd, this._defaultShader, renderer.Statistics, capacity);
     }
 
     /// <summary>
@@ -45,7 +44,7 @@ internal class SpritesPass : IDisposable, IPipelineProvider
     /// </summary>
     public void Dispose()
     {
-        this._drawingContext.Dispose();
+        this.DrawingContext.Dispose();
     }
 
     /// <inheritdoc/>
@@ -70,7 +69,7 @@ internal class SpritesPass : IDisposable, IPipelineProvider
             Outputs = this._outputDescription,
             ResourceLayouts =
             [
-                this._drawingContext.PassResourceLayout,
+                this.DrawingContext.PassResourceLayout,
                 shaderVariant.MaterialResourceLayout,
             ],
         });
@@ -99,25 +98,6 @@ internal class SpritesPass : IDisposable, IPipelineProvider
                 }
             ],
         };
-    }
-
-    /// <summary>
-    /// Renders the specified stage to the render texture.
-    /// </summary>
-    /// <param name="cl">The command list to use.</param>
-    /// <param name="renderTexture">The render texture to render to.</param>
-    /// <param name="layer">The layer to render.</param>
-    public void Render(CommandList cl, IRenderTexture renderTexture, ILayer2D layer)
-    {
-        cl.SetFramebuffer(renderTexture.Framebuffer);
-        cl.SetFullViewports();
-        cl.SetFullScissorRects();
-
-        this._drawingContext.Begin(cl);
-        layer.Draw(this._drawingContext);
-        this._drawingContext.End();
-
-        this._renderer.Statistics.CurrentGuiDrawCalls += this._drawingContext.DrawCallCount;
     }
 
     private static readonly string _fragmentShader = @"

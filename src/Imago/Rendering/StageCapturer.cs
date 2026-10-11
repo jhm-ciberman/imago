@@ -44,7 +44,7 @@ public sealed class StageCapturer : IDisposable
         uint targetHeight = height ?? this._renderer.FullScreenRenderTexture.Height;
 
         var target = this.GetTarget(targetWidth, targetHeight);
-        this._renderer.RenderStage(stage, target, includeImGui: false);
+        this._renderer.RenderStage(stage, target);
 
         return this._renderer.ReadColorToImage(target);
     }

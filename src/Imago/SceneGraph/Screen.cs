@@ -129,13 +129,13 @@ public class Screen : IDisposable, IMountable
     {
         this._stage = stage;
         stage.Scene3D = this.Scene3D;
+        stage.Screen = this;
 
         foreach (var layer in this._layers)
         {
             stage.AddLayer(layer);
         }
 
-        stage.ImGuiRendering += this.RenderImGui;
         this._bindings = this.CreateBindings();
         this.OnMounted();
         this.Mounted?.Invoke(this, EventArgs.Empty);
@@ -161,14 +161,15 @@ public class Screen : IDisposable, IMountable
         this.OnUnmounted();
         this._bindings?.Dispose();
         this._bindings = null;
-        this._stage!.ImGuiRendering -= this.RenderImGui;
 
+        var stage = this._stage!;
         foreach (var layer in this._layers)
         {
-            this._stage.RemoveLayer(layer);
+            stage.RemoveLayer(layer);
         }
 
-        this._stage.Scene3D = null;
+        stage.Scene3D = null;
+        stage.Screen = null;
         this._stage = null;
     }
 
@@ -192,13 +193,6 @@ public class Screen : IDisposable, IMountable
     /// </summary>
     /// <param name="deltaTime">The time elapsed since the last update, in seconds.</param>
     public virtual void Update(float deltaTime)
-    {
-    }
-
-    /// <summary>
-    /// Renders the ImGui user interface for this screen.
-    /// </summary>
-    public virtual void RenderImGui()
     {
     }
 

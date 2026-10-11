@@ -72,7 +72,7 @@ public class Renderer : IDisposable
     /// <summary>
     /// Gets the current GraphicsDevice.
     /// </summary>
-    internal GraphicsDevice GraphicsDevice { get; }
+    public GraphicsDevice GraphicsDevice { get; }
 
     /// <summary>
     /// Gets the main render texture.
@@ -87,7 +87,7 @@ public class Renderer : IDisposable
     /// <summary>
     /// Gets the full screen render texture.
     /// </summary>
-    internal SwapchainRenderTexture FullScreenRenderTexture { get; }
+    public IRenderTexture FullScreenRenderTexture { get; }
 
     private readonly CommandList _commandList;
     private readonly DisposeCollector _disposeCollector;
@@ -97,7 +97,6 @@ public class Renderer : IDisposable
 
     private readonly SpritesPass _spritesPass;
     private readonly Dictionary<OutputDescription, SpritesPass> _overlaySpritesPasses = new();
-    private readonly ImGuiPass _imGuiPass;
 
     private readonly RendererResources _rendererResources;
     private readonly HashSet<IDisposable> _disposables = new HashSet<IDisposable>();
@@ -152,7 +151,6 @@ public class Renderer : IDisposable
         this._disposeCollector = new DisposeCollector();
 
         this._forward3DRenderer = new Forward3DRenderer(this);
-        this._imGuiPass = new ImGuiPass(this);
         this._spritesPass = new SpritesPass(this);
         this._overlaySpritesPasses[this.FullScreenRenderTexture.OutputDescription] = new SpritesPass(this, this.FullScreenRenderTexture, capacity: 64, depthTested: false);
         this._fullScreenPass = new FullScreenPass(this, isPixelArt: false, isOverlay: false);
@@ -173,11 +171,9 @@ public class Renderer : IDisposable
     /// Updates the state of the renderer and its components.
     /// </summary>
     /// <param name="deltaTime">The time elapsed since the last frame, in seconds.</param>
-    /// <param name="inputSnapshot">The current input snapshot.</param>
-    public void Update(float deltaTime, InputSnapshot inputSnapshot)
+    public void Update(float deltaTime)
     {
         this._totalTime += deltaTime;
-        this._imGuiPass.Update(deltaTime, inputSnapshot);
         this._forward3DRenderer.Update();
     }
 
@@ -222,16 +218,6 @@ public class Renderer : IDisposable
     }
 
     /// <summary>
-    /// Gets or creates an ImGui binding for the given texture.
-    /// </summary>
-    /// <param name="texture">The texture to get or create the binding for.</param>
-    /// <returns>The ImGui binding.</returns>
-    public nint GetOrCreateImGuiBinding(Texture texture)
-    {
-        return this._imGuiPass.GetOrCreateBinding(texture);
-    }
-
-    /// <summary>
     /// Creates a new surface material of the specified type.
     /// </summary>
     /// <typeparam name="T">The material type, must have a <see cref="SurfaceShaderAttribute"/>.</typeparam>
@@ -270,7 +256,7 @@ public class Renderer : IDisposable
         stats.RenderTime.Begin();
         stats.BeginFrame();
 
-        this.RenderStage(stage, this.FullScreenRenderTexture, includeImGui: true);
+        this.RenderStage(stage, this.FullScreenRenderTexture, RenderOutputMode.Screen);
 
         this._forward3DRenderer.ReadPickingResult(stage.Scene3D);
         stats.RenderTime.End();
@@ -290,13 +276,17 @@ public class Renderer : IDisposable
     /// </remarks>
     /// <param name="stage">The stage to render.</param>
     /// <param name="target">The target to render into.</param>
-    /// <param name="includeImGui">Whether to draw the ImGui overlay, which only appears when rendering to the screen.</param>
-    public void RenderStage(Stage stage, IRenderTexture target, bool includeImGui)
+    public void RenderStage(Stage stage, IRenderTexture target)
+    {
+        this.RenderStage(stage, target, RenderOutputMode.Offscreen);
+    }
+
+    private void RenderStage(Stage stage, IRenderTexture target, RenderOutputMode outputMode)
     {
         var stats = this.Statistics;
 
         stats.PreparePhase.Begin();
-        stage.PrepareForRender(this.MainRenderTexture, includeImGui);
+        stage.PrepareForRender(this.MainRenderTexture);
         var cl = this._commandList;
         cl.Begin();
         this._rendererResources.Update(cl);
@@ -326,24 +316,19 @@ public class Renderer : IDisposable
         {
             if (layer.IsVisible)
             {
-                this._spritesPass.Render(cl, this.GuiRenderTexture, layer);
+                layer.Render(new RenderContext(this.GraphicsDevice, cl, this.GuiRenderTexture, outputMode, this._spritesPass.DrawingContext));
             }
         }
 
         this._fullScreenPass.Render(cl, this.MainRenderTexture, target);
         this._fullScreenPixelArtPass.Render(cl, this.GuiRenderTexture, target);
 
-        if (includeImGui)
-        {
-            this._imGuiPass.Render(cl);
-        }
-
         var overlayPass = this.GetOverlaySpritesPass(target);
         foreach (var layer in stage.OverlayLayers)
         {
             if (layer.IsVisible)
             {
-                overlayPass.Render(cl, target, layer);
+                layer.Render(new RenderContext(this.GraphicsDevice, cl, target, outputMode, overlayPass.DrawingContext));
             }
         }
 
@@ -540,7 +525,7 @@ public class Renderer : IDisposable
     /// Registers a disposable object to be disposed when the renderer is disposed.
     /// </summary>
     /// <param name="disposable">The object to register.</param>
-    internal void RegisterDisposable(IDisposable disposable)
+    public void RegisterDisposable(IDisposable disposable)
     {
         this._disposables.Add(disposable);
     }
@@ -549,7 +534,7 @@ public class Renderer : IDisposable
     /// Unregisters a disposable object.
     /// </summary>
     /// <param name="disposable">The object to unregister.</param>
-    internal void UnregisterDisposable(IDisposable disposable)
+    public void UnregisterDisposable(IDisposable disposable)
     {
         this._disposables.Remove(disposable);
     }
@@ -600,7 +585,6 @@ public class Renderer : IDisposable
             }
 
             // Passes
-            this._imGuiPass.Dispose();
             this._spritesPass.Dispose();
             foreach (var pass in this._overlaySpritesPasses.Values)
             {

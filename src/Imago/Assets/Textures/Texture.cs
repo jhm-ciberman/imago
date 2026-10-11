@@ -115,11 +115,6 @@ public class Texture : ITexture, ITextureRegion, IDisposable
     }
 
     /// <summary>
-    /// Gets the ImGui binding for this texture, allowing it to be displayed in an ImGui UI.
-    /// </summary>
-    public nint ImGuiBinding => Renderer.Instance.GetOrCreateImGuiBinding(this);
-
-    /// <summary>
     /// Gets the size of the texture as a <see cref="Vector2Int"/>.
     /// </summary>
     public Vector2Int Size => new Vector2Int((int)this.Width, (int)this.Height);

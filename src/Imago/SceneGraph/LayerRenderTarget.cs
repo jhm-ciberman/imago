@@ -1,7 +1,7 @@
 namespace Imago.SceneGraph;
 
 /// <summary>
-/// Specifies which render target a 2D layer should be drawn to.
+/// Specifies which render target a layer should be drawn to.
 /// </summary>
 public enum LayerRenderTarget
 {
@@ -11,7 +11,7 @@ public enum LayerRenderTarget
     Gui,
 
     /// <summary>
-    /// Rendered directly to the swapchain after ImGui, on top of all other content.
+    /// Rendered directly to the final target, on top of all other content.
     /// </summary>
     Overlay
 }
