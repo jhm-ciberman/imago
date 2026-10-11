@@ -21,6 +21,15 @@
         <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-5crp-9r3c-p9vr" />
     </ItemGroup>
 
+    <!-- Suppress SixLabors.ImageSharp 3.1 vulnerability warnings. Only 4.x fixes them, and 4.x needs a license key to build. -->
+    <ItemGroup>
+        <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-gwg2-r3hj-4w44" />
+        <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-j3p4-wp97-rph4" />
+        <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-j9gm-c75j-xc9q" />
+        <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-jjfr-hcj7-qf5w" />
+        <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-wmxv-xphr-5c9g" />
+    </ItemGroup>
+
     <!-- Workaround for https://github.com/dotnet/roslyn/issues/41640 -->
     <PropertyGroup>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
