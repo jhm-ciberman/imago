@@ -319,6 +319,7 @@ public class Node3D : IDisposable, IFormattable, IMountable
             child.Mount(scene);
         }
 
+        scene.Stage?.NotifyItemMounted(this);
         this.Mounted?.Invoke(this, EventArgs.Empty);
     }
 
@@ -340,6 +341,7 @@ public class Node3D : IDisposable, IFormattable, IMountable
             child.Unmount();
         }
 
+        this.Scene3D.Stage?.NotifyItemUnmounted(this);
         this.Unmounting?.Invoke(this, EventArgs.Empty);
         this.Scene3D = null;
     }

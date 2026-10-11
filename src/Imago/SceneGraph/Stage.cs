@@ -26,6 +26,8 @@ public class Stage
     private readonly List<IRenderLayer> _guiLayers = new();
     private readonly List<IRenderLayer> _overlayLayers = new();
     private readonly List<IInputHandler> _inputHandlers = new();
+    private readonly List<IMountListener> _mountListeners = new();
+    private readonly HashSet<IMountable> _mountedItems = new();
     private Scene3D? _scene3D;
 
     /// <summary>
@@ -156,7 +158,13 @@ public class Stage
     {
         this._allLayers.Add(layer);
         layer.Mount(this);
+        this.NotifyItemMounted(layer);
         this.RebuildLayerList();
+
+        if (layer is IMountListener listener)
+        {
+            this.ForEachMountedItem(listener, listener.NotifyItemMounted);
+        }
     }
 
     /// <summary>
@@ -168,6 +176,51 @@ public class Stage
         if (!this._allLayers.Remove(layer)) return;
         layer.Unmount();
         this.RebuildLayerList();
+        this.NotifyItemUnmounted(layer);
+
+        if (layer is IMountListener listener)
+        {
+            this.ForEachMountedItem(listener, listener.NotifyItemUnmounted);
+        }
+    }
+
+    /// <summary>
+    /// Tells the stage that the given item was mounted on it, so its mount listeners are notified.
+    /// </summary>
+    /// <param name="item">The item that was mounted.</param>
+    internal void NotifyItemMounted(IMountable item)
+    {
+        if (!this._mountedItems.Add(item)) return;
+
+        for (int i = 0; i < this._mountListeners.Count; i++)
+        {
+            this._mountListeners[i].NotifyItemMounted(item);
+        }
+    }
+
+    /// <summary>
+    /// Tells the stage that the given item was unmounted from it, so its mount listeners are notified.
+    /// </summary>
+    /// <param name="item">The item that was unmounted.</param>
+    internal void NotifyItemUnmounted(IMountable item)
+    {
+        if (!this._mountedItems.Remove(item)) return;
+
+        for (int i = 0; i < this._mountListeners.Count; i++)
+        {
+            this._mountListeners[i].NotifyItemUnmounted(item);
+        }
+    }
+
+    private void ForEachMountedItem(IMountListener listener, Action<IMountable> action)
+    {
+        foreach (var item in this._mountedItems)
+        {
+            if (item != listener)
+            {
+                action(item);
+            }
+        }
     }
 
     private void RebuildLayerList()
@@ -175,6 +228,7 @@ public class Stage
         this._allLayers.Sort((a, b) => a.ZOrder.CompareTo(b.ZOrder));
 
         this._inputHandlers.Clear();
+        this._mountListeners.Clear();
         this._guiLayers.Clear();
         this._overlayLayers.Clear();
 
@@ -183,6 +237,11 @@ public class Stage
             if (layer is IInputHandler handler)
             {
                 this._inputHandlers.Add(handler);
+            }
+
+            if (layer is IMountListener listener)
+            {
+                this._mountListeners.Add(listener);
             }
 
             if (layer is IRenderLayer renderLayer)

@@ -393,6 +393,7 @@ public abstract class Visual : ObservableObject, IDisposable, IMountable
         }
 
         this._bindings = this.CreateBindings();
+        layer.Stage?.NotifyItemMounted(this);
         this.Mounted?.Invoke(this, EventArgs.Empty);
     }
 
@@ -427,6 +428,7 @@ public abstract class Visual : ObservableObject, IDisposable, IMountable
 
         this._bindings?.Dispose();
         this._bindings = null;
+        this.Layer.Stage?.NotifyItemUnmounted(this);
         this.Unmounting?.Invoke(this, EventArgs.Empty);
         this.Layer = null;
     }

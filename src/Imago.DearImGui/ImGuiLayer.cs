@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Imago.Assets.Textures;
 using Imago.Input;
 using Imago.Rendering;
@@ -12,7 +13,7 @@ namespace Imago.DearImGui;
 /// <summary>
 /// A layer that draws ImGui windows on top of the screen.
 /// </summary>
-public sealed class ImGuiLayer : IRenderLayer, IInputHandler, IDisposable
+public sealed class ImGuiLayer : IRenderLayer, IInputHandler, IMountListener, IDisposable
 {
     /// <summary>
     /// Occurs when a new ImGui frame starts. ImGui windows are submitted from handlers of this event.
@@ -54,6 +55,8 @@ public sealed class ImGuiLayer : IRenderLayer, IInputHandler, IDisposable
     private readonly GraphicsDevice _gd;
     private readonly IRenderTexture _renderTexture;
     private readonly ImGuiRenderer _imguiRenderer;
+    private readonly List<IImGuiDrawable> _drawables = [];
+    private readonly IImGuiDrawable? _application;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ImGuiLayer"/> class.
@@ -85,6 +88,8 @@ public sealed class ImGuiLayer : IRenderLayer, IInputHandler, IDisposable
 
         this._renderTexture.Resized += this.RenderTexture_Resized;
         renderer.RegisterDisposable(this);
+
+        this._application = Application.Instance as IImGuiDrawable;
     }
 
     /// <inheritdoc />
@@ -107,26 +112,29 @@ public sealed class ImGuiLayer : IRenderLayer, IInputHandler, IDisposable
         this._imguiRenderer.Update(deltaTime, InputManager.Instance.InputSnapshot);
         this.FrameStarted?.Invoke(this, EventArgs.Empty);
 
-        if (this.Stage is Stage stage)
+        for (int i = 0; i < this._drawables.Count; i++)
         {
-            if (stage.Screen is IImGuiDrawable screen)
-            {
-                screen.RenderImGui();
-            }
-
-            var layers = stage.Layers;
-            for (int i = 0; i < layers.Count; i++)
-            {
-                if (layers[i] is IImGuiDrawable layer)
-                {
-                    layer.RenderImGui();
-                }
-            }
+            this._drawables[i].RenderImGui();
         }
 
-        if (Application.Instance is IImGuiDrawable application)
+        this._application?.RenderImGui();
+    }
+
+    /// <inheritdoc />
+    public void NotifyItemMounted(IMountable item)
+    {
+        if (item is IImGuiDrawable drawable)
         {
-            application.RenderImGui();
+            this._drawables.Add(drawable);
+        }
+    }
+
+    /// <inheritdoc />
+    public void NotifyItemUnmounted(IMountable item)
+    {
+        if (item is IImGuiDrawable drawable)
+        {
+            this._drawables.Remove(drawable);
         }
     }
 

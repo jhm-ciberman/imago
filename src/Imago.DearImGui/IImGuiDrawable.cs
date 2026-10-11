@@ -3,14 +3,10 @@ namespace Imago.DearImGui;
 /// <summary>
 /// Defines a contract for objects that draw ImGui windows.
 /// </summary>
-/// <remarks>
-/// The <see cref="ImGuiLayer"/> calls it every frame on the mounted screen, on the stage layers, and on the
-/// application.
-/// </remarks>
 public interface IImGuiDrawable
 {
     /// <summary>
-    /// Draws the ImGui windows of this object.
+    /// Draws the ImGui windows of this object. The <see cref="ImGuiLayer"/> calls it once per frame.
     /// </summary>
     public void RenderImGui();
 }

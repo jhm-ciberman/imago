@@ -136,6 +136,7 @@ public class Screen : IDisposable, IMountable
             stage.AddLayer(layer);
         }
 
+        stage.NotifyItemMounted(this);
         this._bindings = this.CreateBindings();
         this.OnMounted();
         this.Mounted?.Invoke(this, EventArgs.Empty);
@@ -170,6 +171,7 @@ public class Screen : IDisposable, IMountable
 
         stage.Scene3D = null;
         stage.Screen = null;
+        stage.NotifyItemUnmounted(this);
         this._stage = null;
     }
 

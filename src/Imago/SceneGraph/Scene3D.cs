@@ -59,6 +59,7 @@ public class Scene3D : IDisposable, IMountable
     {
         this._stage = stage;
         this._root?.Mount(this);
+        stage.NotifyItemMounted(this);
         this.Mounted?.Invoke(this, EventArgs.Empty);
     }
 
@@ -69,6 +70,7 @@ public class Scene3D : IDisposable, IMountable
     {
         this.Unmounting?.Invoke(this, EventArgs.Empty);
         this._root?.Unmount();
+        this._stage?.NotifyItemUnmounted(this);
         this._stage = null;
     }
 
