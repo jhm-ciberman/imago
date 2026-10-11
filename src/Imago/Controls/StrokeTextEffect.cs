@@ -43,7 +43,7 @@ public class StrokeTextEffect : ITextEffect
     ];
 
     /// <inheritdoc/>
-    public void Draw(DrawingContext ctx, string text, SpriteFontBase font, Vector2 position, Color color)
+    public void Draw(SpriteBatch batch, string text, SpriteFontBase font, Vector2 position, Color color)
     {
         if (string.IsNullOrWhiteSpace(text))
         {
@@ -59,13 +59,13 @@ public class StrokeTextEffect : ITextEffect
             {
                 var offset = _strokeOffsets[i];
                 var strokePosition = position + offset * strokeThickness;
-                ctx.DrawText(font, text, strokePosition, strokeColor);
+                batch.DrawText(font, text, strokePosition, strokeColor);
             }
         }
 
         if (color.A > 0)
         {
-            ctx.DrawText(font, text, position, color);
+            batch.DrawText(font, text, position, color);
         }
     }
 }

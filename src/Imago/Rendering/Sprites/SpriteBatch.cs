@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Numerics;
 using FontStashSharp;
 using Imago.Assets.Textures;
-using Imago.SceneGraph;
 using Imago.Support.Drawing;
 using Imago.Support.Numerics;
 using NeoVeldrid;
@@ -12,9 +11,9 @@ using Texture = Imago.Assets.Textures.Texture;
 namespace Imago.Rendering.Sprites;
 
 /// <summary>
-/// Provides a context for drawing 2D sprites, text, and other graphical elements.
+/// Draws batches of 2D sprites, text, and other graphical elements.
 /// </summary>
-public class DrawingContext
+public class SpriteBatch
 {
     private readonly SpritesPass _pass;
 
@@ -24,49 +23,69 @@ public class DrawingContext
 
     private readonly Stack<float> _opacityStack = new Stack<float>();
 
+    private CommandList _commandList = null!;
+
+    private IRenderTexture _target = null!;
+
+    private bool _hasBegun;
+
     /// <summary>
-    /// Initializes a new instance of the <see cref="DrawingContext"/> class.
+    /// Initializes a new instance of the <see cref="SpriteBatch"/> class.
     /// </summary>
     /// <param name="gd">The graphics device.</param>
     /// <param name="pass">The sprites pass that records the drawn quads.</param>
-    internal DrawingContext(GraphicsDevice gd, SpritesPass pass)
+    internal SpriteBatch(GraphicsDevice gd, SpritesPass pass)
     {
         this._pass = pass;
         this._fontStashAdapter = new FontStashAdapter(gd, this);
     }
 
     /// <summary>
-    /// Begins the frame and sets up the sprite batcher for drawing.
-    /// This method should be called before any drawing.
+    /// Sets the command list and the render texture that the next batches draw into.
     /// </summary>
-    /// <remarks>
-    /// The target must be the one from the same <see cref="RenderContext"/> that gave this drawing context.
-    /// </remarks>
-    /// <param name="cl">The command list to use.</param>
+    /// <param name="commandList">The command list to record on.</param>
     /// <param name="target">The render texture to draw into.</param>
-    public void Begin(CommandList cl, IRenderTexture target)
+    internal void SetRenderTarget(CommandList commandList, IRenderTexture target)
     {
-        this._pass.Begin(cl, target);
+        this._commandList = commandList;
+        this._target = target;
+    }
+
+    /// <summary>
+    /// Begins a new batch. Positions are in pixels of the render target, with the origin at the top left corner.
+    /// </summary>
+    /// <param name="transform">The transform applied to everything drawn in the batch, or null for no transform.</param>
+    /// <exception cref="InvalidOperationException">Thrown if the batch has already begun.</exception>
+    public void Begin(Matrix3x2? transform = null)
+    {
+        if (this._hasBegun)
+        {
+            throw new InvalidOperationException("Begin cannot be called again until End has been called.");
+        }
+
+        var projection = Matrix4x4.CreateOrthographicOffCenter(0f, this._target.Width, this._target.Height, 0f, -10f, 100f);
+
+        this._pass.Begin(this._commandList, this._target);
+        this._pass.SetViewProjectionMatrix(new Matrix4x4(transform ?? Matrix3x2.Identity) * projection);
         this._opacityStack.Clear();
         this._opacityStack.Push(1f);
         this._clipRectStack.Clear();
+        this._hasBegun = true;
     }
 
     /// <summary>
-    /// Sets the view projection matrix for rendering transformations.
+    /// Ends the batch and draws the remaining sprites.
     /// </summary>
-    /// <param name="viewProjectionMatrix">The view projection matrix to use.</param>
-    public void SetViewProjectionMatrix(Matrix4x4 viewProjectionMatrix)
-    {
-        this._pass.SetViewProjectionMatrix(viewProjectionMatrix);
-    }
-
-    /// <summary>
-    /// Ends the frame and flushes any remaining batched sprites. This method should be called after all drawing.
-    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if <see cref="Begin"/> has not been called.</exception>
     public void End()
     {
+        if (!this._hasBegun)
+        {
+            throw new InvalidOperationException("Begin must be called before calling End.");
+        }
+
         this._pass.End();
+        this._hasBegun = false;
     }
 
     /// <summary>
@@ -75,6 +94,7 @@ public class DrawingContext
     /// <param name="texture">The texture to draw.</param>
     /// <param name="position">The position to draw the texture at.</param>
     /// <param name="size">The size of the texture to draw.</param>
+    /// <exception cref="InvalidOperationException">Thrown if <see cref="Begin"/> has not been called.</exception>
     public void DrawTexture(ITexture texture, Vector2 position, Vector2 size)
     {
         this.DrawTexture(texture, position, size, Vector2.Zero, Vector2.One, Color.White);
@@ -86,6 +106,7 @@ public class DrawingContext
     /// <param name="texture">The texture to draw.</param>
     /// <param name="position">The position to draw the texture at.</param>
     /// <param name="size">The size of the texture to draw.</param>
+    /// <exception cref="InvalidOperationException">Thrown if <see cref="Begin"/> has not been called.</exception>
     public void DrawTexture(ITextureRegion texture, Vector2 position, Vector2 size)
     {
         this.DrawTexture(texture.Texture, position, size, texture.TransformUV(Vector2.Zero), texture.TransformUV(Vector2.One), Color.White);
@@ -101,8 +122,10 @@ public class DrawingContext
     /// <param name="uvBottomRight">The bottom right UV coordinate of the texture.</param>
     /// <param name="transform">A transformation matrix to apply to the texture.</param>
     /// <param name="color">The color to draw the texture with.</param>
+    /// <exception cref="InvalidOperationException">Thrown if <see cref="Begin"/> has not been called.</exception>
     public void DrawTexture(ITexture texture, Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, in Matrix3x2 transform, Color color)
     {
+        this.EnsureBegun();
         this._pass.Draw(texture, SpriteQuad.FromRectangle(position, size, uvTopLeft, uvBottomRight, in transform, this.ApplyOpacity(color)));
     }
 
@@ -115,8 +138,10 @@ public class DrawingContext
     /// <param name="uvTopLeft">The top left UV coordinate of the texture.</param>
     /// <param name="uvBottomRight">The bottom right UV coordinate of the texture.</param>
     /// <param name="color">The color to draw the texture with.</param>
+    /// <exception cref="InvalidOperationException">Thrown if <see cref="Begin"/> has not been called.</exception>
     public void DrawTexture(ITexture texture, Vector2 position, Vector2 size, Vector2 uvTopLeft, Vector2 uvBottomRight, Color color)
     {
+        this.EnsureBegun();
         this._pass.Draw(texture, SpriteQuad.FromRectangle(position, size, uvTopLeft, uvBottomRight, this.ApplyOpacity(color)));
     }
 
@@ -129,8 +154,11 @@ public class DrawingContext
     /// <param name="patchMargin">The margin of the unstretchable area of the texture. Any area inside this margin will be stretched.</param>
     /// <param name="color">The color to draw the texture with.</param>
     /// <param name="scale">The scale to apply to the texture.</param>
+    /// <exception cref="InvalidOperationException">Thrown if <see cref="Begin"/> has not been called.</exception>
     public void DrawNinePatch(ITextureRegion texture, Vector2 position, Vector2 size, Thickness patchMargin, Color color, float scale)
     {
+        this.EnsureBegun();
+
         var sizeTL = new Vector2(patchMargin.Left, patchMargin.Top);
         var sizeBR = new Vector2(patchMargin.Right, patchMargin.Bottom);
         var sizeTR = new Vector2(patchMargin.Right, patchMargin.Top);
@@ -221,8 +249,11 @@ public class DrawingContext
     /// <param name="color">The color to draw the text with.</param>
     /// <param name="effect">The effect to apply to the text.</param>
     /// <param name="effectAmount">The amount of the effect to apply.</param>
+    /// <exception cref="InvalidOperationException">Thrown if <see cref="Begin"/> has not been called.</exception>
     public void DrawText(SpriteFontBase font, string text, Vector2 position, Color color, FontSystemEffect effect = FontSystemEffect.None, int effectAmount = 0)
     {
+        this.EnsureBegun();
+
         // TODO: Use a LRU cache for text strings. Use Span<char> for the "text" parameter and only call .ToString() if the string is not in the cache.
         // Idk if this is worth it, but it could be a nice optimization.
 
@@ -239,8 +270,11 @@ public class DrawingContext
     /// <param name="topRight">The top right vertex of the quad.</param>
     /// <param name="bottomLeft">The bottom left vertex of the quad.</param>
     /// <param name="bottomRight">The bottom right vertex of the quad.</param>
+    /// <exception cref="InvalidOperationException">Thrown if <see cref="Begin"/> has not been called.</exception>
     public void DrawQuad(ITexture texture, ref SpriteVertex topLeft, ref SpriteVertex topRight, ref SpriteVertex bottomLeft, ref SpriteVertex bottomRight)
     {
+        this.EnsureBegun();
+
         if (this._opacityStack.Peek() < 1f)
         {
             this.ApplyOpacity(ref topLeft.Color);
@@ -258,6 +292,7 @@ public class DrawingContext
     /// <param name="position">The position to draw the rectangle at.</param>
     /// <param name="size">The size of the rectangle to draw.</param>
     /// <param name="color">The color to draw the rectangle with.</param>
+    /// <exception cref="InvalidOperationException">Thrown if <see cref="Begin"/> has not been called.</exception>
     public void DrawRectangle(Vector2 position, Vector2 size, Color color)
     {
         this.DrawTexture(Texture.White, position, size, Vector2.Zero, Vector2.One, color);
@@ -306,6 +341,14 @@ public class DrawingContext
         else
         {
             this._pass.ClearScissorRectangle();
+        }
+    }
+
+    private void EnsureBegun()
+    {
+        if (!this._hasBegun)
+        {
+            throw new InvalidOperationException("Begin must be called before calling Draw.");
         }
     }
 

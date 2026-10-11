@@ -287,9 +287,9 @@ public class TextBlock : Control
     }
 
     /// <inheritdoc/>
-    protected override void DrawCore(DrawingContext ctx)
+    protected override void DrawCore(SpriteBatch batch)
     {
-        base.DrawCore(ctx);
+        base.DrawCore(batch);
 
         var font = this.ResolvedFont;
         var layout = this._layout;
@@ -318,7 +318,7 @@ public class TextBlock : Control
                 if (segment.IsInlineContent)
                 {
                     var yOffset = (layout.ActualLineHeight - segment.Size.Y) / 2f;
-                    ctx.DrawTexture(
+                    batch.DrawTexture(
                         segment.Texture!,
                         new Vector2(cursorX, position.Y + yOffset - layout.LineSpacing / 2f),
                         segment.Size
@@ -328,22 +328,22 @@ public class TextBlock : Control
                 else
                 {
                     var text = line.Substring(segment.Start, segment.Length);
-                    this.DrawTextSegment(ctx, font, text, new Vector2(cursorX, position.Y));
+                    this.DrawTextSegment(batch, font, text, new Vector2(cursorX, position.Y));
                     cursorX += font.MeasureString(text).X;
                 }
             }
         }
     }
 
-    private void DrawTextSegment(DrawingContext ctx, SpriteFontBase font, string text, Vector2 position)
+    private void DrawTextSegment(SpriteBatch batch, SpriteFontBase font, string text, Vector2 position)
     {
         if (this._textEffect == null)
         {
-            ctx.DrawText(font, text, position, this.Foreground);
+            batch.DrawText(font, text, position, this.Foreground);
         }
         else
         {
-            this._textEffect.Draw(ctx, text, font, position, this.Foreground);
+            this._textEffect.Draw(batch, text, font, position, this.Foreground);
         }
     }
 

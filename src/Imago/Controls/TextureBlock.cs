@@ -107,14 +107,14 @@ public class TextureBlock : Control
     }
 
     /// <inheritdoc/>
-    protected override void DrawCore(DrawingContext ctx)
+    protected override void DrawCore(SpriteBatch batch)
     {
-        base.DrawCore(ctx);
+        base.DrawCore(batch);
 
         if (this.Texture != null)
         {
             var coords = GetTextureCoordinates(this.Texture, this.FlipX, this.FlipY);
-            ctx.DrawTexture(this.Texture.Texture, this.Position, this.ActualSize, coords.TopLeft, coords.BottomRight, this.Color);
+            batch.DrawTexture(this.Texture.Texture, this.Position, this.ActualSize, coords.TopLeft, coords.BottomRight, this.Color);
         }
     }
 

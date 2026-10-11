@@ -344,13 +344,13 @@ public class DeveloperConsoleView : DockPanel
     }
 
     /// <inheritdoc/>
-    protected override void DrawCore(DrawingContext ctx)
+    protected override void DrawCore(SpriteBatch batch)
     {
-        base.DrawCore(ctx);
+        base.DrawCore(batch);
 
         var font = ConsoleFont.System.GetFont(ConsoleFont.Size);
         float popupBottomY = this.Position.Y + this.ActualSize.Y - InputRowHeight - 1f;
-        this._autocomplete.Draw(ctx, font, new Vector2(this.Position.X, popupBottomY), this.ActualSize.X);
+        this._autocomplete.Draw(batch, font, new Vector2(this.Position.X, popupBottomY), this.ActualSize.X);
     }
 
     /// <summary>
@@ -487,15 +487,15 @@ public class DeveloperConsoleView : DockPanel
         /// <summary>
         /// Draws the popup above the input row.
         /// </summary>
-        /// <param name="ctx">The drawing context.</param>
+        /// <param name="batch">The sprite batch.</param>
         /// <param name="font">The font to render text with.</param>
         /// <param name="bottomLeft">The bottom-left anchor point (just above the separator).</param>
         /// <param name="width">The available width for the popup.</param>
-        public void Draw(DrawingContext ctx, SpriteFontBase font, Vector2 bottomLeft, float width)
+        public void Draw(SpriteBatch batch, SpriteFontBase font, Vector2 bottomLeft, float width)
         {
             if (this._argumentHint != null)
             {
-                this.DrawArgumentHint(ctx, font, bottomLeft, width);
+                this.DrawArgumentHint(batch, font, bottomLeft, width);
                 return;
             }
 
@@ -505,13 +505,13 @@ public class DeveloperConsoleView : DockPanel
             float popupHeight = visibleCount * ItemHeight;
             float popupTop = bottomLeft.Y - popupHeight;
 
-            ctx.DrawRectangle(
+            batch.DrawRectangle(
                 new Vector2(bottomLeft.X, popupTop),
                 new Vector2(width, popupHeight),
                 _popupBackgroundColor
             );
 
-            ctx.DrawRectangle(
+            batch.DrawRectangle(
                 new Vector2(bottomLeft.X, popupTop),
                 new Vector2(width, 1f),
                 _popupBorderColor
@@ -527,7 +527,7 @@ public class DeveloperConsoleView : DockPanel
 
                 if (idx == this._selectedIndex)
                 {
-                    ctx.DrawRectangle(
+                    batch.DrawRectangle(
                         new Vector2(bottomLeft.X, itemY),
                         new Vector2(width, ItemHeight),
                         _popupSelectedColor
@@ -536,7 +536,7 @@ public class DeveloperConsoleView : DockPanel
 
                 float textY = itemY + textOffsetY;
 
-                ctx.DrawText(
+                batch.DrawText(
                     font,
                     command.FullName,
                     new Vector2(bottomLeft.X + PaddingX, textY),
@@ -546,7 +546,7 @@ public class DeveloperConsoleView : DockPanel
                 if (!string.IsNullOrEmpty(command.Description))
                 {
                     float nameWidth = font.MeasureString(command.FullName).X;
-                    ctx.DrawText(
+                    batch.DrawText(
                         font,
                         command.Description,
                         new Vector2(bottomLeft.X + PaddingX + nameWidth + 16f, textY),
@@ -556,17 +556,17 @@ public class DeveloperConsoleView : DockPanel
             }
         }
 
-        private void DrawArgumentHint(DrawingContext ctx, SpriteFontBase font, Vector2 bottomLeft, float width)
+        private void DrawArgumentHint(SpriteBatch batch, SpriteFontBase font, Vector2 bottomLeft, float width)
         {
             float popupTop = bottomLeft.Y - ItemHeight;
 
-            ctx.DrawRectangle(
+            batch.DrawRectangle(
                 new Vector2(bottomLeft.X, popupTop),
                 new Vector2(width, ItemHeight),
                 _popupBackgroundColor
             );
 
-            ctx.DrawRectangle(
+            batch.DrawRectangle(
                 new Vector2(bottomLeft.X, popupTop),
                 new Vector2(width, 1f),
                 _popupBorderColor
@@ -576,12 +576,12 @@ public class DeveloperConsoleView : DockPanel
             float textY = popupTop + textOffsetY;
 
             string usage = this._argumentHint!.GetUsage();
-            ctx.DrawText(font, usage, new Vector2(bottomLeft.X + PaddingX, textY), _commandTextColor);
+            batch.DrawText(font, usage, new Vector2(bottomLeft.X + PaddingX, textY), _commandTextColor);
 
             if (!string.IsNullOrEmpty(this._argumentHint.Description))
             {
                 float usageWidth = font.MeasureString(usage).X;
-                ctx.DrawText(
+                batch.DrawText(
                     font,
                     this._argumentHint.Description,
                     new Vector2(bottomLeft.X + PaddingX + usageWidth + 16f, textY),
@@ -612,9 +612,9 @@ public class DeveloperConsoleView : DockPanel
         }
 
         /// <inheritdoc/>
-        protected override void DrawCore(DrawingContext ctx)
+        protected override void DrawCore(SpriteBatch batch)
         {
-            base.DrawCore(ctx);
+            base.DrawCore(batch);
 
             var console = this._owner._console;
             var lines = console.Lines;
@@ -641,22 +641,22 @@ public class DeveloperConsoleView : DockPanel
                 switch (line.Kind)
                 {
                     case ConsoleLineKind.Command:
-                        this.DrawSegmentedText(ctx, font, PromptSymbol, x, y, _promptColor);
-                        this.DrawSegmentedText(ctx, font, line.Text, x + this._promptWidth, y, _commandTextColor);
+                        this.DrawSegmentedText(batch, font, PromptSymbol, x, y, _promptColor);
+                        this.DrawSegmentedText(batch, font, line.Text, x + this._promptWidth, y, _commandTextColor);
                         break;
 
                     case ConsoleLineKind.Error:
-                        this.DrawSegmentedText(ctx, font, line.Text, x, y, _errorTextColor);
+                        this.DrawSegmentedText(batch, font, line.Text, x, y, _errorTextColor);
                         break;
 
                     default:
-                        this.DrawSegmentedText(ctx, font, line.Text, x, y, _outputTextColor);
+                        this.DrawSegmentedText(batch, font, line.Text, x, y, _outputTextColor);
                         break;
                 }
             }
         }
 
-        private void DrawSegmentedText(DrawingContext ctx, SpriteFontBase font, string text, float x, float y, Color color)
+        private void DrawSegmentedText(SpriteBatch batch, SpriteFontBase font, string text, float x, float y, Color color)
         {
             this._layout.Text = text;
 
@@ -675,7 +675,7 @@ public class DeveloperConsoleView : DockPanel
                     if (segment.IsInlineContent)
                     {
                         var inlineYOffset = (this._layout.ActualLineHeight - segment.Size.Y) / 2f;
-                        ctx.DrawTexture(
+                        batch.DrawTexture(
                             segment.Texture!,
                             new Vector2(cursorX, lineY + inlineYOffset - this._layout.LineSpacing / 2f),
                             segment.Size
@@ -685,7 +685,7 @@ public class DeveloperConsoleView : DockPanel
                     else
                     {
                         var segText = lineText.Substring(segment.Start, segment.Length);
-                        ctx.DrawText(font, segText, new Vector2(cursorX, lineY), color);
+                        batch.DrawText(font, segText, new Vector2(cursorX, lineY), color);
                         cursorX += font.MeasureString(segText).X;
                     }
                 }

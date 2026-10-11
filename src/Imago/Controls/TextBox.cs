@@ -312,12 +312,12 @@ public class TextBox : Control
     }
 
     /// <inheritdoc/>
-    protected override void DrawCore(DrawingContext ctx)
+    protected override void DrawCore(SpriteBatch batch)
     {
-        base.DrawCore(ctx);
+        base.DrawCore(batch);
 
         var tb = this.TextBlock;
-        tb.Draw(ctx);
+        tb.Draw(batch);
 
         if (this._caretVisible)
         {
@@ -329,7 +329,7 @@ public class TextBox : Control
             ColorF caretColor = this.CaretColor ?? tb.Foreground;
             Vector2 caretPos = new Vector2(this.Position.X + size.X, this.Position.Y) + this.Padding.TopLeft;
             Vector2 caretSize = new Vector2(this.CaretWidth, tb.FontSize);
-            ctx.DrawRectangle(caretPos, caretSize, caretColor);
+            batch.DrawRectangle(caretPos, caretSize, caretColor);
         }
     }
 

@@ -26,7 +26,7 @@ public class MultiTextEffect : ITextEffect
     }
 
     /// <inheritdoc/>
-    public void Draw(DrawingContext ctx, string text, SpriteFontBase font, Vector2 position, Color color)
+    public void Draw(SpriteBatch batch, string text, SpriteFontBase font, Vector2 position, Color color)
     {
         if (string.IsNullOrWhiteSpace(text))
         {
@@ -35,7 +35,7 @@ public class MultiTextEffect : ITextEffect
 
         foreach (var effect in this.Effects)
         {
-            effect.Draw(ctx, text, font, position, color);
+            effect.Draw(batch, text, font, position, color);
         }
     }
 }

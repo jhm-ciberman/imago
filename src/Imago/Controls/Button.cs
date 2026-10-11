@@ -126,9 +126,9 @@ public class Button : ContentControl
     }
 
     /// <inheritdoc/>
-    protected override void DrawCore(DrawingContext ctx)
+    protected override void DrawCore(SpriteBatch batch)
     {
-        base.DrawCore(ctx);
+        base.DrawCore(batch);
     }
 
     /// <inheritdoc/>

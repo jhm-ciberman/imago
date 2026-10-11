@@ -1,6 +1,5 @@
 using System;
 using System.Numerics;
-using Imago.Rendering;
 using Imago.Rendering.Sprites;
 using Imago.SceneGraph;
 using Imago.Support.Numerics;
@@ -17,7 +16,6 @@ namespace Imago.Controls;
 public class TooltipLayer : IRenderLayer, IDisposable
 {
     private readonly TooltipPresenter _presenter;
-    private readonly Viewport _viewport;
 
     private Control? _currentOwner;
     private Rect _ownerBounds;
@@ -57,10 +55,8 @@ public class TooltipLayer : IRenderLayer, IDisposable
     /// <summary>
     /// Initializes a new instance of the <see cref="TooltipLayer"/> class.
     /// </summary>
-    /// <param name="viewport">The viewport to use for rendering. If null, uses the default GUI viewport.</param>
-    internal TooltipLayer(Viewport? viewport = null)
+    internal TooltipLayer()
     {
-        this._viewport = viewport ?? Renderer.Instance.GuiViewport;
         this._presenter = new TooltipPresenter();
     }
 
@@ -127,12 +123,10 @@ public class TooltipLayer : IRenderLayer, IDisposable
     /// <inheritdoc />
     public void Render(RenderContext ctx)
     {
-        ctx.Sprites.Begin(ctx.CommandList, ctx.Target);
-        this.Draw(ctx.Sprites);
-        ctx.Sprites.End();
+        this.Draw(ctx.SpriteBatch, new Vector2(ctx.Target.Width, ctx.Target.Height));
     }
 
-    private void Draw(DrawingContext ctx)
+    private void Draw(SpriteBatch batch, Vector2 targetSize)
     {
         if (this._currentOwner?.Layer == null || this._currentOwner.Tooltip == null)
         {
@@ -151,17 +145,9 @@ public class TooltipLayer : IRenderLayer, IDisposable
         var tooltipRect = new Rect(optimalPosition, tooltipSize);
         this._presenter.Arrange(tooltipRect);
 
-        var position = this._viewport.Position;
-        var viewProjectionMatrix = Matrix4x4.CreateOrthographicOffCenter(
-            position.X,
-            viewportSize.X,
-            viewportSize.Y,
-            position.Y,
-            -10f,
-            100f);
-
-        ctx.SetViewProjectionMatrix(viewProjectionMatrix);
-        this._presenter.Draw(ctx);
+        batch.Begin(Matrix3x2.CreateScale(targetSize / viewportSize));
+        this._presenter.Draw(batch);
+        batch.End();
     }
 
     private static Vector2 CalculateTooltipPosition(TooltipPlacement placement, Rect controlBounds, Vector2 tooltipSize)

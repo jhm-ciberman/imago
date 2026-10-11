@@ -69,7 +69,7 @@ public class ShadowTextEffect : ITextEffect
     }
 
     /// <inheritdoc/>
-    public void Draw(DrawingContext ctx, string text, SpriteFontBase font, Vector2 position, Color color)
+    public void Draw(SpriteBatch batch, string text, SpriteFontBase font, Vector2 position, Color color)
     {
         if (string.IsNullOrWhiteSpace(text))
         {
@@ -82,13 +82,13 @@ public class ShadowTextEffect : ITextEffect
             var offset = this.Offset - new Vector2(this.BlurAmount, this.BlurAmount);
             //var shadowFont = this.BlurAmount == 0 ? font : Font.GetBlurredFont(font.FontFamily, font.FontSize, this.BlurAmount);
             var effect = this.BlurAmount > 0 ? FontSystemEffect.Blurry : FontSystemEffect.None;
-            ctx.DrawText(font, text, position + offset, this.Color, effect, this.BlurAmount);
+            batch.DrawText(font, text, position + offset, this.Color, effect, this.BlurAmount);
         }
 
         // Draw the text
         if (color.A > 0)
         {
-            ctx.DrawText(font, text, position, color);
+            batch.DrawText(font, text, position, color);
         }
     }
 }

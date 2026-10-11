@@ -42,9 +42,9 @@ public readonly struct RenderContext
     public RenderOutputMode OutputMode { get; }
 
     /// <summary>
-    /// Gets the drawing context for sprites and text in the target.
+    /// Gets the sprite batch that draws sprites and text into the target.
     /// </summary>
-    public DrawingContext Sprites { get; }
+    public SpriteBatch SpriteBatch { get; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RenderContext"/> struct.
@@ -53,13 +53,13 @@ public readonly struct RenderContext
     /// <param name="commandList">The command list that records the frame.</param>
     /// <param name="target">The render texture to draw into.</param>
     /// <param name="outputMode">Where the frame is rendered to.</param>
-    /// <param name="sprites">The drawing context for sprites and text in the target.</param>
-    internal RenderContext(GraphicsDevice device, CommandList commandList, IRenderTexture target, RenderOutputMode outputMode, DrawingContext sprites)
+    /// <param name="spriteBatch">The sprite batch that draws sprites and text into the target.</param>
+    internal RenderContext(GraphicsDevice device, CommandList commandList, IRenderTexture target, RenderOutputMode outputMode, SpriteBatch spriteBatch)
     {
         this.Device = device;
         this.CommandList = commandList;
         this.Target = target;
         this.OutputMode = outputMode;
-        this.Sprites = sprites;
+        this.SpriteBatch = spriteBatch;
     }
 }

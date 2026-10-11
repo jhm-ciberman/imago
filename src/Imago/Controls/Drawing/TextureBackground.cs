@@ -31,11 +31,11 @@ public class TextureBackground : IBackground
     public Color Color { get; set; } = Color.White;
 
     /// <inheritdoc/>
-    public void DrawRectangle(DrawingContext ctx, Vector2 position, Vector2 size)
+    public void DrawRectangle(SpriteBatch batch, Vector2 position, Vector2 size)
     {
         if (this.Texture != null)
         {
-            ctx.DrawTexture(this.Texture.Texture, position, size, this.Texture.TopLeft, this.Texture.BottomRight, this.Color);
+            batch.DrawTexture(this.Texture.Texture, position, size, this.Texture.TopLeft, this.Texture.BottomRight, this.Color);
         }
     }
 

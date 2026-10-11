@@ -243,8 +243,8 @@ public abstract class Visual : ObservableObject, IDisposable, IMountable
     /// <summary>
     /// Draws the control.
     /// </summary>
-    /// <param name="ctx">The drawing context to use for drawing.</param>
-    public void Draw(DrawingContext ctx)
+    /// <param name="batch">The sprite batch to draw with.</param>
+    public void Draw(SpriteBatch batch)
     {
         if (this.Visibility != Visibility.Visible || this.Opacity <= 0f)
         {
@@ -253,23 +253,23 @@ public abstract class Visual : ObservableObject, IDisposable, IMountable
 
         if (this.Opacity < 1f)
         {
-            ctx.PushOpacity(this.Opacity);
+            batch.PushOpacity(this.Opacity);
         }
 
         if (this.ClipToBounds)
         {
-            ctx.PushScissorRectangle(this.GetBounds() * this.Layer!.Zoom);
-            this.DrawCore(ctx);
-            ctx.PopScissorRectangle();
+            batch.PushScissorRectangle(this.GetBounds() * this.Layer!.Zoom);
+            this.DrawCore(batch);
+            batch.PopScissorRectangle();
         }
         else
         {
-            this.DrawCore(ctx);
+            this.DrawCore(batch);
         }
 
         if (this.Opacity < 1f)
         {
-            ctx.PopOpacity();
+            batch.PopOpacity();
         }
     }
 
@@ -285,8 +285,8 @@ public abstract class Visual : ObservableObject, IDisposable, IMountable
     /// Implements the core drawing logic for the control. Derived classes should override this method
     /// to render their specific visual content, such as backgrounds, borders, or child elements.
     /// </summary>
-    /// <param name="ctx">The <see cref="DrawingContext"/> to use for rendering operations.</param>
-    protected abstract void DrawCore(DrawingContext ctx);
+    /// <param name="batch">The <see cref="SpriteBatch"/> to use for rendering operations.</param>
+    protected abstract void DrawCore(SpriteBatch batch);
 
     /// <summary>
     /// Performs the measure pass of the layout process. In the measure pass, the control computes the desired size of the control

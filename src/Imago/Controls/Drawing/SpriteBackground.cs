@@ -79,18 +79,18 @@ public class SpriteBackground : IBackground
     }
 
     /// <inheritdoc/>
-    public virtual void DrawRectangle(DrawingContext ctx, Vector2 position, Vector2 size)
+    public virtual void DrawRectangle(SpriteBatch batch, Vector2 position, Vector2 size)
     {
         int frameIndex = (int)this._frameIndex;
         var frame = this.Sprite.Frames[frameIndex];
         var sprite = this.Sprite;
         if (sprite.IsNineSlice)
         {
-            ctx.DrawNinePatch(frame, position, size, sprite.NineSliceMargin, this.Color, sprite.Scale);
+            batch.DrawNinePatch(frame, position, size, sprite.NineSliceMargin, this.Color, sprite.Scale);
         }
         else
         {
-            ctx.DrawTexture(frame.Texture, position, size, frame.TopLeft, frame.BottomRight, this.Color);
+            batch.DrawTexture(frame.Texture, position, size, frame.TopLeft, frame.BottomRight, this.Color);
         }
     }
 

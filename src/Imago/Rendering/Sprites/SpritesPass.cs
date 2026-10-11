@@ -17,9 +17,9 @@ namespace Imago.Rendering.Sprites;
 internal class SpritesPass : IDisposable, IPipelineProvider
 {
     /// <summary>
-    /// Gets the drawing context that draws sprites with this pass.
+    /// Gets the sprite batch that draws with this pass.
     /// </summary>
-    public DrawingContext DrawingContext { get; }
+    public SpriteBatch SpriteBatch { get; }
 
     private readonly GraphicsDevice _gd;
 
@@ -115,7 +115,7 @@ internal class SpritesPass : IDisposable, IPipelineProvider
 
         this._resourceSetCache = new ResourceSetCache(factory);
 
-        this.DrawingContext = new DrawingContext(this._gd, this);
+        this.SpriteBatch = new SpriteBatch(this._gd, this);
     }
 
     /// <summary>

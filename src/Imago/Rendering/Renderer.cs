@@ -312,11 +312,12 @@ public class Renderer : IDisposable
         cl.ClearColorTarget(0, RgbaFloat.Clear);
         cl.ClearDepthStencil(1f);
 
+        this._spritesPass.SpriteBatch.SetRenderTarget(cl, this.GuiRenderTexture);
         foreach (var layer in stage.GuiLayers)
         {
             if (layer.IsVisible)
             {
-                layer.Render(new RenderContext(this.GraphicsDevice, cl, this.GuiRenderTexture, outputMode, this._spritesPass.DrawingContext));
+                layer.Render(new RenderContext(this.GraphicsDevice, cl, this.GuiRenderTexture, outputMode, this._spritesPass.SpriteBatch));
             }
         }
 
@@ -324,11 +325,12 @@ public class Renderer : IDisposable
         this._fullScreenPixelArtPass.Render(cl, this.GuiRenderTexture, target);
 
         var overlayPass = this.GetOverlaySpritesPass(target);
+        overlayPass.SpriteBatch.SetRenderTarget(cl, target);
         foreach (var layer in stage.OverlayLayers)
         {
             if (layer.IsVisible)
             {
-                layer.Render(new RenderContext(this.GraphicsDevice, cl, target, outputMode, overlayPass.DrawingContext));
+                layer.Render(new RenderContext(this.GraphicsDevice, cl, target, outputMode, overlayPass.SpriteBatch));
             }
         }
 

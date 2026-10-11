@@ -117,14 +117,14 @@ public abstract class ItemsControl : Control
     }
 
     /// <inheritdoc/>
-    protected override void DrawCore(DrawingContext ctx)
+    protected override void DrawCore(SpriteBatch batch)
     {
-        base.DrawCore(ctx);
+        base.DrawCore(batch);
 
         var children = this.VisualChildren;
         for (var i = 0; i < children.Count; i++)
         {
-            children[i].Draw(ctx);
+            children[i].Draw(batch);
         }
     }
 

@@ -55,11 +55,11 @@ public class ColorBackground : IBackground, ICloneable
     }
 
     /// <inheritdoc/>
-    public void DrawRectangle(DrawingContext ctx, Vector2 position, Vector2 size)
+    public void DrawRectangle(SpriteBatch batch, Vector2 position, Vector2 size)
     {
         if (this.Color.A == 0) return;
 
-        ctx.DrawRectangle(position, size, this.Color);
+        batch.DrawRectangle(position, size, this.Color);
     }
 
     /// <summary>

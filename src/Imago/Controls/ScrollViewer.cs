@@ -183,14 +183,14 @@ public class ScrollViewer : ContentControl
     }
 
     /// <inheritdoc/>
-    protected override void DrawCore(DrawingContext ctx)
+    protected override void DrawCore(SpriteBatch batch)
     {
-        base.DrawCore(ctx);
+        base.DrawCore(batch);
 
         var thumb = this.ScrollBarThumb;
         if (thumb.Visibility == Visibility.Visible)
         {
-            thumb.Draw(ctx);
+            thumb.Draw(batch);
         }
     }
 

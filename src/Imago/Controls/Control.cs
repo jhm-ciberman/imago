@@ -399,9 +399,9 @@ public class Control : Visual
     }
 
     /// <inheritdoc/>
-    protected override void DrawCore(DrawingContext ctx)
+    protected override void DrawCore(SpriteBatch batch)
     {
-        this.Background?.DrawRectangle(ctx, this.Position, this.ActualSize);
+        this.Background?.DrawRectangle(batch, this.Position, this.ActualSize);
     }
 
     /// <summary>

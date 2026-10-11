@@ -147,12 +147,10 @@ public class GuiLayer : IRenderLayer, IInputHandler
     /// <inheritdoc />
     public void Render(RenderContext ctx)
     {
-        ctx.Sprites.Begin(ctx.CommandList, ctx.Target);
-        this.Draw(ctx.Sprites);
-        ctx.Sprites.End();
+        this.Draw(ctx.SpriteBatch, new Vector2(ctx.Target.Width, ctx.Target.Height));
     }
 
-    private void Draw(DrawingContext ctx)
+    private void Draw(SpriteBatch batch, Vector2 targetSize)
     {
         if (this._content is null) return;
 
@@ -164,11 +162,9 @@ public class GuiLayer : IRenderLayer, IInputHandler
 
         this.MeasureArrangeTime = this._measureArrangeStopwatch.Elapsed;
 
-        var position = this.Viewport.Position;
-        var viewProjectionMatrix = Matrix4x4.CreateOrthographicOffCenter(position.X, size.X, size.Y, position.Y, -10f, 100f);
-
-        ctx.SetViewProjectionMatrix(viewProjectionMatrix);
-        this._content.Draw(ctx);
+        batch.Begin(Matrix3x2.CreateScale(targetSize / size));
+        this._content.Draw(batch);
+        batch.End();
     }
 
     /// <summary>

@@ -8,7 +8,7 @@
     - [Drawing](#drawing)
 - [Defining Properties](#defining-properties)
 - [Input Handling](#input-handling)
-- [The DrawingContext](#the-drawingcontext)
+- [The SpriteBatch](#the-spritebatch)
 - [Reference Code](#reference-code)
 
 
@@ -75,13 +75,13 @@ protected override Rect ArrangeOverride(Rect finalRect)
 
 ### Drawing
 
-Override `DrawCore` to render your control. Always call `base.DrawCore(ctx)` first (it draws the background), then draw your content using the [DrawingContext](#the-drawingcontext):
+Override `DrawCore` to render your control. Always call `base.DrawCore(batch)` first (it draws the background), then draw your content using the [SpriteBatch](#the-spritebatch):
 
 ```csharp
-protected override void DrawCore(DrawingContext ctx)
+protected override void DrawCore(SpriteBatch batch)
 {
-    base.DrawCore(ctx);
-    ctx.DrawRectangle(this.Position, this.ActualSize, Color.Red);
+    base.DrawCore(batch);
+    batch.DrawRectangle(this.Position, this.ActualSize, Color.Red);
 }
 ```
 
@@ -131,15 +131,15 @@ Hit testing is automatic: `Control.HitTest` walks `VisualChildren` (front-to-bac
 Controls also expose events for external subscribers: `MouseDown`, `MouseUp`, `MouseWheel`, `MouseEnter`, `MouseLeave`.
 
 
-## The DrawingContext
+## The SpriteBatch
 
 These are the drawing primitives available inside `DrawCore`:
 
 | Method | What it draws |
 |--------|--------------|
-| `ctx.DrawRectangle(position, size, color)` | Solid color rectangle. |
-| `ctx.DrawTexture(texture, position, size)` | Texture. Multiple overloads for UVs and tint. |
-| `ctx.DrawNinePatch(texture, position, size, margin, color, scale)` | 9-slice scalable texture. |
-| `ctx.DrawText(font, text, position, color)` | Text string. |
-| `ctx.PushOpacity(float)` / `PopOpacity()` | Multiply opacity for nested drawing. |
-| `ctx.PushScissorRectangle(rect)` / `PopScissorRectangle()` | Clip drawing to a rectangle. |
+| `batch.DrawRectangle(position, size, color)` | Solid color rectangle. |
+| `batch.DrawTexture(texture, position, size)` | Texture. Multiple overloads for UVs and tint. |
+| `batch.DrawNinePatch(texture, position, size, margin, color, scale)` | 9-slice scalable texture. |
+| `batch.DrawText(font, text, position, color)` | Text string. |
+| `batch.PushOpacity(float)` / `PopOpacity()` | Multiply opacity for nested drawing. |
+| `batch.PushScissorRectangle(rect)` / `PopScissorRectangle()` | Clip drawing to a rectangle. |

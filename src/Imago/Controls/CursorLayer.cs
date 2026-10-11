@@ -84,12 +84,10 @@ public class CursorLayer : IRenderLayer
     /// <inheritdoc />
     public void Render(RenderContext ctx)
     {
-        ctx.Sprites.Begin(ctx.CommandList, ctx.Target);
-        this.Draw(ctx.Sprites);
-        ctx.Sprites.End();
+        this.Draw(ctx.SpriteBatch, new Vector2(ctx.Target.Width, ctx.Target.Height));
     }
 
-    private void Draw(DrawingContext ctx)
+    private void Draw(SpriteBatch batch, Vector2 targetSize)
     {
         if (this.Cursor == null || !this._input.IsCursorInsideWindow)
         {
@@ -105,22 +103,14 @@ public class CursorLayer : IRenderLayer
             return;
         }
 
-        var viewProjectionMatrix = Matrix4x4.CreateOrthographicOffCenter(
-            position.X,
-            viewportSize.X,
-            viewportSize.Y,
-            position.Y,
-            -10f,
-            100f
-        );
-
-        ctx.SetViewProjectionMatrix(viewProjectionMatrix);
+        batch.Begin(Matrix3x2.CreateScale(targetSize / viewportSize));
 
         var cursorSize = this.Cursor.TextureSize * this.CursorScale;
         var hotspot = this.Cursor.HotspotPixels * this.CursorScale;
         var cursorPosition = mousePosition - hotspot;
         cursorPosition = new Vector2(MathF.Floor(cursorPosition.X), MathF.Floor(cursorPosition.Y));
 
-        ctx.DrawTexture(this.Cursor.Texture, cursorPosition, cursorSize, Vector2.Zero, Vector2.One, Color.White);
+        batch.DrawTexture(this.Cursor.Texture, cursorPosition, cursorSize, Vector2.Zero, Vector2.One, Color.White);
+        batch.End();
     }
 }

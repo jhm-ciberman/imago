@@ -108,9 +108,9 @@ public class Viewport3D : Control
     }
 
     /// <inheritdoc />
-    protected override void DrawCore(DrawingContext ctx)
+    protected override void DrawCore(SpriteBatch batch)
     {
-        base.DrawCore(ctx);
+        base.DrawCore(batch);
 
         if (this._resolvedTexture == null) return;
 
@@ -121,7 +121,7 @@ public class Viewport3D : Control
             region = region.MirrorY();
         }
 
-        ctx.DrawTexture(region, this.Position, this.ActualSize);
+        batch.DrawTexture(region, this.Position, this.ActualSize);
     }
 
     private void EnsureResources(uint width, uint height)

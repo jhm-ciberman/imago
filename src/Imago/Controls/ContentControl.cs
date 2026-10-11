@@ -138,11 +138,11 @@ public class ContentControl : Control
     }
 
     /// <inheritdoc/>
-    protected override void DrawCore(DrawingContext ctx)
+    protected override void DrawCore(SpriteBatch batch)
     {
-        base.DrawCore(ctx);
+        base.DrawCore(batch);
 
-        this.Content?.Draw(ctx);
+        this.Content?.Draw(batch);
     }
 
     /// <inheritdoc/>
