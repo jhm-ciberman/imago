@@ -101,7 +101,7 @@ public class Viewport3D : Control
 
         if (this._dirty)
         {
-            Renderer.Instance.RenderToOffScreenTexture(this._scene, this._renderTexture!);
+            Renderer.Instance.RenderToOffscreenTexture(this._scene, this._renderTexture!);
             Renderer.Instance.ResolveTexture(this._renderTexture!, this._resolvedTexture!);
             this._dirty = false;
         }

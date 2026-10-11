@@ -24,7 +24,7 @@ public enum TextureInterpolation
 /// Represents a texture that can be used as a rendering target.
 /// </summary>
 /// <remarks>
-/// This class encapsulates the color and depth textures, as well as the framebuffers, required for off-screen rendering.
+/// This class encapsulates the color and depth textures, as well as the framebuffers, required for offscreen rendering.
 /// It also manages the resources for mouse picking.
 /// </remarks>
 public class RenderTexture : IRenderTexture

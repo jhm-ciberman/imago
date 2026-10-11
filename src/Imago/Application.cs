@@ -35,7 +35,7 @@ public abstract class Application : IDisposable
     /// constructing the application.
     /// </summary>
     /// <remarks>
-    /// A hidden window still provides a render context, so off-screen rendering and capture work without a window
+    /// A hidden window still provides a render context, so offscreen rendering and capture work without a window
     /// ever appearing. The window is hidden, not absent: a windowing system is still required (an X or Wayland
     /// server on Linux, or Xvfb), so this is not true display-less rendering.
     /// </remarks>
