@@ -36,8 +36,9 @@ I built Imago for my game Medieval Life over several years. I'm extracting it so
 
 Projects:
 
-- **Imago**: the framework itself. Application, rendering, scene graph, input, UI controls, assets, dev console.
+- **Imago**: the framework itself. Application, rendering, scene graph, input, UI controls, assets.
 - **Imago.Support**: foundational types shared with consumers. Math primitives (`Vector2Int`, `Rect`, etc.), collections, colors, tweening, extensions.
+- **Imago.DevConsole**: the in-game developer console, built on the Imago UI.
 - **Imago.Generators**: compile-time Roslyn source generators used internally.
 - **Imago.ScenarioRunner**: an opt-in host that runs a game from a script and captures screenshots.
 

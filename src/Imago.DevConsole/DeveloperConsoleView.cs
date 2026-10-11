@@ -31,14 +31,14 @@ public class DeveloperConsoleView : DockPanel
     private static readonly Color _popupSelectedColor = TailwindColors.Slate700;
     private static readonly Color _popupDescriptionColor = TailwindColors.Slate500;
 
-    private const string EmbeddedConsoleFontResource = "Imago.Resources.Fonts.basis33.ttf";
+    private const string EmbeddedConsoleFontResource = "Imago.DevConsole.Resources.Fonts.basis33.ttf";
     private static TextFont? _consoleFont;
 
     /// <summary>
     /// Gets or sets the font used by the developer console.
     /// </summary>
     /// <remarks>
-    /// Defaults to a pixel bitmap font (basis33) embedded in the Imago assembly,
+    /// Defaults to a pixel bitmap font (basis33) embedded in the Imago.DevConsole assembly,
     /// intended for small sizes. Set this before the first console view is created
     /// to use a different font.
     /// </remarks>
