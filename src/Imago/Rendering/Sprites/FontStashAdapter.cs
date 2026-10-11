@@ -8,14 +8,14 @@ internal class FontStashAdapter : ITexture2DManager, IFontStashRenderer2
 {
     private readonly GraphicsDevice _gd;
 
-    private readonly DrawingContext _batcher;
+    private readonly DrawingContext _drawingContext;
 
     ITexture2DManager IFontStashRenderer2.TextureManager => this;
 
-    public FontStashAdapter(GraphicsDevice gd, DrawingContext batcher)
+    public FontStashAdapter(GraphicsDevice gd, DrawingContext drawingContext)
     {
         this._gd = gd;
-        this._batcher = batcher;
+        this._drawingContext = drawingContext;
     }
 
     object ITexture2DManager.CreateTexture(int width, int height)
@@ -40,6 +40,6 @@ internal class FontStashAdapter : ITexture2DManager, IFontStashRenderer2
         var v2 = new SpriteVertex(topRight.Position, topRight.TextureCoordinate, topRight.Color.PackedValue);
         var v3 = new SpriteVertex(bottomLeft.Position, bottomLeft.TextureCoordinate, bottomLeft.Color.PackedValue);
         var v4 = new SpriteVertex(bottomRight.Position, bottomRight.TextureCoordinate, bottomRight.Color.PackedValue);
-        this._batcher.DrawQuad((ITexture)texture, ref v1, ref v2, ref v3, ref v4);
+        this._drawingContext.DrawQuad((ITexture)texture, ref v1, ref v2, ref v3, ref v4);
     }
 }
