@@ -80,7 +80,7 @@ public class FontLoader
     {
         return new FontSystem(new FontSystemSettings
         {
-            PremultiplyAlpha = false,
+            GlyphRenderResult = GlyphRenderResult.NonPremultiplied,
         });
     }
 }
