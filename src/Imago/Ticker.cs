@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Threading;
+using CommunityToolkit.Diagnostics;
 
 namespace Imago;
 
@@ -64,15 +65,20 @@ public class Ticker
     /// <summary>
     /// Gets or sets the minimum time that should pass between frames.
     /// </summary>
-    public float TargetFrameTime { get; set; } = 1f / 60f;
+    public float TargetFrameTime { get; set; }
 
     /// <summary>
     /// Gets or sets the target frames per second. If set to <see cref="float.PositiveInfinity"/>, the ticker will run as fast as possible.
     /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown if the value is not greater than zero.</exception>
     public float TargetFramesPerSecond
     {
         get => this.TargetFrameTime > 0 ? 1f / this.TargetFrameTime : float.PositiveInfinity;
-        set => this.TargetFrameTime = float.IsPositiveInfinity(value) ? 1f / value : 0;
+        set
+        {
+            Guard.IsGreaterThan(value, 0f);
+            this.TargetFrameTime = float.IsPositiveInfinity(value) ? 0 : 1f / value;
+        }
     }
 
     /// <summary>
@@ -91,6 +97,7 @@ public class Ticker
     /// Initializes a new instance of the <see cref="Ticker"/> class.
     /// </summary>
     /// <param name="targetFramesPerSecond">The target frames per second. If set to <see cref="float.PositiveInfinity"/>, the ticker will run as fast as possible.</param>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown if <paramref name="targetFramesPerSecond"/> is not greater than zero.</exception>
     public Ticker(float targetFramesPerSecond = float.PositiveInfinity)
     {
         this.TargetFramesPerSecond = targetFramesPerSecond;
