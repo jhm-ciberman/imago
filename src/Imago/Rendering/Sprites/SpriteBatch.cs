@@ -27,6 +27,8 @@ public class SpriteBatch
 
     private IRenderTexture _target = null!;
 
+    private Matrix3x2 _transform = Matrix3x2.Identity;
+
     private bool _hasBegun;
 
     /// <summary>
@@ -64,9 +66,10 @@ public class SpriteBatch
         }
 
         var projection = Matrix4x4.CreateOrthographicOffCenter(0f, this._target.Width, this._target.Height, 0f, -10f, 100f);
+        this._transform = transform ?? Matrix3x2.Identity;
 
         this._pass.Begin(this._commandList, this._target);
-        this._pass.SetViewProjectionMatrix(new Matrix4x4(transform ?? Matrix3x2.Identity) * projection);
+        this._pass.SetViewProjectionMatrix(new Matrix4x4(this._transform) * projection);
         this._opacityStack.Clear();
         this._opacityStack.Push(1f);
         this._clipRectStack.Clear();
@@ -317,13 +320,21 @@ public class SpriteBatch
     }
 
     /// <summary>
-    /// Begins drawing with a new scissor rectangle mask applied. This method will clip all drawing to the specified rectangle.
+    /// Begins drawing with a new scissor rectangle mask applied. The rectangle uses the same units as the draw calls,
+    /// and it is intersected with the current scissor rectangle.
     /// </summary>
     /// <param name="rect">The rectangle to clip to.</param>
     public void PushScissorRectangle(Rect rect)
     {
-        this._clipRectStack.Push(rect);
-        this._pass.SetScissorRectangle(rect);
+        rect.Transform(this._transform);
+
+        var parent = this._clipRectStack.Count > 0
+            ? this._clipRectStack.Peek()
+            : new Rect(0f, 0f, this._target.Width, this._target.Height);
+        var clip = parent.IntersectionTest(rect, out var intersection) ? intersection : Rect.Empty;
+
+        this._clipRectStack.Push(clip);
+        this._pass.SetScissorRectangle(clip);
     }
 
     /// <summary>

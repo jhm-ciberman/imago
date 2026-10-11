@@ -258,7 +258,7 @@ public abstract class Visual : ObservableObject, IDisposable, IMountable
 
         if (this.ClipToBounds)
         {
-            batch.PushScissorRectangle(this.GetBounds() * this.Layer!.Zoom);
+            batch.PushScissorRectangle(this.GetBounds());
             this.DrawCore(batch);
             batch.PopScissorRectangle();
         }
