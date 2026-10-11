@@ -38,6 +38,7 @@ Projects:
 
 - **Imago**: the framework itself. Application, rendering, scene graph, input, UI controls, assets.
 - **Imago.Support**: foundational types shared with consumers. Math primitives (`Vector2Int`, `Rect`, etc.), collections, colors, tweening, extensions.
+- **Imago.DearImGui**: a layer that draws Dear ImGui windows on top of the game, for debug UI.
 - **Imago.DevConsole**: the in-game developer console, built on the Imago UI.
 - **Imago.Generators**: compile-time Roslyn source generators used internally.
 - **Imago.ScenarioRunner**: an opt-in host that runs a game from a script and captures screenshots.

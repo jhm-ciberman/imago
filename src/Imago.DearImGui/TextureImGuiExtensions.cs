@@ -1,6 +1,6 @@
 using Imago.Assets.Textures;
 
-namespace Imago.Rendering;
+namespace Imago.DearImGui;
 
 /// <summary>
 /// Provides ImGui extensions for <see cref="Texture"/>.

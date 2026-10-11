@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/Imago.DearImGui/Imago.DearImGui.csproj" />
     <Project Path="src/Imago.DevConsole/Imago.DevConsole.csproj" />
     <Project Path="src/Imago.Generators/Imago.Generators.csproj" />
     <Project Path="src/Imago.ScenarioRunner/Imago.ScenarioRunner.csproj" />

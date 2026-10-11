@@ -1,12 +1,13 @@
 using System;
 using Imago.Assets.Textures;
 using Imago.Input;
+using Imago.Rendering;
 using Imago.SceneGraph;
 using ImGuiNET;
 using NeoVeldrid;
 using Texture = Imago.Assets.Textures.Texture;
 
-namespace Imago.Rendering;
+namespace Imago.DearImGui;
 
 /// <summary>
 /// A layer that draws ImGui windows on top of the screen.

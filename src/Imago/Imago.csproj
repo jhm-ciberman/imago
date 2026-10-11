@@ -12,7 +12,6 @@
         <PackageReference Include="FontStashSharp.PlatformAgnostic" />
         <PackageReference Include="SixLabors.ImageSharp" />
         <PackageReference Include="NeoVeldrid" />
-        <PackageReference Include="NeoVeldrid.ImGui" />
         <PackageReference Include="NeoVeldrid.SDL2" />
         <PackageReference Include="NeoVeldrid.SPIRV" />
         <PackageReference Include="NeoVeldrid.StartupUtilities" />

@@ -1,4 +1,4 @@
-namespace Imago.Rendering;
+namespace Imago.DearImGui;
 
 /// <summary>
 /// Defines a contract for objects that draw ImGui windows.

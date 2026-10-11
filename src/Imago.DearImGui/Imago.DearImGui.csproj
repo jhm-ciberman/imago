@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <ItemGroup>
+        <ProjectReference Include="../Imago/Imago.csproj" />
+        <ProjectReference Include="../Imago.Support/Imago.Support.csproj" />
+
+        <PackageReference Include="NeoVeldrid" />
+        <PackageReference Include="NeoVeldrid.ImGui" />
+    </ItemGroup>
+</Project>
