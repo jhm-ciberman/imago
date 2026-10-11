@@ -95,9 +95,8 @@ public class CursorLayer : IRenderLayer
         }
 
         var viewportSize = this._viewport.Size;
-        var position = this._viewport.Position;
         var guiScale = this.Stage?.GuiScale ?? Vector2.One;
-        var mousePosition = (this._input.CursorPosition - position) / guiScale;
+        var mousePosition = this._input.CursorPosition / guiScale;
         if (!new Rect(Vector2.Zero, viewportSize).Contains(mousePosition))
         {
             return;

@@ -4,7 +4,7 @@ using System.Numerics;
 namespace Imago.SceneGraph;
 
 /// <summary>
-/// Defines a 2D rectangular area on the screen.
+/// Defines the size of a 2D area that is rendered to. Many objects can share one viewport.
 /// </summary>
 public class Viewport
 {
@@ -16,20 +16,10 @@ public class Viewport
     /// <summary>
     /// Initializes a new instance of the <see cref="Viewport"/> class.
     /// </summary>
-    /// <param name="position">The position of the top-left corner of the viewport.</param>
     /// <param name="size">The size of the viewport in pixels.</param>
-    public Viewport(Vector2 position, Vector2 size)
+    public Viewport(Vector2 size)
     {
         this.Size = size;
-        this.Position = position;
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="Viewport"/> class.
-    /// </summary>
-    /// <param name="size">The size of the viewport in pixels.</param>
-    public Viewport(Vector2 size) : this(Vector2.Zero, size)
-    {
     }
 
     /// <summary>
@@ -48,11 +38,6 @@ public class Viewport
     /// Gets the size of the viewport in pixels.
     /// </summary>
     public Vector2 Size { get; private set; }
-
-    /// <summary>
-    /// Gets the position of the top-left corner of the viewport.
-    /// </summary>
-    public Vector2 Position { get; private set; }
 
     /// <summary>
     /// Gets the aspect ratio of the viewport.

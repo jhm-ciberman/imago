@@ -293,6 +293,6 @@ public class GuiLayer : IRenderLayer, IInputHandler
     public Vector2 WindowToViewport(Vector2 mousePosition)
     {
         var guiScale = this.Stage?.GuiScale ?? Vector2.One;
-        return (mousePosition - this.Viewport.Position) / guiScale;
+        return mousePosition / guiScale;
     }
 }
