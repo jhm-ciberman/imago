@@ -7,29 +7,29 @@ namespace Imago.Generators;
 internal static class KnownSymbols
 {
     /// <summary>The <c>[ItemsProperty]</c> attribute that marks a multi-child collection slot.</summary>
-    public const string ItemsPropertyAttribute = "Imago.Controls.ItemsPropertyAttribute";
+    public const string ItemsPropertyAttribute = "Imago.Templates.ItemsPropertyAttribute";
 
     /// <summary>The <c>[ItemsMethod]</c> attribute that marks an additive method for children.</summary>
-    public const string ItemsMethodAttribute = "Imago.Controls.ItemsMethodAttribute";
+    public const string ItemsMethodAttribute = "Imago.Templates.ItemsMethodAttribute";
 
     /// <summary>The <c>[ContentProperty]</c> attribute that marks a single-child slot.</summary>
-    public const string ContentPropertyAttribute = "Imago.Controls.ContentPropertyAttribute";
+    public const string ContentPropertyAttribute = "Imago.Templates.ContentPropertyAttribute";
 
     /// <summary>The <c>[TextProperty]</c> attribute that marks the property receiving inline text.</summary>
-    public const string TextPropertyAttribute = "Imago.Controls.TextPropertyAttribute";
+    public const string TextPropertyAttribute = "Imago.Templates.TextPropertyAttribute";
 
     /// <summary>The <c>[FactoryTemplate]</c> attribute that marks a factory-template type like <c>DataTemplate&lt;T&gt;</c>.</summary>
-    public const string FactoryTemplateAttribute = "Imago.Controls.FactoryTemplateAttribute";
+    public const string FactoryTemplateAttribute = "Imago.Templates.FactoryTemplateAttribute";
 
     /// <summary>The <c>IDataTemplate</c> interface implemented by every data template, including the polymorphic composite.</summary>
-    public const string DataTemplateInterface = "Imago.Controls.IDataTemplate";
+    public const string DataTemplateInterface = "Imago.Gui.IDataTemplate";
 
     /// <summary>The <c>IMountable</c> interface required by templates that declare bindings.</summary>
     public const string MountableInterface = "Imago.SceneGraph.IMountable";
 
     /// <summary>The <c>DataTemplates</c> composite type emitted when a template slot has multiple <c>DataTemplate</c> branches.</summary>
-    public const string DataTemplatesType = "Imago.Controls.DataTemplates";
+    public const string DataTemplatesType = "Imago.Gui.DataTemplates";
 
     /// <summary>The disposable wrapper emitted for template-binding teardown.</summary>
-    public const string TemplateBindingDisposableType = "Imago.Controls.TemplateBindingDisposable";
+    public const string TemplateBindingDisposableType = "Imago.Gui.TemplateBindingDisposable";
 }

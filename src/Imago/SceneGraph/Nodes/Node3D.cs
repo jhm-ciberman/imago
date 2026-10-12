@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using CommunityToolkit.Diagnostics;
-using Imago.Controls;
 using Imago.Support.Collections;
+using Imago.Templates;
 
 namespace Imago.SceneGraph.Nodes;
 

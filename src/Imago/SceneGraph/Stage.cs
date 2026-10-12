@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using Imago.Assets.Textures;
-using Imago.Controls;
 using Imago.Input;
 using Imago.SceneGraph.Cameras;
 using Imago.Support.Drawing;
@@ -77,27 +77,6 @@ public class Stage
     /// Gets or sets the scale factor for 2D/GUI layers, used to adjust for high-DPI displays.
     /// </summary>
     public Vector2 GuiScale { get; set; } = Vector2.One;
-
-    /// <summary>
-    /// Gets the built-in tooltip layer for displaying tooltips above all other UI content.
-    /// </summary>
-    public TooltipLayer TooltipLayer { get; }
-
-    /// <summary>
-    /// Gets the built-in cursor layer for displaying the mouse cursor above all other content.
-    /// </summary>
-    public CursorLayer CursorLayer { get; }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="Stage"/> class.
-    /// </summary>
-    public Stage()
-    {
-        this.TooltipLayer = new TooltipLayer();
-        this.CursorLayer = new CursorLayer();
-        this.AddLayer(this.TooltipLayer);
-        this.AddLayer(this.CursorLayer);
-    }
 
     /// <summary>
     /// Subscribes to input events to enable input handling.
@@ -185,10 +164,20 @@ public class Stage
     }
 
     /// <summary>
+    /// Finds the first layer of the given type, in ZOrder.
+    /// </summary>
+    /// <typeparam name="T">The type of layer to find.</typeparam>
+    /// <returns>The first layer of type <typeparamref name="T"/>, or null if the stage has none.</returns>
+    public T? FindLayer<T>() where T : class, ILayer
+    {
+        return this._allLayers.FirstOrDefault(layer => layer is T) as T;
+    }
+
+    /// <summary>
     /// Tells the stage that the given item was mounted on it, so its mount listeners are notified.
     /// </summary>
     /// <param name="item">The item that was mounted.</param>
-    internal void NotifyItemMounted(IMountable item)
+    public void NotifyItemMounted(IMountable item)
     {
         if (!this._mountedItems.Add(item)) return;
 
@@ -202,7 +191,7 @@ public class Stage
     /// Tells the stage that the given item was unmounted from it, so its mount listeners are notified.
     /// </summary>
     /// <param name="item">The item that was unmounted.</param>
-    internal void NotifyItemUnmounted(IMountable item)
+    public void NotifyItemUnmounted(IMountable item)
     {
         if (!this._mountedItems.Remove(item)) return;
 
@@ -321,7 +310,7 @@ public class Stage
             if (handler.IsVisible)
             {
                 handler.HandleKeyPressed(e);
-                if (e.Handled || BlocksInputBelow(handler)) return;
+                if (e.Handled || handler.BlocksInputBelow) return;
             }
         }
     }
@@ -338,14 +327,9 @@ public class Stage
             if (handler.IsVisible)
             {
                 handler.HandleKeyReleased(e);
-                if (e.Handled || BlocksInputBelow(handler)) return;
+                if (e.Handled || handler.BlocksInputBelow) return;
             }
         }
-    }
-
-    private static bool BlocksInputBelow(IInputHandler handler)
-    {
-        return handler is GuiLayer { BlocksInputBelow: true };
     }
 
     /// <summary>
@@ -378,7 +362,7 @@ public class Stage
             var layer = this._allLayers[i];
             layer.IsInputBlocked = blocked;
 
-            if (layer is GuiLayer { IsVisible: true, BlocksInputBelow: true })
+            if (layer is IInputHandler { IsVisible: true, BlocksInputBelow: true })
             {
                 blocked = true;
             }

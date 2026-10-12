@@ -29,7 +29,7 @@ There are three kinds of custom controls, depending on what you're building:
 
 **Composites** combine existing controls into a reusable unit. They're the most common type. You typically inherit from a panel, add children in the constructor (or use a [template](templates.md)), and wire up behavior. Most game UI is built this way.
 
-Framework-level leaf controls and containers live under `src/Imago/Controls/`. Composites go in your game or application project.
+Framework-level leaf controls and containers live under `src/Imago.Gui/`. Composites go in your game or application project.
 
 
 ## The Layout Lifecycle

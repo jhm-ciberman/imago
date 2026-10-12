@@ -3,6 +3,7 @@
     <Project Path="src/Imago.DearImGui/Imago.DearImGui.csproj" />
     <Project Path="src/Imago.DevConsole/Imago.DevConsole.csproj" />
     <Project Path="src/Imago.Generators/Imago.Generators.csproj" />
+    <Project Path="src/Imago.Gui/Imago.Gui.csproj" />
     <Project Path="src/Imago.ScenarioRunner/Imago.ScenarioRunner.csproj" />
     <Project Path="src/Imago.Support/Imago.Support.csproj" />
     <Project Path="src/Imago/Imago.csproj" />

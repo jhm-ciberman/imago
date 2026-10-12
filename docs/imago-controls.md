@@ -109,7 +109,7 @@ A style is a reusable bag of property values. Apply one with the `Style` propert
 To create a new style:
 
 ```csharp
-using Imago.Controls;
+using Imago.Gui;
 
 public static class AppStyles
 {
@@ -132,7 +132,7 @@ Buttons have four visual states: idle, hover, pressed, and disabled. A `ButtonAp
 You can create appearances from sprites (4-frame strip) or solid colors:
 
 ```csharp
-using Imago.Controls;
+using Imago.Gui;
 
 ButtonAppearance.FromSprite(sprite)
 ButtonAppearance.FromColor(color)
@@ -144,7 +144,7 @@ ButtonAppearance.FromColors(idle, hover, pressed, disabled)
 Any control can have a background. The available types are:
 
 ```csharp
-using Imago.Controls.Drawing;
+using Imago.Gui.Drawing;
 using Imago.Support.Drawing;
 
 new ColorBackground(TailwindColors.Stone900)    // Solid color fill
@@ -209,13 +209,19 @@ Any control can display a tooltip on hover. Set it using a [property element](te
 
 `Placement` controls where the tooltip appears relative to the control: `Top`, `Bottom`, `Left`, or `Right`.
 
+Tooltips are drawn by a `TooltipLayer`. Add one to the stage once, at startup:
+
+```csharp
+this.Stage.AddLayer(new TooltipLayer());
+```
+
 
 ## Data-Bound Collections
 
 `ItemsControl` renders a list of items using a data template. Set `ItemsSource` to your data and `ItemTemplate` to a `DataTemplate` that builds a control for each item:
 
 ```csharp
-using Imago.Controls;
+using Imago.Gui;
 
 var list = new ItemsControl
 {

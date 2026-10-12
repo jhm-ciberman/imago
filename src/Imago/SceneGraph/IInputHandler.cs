@@ -25,6 +25,11 @@ public interface IInputHandler : ILayer
     public bool IsCursorOverElement { get; }
 
     /// <summary>
+    /// Gets a value indicating whether this layer blocks input from reaching layers below it.
+    /// </summary>
+    public bool BlocksInputBelow => false;
+
+    /// <summary>
     /// Handles mouse button press events.
     /// </summary>
     /// <param name="e">The mouse button event arguments.</param>

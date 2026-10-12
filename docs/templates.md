@@ -43,7 +43,7 @@ Let's walk through a simple pause menu. The two files sit side by side:
 
 **PauseMenu.template.xml**
 ```xml
-<?using Imago.Controls ?>
+<?using Imago.Gui ?>
 
 <Canvas
     xmlns="urn:imago:controls"
@@ -89,7 +89,7 @@ Every template needs two XML namespace declarations on the root element. `xmlns=
 Import every namespace that contains a control you use as an element, or a type you reference inside an expression:
 
 ```xml
-<?using Imago.Controls ?>
+<?using Imago.Gui ?>
 <?using Imago.Support.Numerics ?>
 <?using MyGame.Gui ?>
 ```
@@ -762,7 +762,7 @@ This keeps the static layout in the template while the code-behind builds the dy
 <a name="custom-controls"></a>
 ## Custom Controls
 
-The built-in controls work in templates out of the box. Panels accept children, content controls accept a single child, and `TextBlock` accepts text. If you're building your own controls, you can teach the compiler how they accept content using three attributes.
+The built-in controls work in templates out of the box. Panels accept children, content controls accept a single child, and `TextBlock` accepts text. If you're building your own controls, you can teach the compiler how they accept content using the attributes in `Imago.Templates`.
 
 `[ItemsProperty]` tells the compiler which property holds multiple children:
 

@@ -1,5 +1,5 @@
 using System;
-using Imago.Controls;
+using Imago.Gui;
 
 namespace Imago.DevConsole;
 

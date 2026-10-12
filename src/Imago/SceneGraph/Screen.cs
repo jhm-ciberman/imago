@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Imago.Controls;
 using Imago.SceneGraph.Cameras;
 using Imago.Support.Drawing;
+using Imago.Templates;
 
 namespace Imago.SceneGraph;
 
@@ -29,16 +29,6 @@ public class Screen : IDisposable, IMountable
     /// Gets or sets the 3D scene of the screen, if any.
     /// </summary>
     public Scene3D? Scene3D { get; set; }
-
-    /// <summary>
-    /// Gets the primary GUI layer of the screen (the first one added), if any.
-    /// </summary>
-    public GuiLayer? GuiLayer { get; private set; }
-
-    /// <summary>
-    /// Gets all GUI layers in the screen, ordered by ZOrder.
-    /// </summary>
-    public IEnumerable<GuiLayer> GuiLayers => this._layers.OfType<GuiLayer>().OrderBy(l => l.ZOrder);
 
     /// <summary>
     /// Gets or sets the clear color for the screen.
@@ -96,11 +86,6 @@ public class Screen : IDisposable, IMountable
     /// <param name="layer">The layer to add.</param>
     public void AddLayer(ILayer layer)
     {
-        if (layer is GuiLayer guiLayer)
-        {
-            this.GuiLayer ??= guiLayer;
-        }
-
         this._layers.Add(layer);
         this._stage?.AddLayer(layer);
     }
@@ -113,12 +98,17 @@ public class Screen : IDisposable, IMountable
     {
         if (!this._layers.Remove(layer)) return;
 
-        if (layer == this.GuiLayer)
-        {
-            this.GuiLayer = this._layers.OfType<GuiLayer>().FirstOrDefault();
-        }
-
         this._stage?.RemoveLayer(layer);
+    }
+
+    /// <summary>
+    /// Finds the first layer of the given type, in the order the layers were added.
+    /// </summary>
+    /// <typeparam name="T">The type of layer to find.</typeparam>
+    /// <returns>The first layer of type <typeparamref name="T"/>, or null if the screen has none.</returns>
+    public T? FindLayer<T>() where T : class, ILayer
+    {
+        return this._layers.FirstOrDefault(layer => layer is T) as T;
     }
 
     /// <summary>

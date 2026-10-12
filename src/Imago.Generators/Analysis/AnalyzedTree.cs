@@ -205,7 +205,7 @@ internal sealed class AnalyzedPropertyElement
     public List<AnalyzedNode> Children { get; } = new List<AnalyzedNode>();
 
     /// <summary>
-    /// Gets or sets a value indicating whether the target property's type is <c>Imago.Controls.IDataTemplate</c>.
+    /// Gets or sets a value indicating whether the target property's type is <c>Imago.Gui.IDataTemplate</c>.
     /// When true and <see cref="Children"/> has more than one entry, the emitter wraps them in a
     /// <c>DataTemplates</c> composite instead of treating the property as a collection.
     /// </summary>
