@@ -209,10 +209,10 @@ Any control can display a tooltip on hover. Set it using a [property element](te
 
 `Placement` controls where the tooltip appears relative to the control: `Top`, `Bottom`, `Left`, or `Right`.
 
-Tooltips are drawn by a `TooltipLayer`. Add one to the stage once, at startup:
+Tooltips are drawn by a `TooltipLayer`. `GuiModule` adds one to the stage, so list it in the modules of your application:
 
 ```csharp
-this.Stage.AddLayer(new TooltipLayer());
+protected override IEnumerable<Module> Modules => [new GuiModule()];
 ```
 
 

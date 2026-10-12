@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime;
 using Imago.Input;
 using Imago.Rendering;
 using Imago.SceneGraph;
+using Microsoft.Extensions.DependencyInjection;
 using NeoVeldrid;
 using NeoVeldrid.Sdl2;
 using NeoVeldrid.StartupUtilities;
@@ -71,6 +73,14 @@ public abstract class Application : IDisposable
     /// </summary>
     public SceneGraph.Viewport Viewport => this.Renderer.MainViewport;
 
+    private ServiceProvider? _services;
+
+    /// <summary>
+    /// Gets the services of the application and its modules.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if the application has not started running yet.</exception>
+    public IServiceProvider Services => this._services ?? throw new InvalidOperationException("The application has not started running yet.");
+
     /// <summary>
     /// Initializes a new instance of the <see cref="Application"/> class.
     /// </summary>
@@ -135,12 +145,62 @@ public abstract class Application : IDisposable
     protected virtual GuiSizeMode GuiSizeMode => GuiSizeMode.Native;
 
     /// <summary>
-    /// Runs the application main loop. Returns once the application has been quit and fully disposed.
+    /// Gets the modules of the application. Override to add modules. It is read once, when the application starts.
+    /// </summary>
+    protected virtual IEnumerable<Module> Modules => [];
+
+    /// <summary>
+    /// Called when the application starts, after every module has registered its services. Override to add the
+    /// services of the application.
+    /// </summary>
+    /// <param name="services">The collection to add the services to.</param>
+    protected virtual void Register(IServiceCollection services)
+    {
+    }
+
+    /// <summary>
+    /// Called when the application starts, after every module has booted. Override to set up the application.
+    /// </summary>
+    protected virtual void Boot()
+    {
+    }
+
+    /// <summary>
+    /// Starts the application and runs its main loop. Returns once the application has been quit and fully disposed.
     /// </summary>
     public void Run()
     {
+        this.StartServices();
         this.Ticker.Start();
         this.Dispose();
+    }
+
+    private void StartServices()
+    {
+        List<Module> modules = [.. this.Modules];
+
+        var services = new ServiceCollection();
+        services.AddSingleton(this);
+        services.AddSingleton(this.Window);
+        services.AddSingleton(this.Renderer);
+        services.AddSingleton(this.Input);
+        services.AddSingleton(this.Ticker);
+        services.AddSingleton(this.Stage);
+
+        foreach (var module in modules)
+        {
+            module.Register(services);
+        }
+
+        this.Register(services);
+        this._services = services.BuildServiceProvider();
+
+        foreach (var module in modules)
+        {
+            module.Boot(this);
+        }
+
+        this.Boot();
     }
 
     /// <summary>
@@ -239,6 +299,7 @@ public abstract class Application : IDisposable
     public virtual void Dispose()
     {
         this.Ticker.Stop();
+        this._services?.Dispose();
         this.Input.Dispose();
         this.Renderer.Dispose();
         this.Window.Close();

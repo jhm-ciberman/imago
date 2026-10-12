@@ -8,6 +8,7 @@
         <ProjectReference Include="../Imago.Support/Imago.Support.csproj" />
 
         <PackageReference Include="FontStashSharp.PlatformAgnostic" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
         <PackageReference Include="NeoVeldrid" />
     </ItemGroup>
 </Project>

@@ -3,6 +3,7 @@
         <ProjectReference Include="../Imago/Imago.csproj" />
         <ProjectReference Include="../Imago.Support/Imago.Support.csproj" />
 
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
         <PackageReference Include="NeoVeldrid" />
         <PackageReference Include="NeoVeldrid.ImGui" />
     </ItemGroup>
