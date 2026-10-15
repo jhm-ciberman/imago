@@ -1,6 +1,7 @@
 using System;
 using System.Numerics;
 using Imago.Rendering;
+using Imago.SceneGraph.Lighting;
 using Imago.Support.Drawing;
 using Imago.Utilities;
 
@@ -256,4 +257,16 @@ public abstract class Camera
     /// Gets the maximum number of shadow cascades supported by the camera.
     /// </summary>
     public virtual int MaxShadowCascades => int.MaxValue;
+
+    /// <summary>
+    /// Gets the maximum shadow distance for this camera, in world units.
+    /// If it is <see langword="null"/>, the camera uses <see cref="ShadowMap.MaximumShadowsDistance"/>.
+    /// </summary>
+    public virtual float? MaximumShadowsDistance => null;
+
+    /// <summary>
+    /// Gets the shadow depth bias for this camera, in texels.
+    /// If it is <see langword="null"/>, the camera uses <see cref="ShadowMap.DepthBias"/>.
+    /// </summary>
+    public virtual float? ShadowDepthBias => null;
 }

@@ -58,6 +58,16 @@ public class InterpolationCamera : Camera
     /// <inheritdoc/>
     public override int MaxShadowCascades => this._maxShadowCascades;
 
+    private float? _maximumShadowsDistance;
+
+    /// <inheritdoc/>
+    public override float? MaximumShadowsDistance => this._maximumShadowsDistance;
+
+    private float? _shadowDepthBias;
+
+    /// <inheritdoc/>
+    public override float? ShadowDepthBias => this._shadowDepthBias;
+
     /// <summary>
     /// Transitions to the given camera with a smooth transition.
     /// </summary>
@@ -92,6 +102,8 @@ public class InterpolationCamera : Camera
         this._projectionMatrix = camera.ProjectionMatrix;
         this.ClearColor = camera.ClearColor;
         this._maxShadowCascades = camera.MaxShadowCascades;
+        this._maximumShadowsDistance = camera.MaximumShadowsDistance;
+        this._shadowDepthBias = camera.ShadowDepthBias;
     }
 
     /// <inheritdoc/>
@@ -119,6 +131,8 @@ public class InterpolationCamera : Camera
             this.NearPlane = this.TargetCamera.NearPlane;
             this.FarPlane = this.TargetCamera.FarPlane;
             this.ClearColor = this.TargetCamera.ClearColor;
+            this._maximumShadowsDistance = this.TargetCamera.MaximumShadowsDistance;
+            this._shadowDepthBias = this.TargetCamera.ShadowDepthBias;
             return;
         }
 
@@ -144,6 +158,9 @@ public class InterpolationCamera : Camera
         if (prevColor != null && targetColor != null)
             this.ClearColor = ColorF.Lerp(prevColor.Value, targetColor.Value, p);
 
-        this._maxShadowCascades = p >= 0.5f ? this.TargetCamera.MaxShadowCascades : this.PreviousCamera.MaxShadowCascades;
+        var shadowCamera = p >= 0.5f ? this.TargetCamera : this.PreviousCamera;
+        this._maxShadowCascades = shadowCamera.MaxShadowCascades;
+        this._maximumShadowsDistance = shadowCamera.MaximumShadowsDistance;
+        this._shadowDepthBias = shadowCamera.ShadowDepthBias;
     }
 }

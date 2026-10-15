@@ -15,6 +15,7 @@ public class ShadowMap
     /// <summary>
     /// Gets or sets the maximum distance that the light will cast shadows.
     /// The value is measured in world units.
+    /// A camera can use its own value instead. See <see cref="Camera.MaximumShadowsDistance"/>.
     /// </summary>
     /// <exception cref="ArgumentOutOfRangeException">
     /// Thrown if the value is less than 0.
@@ -106,6 +107,7 @@ public class ShadowMap
     /// Gets or sets the depth bias used when rendering the shadow map.
     /// The units are in texels so a value of 0.1f will bias the depth by 0.1 texels.
     /// This way the same value works independent of the shadow map resolution.
+    /// A camera can use its own value instead. See <see cref="Camera.ShadowDepthBias"/>.
     /// </summary>
     public float DepthBias { get; set; } = 5.0f;
 
@@ -146,7 +148,7 @@ public class ShadowMap
             near = 0.01f;
         }
 
-        far = MathF.Min(far, near + this.MaximumShadowsDistance);
+        far = MathF.Min(far, near + (camera.MaximumShadowsDistance ?? this.MaximumShadowsDistance));
         far = MathF.Max(far, near + 0.01f);
 
         cascadesCount = Math.Min(camera.MaxShadowCascades, (int)this.CascadesCount);

@@ -79,7 +79,7 @@ internal class ShadowCascade
         this.SplitNear = near;
         this.SplitFar = far;
 
-        this.DepthBias = -config.DepthBias * unitsPerTexel;
+        this.DepthBias = -(camera.ShadowDepthBias ?? config.DepthBias) * unitsPerTexel;
         this.NormalOffset = config.NormalOffset * unitsPerTexel;
     }
 }

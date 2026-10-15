@@ -31,16 +31,14 @@ int GetCascadeIndex(float distanceToCamera)
 }
 
 /**
- * Gets the distance from the fragment to the camera.
- * Handles platform differences between D3D11 and other backends.
+ * Gets the distance from the fragment to the camera, along the camera view direction.
+ * The value is in world units, the same as ShadowMapDistances.
+ * With an orthographic camera the value is always 1.
  */
 float GetDistanceToCamera()
 {
-#ifdef D3D11
-    return gl_FragCoord.w;
-#else
-    return gl_FragCoord.z / gl_FragCoord.w;
-#endif
+    // gl_FragCoord.w is 1 / clip.w on every backend. SPIRV-Cross converts the HLSL SV_Position.w to match.
+    return 1.0 / gl_FragCoord.w;
 }
 
 /**
