@@ -199,12 +199,15 @@ public class TextureGroup : IDisposable
     /// </summary>
     public void FlushChanges()
     {
-        if (!this._flushRequested) return;
-        this._flushRequested = false;
-
-        foreach (var currentPage in this._pages)
+        lock (this._packLock)
         {
-            currentPage.Apply();
+            if (!this._flushRequested) return;
+            this._flushRequested = false;
+
+            foreach (var currentPage in this._pages)
+            {
+                currentPage.Apply();
+            }
         }
     }
 

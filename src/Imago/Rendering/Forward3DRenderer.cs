@@ -195,6 +195,7 @@ public class Forward3DRenderer : IDisposable
 
         stats.OtherSubPass.Begin();
         this._immediatePass.Render(cl, renderTexture, camera, immediateRQ);
+        this._particlesPass.Render(cl, renderTexture, camera, scene.ParticleSystems);
         stats.OtherSubPass.End();
 
         stats.PickingSubPass.Begin();
@@ -202,7 +203,6 @@ public class Forward3DRenderer : IDisposable
         stats.PickingSubPass.End();
 
         stats.OtherSubPass.Begin();
-        this._particlesPass.Render(cl, renderTexture, camera, scene.ParticleSystems);
         this._gizmosPass.Render(cl, renderTexture, camera, scene.Gizmos);
         stats.OtherSubPass.End();
     }
