@@ -256,13 +256,16 @@ public class TextureGroup : IDisposable
     /// <exception cref="InvalidOperationException">Thrown if the texture is not part of this group.</exception>
     public void Redraw(PackedTexture packedTexture, IDrawOperation drawOperation)
     {
-        if (!this._packedTexturesPages.TryGetValue(packedTexture, out var page))
+        lock (this._packLock)
         {
-            throw new InvalidOperationException("Texture not found in any page.");
-        }
+            if (!this._packedTexturesPages.TryGetValue(packedTexture, out var page))
+            {
+                throw new InvalidOperationException("Texture not found in any page.");
+            }
 
-        page.Redraw(packedTexture, drawOperation);
-        this.RequestFlush();
+            page.Redraw(packedTexture, drawOperation);
+            this.RequestFlush();
+        }
     }
 
     /// <summary>
