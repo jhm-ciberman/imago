@@ -166,22 +166,39 @@ public class GltfReader
 
     private static IChannel MakeChannel(string targetName, PathEnum path, float[] input, GltfAccessor output, InterpolationEnum typeEnum)
     {
-        var type = typeEnum switch
-        {
-            InterpolationEnum.STEP => InterpolationMode.Step,
-            InterpolationEnum.LINEAR => InterpolationMode.Linear,
-            InterpolationEnum.CUBICSPLINE => InterpolationMode.CubicSpline,
-            _ => InterpolationMode.Linear,
-        };
+        var type = ToInterpolationMode(typeEnum);
 
-        return path switch
+        if (path == PathEnum.translation)
         {
-            PathEnum.translation => new PositionChannel(targetName, input, output.AsVector3Array(), type),
-            PathEnum.rotation => new RotationChannel(targetName, input, output.AsQuaternionArray(), type),
-            PathEnum.scale => new ScaleChannel(targetName, input, output.AsVector3Array(), type),
-            PathEnum.weights => throw new System.NotImplementedException(),
-            _ => throw new System.NotImplementedException(),
-        };
+            return new PositionChannel(targetName, input, output.AsVector3Array(), type);
+        }
+
+        if (path == PathEnum.rotation)
+        {
+            return new RotationChannel(targetName, input, output.AsQuaternionArray(), type);
+        }
+
+        if (path == PathEnum.scale)
+        {
+            return new ScaleChannel(targetName, input, output.AsVector3Array(), type);
+        }
+
+        throw new System.NotImplementedException();
+    }
+
+    private static InterpolationMode ToInterpolationMode(InterpolationEnum interpolation)
+    {
+        if (interpolation == InterpolationEnum.STEP)
+        {
+            return InterpolationMode.Step;
+        }
+
+        if (interpolation == InterpolationEnum.CUBICSPLINE)
+        {
+            return InterpolationMode.CubicSpline;
+        }
+
+        return InterpolationMode.Linear;
     }
 
     private GltfSkinInfo GetSkin(int index)

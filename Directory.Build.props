@@ -16,11 +16,6 @@
         <DefineConstants>$(DefineConstants);DEBUG;TRACE</DefineConstants>
     </PropertyGroup>
 
-    <!-- Suppress Newtonsoft.Json vulnerability warning from glTF2Loader transitive dependency -->
-    <ItemGroup>
-        <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-5crp-9r3c-p9vr" />
-    </ItemGroup>
-
     <!-- Suppress SixLabors.ImageSharp 3.1 vulnerability warnings. Only 4.x fixes them, and 4.x needs a license key to build. -->
     <ItemGroup>
         <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-gwg2-r3hj-4w44" />
