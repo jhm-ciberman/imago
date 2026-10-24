@@ -126,8 +126,8 @@ public class Ticker
         {
             double currentTime = this._stopwatch.Elapsed.TotalSeconds;
 
-            // Wait if we haven't reached the target frame time yet.
-            while (this.TargetFrameTime > 0 && (currentTime - previousElapsed) < this.TargetFrameTime)
+            // Wait if we haven't reached the target frame time yet. Some time must always pass, so the delta time is never zero.
+            while (currentTime <= previousElapsed || (currentTime - previousElapsed) < this.TargetFrameTime)
             {
                 Thread.Sleep(0);
                 currentTime = this._stopwatch.Elapsed.TotalSeconds;
