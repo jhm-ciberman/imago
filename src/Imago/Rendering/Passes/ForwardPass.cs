@@ -54,6 +54,7 @@ internal class ForwardPass : IDisposable, IPipelineProvider
     }
 
     private readonly Renderer _renderer;
+    private readonly Forward3DRenderer _forward3DRenderer;
     private readonly GraphicsDevice _gd;
     private readonly DeviceBuffer _lightInfoBuffer;
     private readonly DeviceBuffer _camera3DInfoBuffer;
@@ -63,9 +64,10 @@ internal class ForwardPass : IDisposable, IPipelineProvider
     private readonly RenderBatcher _renderBatcher;
     private readonly ShadowPass _shadowPass;
 
-    public ForwardPass(Renderer renderer, ShadowPass shadowPass)
+    public ForwardPass(Renderer renderer, Forward3DRenderer forward3DRenderer, ShadowPass shadowPass)
     {
         this._renderer = renderer;
+        this._forward3DRenderer = forward3DRenderer;
         this._gd = renderer.GraphicsDevice;
         var factory = this._gd.ResourceFactory;
         this._shadowPass = shadowPass;
@@ -231,13 +233,13 @@ internal class ForwardPass : IDisposable, IPipelineProvider
         var resources = new List<ResourceLayout>
         {
             this._resourceLayout,
-            this._renderer.TransformResourceLayout,
+            this._forward3DRenderer.TransformResourceLayout,
             shaderVariant.MaterialResourceLayout,
-            this._renderer.InstanceResourceLayout
+            this._forward3DRenderer.InstanceResourceLayout
         };
 
         if (shaderVariant.VertexFormat.IsSkinned)
-            resources.Add(this._renderer.SkeletonResourceLayout);
+            resources.Add(this._forward3DRenderer.SkeletonResourceLayout);
 
         return resources.ToArray();
     }

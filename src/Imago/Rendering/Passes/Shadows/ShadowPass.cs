@@ -38,6 +38,8 @@ internal class ShadowPass : IDisposable, IPipelineProvider
 
     private readonly Renderer _renderer;
 
+    private readonly Forward3DRenderer _forward3DRenderer;
+
     private readonly DeviceBuffer _shadowmapInfoBuffer;
 
     private readonly DeviceBuffer _globalDataBuffer;
@@ -48,9 +50,10 @@ internal class ShadowPass : IDisposable, IPipelineProvider
 
     private readonly Matrix4x4 _scalingMatrix;
 
-    public ShadowPass(Renderer renderer)
+    public ShadowPass(Renderer renderer, Forward3DRenderer forward3DRenderer)
     {
         this._renderer = renderer;
+        this._forward3DRenderer = forward3DRenderer;
         this._gd = renderer.GraphicsDevice;
         var factory = this._gd.ResourceFactory;
 
@@ -201,13 +204,13 @@ internal class ShadowPass : IDisposable, IPipelineProvider
         var resources = new List<ResourceLayout>
         {
             this._resourceLayout,
-            this._renderer.TransformResourceLayout,
+            this._forward3DRenderer.TransformResourceLayout,
             shaderVariant.MaterialResourceLayout,
-            this._renderer.InstanceResourceLayout
+            this._forward3DRenderer.InstanceResourceLayout
         };
 
         if (shaderVariant.VertexFormat.IsSkinned)
-            resources.Add(this._renderer.SkeletonResourceLayout);
+            resources.Add(this._forward3DRenderer.SkeletonResourceLayout);
 
         return resources.ToArray();
     }

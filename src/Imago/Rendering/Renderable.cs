@@ -188,9 +188,8 @@ internal class Renderable : IDisposable
     /// </summary>
     public Renderable()
     {
-        var renderer = Renderer.Instance;
-        var transformDataBlock = renderer.RequestTransformDataBlock();
-        var instanceDataBlock = renderer.RequestInstanceDataBlock(Marshal.SizeOf<InstanceData>());
+        var transformDataBlock = Forward3DRenderer.Instance.RequestTransformDataBlock();
+        var instanceDataBlock = Forward3DRenderer.Instance.RequestInstanceDataBlock(Marshal.SizeOf<InstanceData>());
 
         this._transformDataBlock = transformDataBlock;
         this.TransformResourceSet = this._transformDataBlock.Buffer.ResourceSet;
@@ -202,7 +201,7 @@ internal class Renderable : IDisposable
 
         this._instanceDataBlock.Write(ref this._instanceData);
 
-        renderer.RegisterDisposable(this);
+        Renderer.Instance.RegisterDisposable(this);
     }
 
     private Scene3D? _scene3D = null;

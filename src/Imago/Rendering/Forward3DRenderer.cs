@@ -6,6 +6,7 @@ using Imago.Assets.Materials;
 using Imago.Assets.Textures;
 using Imago.Input;
 using Imago.Rendering.Internals;
+using Imago.Rendering.Internals.Buffers;
 using Imago.Rendering.Passes;
 using Imago.Rendering.Passes.Shadows;
 using Imago.SceneGraph;
@@ -24,7 +25,13 @@ namespace Imago.Rendering;
 /// </remarks>
 public class Forward3DRenderer : IDisposable
 {
+    /// <summary>
+    /// Gets the global instance of the 3D renderer.
+    /// </summary>
+    public static Forward3DRenderer Instance { get; private set; } = null!;
+
     private readonly Renderer _renderer;
+    private readonly RendererResources _resources;
     private readonly ParticlesPass _particlesPass;
     private readonly SkyDomePass _skyDomePass;
     private readonly GizmosPass _gizmosPass;
@@ -36,26 +43,78 @@ public class Forward3DRenderer : IDisposable
     private readonly Dictionary<Type, ShaderSet> _shaderCache = new();
 
     /// <summary>
-    /// Gets the GPU buffers and the dirty materials shared by all 3D renderables.
-    /// </summary>
-    internal RendererResources Resources { get; }
-
-    /// <summary>
     /// Initializes a new instance of the <see cref="Forward3DRenderer"/> class.
     /// </summary>
     /// <param name="renderer">The main renderer instance.</param>
+    /// <exception cref="InvalidOperationException">Thrown if a 3D renderer already exists.</exception>
     public Forward3DRenderer(Renderer renderer)
     {
+        if (Instance != null)
+        {
+            throw new InvalidOperationException("Only one instance of Forward3DRenderer can be created.");
+        }
+
+        Instance = this;
+
         this._renderer = renderer;
-        this.Resources = new RendererResources(renderer.GraphicsDevice);
-        this._mousePickerPass = new MousePickingPass(renderer);
+        this._resources = new RendererResources(renderer.GraphicsDevice);
+        this._mousePickerPass = new MousePickingPass(renderer, this);
         this._gizmosPass = new GizmosPass(renderer);
         this._particlesPass = new ParticlesPass(renderer);
-        this._shadowPass = new ShadowPass(renderer);
-        this._forwardPass = new ForwardPass(renderer, this._shadowPass);
+        this._shadowPass = new ShadowPass(renderer, this);
+        this._forwardPass = new ForwardPass(renderer, this, this._shadowPass);
         this._immediatePass = new ImmediatePass(renderer);
         this._skyDomePass = new SkyDomePass(renderer);
         this._ambientOcclusionPass = new AmbientOcclusionPass(renderer);
+    }
+
+    /// <summary>
+    /// Gets the resource layout for transform data.
+    /// </summary>
+    internal ResourceLayout TransformResourceLayout => this._resources.TransformResourceLayout;
+
+    /// <summary>
+    /// Gets the resource layout for instance data.
+    /// </summary>
+    internal ResourceLayout InstanceResourceLayout => this._resources.InstanceResourceLayout;
+
+    /// <summary>
+    /// Gets the resource layout for skeleton data.
+    /// </summary>
+    internal ResourceLayout SkeletonResourceLayout => this._resources.SkeletonResourceLayout;
+
+    /// <summary>
+    /// Requests a data block for instance data.
+    /// </summary>
+    /// <param name="instanceDataBlockSize">The size of the instance data block.</param>
+    internal DataBlock RequestInstanceDataBlock(int instanceDataBlockSize)
+    {
+        return this._resources.RequestInstanceDataBlock(instanceDataBlockSize);
+    }
+
+    /// <summary>
+    /// Requests a data block for transform data.
+    /// </summary>
+    internal DataBlock RequestTransformDataBlock()
+    {
+        return this._resources.RequestTransformDataBlock();
+    }
+
+    /// <summary>
+    /// Requests a data block for skeleton data.
+    /// </summary>
+    internal DataBlock RequestSkeletonDataBlock()
+    {
+        return this._resources.RequestSkeletonDataBlock();
+    }
+
+    /// <summary>
+    /// Notifies the renderer that the given material's resources are dirty and need to be updated.
+    /// </summary>
+    /// <param name="material">The material to update.</param>
+    internal void NotifyMaterialResourcesDirty(Material material)
+    {
+        this._resources.NotifyMaterialResourcesDirty(material);
     }
 
     /// <summary>
@@ -63,7 +122,7 @@ public class Forward3DRenderer : IDisposable
     /// </summary>
     /// <typeparam name="T">The material type, must have a <see cref="SurfaceShaderAttribute"/>.</typeparam>
     /// <returns>A new material instance.</returns>
-    public T MakeMaterial<T>() where T : Material, ICreateableMaterial<T>
+    internal T MakeMaterial<T>() where T : Material, ICreateableMaterial<T>
     {
         var shaders = this.GetOrCreateShaders<T>();
         return T.Create(shaders);
@@ -162,7 +221,7 @@ public class Forward3DRenderer : IDisposable
     /// <param name="renderTexture">The target render texture.</param>
     public void Render(CommandList cl, Scene3D scene, RenderTexture renderTexture)
     {
-        this.Resources.Update(cl);
+        this._resources.Update(cl);
 
         var camera = scene.Camera;
 
@@ -239,6 +298,7 @@ public class Forward3DRenderer : IDisposable
         this._skyDomePass.Dispose();
         this._immediatePass.Dispose();
         this._ambientOcclusionPass.Dispose();
-        this.Resources.Dispose();
+        this._resources.Dispose();
+        Instance = null!;
     }
 }

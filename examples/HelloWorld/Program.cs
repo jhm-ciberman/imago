@@ -3,7 +3,6 @@ using Imago;
 using Imago.Assets.Materials;
 using Imago.Assets.Meshes;
 using Imago.Assets.Textures;
-using Imago.Rendering;
 using Imago.SceneGraph;
 using Imago.SceneGraph.Cameras;
 using Imago.SceneGraph.Nodes;
@@ -40,7 +39,7 @@ internal sealed class HelloWorldApp : Application
         camera.LookAt(new Vector3(0f, 0.5f, 0f));
         scene.Camera = camera;
 
-        var material = Renderer.Instance.MakeMaterial<StandardMaterial>();
+        var material = Material.Create<StandardMaterial>();
         material.Texture = Texture.White;
 
         var floorMesh = new PrimitiveMeshBuilder()

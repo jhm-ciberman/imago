@@ -7,7 +7,6 @@ using Imago.Assets.Gltf;
 using Imago.Assets.Materials;
 using Imago.Assets.Meshes;
 using Imago.Assets.Textures;
-using Imago.Rendering;
 using Imago.SceneGraph;
 using Imago.SceneGraph.Cameras;
 using Imago.SceneGraph.Nodes;
@@ -57,7 +56,7 @@ internal sealed class BasicAnimationApp : Application
         this.UpdateCamera();
         scene.Camera = this._camera;
 
-        var floorMaterial = Renderer.Instance.MakeMaterial<StandardMaterial>();
+        var floorMaterial = Material.Create<StandardMaterial>();
         floorMaterial.Texture = Texture.White;
         floorMaterial.PixelPerfectShadows = false;
 
@@ -76,7 +75,7 @@ internal sealed class BasicAnimationApp : Application
         var assetsDir = Path.Combine(AppContext.BaseDirectory, "Assets");
 
         var foxTexture = ImageTexture.Load(Path.Combine(assetsDir, "fox.png"));
-        var foxMaterial = Renderer.Instance.MakeMaterial<StandardMaterial>();
+        var foxMaterial = Material.Create<StandardMaterial>();
         foxMaterial.Texture = foxTexture;
         foxMaterial.PixelPerfectShadows = false;
 

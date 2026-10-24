@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using CommunityToolkit.Diagnostics;
-using Imago.Assets.Materials;
 using Imago.Assets.Textures;
-using Imago.Rendering.Internals.Buffers;
 using Imago.Rendering.Passes;
 using Imago.Rendering.Sprites;
 using Imago.SceneGraph;
@@ -174,66 +172,6 @@ public class Renderer : IDisposable
     {
         this._totalTime += deltaTime;
         this._forward3DRenderer.Update();
-    }
-
-    /// <summary>
-    /// Gets the resource layout for transform data.
-    /// </summary>
-    internal ResourceLayout TransformResourceLayout => this._forward3DRenderer.Resources.TransformResourceLayout;
-
-    /// <summary>
-    /// Gets the resource layout for instance data.
-    /// </summary>
-    internal ResourceLayout InstanceResourceLayout => this._forward3DRenderer.Resources.InstanceResourceLayout;
-
-    /// <summary>
-    /// Gets the resource layout for skeleton data.
-    /// </summary>
-    internal ResourceLayout SkeletonResourceLayout => this._forward3DRenderer.Resources.SkeletonResourceLayout;
-
-    /// <summary>
-    /// Requests a data block for instance data.
-    /// </summary>
-    /// <param name="instanceDataBlockSize">The size of the instance data block.</param>
-    internal DataBlock RequestInstanceDataBlock(int instanceDataBlockSize)
-    {
-        return this._forward3DRenderer.Resources.RequestInstanceDataBlock(instanceDataBlockSize);
-    }
-
-    /// <summary>
-    /// Requests a data block for transform data.
-    /// </summary>
-    internal DataBlock RequestTransformDataBlock()
-    {
-        return this._forward3DRenderer.Resources.RequestTransformDataBlock();
-    }
-
-    /// <summary>
-    /// Requests a data block for skeleton data.
-    /// </summary>
-    internal DataBlock RequestSkeletonDataBlock()
-    {
-        return this._forward3DRenderer.Resources.RequestSkeletonDataBlock();
-    }
-
-    /// <summary>
-    /// Creates a new surface material of the specified type.
-    /// </summary>
-    /// <typeparam name="T">The material type, must have a <see cref="SurfaceShaderAttribute"/>.</typeparam>
-    /// <returns>A new material instance.</returns>
-    public T MakeMaterial<T>() where T : Material, ICreateableMaterial<T>
-    {
-        return this._forward3DRenderer.MakeMaterial<T>();
-    }
-
-    /// <summary>
-    /// Forces the shader set for <typeparamref name="T"/> to be assembled and cached so the first runtime
-    /// <see cref="MakeMaterial{T}"/> call is allocation-only. SPIR-V variant compilation remains lazy on first draw.
-    /// </summary>
-    /// <typeparam name="T">The material type, must have a <see cref="SurfaceShaderAttribute"/>.</typeparam>
-    public void PreloadMaterial<T>() where T : Material, ICreateableMaterial<T>
-    {
-        this._forward3DRenderer.PreloadMaterial<T>();
     }
 
     /// <summary>
@@ -567,15 +505,6 @@ public class Renderer : IDisposable
         {
             texture.Update(cl);
         }
-    }
-
-    /// <summary>
-    /// Notifies the renderer that the given material's resources are dirty and need to be updated.
-    /// </summary>
-    /// <param name="material">The material to update.</param>
-    internal void NotifyMaterialResourcesDirty(Material material)
-    {
-        this._forward3DRenderer.Resources.NotifyMaterialResourcesDirty(material);
     }
 
     /// <summary>

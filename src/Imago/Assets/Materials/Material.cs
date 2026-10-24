@@ -78,6 +78,25 @@ public abstract class Material : IDisposable
     }
 
     /// <summary>
+    /// Creates a new material of the given type.
+    /// </summary>
+    /// <typeparam name="T">The material type, must have a <see cref="SurfaceShaderAttribute"/>.</typeparam>
+    /// <returns>A new material instance.</returns>
+    public static T Create<T>() where T : Material, ICreateableMaterial<T>
+    {
+        return Forward3DRenderer.Instance.MakeMaterial<T>();
+    }
+
+    /// <summary>
+    /// Prepares the shaders of the given material type, so the first <see cref="Create{T}"/> call is fast.
+    /// </summary>
+    /// <typeparam name="T">The material type, must have a <see cref="SurfaceShaderAttribute"/>.</typeparam>
+    public static void Preload<T>() where T : Material, ICreateableMaterial<T>
+    {
+        Forward3DRenderer.Instance.PreloadMaterial<T>();
+    }
+
+    /// <summary>
     /// Gets or sets a value indicating whether back-face culling is disabled.
     /// </summary>
     public bool DoubleSided { get => this.GetRenderFlag(RenderFlags.DoubleSided); set => this.SetRenderFlag(RenderFlags.DoubleSided, value); }
@@ -209,7 +228,7 @@ public abstract class Material : IDisposable
         if (this._resourceSetDirty) return;
 
         this._resourceSetDirty = true;
-        this._renderer.NotifyMaterialResourcesDirty(this);
+        Forward3DRenderer.Instance.NotifyMaterialResourcesDirty(this);
     }
 
     /// <summary>

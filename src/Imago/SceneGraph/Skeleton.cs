@@ -64,7 +64,7 @@ public class Skeleton : IDisposable
         this.Joints = joints;
         this.InverseBindMatrices = inverseBindMatrices;
         this.BonesMatrices = new Matrix4x4[this.Joints.Count];
-        this._dataBlock = Renderer.Instance.RequestSkeletonDataBlock();
+        this._dataBlock = Forward3DRenderer.Instance.RequestSkeletonDataBlock();
         this.ResourceSet = this._dataBlock.Buffer.ResourceSet;
         Renderer.Instance.RegisterDisposable(this);
     }

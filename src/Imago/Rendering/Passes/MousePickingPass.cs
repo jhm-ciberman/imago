@@ -32,6 +32,7 @@ internal class MousePickingPass : IDisposable, IPipelineProvider
     }
 
     private readonly Renderer _renderer;
+    private readonly Forward3DRenderer _forward3DRenderer;
     private readonly GraphicsDevice _gd;
     private readonly DeviceBuffer _camera3DInfoBuffer;
     private readonly DeviceBuffer _globalDataBuffer;
@@ -44,9 +45,10 @@ internal class MousePickingPass : IDisposable, IPipelineProvider
     private Vector2 _mousePosition;
     private bool _mouseInside;
 
-    public MousePickingPass(Renderer renderer)
+    public MousePickingPass(Renderer renderer, Forward3DRenderer forward3DRenderer)
     {
         this._renderer = renderer;
+        this._forward3DRenderer = forward3DRenderer;
         this._gd = renderer.GraphicsDevice;
         var factory = this._gd.ResourceFactory;
 
@@ -228,13 +230,13 @@ internal class MousePickingPass : IDisposable, IPipelineProvider
         var resources = new List<ResourceLayout>
         {
             this._resourceLayout,
-            this._renderer.TransformResourceLayout,
+            this._forward3DRenderer.TransformResourceLayout,
             shaderVariant.MaterialResourceLayout,
-            this._renderer.InstanceResourceLayout
+            this._forward3DRenderer.InstanceResourceLayout
         };
 
         if (shaderVariant.VertexFormat.IsSkinned)
-            resources.Add(this._renderer.SkeletonResourceLayout);
+            resources.Add(this._forward3DRenderer.SkeletonResourceLayout);
 
         return resources.ToArray();
     }
