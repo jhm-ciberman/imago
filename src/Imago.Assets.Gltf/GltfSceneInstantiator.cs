@@ -63,7 +63,7 @@ internal class GltfSceneInstantiator
         {
             node = this.CreateRenderNode(meshes[0], gltfNode.Material, gltfNode.Skin);
         }
-        else // Multi primitive mesh. Our engine do not Imago.Support this so we create a node for each primitive. KISS.
+        else // Multi primitive mesh. Our engine does not support this, so we create a node for each primitive. KISS.
         {
             node = new Node3D();
             for (var i = 0; i < meshes.Length; i++)

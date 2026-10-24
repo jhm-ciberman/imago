@@ -5,6 +5,7 @@
     </PropertyGroup>
     <ItemGroup>
         <ProjectReference Include="../../src/Imago/Imago.csproj" />
+        <ProjectReference Include="../../src/Imago.Assets.Gltf/Imago.Assets.Gltf.csproj" />
         <ProjectReference Include="../../src/Imago.Support/Imago.Support.csproj" />
     </ItemGroup>
     <ItemGroup>

@@ -1,5 +1,7 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/Imago.Assets.Gltf/Imago.Assets.Gltf.csproj" />
+    <Project Path="src/Imago.Assets.Wavefront/Imago.Assets.Wavefront.csproj" />
     <Project Path="src/Imago.DearImGui/Imago.DearImGui.csproj" />
     <Project Path="src/Imago.DevConsole/Imago.DevConsole.csproj" />
     <Project Path="src/Imago.Generators/Imago.Generators.csproj" />

@@ -15,7 +15,6 @@
         <PackageReference Include="NeoVeldrid.SDL2" />
         <PackageReference Include="NeoVeldrid.SPIRV" />
         <PackageReference Include="NeoVeldrid.StartupUtilities" />
-        <PackageReference Include="glTF2Loader" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     </ItemGroup>
 </Project>
