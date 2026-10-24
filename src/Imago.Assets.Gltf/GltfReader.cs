@@ -104,7 +104,7 @@ public class GltfReader
             }
         }
 
-        if (data.Matrix.Length == 0)
+        if (ToMatrix(data.Matrix) != Matrix4x4.Identity)
         {
             Matrix4x4.Decompose(ToMatrix(data.Matrix), out Vector3 scale, out Quaternion rotation, out Vector3 position);
             node.Scale = scale;
