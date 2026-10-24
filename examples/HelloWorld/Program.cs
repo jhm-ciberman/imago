@@ -27,7 +27,7 @@ internal sealed class HelloWorldApp : Application
 
     public HelloWorldApp()
     {
-        var scene = new Scene3D
+        var scene = new Scene3DLayer
         {
             Root = new Node3D { Name = "Root" },
         };

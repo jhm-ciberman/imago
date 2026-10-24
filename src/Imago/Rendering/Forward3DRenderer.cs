@@ -17,7 +17,7 @@ using Shader = Imago.Assets.Materials.Shader;
 namespace Imago.Rendering;
 
 /// <summary>
-/// Orchestrates the rendering of a <see cref="Scene3D"/> by coordinating various rendering passes.
+/// Orchestrates the rendering of a <see cref="Scene3DLayer"/> by coordinating various rendering passes.
 /// </summary>
 /// <remarks>
 /// This class is responsible for setting up and executing the rendering pipeline for a 3D layer,
@@ -206,7 +206,7 @@ public class Forward3DRenderer : IDisposable
     /// Must be called after command submission.
     /// </summary>
     /// <param name="scene">The 3D scene whose picking manager should be updated, or null if no 3D scene is active.</param>
-    public void ReadPickingResult(Scene3D? scene)
+    public void ReadPickingResult(Scene3DLayer? scene)
     {
         if (scene == null) return;
 
@@ -214,12 +214,12 @@ public class Forward3DRenderer : IDisposable
     }
 
     /// <summary>
-    /// Renders a <see cref="Scene3D"/> to the specified <see cref="RenderTexture"/>.
+    /// Renders a <see cref="Scene3DLayer"/> to the specified <see cref="RenderTexture"/>.
     /// </summary>
     /// <param name="cl">The command list.</param>
     /// <param name="scene">The 3D scene to render.</param>
     /// <param name="renderTexture">The target render texture.</param>
-    public void Render(CommandList cl, Scene3D scene, RenderTexture renderTexture)
+    public void Render(CommandList cl, Scene3DLayer scene, RenderTexture renderTexture)
     {
         this._resources.Update(cl);
 
@@ -274,7 +274,7 @@ public class Forward3DRenderer : IDisposable
         stats.OtherSubPass.End();
     }
 
-    private void ClearRenderTarget(CommandList cl, Scene3D scene)
+    private void ClearRenderTarget(CommandList cl, Scene3DLayer scene)
     {
         ColorF? clearColor = scene.Camera?.ClearColor ?? scene.ClearColor;
         if (clearColor != null)

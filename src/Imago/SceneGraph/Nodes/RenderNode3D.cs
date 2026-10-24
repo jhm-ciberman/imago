@@ -95,7 +95,7 @@ public class RenderNode3D : Node3D, IPickable
         {
             if (this._visible == value) return;
             this._visible = value;
-            this._renderable.Visible = value && this.Scene3D != null;
+            this._renderable.Visible = value && this.Layer != null;
         }
 
     }
@@ -168,22 +168,22 @@ public class RenderNode3D : Node3D, IPickable
     }
 
     /// <inheritdoc/>
-    public override void Mount(Scene3D scene)
+    public override void Mount(Scene3DLayer scene)
     {
         base.Mount(scene);
         this.UpdateRegistrationWithPickingManager();
         this._renderable.Visible = this._visible;
-        this._renderable.Scene3D = scene;
+        this._renderable.Layer = scene;
     }
 
     /// <inheritdoc/>
     public override void Unmount()
     {
         this._renderable.Visible = false;
-        this._renderable.Scene3D = null;
-        if (this.Scene3D != null && this._renderable.PickingId != 0)
+        this._renderable.Layer = null;
+        if (this.Layer != null && this._renderable.PickingId != 0)
         {
-            this.Scene3D.Picking.UnregisterPickable(this);
+            this.Layer.Picking.UnregisterPickable(this);
         }
         base.Unmount();
     }
@@ -193,17 +193,17 @@ public class RenderNode3D : Node3D, IPickable
     /// </summary>
     public void UpdateRegistrationWithPickingManager()
     {
-        if (this.Scene3D is null) return;
+        if (this.Layer is null) return;
 
         if (this._isPickable)
         {
             if (this._renderable.PickingId == 0)
-                this.Scene3D.Picking.RegisterPickable(this);
+                this.Layer.Picking.RegisterPickable(this);
         }
         else
         {
             if (this._renderable.PickingId != 0)
-                this.Scene3D.Picking.UnregisterPickable(this);
+                this.Layer.Picking.UnregisterPickable(this);
         }
     }
 

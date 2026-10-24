@@ -7,11 +7,11 @@ using Imago.SceneGraph;
 namespace Imago.Gui;
 
 /// <summary>
-/// A control that renders a <see cref="Scene3D"/> and displays the result as a 2D texture.
+/// A control that renders a <see cref="Scene3DLayer"/> and displays the result as a 2D texture.
 /// </summary>
 public class Viewport3D : Control
 {
-    private Scene3D? _scene;
+    private Scene3DLayer? _scene;
     private RenderTexture? _renderTexture;
     private Texture? _resolvedTexture;
     private bool _dirty;
@@ -20,7 +20,7 @@ public class Viewport3D : Control
     /// <summary>
     /// Gets or sets the 3D scene to render. The caller owns the scene and is responsible for its disposal.
     /// </summary>
-    public Scene3D? Scene3D
+    public Scene3DLayer? Scene3D
     {
         get => this._scene;
         set

@@ -28,7 +28,7 @@ public class Screen : IDisposable, IMountable
     /// <summary>
     /// Gets or sets the 3D scene of the screen, if any.
     /// </summary>
-    public Scene3D? Scene3D { get; set; }
+    public Scene3DLayer? Scene3D { get; set; }
 
     /// <summary>
     /// Gets or sets the clear color for the screen.

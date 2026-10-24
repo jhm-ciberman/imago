@@ -42,7 +42,7 @@ internal sealed class BasicAnimationApp : Application
 
     public BasicAnimationApp()
     {
-        var scene = new Scene3D
+        var scene = new Scene3DLayer
         {
             Root = new Node3D { Name = "Root" },
         };

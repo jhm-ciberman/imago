@@ -139,7 +139,7 @@ public partial class MainMenu : Canvas { ... }
 
 You can set properties, subscribe to events, and even use `bind:` on the root element. The only thing you cannot do is use `x:Arguments` on it, since the root represents `this` and is never instantiated by the template.
 
-Templates aren't restricted to GUI controls. Any class that implements `IMountable` can be templated, including custom ones you write. That covers `Control` and its subclasses (`StackPanel`, `Canvas`, `Button`, …), `Screen`, `GuiLayer`, `Node3D` and its subclasses (`RenderNode3D` and `MultiMeshRenderNode3D`), and `Scene3D`.
+Templates aren't restricted to GUI controls. Any class that implements `IMountable` can be templated, including custom ones you write. That covers `Control` and its subclasses (`StackPanel`, `Canvas`, `Button`, …), `Screen`, `GuiLayer`, `Node3D` and its subclasses (`RenderNode3D` and `MultiMeshRenderNode3D`), and `Scene3DLayer`.
 
 ```xml
 <Screen xmlns="urn:imago:controls" xmlns:bind="urn:imago:bindings">
@@ -152,9 +152,9 @@ Templates aren't restricted to GUI controls. Any class that implements `IMountab
     <Node3D Name="Avatar" />
 </Node3D>
 
-<Scene3D xmlns="urn:imago:controls">
+<Scene3DLayer xmlns="urn:imago:controls">
     <Node3D Name="Root" />
-</Scene3D>
+</Scene3DLayer>
 ```
 
 

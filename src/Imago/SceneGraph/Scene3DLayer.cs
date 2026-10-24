@@ -16,7 +16,7 @@ namespace Imago.SceneGraph;
 /// Represents a 3D scene containing a scene graph, camera, and environment.
 /// </summary>
 [ContentProperty(nameof(Root))]
-public class Scene3D : IDisposable, IMountable
+public class Scene3DLayer : IDisposable, IMountable
 {
     /// <summary>
     /// Gets or sets a value indicating whether this scene is visible and should be rendered.
@@ -186,9 +186,9 @@ public class Scene3D : IDisposable, IMountable
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Scene3D"/> class.
+    /// Initializes a new instance of the <see cref="Scene3DLayer"/> class.
     /// </summary>
-    public Scene3D()
+    public Scene3DLayer()
     {
         for (int i = 0; i < this.ShadowCasterRenderQueues.Length; i++)
         {

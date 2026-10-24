@@ -294,12 +294,12 @@ public class Renderer : IDisposable
 
 
     /// <summary>
-    /// Renders a <see cref="Scene3D"/> to an offscreen texture.
+    /// Renders a <see cref="Scene3DLayer"/> to an offscreen texture.
     /// </summary>
     /// <param name="scene">The 3D scene to render.</param>
     /// <param name="renderTexture">The render texture to render to.</param>
     /// <param name="resolvedTexture">The texture to resolve the multisampled result to. If null, no resolving is performed.</param>
-    public void RenderToOffscreenTexture(Scene3D scene, RenderTexture renderTexture, Texture? resolvedTexture = null)
+    public void RenderToOffscreenTexture(Scene3DLayer scene, RenderTexture renderTexture, Texture? resolvedTexture = null)
     {
         var cl = this._commandList;
 

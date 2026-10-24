@@ -91,7 +91,7 @@ public class Node3D : IDisposable, IFormattable, IMountable
     /// <summary>
     /// Gets the 3D scene this node is mounted in, or <see langword="null"/> if not mounted.
     /// </summary>
-    public Scene3D? Scene3D { get; protected set; } = null;
+    public Scene3DLayer? Layer { get; protected set; } = null;
 
     private Matrix4x4 _localMatrix = Matrix4x4.Identity;
     private Matrix4x4 _worldMatrix = Matrix4x4.Identity;
@@ -139,7 +139,7 @@ public class Node3D : IDisposable, IFormattable, IMountable
     {
         if (this.LocalTransformIsDirty) return;
         this._dirtyFlags |= DirtyFlags.LocalMatrix | DirtyFlags.WorldMatrix;
-        this.Scene3D?.NotifyTransformDirty(this);
+        this.Layer?.NotifyTransformDirty(this);
 
         foreach (var child in this._children)
         {
@@ -152,7 +152,7 @@ public class Node3D : IDisposable, IFormattable, IMountable
     {
         if (this.WorldTransformIsDirty) return;
         this._dirtyFlags |= DirtyFlags.WorldMatrix;
-        this.Scene3D?.NotifyTransformDirty(this);
+        this.Layer?.NotifyTransformDirty(this);
 
         foreach (var child in this._children)
         {
@@ -265,9 +265,9 @@ public class Node3D : IDisposable, IFormattable, IMountable
 
         node.Parent = this;
 
-        if (this.Scene3D != null)
+        if (this.Layer != null)
         {
-            node.Mount(this.Scene3D);
+            node.Mount(this.Layer);
         }
     }
 
@@ -284,7 +284,7 @@ public class Node3D : IDisposable, IFormattable, IMountable
 
         node.Parent = null;
 
-        if (node.Scene3D != null)
+        if (node.Layer != null)
             node.Unmount();
 
         if (dispose)
@@ -304,14 +304,14 @@ public class Node3D : IDisposable, IFormattable, IMountable
     /// <summary>
     /// Mounts this node into the given scene, recursively mounting all children.
     /// </summary>
-    /// <param name="scene">The <see cref="SceneGraph.Scene3D"/> to mount into.</param>
+    /// <param name="scene">The <see cref="Scene3DLayer"/> to mount into.</param>
     /// <exception cref="InvalidOperationException">Thrown if the node is already mounted.</exception>
-    public virtual void Mount(Scene3D scene)
+    public virtual void Mount(Scene3DLayer scene)
     {
-        if (this.Scene3D != null)
+        if (this.Layer != null)
             throw new InvalidOperationException("Cannot mount a node that is already mounted.");
 
-        this.Scene3D = scene;
+        this.Layer = scene;
         scene.NotifyTransformDirty(this);
 
         foreach (var child in this._children)
@@ -327,23 +327,23 @@ public class Node3D : IDisposable, IFormattable, IMountable
     /// Unmounts this node from the scene graph, recursively unmounting all children.
     /// </summary>
     /// <remarks>
-    /// The <see cref="Scene3D"/> reference remains valid throughout this method and its overrides.
+    /// The <see cref="Layer"/> reference remains valid throughout this method and its overrides.
     /// It is cleared at the end of the base implementation after all children have been unmounted.
     /// </remarks>
     public virtual void Unmount()
     {
-        if (this.Scene3D == null) return;
+        if (this.Layer == null) return;
 
-        this.Scene3D.NotifyTransformNotDirty(this);
+        this.Layer.NotifyTransformNotDirty(this);
 
         foreach (var child in this._children)
         {
             child.Unmount();
         }
 
-        this.Scene3D.Stage?.NotifyItemUnmounted(this);
+        this.Layer.Stage?.NotifyItemUnmounted(this);
         this.Unmounting?.Invoke(this, EventArgs.Empty);
-        this.Scene3D = null;
+        this.Layer = null;
     }
 
     /// <summary>

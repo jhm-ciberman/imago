@@ -141,7 +141,7 @@ internal class Renderable : IDisposable
             {
                 var oldFlags = this._renderQueueFlags;
                 this._renderQueueFlags = value;
-                this._scene3D?.NotifyRenderableRenderQueueChanged(this, oldFlags, value);
+                this._layer?.NotifyRenderableRenderQueueChanged(this, oldFlags, value);
             }
         }
     }
@@ -204,23 +204,23 @@ internal class Renderable : IDisposable
         Renderer.Instance.RegisterDisposable(this);
     }
 
-    private Scene3D? _scene3D = null;
+    private Scene3DLayer? _layer = null;
 
     /// <summary>
     /// Gets or sets the 3D scene this renderable belongs to.
     /// </summary>
-    public Scene3D? Scene3D
+    public Scene3DLayer? Layer
     {
-        get => this._scene3D;
+        get => this._layer;
         set
         {
-            if (this._scene3D == value) return;
+            if (this._layer == value) return;
 
-            this._scene3D?.RemoveRenderable(this);
+            this._layer?.RemoveRenderable(this);
 
-            this._scene3D = value;
+            this._layer = value;
 
-            this._scene3D?.AddRenderable(this);
+            this._layer?.AddRenderable(this);
         }
     }
 
@@ -278,7 +278,7 @@ internal class Renderable : IDisposable
             this.UpdateSkeletonTransform();
             this.RecomputeOffsetVertexData();
             this.InvalidatePipeline();
-            this.Scene3D?.NotifyRenderableSkeletonChanged(this, oldSkeleton, value);
+            this.Layer?.NotifyRenderableSkeletonChanged(this, oldSkeleton, value);
         }
     }
 
@@ -354,7 +354,7 @@ internal class Renderable : IDisposable
         if (this._pipelineDirty) return;
 
         this._pipelineDirty = true;
-        this._scene3D?.NotifyRenderablePipelineDirty(this);
+        this._layer?.NotifyRenderablePipelineDirty(this);
     }
 
     /// <summary>
@@ -398,7 +398,7 @@ internal class Renderable : IDisposable
     /// Updates the renderable.
     /// </summary>
     /// <param name="scene">The 3D scene.</param>
-    public void Update(Scene3D scene)
+    public void Update(Scene3DLayer scene)
     {
         if (this._pipelineDirty)
         {
@@ -553,7 +553,7 @@ internal class Renderable : IDisposable
         if (!isVisible) return null;
 
         RenderFlags flags = material.RenderFlags;
-        var layer = this.Scene3D!;
+        var layer = this.Layer!;
         if (layer.ForceWireframe) flags |= RenderFlags.Wireframe;
         if (this.RenderQueues.HasFlag(RenderQueues.Transparent)) flags |= RenderFlags.Transparent;
         if (layer.EnableFog) flags |= RenderFlags.Fog;
@@ -561,7 +561,7 @@ internal class Renderable : IDisposable
         if (layer.LightingHalfLambert) flags |= RenderFlags.HalfLambert;
         if (layer.CascadesCount > 1) flags |= RenderFlags.ShadowCascades;
 
-        return material.ForwardShader.GetPipeline(this._mesh!.VertexFormat, flags, this.Scene3D!.MultiSampleCount);
+        return material.ForwardShader.GetPipeline(this._mesh!.VertexFormat, flags, this.Layer!.MultiSampleCount);
     }
 
     private NeoVeldrid.Pipeline? GetShadowmapPipeline(Material material)

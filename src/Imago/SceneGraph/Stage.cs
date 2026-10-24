@@ -28,7 +28,7 @@ public class Stage
     private readonly List<IInputHandler> _inputHandlers = new();
     private readonly List<IMountListener> _mountListeners = new();
     private readonly HashSet<IMountable> _mountedItems = new();
-    private Scene3D? _scene3D;
+    private Scene3DLayer? _scene3D;
 
     /// <summary>
     /// Gets or sets the primary 3D scene.
@@ -36,7 +36,7 @@ public class Stage
     /// <remarks>
     /// Setting this property automatically mounts/unmounts the scene graph.
     /// </remarks>
-    public Scene3D? Scene3D
+    public Scene3DLayer? Scene3D
     {
         get => this._scene3D;
         set
