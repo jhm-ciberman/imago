@@ -14,7 +14,7 @@ namespace Imago.Gui;
 /// Represents the root of a 2D user interface, managing the layout, rendering, and input for a tree of <see cref="Control"/> objects.
 /// </summary>
 [ContentProperty(nameof(Content))]
-public class GuiLayer : IRenderLayer, IInputHandler
+public class GuiLayer : IRenderLayer, IOffscreenLayer, IInputHandler
 {
     /// <inheritdoc />
     public int ZOrder { get; init; } = 100;

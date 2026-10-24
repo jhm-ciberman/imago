@@ -17,7 +17,7 @@ namespace Imago.SceneGraph;
 /// Represents a 3D scene containing a scene graph, camera, and environment.
 /// </summary>
 [ContentProperty(nameof(Root))]
-public class Scene3DLayer : IRenderLayer, IDisposable
+public class Scene3DLayer : IRenderLayer, IOffscreenLayer, IDisposable
 {
     /// <inheritdoc />
     public int ZOrder { get; init; } = 0;

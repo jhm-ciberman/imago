@@ -206,7 +206,7 @@ public class Renderer : IDisposable
     /// </summary>
     /// <param name="stage">The stage to render.</param>
     /// <param name="target">The target to render into.</param>
-    public void RenderStage(Stage stage, IRenderTexture target)
+    public void RenderStageOffscreen(Stage stage, IRenderTexture target)
     {
         this.RenderStage(stage, target, RenderOutputMode.Offscreen);
     }
@@ -294,7 +294,7 @@ public class Renderer : IDisposable
     /// </remarks>
     /// <param name="layer">The layer to render.</param>
     /// <param name="target">The render texture to render into.</param>
-    public void RenderLayer(IRenderLayer layer, RenderTexture target)
+    public void RenderLayerOffscreen(IOffscreenLayer layer, RenderTexture target)
     {
         var cl = this._commandList;
 

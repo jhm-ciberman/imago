@@ -7,11 +7,11 @@ using Imago.SceneGraph;
 namespace Imago.Gui;
 
 /// <summary>
-/// A control that renders an <see cref="IRenderLayer"/>, such as a 3D scene, and displays the result as a 2D texture.
+/// A control that renders an <see cref="IOffscreenLayer"/>, such as a 3D scene, and displays the result as a 2D texture.
 /// </summary>
-public class LayerView : Control
+public class LayerHost : Control
 {
-    private IRenderLayer? _renderLayer;
+    private IOffscreenLayer? _renderLayer;
     private RenderTexture? _renderTexture;
     private Texture? _resolvedTexture;
     private bool _dirty;
@@ -20,7 +20,7 @@ public class LayerView : Control
     /// <summary>
     /// Gets or sets the layer to render. The caller owns the layer and is responsible for its disposal.
     /// </summary>
-    public IRenderLayer? RenderLayer
+    public IOffscreenLayer? RenderLayer
     {
         get => this._renderLayer;
         set
@@ -101,7 +101,7 @@ public class LayerView : Control
 
         if (this._dirty)
         {
-            Renderer.Instance.RenderLayer(this._renderLayer, this._renderTexture!);
+            Renderer.Instance.RenderLayerOffscreen(this._renderLayer, this._renderTexture!);
             Renderer.Instance.ResolveTexture(this._renderTexture!, this._resolvedTexture!);
             this._dirty = false;
         }
