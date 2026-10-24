@@ -199,7 +199,7 @@ public class Forward3DRenderer : IDisposable
         stats.OtherSubPass.End();
 
         stats.PickingSubPass.Begin();
-        this._mousePickerPass.Render(cl, renderTexture, camera, scene.Picking, pickingRQ);
+        this._mousePickerPass.Render(cl, renderTexture, camera, pickingRQ);
         stats.PickingSubPass.End();
 
         stats.OtherSubPass.Begin();

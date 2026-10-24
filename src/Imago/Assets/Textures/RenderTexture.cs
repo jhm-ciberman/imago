@@ -24,8 +24,7 @@ public enum TextureInterpolation
 /// Represents a texture that can be used as a rendering target.
 /// </summary>
 /// <remarks>
-/// This class encapsulates the color and depth textures, as well as the framebuffers, required for offscreen rendering.
-/// It also manages the resources for mouse picking.
+/// This class encapsulates the color and depth textures, as well as the framebuffer, required for offscreen rendering.
 /// </remarks>
 public class RenderTexture : IRenderTexture
 {
@@ -48,34 +47,14 @@ public class RenderTexture : IRenderTexture
     public NeoVeldrid.Texture ForwardDepthTexture { get; private set; } = null!;
 
     /// <summary>
-    /// Gets the color texture used for the mouse picking pass.
-    /// </summary>
-    public NeoVeldrid.Texture PickingColorTexture { get; private set; } = null!;
-
-    /// <summary>
-    /// Gets the depth texture used for the mouse picking pass.
-    /// </summary>
-    public NeoVeldrid.Texture PickingDepthTexture { get; private set; } = null!;
-
-    /// <summary>
     /// Gets the framebuffer for the main forward rendering pass.
     /// </summary>
     public Framebuffer Framebuffer { get; private set; } = null!;
 
     /// <summary>
-    /// Gets the framebuffer for the mouse picking pass.
-    /// </summary>
-    public Framebuffer PickingFramebuffer { get; private set; } = null!;
-
-    /// <summary>
     /// Gets the output description for the main framebuffer.
     /// </summary>
     public OutputDescription OutputDescription => this.Framebuffer.OutputDescription;
-
-    /// <summary>
-    /// Gets the output description for the picking framebuffer.
-    /// </summary>
-    public OutputDescription PickingOutputDescription => this.PickingFramebuffer.OutputDescription;
 
     /// <summary>
     /// Gets the width of the render texture in pixels.
@@ -146,26 +125,7 @@ public class RenderTexture : IRenderTexture
             this.SampleCount
         ));
 
-        this.PickingColorTexture = this._gd.ResourceFactory.CreateTexture(new TextureDescription(
-            this.Width, this.Height, depth: 1, mipLevels: 1, arrayLayers: 1,
-            PixelFormat.R32_UInt,
-            TextureUsage.RenderTarget | TextureUsage.Sampled,
-            TextureType.Texture2D,
-            TextureSampleCount.Count1
-        ));
-
-        this.PickingDepthTexture = (this.SampleCount == TextureSampleCount.Count1)
-            ? this.ForwardDepthTexture // We can share the depth texture if we don't need multisampling
-            : this._gd.ResourceFactory.CreateTexture(new TextureDescription(
-                this.Width, this.Height, depth: 1, mipLevels: 1, arrayLayers: 1,
-                PixelFormat.D32_Float_S8_UInt,
-                TextureUsage.DepthStencil | TextureUsage.Sampled,
-                TextureType.Texture2D,
-                TextureSampleCount.Count1
-            ));
-
         this.Framebuffer = this.CreateFramebuffer();
-        this.PickingFramebuffer = this.CreatePickingFramebuffer();
     }
 
     private Framebuffer CreateFramebuffer()
@@ -175,21 +135,11 @@ public class RenderTexture : IRenderTexture
         ));
     }
 
-    private Framebuffer CreatePickingFramebuffer()
-    {
-        return this._gd.ResourceFactory.CreateFramebuffer(new FramebufferDescription(
-            this.PickingDepthTexture, this.PickingColorTexture
-        ));
-    }
-
     private void DisposeResources()
     {
         this._renderer.DisposeWhenIdle(this.ForwardColorTexture);
         this._renderer.DisposeWhenIdle(this.ForwardDepthTexture);
-        this._renderer.DisposeWhenIdle(this.PickingColorTexture);
-        this._renderer.DisposeWhenIdle(this.PickingDepthTexture);
         this._renderer.DisposeWhenIdle(this.Framebuffer);
-        this._renderer.DisposeWhenIdle(this.PickingFramebuffer);
     }
 
     /// <summary>
