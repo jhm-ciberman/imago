@@ -72,9 +72,9 @@ public class Renderer : IDisposable
     public GraphicsDevice GraphicsDevice { get; }
 
     /// <summary>
-    /// Gets the main render texture.
+    /// Gets the render texture that the main layers draw into.
     /// </summary>
-    internal RenderTexture MainRenderTexture { get; }
+    public RenderTexture MainRenderTexture { get; }
 
     /// <summary>
     /// Gets the GUI render texture.
@@ -90,7 +90,6 @@ public class Renderer : IDisposable
     private readonly DisposeCollector _disposeCollector;
     private readonly FullScreenPass _fullScreenPass;
     private readonly FullScreenPass _fullScreenPixelArtPass;
-    private readonly Forward3DRenderer _forward3DRenderer;
 
     private readonly SpritesPass _spritesPass;
     private readonly Dictionary<OutputDescription, SpritesPass> _overlaySpritesPasses = new();
@@ -147,7 +146,6 @@ public class Renderer : IDisposable
 
         this._disposeCollector = new DisposeCollector();
 
-        this._forward3DRenderer = new Forward3DRenderer(this);
         this._spritesPass = new SpritesPass(this, depthTested: false);
         this._overlaySpritesPasses[this.FullScreenRenderTexture.OutputDescription] = new SpritesPass(this, this.FullScreenRenderTexture, capacity: 64, depthTested: false);
         this._fullScreenPass = new FullScreenPass(this, isPixelArt: false, isOverlay: false);
@@ -536,7 +534,6 @@ public class Renderer : IDisposable
                 pass.Dispose();
             }
             this._fullScreenPass.Dispose();
-            this._forward3DRenderer.Dispose();
 
             // The last thing to dispose is the graphics device.
             // Otherwise AccessViolationException is thrown.

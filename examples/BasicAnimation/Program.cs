@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 using Imago;
@@ -7,6 +8,7 @@ using Imago.Assets.Gltf;
 using Imago.Assets.Materials;
 using Imago.Assets.Meshes;
 using Imago.Assets.Textures;
+using Imago.Rendering;
 using Imago.SceneGraph;
 using Imago.SceneGraph.Cameras;
 using Imago.SceneGraph.Nodes;
@@ -99,6 +101,8 @@ internal sealed class BasicAnimationApp : Application
 
         this.Stage.AddLayer(scene);
     }
+
+    protected override IEnumerable<Module> Modules => [new Graphics3DModule()];
 
     protected override void OnUpdate(float deltaTime)
     {
