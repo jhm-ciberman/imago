@@ -30,7 +30,7 @@ internal class GltfBufferView : IGltfBufferView
     private T[] Read<T>(int offset, int count, Func<int, T> reader) where T : struct
     {
         var arr = new T[count];
-        var stride = this._byteStride == 0 ? Marshal.SizeOf(typeof(T)) : this._byteStride;
+        var stride = this._byteStride == 0 ? Marshal.SizeOf<T>() : this._byteStride;
         int finalOffset = offset + this._byteOffset;
         for (int i = 0; i < count; i++)
         {

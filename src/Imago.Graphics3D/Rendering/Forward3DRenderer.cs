@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using Imago.Graphics3D.Materials;
@@ -133,7 +134,7 @@ public class Forward3DRenderer : IDisposable
     /// </summary>
     /// <typeparam name="T">The material type, must have a <see cref="SurfaceShaderAttribute"/>.</typeparam>
     /// <returns>A new material instance.</returns>
-    internal T MakeMaterial<T>() where T : Material, ICreateableMaterial<T>
+    internal T MakeMaterial<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] T>() where T : Material, ICreateableMaterial<T>
     {
         var shaders = this.GetOrCreateShaders<T>();
         return T.Create(shaders);
@@ -143,12 +144,12 @@ public class Forward3DRenderer : IDisposable
     /// Populates the internal shader cache for <typeparamref name="T"/> so subsequent material creation is allocation-only.
     /// </summary>
     /// <typeparam name="T">The material type, must have a <see cref="SurfaceShaderAttribute"/>.</typeparam>
-    internal void PreloadMaterial<T>() where T : Material
+    internal void PreloadMaterial<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] T>() where T : Material
     {
         this.GetOrCreateShaders<T>();
     }
 
-    private ShaderSet GetOrCreateShaders<T>() where T : Material
+    private ShaderSet GetOrCreateShaders<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] T>() where T : Material
     {
         var type = typeof(T);
         if (this._shaderCache.TryGetValue(type, out var cached))
@@ -172,7 +173,7 @@ public class Forward3DRenderer : IDisposable
         return shaders;
     }
 
-    private static string[] GetMaterialTextureNames(Type materialType)
+    private static string[] GetMaterialTextureNames([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] Type materialType)
     {
         return materialType.GetProperties()
             .Select(p => (prop: p, attr: p.GetCustomAttribute<MaterialTextureAttribute>()))

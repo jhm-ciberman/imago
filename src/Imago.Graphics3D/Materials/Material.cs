@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Imago.Graphics3D.Rendering;
 using Imago.Rendering;
 using NeoVeldrid;
@@ -83,7 +84,7 @@ public abstract class Material : IDisposable
     /// </summary>
     /// <typeparam name="T">The material type, must have a <see cref="SurfaceShaderAttribute"/>.</typeparam>
     /// <returns>A new material instance.</returns>
-    public static T Create<T>() where T : Material, ICreateableMaterial<T>
+    public static T Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] T>() where T : Material, ICreateableMaterial<T>
     {
         return Forward3DRenderer.Instance.MakeMaterial<T>();
     }
@@ -92,7 +93,7 @@ public abstract class Material : IDisposable
     /// Prepares the shaders of the given material type, so the first <see cref="Create{T}"/> call is fast.
     /// </summary>
     /// <typeparam name="T">The material type, must have a <see cref="SurfaceShaderAttribute"/>.</typeparam>
-    public static void Preload<T>() where T : Material, ICreateableMaterial<T>
+    public static void Preload<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] T>() where T : Material, ICreateableMaterial<T>
     {
         Forward3DRenderer.Instance.PreloadMaterial<T>();
     }

@@ -163,9 +163,9 @@ internal class DataBuffer : IDisposable
     /// <param name="offset">The offset to read from.</param>
     /// <returns>The value read.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public T Read<T>(int offset) where T : struct
+    public unsafe T Read<T>(int offset) where T : unmanaged
     {
-        return Marshal.PtrToStructure<T>(this._data + offset);
+        return Unsafe.ReadUnaligned<T>((void*)(this._data + offset));
     }
 
     /// <summary>
