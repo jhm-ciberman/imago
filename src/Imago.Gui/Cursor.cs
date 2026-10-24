@@ -1,5 +1,5 @@
 using System.Numerics;
-using Imago.Assets.Textures;
+using Imago.Textures;
 
 namespace Imago.Gui;
 

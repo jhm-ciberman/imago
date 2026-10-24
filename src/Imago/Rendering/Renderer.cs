@@ -3,18 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using CommunityToolkit.Diagnostics;
-using Imago.Assets.Textures;
 using Imago.Rendering.Passes;
 using Imago.Rendering.Sprites;
-using Imago.SceneGraph;
-using Imago.Utilities;
+using Imago.Textures;
 using NeoVeldrid;
 using NeoVeldrid.Sdl2;
 using NeoVeldrid.StartupUtilities;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using Texture = Imago.Assets.Textures.Texture;
-using Viewport = Imago.SceneGraph.Viewport;
+using Texture = Imago.Textures.Texture;
 
 namespace Imago.Rendering;
 

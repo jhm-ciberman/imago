@@ -1,5 +1,3 @@
-using Imago.SceneGraph;
-
 namespace Imago.Gui;
 
 /// <summary>

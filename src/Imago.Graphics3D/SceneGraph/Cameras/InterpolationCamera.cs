@@ -1,5 +1,4 @@
 using System.Numerics;
-using Imago.SceneGraph;
 using Imago.Support.Drawing;
 using Imago.Support.Tweening;
 

@@ -1,5 +1,3 @@
-using Imago.SceneGraph;
-
 namespace Imago.Graphics3D.SceneGraph;
 
 /// <summary>

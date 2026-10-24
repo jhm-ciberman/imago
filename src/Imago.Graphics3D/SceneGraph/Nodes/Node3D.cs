@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using CommunityToolkit.Diagnostics;
-using Imago.SceneGraph;
 using Imago.Support.Collections;
 using Imago.Templates;
 

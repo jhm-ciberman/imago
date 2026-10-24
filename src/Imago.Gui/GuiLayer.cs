@@ -4,7 +4,6 @@ using System.Numerics;
 using Imago.Input;
 using Imago.Rendering;
 using Imago.Rendering.Sprites;
-using Imago.SceneGraph;
 using Imago.Support.Numerics;
 using Imago.Templates;
 

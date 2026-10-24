@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Imago.Assets.Textures;
+using Imago.Textures;
 using NeoVeldrid;
 
 namespace Imago.Rendering.Internals;

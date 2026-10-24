@@ -2,8 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Imago.Assets.Textures;
-using Imago.Graphics3D.Assets.Materials;
+using Imago.Graphics3D.Materials;
 using Imago.Graphics3D.Rendering.Internals;
 using Imago.Graphics3D.Rendering.Internals.Buffers;
 using Imago.Graphics3D.Rendering.Passes;
@@ -12,8 +11,9 @@ using Imago.Graphics3D.SceneGraph;
 using Imago.Graphics3D.SceneGraph.Picking;
 using Imago.Rendering;
 using Imago.Support.Drawing;
+using Imago.Textures;
 using NeoVeldrid;
-using Shader = Imago.Graphics3D.Assets.Materials.Shader;
+using Shader = Imago.Graphics3D.Materials.Shader;
 
 namespace Imago.Graphics3D.Rendering;
 

@@ -1,4 +1,4 @@
-using Imago.Graphics3D.Assets.Meshes;
+using Imago.Graphics3D.Meshes;
 using Imago.Graphics3D.SceneGraph.Nodes;
 
 namespace Imago.Graphics3D.SceneGraph.Prefabs;

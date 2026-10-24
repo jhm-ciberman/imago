@@ -1,4 +1,4 @@
-using Imago.Graphics3D.Assets.Materials;
+using Imago.Graphics3D.Materials;
 using NeoVeldrid;
 
 namespace Imago.Graphics3D.Rendering.Internals;

@@ -1,6 +1,6 @@
 using System;
-using Imago.Assets.Textures;
 using Imago.Rendering;
+using Imago.Textures;
 using NeoVeldrid;
 
 namespace Imago.Graphics3D.Rendering.Passes;

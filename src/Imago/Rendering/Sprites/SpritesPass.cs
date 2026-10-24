@@ -1,10 +1,9 @@
 using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using Imago.Assets.Materials;
-using Imago.Assets.Textures;
 using Imago.Rendering.Internals;
 using Imago.Support.Numerics;
+using Imago.Textures;
 using NeoVeldrid;
 
 namespace Imago.Rendering.Sprites;

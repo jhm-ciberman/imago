@@ -1,6 +1,6 @@
 using System.Numerics;
-using Imago.Graphics3D.Assets.Materials;
-using Imago.Graphics3D.Assets.Meshes;
+using Imago.Graphics3D.Materials;
+using Imago.Graphics3D.Meshes;
 using Imago.Graphics3D.Rendering;
 using Imago.Graphics3D.SceneGraph.Picking;
 using Imago.Support.Drawing;

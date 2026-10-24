@@ -39,8 +39,8 @@ Projects:
 - **Imago**: the framework core. Application, modules, rendering, layers, sprites, textures, input.
 - **Imago.Graphics3D**: 3D rendering. Scenes, nodes, cameras, meshes, materials, animations, shadows, picking.
 - **Imago.Support**: foundational types shared with consumers. Math primitives (`Vector2Int`, `Rect`, etc.), collections, colors, tweening, extensions.
-- **Imago.Assets.Gltf**: loads glTF 2.0 models, scenes, skins, and animations.
-- **Imago.Assets.Wavefront**: loads Wavefront OBJ models.
+- **Imago.Gltf**: loads glTF 2.0 models, scenes, skins, and animations.
+- **Imago.Wavefront**: loads Wavefront OBJ models.
 - **Imago.Gui**: the retained-mode UI. Controls, layout, text, tooltips, and the mouse cursor.
 - **Imago.DearImGui**: a layer that draws Dear ImGui windows on top of the game, for debug UI.
 - **Imago.DevConsole**: the in-game developer console, built on the Imago UI.

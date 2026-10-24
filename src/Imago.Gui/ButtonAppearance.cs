@@ -1,6 +1,6 @@
-using Imago.Assets.Textures;
 using Imago.Gui.Drawing;
 using Imago.Support.Drawing;
+using Imago.Textures;
 
 namespace Imago.Gui;
 

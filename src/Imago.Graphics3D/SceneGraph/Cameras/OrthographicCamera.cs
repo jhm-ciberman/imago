@@ -1,6 +1,5 @@
 using System.Numerics;
 using CommunityToolkit.Diagnostics;
-using Imago.SceneGraph;
 
 namespace Imago.Graphics3D.SceneGraph.Cameras;
 

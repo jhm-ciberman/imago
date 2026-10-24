@@ -1,6 +1,5 @@
 using System;
-using Imago.Assets.Textures;
-using Imago.SceneGraph;
+using Imago.Textures;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 

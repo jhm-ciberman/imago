@@ -2,12 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using Imago.Assets.Materials;
-using Imago.Assets.Textures;
 using Imago.Graphics3D.SceneGraph;
 using Imago.Graphics3D.SceneGraph.Cameras;
 using Imago.Rendering;
 using Imago.Support.Drawing;
+using Imago.Textures;
 using NeoVeldrid;
 
 namespace Imago.Graphics3D.Rendering.Passes;

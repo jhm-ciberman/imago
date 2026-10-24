@@ -1,5 +1,5 @@
 using FontStashSharp.Interfaces;
-using Imago.Assets.Textures;
+using Imago.Textures;
 using NeoVeldrid;
 
 namespace Imago.Rendering.Sprites;

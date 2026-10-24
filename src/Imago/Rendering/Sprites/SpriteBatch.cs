@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using FontStashSharp;
-using Imago.Assets.Textures;
 using Imago.Support.Drawing;
 using Imago.Support.Numerics;
+using Imago.Textures;
 using NeoVeldrid;
-using Texture = Imago.Assets.Textures.Texture;
+using Texture = Imago.Textures.Texture;
 
 namespace Imago.Rendering.Sprites;
 

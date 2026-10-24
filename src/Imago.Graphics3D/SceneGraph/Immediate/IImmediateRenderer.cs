@@ -1,8 +1,8 @@
 using System;
 using System.Numerics;
-using Imago.Assets.Textures;
-using Imago.Graphics3D.Assets.Materials;
+using Imago.Graphics3D.Materials;
 using Imago.Support.Drawing;
+using Imago.Textures;
 
 namespace Imago.Graphics3D.SceneGraph.Immediate;
 

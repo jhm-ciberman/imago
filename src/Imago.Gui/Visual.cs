@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Numerics;
 using FontStashSharp;
 using Imago.Rendering.Sprites;
-using Imago.SceneGraph;
 using Imago.Support.Numerics;
 
 namespace Imago.Gui;
@@ -361,12 +360,12 @@ public abstract class Visual : ObservableObject, IDisposable, IMountable
     protected abstract Rect ArrangeCore(Rect finalRect);
 
     /// <summary>
-    /// Occurs when this control is being mounted to the root <see cref="SceneGraph.Stage"/>.
+    /// Occurs when this control is being mounted to the root <see cref="Stage"/>.
     /// </summary>
     public event EventHandler? Mounted;
 
     /// <summary>
-    /// Occurs when this control is being unmounted from the root <see cref="SceneGraph.Stage"/>.
+    /// Occurs when this control is being unmounted from the root <see cref="Stage"/>.
     /// </summary>
     public event EventHandler? Unmounting;
 

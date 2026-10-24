@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
-using Imago.Assets.Textures;
 using Imago.Input;
 using Imago.Rendering;
-using Imago.SceneGraph;
+using Imago.Textures;
 using ImGuiNET;
 using NeoVeldrid;
-using Texture = Imago.Assets.Textures.Texture;
+using Texture = Imago.Textures.Texture;
 
 namespace Imago.DearImGui;
 

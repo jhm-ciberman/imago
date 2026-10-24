@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Numerics;
-using Imago.Graphics3D.Assets.Meshes;
+using Imago.Graphics3D.Meshes;
 using Imago.Graphics3D.Utilities;
 
 namespace Imago.Graphics3D.SceneGraph;

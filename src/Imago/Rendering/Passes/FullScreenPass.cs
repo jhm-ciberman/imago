@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using Imago.Assets.Materials;
-using Imago.Assets.Textures;
+using Imago.Textures;
 using NeoVeldrid;
 using NativeTexture = NeoVeldrid.Texture;
 

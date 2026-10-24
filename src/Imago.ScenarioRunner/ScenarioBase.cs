@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Imago.Input;
 using Imago.Rendering;
-using Imago.SceneGraph;
 using Imago.Support;
 using NeoVeldrid;
 using SixLabors.ImageSharp;

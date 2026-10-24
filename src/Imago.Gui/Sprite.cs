@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using Imago.Assets.TexturePacking;
-using Imago.Assets.Textures;
 using Imago.Support.Numerics;
+using Imago.TexturePacking;
+using Imago.Textures;
 
 namespace Imago.Gui;
 

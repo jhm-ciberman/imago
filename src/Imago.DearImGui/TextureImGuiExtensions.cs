@@ -1,4 +1,4 @@
-using Imago.Assets.Textures;
+using Imago.Textures;
 
 namespace Imago.DearImGui;
 

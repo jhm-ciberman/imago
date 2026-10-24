@@ -2,18 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using Imago.Assets.Textures;
-using Imago.Graphics3D.Assets.Materials;
-using Imago.Graphics3D.Assets.Meshes;
+using Imago.Graphics3D.Materials;
+using Imago.Graphics3D.Meshes;
 using Imago.Graphics3D.Rendering.Internals;
 using Imago.Graphics3D.SceneGraph.Cameras;
 using Imago.Graphics3D.SceneGraph.Immediate;
 using Imago.Rendering;
 using Imago.Rendering.Internals;
 using Imago.Support.Drawing;
+using Imago.Textures;
 using NeoVeldrid;
-using Shader = Imago.Graphics3D.Assets.Materials.Shader;
-using Texture = Imago.Assets.Textures.Texture;
+using Shader = Imago.Graphics3D.Materials.Shader;
+using Texture = Imago.Textures.Texture;
 
 namespace Imago.Graphics3D.Rendering.Passes;
 

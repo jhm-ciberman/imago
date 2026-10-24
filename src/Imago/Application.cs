@@ -4,7 +4,6 @@ using System.Numerics;
 using System.Runtime;
 using Imago.Input;
 using Imago.Rendering;
-using Imago.SceneGraph;
 using Microsoft.Extensions.DependencyInjection;
 using NeoVeldrid;
 using NeoVeldrid.Sdl2;
@@ -71,7 +70,7 @@ public abstract class Application : IDisposable
     /// <summary>
     /// Gets the main viewport.
     /// </summary>
-    public SceneGraph.Viewport Viewport => this.Renderer.MainViewport;
+    public Viewport Viewport => this.Renderer.MainViewport;
 
     private ServiceProvider? _services;
 

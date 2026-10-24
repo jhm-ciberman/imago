@@ -25,7 +25,7 @@ internal static class KnownSymbols
     public const string DataTemplateInterface = "Imago.Gui.IDataTemplate";
 
     /// <summary>The <c>IMountable</c> interface required by templates that declare bindings.</summary>
-    public const string MountableInterface = "Imago.SceneGraph.IMountable";
+    public const string MountableInterface = "Imago.IMountable";
 
     /// <summary>The <c>DataTemplates</c> composite type emitted when a template slot has multiple <c>DataTemplate</c> branches.</summary>
     public const string DataTemplatesType = "Imago.Gui.DataTemplates";

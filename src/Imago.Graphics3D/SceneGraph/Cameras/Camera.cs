@@ -3,7 +3,6 @@ using System.Numerics;
 using Imago.Graphics3D.SceneGraph.Lighting;
 using Imago.Graphics3D.Utilities;
 using Imago.Rendering;
-using Imago.SceneGraph;
 using Imago.Support.Drawing;
 
 namespace Imago.Graphics3D.SceneGraph.Cameras;

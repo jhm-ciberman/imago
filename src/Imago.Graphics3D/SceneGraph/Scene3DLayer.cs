@@ -1,15 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Imago.Assets.Textures;
 using Imago.Graphics3D.Rendering;
 using Imago.Graphics3D.SceneGraph.Cameras;
 using Imago.Graphics3D.SceneGraph.Immediate;
 using Imago.Graphics3D.SceneGraph.Nodes;
 using Imago.Graphics3D.SceneGraph.Picking;
-using Imago.SceneGraph;
+using Imago.Rendering;
 using Imago.Support.Drawing;
 using Imago.Templates;
+using Imago.Textures;
 using NeoVeldrid;
 
 namespace Imago.Graphics3D.SceneGraph;

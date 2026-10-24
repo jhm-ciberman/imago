@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using Imago.Graphics3D.Assets.Meshes;
+using Imago.Graphics3D.Meshes;
 using Imago.Graphics3D.Utilities;
 using Imago.Support.Collections;
 using Imago.Support.Drawing;

@@ -2,15 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using Imago.Assets.Textures;
-using Imago.Graphics3D.Assets.Materials;
-using Imago.Graphics3D.Assets.Meshes;
+using Imago.Graphics3D.Materials;
+using Imago.Graphics3D.Meshes;
 using Imago.Graphics3D.Rendering.Internals;
 using Imago.Graphics3D.SceneGraph.Cameras;
 using Imago.Graphics3D.SceneGraph.Picking;
 using Imago.Graphics3D.Utilities;
 using Imago.Input;
 using Imago.Rendering;
+using Imago.Textures;
 using NeoVeldrid;
 
 namespace Imago.Graphics3D.Rendering.Passes;

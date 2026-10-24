@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using Imago.Assets.TexturePacking;
-using Imago.Graphics3D.Assets.Materials;
+using Imago.Graphics3D.Materials;
 using Imago.Graphics3D.SceneGraph.Nodes;
 using Imago.Graphics3D.Utilities;
 using Imago.Support.Collections;
 using Imago.Support.Drawing;
 using Imago.Support.Numerics;
+using Imago.TexturePacking;
 
 namespace Imago.Graphics3D.SceneGraph;
 

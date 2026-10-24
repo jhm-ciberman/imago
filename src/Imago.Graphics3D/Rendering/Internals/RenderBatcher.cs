@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Imago.Graphics3D.Assets.Meshes;
+using Imago.Graphics3D.Meshes;
 using Imago.Rendering;
 using NeoVeldrid;
 

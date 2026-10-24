@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 using Imago;
-using Imago.Assets.Gltf;
-using Imago.Assets.Textures;
+using Imago.Gltf;
 using Imago.Graphics3D;
-using Imago.Graphics3D.Assets.Animations;
-using Imago.Graphics3D.Assets.Materials;
-using Imago.Graphics3D.Assets.Meshes;
+using Imago.Graphics3D.Animations;
+using Imago.Graphics3D.Materials;
+using Imago.Graphics3D.Meshes;
 using Imago.Graphics3D.SceneGraph;
 using Imago.Graphics3D.SceneGraph.Cameras;
 using Imago.Graphics3D.SceneGraph.Nodes;
 using Imago.Graphics3D.SceneGraph.Prefabs;
 using Imago.Support.Drawing;
+using Imago.Textures;
 
 namespace BasicAnimation;
 

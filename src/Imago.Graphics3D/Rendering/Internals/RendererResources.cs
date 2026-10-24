@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Imago.Graphics3D.Assets.Materials;
+using Imago.Graphics3D.Materials;
 using Imago.Graphics3D.Rendering.Internals.Buffers;
 using Imago.Graphics3D.SceneGraph;
 using NeoVeldrid;

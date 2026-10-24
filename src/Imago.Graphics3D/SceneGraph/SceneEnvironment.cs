@@ -1,6 +1,6 @@
-using Imago.Assets.Textures;
 using Imago.Graphics3D.SceneGraph.Lighting;
 using Imago.Support.Drawing;
+using Imago.Textures;
 
 namespace Imago.Graphics3D.SceneGraph;
 
