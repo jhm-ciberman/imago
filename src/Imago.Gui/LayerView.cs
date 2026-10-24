@@ -7,36 +7,36 @@ using Imago.SceneGraph;
 namespace Imago.Gui;
 
 /// <summary>
-/// A control that renders a <see cref="Scene3DLayer"/> and displays the result as a 2D texture.
+/// A control that renders an <see cref="IRenderLayer"/>, such as a 3D scene, and displays the result as a 2D texture.
 /// </summary>
-public class Viewport3D : Control
+public class LayerView : Control
 {
-    private Scene3DLayer? _scene;
+    private IRenderLayer? _renderLayer;
     private RenderTexture? _renderTexture;
     private Texture? _resolvedTexture;
     private bool _dirty;
     private bool _needsFlipY;
 
     /// <summary>
-    /// Gets or sets the 3D scene to render. The caller owns the scene and is responsible for its disposal.
+    /// Gets or sets the layer to render. The caller owns the layer and is responsible for its disposal.
     /// </summary>
-    public Scene3DLayer? Scene3D
+    public IRenderLayer? RenderLayer
     {
-        get => this._scene;
+        get => this._renderLayer;
         set
         {
-            if (this._scene == value) return;
+            if (this._renderLayer == value) return;
 
             if (this.Layer != null)
             {
-                this._scene?.Unmount();
+                this._renderLayer?.Unmount();
             }
 
-            this._scene = value;
+            this._renderLayer = value;
 
             if (this.Layer != null)
             {
-                this._scene?.Mount(this.Layer.Stage!);
+                this._renderLayer?.Mount(this.Layer.Stage!);
             }
 
             this._dirty = true;
@@ -47,25 +47,25 @@ public class Viewport3D : Control
     public override void Mount(GuiLayer layer)
     {
         base.Mount(layer);
-        this._scene?.Mount(layer.Stage!);
+        this._renderLayer?.Mount(layer.Stage!);
     }
 
     /// <inheritdoc />
     public override void Unmount()
     {
-        this._scene?.Unmount();
+        this._renderLayer?.Unmount();
         base.Unmount();
     }
 
     /// <summary>
-    /// Gets or sets a value indicating whether the viewport re-renders every frame.
-    /// When <c>false</c>, the viewport only renders when <see cref="Refresh"/> is called or
-    /// when the <see cref="Scene3D"/> property changes.
+    /// Gets or sets a value indicating whether the view re-renders every frame.
+    /// When <c>false</c>, the view only renders when <see cref="Refresh"/> is called or
+    /// when the <see cref="RenderLayer"/> property changes.
     /// </summary>
     public bool AutoRefresh { get; set; }
 
     /// <summary>
-    /// Marks the viewport as needing a re-render on the next frame.
+    /// Marks the view as needing a re-render on the next frame.
     /// </summary>
     public void Refresh()
     {
@@ -85,7 +85,7 @@ public class Viewport3D : Control
     {
         base.Update(deltaTime);
 
-        if (this._scene == null) return;
+        if (this._renderLayer == null) return;
 
         uint width = (uint)this.ActualSize.X;
         uint height = (uint)this.ActualSize.Y;
@@ -101,7 +101,7 @@ public class Viewport3D : Control
 
         if (this._dirty)
         {
-            Renderer.Instance.RenderLayer(this._scene, this._renderTexture!);
+            Renderer.Instance.RenderLayer(this._renderLayer, this._renderTexture!);
             Renderer.Instance.ResolveTexture(this._renderTexture!, this._resolvedTexture!);
             this._dirty = false;
         }

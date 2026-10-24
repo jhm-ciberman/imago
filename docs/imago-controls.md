@@ -33,7 +33,7 @@ All controls inherit from `Control`, which provides the shared properties for si
 |---------|---------|
 | `TextBlock` | Display text. Supports word wrap, alignment, inline emoji, and text effects. |
 | `TextureBlock` | Display an image or texture. |
-| `Viewport3D` | Embed a 3D viewport in the UI. |
+| `LayerView` | Embed a render layer, such as a 3D scene, in the UI. |
 
 ### Interactive
 
