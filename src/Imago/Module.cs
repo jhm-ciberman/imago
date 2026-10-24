@@ -3,10 +3,10 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Imago;
 
 /// <summary>
-/// A part of an application that adds its services and sets them up when the application starts.
+/// A part of an application that adds its services and sets them up when the application is created.
 /// </summary>
 /// <remarks>
-/// When the application starts, every module registers its services first. Then every module boots, so a module can
+/// When the application is created, every module registers its services first. Then every module boots, so a module can
 /// use the services of other modules in <see cref="Boot"/>.
 /// </remarks>
 public abstract class Module

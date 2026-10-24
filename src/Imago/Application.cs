@@ -78,8 +78,8 @@ public abstract class Application : IDisposable
     /// <summary>
     /// Gets the services of the application and its modules.
     /// </summary>
-    /// <exception cref="InvalidOperationException">Thrown if the application has not started running yet.</exception>
-    public IServiceProvider Services => this._services ?? throw new InvalidOperationException("The application has not started running yet.");
+    /// <exception cref="InvalidOperationException">Thrown if the modules have not booted yet.</exception>
+    public IServiceProvider Services => this._services ?? throw new InvalidOperationException("The modules have not booted yet.");
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Application"/> class.
@@ -108,6 +108,8 @@ public abstract class Application : IDisposable
 
         this.Window_Resized();
         this.Stage.EnableInputHandling();
+
+        this.StartServices();
     }
 
     private Sdl2Window CreateWindow()
@@ -145,32 +147,15 @@ public abstract class Application : IDisposable
     protected virtual GuiSizeMode GuiSizeMode => GuiSizeMode.Native;
 
     /// <summary>
-    /// Gets the modules of the application. Override to add modules. It is read once, when the application starts.
+    /// Gets the modules of the application. Override to add modules.
     /// </summary>
     protected virtual IEnumerable<Module> Modules => [];
 
     /// <summary>
-    /// Called when the application starts, after every module has registered its services. Override to add the
-    /// services of the application.
-    /// </summary>
-    /// <param name="services">The collection to add the services to.</param>
-    protected virtual void Register(IServiceCollection services)
-    {
-    }
-
-    /// <summary>
-    /// Called when the application starts, after every module has booted. Override to set up the application.
-    /// </summary>
-    protected virtual void Boot()
-    {
-    }
-
-    /// <summary>
-    /// Starts the application and runs its main loop. Returns once the application has been quit and fully disposed.
+    /// Runs the main loop of the application. Returns once the application has been quit and fully disposed.
     /// </summary>
     public void Run()
     {
-        this.StartServices();
         this.Ticker.Start();
         this.Dispose();
     }
@@ -192,15 +177,12 @@ public abstract class Application : IDisposable
             module.Register(services);
         }
 
-        this.Register(services);
         this._services = services.BuildServiceProvider();
 
         foreach (var module in modules)
         {
             module.Boot(this);
         }
-
-        this.Boot();
     }
 
     /// <summary>
