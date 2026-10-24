@@ -55,7 +55,6 @@ public sealed class ImGuiLayer : IRenderLayer, IInputHandler, IMountListener, ID
     private readonly IRenderTexture _renderTexture;
     private readonly ImGuiRenderer _imguiRenderer;
     private readonly List<IImGuiDrawable> _drawables = [];
-    private readonly IImGuiDrawable? _application;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ImGuiLayer"/> class.
@@ -87,8 +86,6 @@ public sealed class ImGuiLayer : IRenderLayer, IInputHandler, IMountListener, ID
 
         this._renderTexture.Resized += this.RenderTexture_Resized;
         renderer.RegisterDisposable(this);
-
-        this._application = Application.Instance as IImGuiDrawable;
     }
 
     /// <inheritdoc />
@@ -115,8 +112,6 @@ public sealed class ImGuiLayer : IRenderLayer, IInputHandler, IMountListener, ID
         {
             this._drawables[i].RenderImGui();
         }
-
-        this._application?.RenderImGui();
     }
 
     /// <inheritdoc />

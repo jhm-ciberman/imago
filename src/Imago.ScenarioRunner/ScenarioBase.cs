@@ -159,10 +159,10 @@ public abstract class ScenarioBase : IDisposable
     /// Boots the application and deletes the screenshots of a previous run. <see cref="Dispose"/> quits it.
     /// </summary>
     /// <typeparam name="TSelf">The type of this scenario, handed back to the caller.</typeparam>
-    /// <param name="createApp">Builds the application to drive, with its window size already set.</param>
+    /// <param name="builder">The settings of the application to drive, with its window size already set.</param>
     /// <param name="show">Whether to open a real window instead of running hidden.</param>
     /// <returns>An awaitable that yields this scenario on the game loop thread once the application is running.</returns>
-    protected ScenarioStart<TSelf> Start<TSelf>(Func<Application> createApp, bool show) where TSelf : ScenarioBase
+    protected ScenarioStart<TSelf> Start<TSelf>(ApplicationBuilder builder, bool show) where TSelf : ScenarioBase
     {
         this.PrepareOutputDirectory();
 
@@ -174,7 +174,9 @@ public abstract class ScenarioBase : IDisposable
         StartWatchdog();
 
         InputManager.UseVirtualInput = true;
-        Application.Headless = !show;
+        builder
+            .WithWindowState(WindowState.Normal)
+            .WithHeadless(!show);
 
         var start = new ScenarioStart<TSelf>((TSelf)this, this._loop);
 
@@ -183,9 +185,8 @@ public abstract class ScenarioBase : IDisposable
         {
             SynchronizationContext.SetSynchronizationContext(this._loop);
 
-            var app = createApp();
+            var app = builder.Build();
             this._app = app;
-            app.Window.WindowState = show ? WindowState.Normal : WindowState.Hidden;
 
             // Advance the simulation by a fixed step each frame so animated content lands at the same phase every run.
             app.Ticker.FixedDeltaTime = 1.0 / 60.0;

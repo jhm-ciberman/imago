@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using System;
 using System.Numerics;
 using Imago;
 using Imago.Graphics3D;
@@ -12,22 +12,21 @@ using Imago.Textures;
 
 namespace HelloWorld;
 
-internal static class Program
+internal sealed class HelloWorldGame : Game, IDisposable
 {
     private static void Main()
     {
-        using var app = new HelloWorldApp();
-        app.Run();
+        Application.Configure<HelloWorldGame>()
+            .WithTitle("Imago HelloWorld")
+            .WithModules([new Graphics3DModule()])
+            .Run();
     }
-}
 
-internal sealed class HelloWorldApp : Application
-{
     private readonly RenderNode3D _cube;
 
     private float _time;
 
-    public HelloWorldApp()
+    public HelloWorldGame()
     {
         var scene = new Scene3DLayer
         {
@@ -69,24 +68,17 @@ internal sealed class HelloWorldApp : Application
         };
         scene.Root.AddChild(this._cube);
 
-        this.Stage.AddLayer(scene);
+        this.Application.Stage.AddLayer(scene);
     }
 
-    protected override IEnumerable<Module> Modules => [new Graphics3DModule()];
-
-    protected override void OnUpdate(float deltaTime)
+    protected override void Update(float deltaTime)
     {
         this._time += deltaTime;
         this._cube.Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitY, this._time);
     }
 
-    protected override void UpdateWindowTitle()
+    public void Dispose()
     {
-        if (!this.Window.Exists)
-        {
-            return;
-        }
-
-        this.Window.Title = $"Imago HelloWorld ({this.Renderer.BackendType}) - {this.Ticker.FramesPerSecond:0.0} FPS";
+        this._cube.Dispose();
     }
 }

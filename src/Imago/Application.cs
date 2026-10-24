@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Runtime;
 using Imago.Input;
@@ -12,10 +12,13 @@ using NeoVeldrid.StartupUtilities;
 namespace Imago;
 
 /// <summary>
-/// Base class for applications built on the Imago engine.
-/// Provides window management, rendering, input handling, and game loop infrastructure.
+/// An application built on the Imago engine. Provides window management, rendering, input handling, and the game loop,
+/// and runs a <see cref="Game"/>.
 /// </summary>
-public abstract class Application : IDisposable
+/// <remarks>
+/// Create one with <see cref="Configure{TGame}"/>.
+/// </remarks>
+public class Application : IDisposable
 {
     /// <summary>
     /// Gets the singleton instance of the application.
@@ -30,17 +33,6 @@ public abstract class Application : IDisposable
 #else
     public static bool IsDebug => false;
 #endif
-
-    /// <summary>
-    /// Gets or sets a value indicating whether the application window is created hidden. Set this before
-    /// constructing the application.
-    /// </summary>
-    /// <remarks>
-    /// A hidden window still provides a render context, so offscreen rendering and capture work without a window
-    /// ever appearing. The window is hidden, not absent: a windowing system is still required (an X or Wayland
-    /// server on Linux, or Xvfb), so this is not true display-less rendering.
-    /// </remarks>
-    public static bool Headless { get; set; }
 
     /// <summary>
     /// Gets the SDL2 window.
@@ -72,20 +64,23 @@ public abstract class Application : IDisposable
     /// </summary>
     public Viewport Viewport => this.Renderer.MainViewport;
 
-    private ServiceProvider? _services;
-
     /// <summary>
     /// Gets the services of the application and its modules.
     /// </summary>
-    /// <exception cref="InvalidOperationException">Thrown if the modules have not booted yet.</exception>
-    public IServiceProvider Services => this._services ?? throw new InvalidOperationException("The modules have not booted yet.");
+    public IServiceProvider Services => this._services;
+
+    private readonly ServiceProvider _services;
+
+    private readonly GuiSizeMode _guiSizeMode;
+
+    private readonly Game _game;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Application"/> class.
     /// </summary>
-    /// <param name="backend">The graphics backend to use. If null, the default backend is used.</param>
+    /// <param name="builder">The settings of the application.</param>
     /// <exception cref="InvalidOperationException">Thrown if an application instance already exists.</exception>
-    protected Application(GraphicsBackend? backend = null)
+    internal Application(ApplicationBuilder builder)
     {
         if (Instance != null)
         {
@@ -96,8 +91,10 @@ public abstract class Application : IDisposable
 
         GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
 
-        this.Window = this.CreateWindow();
-        this.Renderer = new Renderer(this.Window, backend);
+        this._guiSizeMode = builder.GuiSizeMode;
+
+        this.Window = CreateWindow(builder);
+        this.Renderer = new Renderer(this.Window, builder.Backend);
         this.Input = new InputManager(this.Window);
         this.Ticker = new Ticker();
         this.Stage = new Stage();
@@ -108,61 +105,44 @@ public abstract class Application : IDisposable
         this.Window_Resized();
         this.Stage.EnableInputHandling();
 
-        this.StartServices();
+        this._services = this.BuildServices(builder);
+
+        foreach (var module in builder.Modules)
+        {
+            module.Boot(this);
+        }
+
+        this._game = this._services.GetRequiredService<Game>();
     }
 
-    private Sdl2Window CreateWindow()
+    /// <summary>
+    /// Starts configuring an application that runs the given game.
+    /// </summary>
+    /// <typeparam name="TGame">The type of the game. The application creates it, so its constructor can take services as parameters.</typeparam>
+    /// <returns>A builder for the application.</returns>
+    public static ApplicationBuilder Configure<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TGame>()
+        where TGame : Game
     {
-        var info = this.CreateWindowInfo();
-        if (Headless)
+        return new ApplicationBuilder(typeof(TGame));
+    }
+
+    private static Sdl2Window CreateWindow(ApplicationBuilder builder)
+    {
+        var info = new WindowCreateInfo
         {
-            info.WindowInitialState = WindowState.Hidden;
-        }
+            X = 100,
+            Y = 100,
+            WindowWidth = builder.WindowWidth,
+            WindowHeight = builder.WindowHeight,
+            WindowTitle = builder.Title,
+            WindowInitialState = builder.IsHeadless ? WindowState.Hidden : builder.WindowState,
+        };
 
         return NeoVeldridStartup.CreateWindow(info);
     }
 
-    /// <summary>
-    /// Describes the application window. Override to customize its size, title, and on-screen state. In headless
-    /// mode the window is created hidden regardless of the returned state.
-    /// </summary>
-    /// <returns>The settings used to create the window.</returns>
-    protected virtual WindowCreateInfo CreateWindowInfo()
+    private ServiceProvider BuildServices(ApplicationBuilder builder)
     {
-        return new WindowCreateInfo
-        {
-            X = 100,
-            Y = 100,
-            WindowWidth = 1024,
-            WindowHeight = 600,
-            WindowTitle = "Application",
-            WindowInitialState = IsDebug ? WindowState.Maximized : WindowState.Normal,
-        };
-    }
-
-    /// <summary>
-    /// Gets the GUI sizing mode. Override to opt in to a fixed virtual resolution for pixel art or retro-style rendering.
-    /// </summary>
-    protected virtual GuiSizeMode GuiSizeMode => GuiSizeMode.Native;
-
-    /// <summary>
-    /// Gets the modules of the application. Override to add modules.
-    /// </summary>
-    protected virtual IEnumerable<Module> Modules => [];
-
-    /// <summary>
-    /// Runs the main loop of the application. Returns once the application has been quit and fully disposed.
-    /// </summary>
-    public void Run()
-    {
-        this.Ticker.Start();
-        this.Dispose();
-    }
-
-    private void StartServices()
-    {
-        List<Module> modules = [.. this.Modules];
-
         var services = new ServiceCollection();
         services.AddSingleton(this);
         services.AddSingleton(this.Window);
@@ -171,17 +151,29 @@ public abstract class Application : IDisposable
         services.AddSingleton(this.Ticker);
         services.AddSingleton(this.Stage);
 
-        foreach (var module in modules)
+        foreach (var module in builder.Modules)
         {
             module.Register(services);
         }
 
-        this._services = services.BuildServiceProvider();
-
-        foreach (var module in modules)
+        foreach (var register in builder.ServiceRegistrations)
         {
-            module.Boot(this);
+            register(services);
         }
+
+        services.AddSingleton(builder.GameType);
+        services.AddSingleton(sp => (Game)sp.GetRequiredService(builder.GameType));
+
+        return services.BuildServiceProvider();
+    }
+
+    /// <summary>
+    /// Runs the main loop of the application. Returns once the application has been quit and fully disposed.
+    /// </summary>
+    public void Run()
+    {
+        this.Ticker.Start();
+        this.Dispose();
     }
 
     /// <summary>
@@ -199,12 +191,10 @@ public abstract class Application : IDisposable
         this.Renderer.MainViewport.Resize(size);
         this.Renderer.Resize((uint)size.X, (uint)size.Y);
 
-        var guiSize = this.GuiSizeMode.ComputeSize(size);
+        var guiSize = this._guiSizeMode.ComputeSize(size);
         this.Renderer.GuiViewport.Resize(guiSize);
         this.Renderer.ResizeGui((uint)guiSize.X, (uint)guiSize.Y);
         this.Stage.GuiScale = size / guiSize;
-
-        this.OnWindowResized();
     }
 
     private void Ticker_Ticked(object? sender, TickedEventArgs e)
@@ -216,7 +206,7 @@ public abstract class Application : IDisposable
         this.Input.UpdateState();
         this.Renderer.Update(deltaTime);
 
-        this.OnUpdate(deltaTime);
+        this._game.Update(deltaTime);
 
         this.Stage.Update(deltaTime);
 
@@ -226,52 +216,11 @@ public abstract class Application : IDisposable
             return;
         }
 
-        this.OnPostUpdate(deltaTime);
-
-        this.UpdateWindowTitle();
+        this._game.PostUpdate(deltaTime);
 
         this.Renderer.Statistics.UpdateTime.End();
 
         this.Renderer.Render(this.Stage);
-    }
-
-    /// <summary>
-    /// Called when the window is resized. Override to handle resize events.
-    /// </summary>
-    protected virtual void OnWindowResized()
-    {
-    }
-
-    /// <summary>
-    /// Called each frame before the stage update. Override to implement frame logic.
-    /// </summary>
-    /// <param name="deltaTime">Time elapsed since the last frame in seconds.</param>
-    protected virtual void OnUpdate(float deltaTime)
-    {
-    }
-
-    /// <summary>
-    /// Called each frame after the stage update but before rendering.
-    /// Override to flush visual changes or perform post-update logic.
-    /// </summary>
-    /// <param name="deltaTime">Time elapsed since the last frame in seconds.</param>
-    protected virtual void OnPostUpdate(float deltaTime)
-    {
-    }
-
-    /// <summary>
-    /// Updates the window title. Override to customize the title bar content.
-    /// </summary>
-    protected virtual void UpdateWindowTitle()
-    {
-        if (!this.Window.Exists)
-        {
-            return;
-        }
-
-        var dt = this.Ticker.DeltaTime * 1000;
-        var fps = this.Ticker.FramesPerSecond;
-        this.Window.Title = $"Application ({this.Renderer.BackendType}) {dt:0.00}ms | {fps:0.00} FPS";
     }
 
     /// <summary>
@@ -280,7 +229,7 @@ public abstract class Application : IDisposable
     public virtual void Dispose()
     {
         this.Ticker.Stop();
-        this._services?.Dispose();
+        this._services.Dispose();
         this.Input.Dispose();
         this.Renderer.Dispose();
         this.Window.Close();

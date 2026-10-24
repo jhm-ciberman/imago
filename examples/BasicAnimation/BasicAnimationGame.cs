@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 using Imago;
@@ -17,17 +16,16 @@ using Imago.Textures;
 
 namespace BasicAnimation;
 
-internal static class Program
+internal sealed class BasicAnimationGame : Game
 {
     private static void Main()
     {
-        using var app = new BasicAnimationApp();
-        app.Run();
+        Application.Configure<BasicAnimationGame>()
+            .WithTitle("Imago BasicAnimation")
+            .WithModules([new Graphics3DModule()])
+            .Run();
     }
-}
 
-internal sealed class BasicAnimationApp : Application
-{
     private static readonly Vector3 _cameraTarget = new Vector3(0f, 0.5f, 0f);
 
     private const float _cameraRadius = 2.5f;
@@ -42,7 +40,7 @@ internal sealed class BasicAnimationApp : Application
 
     private float _cameraAngle;
 
-    public BasicAnimationApp()
+    public BasicAnimationGame()
     {
         var scene = new Scene3DLayer
         {
@@ -99,12 +97,10 @@ internal sealed class BasicAnimationApp : Application
             this._players[i] = player;
         }
 
-        this.Stage.AddLayer(scene);
+        this.Application.Stage.AddLayer(scene);
     }
 
-    protected override IEnumerable<Module> Modules => [new Graphics3DModule()];
-
-    protected override void OnUpdate(float deltaTime)
+    protected override void Update(float deltaTime)
     {
         foreach (var player in this._players)
         {
@@ -121,15 +117,5 @@ internal sealed class BasicAnimationApp : Application
         var z = MathF.Sin(this._cameraAngle) * _cameraRadius;
         this._camera.Position = _cameraTarget + new Vector3(x, _cameraHeight, z);
         this._camera.LookAt(_cameraTarget);
-    }
-
-    protected override void UpdateWindowTitle()
-    {
-        if (!this.Window.Exists)
-        {
-            return;
-        }
-
-        this.Window.Title = $"Imago BasicAnimation ({this.Renderer.BackendType}) - {this.Ticker.FramesPerSecond:0.0} FPS";
     }
 }

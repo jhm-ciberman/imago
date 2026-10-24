@@ -212,7 +212,9 @@ Any control can display a tooltip on hover. Set it using a [property element](te
 Tooltips are drawn by a `TooltipLayer`. `GuiModule` adds one to the stage, so list it in the modules of your application:
 
 ```csharp
-protected override IEnumerable<Module> Modules => [new GuiModule()];
+Application.Configure<MyGame>()
+    .WithModules([new GuiModule()])
+    .Run();
 ```
 
 
