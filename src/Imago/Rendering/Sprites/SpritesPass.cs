@@ -2,19 +2,17 @@ using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Imago.Assets.Materials;
-using Imago.Assets.Meshes;
 using Imago.Assets.Textures;
 using Imago.Rendering.Internals;
 using Imago.Support.Numerics;
 using NeoVeldrid;
-using Shader = Imago.Assets.Materials.Shader;
 
 namespace Imago.Rendering.Sprites;
 
 /// <summary>
 /// Draws sprite quads into a render target. Quads that share a texture are batched into one draw call.
 /// </summary>
-internal class SpritesPass : IDisposable, IPipelineProvider
+internal class SpritesPass : IDisposable
 {
     /// <summary>
     /// Gets the sprite batch that draws with this pass.
@@ -23,7 +21,7 @@ internal class SpritesPass : IDisposable, IPipelineProvider
 
     private readonly GraphicsDevice _gd;
 
-    private readonly Shader _defaultShader;
+    private readonly NeoVeldrid.Shader[] _shaders;
 
     private readonly OutputDescription _outputDescription;
 
@@ -33,7 +31,7 @@ internal class SpritesPass : IDisposable, IPipelineProvider
 
     private readonly SpriteQuad[] _quads;
 
-    private readonly VertexFormat _vertexFormat;
+    private readonly VertexLayoutDescription _vertexLayout;
 
     private readonly DeviceBuffer _vertexBuffer;
 
@@ -45,19 +43,23 @@ internal class SpritesPass : IDisposable, IPipelineProvider
 
     private readonly ResourceSet _passResourceSet;
 
+    private readonly ResourceLayout _textureResourceLayout;
+
     private readonly ResourceSetCache _resourceSetCache;
+
+    private readonly Pipeline _pipeline;
+
+    private readonly Pipeline _scissorPipeline;
 
     private int _quadCount;
 
     private ITexture? _texture;
 
-    private RenderFlags _renderFlags = RenderFlags.Transparent;
+    private bool _isScissorEnabled;
 
     private CommandList _commandList = null!;
 
-    private Shader _currentShaderInUse = null!;
-
-    private RenderFlags _currentPipelineFlags = RenderFlags.None;
+    private Pipeline? _currentPipeline;
 
     private int _drawCallCount;
 
@@ -74,7 +76,7 @@ internal class SpritesPass : IDisposable, IPipelineProvider
         this._outputDescription = (outputTarget ?? renderer.MainRenderTexture).OutputDescription;
         this._depthTested = depthTested;
         this._statistics = renderer.Statistics;
-        this._defaultShader = new Shader(renderer, this, _vertexShader, _fragmentShader, ["Main"]);
+        this._shaders = ShaderCompiler.CompileShaders(this._gd, _vertexShader, _fragmentShader);
         var factory = this._gd.ResourceFactory;
 
         var vertexBufferSize = (uint) (Marshal.SizeOf<SpriteQuad>() * capacity);
@@ -100,11 +102,11 @@ internal class SpritesPass : IDisposable, IPipelineProvider
 
         this._quads = new SpriteQuad[capacity];
 
-        this._vertexFormat = new VertexFormat("SpriteVertex", new VertexLayoutDescription(
+        this._vertexLayout = new VertexLayoutDescription(
             new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
             new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
             new VertexElementDescription("Color", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Byte4_Norm)
-        ));
+        );
 
         this._passResourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
             new ResourceLayoutElementDescription("CameraDataBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
@@ -113,7 +115,15 @@ internal class SpritesPass : IDisposable, IPipelineProvider
         this._matrixBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
         this._passResourceSet = factory.CreateResourceSet(new ResourceSetDescription(this._passResourceLayout, this._matrixBuffer));
 
+        this._textureResourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
+            new ResourceLayoutElementDescription("MainTexture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
+            new ResourceLayoutElementDescription("MainSampler", ResourceKind.Sampler, ShaderStages.Fragment)
+        ));
+
         this._resourceSetCache = new ResourceSetCache(factory);
+
+        this._pipeline = this.CreatePipeline(isScissorEnabled: false);
+        this._scissorPipeline = this.CreatePipeline(isScissorEnabled: true);
 
         this.SpriteBatch = new SpriteBatch(this._gd, this);
     }
@@ -128,7 +138,15 @@ internal class SpritesPass : IDisposable, IPipelineProvider
         this._matrixBuffer.Dispose();
         this._passResourceLayout.Dispose();
         this._passResourceSet.Dispose();
+        this._textureResourceLayout.Dispose();
         this._resourceSetCache.Dispose();
+        this._pipeline.Dispose();
+        this._scissorPipeline.Dispose();
+
+        foreach (var shader in this._shaders)
+        {
+            shader.Dispose();
+        }
     }
 
     /// <summary>
@@ -144,9 +162,8 @@ internal class SpritesPass : IDisposable, IPipelineProvider
 
         this._commandList = cl;
         this._quadCount = 0;
-        this._renderFlags = RenderFlags.Transparent;
-        this._currentShaderInUse = null!;
-        this._currentPipelineFlags = RenderFlags.None;
+        this._isScissorEnabled = false;
+        this._currentPipeline = null;
         this._drawCallCount = 0;
     }
 
@@ -204,7 +221,7 @@ internal class SpritesPass : IDisposable, IPipelineProvider
     public void SetScissorRectangle(Rect rect)
     {
         this.Flush();
-        this._renderFlags |= RenderFlags.ScisorTest;
+        this._isScissorEnabled = true;
         this._commandList.SetScissorRect(0, (uint)rect.X, (uint)rect.Y, (uint)rect.Width, (uint)rect.Height);
     }
 
@@ -214,34 +231,32 @@ internal class SpritesPass : IDisposable, IPipelineProvider
     public void ClearScissorRectangle()
     {
         this.Flush();
-        this._renderFlags &= ~RenderFlags.ScisorTest;
+        this._isScissorEnabled = false;
         this._commandList.SetFullScissorRect(0);
     }
 
-    /// <inheritdoc/>
-    Pipeline IPipelineProvider.MakePipeline(ShaderVariant shaderVariant, RenderFlags flags, TextureSampleCount sampleCount)
+    private Pipeline CreatePipeline(bool isScissorEnabled)
     {
-        var scissorTestEnabled = flags.HasFlag(RenderFlags.ScisorTest);
         return this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
         {
             DepthStencilState = (this._depthTested && this._outputDescription.DepthAttachment.HasValue)
                 ? DepthStencilStateDescription.DepthOnlyLessEqual
                 : DepthStencilStateDescription.Disabled,
             PrimitiveTopology = PrimitiveTopology.TriangleList,
-            ShaderSet = shaderVariant.ShaderSetDescription,
+            ShaderSet = new ShaderSetDescription([this._vertexLayout], this._shaders),
             BlendState = GetBlendState(),
             RasterizerState = new RasterizerStateDescription(
                 FaceCullMode.Back,
                 PolygonFillMode.Solid,
                 FrontFace.CounterClockwise,
                 depthClipEnabled: true,
-                scissorTestEnabled
+                isScissorEnabled
             ),
             Outputs = this._outputDescription,
             ResourceLayouts =
             [
                 this._passResourceLayout,
-                shaderVariant.MaterialResourceLayout,
+                this._textureResourceLayout,
             ],
         });
     }
@@ -266,12 +281,10 @@ internal class SpritesPass : IDisposable, IPipelineProvider
 
         this._commandList.UpdateBuffer(this._vertexBuffer, 0, this._quads.AsSpan(0, this._quadCount));
 
-        if (this._defaultShader != this._currentShaderInUse || this._renderFlags != this._currentPipelineFlags)
+        var pipeline = this._isScissorEnabled ? this._scissorPipeline : this._pipeline;
+        if (pipeline != this._currentPipeline)
         {
-            this._currentShaderInUse = this._defaultShader;
-            this._currentPipelineFlags = this._renderFlags;
-            var pipeline = this._currentShaderInUse.GetPipeline(this._vertexFormat, this._currentPipelineFlags);
-
+            this._currentPipeline = pipeline;
             this._commandList.SetPipeline(pipeline);
             this._commandList.SetGraphicsResourceSet(0, this._passResourceSet);
         }
@@ -279,7 +292,7 @@ internal class SpritesPass : IDisposable, IPipelineProvider
         this._commandList.SetVertexBuffer(0, this._vertexBuffer);
         this._commandList.SetIndexBuffer(this._indexBuffer, IndexFormat.UInt16);
 
-        var resourceSet = this._resourceSetCache.GetResourceSet(this._currentShaderInUse, this._texture);
+        var resourceSet = this._resourceSetCache.GetResourceSet(this._textureResourceLayout, this._texture);
         this._commandList.SetGraphicsResourceSet(1, resourceSet);
         this._commandList.DrawIndexed((uint)this._quadCount * 6);
 

@@ -349,7 +349,7 @@ internal class ImmediatePass : IPipelineProvider, IDisposable, IImmediateRendere
         }
 
         this._commandList.SetGraphicsResourceSet(0, this._passResourceSet);
-        ResourceSet resourceSet = this._resourceSetCache.GetResourceSet(this._shader, this._currentBatchTexture);
+        ResourceSet resourceSet = this._resourceSetCache.GetResourceSet(this._shader.MaterialResourceLayout, this._currentBatchTexture);
         this._commandList.SetGraphicsResourceSet(1, resourceSet);
 
         this._commandList.DrawIndexed((uint)this._indexCount);

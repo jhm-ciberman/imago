@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Imago.Assets.Textures;
 using NeoVeldrid;
-using Shader = Imago.Assets.Materials.Shader;
 
 namespace Imago.Rendering.Internals;
 
@@ -13,7 +12,7 @@ namespace Imago.Rendering.Internals;
 /// </summary>
 internal class ResourceSetCache : IDisposable
 {
-    private record struct Key(ITexture Texture, Shader Shader);
+    private record struct Key(ITexture Texture, ResourceLayout Layout);
 
     private readonly Dictionary<Key, ResourceSet> _cachedResourceSets = new Dictionary<Key, ResourceSet>();
 
@@ -29,19 +28,19 @@ internal class ResourceSetCache : IDisposable
     }
 
     /// <summary>
-    /// Gets or creates a resource set using the given texture and shader.
+    /// Gets or creates a resource set using the given layout and texture.
     /// </summary>
-    /// <param name="shader">The shader to use.</param>
+    /// <param name="layout">The resource layout to use. It must hold one texture and one sampler.</param>
     /// <param name="texture">The texture to use.</param>
     /// <returns>The resource set.</returns>
-    public ResourceSet GetResourceSet(Shader shader, ITexture texture)
+    public ResourceSet GetResourceSet(ResourceLayout layout, ITexture texture)
     {
-        var key = new Key(texture, shader);
+        var key = new Key(texture, layout);
         if (this._cachedResourceSets.TryGetValue(key, out var resourceSet))
             return resourceSet;
 
         resourceSet = this._factory.CreateResourceSet(new ResourceSetDescription(
-            shader.MaterialResourceLayout, texture.NativeTexture, texture.NativeSampler));
+            layout, texture.NativeTexture, texture.NativeSampler));
 
         this._cachedResourceSets.Add(key, resourceSet);
 
