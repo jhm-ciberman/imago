@@ -156,11 +156,18 @@ public class ObjParser
             string[] vertexData = args[i].Split('/');
 
             int positionIndex = int.Parse(vertexData[0]) - 1;
-            int? texCoordIndex = (int?)int.Parse(vertexData[1]) - 1;
-            int? normalIndex = (int?)int.Parse(vertexData[2]) - 1;
+            int? texCoordIndex = ParseOptionalIndex(vertexData, 1);
+            int? normalIndex = ParseOptionalIndex(vertexData, 2);
 
             this._groups[this._currentGroup].Add((positionIndex, texCoordIndex, normalIndex));
         }
+    }
+
+    private static int? ParseOptionalIndex(string[] vertexData, int part)
+    {
+        if (part >= vertexData.Length || vertexData[part].Length == 0) return null;
+
+        return int.Parse(vertexData[part]) - 1;
     }
 
     private static Span<string> TriangulateFace(Span<string> args)
