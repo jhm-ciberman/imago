@@ -4,12 +4,12 @@ using System.Linq;
 using System.Reflection;
 using Imago.Assets.Materials;
 using Imago.Assets.Textures;
-using Imago.Input;
 using Imago.Rendering.Internals;
 using Imago.Rendering.Internals.Buffers;
 using Imago.Rendering.Passes;
 using Imago.Rendering.Passes.Shadows;
 using Imago.SceneGraph;
+using Imago.SceneGraph.Picking;
 using Imago.Support.Drawing;
 using NeoVeldrid;
 using Shader = Imago.Assets.Materials.Shader;
@@ -66,6 +66,16 @@ public class Forward3DRenderer : IDisposable
         this._immediatePass = new ImmediatePass(renderer);
         this._skyDomePass = new SkyDomePass(renderer);
         this._ambientOcclusionPass = new AmbientOcclusionPass(renderer);
+    }
+
+    /// <summary>
+    /// Reads the object under the cursor from the last rendered frame into the given picking manager.
+    /// Does nothing if no scene has rendered to the screen since the last read.
+    /// </summary>
+    /// <param name="pickingManager">The picking manager to update.</param>
+    internal void ReadPickingResult(PickingManager pickingManager)
+    {
+        this._mousePickerPass.ReadStagingResult(pickingManager);
     }
 
     /// <summary>
@@ -191,26 +201,6 @@ public class Forward3DRenderer : IDisposable
         var vertexCode = ShaderLoader.AssembleVertexShader(vertexPath, pass);
         var fragmentCode = ShaderLoader.AssembleSurfaceShader(fragmentPath, pass);
         return new Shader(this._renderer, pipelineProvider, vertexCode, fragmentCode, textureNames, hasParams);
-    }
-
-    /// <summary>
-    /// Updates the state of the 3D renderer before rendering.
-    /// </summary>
-    public void Update()
-    {
-        this._mousePickerPass.SetMousePosition(InputManager.Instance.CursorPosition);
-    }
-
-    /// <summary>
-    /// Reads the picking result from the staging texture and updates the picking manager.
-    /// Must be called after command submission.
-    /// </summary>
-    /// <param name="scene">The 3D scene whose picking manager should be updated, or null if no 3D scene is active.</param>
-    public void ReadPickingResult(Scene3DLayer? scene)
-    {
-        if (scene == null) return;
-
-        this._mousePickerPass.ReadStagingResult(scene.Picking);
     }
 
     /// <summary>

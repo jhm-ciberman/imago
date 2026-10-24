@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Imago.SceneGraph.Cameras;
-using Imago.Support.Drawing;
 using Imago.Templates;
 
 namespace Imago.SceneGraph;
@@ -12,7 +10,7 @@ namespace Imago.SceneGraph;
 /// </summary>
 /// <remarks>
 /// A screen is a collection of layers (both 3D and 2D). When activated, its layers
-/// and Scene3D are pushed onto the Stage. When deactivated, they are removed.
+/// are pushed onto the Stage. When deactivated, they are removed.
 /// </remarks>
 [ItemsMethod(nameof(AddLayer))]
 public class Screen : IDisposable, IMountable
@@ -24,35 +22,6 @@ public class Screen : IDisposable, IMountable
     /// Gets the list of layers in the screen.
     /// </summary>
     public IReadOnlyList<ILayer> Layers => this._layers;
-
-    /// <summary>
-    /// Gets or sets the 3D scene of the screen, if any.
-    /// </summary>
-    public Scene3DLayer? Scene3D { get; set; }
-
-    /// <summary>
-    /// Gets or sets the clear color for the screen.
-    /// This is a convenience property that sets ClearColor on the primary Scene3D.
-    /// </summary>
-    public Color? ClearColor
-    {
-        get => this.Scene3D?.ClearColor;
-        set
-        {
-            if (this.Scene3D != null)
-                this.Scene3D.ClearColor = value;
-        }
-    }
-
-    /// <summary>
-    /// Gets the environment from the primary Scene3D, if any.
-    /// </summary>
-    public SceneEnvironment? Environment => this.Scene3D?.Environment;
-
-    /// <summary>
-    /// Gets the camera from the primary Scene3D, if any.
-    /// </summary>
-    public Camera? Camera => this.Scene3D?.Camera;
 
     /// <summary>
     /// Occurs when this screen has been activated on a <see cref="Stage"/>.
@@ -112,13 +81,12 @@ public class Screen : IDisposable, IMountable
     }
 
     /// <summary>
-    /// Mounts this screen on the given stage, pushing its Scene3D and layers.
+    /// Mounts this screen on the given stage, pushing its layers.
     /// </summary>
     /// <param name="stage">The stage to mount to.</param>
     public void Mount(Stage stage)
     {
         this._stage = stage;
-        stage.Scene3D = this.Scene3D;
         stage.Screen = this;
 
         foreach (var layer in this._layers)
@@ -144,7 +112,7 @@ public class Screen : IDisposable, IMountable
     }
 
     /// <summary>
-    /// Unmounts this screen from its stage, removing its layers and Scene3D.
+    /// Unmounts this screen from its stage, removing its layers.
     /// </summary>
     public void Unmount()
     {
@@ -159,7 +127,6 @@ public class Screen : IDisposable, IMountable
             stage.RemoveLayer(layer);
         }
 
-        stage.Scene3D = null;
         stage.Screen = null;
         stage.NotifyItemUnmounted(this);
         this._stage = null;
@@ -197,8 +164,6 @@ public class Screen : IDisposable, IMountable
         {
             if (disposing)
             {
-                this.Scene3D?.Dispose();
-
                 foreach (var layer in this._layers)
                 {
                     if (layer is IDisposable disposable)

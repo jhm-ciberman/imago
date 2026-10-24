@@ -171,7 +171,6 @@ public class Renderer : IDisposable
     public void Update(float deltaTime)
     {
         this._totalTime += deltaTime;
-        this._forward3DRenderer.Update();
     }
 
     /// <summary>
@@ -194,8 +193,6 @@ public class Renderer : IDisposable
         stats.BeginFrame();
 
         this.RenderStage(stage, this.FullScreenRenderTexture, RenderOutputMode.Screen);
-
-        this._forward3DRenderer.ReadPickingResult(stage.Scene3D);
         stats.RenderTime.End();
 
         if (this.GraphicsDevice.MainSwapchain != null)
@@ -207,10 +204,6 @@ public class Renderer : IDisposable
     /// <summary>
     /// Renders a <see cref="Stage"/> into the given render target.
     /// </summary>
-    /// <remarks>
-    /// Honors the visibility of the scene and every layer, so hiding UI first yields a clean capture.
-    /// The result is left in <paramref name="target"/> for read-back or compositing rather than shown on screen.
-    /// </remarks>
     /// <param name="stage">The stage to render.</param>
     /// <param name="target">The target to render into.</param>
     public void RenderStage(Stage stage, IRenderTexture target)
@@ -223,24 +216,24 @@ public class Renderer : IDisposable
         var stats = this.Statistics;
 
         stats.PreparePhase.Begin();
-        stage.PrepareForRender(this.MainRenderTexture);
         var cl = this._commandList;
         cl.Begin();
         this.UpdateDirtyTextures(cl);
         stats.PreparePhase.End();
 
         stats.Pass3D.Begin();
-        var scene3D = stage.Scene3D;
-        if (scene3D != null && scene3D.IsVisible)
+        cl.SetFramebuffer(this.MainRenderTexture.Framebuffer);
+        var col = stage.DefaultClearColor;
+        cl.ClearColorTarget(0, new RgbaFloat(col.R / 255f, col.G / 255f, col.B / 255f, col.A / 255f));
+        cl.ClearDepthStencil(1f);
+
+        this._spritesPass.SpriteBatch.SetRenderTarget(cl, this.MainRenderTexture);
+        foreach (var layer in stage.MainLayers)
         {
-            this._forward3DRenderer.Render(cl, scene3D, this.MainRenderTexture);
-        }
-        else
-        {
-            cl.SetFramebuffer(this.MainRenderTexture.Framebuffer);
-            var col = stage.DefaultClearColor;
-            cl.ClearColorTarget(0, new RgbaFloat(col.R / 255f, col.G / 255f, col.B / 255f, col.A / 255f));
-            cl.ClearDepthStencil(1f);
+            if (layer.IsVisible)
+            {
+                layer.Render(new RenderContext(this.GraphicsDevice, cl, this.MainRenderTexture, outputMode, this._spritesPass.SpriteBatch));
+            }
         }
         stats.Pass3D.End();
 
@@ -294,25 +287,27 @@ public class Renderer : IDisposable
 
 
     /// <summary>
-    /// Renders a <see cref="Scene3DLayer"/> to an offscreen texture.
+    /// Renders a single layer into the given render texture. The layer does not need to be on a stage.
     /// </summary>
-    /// <param name="scene">The 3D scene to render.</param>
-    /// <param name="renderTexture">The render texture to render to.</param>
-    /// <param name="resolvedTexture">The texture to resolve the multisampled result to. If null, no resolving is performed.</param>
-    public void RenderToOffscreenTexture(Scene3DLayer scene, RenderTexture renderTexture, Texture? resolvedTexture = null)
+    /// <remarks>
+    /// The target is cleared to transparent first.
+    /// </remarks>
+    /// <param name="layer">The layer to render.</param>
+    /// <param name="target">The render texture to render into.</param>
+    public void RenderLayer(IRenderLayer layer, RenderTexture target)
     {
         var cl = this._commandList;
 
-        scene.PrepareForRender(renderTexture);
-
         cl.Begin();
         this.UpdateDirtyTextures(cl);
-        this._forward3DRenderer.Render(cl, scene, renderTexture);
 
-        //if (renderTexture.SampleCount != TextureSampleCount.Count1 && resolvedTexture != null)
-        //{
-        //    cl.ResolveTexture(renderTexture.ForwardColorTexture, resolvedTexture!.NativeTexture);
-        //}
+        cl.SetFramebuffer(target.Framebuffer);
+        cl.ClearColorTarget(0, RgbaFloat.Clear);
+        cl.ClearDepthStencil(1f);
+
+        var pass = this.GetOverlaySpritesPass(target);
+        pass.SpriteBatch.SetRenderTarget(cl, target);
+        layer.Render(new RenderContext(this.GraphicsDevice, cl, target, RenderOutputMode.Offscreen, pass.SpriteBatch));
 
         cl.End();
 

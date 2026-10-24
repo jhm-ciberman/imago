@@ -2,20 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using Imago.Assets.Textures;
 using Imago.Input;
-using Imago.SceneGraph.Cameras;
 using Imago.Support.Drawing;
 
 namespace Imago.SceneGraph;
 
 /// <summary>
-/// Represents the root container that manages layers and the 3D scene for rendering.
+/// Represents the root container that manages layers for rendering.
 /// </summary>
 /// <remarks>
 /// Stage is the top-level container that:
 /// <list type="bullet">
-/// <item>Owns the 3D scene and all layers directly</item>
+/// <item>Owns all layers directly</item>
 /// <item>Routes input events to layers</item>
 /// <item>Coordinates rendering through the Renderer</item>
 /// </list>
@@ -23,30 +21,12 @@ namespace Imago.SceneGraph;
 public class Stage
 {
     private readonly List<ILayer> _allLayers = new();
+    private readonly List<IRenderLayer> _mainLayers = new();
     private readonly List<IRenderLayer> _guiLayers = new();
     private readonly List<IRenderLayer> _overlayLayers = new();
     private readonly List<IInputHandler> _inputHandlers = new();
     private readonly List<IMountListener> _mountListeners = new();
     private readonly HashSet<IMountable> _mountedItems = new();
-    private Scene3DLayer? _scene3D;
-
-    /// <summary>
-    /// Gets or sets the primary 3D scene.
-    /// </summary>
-    /// <remarks>
-    /// Setting this property automatically mounts/unmounts the scene graph.
-    /// </remarks>
-    public Scene3DLayer? Scene3D
-    {
-        get => this._scene3D;
-        set
-        {
-            if (this._scene3D == value) return;
-            this._scene3D?.Unmount();
-            this._scene3D = value;
-            this._scene3D?.Mount(this);
-        }
-    }
 
     /// <summary>
     /// Gets the screen that is mounted on this stage, or null if there is none.
@@ -57,6 +37,11 @@ public class Stage
     /// Gets all layers sorted by ZOrder.
     /// </summary>
     public IReadOnlyList<ILayer> Layers => this._allLayers;
+
+    /// <summary>
+    /// Gets the layers that render to the main render texture, sorted by ZOrder.
+    /// </summary>
+    public IReadOnlyList<IRenderLayer> MainLayers => this._mainLayers;
 
     /// <summary>
     /// Gets the layers that render to the GUI render texture, sorted by ZOrder.
@@ -218,6 +203,7 @@ public class Stage
 
         this._inputHandlers.Clear();
         this._mountListeners.Clear();
+        this._mainLayers.Clear();
         this._guiLayers.Clear();
         this._overlayLayers.Clear();
 
@@ -237,6 +223,7 @@ public class Stage
             {
                 var layers = renderLayer.RenderTarget switch
                 {
+                    LayerRenderTarget.Main => this._mainLayers,
                     LayerRenderTarget.Gui => this._guiLayers,
                     LayerRenderTarget.Overlay => this._overlayLayers,
                     _ => throw new ArgumentOutOfRangeException(nameof(layer), renderLayer.RenderTarget, null),
@@ -333,20 +320,12 @@ public class Stage
     }
 
     /// <summary>
-    /// Updates all layers and the 3D scene.
+    /// Updates all layers.
     /// </summary>
     /// <param name="deltaTime">The time elapsed since the last update, in seconds.</param>
     public virtual void Update(float deltaTime)
     {
         this.UpdateInputBlocking();
-
-        if (this.Scene3D != null)
-        {
-            var isCursorOverGui = this.IsCursorOverGui();
-            this.Scene3D.Picking.Update(this.Scene3D.Camera, isCursorOverGui || this.Scene3D.IsInputBlocked);
-        }
-
-        this.Scene3D?.Update(deltaTime);
 
         foreach (var layer in this._allLayers)
         {
@@ -367,17 +346,7 @@ public class Stage
                 blocked = true;
             }
         }
-
-        if (this.Scene3D != null)
-        {
-            this.Scene3D.IsInputBlocked = blocked;
-        }
     }
-
-    /// <summary>
-    /// Gets the camera from the primary 3D scene.
-    /// </summary>
-    public Camera? Camera => this.Scene3D?.Camera;
 
     /// <summary>
     /// Determines if the cursor is over any element in any visible layer that handles input.
@@ -392,22 +361,5 @@ public class Stage
             }
         }
         return false;
-    }
-
-    /// <summary>
-    /// Prepares all layers for rendering.
-    /// </summary>
-    /// <param name="renderTexture">The render texture that will be used for rendering.</param>
-    public void PrepareForRender(RenderTexture renderTexture)
-    {
-        this.Scene3D?.PrepareForRender(renderTexture);
-    }
-
-    /// <summary>
-    /// Gets the clear color for the stage.
-    /// </summary>
-    public Color? GetClearColor()
-    {
-        return this.Scene3D?.ClearColor ?? this.DefaultClearColor;
     }
 }

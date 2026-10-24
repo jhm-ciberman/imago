@@ -67,7 +67,7 @@ internal sealed class HelloWorldApp : Application
         };
         scene.Root.AddChild(this._cube);
 
-        this.Stage.Scene3D = scene;
+        this.Stage.AddLayer(scene);
     }
 
     protected override void OnUpdate(float deltaTime)

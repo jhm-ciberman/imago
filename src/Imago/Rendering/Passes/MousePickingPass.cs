@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using Imago.Assets.Materials;
 using Imago.Assets.Meshes;
 using Imago.Assets.Textures;
+using Imago.Input;
 using Imago.Rendering.Internals;
 using Imago.SceneGraph.Cameras;
 using Imago.SceneGraph.Picking;
@@ -42,7 +43,7 @@ internal class MousePickingPass : IDisposable, IPipelineProvider
     private readonly RenderBatcher _renderBatcher;
     private readonly NeoVeldrid.Texture _pixelStagingTexture;
     private readonly PickingTexture _pickingTexture;
-    private Vector2 _mousePosition;
+    private bool _isCopyRecorded;
     private bool _mouseInside;
 
     public MousePickingPass(Renderer renderer, Forward3DRenderer forward3DRenderer)
@@ -126,22 +127,16 @@ internal class MousePickingPass : IDisposable, IPipelineProvider
     }
 
     /// <summary>
-    /// Set the mouse position in screen coordinates. This position will be used to read the pixel color from the picking texture.
-    /// The pixel color will be used to determine the object that was clicked the last frame.
-    /// </summary>
-    /// <param name="mousePos">The mouse position in screen coordinates.</param>
-    public void SetMousePosition(Vector2 mousePos)
-    {
-        this._mousePosition = mousePos;
-    }
-
-    /// <summary>
     /// Reads the picking result from the staging texture and updates the picking manager.
     /// Must be called after command submission so the copy has executed.
+    /// Does nothing if the pass has not rendered since the last read.
     /// </summary>
     /// <param name="pickingManager">The picking manager to update.</param>
     public void ReadStagingResult(PickingManager pickingManager)
     {
+        if (!this._isCopyRecorded) return;
+        this._isCopyRecorded = false;
+
         if (!this._mouseInside)
         {
             // The cursor is outside the window, so nothing is under it. The staging texture still holds the
@@ -167,7 +162,8 @@ internal class MousePickingPass : IDisposable, IPipelineProvider
 
     private void RecordCopy(CommandList cl)
     {
-        var mousePos = this._mousePosition;
+        var mousePos = InputManager.Instance.CursorPosition;
+        this._isCopyRecorded = true;
         this._mouseInside = this.MouseIsInside(mousePos);
         if (this._mouseInside)
         {

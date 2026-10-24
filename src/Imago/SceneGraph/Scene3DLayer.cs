@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Imago.Assets.Textures;
 using Imago.Rendering;
 using Imago.SceneGraph.Cameras;
@@ -16,8 +17,14 @@ namespace Imago.SceneGraph;
 /// Represents a 3D scene containing a scene graph, camera, and environment.
 /// </summary>
 [ContentProperty(nameof(Root))]
-public class Scene3DLayer : IDisposable, IMountable
+public class Scene3DLayer : IRenderLayer, IDisposable
 {
+    /// <inheritdoc />
+    public int ZOrder { get; init; } = 0;
+
+    /// <inheritdoc />
+    public LayerRenderTarget RenderTarget => LayerRenderTarget.Main;
+
     /// <summary>
     /// Gets or sets a value indicating whether this scene is visible and should be rendered.
     /// </summary>
@@ -55,8 +62,14 @@ public class Scene3DLayer : IDisposable, IMountable
     /// Mounts this scene to the given <see cref="Stage"/>, propagating to all nodes in the scene graph.
     /// </summary>
     /// <param name="stage">The stage to mount to.</param>
+    /// <exception cref="InvalidOperationException">Thrown if the stage already holds another 3D scene layer.</exception>
     public void Mount(Stage stage)
     {
+        if (stage.Layers.Count(layer => layer is Scene3DLayer) > 1)
+        {
+            throw new InvalidOperationException("A stage can only hold one Scene3DLayer.");
+        }
+
         this._stage = stage;
         this._root?.Mount(this);
         stage.NotifyItemMounted(this);
@@ -282,15 +295,27 @@ public class Scene3DLayer : IDisposable, IMountable
     /// <param name="deltaTime">Time elapsed since last update in seconds.</param>
     public void Update(float deltaTime)
     {
+        if (this._stage != null)
+        {
+            Forward3DRenderer.Instance.ReadPickingResult(this.Picking);
+            this.Picking.Update(this.Camera, this._stage.IsCursorOverGui() || this.IsInputBlocked);
+        }
+
         this.Gizmos.Update(deltaTime);
-        // Note: Picking.Update is called by Stage.Update with the correct isCursorOverUi value
     }
 
-    /// <summary>
-    /// Prepares the scene for rendering by updating transforms, skeletons, and render queues.
-    /// </summary>
-    /// <param name="renderTexture">The render texture that will be used for rendering.</param>
-    public void PrepareForRender(RenderTexture renderTexture)
+    /// <inheritdoc />
+    /// <exception cref="InvalidOperationException">Thrown if the target is not a <see cref="RenderTexture"/>.</exception>
+    public void Render(RenderContext ctx)
+    {
+        var target = ctx.Target as RenderTexture
+            ?? throw new InvalidOperationException("A 3D scene can only render into a RenderTexture.");
+
+        this.PrepareForRender(target);
+        Forward3DRenderer.Instance.Render(ctx.CommandList, this, target);
+    }
+
+    private void PrepareForRender(RenderTexture renderTexture)
     {
         if (this.MultiSampleCount != renderTexture.SampleCount)
         {
