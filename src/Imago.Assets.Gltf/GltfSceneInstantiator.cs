@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using Imago.Assets.Materials;
-using Imago.Assets.Meshes;
-using Imago.SceneGraph;
-using Imago.SceneGraph.Nodes;
+using Imago.Graphics3D.Assets.Materials;
+using Imago.Graphics3D.Assets.Meshes;
+using Imago.Graphics3D.SceneGraph;
+using Imago.Graphics3D.SceneGraph.Nodes;
 
 namespace Imago.Assets.Gltf;
 

@@ -36,7 +36,8 @@ I built Imago for my game Medieval Life over several years. I'm extracting it so
 
 Projects:
 
-- **Imago**: the framework itself. Application, rendering, scene graph, input, assets.
+- **Imago**: the framework core. Application, modules, rendering, layers, sprites, textures, input.
+- **Imago.Graphics3D**: 3D rendering. Scenes, nodes, cameras, meshes, materials, animations, shadows, picking.
 - **Imago.Support**: foundational types shared with consumers. Math primitives (`Vector2Int`, `Rect`, etc.), collections, colors, tweening, extensions.
 - **Imago.Assets.Gltf**: loads glTF 2.0 models, scenes, skins, and animations.
 - **Imago.Assets.Wavefront**: loads Wavefront OBJ models.

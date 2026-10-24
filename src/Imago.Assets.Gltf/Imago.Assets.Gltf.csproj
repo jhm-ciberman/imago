@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <ItemGroup>
         <ProjectReference Include="../Imago/Imago.csproj" />
+        <ProjectReference Include="../Imago.Graphics3D/Imago.Graphics3D.csproj" />
         <ProjectReference Include="../Imago.Support/Imago.Support.csproj" />
 
         <PackageReference Include="glTF2Loader" />

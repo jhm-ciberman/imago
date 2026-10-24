@@ -159,7 +159,7 @@ public class PhaseTimer
 
 /// <summary>
 /// Holds per-frame rendering statistics using double-buffering. Public properties expose
-/// the previous frame's completed values, while internal fields accumulate the current frame's data.
+/// the previous frame's completed values, while the <c>Current</c> properties collect the current frame's data.
 /// </summary>
 /// <remarks>
 /// Call <see cref="BeginFrame"/> at the start of each render pass to snapshot the previous frame's
@@ -169,10 +169,26 @@ public class RenderStatistics
 {
     private const int HistoryCapacity = 300;
 
-    internal int CurrentDrawCalls;
-    internal int CurrentShadowDrawCalls;
-    internal int CurrentVisibleRenderables;
-    internal int CurrentTotalRenderables;
+    /// <summary>
+    /// Gets or sets the number of forward draw calls issued so far in the current frame.
+    /// </summary>
+    public int CurrentDrawCalls { get; set; }
+
+    /// <summary>
+    /// Gets or sets the number of shadow draw calls issued so far in the current frame.
+    /// </summary>
+    public int CurrentShadowDrawCalls { get; set; }
+
+    /// <summary>
+    /// Gets or sets the number of renderables that passed culling in the current frame.
+    /// </summary>
+    public int CurrentVisibleRenderables { get; set; }
+
+    /// <summary>
+    /// Gets or sets the number of renderables in the render queues in the current frame.
+    /// </summary>
+    public int CurrentTotalRenderables { get; set; }
+
     internal int CurrentGuiDrawCalls;
 
     /// <summary>

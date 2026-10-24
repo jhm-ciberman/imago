@@ -4,7 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using Imago.Assets.Meshes;
+using Imago.Graphics3D.Assets.Meshes;
 
 namespace Imago.Assets.Wavefront;
 

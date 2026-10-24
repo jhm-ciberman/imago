@@ -160,7 +160,7 @@ public class Renderer : IDisposable
     /// <summary>
     /// Gets the total elapsed time since the renderer was created, in seconds.
     /// </summary>
-    internal float TotalTime => this._totalTime;
+    public float TotalTime => this._totalTime;
 
     /// <summary>
     /// Updates the state of the renderer and its components.

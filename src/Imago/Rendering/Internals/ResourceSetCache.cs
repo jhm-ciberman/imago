@@ -7,10 +7,9 @@ namespace Imago.Rendering.Internals;
 
 /// <summary>
 /// A cache for resource sets used in rendering. This class provides a way to reuse resource sets
-/// that have already been created, which can improve performance by reducing the number of
-/// resource set allocations and deallocations.
+/// that have already been created
 /// </summary>
-internal class ResourceSetCache : IDisposable
+public class ResourceSetCache : IDisposable
 {
     private record struct Key(ITexture Texture, ResourceLayout Layout);
 
@@ -47,6 +46,7 @@ internal class ResourceSetCache : IDisposable
         return resourceSet;
     }
 
+    /// <inheritdoc />
     public void Dispose()
     {
         foreach (var resourceSet in this._cachedResourceSets.Values)

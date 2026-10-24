@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
 using glTFLoader;
-using Imago.Assets.Animations;
-using Imago.Assets.Meshes;
+using Imago.Graphics3D.Assets.Animations;
+using Imago.Graphics3D.Assets.Meshes;
 using static glTFLoader.Schema.AnimationChannelTarget;
 using static glTFLoader.Schema.AnimationSampler;
 
