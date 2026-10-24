@@ -16,6 +16,7 @@ public class AnimationPlayer
 {
     private readonly Dictionary<string, Node3D> _namesToNodes = new();
 
+    private readonly Pose _restPose = new();
     private readonly Pose _currentPose = new();
     private readonly Pose _outgoingPose = new();
     private readonly Pose _finalPose = new();
@@ -138,6 +139,7 @@ public class AnimationPlayer
     public void Play(Animation animation, bool loop)
     {
         this.Animation = animation;
+        this.ResetCurrentPose();
         this._currentTime = 0f;
         this.IsLooping = loop;
         this.IsBlending = false;
@@ -183,6 +185,7 @@ public class AnimationPlayer
         }
 
         this.Animation = animation;
+        this.ResetCurrentPose();
         this._currentTime = 0f;
         this.IsLooping = loop;
         this.IsBlending = true;
@@ -236,7 +239,6 @@ public class AnimationPlayer
             this._currentTime = Math.Clamp(this._currentTime, 0f, duration);
         }
 
-        this._currentPose.Clear();
         this.Animation.Sample(this._currentPose, this._currentTime);
 
         Pose poseToApply;
@@ -270,14 +272,42 @@ public class AnimationPlayer
     /// <summary>
     /// Re-resolves bone names against the current root hierarchy. Call after nodes under <see cref="Root"/> have been added, removed, or renamed.
     /// </summary>
+    /// <remarks>
+    /// The current local transforms of the bones become their rest pose. A bone keeps its rest value for every
+    /// position, rotation, or scale that the playing clip does not animate.
+    /// </remarks>
     public void Rebind()
     {
         this._namesToNodes.Clear();
+        this._restPose.Clear();
         this._hasAppliedPose = false;
 
-        if (this._root == null) return;
+        if (this._root != null)
+        {
+            BuildNamesDictionary(this._root, this._namesToNodes);
+        }
 
-        BuildNamesDictionary(this._root, this._namesToNodes);
+        foreach (var (name, node) in this._namesToNodes)
+        {
+            this._restPose.Set(name, new BoneTransform(node.Position, node.Rotation, node.Scale));
+        }
+
+        this.ResetCurrentPose();
+    }
+
+    private void ResetCurrentPose()
+    {
+        this._currentPose.Clear();
+
+        if (this.Animation == null) return;
+
+        foreach (string boneName in this.Animation.ChannelNames)
+        {
+            if (this._restPose.TryGet(boneName, out BoneTransform rest))
+            {
+                this._currentPose.Set(boneName, rest);
+            }
+        }
     }
 
     private void UpdateRootMotion()

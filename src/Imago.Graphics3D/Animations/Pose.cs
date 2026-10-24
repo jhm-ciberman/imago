@@ -17,7 +17,7 @@ public class Pose
     /// <summary>
     /// Gets the bone names currently stored in this pose.
     /// </summary>
-    public IReadOnlyCollection<string> BoneNames => this._bones.Keys;
+    public Dictionary<string, BoneTransform>.KeyCollection BoneNames => this._bones.Keys;
 
     /// <summary>
     /// Tries to retrieve the transform for the given bone.
