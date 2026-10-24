@@ -4,7 +4,6 @@ using Imago.Assets.Materials;
 using Imago.Rendering.Internals.Buffers;
 using Imago.SceneGraph;
 using NeoVeldrid;
-using Texture = Imago.Assets.Textures.Texture;
 
 namespace Imago.Rendering.Internals;
 
@@ -22,7 +21,6 @@ internal class RendererResources : IDisposable
     private readonly List<DataBuffer> _instanceDataBuffers = [];
     private readonly List<DataBuffer> _transformDataBuffers = [];
     private readonly List<DataBuffer> _skeletonDataBuffers = [];
-    private readonly List<Texture> _dirtyTextures = [];
     private readonly List<Material> _dirtyMaterials = [];
     private readonly object _dirtyLock = new();
 
@@ -96,18 +94,6 @@ internal class RendererResources : IDisposable
     }
 
     /// <summary>
-    /// Notifies the renderer that the given texture is dirty and needs to be updated.
-    /// </summary>
-    /// <param name="texture">The texture to update.</param>
-    internal void NotifyTextureDirty(Texture texture)
-    {
-        lock (this._dirtyLock)
-        {
-            this._dirtyTextures.Add(texture);
-        }
-    }
-
-    /// <summary>
     /// Notifies the renderer that the given material's resources are dirty and need to be updated.
     /// </summary>
     /// <param name="material">The material to update.</param>
@@ -136,27 +122,19 @@ internal class RendererResources : IDisposable
             this._skeletonDataBuffers[i].UploadToGPU(commandList);
         }
 
-        // Snapshot and clear dirty lists under lock, then process without lock
+        // Snapshot and clear the dirty list under lock, then process without lock
         Material[] dirtyMaterials;
-        Texture[] dirtyTextures;
 
         lock (this._dirtyLock)
         {
             dirtyMaterials = this._dirtyMaterials.Count > 0 ? [.. this._dirtyMaterials] : [];
-            dirtyTextures = this._dirtyTextures.Count > 0 ? [.. this._dirtyTextures] : [];
             this._dirtyMaterials.Clear();
-            this._dirtyTextures.Clear();
         }
 
         foreach (var material in dirtyMaterials)
         {
             material.Update();
             material.UpdateResources(commandList);
-        }
-
-        foreach (var texture in dirtyTextures)
-        {
-            texture.Update(commandList);
         }
     }
 

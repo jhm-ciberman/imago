@@ -5,7 +5,6 @@ using System.Numerics;
 using CommunityToolkit.Diagnostics;
 using Imago.Assets.Materials;
 using Imago.Assets.Textures;
-using Imago.Rendering.Internals;
 using Imago.Rendering.Internals.Buffers;
 using Imago.Rendering.Passes;
 using Imago.Rendering.Sprites;
@@ -98,7 +97,8 @@ public class Renderer : IDisposable
     private readonly SpritesPass _spritesPass;
     private readonly Dictionary<OutputDescription, SpritesPass> _overlaySpritesPasses = new();
 
-    private readonly RendererResources _rendererResources;
+    private readonly List<Texture> _dirtyTextures = [];
+    private readonly object _dirtyTexturesLock = new();
     private readonly HashSet<IDisposable> _disposables = new HashSet<IDisposable>();
     private readonly Dictionary<ResourceLayoutDescription, ResourceLayout> _resourceLayoutCache = new();
     private float _totalTime;
@@ -135,7 +135,6 @@ public class Renderer : IDisposable
         Instance = this;
 
         this.GraphicsDevice = gd;
-        this._rendererResources = new RendererResources(this.GraphicsDevice);
 
         swapchain ??= this.GraphicsDevice.MainSwapchain;
 
@@ -180,17 +179,17 @@ public class Renderer : IDisposable
     /// <summary>
     /// Gets the resource layout for transform data.
     /// </summary>
-    internal ResourceLayout TransformResourceLayout => this._rendererResources.TransformResourceLayout;
+    internal ResourceLayout TransformResourceLayout => this._forward3DRenderer.Resources.TransformResourceLayout;
 
     /// <summary>
     /// Gets the resource layout for instance data.
     /// </summary>
-    internal ResourceLayout InstanceResourceLayout => this._rendererResources.InstanceResourceLayout;
+    internal ResourceLayout InstanceResourceLayout => this._forward3DRenderer.Resources.InstanceResourceLayout;
 
     /// <summary>
     /// Gets the resource layout for skeleton data.
     /// </summary>
-    internal ResourceLayout SkeletonResourceLayout => this._rendererResources.SkeletonResourceLayout;
+    internal ResourceLayout SkeletonResourceLayout => this._forward3DRenderer.Resources.SkeletonResourceLayout;
 
     /// <summary>
     /// Requests a data block for instance data.
@@ -198,7 +197,7 @@ public class Renderer : IDisposable
     /// <param name="instanceDataBlockSize">The size of the instance data block.</param>
     internal DataBlock RequestInstanceDataBlock(int instanceDataBlockSize)
     {
-        return this._rendererResources.RequestInstanceDataBlock(instanceDataBlockSize);
+        return this._forward3DRenderer.Resources.RequestInstanceDataBlock(instanceDataBlockSize);
     }
 
     /// <summary>
@@ -206,7 +205,7 @@ public class Renderer : IDisposable
     /// </summary>
     internal DataBlock RequestTransformDataBlock()
     {
-        return this._rendererResources.RequestTransformDataBlock();
+        return this._forward3DRenderer.Resources.RequestTransformDataBlock();
     }
 
     /// <summary>
@@ -214,7 +213,7 @@ public class Renderer : IDisposable
     /// </summary>
     internal DataBlock RequestSkeletonDataBlock()
     {
-        return this._rendererResources.RequestSkeletonDataBlock();
+        return this._forward3DRenderer.Resources.RequestSkeletonDataBlock();
     }
 
     /// <summary>
@@ -289,7 +288,7 @@ public class Renderer : IDisposable
         stage.PrepareForRender(this.MainRenderTexture);
         var cl = this._commandList;
         cl.Begin();
-        this._rendererResources.Update(cl);
+        this.UpdateDirtyTextures(cl);
         stats.PreparePhase.End();
 
         stats.Pass3D.Begin();
@@ -369,7 +368,7 @@ public class Renderer : IDisposable
         scene.PrepareForRender(renderTexture);
 
         cl.Begin();
-        this._rendererResources.Update(cl);
+        this.UpdateDirtyTextures(cl);
         this._forward3DRenderer.Render(cl, scene, renderTexture);
 
         //if (renderTexture.SampleCount != TextureSampleCount.Count1 && resolvedTexture != null)
@@ -547,7 +546,27 @@ public class Renderer : IDisposable
     /// <param name="texture">The texture to update.</param>
     internal void NotifyTextureDirty(Texture texture)
     {
-        this._rendererResources.NotifyTextureDirty(texture);
+        lock (this._dirtyTexturesLock)
+        {
+            this._dirtyTextures.Add(texture);
+        }
+    }
+
+    private void UpdateDirtyTextures(CommandList cl)
+    {
+        // Snapshot and clear the dirty list under lock, then process without lock
+        Texture[] dirtyTextures;
+
+        lock (this._dirtyTexturesLock)
+        {
+            dirtyTextures = this._dirtyTextures.Count > 0 ? [.. this._dirtyTextures] : [];
+            this._dirtyTextures.Clear();
+        }
+
+        foreach (var texture in dirtyTextures)
+        {
+            texture.Update(cl);
+        }
     }
 
     /// <summary>
@@ -556,7 +575,7 @@ public class Renderer : IDisposable
     /// <param name="material">The material to update.</param>
     internal void NotifyMaterialResourcesDirty(Material material)
     {
-        this._rendererResources.NotifyMaterialResourcesDirty(material);
+        this._forward3DRenderer.Resources.NotifyMaterialResourcesDirty(material);
     }
 
     /// <summary>
@@ -594,7 +613,6 @@ public class Renderer : IDisposable
             }
             this._fullScreenPass.Dispose();
             this._forward3DRenderer.Dispose();
-            this._rendererResources.Dispose();
 
             // The last thing to dispose is the graphics device.
             // Otherwise AccessViolationException is thrown.

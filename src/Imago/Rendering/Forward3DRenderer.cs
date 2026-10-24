@@ -36,12 +36,18 @@ public class Forward3DRenderer : IDisposable
     private readonly Dictionary<Type, ShaderSet> _shaderCache = new();
 
     /// <summary>
+    /// Gets the GPU buffers and the dirty materials shared by all 3D renderables.
+    /// </summary>
+    internal RendererResources Resources { get; }
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="Forward3DRenderer"/> class.
     /// </summary>
     /// <param name="renderer">The main renderer instance.</param>
     public Forward3DRenderer(Renderer renderer)
     {
         this._renderer = renderer;
+        this.Resources = new RendererResources(renderer.GraphicsDevice);
         this._mousePickerPass = new MousePickingPass(renderer);
         this._gizmosPass = new GizmosPass(renderer);
         this._particlesPass = new ParticlesPass(renderer);
@@ -156,6 +162,8 @@ public class Forward3DRenderer : IDisposable
     /// <param name="renderTexture">The target render texture.</param>
     public void Render(CommandList cl, Scene3D scene, RenderTexture renderTexture)
     {
+        this.Resources.Update(cl);
+
         var camera = scene.Camera;
 
         cl.SetFramebuffer(renderTexture.Framebuffer);
@@ -231,5 +239,6 @@ public class Forward3DRenderer : IDisposable
         this._skyDomePass.Dispose();
         this._immediatePass.Dispose();
         this._ambientOcclusionPass.Dispose();
+        this.Resources.Dispose();
     }
 }
