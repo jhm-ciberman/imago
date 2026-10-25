@@ -191,9 +191,9 @@ public abstract class Camera
     public Vector3 Right => new Vector3(this.ViewMatrix.M11, this.ViewMatrix.M21, this.ViewMatrix.M31);
 
     /// <summary>
-    /// Gets the forward vector for the camera.
+    /// Gets the forward vector for the camera, which points where the camera looks.
     /// </summary>
-    public Vector3 Forward => new Vector3(this.ViewMatrix.M13, this.ViewMatrix.M23, this.ViewMatrix.M33);
+    public Vector3 Forward => -new Vector3(this.ViewMatrix.M13, this.ViewMatrix.M23, this.ViewMatrix.M33);
 
     /// <summary>
     /// Rotates the camera to look at the specified target.
@@ -206,9 +206,9 @@ public abstract class Camera
     }
 
     /// <summary>
-    /// Unproject a point from screen space to world space.
+    /// Unproject a point from normalized device coordinates to world space.
     /// </summary>
-    /// <param name="point">The point in screen space.</param>
+    /// <param name="point">The point in normalized device coordinates, from -1 to 1 on each axis.</param>
     /// <returns>The point in world space.</returns>
     public Vector3 Unproject(Vector3 point)
     {
@@ -219,15 +219,40 @@ public abstract class Camera
     }
 
     /// <summary>
-    /// Projects a point from world space to screen space.
+    /// Projects a point from world space to normalized device coordinates.
     /// </summary>
     /// <param name="point">The point in world space.</param>
-    /// <returns>The point in screen space.</returns>
+    /// <returns>The point in normalized device coordinates, from -1 to 1 on each axis for points the camera sees.</returns>
     public Vector3 Project(Vector3 point)
     {
         Vector4 v = Vector4.Transform(point, this.ViewProjectionMatrix);
         v /= v.W;
         return new Vector3(v.X, v.Y, v.Z);
+    }
+
+    /// <summary>
+    /// Projects a point from world space to the camera's viewport, in pixels from the top left corner.
+    /// </summary>
+    /// <remarks>
+    /// A point behind the camera does not give a meaningful position. Check it with <see cref="IsInFront"/>.
+    /// </remarks>
+    /// <param name="point">The point in world space.</param>
+    /// <returns>The point in viewport pixels.</returns>
+    public Vector2 WorldToViewport(Vector3 point)
+    {
+        Vector3 ndc = this.Project(point);
+        return new Vector2((ndc.X + 1f) / 2f, (1f - ndc.Y) / 2f) * this.Viewport.Size;
+    }
+
+    /// <summary>
+    /// Determines whether the given point is in front of the camera.
+    /// </summary>
+    /// <param name="point">The point in world space.</param>
+    /// <returns>True if the point is in front of the camera, false otherwise.</returns>
+    public bool IsInFront(Vector3 point)
+    {
+        // The view matrix is right-handed, so the camera looks down -Z.
+        return Vector3.Transform(point, this.ViewMatrix).Z < 0f;
     }
 
     /// <summary>
