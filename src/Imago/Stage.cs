@@ -174,6 +174,26 @@ public class Stage
     }
 
     /// <summary>
+    /// Finds every layer of the given type, in ZOrder.
+    /// </summary>
+    /// <typeparam name="T">The type of layer to find.</typeparam>
+    /// <returns>The layers of type <typeparamref name="T"/>. Empty if the stage has none.</returns>
+    public IEnumerable<T> FindLayers<T>() where T : class, ILayer
+    {
+        return this._allLayers.OfType<T>();
+    }
+
+    /// <summary>
+    /// Finds every visible layer of the given type, in ZOrder.
+    /// </summary>
+    /// <typeparam name="T">The type of layer to find.</typeparam>
+    /// <returns>The visible layers of type <typeparamref name="T"/>. Empty if the stage has none.</returns>
+    public IEnumerable<T> FindVisibleLayers<T>() where T : class, ILayer
+    {
+        return this._allLayers.OfType<T>().Where(layer => layer.IsVisible);
+    }
+
+    /// <summary>
     /// Tells the stage that the given item was mounted on it, so its mount listeners are notified.
     /// </summary>
     /// <param name="item">The item that was mounted.</param>

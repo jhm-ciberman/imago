@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Imago.ScenarioRunner;
+namespace Imago.Scenarios;
 
 /// <summary>
 /// Turns the application's frame loop into awaitable steps so scenario code can suspend until a later frame.

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading;
 
-namespace Imago.ScenarioRunner;
+namespace Imago.Scenarios;
 
 /// <summary>
 /// Resumes awaited continuations on the game loop thread, one batch per frame.

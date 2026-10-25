@@ -11,7 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NeoVeldrid;
 using SixLabors.ImageSharp;
 
-namespace Imago.ScenarioRunner;
+namespace Imago.Scenarios;
 
 /// <summary>
 /// Drives a running application from a script and saves the screenshots it captures. A game derives from this to
@@ -27,6 +27,7 @@ public abstract class Scenario : IDisposable
 
     private readonly ScenarioScheduler _scheduler = new();
     private readonly List<string> _shots = new();
+    private readonly Dictionary<Type, object> _tools = new();
 
     private ScenarioHost? _host;
     private Application? _app;
@@ -112,6 +113,40 @@ public abstract class Scenario : IDisposable
     public T Service<T>() where T : notnull
     {
         return this.App.Services.GetRequiredService<T>();
+    }
+
+    /// <summary>
+    /// Adds a tool to this scenario, so it can be found with <see cref="Tool{T}"/>.
+    /// </summary>
+    /// <remarks>
+    /// Modules call this from <see cref="Module.BootScenario"/> and expose the tool with an extension
+    /// property, so scripts do not call <see cref="Tool{T}"/> themselves.
+    /// </remarks>
+    /// <typeparam name="T">The type the tool is found by.</typeparam>
+    /// <param name="tool">The tool to add.</param>
+    /// <exception cref="InvalidOperationException">Thrown if a tool of the same type was already added.</exception>
+    public void AddTool<T>(T tool) where T : class
+    {
+        if (!this._tools.TryAdd(typeof(T), tool))
+        {
+            throw new InvalidOperationException($"A {typeof(T).Name} tool was already added.");
+        }
+    }
+
+    /// <summary>
+    /// Gets a tool that a module added to this scenario.
+    /// </summary>
+    /// <typeparam name="T">The type of the tool.</typeparam>
+    /// <returns>The tool.</returns>
+    /// <exception cref="InvalidOperationException">Thrown if no tool of that type was added.</exception>
+    public T Tool<T>() where T : class
+    {
+        if (this._tools.TryGetValue(typeof(T), out var tool))
+        {
+            return (T)tool;
+        }
+
+        throw new InvalidOperationException($"No {typeof(T).Name} tool was added. Add the module that provides it to the application.");
     }
 
     /// <summary>

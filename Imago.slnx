@@ -6,7 +6,6 @@
     <Project Path="src/Imago.Gltf/Imago.Gltf.csproj" />
     <Project Path="src/Imago.Graphics3D/Imago.Graphics3D.csproj" />
     <Project Path="src/Imago.Gui/Imago.Gui.csproj" />
-    <Project Path="src/Imago.ScenarioRunner/Imago.ScenarioRunner.csproj" />
     <Project Path="src/Imago.Support/Imago.Support.csproj" />
     <Project Path="src/Imago.Wavefront/Imago.Wavefront.csproj" />
     <Project Path="src/Imago/Imago.csproj" />

@@ -1,9 +1,11 @@
+using Imago.Gui.Scenarios;
+using Imago.Scenarios;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Imago.Gui;
 
 /// <summary>
-/// Adds the tooltip and cursor layers to the stage of the application.
+/// Adds the tooltip and cursor layers to the stage of the application, and the GUI tools to scenarios.
 /// </summary>
 public sealed class GuiModule : Module
 {
@@ -19,5 +21,11 @@ public sealed class GuiModule : Module
     {
         app.Stage.AddLayer(app.Services.GetRequiredService<TooltipLayer>());
         app.Stage.AddLayer(app.Services.GetRequiredService<CursorLayer>());
+    }
+
+    /// <inheritdoc />
+    public override void BootScenario(Scenario scenario)
+    {
+        scenario.AddTool(new GuiScenarioTools(scenario));
     }
 }

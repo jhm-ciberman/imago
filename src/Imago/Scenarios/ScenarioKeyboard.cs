@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using NeoVeldrid;
 
-namespace Imago.ScenarioRunner;
+namespace Imago.Scenarios;
 
 /// <summary>
 /// The virtual keyboard of a <see cref="Scenario"/>. It goes through the same input path as a player's keyboard,

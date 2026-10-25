@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace Imago.ScenarioRunner;
+namespace Imago.Scenarios;
 
 /// <summary>
 /// Awaitable that yields a started scenario on the game loop thread.

@@ -295,4 +295,15 @@ public class GuiLayer : IRenderLayer, IOffscreenLayer, IInputHandler
         var guiScale = this.Stage?.GuiScale ?? Vector2.One;
         return mousePosition / guiScale;
     }
+
+    /// <summary>
+    /// Converts a point from this layer's viewport space to window client space.
+    /// </summary>
+    /// <param name="position">The point in viewport space.</param>
+    /// <returns>The point in window space.</returns>
+    public Vector2 ViewportToWindow(Vector2 position)
+    {
+        var guiScale = this.Stage?.GuiScale ?? Vector2.One;
+        return position * guiScale;
+    }
 }

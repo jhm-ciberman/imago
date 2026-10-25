@@ -1,3 +1,4 @@
+using Imago.Scenarios;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Imago;
@@ -25,6 +26,15 @@ public abstract class Module
     /// </summary>
     /// <param name="app">The application that is starting.</param>
     public virtual void Boot(Application app)
+    {
+        //
+    }
+
+    /// <summary>
+    /// Adds the tools of this module to a scenario. Called once, when a scenario starts.
+    /// </summary>
+    /// <param name="scenario">The scenario that is starting.</param>
+    public virtual void BootScenario(Scenario scenario)
     {
         //
     }

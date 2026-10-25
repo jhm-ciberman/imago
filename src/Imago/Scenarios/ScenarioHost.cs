@@ -5,7 +5,7 @@ using System.Threading;
 using Imago.Input;
 using NeoVeldrid;
 
-namespace Imago.ScenarioRunner;
+namespace Imago.Scenarios;
 
 /// <summary>
 /// Runs a scenario's application on its own loop thread, inside a script process.
@@ -91,6 +91,12 @@ internal sealed class ScenarioHost : IDisposable
                 {
                     isStarted = true;
                     scenario.Attach(app, host);
+
+                    foreach (var module in builder.Modules)
+                    {
+                        module.BootScenario(scenario);
+                    }
+
                     start.MarkStarted();
                 }
 

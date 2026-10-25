@@ -81,6 +81,26 @@ public class Screen : IDisposable, IMountable
     }
 
     /// <summary>
+    /// Finds every layer of the given type, in the order the layers were added.
+    /// </summary>
+    /// <typeparam name="T">The type of layer to find.</typeparam>
+    /// <returns>The layers of type <typeparamref name="T"/>. Empty if the screen has none.</returns>
+    public IEnumerable<T> FindLayers<T>() where T : class, ILayer
+    {
+        return this._layers.OfType<T>();
+    }
+
+    /// <summary>
+    /// Finds every visible layer of the given type, in the order the layers were added.
+    /// </summary>
+    /// <typeparam name="T">The type of layer to find.</typeparam>
+    /// <returns>The visible layers of type <typeparamref name="T"/>. Empty if the screen has none.</returns>
+    public IEnumerable<T> FindVisibleLayers<T>() where T : class, ILayer
+    {
+        return this._layers.OfType<T>().Where(layer => layer.IsVisible);
+    }
+
+    /// <summary>
     /// Mounts this screen on the given stage, pushing its layers.
     /// </summary>
     /// <param name="stage">The stage to mount to.</param>

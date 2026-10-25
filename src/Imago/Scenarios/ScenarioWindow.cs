@@ -1,7 +1,7 @@
 using System.Numerics;
 using System.Threading.Tasks;
 
-namespace Imago.ScenarioRunner;
+namespace Imago.Scenarios;
 
 /// <summary>
 /// The window of the application a <see cref="Scenario"/> drives.
