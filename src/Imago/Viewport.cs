@@ -1,5 +1,6 @@
 using System;
 using System.Numerics;
+using Imago.Support.Numerics;
 
 namespace Imago;
 
@@ -43,4 +44,9 @@ public class Viewport
     /// Gets the aspect ratio of the viewport.
     /// </summary>
     public float AspectRatio => this.Size.X / this.Size.Y;
+
+    /// <summary>
+    /// Gets the area of the viewport, in whole pixels from the top left corner.
+    /// </summary>
+    public RectInt Bounds => new RectInt(0, 0, (int)this.Size.X, (int)this.Size.Y);
 }

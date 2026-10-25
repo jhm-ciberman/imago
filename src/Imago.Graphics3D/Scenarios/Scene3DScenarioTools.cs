@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Imago.Graphics3D.SceneGraph;
 using Imago.Graphics3D.SceneGraph.Cameras;
 using Imago.Scenarios;
+using Imago.Support.Numerics;
 using NeoVeldrid;
 
 namespace Imago.Graphics3D.Scenarios;
@@ -38,7 +39,7 @@ public sealed class Scene3DScenarioTools
     /// </summary>
     /// <param name="point">The point in world space.</param>
     /// <returns>The position in window pixels.</returns>
-    /// <exception cref="InvalidOperationException">Thrown if the point is behind the camera.</exception>
+    /// <exception cref="InvalidOperationException">Thrown if the point is behind the camera or off screen.</exception>
     public Vector2 ToScreen(Vector3 point)
     {
         var camera = this.Camera;
@@ -47,7 +48,13 @@ public sealed class Scene3DScenarioTools
             throw new InvalidOperationException($"The point {point} is behind the camera.");
         }
 
-        return camera.WorldToViewport(point);
+        var position = camera.WorldToViewport(point);
+        if (!camera.Viewport.Bounds.Contains(Vector2Int.Floor(position)))
+        {
+            throw new InvalidOperationException($"The point {point} is off screen at {position}.");
+        }
+
+        return position;
     }
 
     /// <summary>
@@ -55,7 +62,7 @@ public sealed class Scene3DScenarioTools
     /// </summary>
     /// <param name="point">The point in world space.</param>
     /// <returns>A task that completes once the game has seen the mouse over the point.</returns>
-    /// <exception cref="InvalidOperationException">Thrown if the point is behind the camera.</exception>
+    /// <exception cref="InvalidOperationException">Thrown if the point is behind the camera or off screen.</exception>
     public Task Hover(Vector3 point)
     {
         this._scenario.Mouse.Move(this.ToScreen(point));
@@ -68,7 +75,7 @@ public sealed class Scene3DScenarioTools
     /// <param name="point">The point in world space.</param>
     /// <param name="button">The button to click with.</param>
     /// <returns>A task that completes once the button has been released.</returns>
-    /// <exception cref="InvalidOperationException">Thrown if the point is behind the camera.</exception>
+    /// <exception cref="InvalidOperationException">Thrown if the point is behind the camera or off screen.</exception>
     public Task Click(Vector3 point, MouseButton button = MouseButton.Left)
     {
         return this._scenario.Mouse.Click(this.ToScreen(point), button);
@@ -81,7 +88,7 @@ public sealed class Scene3DScenarioTools
     /// <param name="to">The point to release at, in world space.</param>
     /// <param name="button">The button to drag with.</param>
     /// <returns>A task that completes once the button has been released.</returns>
-    /// <exception cref="InvalidOperationException">Thrown if either point is behind the camera.</exception>
+    /// <exception cref="InvalidOperationException">Thrown if either point is behind the camera or off screen.</exception>
     public Task Drag(Vector3 from, Vector3 to, MouseButton button = MouseButton.Left)
     {
         return this._scenario.Mouse.Drag(this.ToScreen(from), this.ToScreen(to), button);

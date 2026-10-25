@@ -121,6 +121,16 @@ public struct Vector2Int : IEquatable<Vector2Int>
     }
 
     /// <summary>
+    /// Returns the vector with each component of the given vector rounded down to a whole number.
+    /// </summary>
+    /// <param name="value">The vector to round down.</param>
+    /// <returns>The rounded down vector.</returns>
+    public static Vector2Int Floor(Vector2 value)
+    {
+        return new Vector2Int((int)float.Floor(value.X), (int)float.Floor(value.Y));
+    }
+
+    /// <summary>
     /// Returns the absolute value of the vector for each component.
     /// </summary>
     /// <param name="value">The vector to get the absolute value of.</param>
