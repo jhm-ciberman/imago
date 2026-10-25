@@ -9,8 +9,8 @@ namespace Imago;
 /// Represents a container for layers that are rendered and updated together.
 /// </summary>
 /// <remarks>
-/// A screen is a collection of layers (both 3D and 2D). When activated, its layers
-/// are pushed onto the Stage. When deactivated, they are removed.
+/// A screen is a collection of layers (both 3D and 2D). Show it with <see cref="Stage.Screen"/>.
+/// While it is shown, its layers are on the stage.
 /// </remarks>
 [ItemsMethod(nameof(AddLayer))]
 public class Screen : IDisposable, IMountable
@@ -84,10 +84,9 @@ public class Screen : IDisposable, IMountable
     /// Mounts this screen on the given stage, pushing its layers.
     /// </summary>
     /// <param name="stage">The stage to mount to.</param>
-    public void Mount(Stage stage)
+    internal void Mount(Stage stage)
     {
         this._stage = stage;
-        stage.Screen = this;
 
         foreach (var layer in this._layers)
         {
@@ -114,7 +113,7 @@ public class Screen : IDisposable, IMountable
     /// <summary>
     /// Unmounts this screen from its stage, removing its layers.
     /// </summary>
-    public void Unmount()
+    internal void Unmount()
     {
         this.Unmounting?.Invoke(this, EventArgs.Empty);
         this.OnUnmounted();
@@ -127,7 +126,6 @@ public class Screen : IDisposable, IMountable
             stage.RemoveLayer(layer);
         }
 
-        stage.Screen = null;
         stage.NotifyItemUnmounted(this);
         this._stage = null;
     }

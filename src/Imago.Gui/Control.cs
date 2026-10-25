@@ -343,6 +343,17 @@ public class Control : Visual
         }
     }
 
+    /// <inheritdoc/>
+    public override void Unmount()
+    {
+        if (this.Tooltip != null)
+        {
+            this.Layer?.Stage?.TooltipLayer?.Hide(this);
+        }
+
+        base.Unmount();
+    }
+
     private bool _isMouseOver = false;
 
     /// <summary>

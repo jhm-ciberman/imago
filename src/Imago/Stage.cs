@@ -27,11 +27,26 @@ public class Stage
     private readonly List<IInputHandler> _inputHandlers = new();
     private readonly List<IMountListener> _mountListeners = new();
     private readonly HashSet<IMountable> _mountedItems = new();
+    private Screen? _screen;
 
     /// <summary>
-    /// Gets the screen that is mounted on this stage, or null if there is none.
+    /// Gets or sets the screen shown on this stage, or null if there is none.
     /// </summary>
-    public Screen? Screen { get; internal set; }
+    /// <remarks>
+    /// Setting a new screen unmounts the old one. The old screen is not disposed.
+    /// </remarks>
+    public Screen? Screen
+    {
+        get => this._screen;
+        set
+        {
+            if (this._screen == value) return;
+
+            this._screen?.Unmount();
+            this._screen = value;
+            this._screen?.Mount(this);
+        }
+    }
 
     /// <summary>
     /// Gets all layers sorted by ZOrder.
@@ -320,12 +335,14 @@ public class Stage
     }
 
     /// <summary>
-    /// Updates all layers.
+    /// Updates the screen and all layers.
     /// </summary>
     /// <param name="deltaTime">The time elapsed since the last update, in seconds.</param>
     public virtual void Update(float deltaTime)
     {
         this.UpdateInputBlocking();
+
+        this._screen?.Update(deltaTime);
 
         foreach (var layer in this._allLayers)
         {
