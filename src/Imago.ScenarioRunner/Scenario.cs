@@ -37,6 +37,9 @@ public abstract class Scenario : IDisposable
     /// </summary>
     protected Scenario()
     {
+        this.Mouse = new ScenarioMouse(this);
+        this.Keyboard = new ScenarioKeyboard(this);
+        this.Window = new ScenarioWindow(this);
     }
 
     /// <summary>
@@ -50,6 +53,21 @@ public abstract class Scenario : IDisposable
     /// </summary>
     /// <exception cref="InvalidOperationException">Thrown when no run is in progress.</exception>
     public Application App => this._app ?? throw new InvalidOperationException("No run is in progress.");
+
+    /// <summary>
+    /// Gets the virtual mouse, which clicks and moves like a player's mouse.
+    /// </summary>
+    public ScenarioMouse Mouse { get; }
+
+    /// <summary>
+    /// Gets the virtual keyboard, which presses keys and types like a player's keyboard.
+    /// </summary>
+    public ScenarioKeyboard Keyboard { get; }
+
+    /// <summary>
+    /// Gets the window of the application being driven.
+    /// </summary>
+    public ScenarioWindow Window { get; }
 
     private ScenarioHost Host => this._host ?? throw new InvalidOperationException("No run is in progress.");
 
@@ -135,15 +153,6 @@ public abstract class Scenario : IDisposable
     public Task WaitUntil(Func<bool> condition, string because, double timeoutSeconds = DefaultTimeoutSeconds)
     {
         return this._scheduler.WaitUntil(condition, because, timeoutSeconds);
-    }
-
-    /// <summary>
-    /// Moves the virtual cursor to a screen position, in window pixels, so hover and picking follow it.
-    /// </summary>
-    /// <param name="screenPosition">The cursor position in window pixels.</param>
-    public void MoveCursor(Vector2 screenPosition)
-    {
-        this.App.Input.SetCursorPosition(screenPosition);
     }
 
     /// <summary>

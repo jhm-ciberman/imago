@@ -152,6 +152,14 @@ public class InputManager : IDisposable
 
     private IReadOnlyList<char> _charactersTypedThisFrame = Array.Empty<char>();
 
+    private readonly List<(Key Key, bool IsDown)> _queuedKeys = new();
+
+    private readonly List<(MouseButton Button, bool IsDown)> _queuedMouseButtons = new();
+
+    private readonly List<char> _queuedCharacters = new();
+
+    private float _queuedWheelDelta;
+
     private Vector2 _cursorPosition;
 
     private bool _relativeMouseMode;
@@ -233,9 +241,17 @@ public class InputManager : IDisposable
             // above still runs, so the window stays responsive while a person moves the real mouse or types.
             this.MouseScrollDelta = 0f;
             this._charactersTypedThisFrame = Array.Empty<char>();
-            return;
+        }
+        else
+        {
+            this.ApplySnapshot();
         }
 
+        this.ApplyQueuedInput();
+    }
+
+    private void ApplySnapshot()
+    {
         this.MouseScrollDelta = this.InputSnapshot.WheelDelta;
 
         for (int i = 0; i < this.InputSnapshot.KeyEvents.Count; i++)
@@ -243,12 +259,12 @@ public class InputManager : IDisposable
             KeyEvent ke = this.InputSnapshot.KeyEvents[i];
             if (ke.Down)
             {
-                this.ReleaseKey(ke.Key);
+                this.SetKeyDown(ke.Key);
                 this.OnKeyPressed(ke.Key);
             }
             else
             {
-                this.PressKey(ke.Key);
+                this.SetKeyUp(ke.Key);
                 this.OnKeyReleased(ke.Key);
             }
         }
@@ -258,13 +274,13 @@ public class InputManager : IDisposable
             MouseEvent me = this.InputSnapshot.MouseEvents[i];
             if (me.Down)
             {
-                this.ReleaseMouseButton(me.MouseButton);
-                this.OnMouseButtonPressed(me);
+                this.SetMouseButtonDown(me.MouseButton);
+                this.OnMouseButtonPressed(me.MouseButton);
             }
             else
             {
-                this.PressMouseButton(me.MouseButton);
-                this.OnMouseButtonReleased(me);
+                this.SetMouseButtonUp(me.MouseButton);
+                this.OnMouseButtonReleased(me.MouseButton);
             }
         }
 
@@ -278,6 +294,55 @@ public class InputManager : IDisposable
         if (this.InputSnapshot.WheelDelta != 0f)
         {
             this.OnMouseWheelScrolled(this.InputSnapshot.WheelDelta);
+        }
+    }
+
+    private void ApplyQueuedInput()
+    {
+        foreach (var (key, isDown) in this._queuedKeys)
+        {
+            if (isDown)
+            {
+                this.SetKeyDown(key);
+                this.OnKeyPressed(key);
+            }
+            else
+            {
+                this.SetKeyUp(key);
+                this.OnKeyReleased(key);
+            }
+        }
+
+        this._queuedKeys.Clear();
+
+        foreach (var (button, isDown) in this._queuedMouseButtons)
+        {
+            if (isDown)
+            {
+                this.SetMouseButtonDown(button);
+                this.OnMouseButtonPressed(button);
+            }
+            else
+            {
+                this.SetMouseButtonUp(button);
+                this.OnMouseButtonReleased(button);
+            }
+        }
+
+        this._queuedMouseButtons.Clear();
+
+        if (this._queuedCharacters.Count > 0)
+        {
+            this._charactersTypedThisFrame = [.. this._charactersTypedThisFrame, .. this._queuedCharacters];
+            this._queuedCharacters.Clear();
+            this.OnTextEntered(this._charactersTypedThisFrame);
+        }
+
+        if (this._queuedWheelDelta != 0f)
+        {
+            this.MouseScrollDelta += this._queuedWheelDelta;
+            this.OnMouseWheelScrolled(this._queuedWheelDelta);
+            this._queuedWheelDelta = 0f;
         }
     }
 
@@ -393,51 +458,89 @@ public class InputManager : IDisposable
     }
 
     /// <summary>
-    /// Manually injects a mouse button press event.
-    /// </summary>
-    /// <param name="mouseButton">The mouse button to press.</param>
-    public void PressMouseButton(MouseButton mouseButton)
-    {
-        this._mouseButtonsDown.Remove(mouseButton);
-        this._mouseButtonsPressedThisFrame.Remove(mouseButton);
-        this._mouseButtonsReleasedThisFrame.Add(mouseButton);
-    }
-
-    /// <summary>
-    /// Manually injects a mouse button release event.
-    /// </summary>
-    /// <param name="mouseButton">The mouse button to release.</param>
-    public void ReleaseMouseButton(MouseButton mouseButton)
-    {
-        if (this._mouseButtonsDown.Add(mouseButton))
-        {
-            this._mouseButtonsPressedThisFrame.Add(mouseButton);
-            this._mouseButtonsReleasedThisFrame.Remove(mouseButton);
-        }
-    }
-
-    /// <summary>
-    /// Manually injects a key press event.
+    /// Queues a key press. It is applied at the start of the next frame, like a press on the real keyboard.
     /// </summary>
     /// <param name="key">The key to press.</param>
-    public void PressKey(Key key)
+    public void QueueKeyDown(Key key)
     {
-        this._keysDown.Remove(key);
-        this._keysPressedThisFrame.Remove(key);
-        this._keysReleasedThisFrame.Add(key);
+        this._queuedKeys.Add((key, true));
     }
 
     /// <summary>
-    /// Manually injects a key release event.
+    /// Queues a key release. It is applied at the start of the next frame, like a release on the real keyboard.
     /// </summary>
     /// <param name="key">The key to release.</param>
-    public void ReleaseKey(Key key)
+    public void QueueKeyUp(Key key)
+    {
+        this._queuedKeys.Add((key, false));
+    }
+
+    /// <summary>
+    /// Queues a mouse button press. It is applied at the start of the next frame, like a press on the real mouse.
+    /// </summary>
+    /// <param name="button">The mouse button to press.</param>
+    public void QueueMouseButtonDown(MouseButton button)
+    {
+        this._queuedMouseButtons.Add((button, true));
+    }
+
+    /// <summary>
+    /// Queues a mouse button release. It is applied at the start of the next frame, like a release on the real mouse.
+    /// </summary>
+    /// <param name="button">The mouse button to release.</param>
+    public void QueueMouseButtonUp(MouseButton button)
+    {
+        this._queuedMouseButtons.Add((button, false));
+    }
+
+    /// <summary>
+    /// Queues typed text. It is applied at the start of the next frame, like typing on the real keyboard.
+    /// </summary>
+    /// <param name="text">The text to type.</param>
+    public void QueueText(string text)
+    {
+        this._queuedCharacters.AddRange(text);
+    }
+
+    /// <summary>
+    /// Queues a mouse wheel scroll. It is applied at the start of the next frame, like a scroll on the real mouse.
+    /// </summary>
+    /// <param name="delta">The amount and direction to scroll.</param>
+    public void QueueMouseWheel(float delta)
+    {
+        this._queuedWheelDelta += delta;
+    }
+
+    private void SetKeyDown(Key key)
     {
         if (this._keysDown.Add(key))
         {
             this._keysPressedThisFrame.Add(key);
             this._keysReleasedThisFrame.Remove(key);
         }
+    }
+
+    private void SetKeyUp(Key key)
+    {
+        this._keysDown.Remove(key);
+        this._keysPressedThisFrame.Remove(key);
+        this._keysReleasedThisFrame.Add(key);
+    }
+
+    private void SetMouseButtonDown(MouseButton button)
+    {
+        if (this._mouseButtonsDown.Add(button))
+        {
+            this._mouseButtonsPressedThisFrame.Add(button);
+            this._mouseButtonsReleasedThisFrame.Remove(button);
+        }
+    }
+
+    private void SetMouseButtonUp(MouseButton button)
+    {
+        this._mouseButtonsDown.Remove(button);
+        this._mouseButtonsPressedThisFrame.Remove(button);
+        this._mouseButtonsReleasedThisFrame.Add(button);
     }
 
     /// <summary>
@@ -477,10 +580,11 @@ public class InputManager : IDisposable
     /// <summary>
     /// Raises the <see cref="MouseButtonPressed"/> event.
     /// </summary>
-    /// <param name="mouseEvent">The mouse event that was pressed.</param>
-    protected void OnMouseButtonPressed(MouseEvent mouseEvent)
+    /// <param name="button">The mouse button that was pressed.</param>
+    protected void OnMouseButtonPressed(MouseButton button)
     {
-        this._mouseButtonEventArgs.Button = mouseEvent.MouseButton;
+        this._mouseButtonEventArgs.Button = button;
+        this._mouseButtonEventArgs.IsDown = true;
         this._mouseButtonEventArgs.Handled = false;
         this.MouseButtonPressed?.Invoke(this, this._mouseButtonEventArgs);
     }
@@ -488,10 +592,11 @@ public class InputManager : IDisposable
     /// <summary>
     /// Raises the <see cref="MouseButtonReleased"/> event.
     /// </summary>
-    /// <param name="mouseEvent">The original mouse event.</param>
-    protected virtual void OnMouseButtonReleased(MouseEvent mouseEvent)
+    /// <param name="button">The mouse button that was released.</param>
+    protected virtual void OnMouseButtonReleased(MouseButton button)
     {
-        this._mouseButtonEventArgs.Button = mouseEvent.MouseButton;
+        this._mouseButtonEventArgs.Button = button;
+        this._mouseButtonEventArgs.IsDown = false;
         this._mouseButtonEventArgs.Handled = false;
         this.MouseButtonReleased?.Invoke(this, this._mouseButtonEventArgs);
     }
