@@ -9,11 +9,6 @@ namespace Imago;
 /// <summary>
 /// Collects the settings of an <see cref="Application"/> before it is created.
 /// </summary>
-/// <remarks>
-/// Every method returns this builder, so calls can be chained. Nothing is created until <see cref="Build"/> or
-/// <see cref="Run"/> is called. A later call replaces the value set by an earlier one, except for modules and
-/// services, which are added.
-/// </remarks>
 public class ApplicationBuilder
 {
     private readonly List<Module> _modules = [];

@@ -1,57 +1,100 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Numerics;
-using System.Threading;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using Imago.Input;
 using Imago.Rendering;
 using Imago.Support;
+using Microsoft.Extensions.DependencyInjection;
 using NeoVeldrid;
 using SixLabors.ImageSharp;
 
 namespace Imago.ScenarioRunner;
 
 /// <summary>
-/// Runs an <see cref="Application"/> from a script and saves the screenshots it captures. A game derives from
-/// this to add helpers for its own screens and state.
+/// Drives a running application from a script and saves the screenshots it captures. A game derives from this to
+/// add helpers for its own screens and state.
 /// </summary>
 /// <remarks>
-/// Every await in the script resumes on the game loop thread, so the script can touch the game freely.
+/// Start one with <see cref="StartAsync{TScenario}"/>. Every await in the script resumes on the game loop thread,
+/// so the script can touch the game freely.
 /// </remarks>
-public abstract class ScenarioBase : IDisposable
+public abstract class Scenario : IDisposable
 {
     private const double DefaultTimeoutSeconds = 20.0;
-    private static readonly TimeSpan WatchdogTimeout = TimeSpan.FromMinutes(5.0);
 
     private readonly ScenarioScheduler _scheduler = new();
-    private readonly LoopSynchronizationContext _loop = new();
     private readonly List<string> _shots = new();
 
+    private ScenarioHost? _host;
     private Application? _app;
     private StageCapturer? _capturer;
-    private TextWriter? _log;
-    private TextWriter? _console;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ScenarioBase"/> class.
+    /// Initializes a new instance of the <see cref="Scenario"/> class.
     /// </summary>
-    /// <param name="outputDirectory">The folder the screenshots and the log are written to.</param>
-    protected ScenarioBase(string outputDirectory)
+    protected Scenario()
     {
-        this.OutputDirectory = outputDirectory;
     }
 
     /// <summary>
     /// Gets the folder the screenshots and the log are written to.
     /// </summary>
-    public string OutputDirectory { get; }
+    /// <exception cref="InvalidOperationException">Thrown when no run is in progress.</exception>
+    public string OutputDirectory => this.Host.OutputDirectory;
 
     /// <summary>
     /// Gets the application being driven.
     /// </summary>
     /// <exception cref="InvalidOperationException">Thrown when no run is in progress.</exception>
     public Application App => this._app ?? throw new InvalidOperationException("No run is in progress.");
+
+    private ScenarioHost Host => this._host ?? throw new InvalidOperationException("No run is in progress.");
+
+    /// <summary>
+    /// Creates the application on its own thread, drives it with a new scenario of the given type, and waits until
+    /// it runs.
+    /// </summary>
+    /// <remarks>
+    /// The backend and the window come from the arguments, then from the command line (<c>--backend</c> and
+    /// <c>--show</c>). By default the scenario runs on OpenGL with a hidden window. The screenshots and the log go to
+    /// the folder of the calling script, and disposing the scenario quits the application.
+    /// </remarks>
+    /// <typeparam name="TScenario">The type of the scenario.</typeparam>
+    /// <param name="backend">The graphics backend, or null to read it from the command line.</param>
+    /// <param name="show">Whether to open a real window instead of running hidden.</param>
+    /// <param name="scriptPath">Filled in by the compiler with the path of the calling script.</param>
+    /// <returns>An awaitable that yields the running scenario on the game loop thread.</returns>
+    /// <exception cref="ArgumentException">Thrown if the command line names an unknown backend.</exception>
+    public static ScenarioStart<TScenario> StartAsync<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] TScenario>(
+        GraphicsBackend? backend = null,
+        bool show = false,
+        [CallerFilePath] string scriptPath = ""
+    )
+        where TScenario : Scenario, new()
+    {
+        var scenario = new TScenario();
+        return ScenarioHost.Start(scenario, scenario.Bootstrap(), backend, show, Path.GetDirectoryName(scriptPath)!);
+    }
+
+    /// <summary>
+    /// Sets up the application that the scenario drives.
+    /// </summary>
+    /// <returns>A builder for the application.</returns>
+    protected abstract ApplicationBuilder Bootstrap();
+
+    /// <summary>
+    /// Gets a service of the running application.
+    /// </summary>
+    /// <typeparam name="T">The type of the service.</typeparam>
+    /// <returns>The service.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when no run is in progress or the service is not registered.</exception>
+    public T Service<T>() where T : notnull
+    {
+        return this.App.Services.GetRequiredService<T>();
+    }
 
     /// <summary>
     /// Waits until the next frame has been rendered.
@@ -100,7 +143,7 @@ public abstract class ScenarioBase : IDisposable
     /// <param name="screenPosition">The cursor position in window pixels.</param>
     public void MoveCursor(Vector2 screenPosition)
     {
-        InputManager.Instance.SetCursorPosition(screenPosition);
+        this.App.Input.SetCursorPosition(screenPosition);
     }
 
     /// <summary>
@@ -109,8 +152,7 @@ public abstract class ScenarioBase : IDisposable
     /// <param name="message">The message to write.</param>
     public void Log(string message)
     {
-        this._console?.WriteLine($"  · {message}");
-        this._log?.WriteLine(message);
+        this._host?.Log(message);
     }
 
     /// <summary>
@@ -156,66 +198,6 @@ public abstract class ScenarioBase : IDisposable
     }
 
     /// <summary>
-    /// Boots the application and deletes the screenshots of a previous run. <see cref="Dispose"/> quits it.
-    /// </summary>
-    /// <typeparam name="TSelf">The type of this scenario, handed back to the caller.</typeparam>
-    /// <param name="builder">The settings of the application to drive, with its window size already set.</param>
-    /// <param name="show">Whether to open a real window instead of running hidden.</param>
-    /// <returns>An awaitable that yields this scenario on the game loop thread once the application is running.</returns>
-    protected ScenarioStart<TSelf> Start<TSelf>(ApplicationBuilder builder, bool show) where TSelf : ScenarioBase
-    {
-        this.PrepareOutputDirectory();
-
-        // The game's own console output goes to the log file, so the console only shows the script's Log lines.
-        this._console = Console.Out;
-        this._log = new StreamWriter(Path.Combine(this.OutputDirectory, "log.txt"), append: false) { AutoFlush = true };
-        Console.SetOut(this._log);
-
-        StartWatchdog();
-
-        InputManager.UseVirtualInput = true;
-        builder
-            .WithWindowState(WindowState.Normal)
-            .WithHeadless(!show);
-
-        var start = new ScenarioStart<TSelf>((TSelf)this, this._loop);
-
-        // The graphics context belongs to the thread that creates it, so the app is built on the loop thread too.
-        var thread = new Thread(() =>
-        {
-            SynchronizationContext.SetSynchronizationContext(this._loop);
-
-            var app = builder.Build();
-            this._app = app;
-
-            // Advance the simulation by a fixed step each frame so animated content lands at the same phase every run.
-            app.Ticker.FixedDeltaTime = 1.0 / 60.0;
-
-            app.Ticker.Ticked += (sender, e) =>
-            {
-                if (this._capturer == null)
-                {
-                    this._capturer = new StageCapturer(app.Renderer);
-                    InputManager.Instance.SetCursorPosition(new Vector2(-1, -1));
-                    start.MarkStarted();
-                }
-
-                this._loop.Drain();
-                this._scheduler.Tick(e.DeltaTime);
-            };
-
-            app.Run();
-        })
-        {
-            IsBackground = true,
-            Name = "game-loop",
-        };
-
-        thread.Start();
-        return start;
-    }
-
-    /// <summary>
     /// Quits the application.
     /// </summary>
     public void Dispose()
@@ -232,37 +214,23 @@ public abstract class ScenarioBase : IDisposable
         this._app.Quit();
         this._app = null;
 
-        Console.SetOut(this._console!);
-        this._log?.Dispose();
-        this._log = null;
+        var host = this.Host;
+        host.Dispose();
+        this._host = null;
 
-        Console.WriteLine($"  {this._shots.Count} shot(s) -> {this.OutputDirectory}");
+        Console.WriteLine($"  {this._shots.Count} shot(s) -> {host.OutputDirectory}");
     }
 
-    private void PrepareOutputDirectory()
+    internal void Attach(Application app, ScenarioHost host)
     {
-        Directory.CreateDirectory(this.OutputDirectory);
-
-        // The script itself lives in this folder, so only the shots go.
-        foreach (string file in Directory.EnumerateFiles(this.OutputDirectory, "*.png"))
-        {
-            File.Delete(file);
-        }
+        this._app = app;
+        this._host = host;
+        this._capturer = new StageCapturer(app.Renderer);
+        app.Input.SetCursorPosition(new Vector2(-1, -1));
     }
 
-    private static void StartWatchdog()
+    internal void Tick(double deltaTime)
     {
-        var thread = new Thread(() =>
-        {
-            Thread.Sleep(WatchdogTimeout);
-            Console.Error.WriteLine($"Watchdog fired after {WatchdogTimeout.TotalSeconds:0}s. Forcing exit.");
-            Environment.Exit(124);
-        })
-        {
-            IsBackground = true,
-            Name = "scenario-watchdog",
-        };
-
-        thread.Start();
+        this._scheduler.Tick(deltaTime);
     }
 }
