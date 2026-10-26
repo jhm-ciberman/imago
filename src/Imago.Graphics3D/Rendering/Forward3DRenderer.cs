@@ -4,12 +4,14 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using Imago.Graphics3D.Materials;
+using Imago.Graphics3D.Metrics;
 using Imago.Graphics3D.Rendering.Internals;
 using Imago.Graphics3D.Rendering.Internals.Buffers;
 using Imago.Graphics3D.Rendering.Passes;
 using Imago.Graphics3D.Rendering.Passes.Shadows;
 using Imago.Graphics3D.SceneGraph;
 using Imago.Graphics3D.SceneGraph.Picking;
+using Imago.Metrics;
 using Imago.Rendering;
 using Imago.Support.Drawing;
 using Imago.Textures;
@@ -44,12 +46,15 @@ public class Forward3DRenderer : IDisposable
     private readonly AmbientOcclusionPass _ambientOcclusionPass;
     private readonly Dictionary<Type, ShaderSet> _shaderCache = new();
 
+    internal Graphics3DMetrics Metrics { get; }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="Forward3DRenderer"/> class.
     /// </summary>
     /// <param name="renderer">The main renderer instance.</param>
+    /// <param name="metrics">The metrics of the application. It must have the <see cref="Graphics3DMetrics"/> group.</param>
     /// <exception cref="InvalidOperationException">Thrown if a 3D renderer already exists.</exception>
-    public Forward3DRenderer(Renderer renderer)
+    public Forward3DRenderer(Renderer renderer, FrameMetrics metrics)
     {
         if (Instance != null)
         {
@@ -59,10 +64,11 @@ public class Forward3DRenderer : IDisposable
         Instance = this;
 
         this._renderer = renderer;
+        this.Metrics = metrics.Graphics3D;
         this._resources = new RendererResources(renderer.GraphicsDevice);
         this._mousePickerPass = new MousePickingPass(renderer, this);
         this._gizmosPass = new GizmosPass(renderer);
-        this._particlesPass = new ParticlesPass(renderer);
+        this._particlesPass = new ParticlesPass(renderer, this.Metrics.ParticleCount);
         this._shadowPass = new ShadowPass(renderer, this);
         this._forwardPass = new ForwardPass(renderer, this, this._shadowPass);
         this._immediatePass = new ImmediatePass(renderer);
@@ -213,7 +219,12 @@ public class Forward3DRenderer : IDisposable
     /// <param name="renderTexture">The target render texture.</param>
     public void Render(CommandList cl, Scene3DLayer scene, RenderTexture renderTexture)
     {
-        this._resources.Update(cl);
+        var metrics = this.Metrics;
+
+        using (metrics.BufferUploadTime.StartTimer())
+        {
+            this._resources.Update(cl);
+        }
 
         var camera = scene.Camera;
 
@@ -228,39 +239,57 @@ public class Forward3DRenderer : IDisposable
         var pickingRQ = scene.PickingRenderQueue;
         var shadowCasterRQs = new Span<RenderQueue>(scene.ShadowCasterRenderQueues, 0, scene.CascadesCount);
 
-        var stats = this._renderer.Statistics;
+        metrics.ShadowCascadeCount.Set(scene.CascadesCount);
 
-        stats.ShadowSubPass.Begin();
-        this._shadowPass.Render(cl, camera, scene.Environment.MainLight, shadowCasterRQs);
-        stats.ShadowSubPass.End();
+        using (metrics.ShadowPassTime.StartTimer())
+        {
+            this._shadowPass.Render(cl, camera, scene.Environment.MainLight, shadowCasterRQs);
+        }
 
-        stats.ForwardSubPass.Begin();
-        this._forwardPass.Prepare(cl, renderTexture, camera, scene.Environment, opaqueRQ, transparentRQ);
-        this._forwardPass.Draw(cl, opaqueRQ);
-        stats.ForwardSubPass.End();
+        using (metrics.ForwardPassTime.StartTimer())
+        {
+            this._forwardPass.Prepare(cl, renderTexture, camera, scene.Environment, opaqueRQ, transparentRQ);
+            this._forwardPass.Draw(cl, opaqueRQ);
+        }
 
-        stats.OtherSubPass.Begin();
-        this._skyDomePass.Render(cl, renderTexture, camera, scene.Environment);
+        using (metrics.SkyDomePassTime.StartTimer())
+        {
+            this._skyDomePass.Render(cl, renderTexture, camera, scene.Environment);
+        }
+
         if (scene.AmbientOcclusion.Enabled)
         {
-            this._ambientOcclusionPass.Render(cl, renderTexture, camera, scene.AmbientOcclusion);
-            cl.SetFramebuffer(renderTexture.Framebuffer);
+            using (metrics.AmbientOcclusionPassTime.StartTimer())
+            {
+                this._ambientOcclusionPass.Render(cl, renderTexture, camera, scene.AmbientOcclusion);
+                cl.SetFramebuffer(renderTexture.Framebuffer);
+            }
         }
-        stats.OtherSubPass.End();
 
-        stats.ForwardSubPass.Begin();
-        this._forwardPass.Draw(cl, transparentRQ);
-        stats.ForwardSubPass.End();
+        using (metrics.ForwardPassTime.StartTimer())
+        {
+            this._forwardPass.Draw(cl, transparentRQ);
+        }
 
-        stats.OtherSubPass.Begin();
-        this._immediatePass.Render(cl, renderTexture, camera, immediateRQ);
-        this._particlesPass.Render(cl, renderTexture, camera, scene.ParticleSystems);
-        this._gizmosPass.Render(cl, renderTexture, camera, scene.Gizmos);
-        stats.OtherSubPass.End();
+        using (metrics.ImmediatePassTime.StartTimer())
+        {
+            this._immediatePass.Render(cl, renderTexture, camera, immediateRQ);
+        }
 
-        stats.PickingSubPass.Begin();
-        this._mousePickerPass.Render(cl, renderTexture, camera, pickingRQ);
-        stats.PickingSubPass.End();
+        using (metrics.ParticlesPassTime.StartTimer())
+        {
+            this._particlesPass.Render(cl, renderTexture, camera, scene.ParticleSystems);
+        }
+
+        using (metrics.GizmosPassTime.StartTimer())
+        {
+            this._gizmosPass.Render(cl, renderTexture, camera, scene.Gizmos);
+        }
+
+        using (metrics.PickingPassTime.StartTimer())
+        {
+            this._mousePickerPass.Render(cl, renderTexture, camera, pickingRQ);
+        }
     }
 
     private void ClearRenderTarget(CommandList cl, Scene3DLayer scene)

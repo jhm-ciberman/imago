@@ -87,7 +87,7 @@ internal class ForwardPass : IDisposable, IPipelineProvider
 
         this._resourceSet = this.CreatePassResourceSet();
 
-        this._renderBatcher = new RenderBatcher(this._gd, RenderBatchPassType.Forward, renderer.Statistics);
+        this._renderBatcher = new RenderBatcher(this._gd, RenderBatchPassType.Forward, forward3DRenderer.Metrics.DrawCallCount);
 
         this._shadowPass.ShadowmapTexture.Resized += this.Shadowmap_Resized;
     }
@@ -124,9 +124,9 @@ internal class ForwardPass : IDisposable, IPipelineProvider
         opaque.Update(frustumForCulling, camera.Position);
         transparent.Update(frustumForCulling, camera.Position);
 
-        var stats = this._renderer.Statistics;
-        stats.CurrentVisibleRenderables = opaque.Count + transparent.Count;
-        stats.CurrentTotalRenderables = opaque.TotalCount + transparent.TotalCount;
+        var metrics = this._forward3DRenderer.Metrics;
+        metrics.VisibleRenderableCount.Add(opaque.Count + transparent.Count);
+        metrics.TotalRenderableCount.Add(opaque.TotalCount + transparent.TotalCount);
 
         cl.SetFramebuffer(renderTexture.Framebuffer);
 

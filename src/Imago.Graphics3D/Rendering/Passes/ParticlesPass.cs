@@ -7,6 +7,7 @@ using Imago.Graphics3D.SceneGraph.Cameras;
 using Imago.Rendering;
 using Imago.Rendering.Internals;
 using Imago.Support.Drawing;
+using Imago.Support.Metrics;
 using Imago.Textures;
 using NeoVeldrid;
 
@@ -73,12 +74,16 @@ internal class ParticlesPass : IDisposable
 
     private readonly ResourceSetCache _resourceSetCache;
 
+    private readonly CounterMetric _particleCount;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="ParticlesPass"/> class.
     /// </summary>
     /// <param name="renderer">The renderer to use.</param>
-    public ParticlesPass(Renderer renderer)
+    /// <param name="particleCount">The metric that counts the particles drawn.</param>
+    public ParticlesPass(Renderer renderer, CounterMetric particleCount)
     {
+        this._particleCount = particleCount;
         this._gd = renderer.GraphicsDevice;
         var factory = this._gd.ResourceFactory;
 
@@ -179,6 +184,7 @@ internal class ParticlesPass : IDisposable
             system.SortParticles(camera.Position);
 
             this.RenderParticles(cl, system.Particles, system.Texture);
+            this._particleCount.Add(system.Particles.Count);
         }
     }
 
