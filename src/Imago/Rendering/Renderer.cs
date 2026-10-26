@@ -24,6 +24,12 @@ namespace Imago.Rendering;
 public class Renderer : IDisposable
 {
     /// <summary>
+    /// Occurs each time a stage is rendered, when the GPU has finished all the work submitted before and the new
+    /// work is not submitted yet. GPU resources written by the earlier work can be read here without waiting.
+    /// </summary>
+    public event EventHandler? FrameCompleted;
+
+    /// <summary>
     /// Gets the global instance of the renderer.
     /// </summary>
     public static Renderer Instance { get; private set; } = null!;
@@ -185,13 +191,11 @@ public class Renderer : IDisposable
     /// <param name="stage">The stage to render.</param>
     public void Render(Stage stage)
     {
-        using (this.Metrics.RenderTime.StartTimer())
-        {
-            this.RenderStage(stage, this.FullScreenRenderTexture, RenderOutputMode.Screen);
-        }
+        this.RenderStage(stage, this.FullScreenRenderTexture, RenderOutputMode.Screen);
 
         if (this.GraphicsDevice.MainSwapchain != null)
         {
+            using var timer = this.Metrics.PresentTime.StartTimer();
             this.GraphicsDevice.SwapBuffers();
         }
     }
@@ -207,6 +211,22 @@ public class Renderer : IDisposable
     }
 
     private void RenderStage(Stage stage, IRenderTexture target, RenderOutputMode outputMode)
+    {
+        using (this.Metrics.RenderTime.StartTimer())
+        {
+            this.RecordStage(stage, target, outputMode);
+        }
+
+        using (this.Metrics.GpuSyncTime.StartTimer())
+        {
+            this.GraphicsDevice.WaitForIdle();
+            this.FrameCompleted?.Invoke(this, EventArgs.Empty);
+            this.GraphicsDevice.SubmitCommands(this._commandList);
+            this._disposeCollector.DisposeAll();
+        }
+    }
+
+    private void RecordStage(Stage stage, IRenderTexture target, RenderOutputMode outputMode)
     {
         var metrics = this.Metrics;
         var cl = this._commandList;
@@ -263,13 +283,6 @@ public class Renderer : IDisposable
             }
 
             cl.End();
-        }
-
-        using (metrics.GpuSyncTime.StartTimer())
-        {
-            this.GraphicsDevice.WaitForIdle();
-            this.GraphicsDevice.SubmitCommands(cl);
-            this._disposeCollector.DisposeAll();
         }
     }
 

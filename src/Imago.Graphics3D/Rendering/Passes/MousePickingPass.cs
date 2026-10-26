@@ -20,6 +20,13 @@ namespace Imago.Graphics3D.Rendering.Passes;
 /// </summary>
 internal class MousePickingPass : IDisposable, IPipelineProvider
 {
+    private enum PixelCopy
+    {
+        None,
+        CursorInside,
+        CursorOutside,
+    }
+
     [StructLayout(LayoutKind.Sequential)]
     private struct CameraDataBuffer
     {
@@ -44,8 +51,10 @@ internal class MousePickingPass : IDisposable, IPipelineProvider
     private readonly RenderBatcher _renderBatcher;
     private readonly NeoVeldrid.Texture _pixelStagingTexture;
     private readonly PickingTexture _pickingTexture;
-    private bool _isCopyRecorded;
-    private bool _mouseInside;
+    private PixelCopy _recordedCopy;
+    private PixelCopy _submittedCopy;
+    private PixelCopy _readCopy;
+    private uint _readObjectId;
 
     public MousePickingPass(Renderer renderer, Forward3DRenderer forward3DRenderer)
     {
@@ -101,12 +110,6 @@ internal class MousePickingPass : IDisposable, IPipelineProvider
     {
         if (renderTexture != this._renderTexture) return;
 
-        // Record a copy from the picking texture into a staging texture.
-        // The actual Map/read and PickingManager update happen in ReadStagingResult(),
-        // called after command submission.
-        this.RecordCopy(cl);
-
-        // Render the scene to the picking texture.
         var frustumForCulling = new BoundingFrustum(camera.FrustumCullingCamera.ViewProjectionMatrix);
         pickingRenderQueue.Update(frustumForCulling, camera.Position);
 
@@ -125,32 +128,53 @@ internal class MousePickingPass : IDisposable, IPipelineProvider
         cl.UpdateBuffer(this._globalDataBuffer, 0, ref globalData);
 
         this._renderBatcher.DrawRenderList(cl, this._resourceSet, pickingRenderQueue);
+
+        // The pixel under the cursor is copied to a staging texture now and read in the next frame, once the GPU has
+        // finished this one, so reading it never waits for the GPU.
+        this.RecordCopy(cl);
     }
 
     /// <summary>
-    /// Reads the picking result from the staging texture and updates the picking manager.
-    /// Must be called after command submission so the copy has executed.
-    /// Does nothing if the pass has not rendered since the last read.
+    /// Reads the pixel copied in the last submitted frame.
     /// </summary>
-    /// <param name="pickingManager">The picking manager to update.</param>
-    public void ReadStagingResult(PickingManager pickingManager)
+    /// <remarks>
+    /// Must be called when the GPU has finished the last submitted frame, and before the next one is submitted.
+    /// </remarks>
+    public void ReadStagingResult()
     {
-        if (!this._isCopyRecorded) return;
-        this._isCopyRecorded = false;
+        var copy = this._submittedCopy;
+        this._submittedCopy = this._recordedCopy;
+        this._recordedCopy = PixelCopy.None;
 
-        if (!this._mouseInside)
+        if (copy == PixelCopy.CursorInside)
         {
-            // The cursor is outside the window, so nothing is under it. The staging texture still holds the
-            // pixel from the last frame the cursor was inside, and reading it would highlight a stale object.
-            pickingManager.HighlightedPickable = null;
-            return;
+            var mappedResource = this._gd.Map<uint>(this._pixelStagingTexture, MapMode.Read);
+            this._readObjectId = mappedResource[0, 0];
+            this._gd.Unmap(this._pixelStagingTexture);
         }
 
-        var mappedResource = this._gd.Map<uint>(this._pixelStagingTexture, MapMode.Read);
-        uint objectID = mappedResource[0, 0];
-        this._gd.Unmap(this._pixelStagingTexture);
+        if (copy != PixelCopy.None)
+        {
+            this._readCopy = copy;
+        }
+    }
 
-        pickingManager.HighlightedPickable = pickingManager.GetPickable(objectID);
+    /// <summary>
+    /// Updates the given picking manager with the last pixel read.
+    /// Does nothing if no pixel was read since the last call.
+    /// </summary>
+    /// <param name="pickingManager">The picking manager to update.</param>
+    public void ApplyResult(PickingManager pickingManager)
+    {
+        if (this._readCopy == PixelCopy.None) return;
+
+        // When the cursor was outside the window, nothing is under it. The staging texture still holds the pixel from
+        // the last frame the cursor was inside, and using it would highlight a stale object.
+        pickingManager.HighlightedPickable = this._readCopy == PixelCopy.CursorInside
+            ? pickingManager.GetPickable(this._readObjectId)
+            : null;
+
+        this._readCopy = PixelCopy.None;
     }
 
     private bool MouseIsInside(Vector2 mousePos)
@@ -164,9 +188,9 @@ internal class MousePickingPass : IDisposable, IPipelineProvider
     private void RecordCopy(CommandList cl)
     {
         var mousePos = InputManager.Instance.CursorPosition;
-        this._isCopyRecorded = true;
-        this._mouseInside = this.MouseIsInside(mousePos);
-        if (this._mouseInside)
+        bool isInside = this.MouseIsInside(mousePos);
+        this._recordedCopy = isInside ? PixelCopy.CursorInside : PixelCopy.CursorOutside;
+        if (isInside)
         {
             uint x = (uint)mousePos.X;
             uint y = this._gd.IsUvOriginTopLeft

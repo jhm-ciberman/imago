@@ -301,7 +301,7 @@ public class Scene3DLayer : IRenderLayer, IOffscreenLayer, IDisposable
 
         if (this._stage != null)
         {
-            renderer.ReadPickingResult(this.Picking);
+            renderer.ApplyPickingResult(this.Picking);
             this.Picking.Update(this.Camera, this._stage.IsCursorOverGui() || this.IsInputBlocked);
         }
 

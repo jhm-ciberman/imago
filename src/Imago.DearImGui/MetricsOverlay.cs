@@ -305,7 +305,11 @@ public sealed class MetricsOverlay
         float slowestValue = 0f;
         foreach (var phase in phases)
         {
-            this.FindSlowestLeaf(phase, ref slowest, ref slowestValue);
+            // A phase without children, like waiting for the GPU, would only name itself.
+            if (phase.Children.Count > 0)
+            {
+                this.FindSlowestLeaf(phase, ref slowest, ref slowestValue);
+            }
         }
 
         if (slowest != null && frameMilliseconds > 0f)
