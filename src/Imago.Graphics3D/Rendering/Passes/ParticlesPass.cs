@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using Imago.Graphics3D.SceneGraph;
 using Imago.Graphics3D.SceneGraph.Cameras;
 using Imago.Rendering;
+using Imago.Rendering.Internals;
 using Imago.Support.Drawing;
 using Imago.Textures;
 using NeoVeldrid;
@@ -64,15 +65,20 @@ internal class ParticlesPass : IDisposable
 
     private readonly DeviceBuffer _viewProjectionBuffer;
 
+    private readonly NeoVeldrid.Shader[] _shaders;
+
     private readonly Pipeline _pipeline;
 
     private readonly ParticleRenderData[] _particlesForRender = new ParticleRenderData[ParticlesPerBatch];
 
-    private readonly Dictionary<ITexture, ResourceSet> _textures = new Dictionary<ITexture, ResourceSet>();
+    private readonly ResourceSetCache _resourceSetCache;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ParticlesPass"/> class.
+    /// </summary>
+    /// <param name="renderer">The renderer to use.</param>
     public ParticlesPass(Renderer renderer)
     {
-        this._particlesForRender = new ParticleRenderData[ParticlesPerBatch];
         this._gd = renderer.GraphicsDevice;
         var factory = this._gd.ResourceFactory;
 
@@ -101,6 +107,7 @@ internal class ParticlesPass : IDisposable
 
 
         this._passResourceSet = factory.CreateResourceSet(new ResourceSetDescription(this._passResourceLayout, this._viewProjectionBuffer));
+        this._resourceSetCache = new ResourceSetCache(factory);
 
         var vertexLayouts = new[]
         {
@@ -114,14 +121,15 @@ internal class ParticlesPass : IDisposable
             )
         };
 
-        var shaders = ShaderCompiler.CompileShaders(this._gd, _vertexShader, _fragmentShader);
+        this._shaders = ShaderCompiler.CompileShaders(this._gd, _vertexShader, _fragmentShader);
 
         this._pipeline = this._gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription()
         {
-            DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
+            // A see-through particle must not hide the particles drawn after it.
+            DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqualRead,
             PrimitiveTopology = PrimitiveTopology.TriangleStrip,
-            ShaderSet = new ShaderSetDescription(vertexLayouts, shaders),
-            BlendState = BlendStateDescription.SingleAlphaBlend,
+            ShaderSet = new ShaderSetDescription(vertexLayouts, this._shaders),
+            BlendState = GetBlendState(),
             RasterizerState = new RasterizerStateDescription(
                 FaceCullMode.None,
                 PolygonFillMode.Solid,
@@ -147,22 +155,26 @@ internal class ParticlesPass : IDisposable
     /// <param name="particleSystems">The particle systems to render.</param>
     public void Render(CommandList cl, RenderTexture renderTexture, Camera camera, IReadOnlyList<IParticleSystem> particleSystems)
     {
+        if (particleSystems.Count == 0) return;
+
         this._currentTexture = null;
 
         cl.SetFramebuffer(renderTexture.Framebuffer);
         cl.SetPipeline(this._pipeline);
         cl.SetGraphicsResourceSet(0, this._passResourceSet);
+        cl.SetVertexBuffer(0, this._vertexBuffer);
+        cl.SetVertexBuffer(1, this._particlesBuffer);
+
+        cl.UpdateBuffer(this._viewProjectionBuffer, 0, new CameraDataBuffer
+        {
+            ViewProjection = camera.ViewProjectionMatrix,
+            CameraRight = camera.Right,
+            CameraUp = camera.Up
+        });
 
         for (int i = 0; i < particleSystems.Count; i++)
         {
             IParticleSystem system = particleSystems[i];
-
-            cl.UpdateBuffer(this._viewProjectionBuffer, 0, new CameraDataBuffer
-            {
-                ViewProjection = camera.ViewProjectionMatrix,
-                CameraRight = camera.Right,
-                CameraUp = camera.Up
-            });
 
             system.SortParticles(camera.Position);
 
@@ -172,19 +184,10 @@ internal class ParticlesPass : IDisposable
 
     private void RenderParticles(CommandList cl, IReadOnlyList<Particle> particles, ITexture texture)
     {
-        if (particles.Count == 0) return;
-        if (particles.Count <= ParticlesPerBatch)
-            this.FlushParticles(cl, particles, 0, particles.Count, texture);
-
-        int batchStartIndex = 0;
-        int batchEndIndex;
-        int numberOfbatches = (int)Math.Ceiling(particles.Count / (float)ParticlesPerBatch);
-
-        for (int i = 0; i < numberOfbatches; i++)
+        for (int batchStartIndex = 0; batchStartIndex < particles.Count; batchStartIndex += ParticlesPerBatch)
         {
-            batchEndIndex = Math.Min(particles.Count, batchStartIndex + ParticlesPerBatch);
+            int batchEndIndex = int.Min(particles.Count, batchStartIndex + ParticlesPerBatch);
             this.FlushParticles(cl, particles, batchStartIndex, batchEndIndex, texture);
-            batchStartIndex = batchEndIndex;
         }
     }
 
@@ -197,37 +200,54 @@ internal class ParticlesPass : IDisposable
             this._particlesForRender[particlesCount++] = new ParticleRenderData(particle.Position, particle.Size, particle.Color);
         }
 
-        cl.UpdateBuffer(this._particlesBuffer, 0, this._particlesForRender);
+        cl.UpdateBuffer(this._particlesBuffer, 0, this._particlesForRender.AsSpan(0, particlesCount));
 
         if (this._currentTexture != texture)
         {
             this._currentTexture = texture;
-            var resourceSet = this.GetTextureResourceSet(texture);
+            var resourceSet = this._resourceSetCache.GetResourceSet(this._materialResourceLayout, texture);
             cl.SetGraphicsResourceSet(1, resourceSet);
         }
 
-        cl.SetVertexBuffer(0, this._vertexBuffer);
-        cl.SetVertexBuffer(1, this._particlesBuffer);
         cl.Draw(4, (uint)particlesCount, 0, 0);
     }
 
-    private ResourceSet GetTextureResourceSet(ITexture texture)
+    private static BlendStateDescription GetBlendState()
     {
-        if (this._textures.TryGetValue(texture, out var resourceSet))
-            return resourceSet;
-
-        resourceSet = this._gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(this._materialResourceLayout, texture.NativeTexture, texture.NativeSampler));
-        this._textures.Add(texture, resourceSet);
-        return resourceSet;
+        // The classic alpha blend lowers the alpha of the target. This formula keeps an opaque target opaque.
+        return new BlendStateDescription
+        {
+            AttachmentStates = [
+                new BlendAttachmentDescription
+                {
+                    BlendEnabled = true,
+                    SourceColorFactor = BlendFactor.SourceAlpha,
+                    DestinationColorFactor = BlendFactor.InverseSourceAlpha,
+                    ColorFunction = BlendFunction.Add,
+                    SourceAlphaFactor = BlendFactor.One,
+                    DestinationAlphaFactor = BlendFactor.InverseSourceAlpha,
+                    AlphaFunction = BlendFunction.Add
+                }
+            ],
+        };
     }
 
+    /// <inheritdoc />
     public void Dispose()
     {
         this._vertexBuffer.Dispose();
+        this._particlesBuffer.Dispose();
         this._viewProjectionBuffer.Dispose();
         this._passResourceLayout.Dispose();
         this._passResourceSet.Dispose();
+        this._materialResourceLayout.Dispose();
+        this._resourceSetCache.Dispose();
         this._pipeline.Dispose();
+
+        foreach (var shader in this._shaders)
+        {
+            shader.Dispose();
+        }
     }
 
     private static readonly string _vertexShader = @"
