@@ -22,6 +22,7 @@ public sealed class ImagoMetrics : MetricGroup
         this.MainLayersTime = this.Timer("Main layers time");
         this.GuiLayersTime = this.Timer("GUI layers time");
         this.GpuSyncTime = this.Timer("GPU sync time");
+        this.PresentTime = this.Timer("Present time");
         this.SpriteDrawCallCount = this.Counter("Sprite draw call count");
         this.TextureUploadCount = this.Counter("Texture upload count");
         this.AllocatedBytes = this.Counter("Allocated bytes");
@@ -51,7 +52,7 @@ public sealed class ImagoMetrics : MetricGroup
     public TimerMetric StageUpdateTime { get; }
 
     /// <summary>
-    /// Gets the time of the whole render, without waiting for the screen.
+    /// Gets the time spent recording the render commands.
     /// </summary>
     public TimerMetric RenderTime { get; }
 
@@ -71,9 +72,14 @@ public sealed class ImagoMetrics : MetricGroup
     public TimerMetric GuiLayersTime { get; }
 
     /// <summary>
-    /// Gets the time spent waiting for the GPU and sending the commands.
+    /// Gets the time spent waiting for the GPU to finish the previous frame and sending the new commands.
     /// </summary>
     public TimerMetric GpuSyncTime { get; }
+
+    /// <summary>
+    /// Gets the time spent showing the frame on the screen, which includes waiting for vertical sync.
+    /// </summary>
+    public TimerMetric PresentTime { get; }
 
     /// <summary>
     /// Gets the number of sprite draw calls.

@@ -74,16 +74,23 @@ public class Forward3DRenderer : IDisposable
         this._immediatePass = new ImmediatePass(renderer);
         this._skyDomePass = new SkyDomePass(renderer);
         this._ambientOcclusionPass = new AmbientOcclusionPass(renderer);
+
+        renderer.FrameCompleted += this.Renderer_FrameCompleted;
     }
 
     /// <summary>
-    /// Reads the object under the cursor from the last rendered frame into the given picking manager.
-    /// Does nothing if no scene has rendered to the screen since the last read.
+    /// Updates the given picking manager with the object under the cursor, as read from an earlier frame.
+    /// Does nothing if no new result was read since the last call.
     /// </summary>
     /// <param name="pickingManager">The picking manager to update.</param>
-    internal void ReadPickingResult(PickingManager pickingManager)
+    internal void ApplyPickingResult(PickingManager pickingManager)
     {
-        this._mousePickerPass.ReadStagingResult(pickingManager);
+        this._mousePickerPass.ApplyResult(pickingManager);
+    }
+
+    private void Renderer_FrameCompleted(object? sender, EventArgs e)
+    {
+        this._mousePickerPass.ReadStagingResult();
     }
 
     /// <summary>
@@ -308,6 +315,7 @@ public class Forward3DRenderer : IDisposable
     /// </summary>
     public void Dispose()
     {
+        this._renderer.FrameCompleted -= this.Renderer_FrameCompleted;
         this._mousePickerPass.Dispose();
         this._gizmosPass.Dispose();
         this._particlesPass.Dispose();
