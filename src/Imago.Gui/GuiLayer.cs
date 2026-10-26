@@ -101,12 +101,15 @@ public class GuiLayer : IRenderLayer, IOffscreenLayer, IInputHandler
 
     private readonly Stopwatch _measureArrangeStopwatch = new Stopwatch();
 
+    private readonly GuiMetrics? _metrics;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="GuiLayer"/> class.
     /// </summary>
     /// <param name="viewport">The viewport to render the GUI to. If null, the default GUI viewport is used.</param>
     public GuiLayer(Viewport? viewport = null)
     {
+        this._metrics = Application.Instance.Metrics.Find<GuiMetrics>();
         this.Input = InputManager.Instance;
         this.Viewport = viewport ?? Renderer.Instance.GuiViewport;
         this.Viewport.SizeChanged += this.Viewport_SizeChanged;
@@ -180,7 +183,20 @@ public class GuiLayer : IRenderLayer, IOffscreenLayer, IInputHandler
     {
         if (this._content is null) return;
 
-        this._content.Update(deltaTime);
+        if (this._metrics is GuiMetrics metrics)
+        {
+            using var timer = metrics.UpdateTime.StartTimer();
+            this.UpdateContent(this._content, deltaTime);
+        }
+        else
+        {
+            this.UpdateContent(this._content, deltaTime);
+        }
+    }
+
+    private void UpdateContent(Control content, float deltaTime)
+    {
+        content.Update(deltaTime);
 
         if (this.IsInputBlocked)
         {
@@ -190,7 +206,7 @@ public class GuiLayer : IRenderLayer, IOffscreenLayer, IInputHandler
         else
         {
             var position = this.WindowToViewport(this.Input.CursorPosition);
-            this.ControlUnderCursor = this._content.HitTest(position);
+            this.ControlUnderCursor = content.HitTest(position);
             this.IsCursorOverElement = this.ControlUnderCursor != null;
         }
     }

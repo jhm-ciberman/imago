@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Imago.Gui.Scenarios;
+using Imago.Metrics;
 using Imago.Scenarios;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -21,6 +22,9 @@ public sealed class GuiModule : Module
     /// <inheritdoc />
     public override void Boot(Application app)
     {
+        var metrics = app.Metrics.Add(new GuiMetrics());
+        app.Metrics.Layout.Time("Update/Layers/GUI", metrics.UpdateTime);
+
         app.Stage.AddLayer(app.Services.GetRequiredService<TooltipLayer>());
         app.Stage.AddLayer(app.Services.GetRequiredService<CursorLayer>());
     }
@@ -70,5 +74,14 @@ public static class GuiExtensions
         /// </summary>
         /// <exception cref="System.InvalidOperationException">Thrown if the application has no <see cref="GuiModule"/>.</exception>
         public GuiScenarioTools Gui => scenario.Tool<GuiScenarioTools>();
+    }
+
+    extension(FrameMetrics metrics)
+    {
+        /// <summary>
+        /// Gets the metrics of the GUI layers.
+        /// </summary>
+        /// <exception cref="System.InvalidOperationException">Thrown if the application has no <see cref="GuiModule"/>.</exception>
+        public GuiMetrics Gui => metrics.Group<GuiMetrics>();
     }
 }

@@ -13,6 +13,8 @@ public sealed class Graphics3DMetrics : MetricGroup
     public Graphics3DMetrics()
         : base("Graphics3D")
     {
+        this.SceneUpdateTime = this.Timer("Scene update time");
+        this.SceneRenderTime = this.Timer("Scene render time");
         this.BufferUploadTime = this.Timer("Buffer upload time");
         this.ShadowPassTime = this.Timer("Shadow pass time");
         this.ForwardPassTime = this.Timer("Forward pass time");
@@ -30,6 +32,16 @@ public sealed class Graphics3DMetrics : MetricGroup
         this.ParticleCount = this.Counter("Particle count");
         this.ShadowCascadeCount = this.Gauge("Shadow cascade count");
     }
+
+    /// <summary>
+    /// Gets the time of the update of the 3D scenes, like reading the object under the cursor.
+    /// </summary>
+    public TimerMetric SceneUpdateTime { get; }
+
+    /// <summary>
+    /// Gets the time of the whole render of the 3D scenes.
+    /// </summary>
+    public TimerMetric SceneRenderTime { get; }
 
     /// <summary>
     /// Gets the time spent uploading instance, transform, and skeleton data to the GPU.

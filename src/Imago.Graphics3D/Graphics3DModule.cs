@@ -22,7 +22,27 @@ public sealed class Graphics3DModule : Module
     /// <inheritdoc />
     public override void Boot(Application app)
     {
-        app.Metrics.Add(new Graphics3DMetrics());
+        var metrics = app.Metrics.Add(new Graphics3DMetrics());
+
+        app.Metrics.Layout
+            .Time("Update/Layers/3D scene", metrics.SceneUpdateTime)
+            .Time("Render/3D", metrics.SceneRenderTime, before: "GUI")
+            .Time("Render/3D/Shadow", metrics.ShadowPassTime)
+            .Time("Render/3D/Forward", metrics.ForwardPassTime)
+            .Time("Render/3D/Other", [
+                metrics.BufferUploadTime,
+                metrics.SkyDomePassTime,
+                metrics.AmbientOcclusionPassTime,
+                metrics.ImmediatePassTime,
+                metrics.ParticlesPassTime,
+                metrics.GizmosPassTime,
+                metrics.PickingPassTime,
+            ])
+            .Count("Draw calls/Forward", metrics.DrawCallCount, before: "Sprites")
+            .Count("Draw calls/Shadow", metrics.ShadowDrawCallCount, before: "Sprites")
+            .Count("Draw calls/Picking", metrics.PickingDrawCallCount, before: "Sprites")
+            .Fraction("Renderables", metrics.VisibleRenderableCount, metrics.TotalRenderableCount, before: "Texture uploads");
+
         app.Services.GetRequiredService<Forward3DRenderer>();
     }
 

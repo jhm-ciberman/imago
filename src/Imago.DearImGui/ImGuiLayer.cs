@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Imago.Input;
+using Imago.Metrics;
 using Imago.Rendering;
 using Imago.Textures;
 using ImGuiNET;
@@ -55,13 +56,17 @@ public sealed class ImGuiLayer : IRenderLayer, IInputHandler, IMountListener, ID
     private readonly IRenderTexture _renderTexture;
     private readonly ImGuiRenderer _imguiRenderer;
     private readonly List<IImGuiDrawable> _drawables = [];
+    private readonly ImGuiMetrics _metrics;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ImGuiLayer"/> class.
     /// </summary>
+    /// <param name="metrics">The metrics of the application. It must have the <see cref="ImGuiMetrics"/> group.</param>
     /// <exception cref="InvalidOperationException">Thrown if an ImGui layer already exists.</exception>
-    public ImGuiLayer()
+    public ImGuiLayer(FrameMetrics metrics)
     {
+        this._metrics = metrics.Group<ImGuiMetrics>();
+
         if (Instance != null)
         {
             throw new InvalidOperationException("Only one instance of ImGuiLayer can be created.");
@@ -105,6 +110,8 @@ public sealed class ImGuiLayer : IRenderLayer, IInputHandler, IMountListener, ID
     /// <inheritdoc />
     public void Update(float deltaTime)
     {
+        using var timer = this._metrics.UpdateTime.StartTimer();
+
         this._imguiRenderer.Update(deltaTime, InputManager.Instance.InputSnapshot);
         this.FrameStarted?.Invoke(this, EventArgs.Empty);
 
