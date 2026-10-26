@@ -2,6 +2,7 @@ using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Imago.Rendering.Internals;
+using Imago.Support.Metrics;
 using Imago.Support.Numerics;
 using Imago.Textures;
 using NeoVeldrid;
@@ -26,7 +27,7 @@ internal class SpritesPass : IDisposable
 
     private readonly bool _depthTested;
 
-    private readonly RenderStatistics _statistics;
+    private readonly CounterMetric _drawCalls;
 
     private readonly SpriteQuad[] _quads;
 
@@ -74,7 +75,7 @@ internal class SpritesPass : IDisposable
         this._gd = renderer.GraphicsDevice;
         this._outputDescription = (outputTarget ?? renderer.MainRenderTexture).OutputDescription;
         this._depthTested = depthTested;
-        this._statistics = renderer.Statistics;
+        this._drawCalls = renderer.Metrics.SpriteDrawCallCount;
         this._shaders = ShaderCompiler.CompileShaders(this._gd, _vertexShader, _fragmentShader);
         var factory = this._gd.ResourceFactory;
 
@@ -181,7 +182,7 @@ internal class SpritesPass : IDisposable
     public void End()
     {
         this.Flush();
-        this._statistics.CurrentGuiDrawCalls += this._drawCallCount;
+        this._drawCalls.Add(this._drawCallCount);
     }
 
     /// <summary>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Imago.Graphics3D.Meshes;
 using Imago.Rendering;
+using Imago.Support.Metrics;
 using NeoVeldrid;
 
 namespace Imago.Graphics3D.Rendering.Internals;
@@ -30,19 +31,19 @@ internal class RenderBatcher : IDisposable
     private readonly List<RenderBatch> _batches;
     private readonly GraphicsDevice _gd;
     private readonly RenderBatchPassType _pass;
-    private readonly RenderStatistics _statistics;
+    private readonly CounterMetric _drawCallCount;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RenderBatcher"/> class.
     /// </summary>
     /// <param name="gd">The <see cref="GraphicsDevice"/> to use for rendering.</param>
     /// <param name="pass">The <see cref="RenderBatchPassType"/> of the render pass.</param>
-    /// <param name="statistics">The <see cref="RenderStatistics"/> to report draw call counts to.</param>
-    public RenderBatcher(GraphicsDevice gd, RenderBatchPassType pass, RenderStatistics statistics)
+    /// <param name="drawCallCount">The metric that counts the draw calls.</param>
+    public RenderBatcher(GraphicsDevice gd, RenderBatchPassType pass, CounterMetric drawCallCount)
     {
         this._gd = gd;
         this._pass = pass;
-        this._statistics = statistics;
+        this._drawCallCount = drawCallCount;
         this._offsetVertexData = new OffsetVertexData[1024];
         this._batches = new List<RenderBatch>(1024);
     }
@@ -128,14 +129,7 @@ internal class RenderBatcher : IDisposable
             instanceIndex += batch.InstanceCount;
         }
 
-        if (this._pass == RenderBatchPassType.Forward)
-        {
-            this._statistics.CurrentDrawCalls += batches.Count;
-        }
-        else if (this._pass == RenderBatchPassType.ShadowMap)
-        {
-            this._statistics.CurrentShadowDrawCalls += batches.Count;
-        }
+        this._drawCallCount.Add(batches.Count);
     }
 
     private void PrepareBatches(IReadOnlyList<Renderable> renderables)

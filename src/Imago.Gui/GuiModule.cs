@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using Imago.Gui.Scenarios;
 using Imago.Scenarios;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,5 +29,46 @@ public sealed class GuiModule : Module
     public override void BootScenario(Scenario scenario)
     {
         scenario.AddTool(new GuiScenarioTools(scenario));
+    }
+}
+
+/// <summary>
+/// Provides the GUI extensions for the core types.
+/// </summary>
+public static class GuiExtensions
+{
+    extension(Stage stage)
+    {
+        /// <summary>
+        /// Gets the tooltip layer on this stage, or null if there is none.
+        /// </summary>
+        public TooltipLayer? TooltipLayer => stage.FindLayer<TooltipLayer>();
+
+        /// <summary>
+        /// Gets the cursor layer on this stage, or null if there is none.
+        /// </summary>
+        public CursorLayer? CursorLayer => stage.FindLayer<CursorLayer>();
+    }
+
+    extension(Screen screen)
+    {
+        /// <summary>
+        /// Gets the primary GUI layer of the screen (the first one added), if any.
+        /// </summary>
+        public GuiLayer? GuiLayer => screen.FindLayer<GuiLayer>();
+
+        /// <summary>
+        /// Gets all GUI layers in the screen, ordered by ZOrder.
+        /// </summary>
+        public IEnumerable<GuiLayer> GuiLayers => screen.Layers.OfType<GuiLayer>().OrderBy(l => l.ZOrder);
+    }
+
+    extension(Scenario scenario)
+    {
+        /// <summary>
+        /// Gets the GUI tools of this scenario.
+        /// </summary>
+        /// <exception cref="System.InvalidOperationException">Thrown if the application has no <see cref="GuiModule"/>.</exception>
+        public GuiScenarioTools Gui => scenario.Tool<GuiScenarioTools>();
     }
 }

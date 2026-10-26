@@ -5,6 +5,7 @@ using System.Numerics;
 using System.Runtime;
 using Imago.Diagnostics;
 using Imago.Input;
+using Imago.Metrics;
 using Imago.Rendering;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -68,6 +69,11 @@ public class Application : IDisposable
     public Viewport Viewport => this.Renderer.MainViewport;
 
     /// <summary>
+    /// Gets the metrics of the application and its modules.
+    /// </summary>
+    public FrameMetrics Metrics { get; }
+
+    /// <summary>
     /// Gets the services of the application and its modules.
     /// </summary>
     public IServiceProvider Services => this._services;
@@ -79,6 +85,12 @@ public class Application : IDisposable
     private readonly GuiSizeMode _guiSizeMode;
 
     private readonly Game _game;
+
+    private readonly ImagoMetrics _metrics;
+
+    private long _allocatedBytes;
+
+    private int _garbageCollections;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Application"/> class.
@@ -94,8 +106,11 @@ public class Application : IDisposable
 
         this._guiSizeMode = builder.GuiSizeMode;
 
+        this.Metrics = new FrameMetrics();
+        this._metrics = this.Metrics.Imago;
+
         this.Window = CreateWindow(builder);
-        this.Renderer = new Renderer(this.Window, builder.Backend);
+        this.Renderer = new Renderer(this.Window, this._metrics, builder.Backend);
         this.Input = new InputManager(this.Window);
         this.Ticker = new Ticker();
         this.Stage = new Stage();
@@ -114,6 +129,9 @@ public class Application : IDisposable
         }
 
         this._game = this._services.GetRequiredService<Game>();
+
+        this._allocatedBytes = GC.GetAllocatedBytesForCurrentThread();
+        this._garbageCollections = GC.CollectionCount(0);
     }
 
     /// <summary>
@@ -151,6 +169,7 @@ public class Application : IDisposable
         services.AddSingleton(this.Input);
         services.AddSingleton(this.Ticker);
         services.AddSingleton(this.Stage);
+        services.AddSingleton(this.Metrics);
         services.AddSingleton(this._exceptions.LoggerFactory);
         services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
 
@@ -214,27 +233,53 @@ public class Application : IDisposable
     private void Ticker_Ticked(object? sender, TickedEventArgs e)
     {
         float deltaTime = (float)e.DeltaTime;
+        var metrics = this._metrics;
 
-        this.Renderer.Statistics.UpdateTime.Begin();
+        metrics.FrameTime.Add(TimeSpan.FromSeconds(e.DeltaTime));
 
-        this.Input.UpdateState();
-        this.Renderer.Update(deltaTime);
-
-        this._game.Update(deltaTime);
-
-        this.Stage.Update(deltaTime);
-
-        if (!this.Window.Exists)
+        using (metrics.UpdateTime.StartTimer())
         {
-            this.Quit();
-            return;
+            this.Input.UpdateState();
+            this.Renderer.Update(deltaTime);
+
+            using (metrics.GameUpdateTime.StartTimer())
+            {
+                this._game.Update(deltaTime);
+            }
+
+            using (metrics.StageUpdateTime.StartTimer())
+            {
+                this.Stage.Update(deltaTime);
+            }
+
+            if (!this.Window.Exists)
+            {
+                this.Quit();
+                return;
+            }
+
+            using (metrics.GameUpdateTime.StartTimer())
+            {
+                this._game.PostUpdate(deltaTime);
+            }
         }
 
-        this._game.PostUpdate(deltaTime);
-
-        this.Renderer.Statistics.UpdateTime.End();
-
         this.Renderer.Render(this.Stage);
+
+        this.RecordMemory();
+        this.Metrics.EndFrame();
+    }
+
+    private void RecordMemory()
+    {
+        long allocatedBytes = GC.GetAllocatedBytesForCurrentThread();
+        int garbageCollections = GC.CollectionCount(0);
+
+        this._metrics.AllocatedBytes.Add((int)(allocatedBytes - this._allocatedBytes));
+        this._metrics.GarbageCollectionCount.Add(garbageCollections - this._garbageCollections);
+
+        this._allocatedBytes = allocatedBytes;
+        this._garbageCollections = garbageCollections;
     }
 
     /// <summary>

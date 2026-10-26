@@ -67,7 +67,7 @@ internal class MousePickingPass : IDisposable, IPipelineProvider
         this._renderTexture = renderer.MainRenderTexture;
         this._pickingTexture = new PickingTexture(renderer, this._renderTexture);
 
-        this._renderBatcher = new RenderBatcher(this._gd, RenderBatchPassType.Picking, renderer.Statistics);
+        this._renderBatcher = new RenderBatcher(this._gd, RenderBatchPassType.Picking, forward3DRenderer.Metrics.PickingDrawCallCount);
 
         this._pixelStagingTexture = factory.CreateTexture(new TextureDescription(
             width: 1, height: 1, depth: 1, mipLevels: 1, arrayLayers: 1,

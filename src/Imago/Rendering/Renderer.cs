@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using CommunityToolkit.Diagnostics;
+using Imago.Metrics;
 using Imago.Rendering.Passes;
 using Imago.Rendering.Sprites;
 using Imago.Support;
@@ -98,29 +99,28 @@ public class Renderer : IDisposable
     private readonly Dictionary<ResourceLayoutDescription, ResourceLayout> _resourceLayoutCache = new();
     private float _totalTime;
 
-    /// <summary>
-    /// Gets the per-frame rendering statistics.
-    /// </summary>
-    public RenderStatistics Statistics { get; } = new RenderStatistics();
+    internal ImagoMetrics Metrics { get; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Renderer"/> class.
     /// </summary>
     /// <param name="window">The window to render to.</param>
+    /// <param name="metrics">The metrics to record the frame times into.</param>
     /// <param name="graphicsBackend">The graphics backend to use.</param>
     /// <param name="debug">Whether to enable debug mode in the graphics device.</param>
     /// <exception cref="InvalidOperationException">Thrown if the renderer is already initialized.</exception>
-    public Renderer(Sdl2Window window, GraphicsBackend? graphicsBackend = null, bool debug = false)
-        : this(CreateGraphicsDevice(window, graphicsBackend, debug)) { }
+    public Renderer(Sdl2Window window, ImagoMetrics metrics, GraphicsBackend? graphicsBackend = null, bool debug = false)
+        : this(CreateGraphicsDevice(window, graphicsBackend, debug), metrics) { }
 
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Renderer"/> class.
     /// </summary>
     /// <param name="gd">The graphics device to use.</param>
+    /// <param name="metrics">The metrics to record the frame times into.</param>
     /// <param name="swapchain">The swapchain to use. If null, the main swapchain of the graphics device is used.</param>
     /// <exception cref="InvalidOperationException">Thrown if the renderer is already initialized.</exception>
-    public Renderer(GraphicsDevice gd, Swapchain? swapchain = null)
+    public Renderer(GraphicsDevice gd, ImagoMetrics metrics, Swapchain? swapchain = null)
     {
         if (Instance != null)
         {
@@ -130,6 +130,7 @@ public class Renderer : IDisposable
         Instance = this;
 
         this.GraphicsDevice = gd;
+        this.Metrics = metrics;
 
         swapchain ??= this.GraphicsDevice.MainSwapchain;
 
@@ -184,12 +185,10 @@ public class Renderer : IDisposable
     /// <param name="stage">The stage to render.</param>
     public void Render(Stage stage)
     {
-        var stats = this.Statistics;
-        stats.RenderTime.Begin();
-        stats.BeginFrame();
-
-        this.RenderStage(stage, this.FullScreenRenderTexture, RenderOutputMode.Screen);
-        stats.RenderTime.End();
+        using (this.Metrics.RenderTime.StartTimer())
+        {
+            this.RenderStage(stage, this.FullScreenRenderTexture, RenderOutputMode.Screen);
+        }
 
         if (this.GraphicsDevice.MainSwapchain != null)
         {
@@ -209,65 +208,69 @@ public class Renderer : IDisposable
 
     private void RenderStage(Stage stage, IRenderTexture target, RenderOutputMode outputMode)
     {
-        var stats = this.Statistics;
-
-        stats.PreparePhase.Begin();
+        var metrics = this.Metrics;
         var cl = this._commandList;
-        cl.Begin();
-        this.UpdateDirtyTextures(cl);
-        stats.PreparePhase.End();
 
-        stats.Pass3D.Begin();
-        cl.SetFramebuffer(this.MainRenderTexture.Framebuffer);
-        var col = stage.DefaultClearColor;
-        cl.ClearColorTarget(0, new RgbaFloat(col.R / 255f, col.G / 255f, col.B / 255f, col.A / 255f));
-        cl.ClearDepthStencil(1f);
-
-        this._spritesPass.SpriteBatch.SetRenderTarget(cl, this.MainRenderTexture);
-        foreach (var layer in stage.MainLayers)
+        using (metrics.PrepareTime.StartTimer())
         {
-            if (layer.IsVisible)
-            {
-                layer.Render(new RenderContext(this.GraphicsDevice, cl, this.MainRenderTexture, outputMode, this._spritesPass.SpriteBatch));
-            }
+            cl.Begin();
+            this.UpdateDirtyTextures(cl);
         }
-        stats.Pass3D.End();
 
-        stats.Pass2D.Begin();
-        cl.SetFramebuffer(this.GuiRenderTexture.Framebuffer);
-        cl.ClearColorTarget(0, RgbaFloat.Clear);
-        cl.ClearDepthStencil(1f);
-
-        this._spritesPass.SpriteBatch.SetRenderTarget(cl, this.GuiRenderTexture);
-        foreach (var layer in stage.GuiLayers)
+        using (metrics.MainLayersTime.StartTimer())
         {
-            if (layer.IsVisible)
+            cl.SetFramebuffer(this.MainRenderTexture.Framebuffer);
+            var col = stage.DefaultClearColor;
+            cl.ClearColorTarget(0, new RgbaFloat(col.R / 255f, col.G / 255f, col.B / 255f, col.A / 255f));
+            cl.ClearDepthStencil(1f);
+
+            this._spritesPass.SpriteBatch.SetRenderTarget(cl, this.MainRenderTexture);
+            foreach (var layer in stage.MainLayers)
             {
-                layer.Render(new RenderContext(this.GraphicsDevice, cl, this.GuiRenderTexture, outputMode, this._spritesPass.SpriteBatch));
+                if (layer.IsVisible)
+                {
+                    layer.Render(new RenderContext(this.GraphicsDevice, cl, this.MainRenderTexture, outputMode, this._spritesPass.SpriteBatch));
+                }
             }
         }
 
-        this._fullScreenPass.Render(cl, this.MainRenderTexture, target);
-        this._fullScreenPixelArtPass.Render(cl, this.GuiRenderTexture, target);
-
-        var overlayPass = this.GetOverlaySpritesPass(target);
-        overlayPass.SpriteBatch.SetRenderTarget(cl, target);
-        foreach (var layer in stage.OverlayLayers)
+        using (metrics.GuiLayersTime.StartTimer())
         {
-            if (layer.IsVisible)
+            cl.SetFramebuffer(this.GuiRenderTexture.Framebuffer);
+            cl.ClearColorTarget(0, RgbaFloat.Clear);
+            cl.ClearDepthStencil(1f);
+
+            this._spritesPass.SpriteBatch.SetRenderTarget(cl, this.GuiRenderTexture);
+            foreach (var layer in stage.GuiLayers)
             {
-                layer.Render(new RenderContext(this.GraphicsDevice, cl, target, outputMode, overlayPass.SpriteBatch));
+                if (layer.IsVisible)
+                {
+                    layer.Render(new RenderContext(this.GraphicsDevice, cl, this.GuiRenderTexture, outputMode, this._spritesPass.SpriteBatch));
+                }
             }
+
+            this._fullScreenPass.Render(cl, this.MainRenderTexture, target);
+            this._fullScreenPixelArtPass.Render(cl, this.GuiRenderTexture, target);
+
+            var overlayPass = this.GetOverlaySpritesPass(target);
+            overlayPass.SpriteBatch.SetRenderTarget(cl, target);
+            foreach (var layer in stage.OverlayLayers)
+            {
+                if (layer.IsVisible)
+                {
+                    layer.Render(new RenderContext(this.GraphicsDevice, cl, target, outputMode, overlayPass.SpriteBatch));
+                }
+            }
+
+            cl.End();
         }
 
-        cl.End();
-        stats.Pass2D.End();
-
-        stats.GpuSync.Begin();
-        this.GraphicsDevice.WaitForIdle();
-        this.GraphicsDevice.SubmitCommands(cl);
-        this._disposeCollector.DisposeAll();
-        stats.GpuSync.End();
+        using (metrics.GpuSyncTime.StartTimer())
+        {
+            this.GraphicsDevice.WaitForIdle();
+            this.GraphicsDevice.SubmitCommands(cl);
+            this._disposeCollector.DisposeAll();
+        }
     }
 
     private SpritesPass GetOverlaySpritesPass(IRenderTexture target)
@@ -496,6 +499,8 @@ public class Renderer : IDisposable
         {
             texture.Update(cl);
         }
+
+        this.Metrics.TextureUploadCount.Add(dirtyTextures.Length);
     }
 
     /// <summary>
