@@ -255,15 +255,12 @@ public class Forward3DRenderer : IDisposable
         stats.OtherSubPass.Begin();
         this._immediatePass.Render(cl, renderTexture, camera, immediateRQ);
         this._particlesPass.Render(cl, renderTexture, camera, scene.ParticleSystems);
+        this._gizmosPass.Render(cl, renderTexture, camera, scene.Gizmos);
         stats.OtherSubPass.End();
 
         stats.PickingSubPass.Begin();
         this._mousePickerPass.Render(cl, renderTexture, camera, pickingRQ);
         stats.PickingSubPass.End();
-
-        stats.OtherSubPass.Begin();
-        this._gizmosPass.Render(cl, renderTexture, camera, scene.Gizmos);
-        stats.OtherSubPass.End();
     }
 
     private void ClearRenderTarget(CommandList cl, Scene3DLayer scene)
