@@ -210,35 +210,11 @@ public abstract class Scenario : IDisposable
         // A screen changed this frame is not laid out and has no glyphs in the atlas until the next update.
         await this.NextFrame();
 
-        var stage = this.App.Stage;
-        var hiddenLayers = new List<IRenderLayer>();
-        if (!includeUi)
-        {
-            foreach (var layer in stage.Layers)
-            {
-                if (layer is IRenderLayer renderLayer && renderLayer.IsVisible)
-                {
-                    renderLayer.IsVisible = false;
-                    hiddenLayers.Add(renderLayer);
-                }
-            }
-        }
-
-        try
-        {
-            using var image = this._capturer!.Capture(stage);
-            string fileName = $"{this._shots.Count:D2}_{label.Slug()}.png";
-            image.SaveAsPng(Path.Combine(this.OutputDirectory, fileName));
-            this._shots.Add(fileName);
-            this.Log($"captured {fileName}");
-        }
-        finally
-        {
-            foreach (var layer in hiddenLayers)
-            {
-                layer.IsVisible = true;
-            }
-        }
+        using var image = this._capturer!.Capture(this.App.Stage, includeUi: includeUi);
+        string fileName = $"{this._shots.Count:D2}_{label.Slug()}.png";
+        image.SaveAsPng(Path.Combine(this.OutputDirectory, fileName));
+        this._shots.Add(fileName);
+        this.Log($"captured {fileName}");
     }
 
     /// <summary>
