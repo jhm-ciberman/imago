@@ -259,7 +259,6 @@ public abstract class Scenario : IDisposable
         this._app = null;
 
         var host = this.Host;
-        host.Dispose();
         this._host = null;
 
         Console.WriteLine($"  {this._shots.Count} shot(s) -> {host.OutputDirectory}");

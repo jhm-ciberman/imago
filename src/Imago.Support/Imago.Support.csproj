@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <ItemGroup>
         <PackageReference Include="CommunityToolkit.Diagnostics" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     </ItemGroup>
 </Project>

@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using Imago.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using NeoVeldrid;
 
@@ -13,6 +16,8 @@ public class ApplicationBuilder
 {
     private readonly List<Module> _modules = [];
     private readonly List<Action<IServiceCollection>> _serviceRegistrations = [];
+    private readonly List<Action<LoggingBuilder>> _loggingConfigurations = [];
+    private readonly ExceptionsBuilder _exceptions = new();
 
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
     internal Type GameType { get; }
@@ -120,6 +125,28 @@ public class ApplicationBuilder
     }
 
     /// <summary>
+    /// Changes the logging settings. Runs after the defaults and after every module, so it has the last word.
+    /// </summary>
+    /// <param name="configure">The callback that changes the logging settings.</param>
+    /// <returns>This builder.</returns>
+    public ApplicationBuilder WithLogging(Action<LoggingBuilder> configure)
+    {
+        this._loggingConfigurations.Add(configure);
+        return this;
+    }
+
+    /// <summary>
+    /// Changes how exceptions are reported and how crashes are shown.
+    /// </summary>
+    /// <param name="configure">The callback that changes the exception settings.</param>
+    /// <returns>This builder.</returns>
+    public ApplicationBuilder WithExceptions(Action<ExceptionsBuilder> configure)
+    {
+        configure(this._exceptions);
+        return this;
+    }
+
+    /// <summary>
     /// Sets whether the window is created hidden.
     /// </summary>
     /// <remarks>
@@ -138,11 +165,30 @@ public class ApplicationBuilder
     /// <summary>
     /// Creates the application and its game.
     /// </summary>
+    /// <remarks>
+    /// Logging starts first. If creating the application fails and no debugger is attached, the crash is reported
+    /// and shown, and the process ends.
+    /// </remarks>
     /// <returns>The application, ready to run.</returns>
     /// <exception cref="InvalidOperationException">Thrown if an application instance already exists.</exception>
     public Application Build()
     {
-        return new Application(this);
+        if (Application.Instance != null)
+        {
+            throw new InvalidOperationException("Only one instance of Application can exist.");
+        }
+
+        var exceptions = this.CreateExceptionHandler();
+
+        try
+        {
+            return new Application(this, exceptions);
+        }
+        catch (Exception e) when (!Debugger.IsAttached)
+        {
+            exceptions.Crash(e);
+            throw; // Not reached, because a crash ends the process.
+        }
     }
 
     /// <summary>
@@ -152,5 +198,23 @@ public class ApplicationBuilder
     public void Run()
     {
         this.Build().Run();
+    }
+
+    private ExceptionHandler CreateExceptionHandler()
+    {
+        var logging = new LoggingBuilder();
+
+        foreach (var module in this._modules)
+        {
+            module.ConfigureLogging(logging);
+        }
+
+        foreach (var configure in this._loggingConfigurations)
+        {
+            configure(logging);
+        }
+
+        string? logPath = logging.FilePath is string filePath ? Path.GetFullPath(filePath) : null;
+        return new ExceptionHandler(logging.Build(), this._exceptions, this.Title, logPath);
     }
 }

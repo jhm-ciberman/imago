@@ -1,3 +1,4 @@
+using Imago.Diagnostics;
 using Imago.Scenarios;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -17,6 +18,15 @@ public abstract class Module
     /// </summary>
     /// <param name="services">The collection to add the services to.</param>
     public virtual void Register(IServiceCollection services)
+    {
+        //
+    }
+
+    /// <summary>
+    /// Changes the logging settings, such as adding a sink. Called before the application is created.
+    /// </summary>
+    /// <param name="logging">The logging settings.</param>
+    public virtual void ConfigureLogging(LoggingBuilder logging)
     {
         //
     }

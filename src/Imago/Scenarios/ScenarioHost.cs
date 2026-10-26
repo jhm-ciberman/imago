@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using Imago.Input;
+using Microsoft.Extensions.Logging;
 using NeoVeldrid;
 
 namespace Imago.Scenarios;
@@ -10,14 +11,12 @@ namespace Imago.Scenarios;
 /// <summary>
 /// Runs a scenario's application on its own loop thread, inside a script process.
 /// </summary>
-internal sealed class ScenarioHost : IDisposable
+internal sealed class ScenarioHost
 {
     private const GraphicsBackend DefaultBackend = GraphicsBackend.OpenGL;
     private static readonly TimeSpan WatchdogTimeout = TimeSpan.FromMinutes(5.0);
 
     private readonly LoopSynchronizationContext _loop = new();
-    private readonly TextWriter _console;
-    private readonly TextWriter _log;
 
     private ScenarioHost(string outputDirectory)
     {
@@ -30,11 +29,6 @@ internal sealed class ScenarioHost : IDisposable
         {
             File.Delete(file);
         }
-
-        // The game's own console output goes to the log file, so the console only shows the script's Log lines.
-        this._console = Console.Out;
-        this._log = new StreamWriter(Path.Combine(outputDirectory, "log.txt"), append: false) { AutoFlush = true };
-        Console.SetOut(this._log);
     }
 
     /// <summary>
@@ -65,7 +59,15 @@ internal sealed class ScenarioHost : IDisposable
         builder
             .WithBackend(backend ?? ReadBackend(args))
             .WithWindowState(WindowState.Normal)
-            .WithHeadless(!show && !args.Contains("--show"));
+            .WithHeadless(!show && !args.Contains("--show"))
+            .WithExceptions(exceptions => exceptions.ShowCrashInConsole())
+            .WithLogging(logging =>
+            {
+                // The log goes to the file only, so the console shows only the script's Log lines.
+                logging.Console = false;
+                logging.FilePath = Path.Combine(outputDirectory, "log.txt");
+                logging.KeepFiles = 1;
+            });
 
         var host = new ScenarioHost(outputDirectory);
         StartWatchdog();
@@ -121,17 +123,8 @@ internal sealed class ScenarioHost : IDisposable
     /// <param name="message">The message to write.</param>
     public void Log(string message)
     {
-        this._console.WriteLine($"  · {message}");
-        this._log.WriteLine(message);
-    }
-
-    /// <summary>
-    /// Gives the console back to the process and closes the log file.
-    /// </summary>
-    public void Dispose()
-    {
-        Console.SetOut(this._console);
-        this._log.Dispose();
+        Console.WriteLine($"  · {message}");
+        Support.Log.Default.LogInformation("Scenario: {Line}", message);
     }
 
     private static GraphicsBackend ReadBackend(string[] args)

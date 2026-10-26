@@ -157,6 +157,12 @@ public class DeveloperConsole
             .WithDescription("Closes the console")
             .Handle(ctx => ctx.Console.RequestExit());
 
+        // The console catches errors inside commands, so the crash happens on the next frame instead.
+        this._registry.Register("crash")
+            .WithDescription("Crashes the application on the next frame, to test crash handling")
+            .Handle(ctx => Application.Instance.Ticker.Ticked += (sender, e) =>
+                throw new InvalidOperationException("Crash requested from the developer console."));
+
         this._registry.Register("q").Hidden().Handle(ctx => ctx.Console.RequestExit());
         this._registry.Register("quit").Hidden().Handle(ctx => ctx.Console.RequestExit());
         this._registry.Register(":q").Hidden().Handle(ctx => ctx.Console.WriteLine("This is not Vim! lol"));

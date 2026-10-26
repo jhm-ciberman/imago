@@ -1,10 +1,13 @@
 using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Runtime;
+using Imago.Diagnostics;
 using Imago.Input;
 using Imago.Rendering;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using NeoVeldrid;
 using NeoVeldrid.Sdl2;
 using NeoVeldrid.StartupUtilities;
@@ -71,6 +74,8 @@ public class Application : IDisposable
 
     private readonly ServiceProvider _services;
 
+    private readonly ExceptionHandler _exceptions;
+
     private readonly GuiSizeMode _guiSizeMode;
 
     private readonly Game _game;
@@ -79,15 +84,11 @@ public class Application : IDisposable
     /// Initializes a new instance of the <see cref="Application"/> class.
     /// </summary>
     /// <param name="builder">The settings of the application.</param>
-    /// <exception cref="InvalidOperationException">Thrown if an application instance already exists.</exception>
-    internal Application(ApplicationBuilder builder)
+    /// <param name="exceptions">The exception handler of the application. The application disposes it.</param>
+    internal Application(ApplicationBuilder builder, ExceptionHandler exceptions)
     {
-        if (Instance != null)
-        {
-            throw new InvalidOperationException("Only one instance of Application can exist.");
-        }
-
         Instance = this;
+        this._exceptions = exceptions;
 
         GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
 
@@ -150,6 +151,8 @@ public class Application : IDisposable
         services.AddSingleton(this.Input);
         services.AddSingleton(this.Ticker);
         services.AddSingleton(this.Stage);
+        services.AddSingleton(this._exceptions.LoggerFactory);
+        services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
 
         foreach (var module in builder.Modules)
         {
@@ -170,9 +173,20 @@ public class Application : IDisposable
     /// <summary>
     /// Runs the main loop of the application. Returns once the application has been quit and fully disposed.
     /// </summary>
+    /// <remarks>
+    /// If the loop throws and no debugger is attached, the crash is reported and shown, and the process ends.
+    /// </remarks>
     public void Run()
     {
-        this.Ticker.Start();
+        try
+        {
+            this.Ticker.Start();
+        }
+        catch (Exception e) when (!Debugger.IsAttached)
+        {
+            this._exceptions.Crash(e);
+        }
+
         this.Dispose();
     }
 
@@ -233,5 +247,6 @@ public class Application : IDisposable
         this.Input.Dispose();
         this.Renderer.Dispose();
         this.Window.Close();
+        this._exceptions.Dispose();
     }
 }

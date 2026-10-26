@@ -5,6 +5,7 @@ using System.Numerics;
 using CommunityToolkit.Diagnostics;
 using Imago.Rendering.Passes;
 using Imago.Rendering.Sprites;
+using Imago.Support;
 using Imago.Textures;
 using NeoVeldrid;
 using NeoVeldrid.Sdl2;
@@ -538,8 +539,7 @@ public class Renderer : IDisposable
         }
         catch (Exception e)
         {
-            Console.WriteLine("Error disposing renderer:");
-            Console.WriteLine(e);
+            Log.Report(e);
 #if DEBUG
             throw; // We want to fix any issues in debug mode.
 #endif

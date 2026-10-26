@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using Imago.Support;
+using Microsoft.Extensions.Logging;
 using NeoVeldrid;
 using NeoVeldrid.SPIRV;
 
@@ -96,7 +98,7 @@ public static class ShaderCompiler
                     if (i == lineNumber)
                         exceptionStr += new string(' ', lineNumberStr.Length) + "^^^^ ERROR HERE ^^^^\n";
                 }
-                Console.WriteLine(sourceText);
+                Log.Default.LogDebug("Shader source:\n{Source}", sourceText);
                 throw new Exception(exceptionStr);
             }
 
