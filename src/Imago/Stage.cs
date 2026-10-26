@@ -30,15 +30,15 @@ public class Stage
     private Screen? _screen;
 
     /// <summary>
-    /// Gets or sets the screen shown on this stage, or null if there is none.
+    /// Gets the screen shown on this stage, or null if there is none.
     /// </summary>
     /// <remarks>
-    /// Setting a new screen unmounts the old one. The old screen is not disposed.
+    /// Show a screen with <see cref="ScreenManager"/>.
     /// </remarks>
     public Screen? Screen
     {
         get => this._screen;
-        set
+        internal set
         {
             if (this._screen == value) return;
 

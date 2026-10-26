@@ -13,5 +13,6 @@
   <Folder Name="/examples/">
     <Project Path="examples/BasicAnimation/BasicAnimation.csproj" />
     <Project Path="examples/HelloWorld/HelloWorld.csproj" />
+    <Project Path="examples/MultipleScreens/MultipleScreens.csproj" />
   </Folder>
 </Solution>

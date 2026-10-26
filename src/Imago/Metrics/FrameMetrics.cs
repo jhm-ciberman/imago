@@ -22,6 +22,7 @@ public sealed class FrameMetrics
         this.Layout
             .Time("Update", imago.UpdateTime)
             .Time("Update/Game", imago.GameUpdateTime)
+            .Time("Update/Screen VM", imago.ScreenViewModelUpdateTime)
             .Time("Update/Layers", imago.StageUpdateTime)
             .Time("Render", imago.RenderTime)
             .Time("Render/GUI", imago.GuiLayersTime)

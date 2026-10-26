@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <RootNamespace>MultipleScreens</RootNamespace>
+    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="../../src/Imago/Imago.csproj" />
+        <ProjectReference Include="../../src/Imago.Graphics3D/Imago.Graphics3D.csproj" />
+        <ProjectReference Include="../../src/Imago.Support/Imago.Support.csproj" />
+    </ItemGroup>
+</Project>

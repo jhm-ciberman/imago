@@ -9,7 +9,7 @@ namespace Imago;
 /// Represents a container for layers that are rendered and updated together.
 /// </summary>
 /// <remarks>
-/// A screen is a collection of layers (both 3D and 2D). Show it with <see cref="Stage.Screen"/>.
+/// A screen is a collection of layers (both 3D and 2D). Show it with <see cref="ScreenManager"/>.
 /// While it is shown, its layers are on the stage.
 /// </remarks>
 [ItemsMethod(nameof(AddLayer))]

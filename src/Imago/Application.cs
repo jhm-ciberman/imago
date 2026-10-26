@@ -7,6 +7,7 @@ using Imago.Diagnostics;
 using Imago.Input;
 using Imago.Metrics;
 using Imago.Rendering;
+using Imago.Support;
 using Imago.Support.Metrics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -63,6 +64,11 @@ public class Application : IDisposable
     /// Gets the main stage that manages scenes and layers.
     /// </summary>
     public Stage Stage { get; }
+
+    /// <summary>
+    /// Gets the screen manager that shows the screens on the stage.
+    /// </summary>
+    public ScreenManager Screens { get; }
 
     /// <summary>
     /// Gets the main viewport.
@@ -123,6 +129,7 @@ public class Application : IDisposable
         this.Stage.EnableInputHandling();
 
         this._services = this.BuildServices(builder);
+        this.Screens = this._services.GetRequiredService<ScreenManager>();
 
         foreach (var module in builder.Modules)
         {
@@ -176,6 +183,8 @@ public class Application : IDisposable
         services.AddSingleton(this.Metrics);
         services.AddSingleton(this._exceptions.LoggerFactory);
         services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
+        services.AddSingleton(sp => new ScreenManager(sp, this, builder.Screens.Screens));
+        services.AddSingleton<IScreenNavigator>(sp => sp.GetRequiredService<ScreenManager>());
 
         foreach (var module in builder.Modules)
         {
@@ -250,6 +259,9 @@ public class Application : IDisposable
             {
                 this._game.Update(deltaTime);
             }
+
+            this.Screens.ShowRequestedScreen();
+            this.Screens.Update(deltaTime);
 
             using (metrics.StageUpdateTime.StartTimer())
             {

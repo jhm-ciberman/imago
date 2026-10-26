@@ -18,6 +18,7 @@ public class ApplicationBuilder
     private readonly List<Action<IServiceCollection>> _serviceRegistrations = [];
     private readonly List<Action<LoggingBuilder>> _loggingConfigurations = [];
     private readonly ExceptionsBuilder _exceptions = new();
+    private readonly ScreensBuilder _screens = new();
 
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
     internal Type GameType { get; }
@@ -39,6 +40,8 @@ public class ApplicationBuilder
     internal IReadOnlyList<Module> Modules => this._modules;
 
     internal IReadOnlyList<Action<IServiceCollection>> ServiceRegistrations => this._serviceRegistrations;
+
+    internal ScreensBuilder Screens => this._screens;
 
     internal ApplicationBuilder([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type gameType)
     {
@@ -143,6 +146,17 @@ public class ApplicationBuilder
     public ApplicationBuilder WithExceptions(Action<ExceptionsBuilder> configure)
     {
         configure(this._exceptions);
+        return this;
+    }
+
+    /// <summary>
+    /// Maps view models to the screens that show them, so the application can navigate to them.
+    /// </summary>
+    /// <param name="configure">The callback that maps the view models to their screens.</param>
+    /// <returns>This builder.</returns>
+    public ApplicationBuilder WithScreens(Action<ScreensBuilder> configure)
+    {
+        configure(this._screens);
         return this;
     }
 

@@ -16,6 +16,7 @@ public sealed class ImagoMetrics : MetricGroup
         this.FrameTime = this.Timer("Frame time");
         this.UpdateTime = this.Timer("Update time");
         this.GameUpdateTime = this.Timer("Game update time");
+        this.ScreenViewModelUpdateTime = this.Timer("Screen VM update time");
         this.StageUpdateTime = this.Timer("Stage update time");
         this.RenderTime = this.Timer("Render time");
         this.PrepareTime = this.Timer("Prepare time");
@@ -37,7 +38,7 @@ public sealed class ImagoMetrics : MetricGroup
     public TimerMetric FrameTime { get; }
 
     /// <summary>
-    /// Gets the time of the whole update: input, game, and stage.
+    /// Gets the time of the whole update: input, game, screen view model, and stage.
     /// </summary>
     public TimerMetric UpdateTime { get; }
 
@@ -45,6 +46,11 @@ public sealed class ImagoMetrics : MetricGroup
     /// Gets the time of the game update and post update.
     /// </summary>
     public TimerMetric GameUpdateTime { get; }
+
+    /// <summary>
+    /// Gets the time of the update of the view model of the current screen.
+    /// </summary>
+    public TimerMetric ScreenViewModelUpdateTime { get; }
 
     /// <summary>
     /// Gets the time of the stage update.
