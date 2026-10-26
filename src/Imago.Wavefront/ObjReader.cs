@@ -9,25 +9,32 @@ using Imago.Graphics3D.Meshes;
 namespace Imago.Wavefront;
 
 /// <summary>
-/// Provides functionality for parsing Wavefront OBJ files and converting them to meshes and scenes.
+/// Reads meshes and scenes from a Wavefront OBJ file.
 /// </summary>
-public class ObjParser
+/// <remarks>
+/// Only what you read is loaded on the GPU. The results belong to the caller and keep working after the reader is disposed.
+/// </remarks>
+public sealed class ObjReader : IDisposable
 {
+    /// <summary>
+    /// Gets the names of all the groups in the file.
+    /// </summary>
+    public IReadOnlyList<string> GroupNames => this._groupNames;
+
     private readonly List<Vector3> _positions = new List<Vector3>();
     private readonly List<Vector3> _normals = new List<Vector3>();
     private readonly List<Vector2> _texCoords = new List<Vector2>();
     private readonly Dictionary<string, List<(int positionIndex, int? texCoordIndex, int? normalIndex)>> _groups = new Dictionary<string, List<(int, int?, int?)>>();
+    private readonly List<string> _groupNames = new List<string>();
     private string _currentGroup = "default";
+    private bool _isDisposed;
 
     /// <summary>
-    /// Loads an entire OBJ scene from a file, including all groups and objects.
+    /// Initializes a new instance of the <see cref="ObjReader"/> class.
     /// </summary>
-    /// <param name="path">The path to the OBJ file to load.</param>
-    /// <returns>An ObjNode containing all the loaded mesh groups.</returns>
-    public ObjNode LoadScene(string path)
+    /// <param name="path">The path to the OBJ file.</param>
+    public ObjReader(string path)
     {
-        this.ClearData();
-
         using (var reader = new StreamReader(path))
         {
             string? line;
@@ -36,44 +43,58 @@ public class ObjParser
                 this.ProcessLine(line);
             }
         }
-
-        return this.CreateScene();
     }
 
     /// <summary>
-    /// Loads a specific mesh group from an OBJ file by group name.
+    /// Reads the whole file as a scene, or a single group.
     /// </summary>
-    /// <param name="path">The path to the OBJ file to load.</param>
-    /// <param name="groupName">The name of the group to extract.</param>
-    /// <returns>The mesh for the specified group if found; otherwise, null.</returns>
-    public Mesh? LoadMeshByGroupName(string path, string groupName)
+    /// <param name="groupName">The name of the group to read. If null, all the groups are read.</param>
+    /// <returns>The scene. The caller owns it.</returns>
+    /// <exception cref="KeyNotFoundException">Thrown if the group is not found.</exception>
+    public ObjScene ReadScene(string? groupName = null)
     {
-        this.ClearData();
+        ObjectDisposedException.ThrowIf(this._isDisposed, this);
 
-        using (var reader = new StreamReader(path))
+        if (groupName != null)
         {
-            string? line;
-            while ((line = reader.ReadLine()) != null)
-            {
-                this.ProcessLine(line);
-            }
+            Mesh mesh = this.ReadMesh(groupName) ?? throw new KeyNotFoundException($"Could not find group with name {groupName}");
+            return new ObjScene(mesh);
         }
 
-        if (_groups.TryGetValue(groupName, out var groupData))
+        var groups = new List<KeyValuePair<string, Mesh>>();
+        foreach (string name in this._groupNames)
         {
-            return this.CreateMesh(groupName, groupData);
+            groups.Add(new KeyValuePair<string, Mesh>(name, this.CreateMesh(this._groups[name])));
+        }
+
+        return new ObjScene("OBJ_Root", groups);
+    }
+
+    /// <summary>
+    /// Reads the mesh of a group.
+    /// </summary>
+    /// <param name="groupName">The name of the group.</param>
+    /// <returns>The mesh, or null if the group is not found. The caller owns it.</returns>
+    public Mesh? ReadMesh(string groupName)
+    {
+        ObjectDisposedException.ThrowIf(this._isDisposed, this);
+
+        if (this._groups.TryGetValue(groupName, out var groupData))
+        {
+            return this.CreateMesh(groupData);
         }
 
         return null;
     }
 
-    private void ClearData()
+    /// <inheritdoc/>
+    public void Dispose()
     {
+        this._isDisposed = true;
         this._positions.Clear();
         this._normals.Clear();
         this._texCoords.Clear();
         this._groups.Clear();
-        this._currentGroup = "default";
     }
 
     private void ProcessLine(string line)
@@ -126,6 +147,7 @@ public class ObjParser
         if (!this._groups.ContainsKey(this._currentGroup))
         {
             this._groups[this._currentGroup] = new List<(int, int?, int?)>();
+            this._groupNames.Add(this._currentGroup);
         }
     }
 
@@ -190,20 +212,7 @@ public class ObjParser
         return result;
     }
 
-    private ObjNode CreateScene()
-    {
-        var rootNode = new ObjNode { Name = "OBJ_Root" };
-
-        foreach (var group in this._groups)
-        {
-            var mesh = this.CreateMesh(group.Key, group.Value);
-            rootNode.Groups.Add(group.Key, mesh);
-        }
-
-        return rootNode;
-    }
-
-    private Mesh CreateMesh(string groupName, List<(int positionIndex, int? texCoordIndex, int? normalIndex)> groupData)
+    private Mesh CreateMesh(List<(int positionIndex, int? texCoordIndex, int? normalIndex)> groupData)
     {
         var uniqueVertices = new Dictionary<(int, int?, int?), int>();
         var positions = new List<Vector3>();
@@ -236,5 +245,3 @@ public class ObjParser
         return new Mesh(meshData);
     }
 }
-
-

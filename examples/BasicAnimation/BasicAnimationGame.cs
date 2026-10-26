@@ -79,9 +79,9 @@ internal sealed class BasicAnimationGame : Game
         foxMaterial.Texture = foxTexture;
         foxMaterial.PixelPerfectShadows = false;
 
-        var foxGltf = GltfLoader.LoadFile(Path.Combine(assetsDir, "fox.gltf"));
-        var foxPrefab = foxGltf.Scene;
-        var foxAnimations = foxGltf.Animations;
+        using var foxReader = new GltfReader(Path.Combine(assetsDir, "fox.gltf"));
+        var foxPrefab = foxReader.ReadScene();
+        var foxAnimations = foxReader.ReadAnimations();
 
         this._players = new AnimationPlayer[3];
         for (int i = 0; i < 3; i++)

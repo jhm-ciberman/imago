@@ -11,71 +11,212 @@ using static glTFLoader.Schema.AnimationSampler;
 namespace Imago.Gltf;
 
 /// <summary>
-/// Provides functionality to read and parse glTF 2.0 files into a usable asset structure.
+/// Reads scenes, meshes and animations from a glTF 2.0 file.
 /// </summary>
-public class GltfReader
+/// <remarks>
+/// Only what you read is loaded. The results belong to the caller and keep working after the reader is disposed.
+/// </remarks>
+public sealed class GltfReader : IDisposable
 {
+    /// <summary>
+    /// Gets the default scene of the file.
+    /// </summary>
+    public GltfNodeInfo Scene => this._scenes[0];
+
+    /// <summary>
+    /// Gets all the scenes of the file.
+    /// </summary>
+    public IReadOnlyList<GltfNodeInfo> Scenes => this._scenes;
+
+    /// <summary>
+    /// Gets the names of all the animations in the file.
+    /// </summary>
+    public IReadOnlyList<string> AnimationNames => this._animationNames;
+
     private readonly string _path;
     private readonly glTFLoader.Schema.Gltf _model;
     private readonly GltfBuffer?[] _buffersCache;
-    private readonly GltfNode?[] _nodesCache;
     private readonly Dictionary<int, GltfAccessor> _accessorsCache = new();
+    private readonly GltfNodeInfo[] _scenes;
+    private readonly string[] _animationNames;
+    private bool _isDisposed;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GltfReader"/> class.
     /// </summary>
-    /// <param name="path">The path to the gltf file.</param>
+    /// <param name="path">The path to the glTF file.</param>
     public GltfReader(string path)
     {
         this._path = path;
         this._model = Interface.LoadModel(path);
         this._buffersCache = new GltfBuffer[this._model.Buffers?.Length ?? 0];
-        this._nodesCache = new GltfNode[this._model.Nodes?.Length ?? 0];
-    }
+        this._scenes = this.CreateScenes();
 
-    /// <summary>
-    /// Loads all resources from the gltf file.
-    /// </summary>
-    /// <returns>A <see cref="GltfAsset"/> object containing all resources.</returns>
-    public GltfAsset Load()
-    {
-        var scenes = this.LoadScenes();
-        var animations = this.LoadAnimations();
-        return new GltfAsset(scenes, animations);
-    }
-
-    /// <summary>
-    /// Loads all scenes from the gltf file.
-    /// </summary>
-    /// <returns>A list of <see cref="GltfNode"/> objects of the root nodes of the scenes.</returns>
-    public IReadOnlyList<GltfNode> LoadScenes()
-    {
-        var scenes = new List<GltfNode>();
-        if (this._model.Scenes != null)
+        this._animationNames = new string[this._model.Animations?.Length ?? 0];
+        for (int i = 0; i < this._animationNames.Length; i++)
         {
-            for (int i = 0; i < this._model.Scenes.Length; i++)
-            {
-                scenes.Add(this.LoadScene(i));
-            }
+            this._animationNames[i] = this.GetAnimationName(i);
         }
-        return scenes;
     }
 
     /// <summary>
-    /// Loads all animations from the gltf file.
+    /// Reads a scene, or a single node and its children.
     /// </summary>
-    /// <returns>A list of <see cref="Animation"/> objects.</returns>
-    public IReadOnlyList<Animation> LoadAnimations()
+    /// <param name="sceneName">The name of the scene. If null, the default scene is used.</param>
+    /// <param name="nodeName">The name of the node to use as the root. If null, the whole scene is read.</param>
+    /// <returns>The scene. The caller owns it.</returns>
+    /// <exception cref="KeyNotFoundException">Thrown if the scene or the node is not found.</exception>
+    public GltfScene ReadScene(string? sceneName = null, string? nodeName = null)
     {
-        var animations = new List<Animation>();
-        if (this._model.Animations != null)
+        ObjectDisposedException.ThrowIf(this._isDisposed, this);
+
+        GltfNodeInfo root = this.FindNode(sceneName, nodeName);
+        var meshes = new Dictionary<int, Mesh[]>();
+        var skins = new Dictionary<int, GltfSkinInfo>();
+        this.ReadNodeResources(root, meshes, skins);
+
+        return new GltfScene(root, meshes, skins);
+    }
+
+    /// <summary>
+    /// Reads one mesh of a node.
+    /// </summary>
+    /// <param name="sceneName">The name of the scene. If null, the default scene is used.</param>
+    /// <param name="nodeName">The name of the node. If null, the scene root is used.</param>
+    /// <param name="index">The index of the mesh in the node, for nodes that have more than one.</param>
+    /// <returns>The mesh. The caller owns it.</returns>
+    /// <exception cref="KeyNotFoundException">Thrown if the scene or the node is not found.</exception>
+    /// <exception cref="InvalidOperationException">Thrown if the node has no mesh.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown if the node has no mesh at the given index.</exception>
+    public Mesh ReadMesh(string? sceneName = null, string? nodeName = null, int index = 0)
+    {
+        ObjectDisposedException.ThrowIf(this._isDisposed, this);
+
+        GltfNodeInfo node = this.FindNode(sceneName, nodeName);
+        if (node.MeshIndex is not int meshIndex)
         {
-            for (int i = 0; i < this._model.Animations.Length; i++)
+            throw new InvalidOperationException($"The node {node.Name} has no mesh.");
+        }
+
+        var primitives = this._model.Meshes[meshIndex].Primitives;
+        ArgumentOutOfRangeException.ThrowIfNegative(index);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(index, primitives.Length);
+
+        return new Mesh(this.GetPrimitiveData(primitives[index]));
+    }
+
+    /// <summary>
+    /// Reads an animation.
+    /// </summary>
+    /// <param name="name">The name of the animation. If null, the first animation is read.</param>
+    /// <returns>The animation.</returns>
+    /// <exception cref="KeyNotFoundException">Thrown if the animation is not found.</exception>
+    /// <exception cref="InvalidOperationException">Thrown if the name is null and the file has no animations.</exception>
+    public Animation ReadAnimation(string? name = null)
+    {
+        ObjectDisposedException.ThrowIf(this._isDisposed, this);
+
+        if (string.IsNullOrEmpty(name))
+        {
+            if (this._animationNames.Length == 0)
             {
-                animations.Add(this.LoadAnimation(i));
+                throw new InvalidOperationException("The file has no animations.");
             }
+
+            return this.LoadAnimation(0);
+        }
+
+        int index = Array.IndexOf(this._animationNames, name);
+        if (index < 0)
+        {
+            throw new KeyNotFoundException($"Could not find animation with name {name}");
+        }
+
+        return this.LoadAnimation(index);
+    }
+
+    /// <summary>
+    /// Reads all the animations of the file.
+    /// </summary>
+    /// <returns>The animations, in the order of <see cref="AnimationNames"/>.</returns>
+    public IReadOnlyList<Animation> ReadAnimations()
+    {
+        ObjectDisposedException.ThrowIf(this._isDisposed, this);
+
+        var animations = new Animation[this._animationNames.Length];
+        for (int i = 0; i < animations.Length; i++)
+        {
+            animations[i] = this.LoadAnimation(i);
         }
         return animations;
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        this._isDisposed = true;
+        Array.Clear(this._buffersCache);
+        this._accessorsCache.Clear();
+    }
+
+    private GltfNodeInfo FindNode(string? sceneName, string? nodeName)
+    {
+        GltfNodeInfo scene = string.IsNullOrEmpty(sceneName)
+            ? this.Scene
+            : Array.Find(this._scenes, s => s.Name == sceneName) ?? throw new KeyNotFoundException($"Could not find scene with name {sceneName}");
+
+        return string.IsNullOrEmpty(nodeName)
+            ? scene
+            : scene.Find(nodeName) ?? throw new KeyNotFoundException($"Could not find node with name {nodeName}");
+    }
+
+    private void ReadNodeResources(GltfNodeInfo node, Dictionary<int, Mesh[]> meshes, Dictionary<int, GltfSkinInfo> skins)
+    {
+        if (node.MeshIndex is int meshIndex && !meshes.ContainsKey(meshIndex))
+        {
+            meshes.Add(meshIndex, this.GetMeshes(meshIndex));
+        }
+
+        if (node.SkinIndex is int skinIndex && !skins.ContainsKey(skinIndex))
+        {
+            skins.Add(skinIndex, this.GetSkin(skinIndex));
+        }
+
+        foreach (GltfNodeInfo child in node.Children)
+        {
+            this.ReadNodeResources(child, meshes, skins);
+        }
+    }
+
+    private GltfNodeInfo[] CreateScenes()
+    {
+        var nodes = new GltfNodeInfo[this._model.Nodes?.Length ?? 0];
+        for (int i = 0; i < nodes.Length; i++)
+        {
+            nodes[i] = this.CreateNode(i);
+        }
+
+        for (int i = 0; i < nodes.Length; i++)
+        {
+            foreach (int child in this._model.Nodes![i].Children ?? Array.Empty<int>())
+            {
+                nodes[i].Add(nodes[child]);
+            }
+        }
+
+        var scenes = new GltfNodeInfo[this._model.Scenes?.Length ?? 0];
+        for (int i = 0; i < scenes.Length; i++)
+        {
+            var data = this._model.Scenes![i];
+            scenes[i] = new GltfNodeInfo(data.Name ?? "Scene_" + i);
+
+            foreach (int node in data.Nodes ?? Array.Empty<int>())
+            {
+                scenes[i].Add(nodes[node]);
+            }
+        }
+
+        return scenes;
     }
 
     private string GetNodeName(int index)
@@ -84,53 +225,42 @@ public class GltfReader
         return string.IsNullOrWhiteSpace(data.Name) ? "Node_" + index : data.Name;
     }
 
-    private GltfNode GetNode(int index)
+    private string GetAnimationName(int index)
     {
-        GltfNode? node = this._nodesCache[index];
-        if (node != null) return node;
+        var data = this._model.Animations[index];
+        return string.IsNullOrWhiteSpace(data.Name) ? "Animation_" + index : data.Name;
+    }
 
+    private GltfNodeInfo CreateNode(int index)
+    {
         var data = this._model.Nodes[index];
 
-        var name = this.GetNodeName(index);
-        node = new GltfNode(name);
-
-        if (data.Mesh.HasValue)
-        {
-            node.Meshes = this.GetMeshes(data.Mesh.Value);
-
-            if (data.Skin.HasValue)
-            {
-                node.Skin = this.GetSkin(data.Skin.Value);
-            }
-        }
+        Vector3 position;
+        Quaternion rotation;
+        Vector3 scale;
 
         if (ToMatrix(data.Matrix) != Matrix4x4.Identity)
         {
-            Matrix4x4.Decompose(ToMatrix(data.Matrix), out Vector3 scale, out Quaternion rotation, out Vector3 position);
-            node.Scale = scale;
-            node.Rotation = rotation;
-            node.Position = position;
+            Matrix4x4.Decompose(ToMatrix(data.Matrix), out scale, out rotation, out position);
         }
         else
         {
             var rot = data.Rotation;
-            var scale = data.Scale;
+            var scl = data.Scale;
             var trans = data.Translation;
-            node.Scale = new Vector3(scale[0], scale[1], scale[2]);
-            node.Rotation = new Quaternion(rot[0], rot[1], rot[2], rot[3]);
-            node.Position = new Vector3(trans[0], trans[1], trans[2]);
+            scale = new Vector3(scl[0], scl[1], scl[2]);
+            rotation = new Quaternion(rot[0], rot[1], rot[2], rot[3]);
+            position = new Vector3(trans[0], trans[1], trans[2]);
         }
 
-        this._nodesCache[index] = node;
-
-        if (data.Children != null)
+        return new GltfNodeInfo(this.GetNodeName(index))
         {
-            foreach (var i in data.Children)
-            {
-                node.Add(this.GetNode(i));
-            }
-        }
-        return node;
+            Position = position,
+            Rotation = rotation,
+            Scale = scale,
+            MeshIndex = data.Mesh,
+            SkinIndex = data.Mesh.HasValue ? data.Skin : null,
+        };
     }
 
     private static Matrix4x4 ToMatrix(float[] m)
@@ -161,7 +291,7 @@ public class GltfReader
             list.Add(channel);
         }
 
-        return new Animation(animationData.Name, list);
+        return new Animation(this._animationNames[index], list);
     }
 
     private static IChannel MakeChannel(string targetName, PathEnum path, float[] input, GltfAccessor output, InterpolationEnum typeEnum)
@@ -220,19 +350,6 @@ public class GltfReader
         string? root = data.Skeleton.HasValue ? this.GetNodeName(data.Skeleton.Value) : null;
 
         return new GltfSkinInfo(matrices, joints, root);
-    }
-
-    private GltfNode LoadScene(int index)
-    {
-        var data = this._model.Scenes[index];
-        var scene = new GltfNode(data.Name ?? "Scene_" + index);
-
-        foreach (var node in data.Nodes ?? Array.Empty<int>())
-        {
-            scene.Add(this.GetNode(node));
-        }
-
-        return scene;
     }
 
     private Mesh[] GetMeshes(int index)
