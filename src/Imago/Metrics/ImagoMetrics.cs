@@ -25,7 +25,9 @@ public sealed class ImagoMetrics : MetricGroup
         this.SpriteDrawCallCount = this.Counter("Sprite draw call count");
         this.TextureUploadCount = this.Counter("Texture upload count");
         this.AllocatedBytes = this.Counter("Allocated bytes");
-        this.GarbageCollectionCount = this.Counter("Garbage collection count");
+        this.Gen0CollectionCount = this.Counter("Gen 0 collection count");
+        this.Gen1CollectionCount = this.Counter("Gen 1 collection count");
+        this.Gen2CollectionCount = this.Counter("Gen 2 collection count");
     }
 
     /// <summary>
@@ -89,7 +91,17 @@ public sealed class ImagoMetrics : MetricGroup
     public CounterMetric AllocatedBytes { get; }
 
     /// <summary>
-    /// Gets the number of garbage collections of the youngest generation.
+    /// Gets the number of garbage collections that included generation 0. Every collection does.
     /// </summary>
-    public CounterMetric GarbageCollectionCount { get; }
+    public CounterMetric Gen0CollectionCount { get; }
+
+    /// <summary>
+    /// Gets the number of garbage collections that included generation 1.
+    /// </summary>
+    public CounterMetric Gen1CollectionCount { get; }
+
+    /// <summary>
+    /// Gets the number of garbage collections that included generation 2, the full collections.
+    /// </summary>
+    public CounterMetric Gen2CollectionCount { get; }
 }

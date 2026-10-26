@@ -7,6 +7,7 @@ using Imago.Diagnostics;
 using Imago.Input;
 using Imago.Metrics;
 using Imago.Rendering;
+using Imago.Support.Metrics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NeoVeldrid;
@@ -90,7 +91,7 @@ public class Application : IDisposable
 
     private long _allocatedBytes;
 
-    private int _garbageCollections;
+    private readonly int[] _collectionCounts = new int[3];
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Application"/> class.
@@ -131,7 +132,10 @@ public class Application : IDisposable
         this._game = this._services.GetRequiredService<Game>();
 
         this._allocatedBytes = GC.GetAllocatedBytesForCurrentThread();
-        this._garbageCollections = GC.CollectionCount(0);
+        for (int generation = 0; generation < this._collectionCounts.Length; generation++)
+        {
+            this._collectionCounts[generation] = GC.CollectionCount(generation);
+        }
     }
 
     /// <summary>
@@ -273,13 +277,19 @@ public class Application : IDisposable
     private void RecordMemory()
     {
         long allocatedBytes = GC.GetAllocatedBytesForCurrentThread();
-        int garbageCollections = GC.CollectionCount(0);
-
         this._metrics.AllocatedBytes.Add((int)(allocatedBytes - this._allocatedBytes));
-        this._metrics.GarbageCollectionCount.Add(garbageCollections - this._garbageCollections);
-
         this._allocatedBytes = allocatedBytes;
-        this._garbageCollections = garbageCollections;
+
+        this.RecordCollections(this._metrics.Gen0CollectionCount, 0);
+        this.RecordCollections(this._metrics.Gen1CollectionCount, 1);
+        this.RecordCollections(this._metrics.Gen2CollectionCount, 2);
+    }
+
+    private void RecordCollections(CounterMetric counter, int generation)
+    {
+        int count = GC.CollectionCount(generation);
+        counter.Add(count - this._collectionCounts[generation]);
+        this._collectionCounts[generation] = count;
     }
 
     /// <summary>

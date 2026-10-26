@@ -296,9 +296,12 @@ public class Scene3DLayer : IRenderLayer, IOffscreenLayer, IDisposable
     /// <param name="deltaTime">Time elapsed since last update in seconds.</param>
     public void Update(float deltaTime)
     {
+        var renderer = Forward3DRenderer.Instance;
+        using var timer = renderer.Metrics.SceneUpdateTime.StartTimer();
+
         if (this._stage != null)
         {
-            Forward3DRenderer.Instance.ReadPickingResult(this.Picking);
+            renderer.ReadPickingResult(this.Picking);
             this.Picking.Update(this.Camera, this._stage.IsCursorOverGui() || this.IsInputBlocked);
         }
 
@@ -312,8 +315,11 @@ public class Scene3DLayer : IRenderLayer, IOffscreenLayer, IDisposable
         var target = ctx.Target as RenderTexture
             ?? throw new InvalidOperationException("A 3D scene can only render into a RenderTexture.");
 
+        var renderer = Forward3DRenderer.Instance;
+        using var timer = renderer.Metrics.SceneRenderTime.StartTimer();
+
         this.PrepareForRender(target);
-        Forward3DRenderer.Instance.Render(ctx.CommandList, this, target);
+        renderer.Render(ctx.CommandList, this, target);
     }
 
     private void PrepareForRender(RenderTexture renderTexture)
