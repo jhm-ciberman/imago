@@ -5,6 +5,10 @@ updates:
     schedule:
       interval: monthly
     target-branch: main
+    groups:
+      neoveldrid:
+        patterns:
+          - "NeoVeldrid*"
 
   - package-ecosystem: github-actions
     directory: /
