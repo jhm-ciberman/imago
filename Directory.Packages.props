@@ -4,7 +4,7 @@
     </PropertyGroup>
     <ItemGroup>
         <PackageVersion Include="CommunityToolkit.Diagnostics" Version="8.4.2" />
-        <PackageVersion Include="FontStashSharp.PlatformAgnostic" Version="1.6.1" />
+        <PackageVersion Include="FontStashSharp.PlatformAgnostic" Version="1.6.2" />
         <PackageVersion Include="glTF2Loader" Version="2.0.0" />
         <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="5.9.0" />
         <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.9.0" />
