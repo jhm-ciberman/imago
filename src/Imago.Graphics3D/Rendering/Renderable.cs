@@ -106,7 +106,7 @@ internal class Renderable : IDisposable
     /// Gets the sort key of this renderable. This is used to sort renderables
     /// by material and mesh.
     /// </summary>
-    public ulong SortKey { get; private set; }
+    public SortKey SortKey { get; private set; }
 
     /// <summary>
     /// Gets the resource set for the transform data.
@@ -414,18 +414,17 @@ internal class Renderable : IDisposable
     {
         if (this.Material == null || this.Mesh == null) return;
 
-        ulong materialHash         = (ulong) (this.Material.GetHashCode() & 0xFF);
-        ulong meshHash             = (ulong) (this.Mesh.GetHashCode() & 0xFFF);
-        ulong transformBufferHash  = (ulong) (this.TransformResourceSet.GetHashCode() & 0xFF);
-        ulong instanceBufferHash   = (ulong) (this.InstanceResourceSet.GetHashCode() & 0xFF);
-        ulong skekeletonBufferHash = (ulong) ((this.SkeletonResourceSet?.GetHashCode() ?? 0) & 0xF);
+        int transformBufferHash = this.TransformResourceSet.GetHashCode();
+        int instanceBufferHash = this.InstanceResourceSet.GetHashCode();
+        int skeletonBufferHash = this.SkeletonResourceSet?.GetHashCode() ?? 0;
 
-        // The sort key is a 64-bit number that is used to sort renderables.
-        this.SortKey = materialHash << 56  // 8 bits (max: 255)
-                | transformBufferHash << 48  // 8 bits (max: 255)
-                | instanceBufferHash << 40  // 8 bits (max: 255)
-                | skekeletonBufferHash << 36  // 4 bits (max: 15)
-                | meshHash << 24; // 12 bits (max: 4095)
+        this.SortKey = new SortKey(
+            this.Material.Id,
+            transformBufferHash,
+            instanceBufferHash,
+            skeletonBufferHash,
+            this.Mesh.Id
+        );
 
         // This key is used to fast check if two instances can be batched together. (They must have the same hash)
         // It could happen that the hash is not unique, but it is extremely unlikely that two instances that are
@@ -435,7 +434,7 @@ internal class Renderable : IDisposable
             this.Material.Id,
             this.Transparent,
             instanceBufferHash,
-            skekeletonBufferHash,
+            skeletonBufferHash,
             transformBufferHash
         );
     }
@@ -499,18 +498,13 @@ internal class Renderable : IDisposable
     /// <param name="cameraPosition">The position of the camera.</param>
     /// <param name="useTransparentSorting">True to order the renderable by its distance to the camera first, false to group it with similar renderables first.</param>
     /// <returns>The sort key.</returns>
-    internal ulong GetSortKey(Vector3 cameraPosition, bool useTransparentSorting)
+    internal SortKey GetSortKey(Vector3 cameraPosition, bool useTransparentSorting)
     {
-        float dist = Vector3.DistanceSquared(this.CenterPosition, cameraPosition);
-        ulong cameraDistance = uint.CreateSaturating(dist * 1000f);
+        float distanceSquared = Vector3.DistanceSquared(this.CenterPosition, cameraPosition);
 
-        if (useTransparentSorting)
-        {
-            // The low bits keep renderables at the same distance together, so they can batch.
-            return cameraDistance << 32 | this.SortKey >> 32;
-        }
-
-        return this.SortKey | cameraDistance & 0xFFFFFF; // 24 bits
+        return useTransparentSorting
+            ? this.SortKey.WithDistanceFirst(distanceSquared)
+            : this.SortKey.WithDistanceLast(distanceSquared);
     }
 
     private void RecomputeRenderQueue()

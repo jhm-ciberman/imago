@@ -127,7 +127,7 @@ internal class RenderQueue : IEnumerable<Renderable>, IReadOnlyList<Renderable>,
             if (cameraFrustum.Contains(renderable.BoundingBox) != ContainmentType.Disjoint)
             {
                 bool useTransparentSorting = this.FilterFlags == RenderQueues.Transparent;
-                ulong key = renderable.GetSortKey(cameraPosition, useTransparentSorting);
+                SortKey key = renderable.GetSortKey(cameraPosition, useTransparentSorting);
                 this._culledIndices.Add(new RenderIndex(key, this._culledItems.Count));
                 this._culledItems.Add(renderable);
             }
@@ -192,10 +192,10 @@ internal class RenderQueue : IEnumerable<Renderable>, IReadOnlyList<Renderable>,
 
     private readonly struct RenderIndex
     {
-        public readonly ulong Key;
+        public readonly SortKey Key;
         public readonly int Index;
 
-        public RenderIndex(ulong key, int index)
+        public RenderIndex(SortKey key, int index)
         {
             this.Key = key;
             this.Index = index;
@@ -203,7 +203,7 @@ internal class RenderQueue : IEnumerable<Renderable>, IReadOnlyList<Renderable>,
 
         public override string ToString()
         {
-            return Convert.ToString((long)this.Key, 16).PadLeft(16, '0');
+            return this.Key.ToString();
         }
     }
 
