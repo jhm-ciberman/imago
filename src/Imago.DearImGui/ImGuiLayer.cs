@@ -52,6 +52,8 @@ public sealed class ImGuiLayer : IRenderLayer, IInputHandler, IMountListener, ID
     /// <inheritdoc />
     public Stage? Stage { get; private set; }
 
+    private readonly Renderer _renderer;
+    private readonly InputManager _input;
     private readonly GraphicsDevice _gd;
     private readonly IRenderTexture _renderTexture;
     private readonly ImGuiRenderer _imguiRenderer;
@@ -62,10 +64,14 @@ public sealed class ImGuiLayer : IRenderLayer, IInputHandler, IMountListener, ID
     /// Initializes a new instance of the <see cref="ImGuiLayer"/> class.
     /// </summary>
     /// <param name="metrics">The metrics of the application. It must have the <see cref="ImGuiMetrics"/> group.</param>
+    /// <param name="renderer">The renderer that draws the layer.</param>
+    /// <param name="input">The input manager that gives ImGui its input.</param>
     /// <exception cref="InvalidOperationException">Thrown if an ImGui layer already exists.</exception>
-    public ImGuiLayer(FrameMetrics metrics)
+    public ImGuiLayer(FrameMetrics metrics, Renderer renderer, InputManager input)
     {
         this._metrics = metrics.Group<ImGuiMetrics>();
+        this._renderer = renderer;
+        this._input = input;
 
         if (Instance != null)
         {
@@ -74,7 +80,6 @@ public sealed class ImGuiLayer : IRenderLayer, IInputHandler, IMountListener, ID
 
         Instance = this;
 
-        var renderer = Renderer.Instance;
         this._gd = renderer.GraphicsDevice;
         this._renderTexture = renderer.FullScreenRenderTexture;
         this._imguiRenderer = new ImGuiRenderer(
@@ -112,7 +117,7 @@ public sealed class ImGuiLayer : IRenderLayer, IInputHandler, IMountListener, ID
     {
         using var timer = this._metrics.UpdateTime.StartTimer();
 
-        this._imguiRenderer.Update(deltaTime, InputManager.Instance.InputSnapshot);
+        this._imguiRenderer.Update(deltaTime, this._input.InputSnapshot);
         this.FrameStarted?.Invoke(this, EventArgs.Empty);
 
         for (int i = 0; i < this._drawables.Count; i++)
@@ -203,7 +208,7 @@ public sealed class ImGuiLayer : IRenderLayer, IInputHandler, IMountListener, ID
     {
         this._renderTexture.Resized -= this.RenderTexture_Resized;
         this._imguiRenderer.Dispose();
-        Renderer.Instance.UnregisterDisposable(this);
+        this._renderer.UnregisterDisposable(this);
         Instance = null!;
     }
 

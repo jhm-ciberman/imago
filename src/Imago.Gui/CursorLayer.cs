@@ -64,11 +64,13 @@ public class CursorLayer : IRenderLayer
     /// <summary>
     /// Initializes a new instance of the <see cref="CursorLayer"/> class.
     /// </summary>
+    /// <param name="renderer">The renderer that has the default GUI viewport.</param>
+    /// <param name="input">The input manager that gives the cursor position.</param>
     /// <param name="viewport">The viewport to use for rendering. If null, uses the default GUI viewport.</param>
-    public CursorLayer(Viewport? viewport = null)
+    public CursorLayer(Renderer renderer, InputManager input, Viewport? viewport = null)
     {
-        this._viewport = viewport ?? Renderer.Instance.GuiViewport;
-        this._input = InputManager.Instance;
+        this._viewport = viewport ?? renderer.GuiViewport;
+        this._input = input;
     }
 
     /// <inheritdoc />
