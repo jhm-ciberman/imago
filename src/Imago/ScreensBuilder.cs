@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.Extensions.DependencyInjection;
+using Imago.Support;
 
 namespace Imago;
 
@@ -37,7 +37,7 @@ public sealed class ScreensBuilder
         where TViewModel : class
         where TScreen : Screen
     {
-        this._screens.Add(typeof(TViewModel), (services, viewModel) => ActivatorUtilities.CreateInstance<TScreen>(services, viewModel));
+        this._screens.Add(typeof(TViewModel), (services, viewModel) => services.Make<TScreen>(viewModel));
         return this;
     }
 }

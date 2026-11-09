@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using Imago.Metrics;
 using Imago.Support;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Imago;
 
@@ -82,7 +81,7 @@ public sealed class ScreenManager : IScreenNavigator, IDisposable
         params object[] args
     ) where TScreen : Screen
     {
-        this.Request(new ScreenRequest(() => null, _ => ActivatorUtilities.CreateInstance<TScreen>(this._services, args)));
+        this.Request(new ScreenRequest(() => null, _ => this._services.Make<TScreen>(args)));
     }
 
     /// <inheritdoc />
@@ -98,7 +97,7 @@ public sealed class ScreenManager : IScreenNavigator, IDisposable
         }
 
         this.Request(new ScreenRequest(
-            () => ActivatorUtilities.CreateInstance<TViewModel>(this._services, args),
+            () => this._services.Make<TViewModel>(args),
             viewModel => createScreen(this._services, viewModel!)
         ));
     }
