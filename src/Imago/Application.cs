@@ -129,6 +129,7 @@ public class Application : IDisposable
         this.Stage.EnableInputHandling();
 
         this._services = this.BuildServices(builder);
+        Ioc.Default.ConfigureServices(this._services);
         this.Screens = this._services.GetRequiredService<ScreenManager>();
 
         foreach (var module in builder.Modules)
