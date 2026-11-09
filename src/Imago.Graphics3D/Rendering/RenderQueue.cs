@@ -126,7 +126,8 @@ internal class RenderQueue : IEnumerable<Renderable>, IReadOnlyList<Renderable>,
 
             if (cameraFrustum.Contains(renderable.BoundingBox) != ContainmentType.Disjoint)
             {
-                ulong key = renderable.GetSortKey(cameraPosition);
+                bool useTransparentSorting = this.FilterFlags == RenderQueues.Transparent;
+                ulong key = renderable.GetSortKey(cameraPosition, useTransparentSorting);
                 this._culledIndices.Add(new RenderIndex(key, this._culledItems.Count));
                 this._culledItems.Add(renderable);
             }

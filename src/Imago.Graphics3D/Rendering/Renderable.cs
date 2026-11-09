@@ -414,11 +414,11 @@ internal class Renderable : IDisposable
     {
         if (this.Material == null || this.Mesh == null) return;
 
-        ulong materialHash         = (ulong) (this.Material.GetHashCode() & 0xFFF);
+        ulong materialHash         = (ulong) (this.Material.GetHashCode() & 0xFF);
         ulong meshHash             = (ulong) (this.Mesh.GetHashCode() & 0xFFF);
-        ulong transformBufferHash  = (ulong) (this.TransformResourceSet.GetHashCode() & 0xFFF);
-        ulong instanceBufferHash   = (ulong) (this.InstanceResourceSet.GetHashCode() & 0xFFF);
-        ulong skekeletonBufferHash = (ulong) (this.SkeletonResourceSet?.GetHashCode() ?? 0 & 0xFF);
+        ulong transformBufferHash  = (ulong) (this.TransformResourceSet.GetHashCode() & 0xFF);
+        ulong instanceBufferHash   = (ulong) (this.InstanceResourceSet.GetHashCode() & 0xFF);
+        ulong skekeletonBufferHash = (ulong) ((this.SkeletonResourceSet?.GetHashCode() ?? 0) & 0xF);
 
         // The sort key is a 64-bit number that is used to sort renderables.
         this.SortKey = materialHash << 56  // 8 bits (max: 255)
@@ -493,10 +493,23 @@ internal class Renderable : IDisposable
         }
     }
 
-    internal ulong GetSortKey(Vector3 cameraPosition)
+    /// <summary>
+    /// Gets the key used to sort this renderable in a render queue.
+    /// </summary>
+    /// <param name="cameraPosition">The position of the camera.</param>
+    /// <param name="useTransparentSorting">True to order the renderable by its distance to the camera first, false to group it with similar renderables first.</param>
+    /// <returns>The sort key.</returns>
+    internal ulong GetSortKey(Vector3 cameraPosition, bool useTransparentSorting)
     {
         float dist = Vector3.DistanceSquared(this.CenterPosition, cameraPosition);
-        uint cameraDistance = Math.Min(uint.MaxValue, (uint) (dist * 1000f));
+        ulong cameraDistance = uint.CreateSaturating(dist * 1000f);
+
+        if (useTransparentSorting)
+        {
+            // The low bits keep renderables at the same distance together, so they can batch.
+            return cameraDistance << 32 | this.SortKey >> 32;
+        }
+
         return this.SortKey | cameraDistance & 0xFFFFFF; // 24 bits
     }
 
